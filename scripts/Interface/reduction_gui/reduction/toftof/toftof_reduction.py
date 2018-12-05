@@ -601,10 +601,16 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')"
                    .format(scaledEC, wsECNorm))
             self.l("{} = Minus({}, {})" .format(gDataSubEC, gDataNorm, scaledEC))
+            wslist = [scaledEC]
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
-                self.l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
-            self.delete_workspaces([scaledEC])
+                scaledECvan = self.prefix + 'ScaledECvan'
+                self.l("van_ecFactor = {:.3f}" .format(self.vanEcFactor))
+                self.l("{} = Scale({}, Factor=van_ecFactor, Operation='Multiply')"
+                       .format(scaledECvan, wsECNorm))
+                self.l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledECvan))
+                wslist.append(scaledECvan)
+            self.delete_workspaces(wslist)
 
         self.l("# group data for processing")
         gDataSource = gDataSubEC if self.ecRuns else gDataNorm
