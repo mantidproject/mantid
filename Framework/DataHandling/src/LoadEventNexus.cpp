@@ -766,7 +766,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       m_file->closeGroup();
     }
   }
-  run_start = firstPulseT;
+  if (takeTimesFromEvents)
+    run_start = firstPulseT;
 
   loadSampleDataISIScompatibility(*m_file, *m_ws);
 
