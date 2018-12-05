@@ -59,11 +59,11 @@ struct from_unicode_py2 {
     const char *value = PyString_AsString(pyutf8);
     if (value == 0)
       boost::python::throw_error_already_set();
-    Py_DECREF(pyutf8);
     using rvalue_from_python_std_string = converter::rvalue_from_python_storage<std::string>;
     void *storage = reinterpret_cast<rvalue_from_python_std_string*>(data)->storage.bytes;
     new (storage) std::string(value);
     data->convertible = storage;
+    Py_DECREF(pyutf8); // Must be deleted after the std::string has taken a copy
   }
 };
 #endif
