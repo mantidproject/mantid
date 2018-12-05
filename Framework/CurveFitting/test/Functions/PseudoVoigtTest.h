@@ -272,12 +272,13 @@ public:
 
     pv->function(domain, values);
 
-        for (size_t i = 0; i < values.size(); ++i) {
-          std::cout << m_xValues[i] << "    " << values[i] << "\n";
-        }
+    for (size_t i = 0; i < values.size(); ++i) {
+      std::cout << m_xValues[i] << "    " << values[i] << "\n";
+    }
 
     // check intensity
-    double numeric_intensity = numerical_integrate_pv(center, intensity, fwhm, mixing);
+    double numeric_intensity =
+        numerical_integrate_pv(center, intensity, fwhm, mixing);
     TS_ASSERT_DELTA(numeric_intensity, intensity, 1.0E-2);
     TS_ASSERT(numeric_intensity < intensity);
 
@@ -285,17 +286,14 @@ public:
     double height = pv->height();
     TS_ASSERT_DELTA(height, values[100], 1.E-10);
 
-//    for (size_t i = 0; i < values.size(); ++i) {
-//      TS_ASSERT_DELTA(values[i], m_yValues[i], 1e-13);
-//    }
+    //    for (size_t i = 0; i < values.size(); ++i) {
+    //      TS_ASSERT_DELTA(values[i], m_yValues[i], 1e-13);
+    //    }
   }
 
   /** Test derivative with eta = 0.5
    */
   void testPseudoVoigtDerivativesXAxis() {
-
-
-
 
     IPeakFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.7);
 
@@ -313,12 +311,10 @@ public:
   }
 
   void ToDo_testPseudoVoigtDerivativesVaryParameters() {
-      std::vector<double> xvalues;
-      for (size_t i = 0; i < 10; ++i)
-      {
-        xvalues.push_back(-5 + static_cast<double>(i));
-      }
-
+    std::vector<double> xvalues;
+    for (size_t i = 0; i < 10; ++i) {
+      xvalues.push_back(-5 + static_cast<double>(i));
+    }
   }
 
   /** Test the intensity ratio between a Gaussian and Lorentzian
@@ -329,8 +325,8 @@ public:
   }
 
 private:
-  IPeakFunction_sptr getInitializedPV(double center, double intensity, double fwhm,
-                                  double mixing) {
+  IPeakFunction_sptr getInitializedPV(double center, double intensity,
+                                      double fwhm, double mixing) {
     IPeakFunction_sptr pv = boost::make_shared<PseudoVoigt>();
     pv->initialize();
     pv->setParameter("PeakCentre", center);
@@ -356,15 +352,18 @@ private:
     return result.result;
   }
 
-  /// calculate \partial pV() / \partial p_i  where i = 0, 1, 2 or 3 for mixing, ....
-  std::vector<double> numerical_paaram_partial_derivative(PseudoVoigt &pv, size_t param_index,
-                                                          double min_value, double max_value,
+  /// calculate \partial pV() / \partial p_i  where i = 0, 1, 2 or 3 for mixing,
+  /// ....
+  std::vector<double> numerical_paaram_partial_derivative(PseudoVoigt &pv,
+                                                          size_t param_index,
+                                                          double min_value,
+                                                          double max_value,
                                                           double resolution) {
 
-      // TODO Implement
-      std::vector<double> deriv_vec;
+    // TODO Implement
+    std::vector<double> deriv_vec;
 
-      return deriv_vec;
+    return deriv_vec;
   }
 
   std::vector<double> m_xValues;
