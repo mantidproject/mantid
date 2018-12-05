@@ -53,6 +53,21 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+std::string getWorkspaceSuffix(std::string const &workspaceName) {
+	return workspaceName.substr(workspaceName.length() - 3);
+}
+
+bool canPlotGuess(std::string const &workspaceName) {
+	if (!workspaceName.empty())
+		return getWorkspaceSuffix(workspaceName) == "red" ? true : false;
+	else
+		return false;
+}
+
+}
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -820,11 +835,10 @@ void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
  * Updates the plot guess feature in this indirect fit property browser.
  */
 void IndirectFitPropertyBrowser::updatePlotGuess() {
-
-  if (getWorkspace() && compositeFunction()->nFunctions() > 0)
-    setPeakToolOn(true);
-  else
-    setPeakToolOn(false);
+	if (canPlotGuess(workspaceName()) && compositeFunction()->nFunctions() > 0)
+		setPeakToolOn(true);
+	else
+		setPeakToolOn(false);	
 }
 
 /**
