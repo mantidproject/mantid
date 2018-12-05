@@ -15,19 +15,11 @@ SCRIPT_DIR=$(dirname "$0")
 # System discovery
 ###############################################################################
 USE_CORE_DUMPS=true
-X11_RUNNER="eval"
-X11_RUNNER_ARGS=""
 if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
   ON_RHEL7=true
-  X11_RUNNER="xvfb-run"
-  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24"
-fi
-if [[ ${NODE_LABELS} == *ubuntu* ]]; then
+elif [[ ${NODE_LABELS} == *ubuntu* ]]; then
   ON_UBUNTU=true
-  X11_RUNNER="xvfb-run"
-  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24"
-fi
-if [[ ${NODE_LABELS} == *osx* ]]; then
+elif [[ ${NODE_LABELS} == *osx* ]]; then
   ON_MACOS=true
   USE_CORE_DUMPS=false
 fi
@@ -47,6 +39,17 @@ trap onexit INT TERM EXIT
 # All nodes currently have PARAVIEW_DIR and PARAVIEW_NEXT_DIR set
 ###############################################################################
 export PARAVIEW_DIR=${PARAVIEW_DIR}
+
+###############################################################################
+# Wraps calls for gui emulation
+###############################################################################
+if [ $(command -v xvfb-run) ]; then
+  X11_RUNNER="xvfb-run"
+  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24"
+else
+  X11_RUNNER="eval"
+  X11_RUNNER_ARGS=""
+fi
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -388,7 +391,7 @@ fi
 # documentation
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
-  ${CMAKE_EXE} --build . --target docs-qthelp
+  ${X11_RUNNER} "${X11_RUNNER_ARGS}" ${CMAKE_EXE} --build . --target docs-qthelp
   ${CPACK_EXE}
 
   # Source tarball on clean build (arbitrarily choose rhel7)
@@ -396,7 +399,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
   if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
-    ${CMAKE_EXE} --build . --target docs-html
+    ${X11_RUNNER} "${X11_RUNNER_ARGS}" ${CMAKE_EXE} --build . --target docs-html
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
     ${CPACK_EXE} --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX=
