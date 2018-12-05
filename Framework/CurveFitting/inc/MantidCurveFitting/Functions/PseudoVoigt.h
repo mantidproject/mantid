@@ -61,9 +61,11 @@ private:
   inline double cal_bg(const double gamma) const;
   /// normalized Gaussian G'(x)
   inline double cal_gaussian(const double ag, const double bg,
-                             const double xdiffsq);
+                             const double xdiffsq) const;
   /// normalized Lorentzian L'(x)
-  inline double cal_lorentzian(const double gamma, const double xdiffsq);
+  inline double cal_lorentzian(const double gamma_div_2,
+                               const double gammasq_div_4,
+                               const double xdiffsq) const;
 };
 
 } // namespace Functions
