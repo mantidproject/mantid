@@ -472,13 +472,13 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
   // try getting the value of total_counts
   if (hasTotalCounts) {
     hasTotalCounts = false;
-    uint64_t numEvents;
     if (exists(file, "total_counts")) {
       try {
         file.openData("total_counts");
         auto info = file.getInfo();
         file.closeData();
         if (info.type == NeXus::UINT64) {
+          uint64_t numEvents;
           file.readData("total_counts", numEvents);
           hasTotalCounts = true;
           return numEvents;
