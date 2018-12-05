@@ -32,27 +32,32 @@ public:
 
   PseudoVoigtTest()
       : m_xValues(), m_yValues(), m_dfdh(), m_dfda(), m_dfdx0(), m_dfdf() {
-    m_xValues.push_back(0.991491491491491);
-    m_xValues.push_back(0.992492492492492);
-    m_xValues.push_back(0.993493493493493);
-    m_xValues.push_back(0.994494494494494);
-    m_xValues.push_back(0.995495495495496);
-    m_xValues.push_back(0.996496496496497);
-    m_xValues.push_back(0.997497497497497);
-    m_xValues.push_back(0.998498498498498);
-    m_xValues.push_back(0.999499499499499);
-    m_xValues.push_back(1.000500500500501);
-    m_xValues.push_back(1.001501501501501);
-    m_xValues.push_back(1.002502502502503);
-    m_xValues.push_back(1.003503503503504);
-    m_xValues.push_back(1.004504504504504);
-    m_xValues.push_back(1.005505505505506);
-    m_xValues.push_back(1.006506506506506);
-    m_xValues.push_back(1.007507507507508);
-    m_xValues.push_back(1.008508508508509);
-    m_xValues.push_back(1.009509509509509);
-    m_xValues.push_back(1.010510510510511);
-    m_xValues.push_back(1.011511511511511);
+    //    m_xValues.push_back(0.991491491491491);
+    //    m_xValues.push_back(0.992492492492492);
+    //    m_xValues.push_back(0.993493493493493);
+    //    m_xValues.push_back(0.994494494494494);
+    //    m_xValues.push_back(0.995495495495496);
+    //    m_xValues.push_back(0.996496496496497);
+    //    m_xValues.push_back(0.997497497497497);
+    //    m_xValues.push_back(0.998498498498498);
+    //    m_xValues.push_back(0.999499499499499);
+    //    m_xValues.push_back(1.000500500500501);
+    //    m_xValues.push_back(1.001501501501501);
+    //    m_xValues.push_back(1.002502502502503);
+    //    m_xValues.push_back(1.003503503503504);
+    //    m_xValues.push_back(1.004504504504504);
+    //    m_xValues.push_back(1.005505505505506);
+    //    m_xValues.push_back(1.006506506506506);
+    //    m_xValues.push_back(1.007507507507508);
+    //    m_xValues.push_back(1.008508508508509);
+    //    m_xValues.push_back(1.009509509509509);
+    //    m_xValues.push_back(1.010510510510511);
+    //    m_xValues.push_back(1.011511511511511);
+
+    for (size_t i = 0; i < 200; ++i) {
+      double x_i = -10 + 0.1 * static_cast<double>(i);
+      m_xValues.push_back(x_i);
+    }
 
     m_yValues.push_back(4.372997125267132);
     m_yValues.push_back(4.458629118465070);
@@ -170,23 +175,129 @@ public:
     TS_ASSERT_EQUALS(fn.category(), "Peak");
   }
 
-  void Redo_testPseudoVoigtValues() {
-    IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.7);
+  /** Test against with pure Gaussian
+   * @brief testGaussianEdge
+   */
+  void InProgress_testGaussianEdge() {
+    FunctionDomain1DVector domain(m_xValues);
+    //    FunctionValues valuesGaussian(domain);
+
+    const double center{-1.0};
+    const double intensity{2.0};
+    const double fwhm{2.0};
+    const double mixing{1.0};
+    IPeakFunction_sptr pv = getInitializedPV(center, intensity, fwhm, mixing);
+    FunctionValues valuesPV(domain);
+
+    pv->function(domain, valuesPV);
+
+    // check integration
+    double num_intensity =
+        numerical_integrate_pv(center, intensity, fwhm, mixing);
+    std::cout << "Integrated = " << num_intensity << "\n";
+
+    //    for (size_t i = 0; i < valuesPV.size(); ++i) {
+    //        std::cout << m_xValues[i] << "    " << valuesPV[i] << "\n";
+    //    }
+
+    TS_ASSERT(true);
+
+    // TODO - Calcualte sigma for Gaussian and compare
+
+    //    // This is a non-normalized Gaussian
+    //    Gaussian gaussian;
+    //    gaussian.initialize();
+    //    gaussian.setCentre(1.0);
+    //    gaussian.setHeight(4.78);
+    //    gaussian.setFwhm(0.05);
+
+    //    FunctionDomain1DVector domain(m_xValues);
+    //    FunctionValues valuesPV(domain);
+    //    FunctionValues valuesGaussian(domain);
+
+    //    pv->function(domain, valuesPV);
+    //    gaussian.function(domain, valuesGaussian);
+
+    //    for (size_t i = 0; i < valuesPV.size(); ++i) {
+    //      TS_ASSERT_DELTA(valuesPV[i], valuesGaussian[i], 1e-15);
+    //    }
+  }
+
+  void testLorentzianEdge() {
+    FunctionDomain1DVector domain(m_xValues);
+
+    const double center{-1.0};
+    const double intensity{2.0};
+    const double fwhm{2.0};
+    const double mixing{0.};
+    IPeakFunction_sptr pv = getInitializedPV(center, intensity, fwhm, mixing);
+    FunctionValues valuesPV(domain);
+
+    pv->function(domain, valuesPV);
+
+    // check integration
+    double num_intensity =
+        numerical_integrate_pv(center, intensity, fwhm, mixing);
+    TS_ASSERT_DELTA(num_intensity, intensity, 2.0E-2);
+    // std::cout << "Integrated = " << num_intensity << "\n";
+    //    for (size_t i = 0; i < valuesPV.size(); ++i) {
+    //      std::cout << m_xValues[i] << "    " << valuesPV[i] << "\n";
+    //    }
+
+    Lorentzian lorentzian;
+    lorentzian.initialize();
+    lorentzian.setIntensity(intensity);
+    lorentzian.setFwhm(fwhm);
+    lorentzian.setCentre(center);
+    FunctionValues valuesLorentzian(domain);
+    lorentzian.function(domain, valuesLorentzian);
+
+    for (size_t i = 0; i < valuesPV.size(); ++i) {
+      TS_ASSERT_DELTA(valuesPV[i], valuesLorentzian[i], 1e-15);
+    }
+  }
+
+  /** Regular pseudo voigt
+   * @brief testPseudoVoigtValues
+   */
+  void testPseudoVoigtValues() {
+    const double center{-1.0};
+    const double intensity{2.0};
+    const double fwhm{2.0};
+    const double mixing{0.5};
+    IPeakFunction_sptr pv = getInitializedPV(center, intensity, fwhm, mixing);
 
     FunctionDomain1DVector domain(m_xValues);
     FunctionValues values(domain);
 
     pv->function(domain, values);
 
-    for (size_t i = 0; i < values.size(); ++i) {
-      TS_ASSERT_DELTA(values[i], m_yValues[i], 1e-13);
-    }
+        for (size_t i = 0; i < values.size(); ++i) {
+          std::cout << m_xValues[i] << "    " << values[i] << "\n";
+        }
+
+    // check intensity
+    double numeric_intensity = numerical_integrate_pv(center, intensity, fwhm, mixing);
+    TS_ASSERT_DELTA(numeric_intensity, intensity, 1.0E-2);
+    TS_ASSERT(numeric_intensity < intensity);
+
+    // check height
+    double height = pv->height();
+    TS_ASSERT_DELTA(height, values[100], 1.E-10);
+
+//    for (size_t i = 0; i < values.size(); ++i) {
+//      TS_ASSERT_DELTA(values[i], m_yValues[i], 1e-13);
+//    }
   }
 
   /** Test derivative with eta = 0.5
    */
-  void Redo_testPseudoVoigtDerivatives() {
-    IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.7);
+  void testPseudoVoigtDerivativesXAxis() {
+
+
+
+
+    IPeakFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.7);
 
     FunctionDomain1DVector domain(m_xValues);
     Mantid::CurveFitting::Jacobian jacobian(domain.size(), 4);
@@ -201,65 +312,13 @@ public:
     }
   }
 
-  /** Test against with pure Gaussian
-   * @brief testGaussianEdge
-   */
-  void Redo_testGaussianEdge() {
-    IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 1.0);
+  void ToDo_testPseudoVoigtDerivativesVaryParameters() {
+      std::vector<double> xvalues;
+      for (size_t i = 0; i < 10; ++i)
+      {
+        xvalues.push_back(-5 + static_cast<double>(i));
+      }
 
-    // FIXME -...
-
-    // This is a non-normalized Gaussian
-    Gaussian gaussian;
-    gaussian.initialize();
-    gaussian.setCentre(1.0);
-    gaussian.setHeight(4.78);
-    gaussian.setFwhm(0.05);
-
-    FunctionDomain1DVector domain(m_xValues);
-    FunctionValues valuesPV(domain);
-    FunctionValues valuesGaussian(domain);
-
-    pv->function(domain, valuesPV);
-    gaussian.function(domain, valuesGaussian);
-
-    for (size_t i = 0; i < valuesPV.size(); ++i) {
-      TS_ASSERT_DELTA(valuesPV[i], valuesGaussian[i], 1e-15);
-    }
-  }
-
-  void Redo_testLorentzianEdge() {
-    IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.0);
-
-    Lorentzian lorentzian;
-    lorentzian.initialize();
-    lorentzian.setCentre(1.0);
-    lorentzian.setFwhm(0.05);
-    lorentzian.setHeight(4.78);
-
-    // TODO ...
-
-    FunctionDomain1DVector domain(m_xValues);
-    FunctionValues valuesPV(domain);
-    FunctionValues valuesLorentzian(domain);
-
-    pv->function(domain, valuesPV);
-    lorentzian.function(domain, valuesLorentzian);
-
-    for (size_t i = 0; i < valuesPV.size(); ++i) {
-      TS_ASSERT_DELTA(valuesPV[i], valuesLorentzian[i], 1e-15);
-    }
-  }
-
-  void Redo_testIntegrate() {
-    PseudoVoigt pv;
-    pv.setParameter(0, 1.0);
-    pv.setParameter(1, 4.78);
-    //   (1.0, 4.78, 0.05, 0.0);
-
-    PeakFunctionIntegrator integrator;
-    IntegrationResult result = integrator.integrate(pv, -100., 100.);
-    std::cout << "Integrated value = " << result.result << "\n";
   }
 
   /** Test the intensity ratio between a Gaussian and Lorentzian
@@ -270,16 +329,42 @@ public:
   }
 
 private:
-  IFunction_sptr getInitializedPV(double center, double height, double fwhm,
+  IPeakFunction_sptr getInitializedPV(double center, double intensity, double fwhm,
                                   double mixing) {
-    IFunction_sptr pv = boost::make_shared<PseudoVoigt>();
+    IPeakFunction_sptr pv = boost::make_shared<PseudoVoigt>();
     pv->initialize();
     pv->setParameter("PeakCentre", center);
     pv->setParameter("FWHM", fwhm);
-    pv->setParameter("Height", height);
+    pv->setParameter("Intensity", intensity);
     pv->setParameter("Mixing", mixing);
 
     return pv;
+  }
+
+  double numerical_integrate_pv(double center, double peak_intensity,
+                                double fwhm, double mixing) {
+    PseudoVoigt pv;
+    pv.initialize();
+    pv.setParameter(0, mixing);
+    pv.setParameter(1, peak_intensity);
+    pv.setParameter(2, center);
+    pv.setParameter(3, fwhm);
+
+    PeakFunctionIntegrator integrator;
+    IntegrationResult result = integrator.integrate(pv, -100., 100.);
+
+    return result.result;
+  }
+
+  /// calculate \partial pV() / \partial p_i  where i = 0, 1, 2 or 3 for mixing, ....
+  std::vector<double> numerical_paaram_partial_derivative(PseudoVoigt &pv, size_t param_index,
+                                                          double min_value, double max_value,
+                                                          double resolution) {
+
+      // TODO Implement
+      std::vector<double> deriv_vec;
+
+      return deriv_vec;
   }
 
   std::vector<double> m_xValues;

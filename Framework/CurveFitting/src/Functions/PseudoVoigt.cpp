@@ -145,6 +145,12 @@ double PseudoVoigt::height() const {
   return height;
 }
 
+void PseudoVoigt::setHeight(const double h) {
+   double intensity = h * 0.5;  // FIXME - This is not correct!
+   setParameter("Intensity", intensity);
+}
+
+
 /** a_G = 2/gamma * sqrt(ln2/pi)
  * @param gamma :: FWHM
  * @return

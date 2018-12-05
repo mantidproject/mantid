@@ -41,7 +41,7 @@ public:
   double fwhm() const override { return getParameter("FWHM"); }
 
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
-  void setHeight(const double h) override { setParameter("Height", h); }
+  void setHeight(const double h) override;
   void setFwhm(const double w) override { setParameter("FWHM", w); }
 
   std::string name() const override { return "PseudoVoigt"; }

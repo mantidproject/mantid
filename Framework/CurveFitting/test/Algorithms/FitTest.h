@@ -1749,6 +1749,8 @@ public:
     TS_ASSERT_DELTA(out->getParameter("Scale"), 0.25, 0.01);
   }
 
+  // FIXME - This Failed!
+  // Get data out for the singled out test!
   void test_function_PseudoVoigt() {
 
     // Mock data
