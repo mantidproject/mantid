@@ -40,6 +40,8 @@
 namespace Mantid {
 namespace DataHandling {
 
+bool exists(::NeXus::File &file, const std::string &name);
+
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
   Load Event Nexus files.
@@ -579,7 +581,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   file.openGroup(entry_name, "NXentry");
 
   // get the title
-  try {
+  if (exists(file, "title")) {
     file.openData("title");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string title = file.getStrData();
@@ -587,12 +589,10 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
         WS->setTitle(title);
     }
     file.closeData();
-  } catch (std::exception &) {
-    // don't set the title if the field is not loaded
   }
 
   // get the notes
-  try {
+  if (exists(file, "notes")) {
     file.openData("notes");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string notes = file.getStrData();
@@ -600,15 +600,12 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
         WS->mutableRun().addProperty("file_notes", notes);
     }
     file.closeData();
-  } catch (::NeXus::Exception &) {
-    // let it drop on floor
   }
 
   // Get the run number
-  std::string run;
-  try {
+  if (exists(file, "run_number")) {
     file.openData("run_number");
-
+    std::string run;
     if (file.getInfo().type == ::NeXus::CHAR) {
       run = file.getStrData();
     } else if (file.isDataInt()) {
@@ -618,17 +615,14 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
       if (!value.empty())
         run = std::to_string(value[0]);
     }
+    if (!run.empty()) {
+      WS->mutableRun().addProperty("run_number", run);
+    }
     file.closeData();
-  } catch (::NeXus::Exception &) {
-    // Nexus format does not require a run_number to be present
-  }
-
-  if (!run.empty()) {
-    WS->mutableRun().addProperty("run_number", run);
   }
 
   // get the experiment identifier
-  try {
+  if (exists(file, "experiment_identifier")) {
     file.openData("experiment_identifier");
     std::string expId;
     if (file.getInfo().type == ::NeXus::CHAR) {
@@ -638,15 +632,13 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
       WS->mutableRun().addProperty("experiment_identifier", expId);
     }
     file.closeData();
-  } catch (::NeXus::Exception &) {
-    // let it drop on floor
   }
 
   // get the sample name - nested try/catch to leave the handle in an
   // appropriate state
   try {
     file.openGroup("sample", "NXsample");
-    try {
+    if (exists(file, "name")) {
       file.openData("name");
       const auto info = file.getInfo();
       std::string name;
@@ -668,8 +660,6 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
       if (!name.empty()) {
         WS->mutableSample().setName(name);
       }
-    } catch (::NeXus::Exception &) {
-      // let it drop on floor
     }
     file.closeGroup();
   } catch (::NeXus::Exception &) {
@@ -677,12 +667,13 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // get the duration
-  file.openData("duration");
-  std::vector<double> duration;
-  file.getDataCoerce(duration);
-  if (duration.size() == 1) {
-    // get the units
-    // clang-format off
+  if (exists(file, "duration")) {
+    file.openData("duration");
+    std::vector<double> duration;
+    file.getDataCoerce(duration);
+    if (duration.size() == 1) {
+      // get the units
+      // clang-format off
     std::vector< ::NeXus::AttrInfo> infos = file.getAttrInfos();
     std::string units;
     for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
@@ -692,12 +683,13 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
         break;
       }
     }
-    // clang-format on
+      // clang-format on
 
-    // set the property
-    WS->mutableRun().addProperty("duration", duration[0], units);
+      // set the property
+      WS->mutableRun().addProperty("duration", duration[0], units);
+    }
+    file.closeData();
   }
-  file.closeData();
 
   // close the file
   file.close();
@@ -708,8 +700,8 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
  *  specified by the info in the Nexus file
  *
  *  @param nexusfilename :: The Nexus file name
- *  @param localWorkspace :: templated workspace in which to put the instrument
- *geometry
+ *  @param localWorkspace :: templated workspace in which to put the
+ *instrument geometry
  *  @param top_entry_name :: entry name at the top of the Nexus file
  *  @param alg :: Handle of the algorithm
  *  @return true if successful
@@ -731,8 +723,8 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
 /** Load the instrument from the nexus file
  *
  *  @param nexusfilename :: The name of the nexus file being loaded
- *  @param localWorkspace :: templated workspace in which to put the instrument
- *geometry
+ *  @param localWorkspace :: templated workspace in which to put the
+ *instrument geometry
  *  @param top_entry_name :: entry name at the top of the Nexus file
  *  @param alg :: Handle of the algorithm
  *  @return true if successful
