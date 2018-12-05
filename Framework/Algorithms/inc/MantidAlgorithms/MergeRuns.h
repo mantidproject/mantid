@@ -49,6 +49,17 @@ namespace Algorithms {
     @date 22/09/2008
 */
 
+namespace MergeRunsParameter {
+/// MergeRuns parameter names of the paramter file for sample log merging
+static const std::string SUM_MERGE = "sample_logs_sum";
+static const std::string TIME_SERIES_MERGE = "sample_logs_time_series";
+static const std::string LIST_MERGE = "sample_logs_list";
+static const std::string WARN_MERGE = "sample_logs_warn";
+static const std::string WARN_MERGE_TOLERANCES = "sample_logs_warn_tolerances";
+static const std::string FAIL_MERGE = "sample_logs_fail";
+static const std::string FAIL_MERGE_TOLERANCES = "sample_logs_fail_tolerances";
+} // namespace MergeRunsParameter
+
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

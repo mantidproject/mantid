@@ -31,9 +31,10 @@ New
     :class: screenshot
     :align: right
     :figwidth: 70%
-    
+
 - Project Recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
 - Project Recovery now adds a lock file at the start of saving so if MantidPlot crashes when saving it will no longer use that checkpoint as it is incomplete.
+- Project Recovery now has the ability to be changed from inside of MantidPlot without using the config files directly, this can be found in view->preferences->mantid->projectrecovery
 
 
 Changes
@@ -69,6 +70,7 @@ Changes
 #######
 
 - All File Browser dialog boxes will now (by default) display all valid file extensions as the first file filter.
+- Plot -> Advanced now allows for plotting against any property in the ``Run`` object that can be represented as a single number. It uses the time-average value for time series properties and the average for others.
 
 BugFixes
 ########

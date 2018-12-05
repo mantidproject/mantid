@@ -235,23 +235,28 @@ public:
 
     // test the table workspace
     TS_ASSERT_EQUALS(wksp->columnCount(), 14);
-    TS_ASSERT_EQUALS(wksp->rowCount(), 1);
+    TS_ASSERT_EQUALS(wksp->rowCount(), 2);
 
-    // check all of the contents of row 0
-    TS_ASSERT_EQUALS(wksp->Double(0, 0), 60.);
+    // the two rows are only difference in wavelength setting
     TS_ASSERT_EQUALS(wksp->Double(0, 1), 1.4);
-    TS_ASSERT_EQUALS(wksp->Int(0, 2), 1);
-    TS_ASSERT_EQUALS(wksp->String(0, 3), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 4), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 5), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 7), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 8), ".31,.25,.13,.13,.13,.42");
-    TS_ASSERT_EQUALS(wksp->String(0, 9), "13.66,5.83,3.93,2.09,1.57,31.42");
-    TS_ASSERT_EQUALS(wksp->Double(0, 10), 300.00);
-    TS_ASSERT_EQUALS(wksp->Double(0, 11), 16666.67);
-    TS_ASSERT_EQUALS(wksp->Double(0, 12), .1);
-    TS_ASSERT_EQUALS(wksp->Double(0, 13), 2.9);
+    TS_ASSERT_EQUALS(wksp->Double(1, 1), 1.5);
+
+    // check all of the contents of the rows
+    for (size_t i = 0; i < 2; ++i) {
+      TS_ASSERT_EQUALS(wksp->Double(i, 0), 60.); // frequency
+      TS_ASSERT_EQUALS(wksp->Int(i, 2), 1);      // bank number
+      TS_ASSERT_EQUALS(wksp->String(i, 3), "0");
+      TS_ASSERT_EQUALS(wksp->String(i, 4), "0");
+      TS_ASSERT_EQUALS(wksp->String(i, 5), "0");
+      TS_ASSERT_EQUALS(wksp->String(i, 6), "0");
+      TS_ASSERT_EQUALS(wksp->String(i, 7), "0");
+      TS_ASSERT_EQUALS(wksp->String(i, 8), ".31,.25,.13,.13,.13,.42");
+      TS_ASSERT_EQUALS(wksp->String(i, 9), "13.66,5.83,3.93,2.09,1.57,31.42");
+      TS_ASSERT_EQUALS(wksp->Double(i, 10), 300.00);
+      TS_ASSERT_EQUALS(wksp->Double(i, 11), 16666.67);
+      TS_ASSERT_EQUALS(wksp->Double(i, 12), .1);
+      TS_ASSERT_EQUALS(wksp->Double(i, 13), 2.9);
+    }
 
     // test the other output properties
     checkNOMAD(alg);
@@ -411,12 +416,14 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve(WKSP_NAME));
     TS_ASSERT(wksp);
 
-    TS_ASSERT_EQUALS(wksp->rowCount(), 1);
-    TS_ASSERT_EQUALS(wksp->String(0, 3), "49258"); // vanadium
-    TS_ASSERT_EQUALS(wksp->String(0, 4), "49086"); // vanadium_background
-    TS_ASSERT_EQUALS(wksp->String(0, 5), "49257"); // container
-    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");     // empty_environment
-    TS_ASSERT_EQUALS(wksp->String(0, 7), "0");     // empty_instrument
+    TS_ASSERT_EQUALS(wksp->rowCount(), 2);
+    for (size_t i = 0; i < 2; ++i) {
+      TS_ASSERT_EQUALS(wksp->String(i, 3), "49258"); // vanadium
+      TS_ASSERT_EQUALS(wksp->String(i, 4), "49086"); // vanadium_background
+      TS_ASSERT_EQUALS(wksp->String(i, 5), "49257"); // container
+      TS_ASSERT_EQUALS(wksp->String(i, 6), "0");     // empty_environment
+      TS_ASSERT_EQUALS(wksp->String(i, 7), "0");     // empty_instrument
+    }
   }
 
   void test_ExpIni_failing() {

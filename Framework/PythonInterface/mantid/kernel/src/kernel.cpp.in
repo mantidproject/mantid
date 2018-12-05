@@ -5,36 +5,70 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 /*****************************************************************************************/
-/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
-/********** Source = kernel.cpp.in *******************************************************/
+/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.
+ * ***********************/
+/********** Source = kernel.cpp.in
+ * *******************************************************/
 /*****************************************************************************************/
-#include <boost/python/module.hpp>
-#include <boost/python/docstring_options.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/docstring_options.hpp>
+#include <boost/python/module.hpp>
+#include <boost/python/type_id.hpp>
 
 #include "MantidKernel/MantidVersion.h"
 #include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/kernel/kernel.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/kernel.h"
 
-// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
+// See
+// http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #include <numpy/arrayobject.h>
 
 // See comment in kernel.h
 #ifdef _WIN32
-void kernel_dll_import_numpy_capi_for_unittest() {
-  _import_array();
-}
+void kernel_dll_import_numpy_capi_for_unittest() { _import_array(); }
 #endif
 
 using boost::python::def;
+using boost::python::type_id;
+namespace converter = boost::python::converter;
 
 // Forward declare
 @EXPORT_DECLARE@
 
-BOOST_PYTHON_MODULE(_kernel)
-{
+#if PY_VERSION_HEX < 0x03000000
+    /**
+     * Adds a from_python converter to converter unicode strings to std::string
+     * by encoding them in utf-8 if possible. Adapted from
+     * https://www.boost.org/doc/libs/1_68_0/libs/python/doc/html/faq/how_can_i_automatically_convert_.html
+     */
+struct from_unicode_py2 {
+  from_unicode_py2() {
+    converter::registry::push_back(&convertible, &construct,
+                                   type_id<std::string>());
+  }
+  static void *convertible(PyObject *obj_ptr) {
+    return (PyUnicode_Check(obj_ptr)) ? obj_ptr : 0;
+  }
+  static void construct(PyObject *obj_ptr,
+                        converter::rvalue_from_python_stage1_data *data) {
+    PyObject *pyutf8 = PyUnicode_AsUTF8String(obj_ptr);
+    if (pyutf8 == 0)
+      boost::python::throw_error_already_set();
+    const char *value = PyString_AsString(pyutf8);
+    if (value == 0)
+      boost::python::throw_error_already_set();
+    using rvalue_from_python_std_string = converter::rvalue_from_python_storage<std::string>;
+    void *storage = reinterpret_cast<rvalue_from_python_std_string*>(data)->storage.bytes;
+    new (storage) std::string(value);
+    data->convertible = storage;
+    Py_DECREF(pyutf8); // Must be deleted after the std::string has taken a copy
+  }
+};
+#endif
+
+BOOST_PYTHON_MODULE(_kernel) {
   // Doc string options - User defined, python arguments, C++ call signatures
   boost::python::docstring_options docstrings(true, true, false);
   // Import numpy for the core DLL
@@ -57,8 +91,12 @@ BOOST_PYTHON_MODULE(_kernel)
   def("paper_citation", &Mantid::Kernel::MantidVersion::paperCitation,
       "Returns The citation for the Mantid paper");
 
+#if PY_VERSION_HEX < 0x03000000
+  // accept unicode strings wherever we see std::string (as long as they can be
+  // encoded in utf8)
+  from_unicode_py2();
+#endif
   Mantid::PythonInterface::Registry::TypeRegistry::registerBuiltins();
 
-
-@EXPORT_FUNCTIONS@
+  @EXPORT_FUNCTIONS@
 }

@@ -275,30 +275,30 @@ void ReflectometryReductionOneAuto2::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "Polarization analysis mode.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Pp", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
       "Effective polarizing power of the polarizing system. "
       "Expressed as a ratio 0 &lt; Pp &lt; 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Ap", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("CAp", Direction::Input),
       "Effective polarizing power of the analyzing system. "
       "Expressed as a ratio 0 &lt; Ap &lt; 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Rho", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("CRho", Direction::Input),
       "Ratio of efficiencies of polarizer spin-down to polarizer "
       "spin-up. This is characteristic of the polarizer flipper. "
       "Values are constants for each term in a polynomial "
       "expression.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Alpha", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("CAlpha", Direction::Input),
       "Ratio of efficiencies of analyzer spin-down to analyzer "
       "spin-up. This is characteristic of the analyzer flipper. "
       "Values are factors for each term in a polynomial "
       "expression.");
   setPropertyGroup("PolarizationAnalysis", "Polarization Corrections");
-  setPropertyGroup("Pp", "Polarization Corrections");
-  setPropertyGroup("Ap", "Polarization Corrections");
-  setPropertyGroup("Rho", "Polarization Corrections");
-  setPropertyGroup("Alpha", "Polarization Corrections");
+  setPropertyGroup("CPp", "Polarization Corrections");
+  setPropertyGroup("CAp", "Polarization Corrections");
+  setPropertyGroup("CRho", "Polarization Corrections");
+  setPropertyGroup("CAlpha", "Polarization Corrections");
 
   // Flood correction
   propOptions = {"Workspace", "ParameterFile"};
@@ -944,17 +944,17 @@ ReflectometryReductionOneAuto2::getPolarizationEfficiencies() {
   } else {
     auto effAlg = createChildAlgorithm("CreatePolarizationEfficiencies");
     effAlg->setProperty("InputWorkspace", workspace);
-    if (!isDefault("Pp")) {
-      effAlg->setProperty("Pp", getPropertyValue("Pp"));
+    if (!isDefault("CPp")) {
+      effAlg->setProperty("Pp", getPropertyValue("CPp"));
     }
-    if (!isDefault("Rho")) {
-      effAlg->setProperty("Rho", getPropertyValue("Rho"));
+    if (!isDefault("CRho")) {
+      effAlg->setProperty("Rho", getPropertyValue("CRho"));
     }
-    if (!isDefault("Ap")) {
-      effAlg->setProperty("Ap", getPropertyValue("Ap"));
+    if (!isDefault("CAp")) {
+      effAlg->setProperty("Ap", getPropertyValue("CAp"));
     }
-    if (!isDefault("Alpha")) {
-      effAlg->setProperty("Alpha", getPropertyValue("Alpha"));
+    if (!isDefault("CAlpha")) {
+      effAlg->setProperty("Alpha", getPropertyValue("CAlpha"));
     }
     effAlg->execute();
     efficiencies = effAlg->getProperty("OutputWorkspace");

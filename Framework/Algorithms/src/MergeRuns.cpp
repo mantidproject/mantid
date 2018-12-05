@@ -368,8 +368,16 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
   if (rebinParams) {
     outWS = this->rebinInput(outWS, *rebinParams);
   }
+  SampleLogsBehaviour::ParameterName parName = {
+      MergeRunsParameter::SUM_MERGE,
+      MergeRunsParameter::TIME_SERIES_MERGE,
+      MergeRunsParameter::LIST_MERGE,
+      MergeRunsParameter::WARN_MERGE,
+      MergeRunsParameter::WARN_MERGE_TOLERANCES,
+      MergeRunsParameter::FAIL_MERGE,
+      MergeRunsParameter::FAIL_MERGE_TOLERANCES};
   Algorithms::SampleLogsBehaviour sampleLogsBehaviour =
-      SampleLogsBehaviour(outWS, g_log, logEntries);
+      SampleLogsBehaviour(outWS, g_log, logEntries, parName);
 
   auto isScanning = outWS->detectorInfo().isScanning();
 
