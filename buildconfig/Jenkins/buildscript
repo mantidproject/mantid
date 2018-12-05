@@ -409,8 +409,8 @@ fi
 ###############################################################################
 if [[ ${DO_SYSTEMTESTS} == true ]]; then
   if [[ ${PRBUILD} == true ]]; then
-    EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+    EXTRA_ARGS="--exclude-in-pull-requests" ${X11_RUNNER} "${X11_RUNNER_ARGS}" $SCRIPT_DIR/systemtests
   else
-    $SCRIPT_DIR/systemtests
+    ${X11_RUNNER} "${X11_RUNNER_ARGS}" $SCRIPT_DIR/systemtests
   fi
 fi
