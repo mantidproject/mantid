@@ -82,12 +82,13 @@ Bugfixes
 - Fixed an issue where if a workspace's history wouldn't update for some algorithms
 - Fixed a ``std::bad_cast`` error in :ref:`algm-LoadLiveData` when the data size changes.
 - :ref:`Fit <algm-Fit>` now applies the ties in correct order independently on the order they are set. If any circular dependencies are found Fit will give an error.
-- Fixed a rare bug in :ref:`MaskDetectors <algm-MaskDetectors>` where a workspace could become invalidaded in Python if it was a ``MaskWorkspace``.
+- Fixed a rare bug in :ref:`MaskDetectors <algm-MaskDetectors>` where a workspace could become invalidated in Python if it was a ``MaskWorkspace``.
 - Fixed a crash in :ref:`MaskDetectors <algm-MaskDetectors>` when a non-existent component was given in ``ComponentList``.
 - SampleLogs units are present, algorithms :ref:`MergeRuns <algm-MergeRuns>` and :ref:`ConjoinXRuns <algm-ConjoinXRuns>`.
 - History for algorithms that took groups sometimes would get incorrect history causing history to be incomplete, so now full group history is saved for all items belonging to the group.
 - Fixed a bug in `SetGoniometer <algm-SetGoniometer>` where it would use the mean log value rather than the time series average value for goniometer angles.
 - `ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``
+- The input validator is fixed in :ref:`MostLikelyMean <algm-MostLikelyMean>` avoiding a segmentation fault.
 
 Python
 ------
