@@ -8,7 +8,6 @@
 #define MANTID_ALGORITHMS_STITCH1DMANY_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {

@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"

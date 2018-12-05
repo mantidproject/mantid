@@ -54,7 +54,7 @@ private:
   getRebinParams(Mantid::API::MatrixWorkspace_const_sptr &lhsWS,
                  Mantid::API::MatrixWorkspace_const_sptr &rhsWS,
                  const bool scaleRHS) const;
-  void replaceSpecialValues(API::MatrixWorkspace_sptr &input);
+  void replaceSpecialValues(API::MatrixWorkspace_sptr &ws);
   /// Perform rebin
   void rebin(Mantid::API::MatrixWorkspace_sptr &ws,
              const std::vector<double> &params);
