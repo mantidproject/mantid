@@ -38,15 +38,22 @@ class SaveOtherPresenter():
             return
         selected_workspaces = self.get_workspaces()
         selected_filenames = self.get_filenames(selected_workspaces, self.filename)
+
+        self._view.progress_bar_minimum = 0
+        self._view.progress_bar_maximum = len(selected_workspaces)
+        self._view.progress_bar_value = 0
         for name_to_save, filename in zip(selected_workspaces, selected_filenames):
             save_workspace_to_file(name_to_save, file_formats, filename)
+            self._view.increment_progress()
 
     def on_item_selection_changed(self):
         self.selected_workspaces = self._view.get_selected_workspaces()
+        self._view.progress_bar_value = 0
+
         if len(self.selected_workspaces) > 1:
-            self._view.disable_filename()
+            self._view.rename_filebox('Suffix')
         else:
-            self._view.enable_filename()
+            self._view.rename_filebox('Filename')
 
     def on_directory_changed(self, directory):
         self.current_directory = directory

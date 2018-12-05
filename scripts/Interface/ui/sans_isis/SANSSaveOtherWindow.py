@@ -32,9 +32,11 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         self.directory_lineEdit.textChanged.connect(self.on_directory_changed)
         self.nxcansas_checkBox.setChecked(True)
         self.ads_widget = MantidQt.MantidWidgets.WorkspaceTreeWidgetSimple(True, self)
+        self.ads_widget.treeSelectionChanged.connect(self.on_item_selection_changed)
         self.ads_widget.refreshWorkspaces()
         self.ads_widget.installEventFilter(self)
         self.workspace_list_layout.addWidget(self.ads_widget, 0, 1, 4, 1)
+        self.progress_bar_value = 0
 
     def eventFilter(self, source, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -87,14 +89,38 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
                                                           QtGui.QFileDialog.ShowDirsOnly)
         return filename
 
-    def disable_filename(self):
-        self.filename_lineEdit.setEnabled(False)
-
-    def enable_filename(self):
-        self.filename_lineEdit.setEnabled(True)
+    def rename_filebox(self, name):
+        self.filename_label.setText(name)
 
     def _on_help_button_clicked(self):
         pymantidplot.proxies.showCustomInterfaceHelp('sans_save_other')
+
+    @property
+    def progress_bar_minimum(self):
+        return self.progress_bar.minimum()
+
+    @progress_bar_minimum.setter
+    def progress_bar_minimum(self, value):
+        self.progress_bar.setMinimum(value)
+
+    @property
+    def progress_bar_maximum(self):
+        return self.progress_bar.maximum()
+
+    @progress_bar_maximum.setter
+    def progress_bar_maximum(self, value):
+        self.progress_bar.setMaximum(value)
+
+    @property
+    def progress_bar_value(self):
+        return self.progress_bar.value()
+
+    @progress_bar_value.setter
+    def progress_bar_value(self, progress):
+        self.progress_bar.setValue(progress)
+
+    def increment_progress(self):
+        self.progress_bar_value += 1
 
     @property
     def current_directory(self):
