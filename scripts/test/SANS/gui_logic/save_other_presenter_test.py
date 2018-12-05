@@ -41,17 +41,17 @@ class SaveOtherPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.presenter.filename, 'test_file')
 
-    def test_on_item_selection_changed_disables_filename_if_multi_selection(self):
+    def test_on_item_selection_changed_changes_label_to_suffix_on_multi_selection(self):
         self.mock_view.get_selected_workspaces.return_value = ['workspace_1', 'workspace_2']
         self.presenter.on_item_selection_changed()
 
-        self.mock_view.disable_filename.assert_called_once_with()
+        self.mock_view.rename_filebox.assert_called_once_with('Suffix')
 
     def test_on_item_selection_changed_enables_filename_if_single_selection(self):
         self.mock_view.get_selected_workspaces.return_value = ['workspace_1']
         self.presenter.on_item_selection_changed()
 
-        self.mock_view.enable_filename.assert_called_once_with()
+        self.mock_view.rename_filebox.assert_called_once_with('Filename')
 
     def test_on_directory_changed_updates_current_directory(self):
         self.presenter.on_directory_changed('new_dir')
