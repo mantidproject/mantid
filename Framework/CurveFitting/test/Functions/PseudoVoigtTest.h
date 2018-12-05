@@ -204,7 +204,7 @@ public:
   /** Test against with pure Gaussian
    * @brief testGaussianEdge
    */
-  void testGaussianEdge() {
+  void Redo_testGaussianEdge() {
     IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 1.0);
 
     // FIXME -...
@@ -228,7 +228,7 @@ public:
     }
   }
 
-  void testLorentzianEdge() {
+  void Redo_testLorentzianEdge() {
     IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.0);
 
     Lorentzian lorentzian;
@@ -251,7 +251,7 @@ public:
     }
   }
 
-  void testIntegrate() {
+  void Redo_testIntegrate() {
     PseudoVoigt pv;
     pv.setParameter(0, 1.0);
     pv.setParameter(1, 4.78);
@@ -265,7 +265,7 @@ public:
   /** Test the intensity ratio between a Gaussian and Lorentzian
    * @brief testIntensityRatio
    */
-  void testIntensityRatio() {
+  void Redo_testIntensityRatio() {
     // TODO - Implement!
   }
 
