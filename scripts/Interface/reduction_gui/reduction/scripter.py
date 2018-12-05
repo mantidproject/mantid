@@ -37,6 +37,7 @@ except(ImportError, ImportWarning):
     if 'workbench' in sys.modules:
         SCRIPT_EXEC_METHOD = 'async'
 
+
 class BaseScriptElement(object):
     """
         Base class for each script element (panel on the UI).
