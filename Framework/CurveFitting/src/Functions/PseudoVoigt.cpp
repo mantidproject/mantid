@@ -164,10 +164,9 @@ double PseudoVoigt::cal_bg(const double gamma) const {
 }
 
 /** calculate normalized Gaussian
- * @brief PseudoVoigt::cal_gaussian
- * @param gamma
- * @param x_0
- * @param x
+ * @param ag : a_G
+ * @param bg : b_G
+ * @param xdiffsq : (x - x0)**2
  * @return
  */
 double PseudoVoigt::cal_gaussian(const double ag, const double bg,
