@@ -18,6 +18,24 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace API {
 
+/*
+ * To use the AnalysisDataServiceObserver you will need to do a few things:
+ *
+ * 1. Inherit from this class in the class you wish to take effect on
+ *
+ * 2. Make sure that the effect you are attempting to observe has been added
+ * to the AnalysisDataService itself by using the public method in this
+ * class, e.g. observeAll, observeAdd, observeReplace etc.
+ *
+ * 3. The last thing to actually have something take effect is by overriding
+ * the relevant handle function e.g. when observing all override
+ * anyChangeHandle and anything done in that overriden method will happen
+ * every time something changes in the AnalysisDataService.
+ *
+ * This works in both C++ and Python however not all of this class is exposed
+ * to Python.
+ */
+
 class MANTID_API_DLL AnalysisDataServiceObserver {
 public:
   AnalysisDataServiceObserver();
@@ -27,6 +45,11 @@ public:
   void observeAdd(bool turnOn = true);
   void observeReplace(bool turnOn = true);
   void observeDelete(bool turnOn = true);
+  void observeClear(bool turnOn = true);
+  void observeRename(bool turnOn = true);
+  void observeGroup(bool turnOn = true);
+  void observeUnGroup(bool turnOn = true);
+  void observeGroupUpdate(bool turnOn = true);
 
   virtual void anyChangeHandle() {}
 
@@ -35,9 +58,19 @@ protected:
   virtual void replaceHandle(const std::string &wsName,
                              const Workspace_sptr ws);
   virtual void deleteHandle(const std::string &wsName, const Workspace_sptr ws);
+  virtual void clearHandle();
+  virtual void renameHandle(const std::string &wsName,
+                            const std::string &newName);
+  virtual void groupHandle(const std::string &wsName, const Workspace_sptr ws);
+  virtual void unGroupHandle(const std::string &wsName,
+                             const Workspace_sptr ws);
+  virtual void groupUpdateHandle(const std::string &wsName,
+                                 const Workspace_sptr ws);
 
 private:
-  bool m_observingAdd, m_observingReplace, m_observingDelete;
+  bool m_observingAdd, m_observingReplace, m_observingDelete, m_observingClear,
+      m_observingRename, m_observingGroup, m_observingUnGroup,
+      m_observingGroupUpdate;
 
   void _addHandle(
       const Poco::AutoPtr<AnalysisDataServiceImpl::AddNotification> &pNf);
@@ -45,7 +78,19 @@ private:
       const Poco::AutoPtr<AnalysisDataServiceImpl::AfterReplaceNotification>
           &pNf);
   void _deleteHandle(
-      const Poco::AutoPtr<AnalysisDataServiceImpl::PostDeleteNotification>
+      const Poco::AutoPtr<AnalysisDataServiceImpl::PreDeleteNotification> &pNf);
+  void _clearHandle(
+      const Poco::AutoPtr<AnalysisDataServiceImpl::ClearNotification> &pNf);
+  void _renameHandle(
+      const Poco::AutoPtr<AnalysisDataServiceImpl::RenameNotification> &pNf);
+  void _groupHandle(
+      const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification>
+          &pNf);
+  void _unGroupHandle(
+      const Poco::AutoPtr<
+          AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &pNf);
+  void _groupUpdateHandle(
+      const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification>
           &pNf);
 
   /// Poco::NObserver for AddNotification.
@@ -60,16 +105,33 @@ private:
 
   /// Poco::NObserver for DeleteNotification.
   Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::PostDeleteNotification>
+                  AnalysisDataServiceImpl::PreDeleteNotification>
       m_deleteObserver;
 
   /// Poco::NObserver for ClearNotification
+  Poco::NObserver<AnalysisDataServiceObserver,
+                  AnalysisDataServiceImpl::ClearNotification>
+      m_clearObserver;
 
   /// Poco::NObserver for RenameNotification
+  Poco::NObserver<AnalysisDataServiceObserver,
+                  AnalysisDataServiceImpl::RenameNotification>
+      m_renameObserver;
 
   /// Poco::NObserver for GroupNotification
+  Poco::NObserver<AnalysisDataServiceObserver,
+                  AnalysisDataServiceImpl::GroupWorkspacesNotification>
+      m_groupObserver;
 
   /// Poco::NObserver for UnGroupNotification
+  Poco::NObserver<AnalysisDataServiceObserver,
+                  AnalysisDataServiceImpl::UnGroupingWorkspaceNotification>
+      m_unGroupObserver;
+
+  /// Poco::NObserver for GroupUpdateNotification
+  Poco::NObserver<AnalysisDataServiceObserver,
+                  AnalysisDataServiceImpl::GroupUpdatedNotification>
+      m_groupUpdatedObserver;
 };
 
 } // namespace API

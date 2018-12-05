@@ -69,6 +69,7 @@ endif ()
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
 
+    mantidqt/project/test/test_project.py
     mantidqt/project/test/test_projectloader.py
     mantidqt/project/test/test_projectsaver.py
     mantidqt/project/test/test_workspaceloader.py

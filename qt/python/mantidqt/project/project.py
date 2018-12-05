@@ -22,7 +22,7 @@ class Project(AnalysisDataServiceObserver):
     def __init__(self):
         super(Project, self).__init__()
         # Has the project been saved
-        self.saved = False
+        self.saved = True
 
         # Last save locations
         self.last_project_location = None
@@ -39,22 +39,17 @@ class Project(AnalysisDataServiceObserver):
             self._clear_unused_workspaces(self.last_project_location)
             # Actually save
             workspaces_to_save = AnalysisDataService.getObjectNames()
-            project_saver = ProjectSaver(self.project_save_name)
+            project_saver = ProjectSaver(self.project_file_ext)
             project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
                                        interfaces_to_save=None)
             self.saved = True
 
     def save_as(self):
-        directory = None
-        # Check if it exists
-        first_pass = True
-        while first_pass or (not os.path.exists(directory) and os.path.exists(directory + (os.path.basename(directory)
-                                                                                           + ".mtdproj"))):
-            first_pass = False
-            directory = open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.DirectoryOnly)
-            if directory is None:
-                # Cancel close dialogs
-                return
+        directory = self._get_directory_finder(accept_mode=QFileDialog.AcceptSave)
+
+        # If none then the user cancelled
+        if directory is None:
+            return
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = directory
@@ -63,16 +58,28 @@ class Project(AnalysisDataServiceObserver):
         project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save, interfaces_to_save=None)
         self.saved = True
 
-    def load(self):
+    @staticmethod
+    def _get_directory_finder(accept_mode):
         directory = None
         # Check if it exists
         first_pass = True
-        while first_pass or not os.path.isdir(directory):
+        while first_pass or (not os.path.exists(directory) and os.path.exists(directory + (os.path.basename(directory)
+                                                                                           + ".mtdproj"))):
             first_pass = False
-            directory = open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.DirectoryOnly)
+            directory = open_a_file_dialog(accept_mode=accept_mode, file_mode=QFileDialog.DirectoryOnly)
             if directory is None:
                 # Cancel close dialogs
                 return
+
+        return directory
+
+    def load(self):
+        directory = self._get_directory_finder(accept_mode=QFileDialog.AcceptOpen)
+
+        # If none then the user cancelled
+        if directory is None:
+            return
+
         project_loader = ProjectLoader(self.project_file_ext)
         project_loader.load_project(directory)
         self.last_project_location = directory
@@ -82,15 +89,24 @@ class Project(AnalysisDataServiceObserver):
         :param parent: QWidget; Parent of the QMessageBox that is popped up
         :return: Bool; Returns false if no save needed/save complete. Returns True if need to cancel closing.
         """
-        result = QMessageBox.question(parent, 'Unsaved Project', "The project is currently unsaved would you like to "
-                                      "save before closing?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
-                                      QMessageBox.Yes)
+        # If the current project is saved then return and don't do anything
+        if self.saved:
+            return
+
+        result = self._offer_save_message_box(parent)
+
         if result == QMessageBox.Yes:
             self.save()
         elif result == QMessageBox.Cancel:
             return True
         # else
         return False
+
+    @staticmethod
+    def _offer_save_message_box(parent):
+        return QMessageBox.question(parent, 'Unsaved Project', "The project is currently unsaved would you like to "
+                                    "save before closing?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                    QMessageBox.Yes)
 
     def modified_project(self):
         if not self.saved:
@@ -108,7 +124,8 @@ class Project(AnalysisDataServiceObserver):
         for item in list_dir:
             # Don't count or check files that do not end in .nxs, and check that they are not in current workspaces
             # without the .nxs
-            if bool(re.search('$.nxs', item)):
+            value = re.search('.nxs$', item)
+            if bool(value):
                 workspace_name = item.replace(".nxs", "")
                 if workspace_name not in current_workspaces:
                     files_to_remove.append(item)
