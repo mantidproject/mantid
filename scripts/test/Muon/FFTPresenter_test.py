@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
 
-from Muon.GUI.Common import load_utils
+from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.Common import thread_model
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
