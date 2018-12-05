@@ -28,6 +28,9 @@ initiated)
 
 *@returns shared pointer to new solver, which corresponds to the workspace
 */
+
+ConvToMDSelector::ConvToMDSelector(ConvToMDSelector::ConverterType tp) : converterType(tp) {}
+
 boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     API::MatrixWorkspace_sptr inputWS,
     boost::shared_ptr<ConvToMDBase> &currentSolver) const {
@@ -59,7 +62,11 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
       (existingWsConvType != inputWSType)) {
     switch (inputWSType) {
     case (EventWS):
-      return boost::make_shared<ConvToMDEventsWS>();
+      // check if user set a property to use indexing
+      if(converterType == ConvToMDSelector::DEFAULT)
+        return boost::make_shared<ConvToMDEventsWS>();
+      else
+        return boost::make_shared<ConvToMDEventsWSIndexing>();
     case (Matrix2DWS):
       return boost::make_shared<ConvToMDHistoWS>();
     default:
@@ -67,8 +74,14 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
                              "for unknown ws type"));
     }
 
-  } else { // existing converter is suitable for the workspace
-    return currentSolver;
+  } else {
+    // existing converter is suitable for the workspace
+    // in case of Event workspace check if user set a property to use indexing
+    if (inputWSType == EventWS)
+      if(converterType == ConvToMDSelector::DEFAULT)
+        return boost::make_shared<ConvToMDEventsWS>();
+      else
+        return boost::make_shared<ConvToMDEventsWSIndexing>();
   }
 }
 } // namespace MDAlgorithms

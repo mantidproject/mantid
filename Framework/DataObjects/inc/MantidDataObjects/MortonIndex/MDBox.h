@@ -107,6 +107,13 @@ public:
    */
   static constexpr size_t ChildBoxCount = 1 << ND;
 
+  struct Leaf {
+    unsigned level;
+    MDBox<ND, IntT, MortonT, MDEvent>& box;
+
+    Leaf(unsigned l, MDBox<ND, IntT, MortonT, MDEvent>& b) : level(l), box(b) {}
+  };
+
 public:
   using Children = std::vector<MDBox<ND, IntT, MortonT, MDEvent>>;
   using ZCurveIterator =
@@ -118,6 +125,19 @@ private:
     IntArray<ND, IntT> minCoord;
     minCoord.fill(intBound);
     return interleave<ND, IntT, MortonT>(minCoord);
+  }
+
+  void leafs(std::vector<Leaf>& lf, unsigned& level) {
+    if(isLeaf()) {
+      Leaf l(level, *this);
+      lf.push_back(l);
+    }
+    else {
+      ++level;
+      for(auto& child: m_childBoxes)
+        child.leafs(lf, level);
+      --level;
+    }
   }
 
 public:
@@ -151,6 +171,16 @@ public:
 //  bool contains(const MDEvent<ND, IntT, MortonT> &event) const {
 //    return contains(event.mortonNumber());
 //  }
+
+  bool isLeaf() { return m_childBoxes.empty(); }
+
+  std::vector<Leaf> leafs() {
+    std::vector<Leaf> leafBoxes;
+    unsigned level = 0;
+    leafs(leafBoxes, level);
+    return leafBoxes;
+  }
+
 
   /**
    * Tests if a given Morton number is inside this box.

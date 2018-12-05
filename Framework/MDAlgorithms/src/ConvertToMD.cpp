@@ -118,6 +118,12 @@ void ConvertToMD::init() {
                   "will create the specified file in addition to an output "
                   "workspace. The workspace will load data from the file on "
                   "demand in order to reduce memory use.");
+
+  std::vector<std::string> converterType{"default", "indexed"};
+  auto loadTypeValidator = boost::make_shared<StringListValidator>(converterType);
+  declareProperty("ConverterType", "default", loadTypeValidator,
+                  "[default, indexed], indexed is the experimental type that can speedup the conversion process"
+                  "for the big files using the indexing.");
 }
 //----------------------------------------------------------------------------------------------
 
@@ -250,7 +256,9 @@ void ConvertToMD::exec() {
   // get pointer to appropriate  ConverttToMD plugin from the CovertToMD plugins
   // factory, (will throw if logic is wrong and ChildAlgorithm is not found
   // among existing)
-  ConvToMDSelector AlgoSelector;
+  ConvToMDSelector::ConverterType convType =
+      getPropertyValue("ConverterType") == "indexed" ? ConvToMDSelector::INDEXED : ConvToMDSelector::DEFAULT;
+  ConvToMDSelector AlgoSelector(convType);
   this->m_Convertor = AlgoSelector.convSelector(m_InWS2D, this->m_Convertor);
 
   bool ignoreZeros = getProperty("IgnoreZeroSignals");

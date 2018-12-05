@@ -70,6 +70,10 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
     NONE
   };
 
+  template<size_t ND, template <size_t> class MDEventType>
+  using BoxStructureType = md_structure_ws::MDBox<ND, typename MDEventType<ND>::IntT,
+                                                  typename MDEventType<ND>::MortonT, MDEventType>;
+
   template <size_t ND>
   MD_EVENT_TYPE mdEventType();
 
@@ -128,7 +132,8 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   DataObjects::MDBoxBase<MDEventType<ND>, ND> *convertToNativeBoxStructure(const md_structure_ws::MDBox<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT, MDEventType>& mdBox);
 
   template<size_t ND, template <size_t> class MDEventType>
-  void buildStructureFromSortedEvents(API::Progress *pProgress, const API::BoxController_sptr &bc,
+  std::unique_ptr<ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>>
+  buildStructureFromSortedEvents(API::Progress *pProgress, const API::BoxController_sptr &bc,
                                       const std::vector<MDEventType<ND>> &mdEvents);
 
   template<typename EventType, size_t ND, template <size_t> class MDEventType>
@@ -227,23 +232,28 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
 }
 
 template<size_t ND, template <size_t> class MDEventType>
-DataObjects::MDBoxBase<MDEventType<ND>, ND>* ConvToMDEventsWSIndexing::convertToNativeBoxStructure(const md_structure_ws::MDBox<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT, MDEventType>& mdBox) {
+DataObjects::MDBoxBase<MDEventType<ND>, ND>* ConvToMDEventsWSIndexing::
+convertToNativeBoxStructure(const ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType> & mdBox) {
   return nullptr;
 }
 
 template<size_t ND, template <size_t> class MDEventType>
-void ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(API::Progress *pProgress,
+std::unique_ptr<ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>>
+ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(API::Progress *pProgress,
                                                               const API::BoxController_sptr &bc,
                                                               const std::vector<MDEventType<ND>> &mdEvents) {
-  md_structure_ws::MDBox<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT, MDEventType> rootMdBox(mdEvents.cbegin(), mdEvents.cend());
-  rootMdBox.distributeEvents(bc->getSplitThreshold(), bc->getMaxDepth());
-  m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure(rootMdBox));
+  auto rootMdBox =
+      std::make_unique<ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>>(mdEvents.cbegin(), mdEvents.cend());
+  rootMdBox->distributeEvents(bc->getSplitThreshold(), bc->getMaxDepth());
+  std::cerr << "Box structure has " << rootMdBox->leafs().size() << " leafs\n";
+  return rootMdBox;
 }
 
 
 
 template<typename EventType, size_t ND, template <size_t> class MDEventType>
 void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+  std::cerr << __PRETTY_FUNCTION__ << " started\n";
   std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
   MDSpaceBounds<ND> space;
   const auto& pws{m_OutWSWrapper->pWorkspace()};
@@ -251,14 +261,24 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
     space(ax, 0) = pws->getDimension(ax)->getMinimum();
     space(ax, 1) = pws->getDimension(ax)->getMaximum();
   }
+
 #pragma omp parallel for
   for(size_t i = 0; i < mdEvents.size(); ++i)
     mdEvents[i].retrieveIndex(space);
+
   tbb::parallel_sort(mdEvents.begin(), mdEvents.end(), [] (const MDEventType<ND>& a, const MDEventType<ND>& b) {
     return a.getIndex() < b.getIndex();
   });
 
-  buildStructureFromSortedEvents(pProgress, bc, mdEvents);
+  auto rootMdBox = buildStructureFromSortedEvents(pProgress, bc, mdEvents);
+
+#pragma omp parallel for
+  for(size_t i = 0; i < mdEvents.size(); ++i)
+    mdEvents[i].retrieveCoordinates(space);
+
+  m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure(*(rootMdBox.get())));
+
+  std::cerr << __PRETTY_FUNCTION__ << " finished\n";
 }
 
 
