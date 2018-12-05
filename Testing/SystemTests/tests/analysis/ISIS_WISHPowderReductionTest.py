@@ -18,7 +18,6 @@ output_folder_name = "output"
 # Relative to input folder
 calibration_folder_name = "Cal"
 
-
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
 working_dir = os.path.join(DIRS[0], working_folder_name)
@@ -54,7 +53,49 @@ class WISHPowderReductionTest(MantidSystemTest):
 
     def runTest(self):
         os.makedirs(output_dir)
-        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir+"/")
+        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir + "/", False)
+        runs = [40503]
+
+        wish_test.reduce(runs, panels)
+        self.clearWorkspaces()
+
+    def validate(self):
+        validation_files = []
+        for panel in [x for x in panels if x < 6]:
+            validation_files = validation_files + \
+                               ["w40503-{0}_{1}foc".format(panel, linked_panels.get(panel)),
+                                "WISH40503-{0}_{1}no_absorb_raw.nxs".format(panel, linked_panels.get(panel))]
+        return validation_files
+
+    def clearWorkspaces(self):
+        deletews = ["w40503-{}foc".format(panel) for panel in panels]
+        for ws in deletews:
+            mantid.DeleteWorkspace(ws)
+            mantid.DeleteWorkspace(ws + "-d")
+
+    # Skip test when on builds as extremely slow, run only as reversion test for wish script
+    def skipTests(self):
+        return False
+
+
+class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
+    # still missing required files check with ./systemtest -R PowderReduction --showskipped
+    def requiredFiles(self):
+        input_files = ["vana19612-1foc-SF-SS.nxs", "vana19612-2foc-SF-SS.nxs", "vana19612-3foc-SF-SS.nxs",
+                       "vana19612-4foc-SF-SS.nxs", "vana19612-5foc-SF-SS.nxs", "vana19612-6foc-SF-SS.nxs",
+                       "vana19612-7foc-SF-SS.nxs", "vana19612-8foc-SF-SS.nxs", "vana19612-9foc-SF-SS.nxs",
+                       "vana19612-10foc-SF-SS.nxs"]
+
+        input_files = [os.path.join(calibration_dir, files) for files in input_files]
+        return input_files
+
+    def cleanup(self):
+        if os.path.isdir(output_dir):
+            shutil.rmtree(output_dir)
+
+    def runTest(self):
+        os.makedirs(output_dir)
+        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir + "/")
         runs = [40503]
 
         wish_test.reduce(runs, panels)
