@@ -11,13 +11,12 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
+from mantidqt.widgets.tableworkspacedisplay.model import TableWorkspaceDisplayModel
+from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import \
+    MockWorkspace
 from mock import Mock
 
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.widgets.TableWorkspacedisplay.model import TableWorkspaceDisplayModel
-from mantidqt.widgets.TableWorkspacedisplay.table_view_model import TableWorkspaceTableViewModelType
-from mantidqt.widgets.TableWorkspacedisplay.test_helpers.TableWorkspacedisplay_common import \
-    MockWorkspace
 
 
 class TableWorkspaceDisplayModelTest(unittest.TestCase):
@@ -30,22 +29,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
 
         self.assertEqual(expected_name, model.get_name())
 
-    def test_get_item_model(self):
-        ws = MockWorkspace()
-        expected_name = "TEST_WORKSPACE"
-        ws.name = Mock(return_value=expected_name)
-        model = TableWorkspaceDisplayModel(ws)
-
-        x_model, y_model, e_model = model.get_item_model()
-
-        self.assertEqual(x_model.type, TableWorkspaceTableViewModelType.x)
-        self.assertEqual(y_model.type, TableWorkspaceTableViewModelType.y)
-        self.assertEqual(e_model.type, TableWorkspaceTableViewModelType.e)
-
     def test_raises_with_unsupported_workspace(self):
-        # ws = MockWorkspace()
-        # expected_name = "TEST_WORKSPACE"
-        # ws.name = Mock(return_value=expected_name)
         self.assertRaises(ValueError, lambda: TableWorkspaceDisplayModel([]))
         self.assertRaises(ValueError, lambda: TableWorkspaceDisplayModel(1))
         self.assertRaises(ValueError, lambda: TableWorkspaceDisplayModel("test_string"))

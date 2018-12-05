@@ -132,3 +132,15 @@ class MockWorkspace:
         self.getAxis = Mock(return_value=self.mock_axis)
 
         self.name = None
+
+    def rowCount(self):
+        pass
+
+    def columnCount(self):
+        pass
+
+    def getColumnNames(self):
+        pass
+
+    def column(self, index):
+        pass

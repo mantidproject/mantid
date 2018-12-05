@@ -12,30 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
 from mantid.py3compat import Enum
-
-
-class ITableDisplayModel(object):
-    def get_name(self):
-        raise NotImplementedError("This is an interface and should be implemented.")
-
-    def get_column_headers(self):
-        raise NotImplementedError("This is an interface and should be implemented.")
-
-    def get_column_header(self, index):
-        raise NotImplementedError("This is an interface and should be implemented.")
-
-    def get_column(self, index):
-        raise NotImplementedError("This is an interface and should be implemented.")
-
-    def get_number_of_rows(self):
-        raise NotImplementedError("This is an interface and should be implemented.")
-
-    def get_number_of_columns(self):
-        raise NotImplementedError("This is an interface and should be implemented.")
-
-    @staticmethod
-    def is_peaks_workspace(ws):
-        return isinstance(ws, PeaksWorkspace)
+from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockWorkspace
 
 
 class TableDisplayColumnType(Enum):
@@ -43,12 +20,14 @@ class TableDisplayColumnType(Enum):
     TEST = 123
 
 
-class TableWorkspaceDisplayModel(ITableDisplayModel):
+class TableWorkspaceDisplayModel:
     SPECTRUM_PLOT_LEGEND_STRING = '{}-{}'
     BIN_PLOT_LEGEND_STRING = '{}-bin-{}'
 
     def __init__(self, ws):
-        if not isinstance(ws, TableWorkspace) and not isinstance(ws, PeaksWorkspace):
+        if not isinstance(ws, TableWorkspace) \
+                and not isinstance(ws, PeaksWorkspace) \
+                and not isinstance(ws, MockWorkspace):
             raise ValueError("The workspace type is not supported: {0}".format(type(ws)))
 
         self.ws = ws
