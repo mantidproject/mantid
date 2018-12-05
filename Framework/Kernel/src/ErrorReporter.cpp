@@ -39,15 +39,17 @@ ErrorReporter::ErrorReporter(const std::string application,
  */
 ErrorReporter::ErrorReporter(const std::string application,
                              const Types::Core::time_duration upTime,
-                             const std::string exitCode, const bool share, const std::string name,
-                             const std::string email, const std::string textBox)
+                             const std::string exitCode, const bool share,
+                             const std::string name, const std::string email,
+                             const std::string textBox)
     : ErrorReporter(application, upTime, exitCode, share, name, email, textBox,
                     "") {}
 
 ErrorReporter::ErrorReporter(const std::string application,
                              const Types::Core::time_duration upTime,
-                             const std::string exitCode, const bool share, const std::string name,
-                             const std::string email, const std::string textBox,
+                             const std::string exitCode, const bool share,
+                             const std::string name, const std::string email,
+                             const std::string textBox,
                              const std::string recoveryFile)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
       m_share(share), m_name(name), m_email(email), m_textbox(textBox),
