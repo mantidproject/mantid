@@ -26,6 +26,7 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
+        self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D11_IQ.nxs']
 
     def runTest(self):
@@ -85,6 +86,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
+        self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D22_IQ.nxs']
 
     def runTest(self):
@@ -145,6 +147,7 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
+        self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_VTOF_IQ.nxs']
 
     def runTest(self):
@@ -188,6 +191,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
+        self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_LTOF_IQ.nxs']
 
     def runTest(self):
@@ -232,6 +236,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
+        self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_IQ.nxs']
 
     def runTest(self):

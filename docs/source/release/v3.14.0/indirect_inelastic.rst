@@ -102,6 +102,13 @@ Improvements
 
 - The Run button is now above the output options.
 - The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- The sample logs are now copied over properly for the result workspace in the ResNorm tab.
+- Sqw files can now be loaded as Vanadium in the ResNorm interface.
+
+Bugfixes
+########
+
+- An unwanted 'Fit' plot is no longer plotted in ResNorm when you click `Plot` in the output options.
 
 
 Diffraction Interface
@@ -120,4 +127,4 @@ Tools Interface
 Improvements
 ############
 
-- The Run button has been moved in the Transmission tab, and is disabled while running.
+- The Run button has been moved in each of the Tools tabs, and is disabled while running.
