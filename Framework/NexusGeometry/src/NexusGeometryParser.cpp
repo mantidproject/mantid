@@ -416,7 +416,10 @@ getTransformations(const H5File &file, const Group &detectorGroup) {
 std::vector<Mantid::detid_t> getDetectorIds(const Group &detectorGroup) {
 
   std::vector<Mantid::detid_t> detIds;
-
+  if (!detectorGroup.exists(DETECTOR_IDS))
+    throw std::invalid_argument("Mantid requires the following named dataset "
+                                "to be present in NXDetectors: " +
+                                DETECTOR_IDS);
   for (unsigned int i = 0; i < detectorGroup.getNumObjs(); ++i) {
     H5std_string objName = detectorGroup.getObjnameByIdx(i);
     if (objName == DETECTOR_IDS) {
@@ -661,7 +664,10 @@ extractInstrument(const H5File &file, const Group &root) {
     Eigen::Vector3d bankPos = transforms * Eigen::Vector3d{0, 0, 0};
     // Absolute bank rotation
     auto bankRotation = Eigen::Quaterniond(transforms.rotation());
-    auto bankName = get1DStringDataset(BANK_NAME, detectorGroup);
+    std::string bankName;
+    if (detectorGroup.exists(BANK_NAME))
+      bankName = get1DStringDataset(BANK_NAME,
+                                    detectorGroup); // local_name is optional
     builder.addBank(bankName, bankPos, bankRotation);
     // Get the pixel detIds
     auto detectorIds = getDetectorIds(detectorGroup);
