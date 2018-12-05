@@ -30,7 +30,6 @@ if command_line_args.qtdir is not None:
     )
 
 
-
 def main():
     if mantid.config['usagereports.enabled'] != '1':
         return int(command_line_args.exit_code)
