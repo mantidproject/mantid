@@ -44,6 +44,7 @@ Improvements
   maximum of 18 plots.
 - The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed.
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
+- Fit and Fit Sequential in the Fit combobox above the FitPropertyBrowser are now disabled while fitting is taking place.
 
 Bugfixes
 ########
