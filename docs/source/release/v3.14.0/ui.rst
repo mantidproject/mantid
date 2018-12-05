@@ -71,6 +71,7 @@ Changes
 #######
 
 - All File Browser dialog boxes will now (by default) display all valid file extensions as the first file filter.
+- Plot -> Advanced now allows for plotting against any property in the ``Run`` object that can be represented as a single number. It uses the time-average value for time series properties and the average for others.
 
 BugFixes
 ########
