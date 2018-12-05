@@ -98,6 +98,9 @@ class ProjectTest(unittest.TestCase):
         self.project.saved = True
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
+        # It takes some time for the notification to move sometimes so wait for it
+        sleep(0.05)
+
         self.assertTrue(not self.project.saved)
 
     def test_removing_from_ads_sets_saved_to_false(self):
@@ -105,7 +108,7 @@ class ProjectTest(unittest.TestCase):
         self.project.saved = True
         DeleteWorkspace("ws1")
 
-        # DeleteWorkspace tries to complete on a separate thread and it is required to wait for it
+        # It takes some time for the notification to move sometimes so wait for it
         sleep(0.05)
 
         self.assertTrue(not self.project.saved)
@@ -117,12 +120,18 @@ class ProjectTest(unittest.TestCase):
         self.project.saved = True
         GroupWorkspaces(InputWorkspaces="ws1,ws2", OutputWorkspace="NewGroup")
 
+        # It takes some time for the notification to move sometimes so wait for it
+        sleep(0.05)
+
         self.assertTrue(not self.project.saved)
 
     def test_renaming_in_ads_sets_saved_to_false(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project.saved = True
         RenameWorkspace(InputWorkspace="ws1", OutputWorkspace="ws2")
+
+        # It takes some time for the notification to move sometimes so wait for it
+        sleep(0.05)
 
         self.assertTrue(not self.project.saved)
 
@@ -133,6 +142,9 @@ class ProjectTest(unittest.TestCase):
 
         self.project.saved = True
         UnGroupWorkspace(InputWorkspace="NewGroup")
+
+        # It takes some time for the notification to move sometimes so wait for it
+        sleep(0.05)
 
         self.assertTrue(not self.project.saved)
 
@@ -145,7 +157,7 @@ class ProjectTest(unittest.TestCase):
         self.project.saved = True
         ADS.addToGroup("NewGroup", "ws3")
 
-        # Adding a ws to a group takes time so wait for it
+        # It takes some time for the notification to move sometimes so wait for it
         sleep(0.05)
 
         self.assertTrue(not self.project.saved)

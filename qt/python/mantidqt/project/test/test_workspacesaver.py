@@ -40,7 +40,7 @@ class WorkspaceSaverTest(unittest.TestCase):
 
         list_of_files = listdir(self.working_directory)
         self.assertEqual(len(list_of_files), 1)
-        self.assertEqual(list_of_files[0], ws1_name)
+        self.assertTrue(ws1_name + ".nxs" in list_of_files)
 
     def test_saving_multiple_workspaces(self):
         ws_saver = workspacesaver.WorkspaceSaver(self.working_directory)
@@ -55,8 +55,8 @@ class WorkspaceSaverTest(unittest.TestCase):
 
         list_of_files = listdir(self.working_directory)
         self.assertEqual(len(list_of_files), 2)
-        self.assertEqual(list_of_files[0], ws2_name)
-        self.assertEqual(list_of_files[1], ws1_name)
+        self.assertTrue(ws2_name + ".nxs" in list_of_files)
+        self.assertTrue(ws1_name + ".nxs" in list_of_files)
 
     def test_when_MDWorkspace_is_in_ADS(self):
         ws_saver = workspacesaver.WorkspaceSaver(self.working_directory)
@@ -70,11 +70,11 @@ class WorkspaceSaverTest(unittest.TestCase):
 
         list_of_files = listdir(self.working_directory)
         self.assertEqual(len(list_of_files), 1)
-        self.assertEqual(list_of_files[0], ws1_name)
+        self.assertTrue(ws1_name + ".nxs" in list_of_files)
         self._load_MDWorkspace_and_test_it(ws1_name)
 
     def _load_MDWorkspace_and_test_it(self, save_name):
-        filename = self.working_directory + '/' + save_name
+        filename = self.working_directory + '/' + save_name + ".nxs"
         ws = LoadMD(Filename=filename)
         ws_is_a_mdworkspace = isinstance(ws, IMDEventWorkspace) or isinstance(ws, MDHistoWorkspace)
         self.assertEqual(ws_is_a_mdworkspace, True)
