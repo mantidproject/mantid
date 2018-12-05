@@ -19,9 +19,9 @@ class ResNorm2Test(unittest.TestCase):
 
     def setUp(self):
         self._res_ws = Load(Filename='irs26173_graphite002_res.nxs',
-                            OutputWorkspace='__ResNormTest_Resolution')
+                            OutputWorkspace='irs26173_graphite002_res')
         self._van_ws = Load(Filename='irs26173_graphite002_red.nxs',
-                            OutputWorkspace='__ResNormTest_Vanadium')
+                            OutputWorkspace='irs26173_graphite002_red')
 
 
     def _validate_result(self, result):
