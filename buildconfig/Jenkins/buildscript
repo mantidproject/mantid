@@ -20,12 +20,12 @@ X11_RUNNER_ARGS=""
 if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
   ON_RHEL7=true
   X11_RUNNER="xvfb-run"
-  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24"
+  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24 --auto-servernum"
 fi
 if [[ ${NODE_LABELS} == *ubuntu* ]]; then
   ON_UBUNTU=true
   X11_RUNNER="xvfb-run"
-  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24"
+  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24 --auto-servernum"
 fi
 if [[ ${NODE_LABELS} == *osx* ]]; then
   ON_MACOS=true
