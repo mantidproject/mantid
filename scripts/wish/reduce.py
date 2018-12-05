@@ -10,7 +10,8 @@ class Wish:
     LAMBDA_RANGE = (0.7, 10.35)
 
     def __init__(self, cal_directory, output_folder, delete_workspace,
-                 user_directory="/archive/ndxwish/Instrument/data/cycle_"):
+                 user_directory="/archive/ndxwish/Instrument/data/cycle_", absorb=True):
+        self.absorb = absorb
         self.cal_dir = cal_directory
         self.use_folder = user_directory
         self.out_folder = output_folder
@@ -140,7 +141,11 @@ class Wish:
         mantid.ConvertUnits(InputWorkspace=output, OutputWorkspace=output, Target="Wavelength", Emode="Elastic")
         lmin, lmax = Wish.LAMBDA_RANGE
         mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=lmin, XMax=lmax)
-        monitor = self.process_incidentmon(number, ext, spline_terms=70)
+        monitor_run = "monitor{}".format(number)
+        if monitor_run not in mantid.mtd:
+            monitor = self.process_incidentmon(number, ext, spline_terms=70)
+        else:
+            monitor = mantid.mtd[monitor_run]
         print("first norm to be done")
         mantid.NormaliseToMonitor(InputWorkspace=output, OutputWorkspace=output + "norm1", MonitorWorkspace=monitor)
         print("second norm to be done")
@@ -265,6 +270,7 @@ class Wish:
         self.datafile = self.get_file_name(empty, "raw")
         wempty = self.read(empty, panel, "raw")
         mantid.Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
+        mantid.DeleteWorkspace(wempty)
         absorption_corrections(4.8756, vh, 0.07118, vr, 5.16, wvan)
         vanfoc = self.focus(wvan, panel)
 
@@ -304,6 +310,12 @@ class Wish:
         self.is_vanadium = True
         for panel in panels:
             self.process_vanadium(van_run_number, empty_run_number, panel, 4, 0.14999999999999999, "11_4", "11_4")
+        monitor_runs = "monitor{}"
+        mantid.DeleteWorkspace(monitor_runs.format(van_run_number))
+        mantid.DeleteWorkspace(monitor_runs.format(empty_run_number))
+        mantid.DeleteWorkspace("WISH_diff_cal")
+        mantid.DeleteWorkspace("WISH_diff_group")
+        mantid.DeleteWorkspace("WISH_diff_mask")
 
     def monitors(self, rb, ext):
         monitor_file = self.get_file_name(rb, ext)
@@ -363,10 +375,15 @@ class Wish:
         for run in run_numbers:
             self.datafile = self.get_file_name(run, "raw")
             for panel in panels:
-                wout = self.process_run(run, panel, "raw", "11_4", absorb=True, number_density=0.025, scattering=5.463,
-                                        attenuation=2.595, height=4.0, radius=0.55)
+                wout = self.process_run(run, panel, "raw", "11_4", absorb=self.absorb, number_density=0.025,
+                                        scattering=5.463, attenuation=2.595, height=4.0, radius=0.55)
                 mantid.ConvertUnits(InputWorkspace=wout, OutputWorkspace="{}-d".format(wout), Target="dSpacing",
                                     EMode="Elastic")
+
+            mantid.DeleteWorkspace("WISH_diff_cal")
+            mantid.DeleteWorkspace("WISH_diff_group")
+            mantid.DeleteWorkspace("WISH_diff_mask")
+            mantid.DeleteWorkspace("monitor{}".format(run))
             if 0 in panels:
                 panels = [1, 2, 3, 4, 5]
             for panel in [x for x in panels if x < 6]:

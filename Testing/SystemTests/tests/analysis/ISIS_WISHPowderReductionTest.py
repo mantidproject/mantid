@@ -43,10 +43,7 @@ class WISHPowderReductionTest(MantidSystemTest):
         input_files = ["vana19612-1foc-SF-SS.nxs", "vana19612-2foc-SF-SS.nxs", "vana19612-3foc-SF-SS.nxs",
                        "vana19612-4foc-SF-SS.nxs", "vana19612-5foc-SF-SS.nxs", "vana19612-6foc-SF-SS.nxs",
                        "vana19612-7foc-SF-SS.nxs", "vana19612-8foc-SF-SS.nxs", "vana19612-9foc-SF-SS.nxs",
-                       "vana19612-10foc-SF-SS.nxs", "emptyinst19618-1foc-SF-S.nxs", "emptyinst19618-2foc-SF-S.nxs",
-                       "emptyinst19618-3foc-SF-S.nxs", "emptyinst19618-4foc-SF-S.nxs", "emptyinst19618-5foc-SF-S.nxs",
-                       "emptyinst19618-6foc-SF-S.nxs", "emptyinst19618-7foc-SF-S.nxs", "emptyinst19618-8foc-SF-S.nxs",
-                       "emptyinst19618-9foc-SF-S.nxs", "emptyinst19618-10foc-SF-S.nxs"]
+                       "vana19612-10foc-SF-SS.nxs"]
 
         input_files = [os.path.join(calibration_dir, files) for files in input_files]
         return input_files
@@ -57,7 +54,7 @@ class WISHPowderReductionTest(MantidSystemTest):
 
     def runTest(self):
         os.makedirs(output_dir)
-        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir)
+        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir+"/")
         runs = [40503]
 
         wish_test.reduce(runs, panels)
@@ -78,7 +75,7 @@ class WISHPowderReductionTest(MantidSystemTest):
 
     # Skip test when on builds as extremely slow, run only as reversion test for wish script
     def skipTests(self):
-        return True
+        return False
 
 
 class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
