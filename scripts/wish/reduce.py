@@ -9,9 +9,8 @@ class Wish:
     NUM_MONITORS = 6
     LAMBDA_RANGE = (0.7, 10.35)
 
-    def __init__(self, input_mode, cal_directory, output_folder, delete_workspace,
+    def __init__(self, cal_directory, output_folder, delete_workspace,
                  user_directory="/archive/ndxwish/Instrument/data/cycle_"):
-        self.name = input_mode
         self.cal_dir = cal_directory
         self.use_folder = user_directory
         self.out_folder = output_folder
@@ -257,10 +256,12 @@ class Wish:
     # save a a nexus processed file.
     # It looks like smoothing of 100 works quite well
     def process_vanadium(self, van, empty, panel, vh, vr, cycle_van="09_3", cycle_empty="09_3"):
-        self.data_directory = "/archive/ndxwish/Instrument/data/cycle_" + cycle_van + "/"
+        user_data_directory = self.use_folder + cycle_van + '/'
+        self.set_data_directory(user_data_directory)
         self.datafile = self.get_file_name(van, "raw")
         wvan = self.read(van, panel, "raw")
-        self.data_directory = "/archive/ndxwish/Instrument/data/cycle_" + cycle_empty + "/"
+        user_data_directory = self.use_folder + cycle_empty + '/'
+        self.set_data_directory(user_data_directory)
         self.datafile = self.get_file_name(empty, "raw")
         wempty = self.read(empty, panel, "raw")
         mantid.Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
@@ -368,9 +369,7 @@ class Wish:
                                     EMode="Elastic")
             if 0 in panels:
                 panels = [1, 2, 3, 4, 5]
-            else:
-                panels = [x for x in panels if x < 6]
-            for panel in panels:
+            for panel in [x for x in panels if x < 6]:
                 self.save_combined_panel(run, panel)
 
     def save_combined_panel(self, run, panel):
