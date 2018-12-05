@@ -149,10 +149,10 @@ private:
 
 public:
   void test_load_event_nexus() {
-    const std::string file = "/Users/spu92482/Downloads/V20_example_5.nxs";
+    const std::string file = "SANS2D_ESS_example.nxs";
     LoadEventNexus alg;
-    alg.setRethrows(true);
     alg.setChild(true);
+    alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("Filename", file);
     alg.setProperty("OutputWorkspace", "dummy_for_child");
