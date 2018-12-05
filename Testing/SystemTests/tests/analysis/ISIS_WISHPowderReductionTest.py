@@ -50,16 +50,16 @@ class WISHPowderReductionTest(MantidSystemTest):
         os.makedirs(output_dir)
         wish_test = Wish("__main__", calibration_dir+"/", output_dir + "/", True, input_dir)
         runs = [40503]
-        panels = [5, 6]
+        panels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         wish_test.reduce(runs, panels)
         self.clearWorkspaces()
 
     def validate(self):
-        #return "w40503-1_10foc", "WISH40503-1_10raw.nxs", \
-        #       "w40503-2_9foc",  "WISH40503-2_9raw.nxs", \
-        #       "w40503-3_8foc",  "WISH40503-3_8raw.nxs", \
-        #       "w40503-4_7foc",  "WISH40503-4_7raw.nxs", \
-        return "w40503-5_6foc",  "WISH40503-5_6raw.nxs"
+        return "w40503-1_10foc", "WISH40503-1_10raw.nxs", \
+               "w40503-2_9foc",  "WISH40503-2_9raw.nxs", \
+               "w40503-3_8foc",  "WISH40503-3_8raw.nxs", \
+               "w40503-4_7foc",  "WISH40503-4_7raw.nxs", \
+               "w40503-5_6foc",  "WISH40503-5_6raw.nxs"
 
     def clearWorkspaces(self):
         deletews = ["w40503-" + str(i) + "foc" for i in range(5, 7)]

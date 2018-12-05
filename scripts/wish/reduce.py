@@ -16,6 +16,7 @@ class Wish:
         self.use_folder = user_directory
         self.out_folder = output_folder
         self.deleteWorkspace = delete_workspace
+        self.is_vanadium = False
         self.username = None
         self.data_directory = None
         self.user_directory = None
@@ -23,17 +24,29 @@ class Wish:
         self.userdatadir = None
         self.userdataprocessed = None
         self.return_panel = {
+            1:  (6, 19461),
+            2:  (19462, 38917),
+            3:  (38918, 58373),
+            4:  (58374, 77829),
+            5:  (77830, 97285),
+            6:  (97286, 116741),
+            7:  (116742, 136197),
+            8:  (136198, 155653),
+            9:  (155654, 175109),
+            10: (175110, 194565),
+            0:  (6, 194565)
+        }
+        self.return_panel_van = {
             1: (6, 19461),
             2: (19462, 38917),
             3: (38918, 58373),
             4: (58374, 77829),
             5: (77830, 97285),
-            6: (97286, 116741),
-            7: (116742, 136197),
-            8: (136198, 155653),
-            9: (155654, 175109),
-            10: (175110, 194565),
-            0: (6, 194565)
+            6: (77830, 97285),
+            7: (58374, 77829),
+            8: (38918, 58373),
+            9: (19462, 38917),
+            10: (6, 19461)
         }
 
     def set_user_name(self, username):
@@ -55,11 +68,11 @@ class Wish:
 
     # Returns the calibration filename
     def get_cal(self):
-        return self.cal_dir + "WISH_cycle_10_3_noends_10to10.cal"
+        return self.cal_dir + "WISH_cycle_15_4_noends_10to10_dodgytube_removed_feb2016.cal"
 
     # Returns the grouping filename
     def get_group_file(self):
-        return self.cal_dir + "WISH_cycle_10_3_noends_10to10.cal"
+        return self.cal_dir + "WISH_cycle_15_4_noends_10to10_dodgytube_removed_feb2016.cal"
 
     def get_vanadium(self, panel, cycle="09_4"):
         vanadium_string = {
@@ -91,7 +104,9 @@ class Wish:
         if type(number) is int:
             filename = self.datafile
             print("will be reading filename...", filename)
-            spectra_min, spectra_max = self.return_panel.get(panel)
+
+            spectra_min, spectra_max = self.return_panel_van.get(panel) if self.is_vanadium else \
+                self.return_panel.get(panel)
             if panel != 0:
                 output = "w{0}-{1}".format(number, panel)
             else:
@@ -162,8 +177,11 @@ class Wish:
 
     # Focus dataset for a given panel and return the workspace
     def focus_onepanel(self, work, focus, panel):
-        mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=self.get_cal())
-        mantid.DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus, GroupingFileName=self.get_group_file())
+        cal = "WISH_diff{}";
+        if cal.format("_cal") not in mantid.mtd:
+            mantid.LoadDiffCal(filename=self.get_cal(), InstrumentName="WISH", WorkspaceName=cal.format(""))
+        mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationWorkspace=cal.format("_cal"))
+        mantid.DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus, GroupingWorkspace=cal.format("_group"))
         if self.deleteWorkspace:
             mantid.DeleteWorkspace(work)
         if panel == 5 or panel == 6:
@@ -238,7 +256,7 @@ class Wish:
     # Create a corrected vanadium (normalise,corrected for attenuation and empty, strip peaks) and
     # save a a nexus processed file.
     # It looks like smoothing of 100 works quite well
-    def createvan(self, van, empty, panel, smoothing, vh, vr, cycle_van="09_3", cycle_empty="09_3"):
+    def process_vanadium(self, van, empty, panel, vh, vr, cycle_van="09_3", cycle_empty="09_3"):
         self.data_directory = "/archive/ndxwish/Instrument/data/cycle_" + cycle_van + "/"
         self.datafile = self.get_file_name(van, "raw")
         wvan = self.read(van, panel, "raw")
@@ -246,20 +264,45 @@ class Wish:
         self.datafile = self.get_file_name(empty, "raw")
         wempty = self.read(empty, panel, "raw")
         mantid.Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
-        mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="Wavelength", EMode="Elastic")
-        mantid.CylinderAbsorption(InputWorkspace=wvan, OutputWorkspace="T",
-                                  CylinderSampleHeight=str(vh), CylinderSampleRadius=str(vr),
-                                  AttenuationXSection="4.8756",
-                                  ScatteringXSection="5.16", SampleNumberDensity="0.07118",
-                                  NumberOfSlices="10", NumberOfAnnuli="10", NumberOfWavelengthPoints="25",
-                                  ExpMethod="Normal")
-        mantid.Divide(LHSWorkspace=wvan, RHSWorkspace="T", OutputWorkspace=wvan)
-        mantid.DeleteWorkspace("T")
-        mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF", EMode="Elastic")
+        absorption_corrections(4.8756, vh, 0.07118, vr, 5.16, wvan)
         vanfoc = self.focus(wvan, panel)
+
+        panel_crop = {
+            1:  (0.95, 53.3),
+            2:  (0.58, 13.1),
+            3:  (0.44, 7.77),
+            4:  (0.38, 5.86),
+            5:  (0.35, 4.99),
+            6:  (0.35, 4.99),
+            7:  (0.38, 5.86),
+            8:  (0.44, 7.77),
+            9:  (0.58, 13.1),
+            10: (0.95, 53.3)
+        }
+        d_min, d_max = panel_crop.get(panel)
+        mantid.CropWorkspace(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, XMin=d_min, XMax=d_max)
         # StripPeaks(vanfoc,vanfoc)
-        # SmoothData(vanfoc,vanfoc,str(smoothing))
+        spline_coefficient = {
+            1:  120,
+            2:  120,
+            3:  120,
+            4:  130,
+            5:  140,
+            6:  140,
+            7:  130,
+            8:  120,
+            9:  120,
+            10: 120
+        }
+        mantid.SplineBackground(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, NCoeff=spline_coefficient.get(panel))
+        smoothing_coefficient = "30" if panel == 3 else "40"
+        mantid.SmoothData(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, NPoints=smoothing_coefficient)
         return
+
+    def create_vanadium_run(self, van_run_number, empty_run_number, panels):
+        self.is_vanadium = True
+        for panel in panels:
+            self.process_vanadium(van_run_number, empty_run_number, panel, 4, 0.14999999999999999, "11_4", "11_4")
 
     def monitors(self, rb, ext):
         monitor_file = self.get_file_name(rb, ext)
@@ -315,6 +358,7 @@ class Wish:
     def reduce(self, run_numbers, panels):
 
         self.startup("18_1")
+        self.is_vanadium = False
         for run in run_numbers:
             self.datafile = self.get_file_name(run, "raw")
             for panel in panels:
