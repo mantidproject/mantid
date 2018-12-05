@@ -709,7 +709,7 @@ class RunTabPresenter(object):
         self.update_view_from_table_model()
 
         return selected_rows
-    
+
     @log_times
     def get_states(self, row_index=None, file_lookup=True):
         """
