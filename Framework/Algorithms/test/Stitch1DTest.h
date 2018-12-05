@@ -466,13 +466,13 @@ public:
 
     // Check the ranges on the output workspace against the param inputs.
     const auto &out_x_values = ret.get<0>()->x(0);
-    double x_min = out_x_values.front();
-    double x_max = out_x_values.back();
-    double step_size = out_x_values[1] - out_x_values[0];
+    const double x_min = out_x_values.front();
+    const double x_max = out_x_values.back();
+    const double step_size = out_x_values[1] - out_x_values[0];
 
     TS_ASSERT_EQUALS(x_min, -1);
-    TS_ASSERT_DELTA(x_max - demanded_step_size, 1.4, 0.000001);
-    TS_ASSERT_DELTA(step_size, demanded_step_size, 0.000001);
+    TS_ASSERT_DELTA(x_max - demanded_step_size, 1.4, 1.e-9);
+    TS_ASSERT_DELTA(step_size, demanded_step_size, 1.e-9);
   }
 
   void test_stitching_determines_overlap() {
@@ -535,6 +535,36 @@ public:
     for (size_t i = 7; i < 10; ++i) { // rhs e scaled after end overlap 0.4
       TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
                        scaleE * 4., 1.e-9)
+    }
+    // X values
+    auto &stitched_x = ret.get<0>()->mutableX(0);
+    TSM_ASSERT_DELTA("X values unchanged", stitched_x.rawData(), this->x, 1.e-9)
+  }
+
+  void test_stitching_histogram_no_overlap_specified() {
+    std::vector<double> params = {0.2};
+    auto ret =
+        do_stitch1D(this->b, this->a, true, true, 0.389, 0.39, params, 1.22);
+    const double scale = ret.get<1>();
+    const double scaleExpected = 1.22;
+    TSM_ASSERT_DELTA("Scaling factor", scale, scaleExpected, 1.e-9)
+    // Y values
+    const auto &stitched_y = ret.get<0>()->y(0);
+    for (size_t i = 0; i < 6; ++i) { // lhs y not scaled
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i], 2., 1.e-9)
+    }
+    for (size_t i = 6; i < 10; ++i) { // rhs y scaled
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       3. * scaleExpected, 1.e-9)
+    }
+    // E values
+    const auto &stitched_e = ret.get<0>()->e(0);
+    for (size_t i = 0; i < 6; ++i) { // lhs e not scaled
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i], 4., 1.e-9)
+    }
+    for (size_t i = 6; i < 10; ++i) { // rhs e scaled
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
+                       scaleExpected * 4., 1.e-9)
     }
     // X values
     auto &stitched_x = ret.get<0>()->mutableX(0);

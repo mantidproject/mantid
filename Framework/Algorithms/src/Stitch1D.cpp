@@ -522,7 +522,7 @@ void Stitch1D::exec() {
                     "workspace in which start and end overlap appear "
                     "in the same bin. Make binning finer via input "
                     "Params. Stitching remains possible in the sense of "
-                    "scaling and joining.");
+                    "manual scaling and joining.");
       a1 = a2; // in case a1 > a2
     }
     // Overlap region of lhs and rhs
