@@ -65,7 +65,7 @@ public:
 
   void setCustomSettingEnabled(const QString &customName, bool enabled);
 
-	void setFitEnabled(bool enable);
+  void setFitEnabled(bool enable);
 
   void addCheckBoxFunctionGroup(
       const QString &groupName,

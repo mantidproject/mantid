@@ -752,7 +752,7 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
-	enableFitAnalysisButtons(true);
+  enableFitAnalysisButtons(true);
   enablePlotResult(error);
   setSaveResultEnabled(!error);
   updateParameterValues();
@@ -967,10 +967,10 @@ void IndirectFitAnalysisTab::singleFit() {
 
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
-	if (validate()) {
-		enableFitAnalysisButtons(false);
-		runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
-	}
+  if (validate()) {
+    enableFitAnalysisButtons(false);
+    runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
+  }
 }
 
 /**
@@ -978,10 +978,10 @@ void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
  * tab.
  */
 void IndirectFitAnalysisTab::executeFit() {
-	if (validate()) {
-		enableFitAnalysisButtons(false);
-		runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
-	}
+  if (validate()) {
+    enableFitAnalysisButtons(false);
+    runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+  }
 }
 
 bool IndirectFitAnalysisTab::validate() {
@@ -1002,7 +1002,7 @@ bool IndirectFitAnalysisTab::validate() {
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void IndirectFitAnalysisTab::run() {
-	enableFitAnalysisButtons(false);
+  enableFitAnalysisButtons(false);
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 

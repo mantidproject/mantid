@@ -950,7 +950,7 @@ void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
 }
 
 void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {
-	FitPropertyBrowser::setFitEnabled(enable);
+  FitPropertyBrowser::setFitEnabled(enable);
 }
 
 /**

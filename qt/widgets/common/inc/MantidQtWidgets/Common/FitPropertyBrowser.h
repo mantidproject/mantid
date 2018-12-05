@@ -201,8 +201,8 @@ public:
   /// Returns true if the function is ready for a fit
   bool isFitEnabled() const;
 
-	/// Enable/disable the Fit button;
-	virtual void setFitEnabled(bool enable);
+  /// Enable/disable the Fit button;
+  virtual void setFitEnabled(bool enable);
 
   /// Display a tip
   void setTip(const QString &txt);
