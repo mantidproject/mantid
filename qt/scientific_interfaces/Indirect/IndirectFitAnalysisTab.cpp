@@ -967,10 +967,10 @@ void IndirectFitAnalysisTab::singleFit() {
 
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
-  if (validate()) {
-    setFitSingleSpectrumIsFitting(true);
-    runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
-  }
+	if (validate()) {
+		enableFitAnalysisButtons(false);
+		runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
+	}
 }
 
 /**
@@ -978,8 +978,10 @@ void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
  * tab.
  */
 void IndirectFitAnalysisTab::executeFit() {
-  if (validate())
-    runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+	if (validate()) {
+		enableFitAnalysisButtons(false);
+		runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+	}
 }
 
 bool IndirectFitAnalysisTab::validate() {
