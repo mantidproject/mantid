@@ -2027,9 +2027,9 @@ bool FitPropertyBrowser::isUndoEnabled() const {
 }
 
 /// Enable/disable the Fit button;
-void FitPropertyBrowser::setFitEnabled(bool yes) {
-  m_fitActionFit->setEnabled(yes);
-  m_fitActionSeqFit->setEnabled(yes);
+void FitPropertyBrowser::setFitEnabled(bool enable) {
+  m_fitActionFit->setEnabled(enable);
+  m_fitActionSeqFit->setEnabled(enable);
 }
 
 /// Returns true if the function is ready for a fit
