@@ -14,6 +14,7 @@ import urllib2
 import re
 import webbrowser
 import time
+import argparse
 
 
 def crawl_url_for_html_addons(url):
@@ -40,7 +41,12 @@ def open_urls(list_of_urls, delay=1):
         webbrowser.open(url)
 
 
-main_url = "http://docs.mantidproject.org/nightly/"
+parser = argparse.ArgumentParser()
+parser.add_argument(
+        '-d', '--open-tab-delay', type=int, help="Delay between each new page tab in seconds.")
+args = parser.parse_args()
+
+print(args.delay)
 
 all_urls = []
 
@@ -89,5 +95,11 @@ all_urls.extend(mantidplot_urls)
 print("All webpages crawled")
 
 print("Opening Urls...")
-open_urls(all_urls)
+
+delay = args.delay
+
+if delay is None:
+        delay = 1
+
+open_urls(all_urls, delay)
 print("All URLs opened")
