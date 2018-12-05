@@ -8,9 +8,9 @@
 #define MANTID_CRYSTAL_FIND_UB_USING_INDEXED_PEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/Peak.h"
 
 namespace Mantid {
 namespace Crystal {

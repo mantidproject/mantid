@@ -14,11 +14,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
 
 using namespace Mantid::Crystal;
 using Mantid::Geometry::OrientedLattice;
@@ -102,7 +102,8 @@ public:
       const V3D mnp = peak.getIntMNP();
       V3D mnpNew = mnp;
       srand(0);
-      if(std::abs(mnp[0]) == 1) mnpNew[1] = rand() % 2;
+      if (std::abs(mnp[0]) == 1)
+        mnpNew[1] = rand() % 2;
       peak.setIntMNP(mnpNew);
     }
     FindUBUsingIndexedPeaks alg2;
@@ -123,8 +124,8 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = ws->mutableSample().getOrientedLattice();
 
-    double correct_err1[] = {0.003723,0.002231,0.002820};
-    double correct_err2[] = {0.000796,0.002043,0.002671};
+    double correct_err1[] = {0.003723, 0.002231, 0.002820};
+    double correct_err2[] = {0.000796, 0.002043, 0.002671};
 
     std::vector<double> err_calculated1 = latt.getVecErr(0);
     std::vector<double> err_calculated2 = latt.getVecErr(1);

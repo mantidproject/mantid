@@ -8,8 +8,8 @@
 #define MANTID_CRYSTAL_LOADISAWUB_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

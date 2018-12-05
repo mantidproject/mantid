@@ -574,29 +574,28 @@ V3D V3D::directionAngles(bool inDegrees) const {
 */
 int V3D::maxCoeff() {
   int MaxOrder = 0;
-    if (abs(static_cast<int>(x)) > MaxOrder)
-      MaxOrder = abs(static_cast<int>(x));
-    if (abs(static_cast<int>(y)) > MaxOrder)
-      MaxOrder = abs(static_cast<int>(y));
-    if (abs(static_cast<int>(z)) > MaxOrder)
-      MaxOrder = abs(static_cast<int>(z));
-    return MaxOrder;
+  if (abs(static_cast<int>(x)) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(x));
+  if (abs(static_cast<int>(y)) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(y));
+  if (abs(static_cast<int>(z)) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(z));
+  return MaxOrder;
 }
 
 /**
-  Calculates the absolute value. 
+  Calculates the absolute value.
   @return The absolute value
 */
-V3D V3D::absoluteValue() const {
-  return V3D(fabs(x), fabs(y), fabs(z));
-}
+V3D V3D::absoluteValue() const { return V3D(fabs(x), fabs(y), fabs(z)); }
 
 /**
   Calculates the error of the HKL to compare with tolerance
   @return The error
 */
 double V3D::hklError() const {
-  return fabs(x - std::round(x)) + fabs(y - std::round(y)) + fabs(z - std::round(z));
+  return fabs(x - std::round(x)) + fabs(y - std::round(y)) +
+         fabs(z - std::round(z));
 }
 
 } // Namespace Kernel

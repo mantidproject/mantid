@@ -151,17 +151,15 @@ public:
     UBinv.setRow(1, V3D(0, .2, 0));
     UBinv.setRow(2, V3D(0, 0, .25));
 
-    std::vector<V3D> hkl_list{
-        UBinv * peak_1,  UBinv * peak_2, UBinv * peak_3};
- 
+    std::vector<V3D> hkl_list{UBinv * peak_1, UBinv * peak_2, UBinv * peak_3};
+
     // synthesize a ModHKL
     DblMatrix ModHKL(3, 3, false); // Q to h,k,l
     ModHKL.setRow(0, V3D(0.4, 0, 0));
     ModHKL.setRow(1, V3D(0, 0, 0));
     ModHKL.setRow(2, V3D(0, 0, 0));
 
-    std::vector<V3D> mnp_list{
-        V3D(-1, 0, 0), V3D(0, 0, 0), V3D(0, 0, 0)};
+    std::vector<V3D> mnp_list{V3D(-1, 0, 0), V3D(0, 0, 0), V3D(0, 0, 0)};
 
     // synthesize events around the
     // peaks.  All events with in one
@@ -209,7 +207,8 @@ public:
     double radius_s = 0.1;
     int maxOrder = 1;
     bool crossTerm = false;
-    Integrate3DEvents integrator(peak_q_list, hkl_list, mnp_list, UBinv, ModHKL, radius, radius_s, maxOrder, crossTerm);
+    Integrate3DEvents integrator(peak_q_list, hkl_list, mnp_list, UBinv, ModHKL,
+                                 radius, radius_s, maxOrder, crossTerm);
 
     integrator.addEvents(event_Qs, false);
 

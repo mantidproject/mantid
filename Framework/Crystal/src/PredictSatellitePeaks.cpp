@@ -212,10 +212,9 @@ void PredictSatellitePeaks::exec() {
   for (auto it = possibleHKLs.begin(); it != possibleHKLs.end(); ++it) {
     V3D hkl = *it;
     if (crossTerms) {
-      predictOffsetsWithCrossTerms(offsets1, offsets2,
-                                   offsets3, maxOrder, hkl, lambdaFilter,
-                                   includePeaksInRange, includeOrderZero,
-                                   AlreadyDonePeaks);
+      predictOffsetsWithCrossTerms(offsets1, offsets2, offsets3, maxOrder, hkl,
+                                   lambdaFilter, includePeaksInRange,
+                                   includeOrderZero, AlreadyDonePeaks);
     } else {
       predictOffsets(0, offsets1, maxOrder, hkl, lambdaFilter,
                      includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
@@ -291,10 +290,9 @@ void PredictSatellitePeaks::exec_peaks() {
     auto peak = *it;
     V3D hkl = peak.getHKL();
     if (crossTerms) {
-      predictOffsetsWithCrossTerms(offsets1, offsets2,
-                                   offsets3, maxOrder, hkl, lambdaFilter,
-                                   includePeaksInRange, includeOrderZero,
-                                   AlreadyDonePeaks);
+      predictOffsetsWithCrossTerms(offsets1, offsets2, offsets3, maxOrder, hkl,
+                                   lambdaFilter, includePeaksInRange,
+                                   includeOrderZero, AlreadyDonePeaks);
     } else {
       predictOffsets(0, offsets1, maxOrder, hkl, lambdaFilter,
                      includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
@@ -322,10 +320,9 @@ void PredictSatellitePeaks::exec_peaks() {
 }
 
 void PredictSatellitePeaks::predictOffsets(
-    int indexModulatedVector,
-    V3D offsets, int &maxOrder, V3D &hkl, HKLFilterWavelength &lambdaFilter,
-    bool &includePeaksInRange, bool &includeOrderZero,
-    vector<vector<int>> &AlreadyDonePeaks) {
+    int indexModulatedVector, V3D offsets, int &maxOrder, V3D &hkl,
+    HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
+    bool &includeOrderZero, vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets == V3D(0, 0, 0))
     return;
   const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
@@ -379,8 +376,7 @@ void PredictSatellitePeaks::predictOffsets(
 }
 
 void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
-    V3D offsets1,
-    V3D offsets2, V3D offsets3, int &maxOrder, V3D &hkl,
+    V3D offsets1, V3D offsets2, V3D offsets3, int &maxOrder, V3D &hkl,
     HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
     bool &includeOrderZero, vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets1 == V3D(0, 0, 0) && offsets2 == V3D(0, 0, 0) &&

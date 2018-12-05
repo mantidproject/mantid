@@ -28,9 +28,9 @@ using Mantid::Types::Event::TofEvent;
 
 namespace {
 // Add A Fake 'Peak' to both the event data and to the peaks workspace
-void addFakeEllipsoid(const V3D &peakHKL, const V3D &peakMNP, const int &totalNPixels,
-                      const int &nEvents, const double tofGap,
-                      EventWorkspace_sptr &eventWS,
+void addFakeEllipsoid(const V3D &peakHKL, const V3D &peakMNP,
+                      const int &totalNPixels, const int &nEvents,
+                      const double tofGap, EventWorkspace_sptr &eventWS,
                       PeaksWorkspace_sptr &peaksWS) {
   // Create the peak and add it to the peaks ws
   Peak *peak = peaksWS->createPeakHKL(peakHKL);
@@ -358,7 +358,8 @@ public:
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
                      integratedPeaksWS->getPeak(0).getIntensity(), 6, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 10.8964, 0.01);
+                     integratedPeaksWS->getPeak(1).getIntensity(), 10.8964,
+                     0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
                      integratedPeaksWS->getPeak(2).getIntensity(), 9, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
@@ -366,7 +367,8 @@ public:
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
                      integratedPeaksWS->getPeak(4).getIntensity(), 0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 20.9410, 0.01);
+                     integratedPeaksWS->getPeak(5).getIntensity(), 20.9410,
+                     0.01);
   }
 
   void test_execution_histograms_adaptive() {

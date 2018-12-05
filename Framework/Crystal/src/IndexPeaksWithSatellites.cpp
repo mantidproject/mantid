@@ -178,8 +178,9 @@ void IndexPeaksWithSatellites::exec() {
 
     // get list of run numbers in this peaks workspace
     std::unordered_set<int> run_numbers;
-    transform(peaks.begin(), peaks.end(), std::inserter(run_numbers, run_numbers.begin()), 
-            [] (const auto& peak) { return peak.getRunNumber(); });
+    transform(peaks.begin(), peaks.end(),
+              std::inserter(run_numbers, run_numbers.begin()),
+              [](const auto &peak) { return peak.getRunNumber(); });
 
     // index the peaks for each run separately, using a UB matrix optimized for
     // that run

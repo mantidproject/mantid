@@ -82,8 +82,7 @@ void FindUBUsingIndexedPeaks::exec() {
     if (mnp[0] * mnp[1] != 0 || mnp[1] * mnp[2] != 0 || mnp[2] * mnp[0] != 0)
       CrossTerm = true;
 
-    if (isPeakIndexed(peak))
-    {
+    if (isPeakIndexed(peak)) {
       q_vectors.push_back(peak.getQSampleFrame());
       hkl_vectors.push_back(hkl);
       mnp_vectors.push_back(mnp);
@@ -91,7 +90,7 @@ void FindUBUsingIndexedPeaks::exec() {
     }
   }
 
-  //too few indexed peaks to work with
+  // too few indexed peaks to work with
   if (indexed_count < MIN_INDEXED_PEAKS) {
     throw std::runtime_error(
         "At least three linearly independent indexed peaks are needed.");
@@ -114,7 +113,7 @@ void FindUBUsingIndexedPeaks::exec() {
   {                    // from the full list of peaks, and
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
-    for (auto & peak : peaks) {
+    for (auto &peak : peaks) {
       q_vectors.push_back(peak.getQSampleFrame());
     }
 
@@ -170,14 +169,14 @@ void FindUBUsingIndexedPeaks::exec() {
                              rsigabc[4], rsigabc[5]);
         g_log.notice() << run_lattice << "\n";
 
-          double average_error = 0.;
-          IndexingUtils::CalculateMillerIndices(
-              UB, run_q_vectors, 1.0, run_fhkl_vectors, average_error);
-          for (size_t i = 0; i < run_indexed; i++) {
-            if (IndexingUtils::ValidIndex(run_fhkl_vectors[i], tolerance))
-              continue;
+        double average_error = 0.;
+        IndexingUtils::CalculateMillerIndices(UB, run_q_vectors, 1.0,
+                                              run_fhkl_vectors, average_error);
+        for (size_t i = 0; i < run_indexed; i++) {
+          if (IndexingUtils::ValidIndex(run_fhkl_vectors[i], tolerance))
+            continue;
 
-            V3D fhkl(run_fhkl_vectors[i]);
+          V3D fhkl(run_fhkl_vectors[i]);
           for (int j = 0; j < 3; j++) {
             if (run_mnp_vectors[i][j] != 0) {
               fhkl -= run_lattice.getModVec(j) * run_mnp_vectors[i][j];
@@ -185,9 +184,10 @@ void FindUBUsingIndexedPeaks::exec() {
                 sate_indexed++;
                 V3D errhkl = fhkl - run_hkl_vectors[i];
                 errhkl = errhkl.absoluteValue();
-          for (int k = 0; k < 3; k++)  errorHKL[k][j] += errhkl[k];
+                for (int k = 0; k < 3; k++)
+                  errorHKL[k][j] += errhkl[k];
               }
-            } 
+            }
           }
         }
       }
@@ -224,17 +224,17 @@ void FindUBUsingIndexedPeaks::logLattice(OrientedLattice &o_lattice,
   g_log.notice() << o_lattice << "\n";
   g_log.notice() << "Modulation Dimension is: " << ModDim << "\n";
   for (int i = 0; i < ModDim; i++) {
-    g_log.notice() << "Modulation Vector " << i+1 << ": "
+    g_log.notice() << "Modulation Vector " << i + 1 << ": "
                    << o_lattice.getModVec(i) << "\n";
-    g_log.notice() << "Modulation Vector " << i+1
+    g_log.notice() << "Modulation Vector " << i + 1
                    << " error: " << o_lattice.getVecErr(i) << "\n";
   }
 }
 bool FindUBUsingIndexedPeaks::isPeakIndexed(Peak &peak) {
-            V3D hkl(peak.getIntHKL()); // ##### KEEP
-            V3D mnp(peak.getIntMNP());
-            return (IndexingUtils::ValidIndex(hkl, 1.0) ||
-                IndexingUtils::ValidIndex(mnp, 1.0));
+  V3D hkl(peak.getIntHKL()); // ##### KEEP
+  V3D mnp(peak.getIntMNP());
+  return (IndexingUtils::ValidIndex(hkl, 1.0) ||
+          IndexingUtils::ValidIndex(mnp, 1.0));
 }
 } // namespace Crystal
 } // namespace Mantid

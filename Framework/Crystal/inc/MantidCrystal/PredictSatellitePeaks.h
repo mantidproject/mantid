@@ -70,8 +70,7 @@ private:
   void exec() override;
   void exec_peaks();
   Kernel::V3D getOffsetVector(const std::string &label);
-  void predictOffsets(
-                      int iVector, Kernel::V3D offsets, int &maxOrder,
+  void predictOffsets(int iVector, Kernel::V3D offsets, int &maxOrder,
                       Kernel::V3D &hkl,
                       Geometry::HKLFilterWavelength &lambdaFilter,
                       bool &includePeaksInRange, bool &includeOrderZero,

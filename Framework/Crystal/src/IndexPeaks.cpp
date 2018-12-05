@@ -112,7 +112,7 @@ void IndexPeaks::exec() {
     std::vector<V3D> q_vectors;
 
     q_vectors.reserve(n_peaks);
-    for (auto& peak : peaks) {
+    for (auto &peak : peaks) {
       q_vectors.push_back(peak.getQSampleFrame());
     }
 
@@ -132,7 +132,7 @@ void IndexPeaks::exec() {
 
     // get list of run numbers in this peaks workspace
     std::vector<int> run_numbers;
-    for (auto& peak : peaks) {
+    for (auto &peak : peaks) {
       int run = peak.getRunNumber();
       bool found = false;
       size_t k = 0;
@@ -154,7 +154,7 @@ void IndexPeaks::exec() {
       std::vector<V3D> q_vectors;
 
       int run = run_numbers[run_index];
-      for (auto& peak : peaks) {
+      for (auto &peak : peaks) {
         if (peak.getRunNumber() == run)
           q_vectors.push_back(peak.getQSampleFrame());
       }
@@ -228,7 +228,7 @@ void IndexPeaks::exec() {
         }
 
         size_t miller_index_counter = 0;
-        for (auto& peak : peaks) {
+        for (auto &peak : peaks) {
           if (peak.getRunNumber() == run) {
             peak.setHKL(miller_indices[miller_index_counter]);
             peak.setIntHKL(miller_indices[miller_index_counter]);
@@ -262,7 +262,7 @@ void IndexPeaks::exec() {
 
         // Index satellite peaks
         size_t miller_index_counter = 0;
-        for (auto& peak : peaks) {
+        for (auto &peak : peaks) {
           if (peak.getRunNumber() == run) {
             peak.setHKL(miller_indices[miller_index_counter]);
             miller_index_counter++;
@@ -297,7 +297,7 @@ void IndexPeaks::exec() {
                   if (order == 0)
                     continue; // exclude order 0
                   V3D hkl1(hkl);
-                  hkl1 -= offsets2* order;
+                  hkl1 -= offsets2 * order;
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(0, order, 0));
@@ -328,7 +328,7 @@ void IndexPeaks::exec() {
                   if (order == 0)
                     continue; // exclude order 0
                   V3D hkl1(hkl);
-                  hkl1 -= offsets1  * order;
+                  hkl1 -= offsets1 * order;
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(order, 0, 0));
@@ -344,7 +344,7 @@ void IndexPeaks::exec() {
                     if (m == 0 && n == 0)
                       continue; // exclude 0,0
                     V3D hkl1(hkl);
-                    hkl1 -= offsets1 * m +  offsets2 * n;
+                    hkl1 -= offsets1 * m + offsets2 * n;
                     if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                       peak.setIntHKL(hkl1);
                       peak.setIntMNP(V3D(m, n, 0));
@@ -361,8 +361,7 @@ void IndexPeaks::exec() {
                       if (m == 0 && n == 0 && p == 0)
                         continue; // exclude 0,0,0
                       V3D hkl1(hkl);
-                      hkl1 -=
-                           offsets1 * m + offsets2 * n + offsets3 * p;
+                      hkl1 -= offsets1 * m + offsets2 * n + offsets3 * p;
                       if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                         peak.setIntHKL(hkl1);
                         peak.setIntMNP(V3D(m, n, p));
