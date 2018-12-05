@@ -24,8 +24,11 @@ Improved
 * Updated file adding to prefix the instrument name
 * Updated file finding to be able to find added runs without instrument name prefix
 * Updated GUI code so calculated merge scale and shift are shown after reduction.
+* Removed instrument selection box. Instrument is now determined by user file.
 * Automatically remembers last loaded user file
 * Added display of current save directory
+* Added a load button to load selected workspaces without processing.
+* Added save_can option to output unsubtracted can and sample workspaces.
 
 Bug fixes
 #########

@@ -16,10 +16,11 @@ from mantid.kernel import PropertyManagerDataService
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
                                RangeStepType, FitType, SANSInstrument, RowState)
-from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
+from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF,
+                                                    sample_user_file_with_instrument)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file)
-from sans.common.enums import BatchReductionEntry
+from sans.common.enums import BatchReductionEntry, SANSInstrument
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
@@ -67,7 +68,6 @@ class MultiPeriodMock(object):
 class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
         config.setFacility("ISIS")
-        config.setString("default.instrument", "SANS2D")
 
         patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.BatchCsvParser')
         self.addCleanup(patcher.stop)
@@ -89,7 +89,11 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.set_view(view)
 
         # Act
-        presenter.on_user_file_load()
+        try:
+            presenter.on_user_file_load()
+        except RuntimeError:
+            # Assert that RuntimeError from no instrument is caught
+            self.fail("on_user_file_load raises a RuntimeError which should be caught")
 
         # Assert
         # Note that the event slices are not set in the user file
@@ -144,7 +148,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_max == 15.)
-        self.assertFalse(view.compatibility_mode)
+        self.assertTrue(view.compatibility_mode)
         self.assertTrue(view.show_transmission)
 
         # Assert that Beam Centre View is updated correctly
