@@ -26,8 +26,8 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_instrument_strings_for_gui)
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui)
+from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
@@ -66,6 +66,9 @@ class RunTabPresenter(object):
 
         def on_processed_clicked(self):
             self._presenter.on_processed_clicked()
+
+        def on_load_clicked(self):
+            self._presenter.on_load_clicked()
 
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
@@ -167,10 +170,6 @@ class RunTabPresenter(object):
         reduction_mode_list = get_reduction_mode_strings_for_gui()
         self._view.set_reduction_modes(reduction_mode_list)
 
-        # Set the possible instruments
-        instrument_list = get_instrument_strings_for_gui()
-        self._view.set_instruments(instrument_list)
-
         # Set the step type options for wavelength
         range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
                             RangeStepType.to_string(RangeStepType.Log),
@@ -222,6 +221,7 @@ class RunTabPresenter(object):
 
             # Default gui setup
             self._default_gui_setup()
+            self._view.disable_process_buttons()
 
             # Set appropriate view for the state diagnostic tab presenter
             self._settings_diagnostic_tab_presenter.set_view(self._view.settings_diagnostic_tab)
@@ -237,6 +237,9 @@ class RunTabPresenter(object):
 
             self._view.setup_layout()
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
+
+            self._view.set_out_default_user_file()
+
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
@@ -273,6 +276,10 @@ class RunTabPresenter(object):
             self._beam_centre_presenter.on_update_rows()
             self._masking_table_presenter.on_update_rows()
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
+
+            # 6. Warning if user file did not contain a recognised instrument
+            if self._view.instrument == SANSInstrument.NoInstrument:
+                raise RuntimeError("User file did not contain a SANS Instrument.")
 
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
@@ -386,16 +393,14 @@ class RunTabPresenter(object):
             self.sans_logger.information("Starting processing of batch table.")
 
             # 1. Set up the states and convert them into property managers
-            selected_rows = self._view.get_selected_rows()
-            selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
-            for row in selected_rows:
-                self._table_model.reset_row_state(row)
+            selected_rows = self._get_selected_rows()
             states, errors = self.get_states(row_index=selected_rows)
 
             for row, error in errors.items():
                 self.on_processing_error(row, error)
 
             if not states:
+                self.sans_logger.warning("No states. Ending processing of batch table.")
                 self.on_processing_finished(None)
                 return
 
@@ -413,18 +418,47 @@ class RunTabPresenter(object):
             # Check if results should be plotted
             plot_results = self._view.plot_results
 
+            save_can = self._view.save_can
+
             # Get the name of the graph to output to
             output_graph = self.output_graph
 
             self.progress = 0
             setattr(self._view, 'progress_bar_value', self.progress)
             setattr(self._view, 'progress_bar_maximum', len(states))
-            self.batch_process_runner.process_states(states, use_optimizations, output_mode, plot_results, output_graph)
+
+            self.batch_process_runner.process_states(states, use_optimizations, output_mode, plot_results,
+                                                     output_graph, save_can)
 
         except Exception as e:
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
+
+    def on_load_clicked(self):
+        try:
+            self._view.disable_buttons()
+            self._processing = True
+            self.sans_logger.information("Starting load of batch table.")
+
+            selected_rows = self._get_selected_rows()
+            states, errors = self.get_states(row_index=selected_rows)
+
+            for row, error in errors.items():
+                self.on_processing_error(row, error)
+
+            if not states:
+                self.on_processing_finished(None)
+                return
+
+            self.progress = 0
+            setattr(self._view, 'progress_bar_value', self.progress)
+            setattr(self._view, 'progress_bar_maximum', len(states))
+            self.batch_process_runner.load_workspaces(states)
+        except Exception as e:
+            self._view.enable_buttons()
+            self.sans_logger.error("Process halted due to: {}".format(str(e)))
+            self.display_warning_box("Warning", "Process halted", str(e))
 
     def on_multiperiod_changed(self, show_periods):
         if show_periods:
@@ -577,6 +611,15 @@ class RunTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Table Model and state population
     # ------------------------------------------------------------------------------------------------------------------
+    def _get_selected_rows(self):
+        selected_rows = self._view.get_selected_rows()
+        selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
+        for row in selected_rows:
+            self._table_model.reset_row_state(row)
+        self.update_view_from_table_model()
+
+        return selected_rows
+
     def get_states(self, row_index=None, file_lookup=True):
         """
         Gathers the state information for all rows.
@@ -601,6 +644,12 @@ class RunTabPresenter(object):
         stop_time_state_generation = time.time()
         time_taken = stop_time_state_generation - start_time_state_generation
         self.sans_logger.information("The generation of all states took {}s".format(time_taken))
+
+        if errors:
+            self.sans_logger.warning("Errors in getting states...")
+            for _, v in errors.items():
+                self.sans_logger.warning("{}".format(v))
+
         return states, errors
 
     def get_state_for_row(self, row_index, file_lookup=True):
@@ -620,6 +669,8 @@ class RunTabPresenter(object):
         return None
 
     def _update_view_from_state_model(self):
+        self._set_on_view("instrument")
+
         # Front tab view
         self._set_on_view("zero_error_free")
         self._set_on_view("save_types")
@@ -973,6 +1024,10 @@ class RunTabPresenter(object):
         if not instrument:
             instrument = self._view.instrument
 
+        if instrument == SANSInstrument.NoInstrument:
+            self._view.disable_process_buttons()
+        else:
+            self._view.enable_process_buttons()
         self._view.set_instrument_settings(instrument)
         self._beam_centre_presenter.on_update_instrument(instrument)
         self._workspace_diagnostic_presenter.set_instrument_settings(instrument)

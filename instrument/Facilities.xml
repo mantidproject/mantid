@@ -849,12 +849,12 @@
   <instrument name="Bilby">
     <technique>Small Angle Scattering</technique>
   </instrument>
-  
+
   <instrument name="EMUau">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
-  
+
 </facility>
 
 <!-- HZB -->
@@ -915,6 +915,13 @@
     </livedata>
   </instrument>
 
+</facility>
+<!--  ESS  -->
+<facility name="ESS" FileExtensions=".nxs,.hdf5">
+ <timezone>Europe/Copenhagen</timezone>
+  <instrument name="LOKI">
+    <technique>Small Angle Scattering</technique>
+  </instrument>
 </facility>
 
 </facilities>

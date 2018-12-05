@@ -28,17 +28,14 @@ try:
 except (ImportError, ImportWarning):
     HAS_MANTID = False
 
-HAS_ASYNC = False
-HAS_MANTIDPLOT = True
+SCRIPT_EXEC_METHOD = 'exec'
 try:
     import mantidplot
+    SCRIPT_EXEC_METHOD = 'mantidplot'
 except(ImportError, ImportWarning):
-    HAS_MANTIDPLOT = False
-    try:
-        from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-        HAS_ASYNC = True
-    except(ImportError, ImportWarning):
-        pass
+    # are we running workbench
+    if 'workbench' in sys.modules:
+        SCRIPT_EXEC_METHOD = 'async'
 
 class BaseScriptElement(object):
     """
@@ -312,22 +309,35 @@ def execute_script(script, error_cb=None):
     @param script :: A chunk of code to execute
     @param error_cb :: method to call on error, only registered in workbench
     """
-    if HAS_ASYNC:
-        def onError(arg):
-            Logger('scripter').error('Failed to execute script: {}'.format(arg))
-
+    if SCRIPT_EXEC_METHOD == 'async':
         Logger('scripter').information('using PythonCodeExecution')
-        executioner = PythonCodeExecution()
-        if error_cb is None:
-            executioner.sig_exec_error.connect(onError)
-        else:
-            executioner.sig_exec_error.connect(error_cb)
-        executioner.execute_async(script, '<string>')
-    elif HAS_MANTIDPLOT:
+        execute_script_async(script, error_cb)
+    elif SCRIPT_EXEC_METHOD == 'mantidplot':
         Logger('scripter').information('using runPythonScript')
         mantidplot.runPythonScript(script, True)  # TODO this option should get removed
     else:
-        raise RuntimeError('Do not have a way to directly execute the script')
+        Logger('scripter').information('using straight exec')
+        exec(script, globals(), locals())
+
+
+def execute_script_async(script, error_cb=None):
+    # Cannot define this code in execute_script as Python 2.7.5 generates an error:
+    # SyntaxError: unqualified exec is not allowed in function 'execute_script' it
+    # contains a nested function with free variables
+
+    # this is intentionally imported lazily to avoid a Qt dependency
+    # in the framework
+    from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+
+    def on_error(arg):
+        Logger('scripter').error('Failed to execute script: {}'.format(arg))
+
+    executioner = PythonCodeExecution()
+    if error_cb is None:
+        executioner.sig_exec_error.connect(on_error)
+    else:
+        executioner.sig_exec_error.connect(error_cb)
+    executioner.execute_async(script, '<string>')
 
 
 class BaseReductionScripter(object):
@@ -663,10 +673,10 @@ class BaseReductionScripter(object):
         @param script :: A chunk of code to execute
         """
         # script_executor.execute_script(script, progress_action)
-        def onError(arg):
+        def on_error(arg):
             Logger('scripter').error('Failed to execute script: {}'.format(arg))
             raise RuntimeError(str(arg))
-        execute_script(script, onError)
+        execute_script(script, on_error)
 
     def reset(self):
         """

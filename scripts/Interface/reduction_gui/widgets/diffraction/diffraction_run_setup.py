@@ -154,9 +154,8 @@ class RunSetupWidget(BaseWidget):
 
         self._content.help_button.clicked.connect(self._show_help)
 
-        # Validated widgets
-
-        return
+        # mutex for whether to update the linear/log drop-down
+        self._content._binning_edit_mutex = False
 
     def set_state(self, state):
         """ Populate the UI elements with the data from the given state.
@@ -170,7 +169,26 @@ class RunSetupWidget(BaseWidget):
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
         self._content.charfile_edit.setText(state.charfilename)
         self._content.sum_checkbox.setChecked(state.dosum)
-        # Set binning type (logarithm or linear)
+
+        # Set binning parameter
+        try:
+            binning_float = float(state.binning)
+            binning_str = '%.6f' % abs(binning_float)
+        except ValueError:
+            binning_str = str(state.binning)
+        self._content._binning_edit_mutex = True
+        self._content.binning_edit.setText(binning_str)
+        # Set ResampleX
+        try:
+            resamplex_i = int(state.resamplex)
+            resamplex_str = '%d' % abs(resamplex_i)
+        except ValueError:
+            resamplex_str = str(state.resamplex)
+        self._content.resamplex_edit.setText(resamplex_str)
+        self._content._binning_edit_mutex = False
+
+        # Set binning type (logarithm=1 or linear=0) - must be done after the
+        # binning/resamplex boxes are set or it will be lost
         bintype_index = 1
         if state.doresamplex is True:
             # resample x
@@ -189,20 +207,6 @@ class RunSetupWidget(BaseWidget):
         # END-IF-ELSE
         self._content.bintype_combo.setCurrentIndex(bintype_index)
 
-        # Set binning parameter
-        try:
-            binning_float = float(state.binning)
-            binning_str = '%.6f' % abs(binning_float)
-        except ValueError:
-            binning_str = str(state.binning)
-        self._content.binning_edit.setText(binning_str)
-        # Set ResampleX
-        try:
-            resamplex_i = int(state.resamplex)
-            resamplex_str = '%d' % abs(resamplex_i)
-        except ValueError:
-            resamplex_str = str(state.resamplex)
-        self._content.resamplex_edit.setText(resamplex_str)
         # Others
         self._content.binind_checkbox.setChecked(state.binindspace)
         self._content.outputdir_edit.setText(state.outputdir)
@@ -307,8 +311,6 @@ class RunSetupWidget(BaseWidget):
         if fname:
             self._content.calfile_edit.setText(fname)
 
-        return
-
     def _charfile_browse(self):
         """ Event handing for browsing calibration file
         """
@@ -316,16 +318,12 @@ class RunSetupWidget(BaseWidget):
         if fname:
             self._content.charfile_edit.setText(','.join(fname))
 
-        return
-
     def _groupfile_browse(self):
         ''' Event handling for browsing for a grouping file
         '''
         fname = self.data_browse_dialog(data_type='*.xml;;*.h5;;*')
         if fname:
             self._content.groupfile_edit.setText(fname)
-
-        return
 
     def do_browse_ini_file(self):
         """ Event handling for browsing Exp Ini file
@@ -335,16 +333,12 @@ class RunSetupWidget(BaseWidget):
         if exp_ini_file_name:
             self._content.lineEdit_expIniFile.setText(exp_ini_file_name)
 
-        return
-
     def _outputdir_browse(self):
         """ Event handling for browing output directory
         """
         dirname = self.dir_browse_dialog()
         if dirname:
             self._content.outputdir_edit.setText(dirname)
-
-        return
 
     def _binvalue_edit(self):
         """ Handling event for binning value changed
@@ -358,11 +352,11 @@ class RunSetupWidget(BaseWidget):
         else:
             self._content.bintype_combo.setCurrentIndex(0)
 
-        return
-
     def _bintype_process(self):
         """ Handling bin type changed
         """
+        if self._content._binning_edit_mutex:
+            return
         currindex = self._content.bintype_combo.currentIndex()
         curbinning = self._content.binning_edit.text()
         if curbinning != "" and curbinning is not None:
@@ -373,8 +367,6 @@ class RunSetupWidget(BaseWidget):
                 self._content.binning_edit.setText(str(-1.0*abs(curbinning)))
             #ENDIFELSE
         #ENDIF
-
-        return
 
     def validateIntegerList(self, intliststring):
         """ Validate whether the string can be divided into integer strings.

@@ -142,9 +142,12 @@ class BaseWidget(QWidget):
         if title is None:
             title = "Data file - Choose a data file"
 
-        flist = QFileDialog.getOpenFileNames(self, title,
-                                             self._settings.data_path,
-                                             data_type)
+        if hasattr(QFileDialog, 'getOpenFileNamesAndFilter'):
+            getOpenFileNames = QFileDialog.getOpenFileNamesAndFilter
+        else:
+            getOpenFileNames = QFileDialog.getOpenFileNames
+        flist, _ = getOpenFileNames(self, title, self._settings.data_path,
+                                    data_type)
         if not flist:
             return None
 
@@ -152,7 +155,7 @@ class BaseWidget(QWidget):
             flist = [QFileInfo(item).filePath() for item in flist]
             self._settings.data_path = flist[-1]
         else:
-            if isinstance(flist, tuple):
+            if isinstance(flist, (tuple, list)):
                 flist = flist[0]
             flist = QFileInfo(flist).filePath()
             self._settings.data_path = flist
