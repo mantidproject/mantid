@@ -37,7 +37,8 @@ void PseudoVoigt::init() {
   mixingConstraint->setPenaltyFactor(1e9);
   addConstraint(std::move(mixingConstraint));
 
-  auto fwhm_constraint = Kernel::make_unique<BoundaryConstraint>(this, "FWHM", 1.E-20, true);
+  auto fwhm_constraint =
+      Kernel::make_unique<BoundaryConstraint>(this, "FWHM", 1.E-20, true);
   fwhm_constraint->setPenaltyFactor(1e9);
   addConstraint(std::move(fwhm_constraint));
 }

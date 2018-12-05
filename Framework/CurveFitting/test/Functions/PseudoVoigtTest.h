@@ -10,12 +10,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidCurveFitting/Functions/PseudoVoigt.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidAPI/PeakFunctionIntegrator.h"
 
 #include <boost/make_shared.hpp>
 
@@ -252,15 +252,14 @@ public:
   }
 
   void testIntegrate() {
-      PseudoVoigt pv;
-      pv.setParameter(0, 1.0);
-      pv.setParameter(1, 4.78);
+    PseudoVoigt pv;
+    pv.setParameter(0, 1.0);
+    pv.setParameter(1, 4.78);
     //   (1.0, 4.78, 0.05, 0.0);
 
-      PeakFunctionIntegrator integrator;
-      IntegrationResult result =
-          integrator.integrate(pv, -100., 100.);
-      std::cout << "Integrated value = " << result.result << "\n";
+    PeakFunctionIntegrator integrator;
+    IntegrationResult result = integrator.integrate(pv, -100., 100.);
+    std::cout << "Integrated value = " << result.result << "\n";
   }
 
   /** Test the intensity ratio between a Gaussian and Lorentzian
