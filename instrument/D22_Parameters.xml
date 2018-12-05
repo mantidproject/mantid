@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <parameter-file instrument = "D22" valid-from="2017-10-01 23:59:59">
 
+
+    <!-- This should be removed when the new way of correction is in the workflow-->
     <component-link name="D22">
 
-    <!-- This is the formula to model the theta dependency of the
-    detector sensitivities because of varying path lengths in the
-    detector volume. This is evaluated with python eval.
-    Note that the np stands for the numpy, p must be the parallax:
-    p = arctan(x/l2) [in radians], where x is the coordinate of the
-    detector pixel, l2 is the sample to detector distance. -->
-		<parameter name="parallax" type="string">
-		  <value val="1+0.14*np.exp(-4*np.log(2.)*((np.abs(p)-0.588)/0.414)**2)"/>
+      <!-- This is the formula to model the theta dependency of the
+      detector sensitivities because of varying path lengths in the
+      detector volume. This is evaluated with python eval.
+      Note that the np stands for the numpy, p must be the parallax:
+      p = arctan(x/l2) [in radians], where x is the coordinate of the
+      detector pixel, l2 is the sample to detector distance. -->
+      <parameter name="parallax_old" type="string">
+        <value val="1+0.14*np.exp(-4*np.log(2.)*((np.abs(p)-0.588)/0.414)**2)"/>
+      </parameter>
+
+    </component-link>
+
+    <!-- These parameters are used in ParallaxCorrection algorithm -->
+
+    <component-link name="detector">
+
+    <parameter name="parallax" type="string">
+		  <value val="1+0.14*exp(-4*log(2.)*((t-0.588)/0.414)^2)"/>
+		</parameter>
+
+    <parameter name="direction" type="string">
+		  <value val="y"/>
 		</parameter>
 
     </component-link>
