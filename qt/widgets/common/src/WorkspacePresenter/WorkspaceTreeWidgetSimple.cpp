@@ -56,7 +56,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
   connect(m_showInstrument, SIGNAL(triggered()), this,
           SLOT(onShowInstrumentClicked()));
   connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
-  connect(m_tree, SIGNAL(itemSelectionChanged()), this, SIGNAL(treeSelectionChanged()));
+  connect(m_tree, SIGNAL(itemSelectionChanged()), this,
+          SIGNAL(treeSelectionChanged()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
