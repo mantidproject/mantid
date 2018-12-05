@@ -497,25 +497,12 @@ void Stitch1D::exec() {
   if (lhsWS->isHistogramData()) { // If the input workspaces are histograms ...
     size_t a1 = 0;
     size_t a2 = 0;
-    try {
-      a1 = lhs->binIndexOf(startOverlap + params[1]);
-    } catch (std::out_of_range) {
-      g_log.error(
-          "The bin boundary of the StartOverlap is smaller than the smallest "
-          "bin boundary (computational inaccuracy)."
-          "Consider to use only a rebin step (params) or precise the "
-          "StartOverlap(s).");
-      throw std::runtime_error("Minimum bin boundary is out of range.");
-    }
+    a1 = lhs->binIndexOf(startOverlap + params[1]);
     try {
       a2 = lhs->binIndexOf(endOverlap);
     } catch (std::out_of_range) {
-      g_log.error(
-          "The bin bounday of the EndOverlap is greater than the greatest bin "
-          "boundary (computational inaccuracy)."
-          "Consider to use only a rebin step (params) or precise the "
-          "EndOverlap(s).");
-      throw std::runtime_error("Maximum bin boundary is out of range.");
+      // This happens for end overlap = last bin
+      a2 = lhs->blocksize();
     }
     if (a1 >= a2) {
       g_log.warning("The Params you have provided for binning yield a "
