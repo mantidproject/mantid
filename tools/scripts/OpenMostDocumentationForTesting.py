@@ -43,10 +43,8 @@ def open_urls(list_of_urls, delay=1):
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-        '-d', '--open-tab-delay', type=int, help="Delay between each new page tab in seconds.")
+        '-d', '--open-tab-delay', type=int, help="Delay between each new page tab in seconds.", default=1)
 args = parser.parse_args()
-
-print(args.delay)
 
 all_urls = []
 
@@ -96,7 +94,7 @@ print("All webpages crawled")
 
 print("Opening Urls...")
 
-delay = args.delay
+delay = args.open_tab_delay
 
 if delay is None:
         delay = 1
