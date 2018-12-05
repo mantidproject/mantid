@@ -42,16 +42,16 @@ public:
   static void destroySuite(ErrorReporterTest *suite) { delete suite; }
 
   void test_errorMessage() {
-    std::string name = "My testing application name";
-    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string name = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", false);
-    std::string message = errorService.generateErrorMessage();
+    const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
     ::Json::Value root;
     reader.parse(message, root);
     auto members = root.getMemberNames();
-    std::vector<std::string> expectedMembers{
+    const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode"};
@@ -67,17 +67,17 @@ public:
   }
 
   void test_errorMessageWithShare() {
-    std::string name = "My testing application name";
-    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string name = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
                                        "textBox");
-    std::string message = errorService.generateErrorMessage();
+    const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
     ::Json::Value root;
     reader.parse(message, root);
     auto members = root.getMemberNames();
-    std::vector<std::string> expectedMembers{
+    const std::vector<std::string> expectedMembers{
         "ParaView",      "application", "host",     "mantidSha1",
         "mantidVersion", "osArch",      "osName",   "osReadable",
         "osVersion",     "uid",         "facility", "upTime",
@@ -97,17 +97,17 @@ public:
   }
 
   void test_errorMessageWithShareAndRecoveryFileHash() {
-    std::string name = "My testing application name";
-    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string name = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
                                        "textBox", "fileHash");
-    std::string message = errorService.generateErrorMessage();
+    const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
     ::Json::Value root;
     reader.parse(message, root);
     auto members = root.getMemberNames();
-    std::vector<std::string> expectedMembers{
+    const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode",   "textBox",    "name",
@@ -128,17 +128,17 @@ public:
   }
 
   void test_errorMessageWithNoShareAndRecoveryFileHash() {
-    std::string name = "My testing application name";
-    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string name = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", false, "name",
                                        "email", "textBox", "fileHash");
-    std::string message = errorService.generateErrorMessage();
+    const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
     ::Json::Value root;
     reader.parse(message, root);
     auto members = root.getMemberNames();
-    std::vector<std::string> expectedMembers{
+    const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode",   "textBox",    "name",
