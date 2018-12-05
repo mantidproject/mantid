@@ -81,6 +81,7 @@ set PKGDIR=%WORKSPACE%\build
 :: A completely clean build will not have Mantid installed but will need Python to
 :: run the testing setup scripts. Assume it is in the PATH
 set NTHREADS=%BUILD_THREADS%
-if %NTHREADS% gtr 12 set NTHREADS=12
+set MAXTHREADS=8
+if %NTHREADS% gtr %MAXTHREADS% set NTHREADS=%MAXTHREADS%
 set PYTHON_EXE=python.exe
 %PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR% -j %NTHREADS% %EXTRA_ARGS%
