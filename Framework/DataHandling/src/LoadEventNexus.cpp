@@ -408,8 +408,8 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
     throw std::runtime_error("No ISO8601 offset attribute provided");
 
   const auto heldTimeZeroType = file.getInfo().type;
-  // Nexus requireds event_time_zero to be a NXNumber, we support two
-  // possilibites for held type
+  // Nexus only requires event_time_zero to be a NXNumber, we support two
+  // possibilities for held type
 
   std::string isooffset; // ISO8601 offset
   file.getAttr("offset", isooffset);
@@ -419,6 +419,7 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
     file.getAttr("unit", unit);
   file.closeData();
 
+  // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
   if (heldTimeZeroType == ::NeXus::UINT64) {
     if (unit != "ns")
       logger.warning(
@@ -563,13 +564,11 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      Kernel::TimeSeriesProperty<double> *log =
-          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-              localWorkspace->mutableRun().getProperty("proton_charge"));
+      auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+          localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
     }
-    // if (returnpulsetimes) out = new BankPulseTimes(temp);
     if (returnpulsetimes)
       out = boost::make_shared<BankPulseTimes>(temp);
 
@@ -690,7 +689,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                    true);
   }
   m_ws->setNPeriods(
-      nPeriods,
+      static_cast<size_t>(nPeriods),
       periodLog); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
@@ -733,7 +732,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool hasTotalCounts(true);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
-  auto lastPulseT = DateAndTime::minimum();
   for (; it != entries.end(); ++it) {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
@@ -749,7 +747,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
          */
         auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
         firstPulseT = std::min(firstPulseT, localFirstLast.first);
-        lastPulseT = std::max(firstPulseT, localFirstLast.second);
       }
       // get the number of events
       std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);

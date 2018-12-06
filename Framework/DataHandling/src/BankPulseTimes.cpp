@@ -30,8 +30,8 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
   // Load the seconds offsets
 
   const auto heldTimeZeroType = file.getInfo().type;
-  // Nexus requireds event_time_zero to be a NXNumber, we support two
-  // possilibites
+  // Nexus only requires event_time_zero to be a NXNumber, we support two
+  // possilites
   if (heldTimeZeroType == ::NeXus::FLOAT64) {
     std::vector<double> seconds;
     file.getData(seconds);
