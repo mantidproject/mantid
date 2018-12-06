@@ -129,4 +129,3 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
             validation_files = validation_files + ["w19612-{}foc".format(panel),
                                                    "vana19612-{}foc-SF-SS.nxs".format(panel)]
         return validation_files
-
