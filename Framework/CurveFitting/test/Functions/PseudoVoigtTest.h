@@ -310,11 +310,210 @@ public:
     }
   }
 
-  void ToDo_testPseudoVoigtDerivativesVaryParameters() {
-    std::vector<double> xvalues;
-    for (size_t i = 0; i < 10; ++i) {
-      xvalues.push_back(-5 + static_cast<double>(i));
+  /// compare numerical derivative and analytical derivatives for eta
+  void ToDo_testPseudoVoigtDerivativesVaringMixing() {
+    double x0 = -1.;
+    double intensity = 2;
+    double fwhm = 4.0;
+    double min_eta = 0.4;
+    double max_eta = 0.6;
+    double eta_resolution = 0.005;
+
+    // create function
+    IPeakFunction_sptr pv = getInitializedPV(x0, intensity, fwhm, min_eta);
+    // Mantid::CurveFitting::Jacobian jacobian(1, 4);
+
+    // evalulate at N points
+    std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
+    for (double x : xvalues) {
+      // calculate by Jacobian (analytically)
+      std::vector<double> x_vec{x};
+      FunctionDomain1DVector domain(x_vec);
+      Mantid::CurveFitting::Jacobian jacobian(domain.size(), 4);
+
+      std::vector<double> vec_jocob_deriv;
+      double param_value = min_eta;
+      while (param_value < max_eta) {
+        // update eta and calcualte Jocobian
+        pv->setParameter(0, param_value);
+        pv->functionDeriv(domain, jacobian);
+        // get value and add to the vector
+        vec_jocob_deriv.push_back(jacobian.get(0, 0));
+        // update eta
+        param_value += eta_resolution;
+      }
+
+      // calculate numerically
+      std::vector<double> vec_eta;
+      std::vector<double> vec_numeric_deriv;
+      numerical_paaram_partial_derivative(pv, 0, min_eta, max_eta,
+                                          eta_resolution, x, vec_eta,
+                                          vec_numeric_deriv);
+
+      std::cout << "Jocobian size = " << vec_jocob_deriv.size() << ", "
+                << "Numerical size = " << vec_numeric_deriv.size() << "\n";
+
+      // compare
+      for (size_t i = 0; i < vec_eta.size(); ++i) {
+        // TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-2);
+        std::cout << vec_eta[i] << "    " << vec_numeric_deriv[i]
+                  << vec_jocob_deriv[i] << "\n";
+      }
     }
+    return;
+  }
+
+  void ToDo_testPseudoVoigtDerivativesVaringIntensity() {
+    double x0 = -1.;
+    double min_intensity = 0.9;
+    double max_intensity = 1.1;
+    double fwhm = 4.0;
+    double eta = 0.5;
+    double intensity_resolution = 0.005;
+
+    // create function
+    IPeakFunction_sptr pv = getInitializedPV(x0, min_intensity, fwhm, eta);
+    // Mantid::CurveFitting::Jacobian jacobian(1, 4);
+
+    // evalulate at N points
+    std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
+    for (double x : xvalues) {
+      // calculate by Jacobian (analytically)
+      std::vector<double> x_vec{x};
+      FunctionDomain1DVector domain(x_vec);
+      Mantid::CurveFitting::Jacobian jacobian(domain.size(), 4);
+
+      std::vector<double> vec_jocob_deriv;
+      double param_value = min_intensity;
+      while (param_value < max_intensity) {
+        // update eta and calcualte Jocobian
+        pv->setParameter(0, param_value);
+        pv->functionDeriv(domain, jacobian);
+        // get value and add to the vector
+        vec_jocob_deriv.push_back(jacobian.get(0, 1));
+        // update eta
+        param_value += intensity_resolution;
+      }
+
+      // calculate numerically
+      std::vector<double> vec_intensity;
+      std::vector<double> vec_numeric_deriv;
+      numerical_paaram_partial_derivative(pv, 1, min_intensity, max_intensity,
+                                          intensity_resolution, x,
+                                          vec_intensity, vec_numeric_deriv);
+
+      std::cout << "Jocobian size = " << vec_jocob_deriv.size() << ", "
+                << "Numerical size = " << vec_numeric_deriv.size() << "\n";
+
+      // compare
+      for (size_t i = 0; i < vec_intensity.size(); ++i) {
+        // TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-2);
+        std::cout << vec_intensity[i] << "    " << vec_numeric_deriv[i]
+                  << vec_jocob_deriv[i] << "\n";
+      }
+    }
+    return;
+  }
+
+  void ToDo_testPseudoVoigtDerivativesVaringCentre() {
+    double min_x0 = -1.2;
+    double max_x0 = -0.8;
+    double intensity = 2.;
+    double fwhm = 4.0;
+    double eta = 0.5;
+    double x0_resolution = 0.005;
+
+    // create function
+    IPeakFunction_sptr pv = getInitializedPV(min_x0, intensity, fwhm, eta);
+
+    // evalulate at N points
+    std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
+    for (double x : xvalues) {
+      // calculate by Jacobian (analytically)
+      std::vector<double> x_vec{x};
+      FunctionDomain1DVector domain(x_vec);
+      Mantid::CurveFitting::Jacobian jacobian(domain.size(), 4);
+
+      std::vector<double> vec_jocob_deriv;
+      double param_value = min_x0;
+      while (param_value < max_x0) {
+        // update eta and calcualte Jocobian
+        pv->setParameter(2, param_value);
+        pv->functionDeriv(domain, jacobian);
+        // get value and add to the vector
+        vec_jocob_deriv.push_back(jacobian.get(0, 2));
+        // update eta
+        param_value += x0_resolution;
+      }
+
+      // calculate numerically
+      std::vector<double> vec_x0;
+      std::vector<double> vec_numeric_deriv;
+      numerical_paaram_partial_derivative(pv, 2, min_x0, max_x0, x0_resolution,
+                                          x, vec_x0, vec_numeric_deriv);
+
+      std::cout << "Jocobian size = " << vec_jocob_deriv.size() << ", "
+                << "Numerical size = " << vec_numeric_deriv.size() << "\n";
+
+      // compare
+      for (size_t i = 0; i < vec_x0.size(); ++i) {
+        // TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-2);
+        std::cout << vec_x0[i] << "    " << vec_numeric_deriv[i]
+                  << vec_jocob_deriv[i] << "\n";
+      }
+    }
+    return;
+  }
+
+  void ToDo_testPseudoVoigtDerivativesVaringFWHM() {
+    double x0 = -1.;
+    double intensity = 2;
+    double min_fwhm = 3.5;
+    double max_fwhm = 4.5;
+    double eta = 0.5;
+    double fwhm_resolution = 0.005;
+
+    // create function
+    IPeakFunction_sptr pv = getInitializedPV(x0, intensity, min_fwhm, eta);
+
+    // evalulate at N points
+    std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
+    for (double x : xvalues) {
+      // calculate by Jacobian (analytically)
+      std::vector<double> x_vec{x};
+      FunctionDomain1DVector domain(x_vec);
+      Mantid::CurveFitting::Jacobian jacobian(domain.size(), 4);
+
+      std::vector<double> vec_jocob_deriv;
+      double param_value = min_fwhm;
+      while (param_value < max_fwhm) {
+        // update eta and calcualte Jocobian
+        pv->setParameter(3, param_value);
+        pv->functionDeriv(domain, jacobian);
+        // get value and add to the vector
+        vec_jocob_deriv.push_back(jacobian.get(0, 3));
+        // update eta
+        param_value += fwhm_resolution;
+      }
+
+      // calculate numerically
+      std::vector<double> vec_fwhm;
+      std::vector<double> vec_numeric_deriv;
+      numerical_paaram_partial_derivative(pv, 3, min_fwhm, max_fwhm,
+                                          fwhm_resolution, x, vec_fwhm,
+                                          vec_numeric_deriv);
+
+      std::cout << "Jocobian size = " << vec_jocob_deriv.size() << ", "
+                << "Numerical size = " << vec_numeric_deriv.size() << "\n";
+
+      // compare
+      for (size_t i = 0; i < vec_fwhm.size(); ++i) {
+        // TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-2);
+        std::cout << vec_fwhm[i] << "    " << vec_numeric_deriv[i]
+                  << vec_jocob_deriv[i] << "\n";
+      }
+    }
+    return;
   }
 
   /** Test the intensity ratio between a Gaussian and Lorentzian
@@ -337,6 +536,14 @@ private:
     return pv;
   }
 
+  /**
+   * @brief numerical_integrate_pv : integrate PseudoVoigt numerically
+   * @param center: peak center
+   * @param peak_intensity: intensity
+   * @param fwhm: gamma/peak width
+   * @param mixing: eta/mixing ratio of Gaussian
+   * @return
+   */
   double numerical_integrate_pv(double center, double peak_intensity,
                                 double fwhm, double mixing) {
     PseudoVoigt pv;
@@ -352,18 +559,55 @@ private:
     return result.result;
   }
 
-  /// calculate \partial pV() / \partial p_i  where i = 0, 1, 2 or 3 for mixing,
-  /// ....
-  std::vector<double> numerical_paaram_partial_derivative(PseudoVoigt &pv,
-                                                          size_t param_index,
-                                                          double min_value,
-                                                          double max_value,
-                                                          double resolution) {
+  /** evalulate the derivative numerically for an arbitrary parameter at x
+   * calculate \partial pV() / \partial p_i  where i = 0, 1, 2 or 3 for mixing,
+   * @param pv : IPeakFunction pointer to PseudoVoigt
+   * @param param_index: index of the parameter (mixing: 0; I: 1; x0: 2; FHWM:
+   * 3)
+   * @param min_value: minimum value of the parameter to evalulate the
+   * derivative
+   * @param max_value: maximum value of the parameter to evalulate the
+   * derivative
+   * @param resolution: resolution (min step)
+   * @param x:x value
+   * @param param_vec: (output) parameter value vector
+   * @param deriv_vec: (output) derivative vector
+   */
+  void numerical_paaram_partial_derivative(IPeakFunction_sptr &pv,
+                                           size_t param_index, double min_value,
+                                           double max_value, double resolution,
+                                           double x,
+                                           std::vector<double> &param_vec,
+                                           std::vector<double> &deriv_vec) {
+    // create a single value vector for domain
+    std::vector<double> vec_x{x};
+    FunctionDomain1DVector domain(vec_x);
+    FunctionValues values(domain);
 
-    // TODO Implement
-    std::vector<double> deriv_vec;
+    // calculate pv value of a given X with changing parameter value
+    double param_value = min_value - resolution;
+    param_vec.clear();
+    std::vector<double> pv_vec;
+    while (param_value < max_value - resolution) {
+      // update parameter and calculate
+      pv->setParameter(param_index, param_value);
+      pv->function(domain, values);
+      // set to vector
+      param_vec.push_back(param_value);
+      pv_vec.push_back(values[0]);
+      // increment
+      param_value += resolution;
+    }
 
-    return deriv_vec;
+    // evalulate derivative to parameter (single way dx = (f(x+h) - f(x))/h
+    deriv_vec.resize(param_vec.size() - 1);
+    for (size_t i = 0; i < param_vec.size() - 2; ++i) {
+      deriv_vec[i] = (pv_vec[i + 1] - pv_vec[i]) / resolution;
+    }
+    // pop out the last element of parameter vector
+    param_vec.pop_back();
+
+    return;
   }
 
   std::vector<double> m_xValues;
