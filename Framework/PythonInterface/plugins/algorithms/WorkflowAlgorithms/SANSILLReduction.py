@@ -250,7 +250,7 @@ class SANSILLReduction(PythonAlgorithm):
 
     @staticmethod
     def _parallax_correction(ws):
-        formula = ws.getInstrument().getStringParameter('parallax')[0]
+        formula = ws.getInstrument().getStringParameter('parallax_old')[0]
         l2 = ws.getRun().getLogData('L2').value
         n_spectra = ws.getNumberHistograms()
         p = np.empty(n_spectra)
@@ -342,7 +342,7 @@ class SANSILLReduction(PythonAlgorithm):
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         # parallax (gondola) effect
-                        if mtd[ws].getInstrument().hasParameter('parallax'):
+                        if mtd[ws].getInstrument().hasParameter('parallax_old'):
                             # for the moment it's only D22 that has this
                             self.log().information('Performing parallax correction')
                             self._parallax_correction(mtd[ws])

@@ -6,15 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import sys
+from Muon.GUI.Common.thread_model import ThreadModel
+from Muon.GUI.Common import mock_widget
 
 if sys.version_info.major == 3:
     from unittest import mock
 else:
     import mock
-
-from Muon.GUI.Common.thread_model import ThreadModel
-from Muon.GUI.Common import mock_widget
-from PyQt4.QtGui import QApplication
 
 
 class testModelWithoutExecute:
@@ -69,19 +67,14 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         The finished signal of a QThread is connected to the finished method below"""
         QT_APP = mock_widget.mockQapp()
 
-        def __init__(self, thread):
-            if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
-                self._thread.start()
-                if self._thread.isRunning():
-                    self.QT_APP.exec_()
-
-        def finished(self):
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
+        def __init__(self, thread_model):
+            if thread_model:
+                thread_model.start()
 
     def setUp(self):
+        patcher = mock.patch('Muon.GUI.Common.thread_model.warning')
+        self.addCleanup(patcher.stop)
+        self.warning_box_patcher = patcher.start()
         self.model = testModel()
         self.thread = ThreadModel(self.model)
 
@@ -108,6 +101,8 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.execute = mock.Mock()
 
         self.Runner(self.thread)
+        self.thread._thread.wait()
+        self.Runner.QT_APP.processEvents()
 
         self.assertEqual(self.model.execute.call_count, 1)
 
@@ -116,6 +111,8 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.output = mock.Mock()
 
         self.Runner(self.thread)
+        self.thread._thread.wait()
+        self.Runner.QT_APP.processEvents()
 
         self.assertEqual(self.model.output.call_count, 1)
 
@@ -126,6 +123,8 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.thread.threadWrapperSetUp(start_slot, end_slot)
 
         self.Runner(self.thread)
+        self.thread._thread.wait()
+        self.Runner.QT_APP.processEvents()
 
         self.assertEqual(start_slot.call_count, 1)
         self.assertEqual(end_slot.call_count, 1)
@@ -156,24 +155,23 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.thread.threadWrapperSetUp(start_slot, end_slot)
 
         self.Runner(self.thread)
-        self.Runner(self.thread)
+        self.thread._thread.wait()
+        self.Runner.QT_APP.processEvents()
 
         self.assertEqual(start_slot.call_count, 1)
         self.assertEqual(end_slot.call_count, 1)
 
-    @mock.patch("Muon.GUI.Common.message_box.warning")
-    def test_that_message_box_called_when_execute_throws_even_without_setup_and_teardown_methods(self, mock_box):
-        # Need to instantiate a new thread for patch to work
-        self.thread = ThreadModel(self.model)
-
+    def test_that_message_box_called_when_execute_throws_even_without_setup_and_teardown_methods(self):
         def raise_error():
             raise ValueError()
 
         self.model.execute = mock.Mock(side_effect=raise_error)
 
         self.Runner(self.thread)
+        self.thread._thread.wait()
+        self.Runner.QT_APP.processEvents()
 
-        self.assertEqual(mock_box.call_count, 1)
+        self.assertEqual(self.warning_box_patcher.call_count, 1)
 
     def test_that_passing_non_callables_to_setUp_throws_AssertionError(self):
 
