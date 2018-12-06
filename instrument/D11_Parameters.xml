@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "D11">
+
+    <!-- Tau coefficient for DeadTimeCorrection, to be applied for the entire detector -->
+    <component-link name="D11">
+      <parameter name="tau" type="number">
+        <value val="0.00000042" />
+      </parameter>
+    </component-link>
+
+    </component-link>
+</parameter-file>

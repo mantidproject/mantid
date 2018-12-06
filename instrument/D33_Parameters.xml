@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <parameter-file instrument = "D33" valid-from = "20th May 2010">
 
+  <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
+  <component-link name="D33">
+    <parameter name="tau" type="number">
+      <value val="0.0000015" />
+    </parameter>
+  </component-link>
+
   <!-- These parameters are used in ParallaxCorrection algorithm -->
 
   <component-link name="back_detector">

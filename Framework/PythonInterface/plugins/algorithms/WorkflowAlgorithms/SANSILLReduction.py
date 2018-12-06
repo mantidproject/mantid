@@ -197,10 +197,21 @@ class SANSILLReduction(PythonAlgorithm):
                 duration = mtd[ws].getRun().getLogData('timer').value
                 if duration != 0.:
                     Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
+                    self._dead_time_correction(ws)
                 else:
                     raise RuntimeError('Unable to normalise to time; duration found is 0 seconds.')
             else:
                 raise RuntimeError('Normalise to timer requested, but timer information is not available.')
+
+    def _dead_time_correction(self, ws):
+
+        run = mtd[ws].getRun()
+        if run.hasParameter('tau'):
+            tau = run.getNumberParameter('tau')[0]
+            DeadTimeCorrection(InputWorkspace=ws, Tau=tau, OutputWorkspace=ws)
+        else:
+            self.log().information('No tau available in IPF, skipping dead time correction.')
+
 
     def _process_beam(self, ws):
         """
@@ -248,25 +259,13 @@ class SANSILLReduction(PythonAlgorithm):
     def _check_processed_flag(ws, value):
         return ws.getRun().getLogData('ProcessedAs').value == value
 
-    @staticmethod
-    def _parallax_correction(ws):
-        formula = ws.getInstrument().getStringParameter('parallax_old')[0]
-        l2 = ws.getRun().getLogData('L2').value
-        n_spectra = ws.getNumberHistograms()
-        p = np.empty(n_spectra)
-        for i in range(n_spectra):
-            d = ws.getDetector(i).getPos()
-            p[i] = np.arctan(d[0]/l2)
-        parallax_ws = ws.getName() + '_parallax'
-        parallax_ws = CreateWorkspace(NSpec=n_spectra, DataY=eval(formula), DataX=ws.extractX(), ParentWorkspace=ws, StoreInADS=False)
-        Divide(LHSWorkspace=ws, RHSWorkspace=parallax_ws, OutputWorkspace=ws.getName())
-
     def PyExec(self): # noqa: C901
         process = self.getPropertyValue('ProcessAs')
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         self._normalise(ws)
         ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
+        instrument = mtd[ws].getInstrument().getName()
         if process in ['Beam', 'Transmission', 'Container', 'Reference', 'Sample']:
             absorber_ws = self.getProperty('AbsorberInputWorkspace').value
             if absorber_ws:
@@ -342,10 +341,13 @@ class SANSILLReduction(PythonAlgorithm):
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         # parallax (gondola) effect
-                        if mtd[ws].getInstrument().hasParameter('parallax_old'):
-                            # for the moment it's only D22 that has this
+                        if instrument in ['D22', 'D22lr', 'D33']:
                             self.log().information('Performing parallax correction')
-                            self._parallax_correction(mtd[ws])
+                            if instrument == 'D33':
+                                components = ['back_detector', 'front_detector_top', 'front_detector_bottom', 'front_detector_left', 'front_detector_right']
+                            else:
+                                components = ['detector']
+                            ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
                         if process == 'Reference':
                             sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
                             if sensitivity_out:
@@ -386,7 +388,7 @@ class SANSILLReduction(PythonAlgorithm):
                                 ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                                                      NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
         if process != 'Transmission':
-            if mtd[ws].getInstrument().getName() == 'D33':
+            if instrument == 'D33':
                 CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
             else:
                 CalculateDynamicRange(Workspace=ws)
