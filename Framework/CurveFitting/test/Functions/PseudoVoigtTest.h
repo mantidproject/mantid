@@ -239,10 +239,6 @@ public:
     double num_intensity =
         numerical_integrate_pv(center, intensity, fwhm, mixing);
     TS_ASSERT_DELTA(num_intensity, intensity, 2.0E-2);
-    // std::cout << "Integrated = " << num_intensity << "\n";
-    //    for (size_t i = 0; i < valuesPV.size(); ++i) {
-    //      std::cout << m_xValues[i] << "    " << valuesPV[i] << "\n";
-    //    }
 
     Lorentzian lorentzian;
     lorentzian.initialize();
@@ -255,12 +251,15 @@ public:
     for (size_t i = 0; i < valuesPV.size(); ++i) {
       TS_ASSERT_DELTA(valuesPV[i], valuesLorentzian[i], 1e-15);
     }
+
+    // check height
+    TS_ASSERT_DELTA(pv->height(), lorentzian.height(), 1e-16);
   }
 
   /** Regular pseudo voigt
    * @brief testPseudoVoigtValues
    */
-  void ToFix_Prioity_00_testPseudoVoigtValues() {
+  void Failed_Still_testPseudoVoigtValues() {
     const double center{-1.0};
     const double intensity{2.0};
     const double fwhm{2.0};
@@ -284,6 +283,7 @@ public:
 
     // check height
     double height = pv->height();
+    // FIXME - THIS IS WRONG!
     TS_ASSERT_DELTA(height, values[100], 1.E-10);
 
     //    for (size_t i = 0; i < values.size(); ++i) {
@@ -311,7 +311,7 @@ public:
   }
 
   /// compare numerical derivative and analytical derivatives for eta
-  void testPseudoVoigtDerivativesVaringMixing() {
+  void Passed_testPseudoVoigtDerivativesVaringMixing() {
     double x0 = -1.;
     double intensity = 2;
     double fwhm = 4.0;
@@ -365,7 +365,7 @@ public:
     return;
   }
 
-  void ToDo_testPseudoVoigtDerivativesVaringIntensity() {
+  void Passed_testPseudoVoigtDerivativesVaringIntensity() {
     double x0 = -1.;
     double min_intensity = 0.9;
     double max_intensity = 1.1;
@@ -387,9 +387,9 @@ public:
 
       std::vector<double> vec_jocob_deriv;
       double param_value = min_intensity;
-      while (param_value < max_intensity) {
-        // update eta and calcualte Jocobian
-        pv->setParameter(0, param_value);
+      while (param_value < max_intensity - intensity_resolution) {
+        // update intensity (index=1) and calcualte Jocobian
+        pv->setParameter(1, param_value);
         pv->functionDeriv(domain, jacobian);
         // get value and add to the vector
         vec_jocob_deriv.push_back(jacobian.get(0, 1));
@@ -409,15 +409,16 @@ public:
 
       // compare
       for (size_t i = 0; i < vec_intensity.size(); ++i) {
-        // TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-2);
-        std::cout << vec_intensity[i] << "    " << vec_numeric_deriv[i]
-                  << vec_jocob_deriv[i] << "\n";
+        TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-3);
+        // std::cout << vec_intensity[i] << "    " << vec_numeric_deriv[i] << "
+        // "
+        //          << vec_jocob_deriv[i] << "\n";
       }
     }
     return;
   }
 
-  void ToDo_testPseudoVoigtDerivativesVaringCentre() {
+  void Passed_testPseudoVoigtDerivativesVaringCentre() {
     double min_x0 = -1.2;
     double max_x0 = -0.8;
     double intensity = 2.;
@@ -438,7 +439,7 @@ public:
 
       std::vector<double> vec_jocob_deriv;
       double param_value = min_x0;
-      while (param_value < max_x0) {
+      while (param_value < max_x0 - x0_resolution) {
         // update eta and calcualte Jocobian
         pv->setParameter(2, param_value);
         pv->functionDeriv(domain, jacobian);
@@ -459,15 +460,18 @@ public:
 
       // compare
       for (size_t i = 0; i < vec_x0.size(); ++i) {
-        // TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-2);
-        std::cout << vec_x0[i] << "    " << vec_numeric_deriv[i]
-                  << vec_jocob_deriv[i] << "\n";
+        TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-1);
+        //        std::cout << vec_x0[i] << "    " << vec_numeric_deriv[i] << "
+        //        "
+        //                  << vec_jocob_deriv[i] << "    "
+        //                  << vec_jocob_deriv[i] - vec_numeric_deriv[i] <<
+        //                  "\n";
       }
     }
     return;
   }
 
-  void ToDo_testPseudoVoigtDerivativesVaringFWHM() {
+  void testPseudoVoigtDerivativesVaringFWHM() {
     double x0 = -1.;
     double intensity = 2;
     double min_fwhm = 3.5;
@@ -488,7 +492,7 @@ public:
 
       std::vector<double> vec_jocob_deriv;
       double param_value = min_fwhm;
-      while (param_value < max_fwhm) {
+      while (param_value < max_fwhm - fwhm_resolution) {
         // update eta and calcualte Jocobian
         pv->setParameter(3, param_value);
         pv->functionDeriv(domain, jacobian);
@@ -510,9 +514,9 @@ public:
 
       // compare
       for (size_t i = 0; i < vec_fwhm.size(); ++i) {
-        // TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-2);
-        std::cout << vec_fwhm[i] << "    " << vec_numeric_deriv[i]
-                  << vec_jocob_deriv[i] << "\n";
+        TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 0.005);
+        // std::cout << vec_fwhm[i] << "    " << vec_numeric_deriv[i] << "    "
+        //          << vec_jocob_deriv[i] << "\n";
       }
     }
     return;

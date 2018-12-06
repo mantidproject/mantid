@@ -17,6 +17,7 @@ namespace Functions {
 
 using namespace CurveFitting;
 using namespace Constraints;
+using namespace std;
 
 using namespace API;
 
@@ -114,7 +115,7 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
     out->set(i, 1, gFraction * gaussian_term + lFraction * lorentzian_term);
 
     // peak center: x0
-    const double derive_g_x0 = 2. * b_g * gaussian_term;
+    const double derive_g_x0 = 2. * b_g * xDiff * gaussian_term;
     const double derive_l_x0 =
         4. * M_PI * xDiff / gamma * lorentzian_term * lorentzian_term;
     const double deriv_x0 =
@@ -139,8 +140,8 @@ double PseudoVoigt::height() const {
   double peak_intensity = getParameter("Intensity");
   double gamma = getParameter("FWHM");
   double eta = getParameter("Mixing");
-  const double height =
-      2. * peak_intensity * (1 + (sqrt(M_PI * M_LN2) - 1) * eta) / gamma;
+  const double height = 2. * peak_intensity *
+                        (1 + (sqrt(M_PI * M_LN2) - 1) * eta) / (M_PI * gamma);
 
   return height;
 }
