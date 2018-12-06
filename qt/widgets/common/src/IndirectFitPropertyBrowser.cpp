@@ -53,21 +53,6 @@
 
 using namespace Mantid::API;
 
-namespace {
-
-std::string getWorkspaceSuffix(std::string const &workspaceName) {
-  return workspaceName.substr(workspaceName.length() - 3);
-}
-
-bool canPlotGuess(std::string const &workspaceName) {
-  if (!workspaceName.empty())
-    return getWorkspaceSuffix(workspaceName) == "red" ? true : false;
-  else
-    return false;
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -189,9 +174,6 @@ void IndirectFitPropertyBrowser::init() {
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
-  connect(this, SIGNAL(functionChanged()), this, SLOT(updatePlotGuess()));
-  connect(this, SIGNAL(workspaceNameChanged(const QString &)), this,
-          SLOT(updatePlotGuess()));
   connect(this, SIGNAL(visibilityChanged(bool)), this,
           SLOT(browserVisibilityChanged(bool)));
   connect(this, SIGNAL(customSettingChanged(QtProperty *)), this,
@@ -833,9 +815,10 @@ void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
 
 /**
  * Updates the plot guess feature in this indirect fit property browser.
+ * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess() {
-  if (canPlotGuess(workspaceName()) && compositeFunction()->nFunctions() > 0)
+void IndirectFitPropertyBrowser::updatePlotGuess(MatrixWorkspace_sptr sampleWorkspace) {
+  if (sampleWorkspace && compositeFunction()->nFunctions() > 0)
     setPeakToolOn(true);
   else
     setPeakToolOn(false);
