@@ -36,7 +36,7 @@ Optional Properties:
 <LI> SelectDetectorTubes - Range of detector tubes to be loaded</LI>
 <LI> OverrideDopplerFrequency - Override the Doppler frequency (Hz)</LI>
 <LI> OverrideDopplerPhase - Override the Doppler phase (degrees)</LI>
-<LI> CalibrateDopplerPhase - Calibrate the Doppler phase prior to TOF</LI> 
+<LI> CalibrateDopplerPhase - Calibrate the Doppler phase prior to TOF</LI>
 <LI> LoadAsRawDopplerTime - Save event time relative the Doppler</LI>
 <LI> FilterByTimeStart - Only include events after the start time</LI>
 <LI> FilterByTimeStop - Only include events before the stop time</LI>
@@ -66,8 +66,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-template <typename FD>
-class DLLExport LoadEMU : public API::IFileLoader<FD> {
+template <typename FD> class DLLExport LoadEMU : public API::IFileLoader<FD> {
 
 public:
   // description
@@ -97,8 +96,7 @@ private:
 
   // load parameters from input file
   void loadParameters(const std::string &hdfFile, API::LogManager &logm);
-  void loadEnvironParameters(const std::string &hdfFile, 
-	                         API::LogManager &logm);
+  void loadEnvironParameters(const std::string &hdfFile, API::LogManager &logm);
 
   // load the instrument definition and instrument parameters
   void loadInstrument();
@@ -115,9 +113,9 @@ private:
 
   // calibrate doppler phase
   void calibrateDopplerPhase(std::vector<size_t> &eventCounts,
-	                         std::vector<EventVector_pt> &eventVectors);
+                             std::vector<EventVector_pt> &eventVectors);
   void dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors,
-	                    double& minTOF, double& maxTOF);
+                        double &minTOF, double &maxTOF);
 
   // prepare event storage
   void prepareEventStorage(ANSTO::ProgressTracker &prog,
@@ -130,7 +128,7 @@ private:
   // binary file access
   template <class Processor>
   static void loadEvents(API::Progress &prog, const char *progMsg,
-	                     const std::string &eventFile,
+                         const std::string &eventFile,
                          Processor &eventProcessor);
 
   // shared member variables

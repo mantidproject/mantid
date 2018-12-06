@@ -244,7 +244,7 @@ public:
   void addPulsetime(const double seconds) override;
 
   void maskTof(const double tofMin, const double tofMax) override;
-  void maskCondition(const std::vector<bool> & mask) override;
+  void maskCondition(const std::vector<bool> &mask) override;
 
   void getTofs(std::vector<double> &tofs) const override;
   double getTofMin() const override;
@@ -458,7 +458,7 @@ private:
                                    const double tofMax);
   template <class T>
   static std::size_t maskConditionHelper(std::vector<T> &events,
-								         const std::vector<bool> &mask);
+                                         const std::vector<bool> &mask);
 
   template <class T>
   static void getTofsHelper(const std::vector<T> &events,

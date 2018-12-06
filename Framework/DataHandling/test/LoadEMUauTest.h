@@ -72,8 +72,8 @@ public:
 
     // test some data properties
     auto logpm = [&run](std::string tag) {
-      return dynamic_cast<TimeSeriesProperty<double> *>(
-		  run.getProperty(tag))->firstValue();
+      return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))
+          ->firstValue();
     };
     TS_ASSERT_DELTA(logpm("DopplerFrequency"), 9.974, 1.0e-3);
     TS_ASSERT_DELTA(logpm("DopplerAmplitude"), 0.075, 1.0e-4);
