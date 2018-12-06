@@ -19,9 +19,9 @@
 #include "MantidEVWorker.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include <exception>
 #include <string>
 
@@ -203,11 +203,12 @@ bool MantidEVWorker::loadAndConvertToMD(
       } else if (corelli) {
         const auto &ADS = AnalysisDataService::Instance();
         Mantid::API::MatrixWorkspace_sptr ev_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
         double phi = 0;
         for (int i = 1; i < 7; i++) {
           std::string axisName = "BL9:Mot:Sample:Axis" + std::to_string(i);
-          phi += ev_ws->run().getLogAsSingleValue(axisName, Mantid::Kernel::Math::TimeAveragedMean);
+          phi += ev_ws->run().getLogAsSingleValue(
+              axisName, Mantid::Kernel::Math::TimeAveragedMean);
         }
         ev_ws->mutableRun().mutableGoniometer().setRotationAngle(0, phi);
       }
@@ -378,7 +379,8 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
                                const std::string &md_ws_name,
                                const std::string &peaks_ws_name, double max_abc,
                                size_t num_to_find, double min_intensity,
-                               double minQPeaks, double maxQPeaks, const std::string &file_name) {
+                               double minQPeaks, double maxQPeaks,
+                               const std::string &file_name) {
   try {
     // Estimate a lower bound on the distance between
     // based on the maximum real space cell edge
@@ -397,8 +399,7 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
         IAlgorithm_sptr mon_alg =
             AlgorithmManager::Instance().create("LoadNexusMonitors");
         mon_alg->setProperty("Filename", file_name);
-        mon_alg->setProperty("OutputWorkspace",
-                             ev_ws_name + "__monitors");
+        mon_alg->setProperty("OutputWorkspace", ev_ws_name + "__monitors");
         mon_alg->execute();
 
         Mantid::API::MatrixWorkspace_sptr mon_ws =
@@ -414,15 +415,15 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
         Mantid::API::MatrixWorkspace_sptr int_ws =
             ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
         monitor_count = int_ws->y(0)[0];
-        std::cout << "Beam monitor counts used for scaling = " << monitor_count
+        g_log.notice() << "Beam monitor counts used for scaling = " << monitor_count
                   << "\n";
-       } catch (...) {
+      } catch (...) {
         Mantid::API::MatrixWorkspace_sptr ev_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
         monitor_count = ev_ws->run().getProtonCharge() * 1000.0;
-          std::cout << "Beam proton charge used for scaling = " << monitor_count
-                    << "\n";
-       }
+        g_log.notice() << "Beam proton charge used for scaling = " << monitor_count
+                  << "\n";
+      }
 
       IPeaksWorkspace_sptr peaks_ws =
           ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);

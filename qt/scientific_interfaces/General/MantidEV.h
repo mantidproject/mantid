@@ -71,7 +71,8 @@ public:
   RunFindPeaks(MantidEVWorker *worker, const std::string &ev_ws_name,
                const std::string &md_ws_name, const std::string &peaks_ws_name,
                double max_abc, size_t num_to_find, double min_intensity,
-               double minQPeaks, double maxQPeaks, const std::string &file_name);
+               double minQPeaks, double maxQPeaks,
+               const std::string &file_name);
 
   /// Calls worker->findPeaks from a separate thread
   void run() override;

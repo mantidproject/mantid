@@ -40,6 +40,7 @@ Improvements
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 - SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
 - :ref:`IntegratePeaksUsingClusters <algm-IntegratePeaksUsingClusters>` will now treat NaN's as background.
+- SCD Event Data Reduction Diffraction Interface now adds goniometer for CORELLI and used proton charge as monitor count if no monitors are in input file.
 
 Bugfixes
 ########
