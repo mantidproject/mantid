@@ -309,6 +309,10 @@ class TableIndexModel(object):
                 self.options_column_model.get_options_string()]
 
     def _convert_sample_shape_to_string(self, shape):
+        if isinstance(shape, str):
+            # TODO temporary fix to shape already being a str
+            # find out where this is being converted as we are trying to convert twice
+            return shape
         if shape:
             return SampleShape.to_string(shape)
         else:
