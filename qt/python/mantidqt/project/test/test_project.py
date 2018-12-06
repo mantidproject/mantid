@@ -12,7 +12,6 @@ import unittest
 import sys
 import tempfile
 import os
-from time import sleep
 
 from qtpy.QtWidgets import QMessageBox
 
@@ -27,28 +26,28 @@ else:
 
 
 class ProjectTest(unittest.TestCase):
-    def setUp(self):
-        self.project = Project()
-
     def tearDown(self):
         ADS.clear()
 
     def test_save_calls_save_as_when_last_location_is_not_none(self):
-        self.project.save_as = mock.MagicMock()
-        self.project.save()
-        self.assertEqual(self.project.save_as.call_count, 1)
+        project = Project()
+        project.save_as = mock.MagicMock()
+        project.save()
+        self.assertEqual(project.save_as.call_count, 1)
 
     def test_save_does_not_call_save_as_when_last_location_is_not_none(self):
-        self.project.save_as = mock.MagicMock()
-        self.project.last_project_location = "1"
-        self.assertEqual(self.project.save_as.call_count, 0)
+        project = Project()
+        project.save_as = mock.MagicMock()
+        project.last_project_location = "1"
+        self.assertEqual(project.save_as.call_count, 0)
 
     def test_save_saves_project_successfully(self):
+        project = Project()
         working_directory = tempfile.mkdtemp()
-        self.project.last_project_location = working_directory
+        project.last_project_location = working_directory
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
-        self.project.save()
+        project.save()
 
         self.assertTrue(os.path.isdir(working_directory))
         file_list = os.listdir(working_directory)
@@ -56,97 +55,87 @@ class ProjectTest(unittest.TestCase):
         self.assertTrue("ws1.nxs" in file_list)
 
     def test_save_as_saves_project_successfully(self):
+        project = Project()
         working_directory = tempfile.mkdtemp()
-        self.project._get_directory_finder = mock.MagicMock(return_value=working_directory)
+        project._get_directory_finder = mock.MagicMock(return_value=working_directory)
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
-        self.project.save_as()
+        project.save_as()
 
-        self.assertEqual(self.project._get_directory_finder.call_count, 1)
+        self.assertEqual(project._get_directory_finder.call_count, 1)
         self.assertTrue(os.path.isdir(working_directory))
         file_list = os.listdir(working_directory)
         self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
         self.assertTrue("ws1.nxs" in file_list)
 
     def test_load_calls_loads_successfully(self):
+        project = Project()
         working_directory = tempfile.mkdtemp()
-        self.project._get_directory_finder = mock.MagicMock(return_value=working_directory)
+        project._get_directory_finder = mock.MagicMock(return_value=working_directory)
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project.save_as()
+        project.save_as()
 
         ADS.clear()
 
-        self.project.load()
-        self.assertEqual(self.project._get_directory_finder.call_count, 2)
+        project.load()
+        self.assertEqual(project._get_directory_finder.call_count, 2)
         self.assertEqual(["ws1"], ADS.getObjectNames())
 
     def test_offer_save_does_nothing_if_saved_is_true(self):
-        self.project.saved = True
-
-        self.assertEqual(self.project.offer_save(None), None)
+        project = Project()
+        self.assertEqual(project.offer_save(None), None)
 
     def test_offer_save_does_something_if_saved_is_false(self):
-        self.project._offer_save_message_box = mock.MagicMock(return_value=QMessageBox.Yes)
-        self.project.save = mock.MagicMock()
-        self.project.saved = False
+        project = Project()
+        project._offer_save_message_box = mock.MagicMock(return_value=QMessageBox.Yes)
+        project.save = mock.MagicMock()
 
-        self.assertEqual(self.project.offer_save(None), False)
-        self.assertEqual(self.project.save.call_count, 1)
-        self.assertEqual(self.project._offer_save_message_box.call_count, 1)
-
-    def test_adding_to_ads_sets_saved_to_false(self):
-        self.project.saved = True
+        # Add something to the ads so __saved is set to false
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
-        # It takes some time for the notification to move sometimes so wait for it
-        sleep(0.05)
+        self.assertEqual(project.offer_save(None), False)
+        self.assertEqual(project.save.call_count, 1)
+        self.assertEqual(project._offer_save_message_box.call_count, 1)
 
-        self.assertTrue(not self.project.saved)
+    def test_adding_to_ads_sets_saved_to_false(self):
+        project = Project()
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+
+        self.assertTrue(not project.saved)
 
     def test_removing_from_ads_sets_saved_to_false(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project.saved = True
-        DeleteWorkspace("ws1")
+        project = Project()
+        ADS.remove("ws1")
 
-        # It takes some time for the notification to move sometimes so wait for it
-        sleep(0.05)
-
-        self.assertTrue(not self.project.saved)
+        self.assertTrue(not project.saved)
 
     def test_grouping_in_ads_sets_saved_to_false(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
         CreateSampleWorkspace(OutputWorkspace="ws2")
 
-        self.project.saved = True
+        project = Project()
         GroupWorkspaces(InputWorkspaces="ws1,ws2", OutputWorkspace="NewGroup")
 
-        # It takes some time for the notification to move sometimes so wait for it
-        sleep(0.05)
-
-        self.assertTrue(not self.project.saved)
+        self.assertTrue(not project.saved)
 
     def test_renaming_in_ads_sets_saved_to_false(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        self.project.saved = True
+
+        project = Project()
         RenameWorkspace(InputWorkspace="ws1", OutputWorkspace="ws2")
 
-        # It takes some time for the notification to move sometimes so wait for it
-        sleep(0.05)
-
-        self.assertTrue(not self.project.saved)
+        self.assertTrue(not project.saved)
 
     def test_ungrouping_in_ads_sets_saved_to_false(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
         CreateSampleWorkspace(OutputWorkspace="ws2")
         GroupWorkspaces(InputWorkspaces="ws1,ws2", OutputWorkspace="NewGroup")
 
-        self.project.saved = True
+        project = Project()
         UnGroupWorkspace(InputWorkspace="NewGroup")
 
-        # It takes some time for the notification to move sometimes so wait for it
-        sleep(0.05)
-
-        self.assertTrue(not self.project.saved)
+        self.assertTrue(not project.saved)
 
     def test_group_updated_in_ads_sets_saved_to_false(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
@@ -154,26 +143,28 @@ class ProjectTest(unittest.TestCase):
         GroupWorkspaces(InputWorkspaces="ws1,ws2", OutputWorkspace="NewGroup")
         CreateSampleWorkspace(OutputWorkspace="ws3")
 
-        self.project.saved = True
+        project = Project()
         ADS.addToGroup("NewGroup", "ws3")
 
-        # It takes some time for the notification to move sometimes so wait for it
-        sleep(0.05)
-
-        self.assertTrue(not self.project.saved)
+        self.assertTrue(not project.saved)
 
     def test_removing_unused_workspaces_operates_as_expected_from_save(self):
+        project = Project()
         working_directory = tempfile.mkdtemp()
-        self.project.last_project_location = working_directory
+        project.last_project_location = working_directory
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
-        self.project.save()
+        project.save()
         ADS.clear()
         CreateSampleWorkspace(OutputWorkspace="ws2")
-        self.project.save()
+        project.save()
 
         self.assertTrue(os.path.isdir(working_directory))
         file_list = os.listdir(working_directory)
         self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
         self.assertTrue("ws2.nxs" in file_list)
         self.assertTrue("ws1.nxs" not in file_list)
+
+
+if __name__ == "__main__":
+    unittest.main()

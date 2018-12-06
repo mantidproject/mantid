@@ -64,3 +64,7 @@ class ProjectReaderTest(unittest.TestCase):
         project_reader.read_project(working_directory)
         self.assertEqual(["ws1"], project_reader.workspace_names)
         self.assertEqual({}, project_reader.interfaces_dicts)
+
+
+if __name__ == "__main__":
+    unittest.main()

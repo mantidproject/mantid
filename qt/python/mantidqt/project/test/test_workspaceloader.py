@@ -36,3 +36,7 @@ class WorkspaceLoaderTest(unittest.TestCase):
         workspace_loader = workspaceloader.WorkspaceLoader()
         workspace_loader.load_workspaces(self.working_directory, self.project_ext)
         self.assertEqual(ADS.getObjectNames(), [self.ws1_name])
+
+
+if __name__ == "__main__":
+    unittest.main()

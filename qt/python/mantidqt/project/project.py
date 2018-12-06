@@ -21,8 +21,8 @@ from mantidqt.project.projectsaver import ProjectSaver
 class Project(AnalysisDataServiceObserver):
     def __init__(self):
         super(Project, self).__init__()
-        # Has the project been saved
-        self.saved = True
+        # Has the project been saved, to Access this call .saved
+        self.__saved = True
 
         # Last save locations
         self.last_project_location = None
@@ -42,7 +42,7 @@ class Project(AnalysisDataServiceObserver):
             project_saver = ProjectSaver(self.project_file_ext)
             project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
                                        interfaces_to_save=None)
-            self.saved = True
+            self.__saved = True
 
     def save_as(self):
         directory = self._get_directory_finder(accept_mode=QFileDialog.AcceptSave)
@@ -56,7 +56,7 @@ class Project(AnalysisDataServiceObserver):
         workspaces_to_save = AnalysisDataService.getObjectNames()
         project_saver = ProjectSaver(self.project_file_ext)
         project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save, interfaces_to_save=None)
-        self.saved = True
+        self.__saved = True
 
     @staticmethod
     def _get_directory_finder(accept_mode):
@@ -90,7 +90,7 @@ class Project(AnalysisDataServiceObserver):
         :return: Bool; Returns false if no save needed/save complete. Returns True if need to cancel closing.
         """
         # If the current project is saved then return and don't do anything
-        if self.saved:
+        if self.__saved:
             return
 
         result = self._offer_save_message_box(parent)
@@ -109,12 +109,15 @@ class Project(AnalysisDataServiceObserver):
                                     QMessageBox.Yes)
 
     def modified_project(self):
-        if not self.saved:
-            return
-        self.saved = False
+        self.__saved = False
 
     def anyChangeHandle(self):
         self.modified_project()
+
+    def __get_saved(self):
+        return self.__saved
+
+    saved = property(__get_saved)
 
     @staticmethod
     def _clear_unused_workspaces(path):

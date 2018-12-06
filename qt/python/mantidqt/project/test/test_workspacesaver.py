@@ -78,3 +78,7 @@ class WorkspaceSaverTest(unittest.TestCase):
         ws = LoadMD(Filename=filename)
         ws_is_a_mdworkspace = isinstance(ws, IMDEventWorkspace) or isinstance(ws, MDHistoWorkspace)
         self.assertEqual(ws_is_a_mdworkspace, True)
+
+
+if __name__ == "__main__":
+    unittest.main()

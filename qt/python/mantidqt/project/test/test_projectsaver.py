@@ -35,13 +35,17 @@ class ProjectSaverTest(unittest.TestCase):
         ADS.addOrReplace(ws1_name, CreateSampleWorkspace(OutputWorkspace=ws1_name))
         project_saver = projectsaver.ProjectSaver(project_file_ext)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-        saved_file = "{\"interfaces\": {}, \"workspaces\": [\"ws1\"]}"
+
+        workspaces_string = "\"workspaces\": [\"ws1\"]"
+        interfaces_string = "\"interfaces\": {}"
 
         project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
 
         # Check project file is saved correctly
         f = open(file_name, "r")
-        self.assertEqual(f.read(), saved_file)
+        file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(interfaces_string in file_string)
 
         # Check workspace is saved
         list_of_files = os.listdir(working_directory)
@@ -62,14 +66,17 @@ class ProjectSaverTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace=ws5_name)
         project_saver = projectsaver.ProjectSaver(project_file_ext)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-        saved_file = "{\"interfaces\": {}, \"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\", \"ws5\"]}"
 
+        workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\", \"ws5\"]"
+        interfaces_string = "\"interfaces\": {}"
         project_saver.save_project(workspace_to_save=[ws1_name, ws2_name, ws3_name, ws4_name, ws5_name],
                                    directory=working_directory)
 
         # Check project file is saved correctly
         f = open(file_name, "r")
-        self.assertEqual(f.read(), saved_file)
+        file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(interfaces_string in file_string)
 
         # Check workspace is saved
         list_of_files = os.listdir(working_directory)
@@ -90,13 +97,15 @@ class ProjectSaverTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace=ws3_name)
         project_saver = projectsaver.ProjectSaver(project_file_ext)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-        saved_file = "{\"interfaces\": {}, \"workspaces\": [\"ws1\"]}"
-
+        workspaces_string = "\"workspaces\": [\"ws1\"]"
+        interfaces_string = "\"interfaces\": {}"
         project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
 
         # Check project file is saved correctly
         f = open(file_name, "r")
-        self.assertEqual(f.read(), saved_file)
+        file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(interfaces_string in file_string)
 
         # Check workspace is saved
         list_of_files = os.listdir(working_directory)
@@ -128,39 +137,54 @@ class ProjectWriterTest(unittest.TestCase):
         if os.path.isdir(working_directory):
             rmtree(working_directory)
 
-    def test_write_out_on_just_dicts(self):
+    def test_write_out_on_just_interfaces(self):
         workspace_list = []
-        small_dict = {"interface1": {"value1": 2, "value2": 3}, "interface2": {"value3": 4, "value4": 5}}
+        small_dict = {"interface1": [2, 3]}
         project_writer = projectsaver.ProjectWriter(small_dict, working_directory, workspace_list, project_file_ext)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-        saved_file = "{\"interfaces\": {\"interface1\": {\"value2\": 3, \"value1\": 2}, \"interface2\": {\"value4\"" \
-                     ": 5, \"value3\": 4}}, \"workspaces\": []}"
+
+        workspaces_string = "\"workspaces\": []"
+        interfaces_string = "\"interfaces\": {\"interface1\": [2, 3]}"
 
         project_writer.write_out()
 
         f = open(file_name, "r")
-        self.assertEqual(f.read(), saved_file)
+        file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(interfaces_string in file_string)
 
     def test_write_out_on_just_workspaces(self):
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
         small_dict = {}
         project_writer = projectsaver.ProjectWriter(small_dict, working_directory, workspace_list, project_file_ext)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-        saved_file = "{\"interfaces\": {}, \"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]}"
+
+        workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
+        interfaces_string = "\"interfaces\": {}"
 
         project_writer.write_out()
 
         f = open(file_name, "r")
-        self.assertEqual(f.read(), saved_file)
+        file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(interfaces_string in file_string)
 
     def test_write_out_on_both_workspaces_and_dicts(self):
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
-        small_dict = {"interface1": {"value1": 2, "value2": 3}, "interface2": {"value3": 4, "value4": 5}}
+        small_dict = {"interface1": [2, 3]}
         project_writer = projectsaver.ProjectWriter(small_dict, working_directory, workspace_list, project_file_ext)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-        saved_file = "{\"interfaces\": {\"interface1\": {\"value2\": 3, \"value1\": 2}, \"interface2\": {\"value4\":" \
-                     " 5, \"value3\": 4}}, \"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]}"
+
+        workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
+        interfaces_string = "\"interfaces\": {\"interface1\": [2, 3]}"
+
         project_writer.write_out()
 
         f = open(file_name, "r")
-        self.assertEqual(f.read(), saved_file)
+        file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(interfaces_string in file_string)
+
+
+if __name__ == "__main__":
+    unittest.main()
