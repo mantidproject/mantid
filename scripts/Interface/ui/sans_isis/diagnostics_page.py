@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod
 
 from PyQt4 import QtGui, QtCore
 from six import with_metaclass
-import ui_diagnostics_page
+from . import ui_diagnostics_page
 from sans.gui_logic.gui_common import (load_file, GENERIC_SETTINGS)
 
 try:

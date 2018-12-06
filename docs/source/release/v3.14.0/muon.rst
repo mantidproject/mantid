@@ -18,6 +18,7 @@ Bugfixes
 ########
 - Results table now includes all logs that are common to all of the loaded files.
 - When turning TF Asymmetry mode off it no longer resets the global options.
+- The x limits on the settings tab will now correct themselves if bad values are entered. 
 
 Algorithms
 ----------

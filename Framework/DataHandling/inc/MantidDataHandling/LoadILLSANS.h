@@ -91,6 +91,10 @@ private:
 
   void setFinalProperties(const std::string &filename);
   void setPixelSize();
+  std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &,
+                                             const std::string &,
+                                             const NeXus::NXInt &,
+                                             const NeXus::NXFloat &) const;
 };
 
 } // namespace DataHandling

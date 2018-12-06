@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
-    : API::MantidWidget(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
+    : IIndirectFitPlotView(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
