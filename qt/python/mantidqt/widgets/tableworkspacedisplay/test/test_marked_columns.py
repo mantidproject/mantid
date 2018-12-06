@@ -191,7 +191,7 @@ class MarkedColumnsTest(unittest.TestCase):
         self.assertEqual(1, len(mc.as_y))
         self.assertEqual(1, len(mc.as_y_err))
 
-        mc.remove_column(4)
+        mc.remove(4)
         # changing the column to NONE should have removed it from X, Y and YErr
         self.assertEqual(0, len(mc.as_x))
         self.assertEqual(0, len(mc.as_y))
@@ -208,17 +208,17 @@ class MarkedColumnsTest(unittest.TestCase):
         self.assertEqual(1, len(mc.as_y))
         self.assertEqual(1, len(mc.as_y_err))
 
-        mc.remove_column(4)
+        mc.remove(4)
         self.assertEqual(0, len(mc.as_y))
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(1, len(mc.as_x))
 
-        mc.remove_column(3)
+        mc.remove(3)
         self.assertEqual(0, len(mc.as_x))
         self.assertEqual(0, len(mc.as_y))
         self.assertEqual(1, len(mc.as_y_err))
 
-        mc.remove_column(2)
+        mc.remove(2)
         self.assertEqual(0, len(mc.as_x))
         self.assertEqual(0, len(mc.as_y))
         self.assertEqual(0, len(mc.as_y_err))

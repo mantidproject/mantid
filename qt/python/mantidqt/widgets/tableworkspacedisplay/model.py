@@ -12,7 +12,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
 from mantid.py3compat import Enum
+#  TODO remove transient mock dependency -> it is not available on Ubuntu fresh install
+# take MWD approach
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockWorkspace
+from mantidqt.widgets.tableworkspacedisplay.marked_columns import MarkedColumns
 
 
 class TableDisplayColumnType(Enum):
@@ -33,19 +36,14 @@ class TableWorkspaceDisplayModel:
         self.ws = ws
         self.ws_num_rows = self.ws.rowCount()
         self.ws_num_cols = self.ws.columnCount()
-        self.column_types = [TableDisplayColumnType.NUMERIC] * self.ws_num_cols
-        self.set_column_type(0, TableDisplayColumnType.TEST)
+        self.marked_columns = MarkedColumns()
+        self._original_column_headers = self.get_column_headers()
 
-        #     TODO figure out a way to store column TYPE
-        # set to Numeric by default
-        # How can the type be set
+    def original_column_headers(self):
+        return self._original_column_headers[:]
 
-    def set_column_type(self, index, type):
-        # find a way to check if type is a TableDisplayColumnType?
-        self.column_types[index] = type
-
-    def get_column_type(self, index):
-        return self.column_types[index]
+    def build_current_labels(self):
+        return self.marked_columns.build_labels()
 
     def get_name(self):
         return self.ws.name()

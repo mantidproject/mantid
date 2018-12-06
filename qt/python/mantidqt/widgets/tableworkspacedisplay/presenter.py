@@ -17,7 +17,6 @@ from qtpy.QtWidgets import QTableWidgetItem
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
 from mantidqt.widgets.common.table_copying import copy_cells, show_mouse_toast, show_no_selection_to_copy_toast
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
-from mantidqt.widgets.tableworkspacedisplay.marked_columns import MarkedColumns
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
@@ -49,9 +48,6 @@ class TableWorkspaceDisplay(object):
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
 
-        self.marked_columns = MarkedColumns()
-        self.original_column_headers = self.model.get_column_headers()
-        # self.column_states = [TableColumn() for i in range(len(self.original_column_headers))]
         self.update_column_headers()
         self.load_data(self.view)
 
@@ -63,11 +59,11 @@ class TableWorkspaceDisplay(object):
         :return:
         """
         # deep copy the original headers so that they are not changed by the appending of the label
-        column_headers = self.original_column_headers[:]
+        column_headers = self.model.original_column_headers()
         num_headers = len(column_headers)
         self.view.setColumnCount(num_headers)
 
-        extra_labels = self.marked_columns.build_labels()
+        extra_labels = self.model.build_current_labels()
         if len(extra_labels) > 0:
             for index, label in extra_labels:
                 column_headers[index] += str(label)
@@ -165,10 +161,10 @@ class TableWorkspaceDisplay(object):
         self.update_column_headers()
 
     def action_set_as_x(self):
-        self._action_set_as(self.marked_columns.add_x)
+        self._action_set_as(self.model.marked_columns.add_x)
 
     def action_set_as_y(self):
-        self._action_set_as(self.marked_columns.add_y)
+        self._action_set_as(self.model.marked_columns.add_y)
 
     def action_set_as_y_err(self, error_for_column, label_index):
         """
@@ -189,11 +185,11 @@ class TableWorkspaceDisplay(object):
             show_mouse_toast(e.message)
             return
 
-        self.marked_columns.add_y_err(err_column)
+        self.model.marked_columns.add_y_err(err_column)
         self.update_column_headers()
 
     def action_set_as_none(self):
-        self._action_set_as(self.marked_columns.remove_column)
+        self._action_set_as(self.model.marked_columns.remove)
 
     def action_sort_ascending(self, order):
         try:
@@ -204,18 +200,19 @@ class TableWorkspaceDisplay(object):
         selected_column = selected_columns[0]
         self.view.sortByColumn(selected_column, order)
 
-    def action_plot(self, type):
+    def action_plot(self, plot_type):
         try:
             selected_columns = self._get_selected_columns()
         except ValueError:
             return
 
         # TODO check if the selected column for plotting is YERR and NOPE out if so
-        # better check: if the selected columns IS NOT Y then nope out
+        # better check: if the selected columns ARE NOT Y then nope out
         # currently it silently ignores it -> maybe we want to do that so people can spam PLOT EVERYTHING
         # if -> a column in the selection is X or YErr ABORT MISSION with a toast :cheer:
-        # it should be possible to reuse the check below as it is similar (is it really tho -> only part of it is similar)
-        x_cols = list(set(selected_columns).intersection(self.marked_columns.as_x))
+        # it should be possible to reuse the check below as it is similar
+        # (is it really tho -> only part of it is similar)
+        x_cols = list(set(selected_columns).intersection(self.model.marked_columns.as_x))
         num_x_cols = len(x_cols)
         # if there is more than 1 column marked as X in the selection
         # -> show toast to the user and do nothing
@@ -229,11 +226,11 @@ class TableWorkspaceDisplay(object):
         else:
             # No X column present in the current selection model
             # -> Use the first column marked as X (if present)
-            if len(self.marked_columns.as_x) == 0:
+            if len(self.model.marked_columns.as_x) == 0:
                 # If no columns are marked as X show user message and exit
                 show_mouse_toast(self.NO_COLUMN_MARKED_AS_X)
                 return
-            selected_x = self.marked_columns.as_x[0]
+            selected_x = self.model.marked_columns.as_x[0]
 
         try:
             # Remove the X column from the selected columns, this is
@@ -246,28 +243,39 @@ class TableWorkspaceDisplay(object):
             show_mouse_toast("Cannot plot column against itself.")
             return
 
-        self._do_plot(selected_columns, selected_x, type)
+        self._do_plot(selected_columns, selected_x, plot_type)
 
-    def _do_plot(self, selected_columns, selected_x, type):
+    def _do_plot(self, selected_columns, selected_x, plot_type):
 
-        if type == PlotType.LINEAR_WITH_ERR:
-            yerr = self.marked_columns.find_yerr(selected_columns)  # type: dict[(int, int)]
+        if plot_type == PlotType.LINEAR_WITH_ERR:
+            yerr = self.model.marked_columns.find_yerr(selected_columns)
             if len(yerr) != len(selected_columns):
                 show_mouse_toast("There is no associated YErr for each selected Y column.")
                 return
         x = self.model.get_column(selected_x)
+
         fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
         ax.set_xlabel(self.model.get_column_header(selected_x))
-        plot_func = self._get_plot_function_from_type(ax, type)
+
+        plot_func = self._get_plot_function_from_type(ax, plot_type)
+        kwargs = {}
         for column in selected_columns:
-            y = self.model.get_column(column)
-            column_label = self.model.get_column_header(column)
-            if type == PlotType.LINEAR_WITH_ERR:
+            if plot_type == PlotType.LINEAR_WITH_ERR:
                 yerr_column = yerr[column]
                 yerr_column_data = self.model.get_column(yerr_column)
-                plot_func(x, y, label='Column {}'.format(column_label), yerr=yerr_column_data)
-            else:
-                plot_func(x, y, label='Column {}'.format(column_label))
+                kwargs["yerr"] = yerr_column_data
+
+            y = self.model.get_column(column)
+            column_label = self.model.get_column_header(column)
+            try:
+                plot_func(x, y, label='Column {}'.format(column_label), **kwargs)
+            except ValueError as e:
+                #     TODO log error?
+                self.view.show_warning(
+                    "One or more of the columns being plotted contain invalid data for MatPlotLib." \
+                    "\n\nError message:\n{}".format(e), "Invalid data - Mantid Workbench")
+                return
+
             ax.set_ylabel(column_label)
         ax.legend()
         fig.show()
@@ -286,4 +294,4 @@ class TableWorkspaceDisplay(object):
         return plot_func
 
     def get_columns_marked_as_y(self):
-        return self.marked_columns.as_y
+        return self.model.marked_columns.as_y[:]

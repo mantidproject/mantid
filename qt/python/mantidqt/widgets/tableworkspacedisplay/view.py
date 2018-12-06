@@ -187,3 +187,6 @@ class TableWorkspaceDisplayView(QTableWidget):
         """
         reply = QMessageBox.question(self, title, message, QMessageBox.Yes, QMessageBox.No)
         return True if reply == QMessageBox.Yes else False
+
+    def show_warning(self, message, title="Mantid Workbench"):
+        QMessageBox.warning(self, title, message)

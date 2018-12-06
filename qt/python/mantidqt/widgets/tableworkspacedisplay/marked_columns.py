@@ -62,7 +62,7 @@ class MarkedColumns:
             err_column.label_index -= (len_before_remove - len_after_remove)
         self.as_y_err.append(err_column)
 
-    def remove_column(self, col_index):
+    def remove(self, col_index):
         self._remove(col_index, [self.as_x, self.as_y, self.as_y_err])
 
     def _remove_associated_yerr_columns(self, col_index):
