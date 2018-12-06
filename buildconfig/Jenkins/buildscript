@@ -12,6 +12,19 @@
 SCRIPT_DIR=$(dirname "$0")
 
 ###############################################################################
+# Terminate existing Xvfb sessions
+###############################################################################
+if [[ -n ${CLEAN_XVFB} && "${CLEAN_XVFB}" == true ]] && [ $(command -v xvfb-run) ]; then
+  echo "Terminating existing Xvfb sessions"
+
+  # Kill Xvfb processes
+  killall Xvfb || true
+
+  # Remove Xvfb X server lock files
+  rm -f /tmp/.X*-lock
+fi
+
+###############################################################################
 # System discovery
 ###############################################################################
 USE_CORE_DUMPS=true
