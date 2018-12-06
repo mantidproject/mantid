@@ -21,7 +21,9 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include <exception>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -173,9 +175,12 @@ bool MantidEVWorker::loadAndConvertToMD(
     IAlgorithm_sptr alg;
     if (load_data) {
       bool topaz = false;
+      bool corelli = false;
       // Limits and filtering only done for topaz
       if (file_name.find("TOPAZ") != std::string::npos)
         topaz = true;
+      if (file_name.find("CORELLI") != std::string::npos)
+        corelli = true;
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
       alg->setProperty("Filename", file_name);
       alg->setProperty("OutputWorkspace", ev_ws_name);
@@ -183,8 +188,7 @@ bool MantidEVWorker::loadAndConvertToMD(
         alg->setProperty("FilterByTofMin", 500.0);
         alg->setProperty("FilterByTofMax", 16666.0);
       }
-      alg->setProperty("LoadMonitors", true);
-
+      alg->setProperty("LoadMonitors", false);
       if (!alg->execute())
         return false;
 
@@ -196,6 +200,16 @@ bool MantidEVWorker::loadAndConvertToMD(
 
         if (!alg->execute())
           return false;
+      } else if (corelli) {
+        const auto &ADS = AnalysisDataService::Instance();
+        Mantid::API::MatrixWorkspace_sptr ev_ws =
+          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+        double phi = 0;
+        for (int i = 1; i < 7; i++) {
+          std::string axisName = "BL9:Mot:Sample:Axis" + std::to_string(i);
+          phi += ev_ws->run().getLogAsSingleValue(axisName, Mantid::Kernel::Math::TimeAveragedMean);
+        }
+        ev_ws->mutableRun().mutableGoniometer().setRotationAngle(0, phi);
       }
 
       if (load_det_cal) {
@@ -357,13 +371,14 @@ bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
  *                        the average intensity will be considered.
  *  @param minQPeaks   Filter with ModQ min
  *  @param maxQPeaks  Filter with ModQmax
+ *  @param file_name  Filename for monitors
  *  @return true if FindPeaksMD completed successfully.
  */
 bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
                                const std::string &md_ws_name,
                                const std::string &peaks_ws_name, double max_abc,
                                size_t num_to_find, double min_intensity,
-                               double minQPeaks, double maxQPeaks) {
+                               double minQPeaks, double maxQPeaks, const std::string &file_name) {
   try {
     // Estimate a lower bound on the distance between
     // based on the maximum real space cell edge
@@ -377,21 +392,37 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
     const auto &ADS = AnalysisDataService::Instance();
 
     if (alg->execute()) {
-      Mantid::API::MatrixWorkspace_sptr mon_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
-      IAlgorithm_sptr int_alg =
-          AlgorithmManager::Instance().create("Integration");
-      int_alg->setProperty("InputWorkspace", mon_ws);
-      int_alg->setProperty("RangeLower", 1000.0);
-      int_alg->setProperty("RangeUpper", 12500.0);
-      int_alg->setProperty("OutputWorkspace",
-                           ev_ws_name + "_integrated_monitor");
-      int_alg->execute();
-      Mantid::API::MatrixWorkspace_sptr int_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
-      double monitor_count = int_ws->y(0)[0];
-      std::cout << "Beam monitor counts used for scaling = " << monitor_count
-                << "\n";
+      double monitor_count = 0;
+      try {
+        IAlgorithm_sptr mon_alg =
+            AlgorithmManager::Instance().create("LoadNexusMonitors");
+        mon_alg->setProperty("Filename", file_name);
+        mon_alg->setProperty("OutputWorkspace",
+                             ev_ws_name + "__monitors");
+        mon_alg->execute();
+
+        Mantid::API::MatrixWorkspace_sptr mon_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
+        IAlgorithm_sptr int_alg =
+            AlgorithmManager::Instance().create("Integration");
+        int_alg->setProperty("InputWorkspace", mon_ws);
+        int_alg->setProperty("RangeLower", 1000.0);
+        int_alg->setProperty("RangeUpper", 12500.0);
+        int_alg->setProperty("OutputWorkspace",
+                             ev_ws_name + "_integrated_monitor");
+        int_alg->execute();
+        Mantid::API::MatrixWorkspace_sptr int_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
+        monitor_count = int_ws->y(0)[0];
+        std::cout << "Beam monitor counts used for scaling = " << monitor_count
+                  << "\n";
+       } catch (...) {
+        Mantid::API::MatrixWorkspace_sptr ev_ws =
+          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+        monitor_count = ev_ws->run().getProtonCharge() * 1000.0;
+          std::cout << "Beam proton charge used for scaling = " << monitor_count
+                    << "\n";
+       }
 
       IPeaksWorkspace_sptr peaks_ws =
           ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);

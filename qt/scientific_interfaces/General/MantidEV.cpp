@@ -57,10 +57,10 @@ RunFindPeaks::RunFindPeaks(MantidEVWorker *worker,
                            const std::string &md_ws_name,
                            const std::string &peaks_ws_name, double max_abc,
                            size_t num_to_find, double min_intensity,
-                           double minQPeaks, double maxQPeaks)
+                           double minQPeaks, double maxQPeaks, const std::string &file_name)
     : worker(worker), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name),
       peaks_ws_name(peaks_ws_name), max_abc(max_abc), num_to_find(num_to_find),
-      min_intensity(min_intensity), minQPeaks(minQPeaks), maxQPeaks(maxQPeaks) {
+      min_intensity(min_intensity), minQPeaks(minQPeaks), maxQPeaks(maxQPeaks), file_name(file_name) {
 }
 
 /**
@@ -68,7 +68,7 @@ RunFindPeaks::RunFindPeaks(MantidEVWorker *worker,
  */
 void RunFindPeaks::run() {
   worker->findPeaks(ev_ws_name, md_ws_name, peaks_ws_name, max_abc, num_to_find,
-                    min_intensity, minQPeaks, maxQPeaks);
+                    min_intensity, minQPeaks, maxQPeaks, file_name);
 }
 
 /**
@@ -715,9 +715,11 @@ void MantidEV::findPeaks_slot() {
 
     std::string ev_ws_name =
         m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+    std::string file_name =
+        m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
     RunFindPeaks *runner =
         new RunFindPeaks(worker, ev_ws_name, md_ws_name, peaks_ws_name, max_abc,
-                         num_to_find, min_intensity, minQPeaks, maxQPeaks);
+                         num_to_find, min_intensity, minQPeaks, maxQPeaks, file_name);
 
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
