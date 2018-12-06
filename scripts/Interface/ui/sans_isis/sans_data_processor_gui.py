@@ -295,7 +295,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.process_selected_button.clicked.connect(self._process_selected_clicked)
         self.process_all_button.clicked.connect(self._process_all_clicked)
 
-        self.load_botton.clicked.connect(self._load_clicked)
+        self.load_button.clicked.connect(self._load_clicked)
 
         self.help_button.clicked.connect(self._on_help_button_clicked)
 
@@ -536,7 +536,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.batch_button.setEnabled(False)
         self.user_file_button.setEnabled(False)
         self.manage_directories_button.setEnabled(False)
-        self.load_botton.setEnabled(False)
+        self.load_button.setEnabled(False)
 
     def enable_buttons(self):
         self.process_selected_button.setEnabled(True)
@@ -544,15 +544,17 @@ class SANSDataProcessorGui(QMainWindow,
         self.batch_button.setEnabled(True)
         self.user_file_button.setEnabled(True)
         self.manage_directories_button.setEnabled(True)
-        self.load_botton.setEnabled(True)
+        self.load_button.setEnabled(True)
 
     def disable_process_buttons(self):
         self.process_selected_button.setEnabled(False)
         self.process_all_button.setEnabled(False)
+        self.load_button.setEnabled(False)
 
     def enable_process_buttons(self):
         self.process_selected_button.setEnabled(True)
         self.process_all_button.setEnabled(True)
+        self.load_button.setEnabled(True)
 
     def display_message_box(self, title, message, details):
         msg = QMessageBox()
@@ -1186,24 +1188,6 @@ class SANSDataProcessorGui(QMainWindow,
     # ------------------------------------------------------------------------------------------------------------------
     # Scale Group
     # ------------------------------------------------------------------------------------------------------------------
-    '''@property
-    def sample_shape(self):
-        geometry_as_string = self.geometry_combo_box.currentText().encode('utf-8')
-        # Either the selection is something that can be converted to a SampleShape or we need to read from file
-        try:
-            return SampleShape.from_string(geometry_as_string)
-        except RuntimeError:
-            return None
-
-    @sample_shape.setter
-    def sample_shape(self, value):
-        if value is None:
-            # Set to the default
-            self.geometry_combo_box.setCurrentIndex(0)
-        else:
-            self.update_gui_combo_box(value=value, expected_type=SampleShape,
-                                      combo_box="geometry_combo_box")'''
-
     @property
     def absolute_scale(self):
         return self.get_simple_line_edit_field(line_edit="absolute_scale_line_edit",
@@ -2009,7 +1993,6 @@ class SANSDataProcessorGui(QMainWindow,
 
     def clear_table(self):
         self.data_processor_table.removeAllRows()
-        # self.enable_process_all()
 
     def clear_selection(self):
         self.data_processor_table.clearSelection()

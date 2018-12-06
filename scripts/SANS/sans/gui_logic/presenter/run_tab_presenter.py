@@ -566,7 +566,7 @@ class RunTabPresenter(object):
 
     def on_row_inserted(self, index, row):
         """
-
+        Insert a row at a selected point
         """
         row_table_index = TableIndexModel(*row)
         self._table_model.add_table_entry(index, row_table_index)
@@ -1111,13 +1111,13 @@ class RunTabPresenter(object):
         if not instrument:
             instrument = self._view.instrument
 
-        instrument_string = get_string_for_gui_from_instrument(instrument)
-        ConfigService["default.instrument"] = instrument_string
-
         if instrument == SANSInstrument.NoInstrument:
             self._view.disable_process_buttons()
         else:
+            instrument_string = get_string_for_gui_from_instrument(instrument)
+            ConfigService["default.instrument"] = instrument_string
             self._view.enable_process_buttons()
+
         self._view.set_instrument_settings(instrument)
         self._beam_centre_presenter.on_update_instrument(instrument)
         self._workspace_diagnostic_presenter.set_instrument_settings(instrument)
