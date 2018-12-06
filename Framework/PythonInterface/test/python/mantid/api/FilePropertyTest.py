@@ -7,10 +7,15 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import FileProperty, FileAction, AlgorithmManager
+from mantid.api import AlgorithmManager, FileProperty, FileAction, FrameworkManagerImpl
 from mantid.kernel import Direction
 
+
 class FilePropertyTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
 
     def test_constructor_with_name_and_default_and_action(self):
         prop = FileProperty("LoadProperty", "", FileAction.Load)

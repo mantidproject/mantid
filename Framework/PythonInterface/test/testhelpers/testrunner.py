@@ -149,9 +149,4 @@ def result_class(pathname):
 
 
 if __name__ == "__main__":
-    if "TESTRUNNER_IMPORT_MANTID" in os.environ:
-        # Import mantid so that it sets up the additional paths to scripts etc
-        # It would be good to try & remove this to soften the impact on tests
-        # that don't require importing mantid at all
-        import mantid  # noqa
     main(sys.argv)

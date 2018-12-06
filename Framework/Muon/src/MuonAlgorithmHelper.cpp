@@ -522,6 +522,10 @@ bool checkValidGroupPairName(const std::string &name) {
   return true;
 }
 
+bool is_alphanumerical_or_underscore(char character) {
+  return (isalpha(character) || isdigit(character) || (character == '_'));
+}
+
 /**
  * Sums the specified periods of the input workspace group
  * @param periodsToSum :: [input] List of period indexes (1-based) to be summed
