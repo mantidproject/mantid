@@ -49,13 +49,13 @@ void cloneWorkspace(std::string const &workspaceName,
 }
 
 void cropWorkspace(std::string const &name, std::string const &newName,
-	double const &cropValue) {
-	auto croper = AlgorithmManager::Instance().create("CropWorkspace");
-	croper->initialize();
-	croper->setProperty("InputWorkspace", name);
-	croper->setProperty("OutputWorkspace", newName);
-	croper->setProperty("XMin", cropValue);
-	croper->execute();
+                   double const &cropValue) {
+  auto croper = AlgorithmManager::Instance().create("CropWorkspace");
+  croper->initialize();
+  croper->setProperty("InputWorkspace", name);
+  croper->setProperty("OutputWorkspace", newName);
+  croper->setProperty("XMin", cropValue);
+  croper->execute();
 }
 
 /**

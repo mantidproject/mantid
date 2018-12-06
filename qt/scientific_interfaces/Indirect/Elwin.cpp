@@ -26,7 +26,7 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
 }
 
 bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
-	return workspace->y(0).size() > 1;
+  return workspace->y(0).size() > 1;
 }
 
 } // namespace
