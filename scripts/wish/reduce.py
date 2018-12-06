@@ -181,7 +181,7 @@ class Wish:
 
     # Focus dataset for a given panel and return the workspace
     def focus_onepanel(self, work, focus, panel):
-        cal = "WISH_diff{}";
+        cal = "WISH_diff{}"
         if cal.format("_cal") not in mantid.mtd:
             mantid.LoadDiffCal(filename=self.get_cal(), InstrumentName="WISH", WorkspaceName=cal.format(""))
         mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationWorkspace=cal.format("_cal"))
