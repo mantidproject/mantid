@@ -71,10 +71,6 @@ class WISHPowderReductionTest(MantidSystemTest):
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
 
-    # Skip test when on builds as extremely slow, run only as reversion test for wish script
-    def skipTests(self):
-        return False
-
 
 class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
@@ -109,10 +105,6 @@ class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
 
-    # Skip test when on builds as extremely slow, run only as reversion test for wish script
-    def skipTests(self):
-        return False
-
 
 class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
@@ -128,7 +120,7 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
 
     def runTest(self):
         os.makedirs(output_dir)
-        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir)
+        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir +"/")
         wish_test.create_vanadium_run(19612, 19618, panels)
 
     def validate(self):
@@ -139,6 +131,3 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
         print(validation_files)
         return validation_files
 
-    # Skip test when on builds as extremely slow, run only as reversion test for wish script
-    def skipTests(self):
-        return False
