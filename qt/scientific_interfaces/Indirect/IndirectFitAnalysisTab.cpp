@@ -115,9 +115,10 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
 
-	connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(updatePlotGuess()));
-	connect(m_fitPropertyBrowser, SIGNAL(workspaceNameChanged(const QString &)), this,
-		SLOT(updatePlotGuess()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updatePlotGuess()));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceNameChanged(const QString &)),
+          this, SLOT(updatePlotGuess()));
 
   connect(m_plotPresenter.get(),
           SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
@@ -846,8 +847,9 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
  * Enables Plot Guess in the FitPropertyBrowser if a sample workspace is loaded
  */
 void IndirectFitAnalysisTab::updatePlotGuess() {
-	auto const sampleWorkspace = m_fittingModel->getWorkspace(getSelectedDataIndex());
-	m_fitPropertyBrowser->updatePlotGuess(sampleWorkspace);
+  auto const sampleWorkspace =
+      m_fittingModel->getWorkspace(getSelectedDataIndex());
+  m_fitPropertyBrowser->updatePlotGuess(sampleWorkspace);
 }
 
 /**

@@ -817,7 +817,8 @@ void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
  * Updates the plot guess feature in this indirect fit property browser.
  * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess(MatrixWorkspace_sptr sampleWorkspace) {
+void IndirectFitPropertyBrowser::updatePlotGuess(
+    MatrixWorkspace_sptr sampleWorkspace) {
   if (sampleWorkspace && compositeFunction()->nFunctions() > 0)
     setPeakToolOn(true);
   else
