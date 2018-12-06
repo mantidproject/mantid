@@ -415,14 +415,14 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
         Mantid::API::MatrixWorkspace_sptr int_ws =
             ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
         monitor_count = int_ws->y(0)[0];
-        g_log.notice() << "Beam monitor counts used for scaling = " << monitor_count
-                  << "\n";
+        g_log.notice() << "Beam monitor counts used for scaling = "
+                       << monitor_count << "\n";
       } catch (...) {
         Mantid::API::MatrixWorkspace_sptr ev_ws =
             ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
         monitor_count = ev_ws->run().getProtonCharge() * 1000.0;
-        g_log.notice() << "Beam proton charge used for scaling = " << monitor_count
-                  << "\n";
+        g_log.notice() << "Beam proton charge used for scaling = "
+                       << monitor_count << "\n";
       }
 
       IPeaksWorkspace_sptr peaks_ws =
