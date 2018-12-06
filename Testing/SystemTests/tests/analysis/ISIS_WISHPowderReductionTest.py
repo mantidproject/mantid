@@ -26,6 +26,7 @@ input_dir = os.path.join(working_dir, input_folder_name)
 output_dir = os.path.join(working_dir, output_folder_name)
 
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
+# just test 5 and 6 to save time as process is the same for all other pairs
 panels = [5, 6]
 linked_panels = {
     1: 10,
@@ -39,10 +40,7 @@ linked_panels = {
 class WISHPowderReductionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
-        input_files = ["vana19612-1foc-SF-SS.nxs", "vana19612-2foc-SF-SS.nxs", "vana19612-3foc-SF-SS.nxs",
-                       "vana19612-4foc-SF-SS.nxs", "vana19612-5foc-SF-SS.nxs", "vana19612-6foc-SF-SS.nxs",
-                       "vana19612-7foc-SF-SS.nxs", "vana19612-8foc-SF-SS.nxs", "vana19612-9foc-SF-SS.nxs",
-                       "vana19612-10foc-SF-SS.nxs"]
+        input_files = ["vana19612-{}foc-SF-SS.nxs".format(panel) for panel in panels]
 
         input_files = [os.path.join(calibration_dir, files) for files in input_files]
         return input_files
@@ -81,10 +79,7 @@ class WISHPowderReductionTest(MantidSystemTest):
 class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
-        input_files = ["vana19612-1foc-SF-SS.nxs", "vana19612-2foc-SF-SS.nxs", "vana19612-3foc-SF-SS.nxs",
-                       "vana19612-4foc-SF-SS.nxs", "vana19612-5foc-SF-SS.nxs", "vana19612-6foc-SF-SS.nxs",
-                       "vana19612-7foc-SF-SS.nxs", "vana19612-8foc-SF-SS.nxs", "vana19612-9foc-SF-SS.nxs",
-                       "vana19612-10foc-SF-SS.nxs"]
+        input_files = ["vana19612-{}foc-SF-SS.nxs".format(panel) for panel in panels]
 
         input_files = [os.path.join(calibration_dir, files) for files in input_files]
         return input_files
@@ -122,10 +117,7 @@ class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
 class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
-        input_files = ["emptyinst19618-2foc-SF-S.nxs",
-                       "emptyinst19618-3foc-SF-S.nxs", "emptyinst19618-4foc-SF-S.nxs", "emptyinst19618-5foc-SF-S.nxs",
-                       "emptyinst19618-6foc-SF-S.nxs", "emptyinst19618-7foc-SF-S.nxs", "emptyinst19618-8foc-SF-S.nxs",
-                       "emptyinst19618-9foc-SF-S.nxs", "emptyinst19618-10foc-SF-S.nxs"]
+        input_files = ["emptyinst19618-{}foc-SF-S.nxs".format(panel) for panel in panels]
 
         input_files = [os.path.join(calibration_dir, files) for files in input_files]
         return input_files
