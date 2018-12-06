@@ -91,11 +91,11 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
                    int32_t def_clock_scale, bool use_tx_chopper) {
   // read file headers (base header then packed-format header)
   EventFileHeader_Base hdr_base;
-  if (!loader.read(reinterpret_cast<int8_t *>(&hdr_base), sizeof(hdr_base)))
+  if (!loader.read(reinterpret_cast<char *>(&hdr_base), sizeof(hdr_base)))
     throw std::runtime_error("unable to load EventFileHeader-Base");
 
   EventFileHeader_Packed hdr_packed;
-  if (!loader.read(reinterpret_cast<int8_t *>(&hdr_packed), sizeof(hdr_packed)))
+  if (!loader.read(reinterpret_cast<char *>(&hdr_packed), sizeof(hdr_packed)))
     throw std::runtime_error("unable to load EventFileHeader-Packed");
 
   if (hdr_base.magic_number != EVENTFILEHEADER_BASE_MAGIC_NUMBER)
@@ -185,7 +185,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
 
     // read next byte
     uint8_t ch;
-    if (!loader.read(reinterpret_cast<int8_t *>(&ch), 1))
+    if (!loader.read(reinterpret_cast<char *>(&ch), 1))
       break;
 
     int32_t nbits_ch_used = 0; // no bits used initially, 8 to go

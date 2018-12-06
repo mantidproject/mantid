@@ -2696,6 +2696,92 @@ void EventList::maskTof(const double tofMin, const double tofMax) {
 }
 
 // --------------------------------------------------------------------------
+/** Mask out events by the condition vector.
+* Events are removed from the list.
+* @param events :: reference to a vector of events to change.
+* @param mask :: condition vector
+* @returns The number of events deleted.
+*/
+template <class T>
+std::size_t EventList::maskConditionHelper(std::vector<T> &events,
+	const std::vector<bool> &mask) {
+
+	// runs through the two synchronized vectors and delete elements 
+	// for condition false
+	auto itm = std::find(mask.begin(), mask.end(), false);
+	auto first = events.begin() + (itm - mask.begin());
+
+	if (itm != mask.end()) {
+		for (auto ite = first; ++ite != events.end() && ++itm != mask.end();) {
+			if (*itm != false) {
+				*first++ = std::move(*ite);
+			}
+		}
+	}
+
+	auto n = events.end() - first;
+	if (n != 0)
+		events.erase(first, events.end());
+
+	return n;
+
+	/*
+	size_t count = 0;
+	auto it_e = events.begin();
+	auto it_m = mask.begin();
+	while (it_e != events.end() && it_m != mask.end()) {
+		if (*it_m) {
+			++it_e;
+		}
+		else {
+			it_e = events.erase(it_e);
+			count++;
+		}
+		++it_m;
+	}
+	return count;
+	*/
+}
+
+// --------------------------------------------------------------------------
+/**
+* Mask out events by the condition vector.
+* Events are removed from the list.
+* @param mask :: condition vector
+*/
+void EventList::maskCondition(const std::vector<bool> & mask) {
+
+	// mask size must match the number of events
+	if (this->getNumberEvents() != mask.size())
+		throw std::runtime_error("EventList::maskTof: tofMax must be > tofMin");
+
+	// don't do anything with an emply list
+	if (this->getNumberEvents() == 0)
+		return;
+
+	// Convert the list
+	size_t numOrig = 0;
+	size_t numDel = 0;
+	switch (eventType) {
+	case TOF:
+		numOrig = this->events.size();
+		numDel = this->maskConditionHelper(this->events, mask);
+		break;
+	case WEIGHTED:
+		numOrig = this->weightedEvents.size();
+		numDel = this->maskConditionHelper(this->weightedEvents, mask);
+		break;
+	case WEIGHTED_NOTIME:
+		numOrig = this->weightedEventsNoTime.size();
+		numDel = this->maskConditionHelper(this->weightedEventsNoTime, mask);
+		break;
+	}
+
+	if (numDel >= numOrig)
+		this->clear(false);
+}
+
+// --------------------------------------------------------------------------
 /** Get the m_tof member of all events in a list
  *
  * @param events :: source vector of events

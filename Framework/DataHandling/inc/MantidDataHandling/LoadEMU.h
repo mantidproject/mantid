@@ -31,12 +31,15 @@ Required Properties:
 
 Optional Properties:
 <UL>
+<LI> PathToBinaryEventFile - Rel or abs path to event file linked to hdf</LI>
 <LI> Mask - The input filename of the mask data</LI>
 <LI> SelectDetectorTubes - Range of detector tubes to be loaded</LI>
+<LI> OverrideDopplerFrequency - Override the Doppler frequency (Hz)</LI>
 <LI> OverrideDopplerPhase - Override the Doppler phase (degrees)</LI>
+<LI> CalibrateDopplerPhase - Calibrate the Doppler phase prior to TOF</LI> 
+<LI> LoadAsRawDopplerTime - Save event time relative the Doppler</LI>
 <LI> FilterByTimeStart - Only include events after the start time</LI>
 <LI> FilterByTimeStop - Only include events before the stop time</LI>
-<LI> LoadAsRawDopplerTime - Save event time relative the Doppler</LI>
 </UL>
 
 @author Geish Miladinovic (ANSTO)
@@ -63,7 +66,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport LoadEMU : public API::IFileLoader<Kernel::FileDescriptor> {
+template <typename FD>
+class DLLExport LoadEMU : public API::IFileLoader<FD> {
 
 public:
   // description
@@ -71,34 +75,36 @@ public:
   const std::vector<std::string> seeAlso() const override {
     return {"Load", "LoadQKK"};
   }
-  const std::string name() const override { return "LoadEMU"; }
+  const std::string name() const override;
   const std::string category() const override { return "DataHandling\\ANSTO"; }
-  const std::string summary() const override {
-    return "Loads an EMU data file into a workspace.";
-  }
+  const std::string summary() const override;
 
   // returns a confidence value that this algorithm can load a specified file
-  int confidence(Kernel::FileDescriptor &descriptor) const override;
+  int confidence(FD &descriptor) const override;
 
 private:
   // initialisation
   void init() override;
+  void init(bool hdfLoader);
 
   // execution
   void exec() override;
+  void exec(const std::string &hdfFile, const std::string &eventFile);
 
   // region of intreset
   static std::vector<bool> createRoiVector(const std::string &seltubes,
                                            const std::string &maskfile);
 
   // load parameters from input file
-  void loadParameters(ANSTO::Tar::File &tarFile, API::LogManager &logm);
+  void loadParameters(const std::string &hdfFile, API::LogManager &logm);
+  void loadEnvironParameters(const std::string &hdfFile, 
+	                         API::LogManager &logm);
 
   // load the instrument definition and instrument parameters
   void loadInstrument();
 
   // create workspace
-  void createWorkspace(ANSTO::Tar::File &tarFile);
+  void createWorkspace(const std::string &title);
 
   // dynamically update the neutronic position
   void loadDetectorL2Values();
@@ -106,6 +112,12 @@ private:
 
   // load and log the Doppler parameters
   void loadDopplerParameters(API::LogManager &logm);
+
+  // calibrate doppler phase
+  void calibrateDopplerPhase(std::vector<size_t> &eventCounts,
+	                         std::vector<EventVector_pt> &eventVectors);
+  void dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors,
+	                    double& minTOF, double& maxTOF);
 
   // prepare event storage
   void prepareEventStorage(ANSTO::ProgressTracker &prog,
@@ -116,20 +128,27 @@ private:
   void setupDetectorMasks(std::vector<bool> &roi);
 
   // binary file access
-  template <class EventProcessor>
+  template <class Processor>
   static void loadEvents(API::Progress &prog, const char *progMsg,
-                         ANSTO::Tar::File &tarFile,
-                         EventProcessor &eventProcessor);
+	                     const std::string &eventFile,
+                         Processor &eventProcessor);
 
   // shared member variables
   DataObjects::EventWorkspace_sptr m_localWorkspace;
   std::vector<double> m_detectorL2;
+  int32_t m_datasetIndex;
+  std::string m_startRun;
 
   // Doppler characteristics
   double m_dopplerAmpl;
   double m_dopplerFreq;
   double m_dopplerPhase;
+  int32_t m_dopplerRun;
+  bool m_calibrateDoppler;
 };
+
+using LoadEMUHdf = LoadEMU<Kernel::NexusDescriptor>;
+using LoadEMUTar = LoadEMU<Kernel::FileDescriptor>;
 
 } // namespace DataHandling
 } // namespace Mantid

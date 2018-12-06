@@ -23,14 +23,14 @@ using namespace Mantid::DataObjects;
 class LoadEMUauTest : public CxxTest::TestSuite {
 public:
   void test_load_emu_algorithm_init() {
-    LoadEMU algToBeTested;
+    LoadEMUTar algToBeTested;
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
     TS_ASSERT(algToBeTested.isInitialized());
   }
 
   void test_load_emu_algorithm() {
-    LoadEMU algToBeTested;
+    LoadEMUTar algToBeTested;
 
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
@@ -72,7 +72,8 @@ public:
 
     // test some data properties
     auto logpm = [&run](std::string tag) {
-      return run.getPropertyValueAsType<double>(tag);
+      return dynamic_cast<TimeSeriesProperty<double> *>(
+		  run.getProperty(tag))->firstValue();
     };
     TS_ASSERT_DELTA(logpm("DopplerFrequency"), 9.974, 1.0e-3);
     TS_ASSERT_DELTA(logpm("DopplerAmplitude"), 0.075, 1.0e-4);
