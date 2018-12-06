@@ -102,6 +102,8 @@ Improvements
 
 - The Run button is now above the output options.
 - The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- There is no longer a plot output option for 'Fit' in the Quasi Tab. The graph 'Fit.2' is also now plotted when you click
+  Plot Current Preview.
 - The sample logs are now copied over properly for the result workspace in the ResNorm tab.
 - Sqw files can now be loaded as Vanadium in the ResNorm interface.
 
