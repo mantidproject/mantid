@@ -51,7 +51,7 @@ class WISHPowderReductionTest(MantidSystemTest):
 
     def runTest(self):
         os.makedirs(output_dir)
-        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir + "/", False)
+        wish_test = Wish(calibration_dir, output_dir, True, input_dir + "/", False)
         runs = [40503]
 
         wish_test.reduce(runs, panels)
@@ -86,7 +86,7 @@ class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
 
     def runTest(self):
         os.makedirs(output_dir)
-        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir + "/")
+        wish_test = Wish(calibration_dir, output_dir, True, input_dir + "/")
         runs = [40503]
 
         wish_test.reduce(runs, panels)
@@ -120,7 +120,7 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
 
     def runTest(self):
         os.makedirs(output_dir)
-        wish_test = Wish(calibration_dir + "/", output_dir + "/", True, input_dir +"/")
+        wish_test = Wish(calibration_dir, output_dir, True, input_dir + "/")
         wish_test.create_vanadium_run(19612, 19618, panels)
 
     def validate(self):
@@ -128,6 +128,5 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
         for panel in [x for x in panels if x < 6]:
             validation_files = validation_files + ["w19612-{}foc".format(panel),
                                                    "vana19612-{}foc-SF-SS.nxs".format(panel)]
-        print(validation_files)
         return validation_files
 
