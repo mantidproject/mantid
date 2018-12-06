@@ -34,11 +34,11 @@ MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
 }
 
 std::size_t numberOfColumns(Workspace_sptr workspace) {
-  return convertToMatrixWorkspace(workspace)->blocksize();
+  return convertToMatrixWorkspace(workspace)->y(0).size();
 }
 
 bool isWorkspacePlottable(Workspace_sptr workspace) {
-  return numberOfColumns(workspace) > 1 ? true : false;
+  return numberOfColumns(workspace) > 1;
 }
 
 bool containsPlottableWorkspace(WorkspaceGroup_sptr workspaceGroup) {

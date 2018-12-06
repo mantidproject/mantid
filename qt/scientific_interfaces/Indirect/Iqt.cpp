@@ -36,7 +36,7 @@ bool checkADSForWorkspace(std::string const &workspaceName) {
 }
 
 bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
-  return workspace->blocksize() > 1 ? true : false;
+  return workspace->y(0).size() > 1;
 }
 
 void cloneWorkspace(std::string const &workspaceName,
