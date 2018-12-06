@@ -31,7 +31,6 @@ Required Properties:
 
 Optional Properties:
 <UL>
-<LI> PathToBinaryEventFile - Rel or abs path to event file linked to hdf</LI>
 <LI> Mask - The input filename of the mask data</LI>
 <LI> SelectDetectorTubes - Range of detector tubes to be loaded</LI>
 <LI> OverrideDopplerFrequency - Override the Doppler frequency (Hz)</LI>
@@ -40,6 +39,12 @@ Optional Properties:
 <LI> LoadAsRawDopplerTime - Save event time relative the Doppler</LI>
 <LI> FilterByTimeStart - Only include events after the start time</LI>
 <LI> FilterByTimeStop - Only include events before the stop time</LI>
+</UL>
+
+Additional Optional HDF Properties:
+<UL>
+<LI> PathToBinaryEventFile - Rel or abs path to event file linked to hdf</LI>
+<LI> SelectDataset - Select the linked event dataset</LI> 
 </UL>
 
 @author Geish Miladinovic (ANSTO)
