@@ -205,13 +205,17 @@ class SANSILLReduction(PythonAlgorithm):
 
     def _dead_time_correction(self, ws):
 
-        run = mtd[ws].getRun()
-        if run.hasParameter('tau'):
-            tau = run.getNumberParameter('tau')[0]
-            DeadTimeCorrection(InputWorkspace=ws, Tau=tau, OutputWorkspace=ws)
+        instrument = mtd[ws].getInstrument()
+        if instrument.hasParameter('tau'):
+            tau = instrument.getNumberParameter('tau')[0]
+            if instrument.hasParameter('grouping'):
+                pattern = instrument.getStringParameter('grouping')[0]
+                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, GroupingPattern=pattern, OutputWorkspace=ws)
+            else:
+                self.log().warning('No grouping available in IPF, dead time correction will be performed pixel-wise.')
+                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, OutputWorkspace=ws)
         else:
             self.log().information('No tau available in IPF, skipping dead time correction.')
-
 
     def _process_beam(self, ws):
         """

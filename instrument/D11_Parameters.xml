@@ -8,5 +8,11 @@
       </parameter>
     </component-link>
 
+    <!-- GroupingPattern for DeadTimeCorrection, groups the entire detector-->
+    <component-link name="D11">
+      <parameter name="grouping" type="string">
+        <value val="0-65535"/>
+      </parameter>
     </component-link>
+
 </parameter-file>
