@@ -395,12 +395,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 beamPos = tableWithBeamPos.cell('PeakCentre', 0)
         if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
             beamPos = self.getProperty(Prop.BEAM_CENTRE).value
-        # Add spectrum number of beam position to sample logs
-        # Convert workspace index to spectrum number
-        peak_position = beamPos + 1
+        # Add the fractional workspace index of the beam position to the sample logs of ws.
         logargs = {'Workspace': ws, 'LogType': 'Number', 'EnableLogging': self._subalgLogging}
         logargs['LogName'] = 'peak_position'
-        logargs['LogText'] = str(peak_position)
+        logargs['LogText'] = str(beamPos)
         logargs['NumberType'] = 'Double'
         AddSampleLog(**logargs)
         # Add foreground start and end workspace indices to the sample logs of ws.

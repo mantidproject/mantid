@@ -331,14 +331,12 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_detectorAngleName = "dan.value";
     m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
-    m_offsetName = "open_offset";
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::FIGARO) {
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
-    m_offsetName = "openOffset";
     // FIGARO: find out which of the four choppers are used
     NXFloat firstChopper =
         entry.openNXFloat("instrument/ChopperSetting/firstChopper");
@@ -514,8 +512,12 @@ std::vector<double> LoadILLReflectometry::getXValues() {
           chop1Phase = 0.0;
       }
       const double POFF = doubleFromRun(m_offsetFrom + ".poff");
-      const double openOffset =
-          doubleFromRun(m_offsetFrom + "." + m_offsetName);
+      double openOffset;
+      if (m_localWorkspace->run().hasProperty(
+              m_offsetFrom + ".open_offset")) // Valid from 2018.
+        openOffset = doubleFromRun(m_offsetFrom + ".open_offset");
+      else // Figaro 2017 / 2018
+        openOffset = doubleFromRun(m_offsetFrom + ".openOffset");
       if (m_instrument == Supported::D17 && chop1Speed != 0.0 &&
           chop2Speed != 0.0 && chop2Phase != 0.0) {
         // virtual chopper entries are valid

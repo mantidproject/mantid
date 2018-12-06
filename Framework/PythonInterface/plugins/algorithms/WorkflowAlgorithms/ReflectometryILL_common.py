@@ -15,13 +15,16 @@ import scipy.constants as constants
 
 def chopperOpeningAngle(sampleLogs, instrumentName):
     """Return the chopper opening angle in degrees."""
+    try:
+        openoffset = sampleLogs.getProperty('CollAngle.open_offset').value
+    except:
+        openoffset = sampleLogs.getProperty('CollAngle.openOffset').value
     if instrumentName == 'D17':
         chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper1_phase_average').value
         if chopper1Phase > 360.:
             # Workaround for broken old D17 NeXus files.
             chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper2_speed_average').value
         chopper2Phase = sampleLogs.getProperty('VirtualChopper.chopper2_phase_average').value
-        openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
         return 45. - (chopper2Phase - chopper1Phase) - openoffset
     else:
         firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
@@ -33,7 +36,6 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
         if chopper1Phase > 360.:
             # CH1.phase on FIGARO is set to an arbitrary value (999.9)
             chopper1Phase = 0.
-        openoffset = sampleLogs.getProperty('CollAngle.openOffset').value
         return 45. - (chopper2Phase - chopper1Phase) - openoffset
 
 
