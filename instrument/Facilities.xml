@@ -15,7 +15,7 @@
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
     <filelocation>
-      <prefix regex="\\\\isis\\inst\$"></prefix>
+      <prefix regex="\\\\isis(?:\.cclrc\.ac\.uk)?\\inst\$"></prefix>
       <windows replacement="\\isis.cclrc.ac.uk\inst$"></windows>
       <linux replacement="/archive"></linux>
       <mac replacement="/archive"></mac>
