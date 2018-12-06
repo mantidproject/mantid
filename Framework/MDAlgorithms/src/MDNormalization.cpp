@@ -17,6 +17,8 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -103,7 +105,9 @@ void MDNormalization::init() {
     std::string propBinning = "Dimension"+Strings::toString(i)+"Binning";
     declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(propName, "", Direction::Input),
                     "Name for the " + Strings::toString(i) + "th dimension. Leave blank for NONE.");
-    declareProperty(Kernel::make_unique<ArrayProperty<double>>(propBinning),
+    auto atMost3 = boost::make_shared<ArrayLengthValidator<double> >(0,3);
+    std::vector<double> temp;
+    declareProperty(Kernel::make_unique<ArrayProperty<double>>(propBinning,temp,atMost3),
                     "Binning for the " + Strings::toString(i) + "th dimension.\n"+
                     "- Leave blank for complete integration\n"+
                     "- One value is interpreted as step\n"
@@ -199,7 +203,7 @@ MDNormalization::validateInputs() {
       }
     }
   }
-  // check projections
+  // check projections and UB
   if (getProperty("RLU")) {
     DblMatrix W = DblMatrix(3, 3);
     std::vector<double> Q1Basis = getProperty("QDimension1");
@@ -216,8 +220,13 @@ MDNormalization::validateInputs() {
       errorMessage.emplace("QDimension3",
                            "The projection dimensions are coplanar or zero");
     }
+    if (!inputWS->getExperimentInfo(0)->sample().hasOrientedLattice()) {
+      errorMessage.emplace("InputWorkspace", "There is no oriented lattice "
+                                             "associated with the input workspace. "
+                                             "Use SetUB algorithm");
+    }
   }
-  // check dimensions
+  // check dimension names
   std::vector<std::string> originalDimensionNames;
   for (size_t i=3; i<inputWS->getNumDims(); i++) {
     originalDimensionNames.push_back(inputWS->getDimension(i)->getName());
@@ -225,18 +234,77 @@ MDNormalization::validateInputs() {
   originalDimensionNames.push_back("QDimension1");
   originalDimensionNames.push_back("QDimension2");
   originalDimensionNames.push_back("QDimension3");
+  std::vector<std::string> selectedDimensions;
   for(std::size_t i=0;i<6;i++) {
     std::string propName = "Dimension"+Strings::toString(i)+"Name";
     std::string dimName = getProperty(propName);
-    //auto it = std::find();
+    std::string binningName = "Dimension"+Strings::toString(i)+"Binning";
+    std::vector<double> binning = getProperty(binningName);
+    if (!dimName.empty()) {
+      auto it = std::find(originalDimensionNames.begin(),originalDimensionNames.end(),dimName);
+      if (it==originalDimensionNames.end()) {
+        errorMessage.emplace(propName, "Name '"+dimName+"' is not one of the "
+                             "original workspace names or a Q dimension");
+      } else {
+        //make sure dimension is unique
+        auto itSel = std::find(selectedDimensions.begin(),selectedDimensions.end(),dimName);
+        if (itSel==selectedDimensions.end()){
+          selectedDimensions.push_back(dimName);
+        } else{
+          errorMessage.emplace(propName, "Name '"+dimName+"' was already selected");
+        }
+      }
+      if (binning.empty()) {
+        errorMessage.emplace(binningName, "Define binning if the dimension name is not empty");
+      }
+    } else {
+      if (!binning.empty()) {
+        errorMessage.emplace(binningName, "There should be no binning if the dimension name is empty");
+      }
+    }
+  }
+  // since Q dimensions can be non - orthogonal, all must be present
+  if ((std::find(selectedDimensions.begin(),selectedDimensions.end(),"QDimension1") == selectedDimensions.end())||
+      (std::find(selectedDimensions.begin(),selectedDimensions.end(),"QDimension2") == selectedDimensions.end())||
+      (std::find(selectedDimensions.begin(),selectedDimensions.end(),"QDimension3") == selectedDimensions.end())) {
+    for(std::size_t i=0;i<6;i++) {
+        std::string propName = "Dimension"+Strings::toString(i)+"Name";
+        errorMessage.emplace(propName, "All of QDimension1, QDimension2, QDimension3 must be present");
+    }
   }
   return errorMessage;
 }
+
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void MDNormalization::exec() {
-  // TODO Auto-generated execute stub
+  // calculate dimensions for binning
+  Mantid::API::IMDEventWorkspace_sptr inputWS =
+        this->getProperty("InputWorkspace");
+  std::vector<double> Q1Basis{1., 0., 0.}, Q2Basis{0., 1., 0.},Q3Basis{0., 0., 1.};
+  DblMatrix UB;
+  bool isRLU = (getProperty("RLU");
+  if (isRLU) {
+    Q1Basis = getProperty("QDimension1");
+    Q2Basis = getProperty("QDimension2");
+    Q3Basis = getProperty("QDimension3");
+    UB = inputWS->getExperimentInfo(0)->sample().getOrientedLattice().getUB()*2*M_PI;
+    Q1Basis = UB * Q1Basis;
+    Q2Basis = UB * Q2Basis;
+    Q3Basis = UB * Q3Basis;
+  }
+
+  std::vector<std::string> originalDimensionNames;
+  originalDimensionNames.push_back("QDimension1");
+  originalDimensionNames.push_back("QDimension2");
+  originalDimensionNames.push_back("QDimension3");
+  for (size_t i=3; i<inputWS->getNumDims(); i++) {
+    originalDimensionNames.push_back(inputWS->getDimension(i)->getName());
+  }
+
+
 }
 
 } // namespace MDAlgorithms
