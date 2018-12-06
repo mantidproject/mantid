@@ -1,11 +1,12 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2016-05-19 16:43:36.344312"
+<instrument
+  xmlns="http://www.mantidproject.org/IDF/1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
 	name="BIOSANS"
 	valid-from="2016-04-22 00:00:00"
 	valid-to="2100-01-31 23:59:59"
-	xmlns="http://www.mantidproject.org/IDF/1.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+  last-modified="2018-12-06 17:45:00.000">
 	
 	<defaults>
 		<length unit="meter"/>
@@ -30,27 +31,47 @@
 	
 	<!-- ***************************************************************** -->
 	<!--MONITOR 1 -->
-	<component type="monitor1" idlist="monitor1">
-		<location z="-10.5" />
+	<component type="monitors" idlist="monitor1">
+		<location/>
 	</component>
-	<type name="monitor1" is="monitor" />
+	<type name="monitors">
+	    <component type="monitor">
+    		<location z="-10.5" name="monitor1"/>
+    	</component>
+	</type>
 	<idlist idname="monitor1">
 		<id val="1" />
 	</idlist>
-	
+
 	<!--MONITOR 2 -->
-	<component type="timer1" idlist="timer1">
-		<location z="-10.5" />
+	<component type="timers" idlist="timer1">
+		<location/>
 	</component>
-	<type name="timer1" is="monitor" />
+	<type name="timers">
+	    <component type="monitor">
+    		<location z="-10.5" name="timer1"/>
+    	</component>
+	</type>
 	<idlist idname="timer1">
 		<id val="2" />
 	</idlist>
-	
+
+	<!--MONITOR SHAPE-->
+	<!--FIXME: Do something real here.-->
+	<type is="monitor" name="monitor">
+		<cylinder id="cyl-approx">
+		<centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
+		<axis y="0.0" x="0.0" z="1.0"/>
+		<radius val="0.01"/>
+		<height val="0.03"/>
+		</cylinder>
+		<algebra val="cyl-approx"/>
+	</type>
+		
 	<!-- ***************************************************************** -->
 	<!-- Main Detector -->
 	<component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
-		<location z='0' />
+		<location z='6' />
 	</component>
 	
 	<!-- Detector: -->
@@ -69,7 +90,6 @@
 		</cuboid>
 		<algebra val="pixel-shape" />
 	</type>
-	
 	
 	<!-- ***************************************************************** -->
 	<!-- Wing Detector -->
