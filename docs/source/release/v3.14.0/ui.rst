@@ -24,7 +24,8 @@ Project Recovery
 ----------------
 New
 ###
-- Project recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
+- Project Recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
+- Project Recovery now adds a lock file at the start of saving so if MantidPlot crashes when saving it will no longer use that checkpoint as it is incomplete.
 - If project recovery fails when attempting to recover a checkpoint it will open a new GUI offering multiple checkpoints to the user and the ability to open them in a script window. (See image below)
 
 .. figure:: ../../images/ProjectRecoveryFailureDialog.png
