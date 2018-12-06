@@ -172,7 +172,7 @@ public:
 //    return contains(event.mortonNumber());
 //  }
 
-  bool isLeaf() { return m_childBoxes.empty(); }
+  bool isLeaf() const { return m_childBoxes.empty(); }
 
   std::vector<Leaf> leafs() {
     std::vector<Leaf> leafBoxes;

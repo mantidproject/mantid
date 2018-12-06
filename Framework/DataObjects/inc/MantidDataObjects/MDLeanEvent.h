@@ -145,12 +145,14 @@ protected:
   };
 
 public:
+  static MDCoordinate<nd> indexToCoordinates(const MortonT& idx, const MDSpaceBounds<nd>& space) {
+    return ConvertCoordinatesFromIntegerRange<nd, IntT>(space, deinterleave<nd, IntT, MortonT>(idx));
+  }
   void retrieveIndex(const MDSpaceBounds<nd>& space) {
     index = interleave<nd, IntT, MortonT>(ConvertCoordinatesToIntegerRange<nd, IntT>(space, center));
   }
   void retrieveCoordinates(const MDSpaceBounds<nd>& space) {
-    auto coords = ConvertCoordinatesFromIntegerRange<nd, IntT>
-        (space, deinterleave<nd, IntT, MortonT>(index)).data();
+    auto coords = indexToCoordinates(index, space);
     for(unsigned i = 0; i < nd; ++i)
       center[i] = coords[i];
   }

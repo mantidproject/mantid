@@ -49,6 +49,7 @@ public:
   MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth = 0,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
+
   MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth = 0,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);

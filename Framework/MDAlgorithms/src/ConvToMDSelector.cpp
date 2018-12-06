@@ -77,11 +77,12 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
   } else {
     // existing converter is suitable for the workspace
     // in case of Event workspace check if user set a property to use indexing
-    if (inputWSType == EventWS)
-      if(converterType == ConvToMDSelector::DEFAULT)
+    if (inputWSType == EventWS) {
+      if (converterType == ConvToMDSelector::DEFAULT)
         return boost::make_shared<ConvToMDEventsWS>();
       else
         return boost::make_shared<ConvToMDEventsWSIndexing>();
+    }
   }
 }
 } // namespace MDAlgorithms
