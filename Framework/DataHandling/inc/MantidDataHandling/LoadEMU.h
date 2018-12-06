@@ -44,7 +44,7 @@ Optional Properties:
 Additional Optional HDF Properties:
 <UL>
 <LI> PathToBinaryEventFile - Rel or abs path to event file linked to hdf</LI>
-<LI> SelectDataset - Select the linked event dataset</LI> 
+<LI> SelectDataset - Select the linked event dataset</LI>
 </UL>
 
 @author Geish Miladinovic (ANSTO)
