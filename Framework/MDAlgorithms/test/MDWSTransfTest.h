@@ -148,8 +148,8 @@ public:
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TWS.setMinMax(minVal, maxVal);
 
-
-    pLattice = std::make_unique<Geometry::OrientedLattice>(5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
+    pLattice = std::make_unique<Geometry::OrientedLattice>(
+        5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
     ws2D->mutableSample().setOrientedLattice(pLattice.get());
     TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 

@@ -54,7 +54,7 @@ protected:
   size_t m_numThreads;
 
   /// The ThreadScheduler instance taking care of task scheduling
-   std::unique_ptr<ThreadScheduler> m_scheduler;
+  std::unique_ptr<ThreadScheduler> m_scheduler;
 
   /// Vector with all the threads that are started
   std::vector<std::unique_ptr<Poco::Thread>> m_threads;

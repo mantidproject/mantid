@@ -141,8 +141,8 @@ void ForegroundModel::setFormFactorIon(const std::string &ionType) {
     if (m_MagIonName != ionType) {
       if (m_formFactorTable) {
       }
-      m_formFactorTable = std::make_unique<MagneticFormFactorTable>(FORM_FACTOR_TABLE_LENGTH,
-                                                      getMagneticIon(ionType));
+      m_formFactorTable = std::make_unique<MagneticFormFactorTable>(
+          FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
       m_MagIonName = ionType;
     }
   }

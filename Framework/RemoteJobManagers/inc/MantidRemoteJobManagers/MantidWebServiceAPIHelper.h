@@ -7,11 +7,11 @@
 #ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIHELPER_H
 #define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIHELPER_H
 
+#include "MantidKernel/DllConfig.h"
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include "MantidKernel/DllConfig.h"
 
 #include <Poco/Net/HTTPResponse.h>
 
@@ -113,8 +113,8 @@ private:
 
   mutable std::unique_ptr<Poco::Net::HTTPClientSession>
       m_session; // Pointer to session object for all our HTTP requests
-                  // (Has to be a pointer because we allocate and delete
-                  // it multiple times)
+                 // (Has to be a pointer because we allocate and delete
+                 // it multiple times)
   Poco::Net::HTTPResponse
       m_response; // Response object for all of our HTTP requests
 

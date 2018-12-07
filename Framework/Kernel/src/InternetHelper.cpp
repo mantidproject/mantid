@@ -120,7 +120,8 @@ void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
 }
 
 void InternetHelper::createRequest(Poco::URI &uri) {
-  m_request = std::make_unique<HTTPRequest>(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
+  m_request = std::make_unique<HTTPRequest>(m_method, uri.getPathAndQuery(),
+                                            HTTPMessage::HTTP_1_1);
   m_response = std::make_unique<HTTPResponse>();
   if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);

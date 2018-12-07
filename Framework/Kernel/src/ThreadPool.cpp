@@ -108,12 +108,11 @@ void ThreadPool::start(double waitSec) {
     // Create the thread
     auto thread = std::make_unique<Poco::Thread>(name.str());
     // Make the runnable object and run it
-    auto runnable = std::make_unique<ThreadPoolRunnable>(i, m_scheduler.get(), m_prog.get(), waitSec);
+    auto runnable = std::make_unique<ThreadPoolRunnable>(i, m_scheduler.get(),
+                                                         m_prog.get(), waitSec);
     thread->start(*runnable);
     m_threads.push_back(std::move(thread));
     m_runnables.push_back(std::move(runnable));
-
-    
   }
   // Yep, all the threads are running.
   m_started = true;

@@ -467,7 +467,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
     return;
   }
 
-  WorkspaceGroup_sptr wsGroup=boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
   size_t yLength = m_multiPeriodCounts[0].size() / numPeriods;
   size_t xLength = yLength + 1;
   size_t numSpectra = m_workspace->getNumberHistograms();

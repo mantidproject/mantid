@@ -13,7 +13,9 @@
 namespace Mantid {
 namespace Geometry {
 
-IObjComponent::IObjComponent() { handle = std::make_unique<GeometryHandler>(this); }
+IObjComponent::IObjComponent() {
+  handle = std::make_unique<GeometryHandler>(this);
+}
 
 /** Constructor, specifying the GeometryHandler (renderer engine)
  * for this IObjComponent.
@@ -24,8 +26,7 @@ IObjComponent::IObjComponent(GeometryHandler *the_handler) {
 
 // Looking to get rid of the first of these constructors in due course (and
 // probably add others)
-IObjComponent::~IObjComponent() {
-}
+IObjComponent::~IObjComponent() {}
 
 /**
  * Set the geometry handler for IObjComponent
@@ -43,7 +44,7 @@ void IObjComponent::setGeometryHandler(GeometryHandler *h) {
  */
 IObjComponent::IObjComponent(const IObjComponent &) {
   // Copy constructor just creates new handle. Copies nothing.
-  handle =std::make_unique<GeometryHandler>(this);
+  handle = std::make_unique<GeometryHandler>(this);
 }
 
 /**

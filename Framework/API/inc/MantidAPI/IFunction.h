@@ -536,7 +536,7 @@ public:
   /// Set a function handler
   void setHandler(std::shared_ptr<FunctionHandler> handler);
   /// Return the handler
-  FunctionHandler* getHandler() const { return m_handler.get(); }
+  FunctionHandler *getHandler() const { return m_handler.get(); }
 
   /// Describe parameter status in relation to fitting:
   /// Active: Fit varies such parameter directly.

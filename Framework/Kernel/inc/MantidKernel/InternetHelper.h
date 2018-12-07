@@ -10,9 +10,9 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProxyInfo.h"
 
-#include <memory>
 #include <ios>
 #include <map>
+#include <memory>
 #include <string>
 
 namespace Poco {
