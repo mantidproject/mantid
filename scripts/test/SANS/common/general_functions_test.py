@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.kernel import (V3D, Quat)
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, FrameworkManager
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log,
                                            get_standard_output_workspace_name, sanitise_instrument_name,
                                            get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
@@ -22,6 +22,11 @@ from sans.state.data import StateData
 
 
 class SANSFunctionsTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
+
     @staticmethod
     def _prepare_workspaces(number_of_workspaces, tagged_workspace_names=None, state=None, reduction_mode=None):
         create_name = "CreateSampleWorkspace"

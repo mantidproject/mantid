@@ -25,22 +25,15 @@ if [ -n "${PYTHONPATH}" ]; then
 	LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
-# Define MANTIDPATH
-MANTIDPATH="${INSTALLDIR}"
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
-
     set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
-
 else
     IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
-
     set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ -c "${IPYTHON_STARTUP}" $*@WRAPPER_POSTFIX@
-
 fi
 
 
 PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
-  MANTIDPATH=${MANTIDPATH} \
   PYTHONPATH=${LOCAL_PYTHONPATH} \
   exec "$@"

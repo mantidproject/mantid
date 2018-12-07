@@ -21,8 +21,16 @@ class SimpleAPITest(unittest.TestCase):
     def tearDown(self):
         mtd.clear()
 
+    def test_python_algorithms_are_loaded_recursively(self):
+        """
+        Test needs improving when the old API goes to just check that everything loads okay
+        """
+        all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
+        self.assertTrue('SNSPowderReduction' in all_algs)
+        self.assertTrue('Squares' in all_algs)
+
     def test_version_number_equals_2(self):
-        self.assertEquals(simpleapi.apiVersion(), 2)
+        self.assertEqual(simpleapi.apiVersion(), 2)
 
     def test_module_dict_seems_to_be_correct_size(self):
         # Check that the module has at least the same number
@@ -36,7 +44,7 @@ class SimpleAPITest(unittest.TestCase):
         expected_doc = """Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.\n\nProperty descriptions: \n\nInputWorkspace(Input:req) *MatrixWorkspace*       Workspace containing the input data\n\nOutputWorkspace(Output:req) *MatrixWorkspace*       The name to give the output workspace\n\nParams(Input:req) *dbl list*       A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be followed by a comma and more widths and last boundary pairs. Optionally this can also be a single number, which is the bin width. In this case, the boundary of binning will be determined by minimum and maximum TOF values among all events, or previous binning boundary, in case of event Workspace, or non-event Workspace, respectively. Negative width values indicate logarithmic binning. \n\nPreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.\n\nFullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller than the step size\n\nIgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero\n"""
         doc = simpleapi.rebin.__doc__
         self.assertTrue(len(doc) > 0)
-        self.assertEquals(doc, expected_doc)
+        self.assertEqual(doc, expected_doc)
 
     def test_function_call_executes_correct_algorithm_when_passed_correct_args(self):
         wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
@@ -164,7 +172,7 @@ class SimpleAPITest(unittest.TestCase):
         self.assertTrue( wsname_box in mtd )
 
         self.assertTrue( isinstance(query, tuple) )
-        self.assertEquals( 2, len(query) )
+        self.assertEqual( 2, len(query) )
 
         self.assertTrue( isinstance(query[0], ITableWorkspace) )
         self.assertTrue( isinstance(query[1], ITableWorkspace) )
@@ -346,8 +354,8 @@ class SimpleAPITest(unittest.TestCase):
 
     def _is_initialized_test(self, alg, version, expected_class, expected_child):
         self.assertTrue(alg.isInitialized())
-        self.assertEquals(expected_child,alg.isChild())
-        self.assertEquals(alg.version(), version)
+        self.assertEqual(expected_child,alg.isChild())
+        self.assertEqual(alg.version(), version)
         self.assertTrue(isinstance(alg, expected_class))
 
     def test_validate_inputs_with_errors_stops_algorithm(self):

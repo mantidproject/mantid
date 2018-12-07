@@ -32,7 +32,7 @@ Improvements
 - The Fit Single Spectrum buttons in the Data Analysis tabs MSDFit, ConvFit, I(Q,t)Fit and F(Q)Fit are now disabled
   during fitting.
 - When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle
-  Fit Types are selected in the ConvFit Tab, the Q values are retrieved from the workspaces, preventing a crash 
+  Fit Types are selected in the ConvFit Tab, the Q values are retrieved from the workspaces, preventing a crash
   when plotting a guess.
 - The Plot buttons in MSDFit and F(Q)Fit are disabled after a Run when the result workspace only has one
   data point to plot.
@@ -42,17 +42,17 @@ Improvements
 - In the I(Q,t) Tab, it is now possible to select which spectrum you want to plot for Plot Spectrum.
 - In the I(Q,t) Tab, it is now possible to select a range of spectra for a Tiled Plot. The interface allows a
   maximum of 18 plots.
-- The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed. 
+- The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed.
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
 
 Bugfixes
 ########
 
-- The parameter values for a selected spectrum are now updated properly when a Fit is run using the Fit String 
+- The parameter values for a selected spectrum are now updated properly when a Fit is run using the Fit String
   option in ConvFit.
 - An unexpected crash is prevented when Plot Current Preview is clicked when no data is loaded. A meaningful error
   message is now displayed.
-- The Probability Density Functions (PDF) workspaces for the FABADA minimiser in ConvFit no longer overwrite each other. 
+- The Probability Density Functions (PDF) workspaces for the FABADA minimiser in ConvFit no longer overwrite each other.
   Various other improvements in the display of the FABADA PDF's have also been finished.
 - Loading a resolution file before a reduced file in ConvFit no longer causes an unexpected error.
 - A bug where fixed parameters don't remain fixed when using the FABADA minimizer in ConvFit has been corrected.
@@ -66,12 +66,14 @@ Data Corrections Interface
 Improvements
 ############
 
-- Added 'Interpolation' combobox to Calculate Monte Carlo Absorption. This allows the method of interpolation 
+- Added 'Interpolation' combobox to Calculate Monte Carlo Absorption. This allows the method of interpolation
   to be selected. Allowed values: ['Linear', 'CSpline'].
-- Added 'MaxScatterPtAttempts' spinbox to Calculate Monte Carlo Absorption. This sets the maximum number of 
+- Added 'MaxScatterPtAttempts' spinbox to Calculate Monte Carlo Absorption. This sets the maximum number of
   tries to be made to generate a scattering point.
 - In the Calculate Monte Carlo Absorption Tab, all of the options in the Monte Carlo section are now read from
   an instrument parameter files once a file has been loaded.
+- The option to choose which spectrum to Plot Spectrum for is now available in the ContainerSubtraction Tab and
+  ApplyAbsorptionCorrections Tab.
 
 
 Data Reduction Interface
@@ -80,11 +82,11 @@ Data Reduction Interface
 Improvements
 ############
 
-- Added 'Default' detector grouping option in ISISEnergyTransfer for TOSCA, to allow a default grouping 
+- Added 'Default' detector grouping option in ISISEnergyTransfer for TOSCA, to allow a default grouping
   using the grouping specified in the Instrument Parameter File.
 - ISISEnergyTransfer now allows overlapping detector grouping.
-- The Run button has been moved to be above the output options. The run button, save button and plotting options 
-  are now disabled while a tab is running or plotting.  
+- The Run button has been moved to be above the output options. The run button, save button and plotting options
+  are now disabled while a tab is running or plotting.
 - It is now possible to choose which spectrum to Plot Output for in the S(Q,w) Tab.
 
 
@@ -100,3 +102,31 @@ Improvements
 
 - The Run button is now above the output options.
 - The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- There is no longer a plot output option for 'Fit' in the Quasi Tab. The graph 'Fit.2' is also now plotted when you click
+  Plot Current Preview.
+- The sample logs are now copied over properly for the result workspace in the ResNorm tab.
+- Sqw files can now be loaded as Vanadium in the ResNorm interface.
+
+Bugfixes
+########
+
+- An unwanted 'Fit' plot is no longer plotted in ResNorm when you click `Plot` in the output options.
+
+
+Diffraction Interface
+---------------------
+
+Improvements
+############
+
+- The Run button is now above the output options.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+
+
+Tools Interface
+---------------
+
+Improvements
+############
+
+- The Run button has been moved in each of the Tools tabs, and is disabled while running.

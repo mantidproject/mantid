@@ -114,10 +114,6 @@ void IndirectFitAnalysisTab::setup() {
           SLOT(updateResultOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
-  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
-          this, SLOT(updateParameterValues()));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-          SLOT(updateParameterValues()));
 
   connect(m_plotPresenter.get(),
           SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
@@ -179,25 +175,35 @@ void IndirectFitAnalysisTab::connectSpectrumAndPlotPresenters() {
 }
 
 void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(setBrowserWorkspaceIndex(std::size_t)));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(setBrowserWorkspace(std::size_t)));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-          SLOT(setBrowserWorkspaceIndex(std::size_t)));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateAttributeValues()));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(updateAttributeValues()));
+  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
+          this, SLOT(updateParameterValues()));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+          SLOT(setBrowserWorkspaceIndex(std::size_t)));
+  // Update attributes before parameters as the parameters may depend on the
+  // attribute values
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(updateAttributeValues()));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+          SLOT(updateParameterValues()));
 
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)),
           m_plotPresenter.get(), SLOT(setStartX(double)));
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)),
           m_plotPresenter.get(), SLOT(setEndX(double)));
-  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)),
-          m_plotPresenter.get(), SLOT(setPlotSpectrum(int)));
+  connect(m_fitPropertyBrowser, SIGNAL(updatePlotSpectrum(int)),
+          m_plotPresenter.get(), SLOT(updatePlotSpectrum(int)));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+          SLOT(setBrowserWorkspaceIndex(int)));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+          SLOT(updateAttributeValues()));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+          SLOT(updateParameterValues()));
 
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(setBrowserStartX(double)));
@@ -258,7 +264,7 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
   m_dataPresenter = std::move(presenter);
 }
 
-void IndirectFitAnalysisTab::setPlotView(IndirectFitPlotView *view) {
+void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = Mantid::Kernel::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view);
 }
@@ -395,7 +401,7 @@ void IndirectFitAnalysisTab::updateBrowserFittingRange() {
 }
 
 void IndirectFitAnalysisTab::setBrowserWorkspace() {
-  if (m_fittingModel->numberOfWorkspaces() != 0) {
+  if (m_fittingModel->numberOfWorkspaces() > 0) {
     auto const name =
         m_fittingModel->getWorkspace(getSelectedDataIndex())->getName();
     m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
@@ -408,7 +414,11 @@ void IndirectFitAnalysisTab::setBrowserWorkspace(std::size_t dataIndex) {
 }
 
 void IndirectFitAnalysisTab::setBrowserWorkspaceIndex(std::size_t spectrum) {
-  m_fitPropertyBrowser->setWorkspaceIndex(boost::numeric_cast<int>(spectrum));
+  setBrowserWorkspaceIndex(boost::numeric_cast<int>(spectrum));
+}
+
+void IndirectFitAnalysisTab::setBrowserWorkspaceIndex(int spectrum) {
+  m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
 }
 
 void IndirectFitAnalysisTab::tableStartXChanged(double startX,
