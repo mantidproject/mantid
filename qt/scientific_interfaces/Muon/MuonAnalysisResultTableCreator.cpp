@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <regex>
 
-
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -27,14 +26,15 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 
 namespace {
-	/**
-	* Checks if a string is a numeric value
-	* @param string:: string to test
-	* @returns :: bool if it is a string
-	*/
-	bool isNumber(const std::string & string) {
-		return std::regex_match(string, std::regex(("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?")));
-	}
+/**
+ * Checks if a string is a numeric value
+ * @param string:: string to test
+ * @returns :: bool if it is a string
+ */
+bool isNumber(const std::string &string) {
+  return std::regex_match(
+      string, std::regex(("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?")));
+}
 /**
  * Converts QStringList -> std::vector<std::string>
  * @param qsl :: [input] QStringList to convert
@@ -139,13 +139,13 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   for (const auto &log : m_logs) {
 
     auto val = valMap[log];
-	auto dashIndex = val.toString().indexOf("-");
+    auto dashIndex = val.toString().indexOf("-");
 
     // multiple files use strings due to x-y format
-	if (dashIndex != 0 && dashIndex != -1) {
-		addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-	}
-	else if (isNumber(val.toString().toStdString()) && !log.endsWith(" (text)")) {
+    if (dashIndex != 0 && dashIndex != -1) {
+      addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    } else if (isNumber(val.toString().toStdString()) &&
+               !log.endsWith(" (text)")) {
       addColumnToResultsTable(table, wsParamsByLabel, log); //
 
     } else {
@@ -512,7 +512,8 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
-      } else if (isNumber(val.toString().toStdString()) && !log.endsWith(" (text)")) {
+      } else if (isNumber(val.toString().toStdString()) &&
+                 !log.endsWith(" (text)")) {
         valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
@@ -555,14 +556,15 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
   for (const auto &wsName : paramsByLabel[labelName].keys()) {
     const auto &logValues = m_logValues->value(wsName);
     const auto &val = logValues[log];
-	auto a = log.toStdString();
-	auto b = val.toString().toStdString();
+    auto a = log.toStdString();
+    auto b = val.toString().toStdString();
     // Special case: if log is time in sec, subtract the first start time
     if (log.endsWith(" (s)")) {
       auto seconds =
           val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
       valuesPerWorkspace.append(QString::number(seconds));
-    } else if (isNumber(val.toString().toStdString()) && !log.endsWith(" (text)")) {
+    } else if (isNumber(val.toString().toStdString()) &&
+               !log.endsWith(" (text)")) {
 
       valuesPerWorkspace.append(QString::number(val.toDouble()));
 
@@ -575,8 +577,8 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
   auto dashIndex = valuesPerWorkspace.front().toStdString().find_first_of("-");
   if (dashIndex != std::string::npos && dashIndex != 0) {
 
-	  addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-	  return;
+    addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    return;
   }
   const auto &min = valuesPerWorkspace.front().toDouble();
   const auto &max = valuesPerWorkspace.back().toDouble();
@@ -610,76 +612,71 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
     columnIndex++;
 
     // Get log values for this row and write in table
-	for (const auto &log : m_logs) {
-		QStringList valuesPerWorkspace;
-		for (const auto &wsName : paramsByLabel[labelName].keys()) {
-			const auto &logValues = m_logValues->value(wsName);
-			const auto &val = logValues[log];
+    for (const auto &log : m_logs) {
+      QStringList valuesPerWorkspace;
+      for (const auto &wsName : paramsByLabel[labelName].keys()) {
+        const auto &logValues = m_logValues->value(wsName);
+        const auto &val = logValues[log];
 
-			auto dashIndex = val.toString().indexOf("-");
-			// Special case: if log is time in sec, subtract the first start time
-			if (log.endsWith(" (s)")) {
-				auto seconds =
-					val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
-				valuesPerWorkspace.append(QString::number(seconds));
-			}
-			else if (dashIndex != 0 && dashIndex != -1) {
-				valuesPerWorkspace.append(logValues[log].toString());
-			}
-			else if (isNumber(val.toString().toStdString()) && !log.endsWith(" (text)")) {
+        auto dashIndex = val.toString().indexOf("-");
+        // Special case: if log is time in sec, subtract the first start time
+        if (log.endsWith(" (s)")) {
+          auto seconds =
+              val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
+          valuesPerWorkspace.append(QString::number(seconds));
+        } else if (dashIndex != 0 && dashIndex != -1) {
+          valuesPerWorkspace.append(logValues[log].toString());
+        } else if (isNumber(val.toString().toStdString()) &&
+                   !log.endsWith(" (text)")) {
 
-				valuesPerWorkspace.append(QString::number(val.toDouble()));
+          valuesPerWorkspace.append(QString::number(val.toDouble()));
 
-			}
-			else {
-				valuesPerWorkspace.append(logValues[log].toString());
-			}
-		}
+        } else {
+          valuesPerWorkspace.append(logValues[log].toString());
+        }
+      }
 
-		// Range of values - use string comparison as works for numbers too
-		// Why not use std::minmax_element? To avoid MSVC warning: QT bug 41092
-		// (https://bugreports.qt.io/browse/QTBUG-41092)
-		valuesPerWorkspace.sort();
+      // Range of values - use string comparison as works for numbers too
+      // Why not use std::minmax_element? To avoid MSVC warning: QT bug 41092
+      // (https://bugreports.qt.io/browse/QTBUG-41092)
+      valuesPerWorkspace.sort();
 
-		auto dashIndex = valuesPerWorkspace.front().toStdString().find_first_of("-");
-		if (dashIndex != std::string::npos && dashIndex != 0) {
-			std::ostringstream oss;
-			auto dad = valuesPerWorkspace.front().toStdString();
-			oss << valuesPerWorkspace.front().toStdString();
-			row << oss.str();
+      auto dashIndex =
+          valuesPerWorkspace.front().toStdString().find_first_of("-");
+      if (dashIndex != std::string::npos && dashIndex != 0) {
+        std::ostringstream oss;
+        auto dad = valuesPerWorkspace.front().toStdString();
+        oss << valuesPerWorkspace.front().toStdString();
+        row << oss.str();
 
-		}
-		else {
-			if (isNumber(valuesPerWorkspace.front().toStdString())) {
-				const auto &min = valuesPerWorkspace.front().toDouble();
-				const auto &max = valuesPerWorkspace.back().toDouble();
-				if (min == max) {
-					row << min;
-				}
-				else {
-					std::ostringstream oss;
-					oss << valuesPerWorkspace.front().toStdString() << "-"
-						<< valuesPerWorkspace.back().toStdString();
-					row << oss.str();
-				}
-			}
-			else {
-				const auto &front = valuesPerWorkspace.front().toStdString();
-				const auto &back = valuesPerWorkspace.back().toStdString();
-				if (front == back) {
-					row << front;
-				}
-				else {
-					std::ostringstream oss;
-					oss << valuesPerWorkspace[0].toStdString();
+      } else {
+        if (isNumber(valuesPerWorkspace.front().toStdString())) {
+          const auto &min = valuesPerWorkspace.front().toDouble();
+          const auto &max = valuesPerWorkspace.back().toDouble();
+          if (min == max) {
+            row << min;
+          } else {
+            std::ostringstream oss;
+            oss << valuesPerWorkspace.front().toStdString() << "-"
+                << valuesPerWorkspace.back().toStdString();
+            row << oss.str();
+          }
+        } else {
+          const auto &front = valuesPerWorkspace.front().toStdString();
+          const auto &back = valuesPerWorkspace.back().toStdString();
+          if (front == back) {
+            row << front;
+          } else {
+            std::ostringstream oss;
+            oss << valuesPerWorkspace[0].toStdString();
 
-					for (size_t k = 1; k < valuesPerWorkspace.size(); k++) {
-						oss << "-" << valuesPerWorkspace[k].toStdString();
-						row << oss.str();
-					}
-				}
-			}
-		}
+            for (size_t k = 1; k < valuesPerWorkspace.size(); k++) {
+              oss << "-" << valuesPerWorkspace[k].toStdString();
+              row << oss.str();
+            }
+          }
+        }
+      }
       columnIndex++;
     }
 
