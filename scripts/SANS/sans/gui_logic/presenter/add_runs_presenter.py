@@ -103,6 +103,5 @@ class AddRunsPagePresenter(object):
             self._sum_runs(run_selection,
                            settings,
                            self._sum_base_file_name(run_selection))
-            self._view.enable_sum()
         else:
             self._view.no_save_directory()

@@ -230,7 +230,7 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
         self.main_stacked_widget.setCurrentIndex(index)
 
     def _setup_add_runs_page(self):
-        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler()),
+        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler(), self.add_runs_page),
                                                        RunSelectorPresenterFactory('Runs To Sum',
                                                                                    SummableRunFinder(SANSFileInformationFactory())),
                                                        _make_run_summation_settings_presenter,
