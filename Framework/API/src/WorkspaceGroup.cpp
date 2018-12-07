@@ -119,7 +119,8 @@ void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
   }
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   // check it's not there already
-  const auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
+  const auto it =
+      std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
   if (it == m_workspaces.end()) {
     m_workspaces.push_back(workspace);
   } else {
