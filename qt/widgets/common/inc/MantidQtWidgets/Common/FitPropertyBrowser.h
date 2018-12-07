@@ -201,7 +201,7 @@ public:
   /// Returns true if the function is ready for a fit
   bool isFitEnabled() const;
 
-  /// Enable/disable the Fit button;
+  /// Enable/disable the Fit buttons;
   virtual void setFitEnabled(bool enable);
 
   /// Display a tip

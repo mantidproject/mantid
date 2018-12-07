@@ -2026,7 +2026,7 @@ bool FitPropertyBrowser::isUndoEnabled() const {
          compositeFunction()->nParams() == m_initialParameters.size();
 }
 
-/// Enable/disable the Fit button;
+/// Enable/disable the Fit buttons;
 void FitPropertyBrowser::setFitEnabled(bool enable) {
   m_fitActionFit->setEnabled(enable);
   m_fitActionSeqFit->setEnabled(enable);
