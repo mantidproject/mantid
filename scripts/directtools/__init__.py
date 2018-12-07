@@ -51,14 +51,21 @@ def _configurematplotlib(params):
     matplotlib.rcParams.update(params)
 
 
-def _denormalizeLine(line):
-    """Multiplies line workspace by the line width."""
-    axis = line.getAxis(1)
-    height = axis.getMax() - axis.getMin()
-    Ys = line.dataY(0)
-    Ys *= height
-    Es = line.dataE(0)
-    Es *= height
+def _chooseylabel(workspace, axes):
+    """Set the correct y label for profile axes."""
+    yUnit = workspace.YUnitLabel()
+    if yUnit == "X''(Q,E)":
+        axes.set_ylabel(r"$\chi''(Q,E)$")
+    elif yUnit == 'g^{neutron}(E) (arb. units)':
+        axes.set_ylabel(r'$g(E)$')
+    elif yUnit == 'g(E) (states/cm^-1)':
+        axes.set_ylabel('$g(E)$ (states/cm$^{-1}$)')
+    elif yUnit == 'g(E) (states/meV)':
+        axes.set_ylabel('$g(E)$ (states/meV)')
+    elif yUnit == 'Intensity':
+        axes.set_ylabel('$S(Q,E)$')
+    else:
+        axes.set_ylabel(yUnit)
 
 
 def _cutCentreAndWidth(line):
@@ -69,6 +76,30 @@ def _cutCentreAndWidth(line):
     centre = (aMin + aMax) / 2.
     width = aMax - aMin
     return centre, width
+
+
+def _denormalizeLine(line):
+    """Multiplies line workspace by the line width."""
+    axis = line.getAxis(1)
+    height = axis.getMax() - axis.getMin()
+    Ys = line.dataY(0)
+    Ys *= height
+    Es = line.dataE(0)
+    Es *= height
+
+
+def _dostitle(workspaces, figure):
+    """Add title to density-of-states figure."""
+    workspaces = _normwslist(workspaces)
+    if len(workspaces) == 1:
+        title = _singledatatitle(workspaces[0])
+    else:
+        title = _plottingtime()
+        logs = workspaces[0].run()
+        instrument = _instrumentName(logs)
+        if instrument is not None:
+            title = instrument + ' ' + title
+    figure.suptitle(title)
 
 
 def _energyLimits(workspaces):
@@ -152,17 +183,7 @@ def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     ws = _normws(ws)
     wsLabel = ''
     if not singleWS:
-        logs = ws.run()
-        run = _runNumber(logs)
-        if run is not None:
-            wsLabel = wsLabel + r'#{:06d} '.format(run)
-        T = _sampleTemperature(logs)
-        if T is not None:
-            T = _applyIfTimeSeries(T, numpy.mean)
-            wsLabel = wsLabel + r'$T$ = {:0.1f} K '.format(T)
-        ei = _incidentEnergy(logs)
-        if ei is not None:
-            wsLabel =  wsLabel + r'$E_i$ = {:0.2f} meV'.format(ei)
+        wsLabel = _workspacelabel(ws)
     cutLabel = ''
     if not singleCut or not singleWidth:
         cutLabel = quantity + r' = {:0.2f} $\pm$ {:1.2f}'.format(cut, width) + ' ' + units
@@ -190,6 +211,32 @@ def _plottingtime():
     return time.strftime('%d.%m.%Y %H:%M:%S')
 
 
+def _plotfirsthistograms(workspaces, labels, style, xscale, yscale):
+    """Plot the first histograms from given workspaces."""
+    workspaces = _normwslist(workspaces)
+    if not isinstance(labels, collections.Iterable) or isinstance(labels, str):
+        if labels is None:
+            labels = len(workspaces) * ['']
+        else:
+            labels = [labels]
+    if len(workspaces) != len(labels):
+        raise ValueError('workspaces and labels list lengths do not match.')
+    lineStyle = 'solid' if 'l' in style else 'None'
+    figure, axes = subplots()
+    markers = matplotlib.markers.MarkerStyle.filled_markers
+    markerStyle = 'None'
+    markerIndex = 0
+    for ws, label in zip(workspaces, labels):
+        if 'm' in style:
+            markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
+        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+    axes.set_xscale(xscale)
+    axes.set_yscale(yscale)
+    _horizontalLineAtZero(axes)
+    _chooseylabel(workspaces[0], axes)
+    return figure, axes
+
+
 def _mantidsubplotsetup():
     """Return the Mantid projection setup."""
     return {'projection': 'mantid'}
@@ -210,14 +257,6 @@ def _profiletitle(workspaces, cuts, scan, units, figure):
         if instrument is not None:
             title = instrument + ' ' + title
     figure.suptitle(title)
-
-
-def _profileytitle(workspace, axes):
-    """Set the correct y label for profile axes."""
-    if workspace.YUnit() == 'Dynamic susceptibility':
-        axes.set_ylabel(r"$\chi''(Q,E)$")
-    else:
-        axes.set_ylabel(r'$S(Q,E)$')
 
 
 def _removesingularity(ws, epsilon):
@@ -295,6 +334,24 @@ def _wavelength(logs):
         return None
 
 
+def _workspacelabel(workspace):
+    """Return workspace information useful for plot labels."""
+    workspace = _normws(workspace)
+    label = ''
+    logs = workspace.run()
+    run = _runNumber(logs)
+    if run is not None:
+        label = label + r'#{:06d} '.format(run)
+    T = _sampleTemperature(logs)
+    if T is not None:
+        T = _applyIfTimeSeries(T, numpy.mean)
+        label = label + r'$T$ = {:0.1f} K '.format(T)
+    ei = _incidentEnergy(logs)
+    if ei is not None:
+        label =  label + r'$E_i$ = {:0.2f} meV'.format(ei)
+    return label
+
+
 def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf, vertMax=numpy.inf):
     """Return slicing for a 2D numpy array limited by given min and max values.
 
@@ -364,7 +421,7 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     if doTranspose:
         outWS = Transpose(outWS, OutputWorkspace=outputName, EnableLogging=False)
         DeleteWorkspace('__transposed_SofQW_', EnableLogging=False)
-    outWS.setYUnit('Dynamic susceptibility')
+    outWS.setYUnitLabel("X''(Q,E)")
     return outWS
 
 
@@ -535,14 +592,41 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
         _horizontalLineAtZero(axes)
-    _profileytitle(workspaces[0], axes)
+    _chooseylabel(workspaces[0], axes)
     return figure, axes, cutWSList
+
+
+def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'):
+    """Plot density of state workspaces.
+
+    Plots the first histograms given DOS workspaces.
+
+    :param workspaces: a single workspace or a list thereof
+    :type workspaces: str, :class:`mantid.api.MatrixWorkspace` or a :class:`list` thereof
+    :param labels: a list of labels for the plot legend
+    :type labels: str, a :class:`list` of strings or None
+    :param style: plot style: 'l' for lines, 'm' for markers, 'lm' for both
+    :type style: str
+    :param xscale: horizontal axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type xscale: str
+    :param yscale: vertical axis scaling: 'linear', 'log', 'symlog', 'logit'
+    :type yscale: str
+    :returns: a tuple of (:mod:`matplotlib.Figure`, :mod:`matplotlib.Axes`)
+    """
+    workspaces = _normwslist(workspaces)
+    if labels is None:
+        labels = [_workspacelabel(ws) for ws in workspaces]
+    figure, axes = _plotfirsthistograms(workspaces, labels, style, xscale, yscale)
+    _dostitle(workspaces, figure)
+    if len(workspaces) > 1:
+        axes.legend()
+    return figure, axes
 
 
 def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='linear'):
     """Plot line profile workspaces.
 
-    Plots the first histograms from given workspaces.
+    Plots the first histograms from given cut workspaces.
 
     :param workspaces: a single workspace or a list thereof
     :type workspaces: str, :class:`mantid.api.MatrixWorkspace` or a :class:`list` thereof
@@ -557,26 +641,7 @@ def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='li
     :returns: a tuple of (:mod:`matplotlib.Figure`, :mod:`matplotlib.Axes`)
     """
     workspaces = _normwslist(workspaces)
-    if not isinstance(labels, collections.Iterable) or isinstance(labels, str):
-        if labels is None:
-            labels = len(workspaces) * ['']
-        else:
-            labels = [labels]
-    if len(workspaces) != len(labels):
-        raise ValueError('workspaces and labels list lengths do not match.')
-    lineStyle = 'solid' if 'l' in style else 'None'
-    figure, axes = subplots()
-    markers = matplotlib.markers.MarkerStyle.filled_markers
-    markerStyle = 'None'
-    markerIndex = 0
-    for ws, label in zip(workspaces, labels):
-        if 'm' in style:
-            markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
-        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
-    axes.set_xscale(xscale)
-    axes.set_yscale(yscale)
-    _horizontalLineAtZero(axes)
-    _profileytitle(workspaces[0], axes)
+    figure, axes = _plotfirsthistograms(workspaces, labels, style, xscale, yscale)
     xUnit = workspaces[0].getAxis(0).getUnit().unitID()
     if xUnit == 'DeltaE':
         _finalizeprofileQ(workspaces, axes)
