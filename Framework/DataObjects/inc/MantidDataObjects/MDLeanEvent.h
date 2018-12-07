@@ -69,9 +69,9 @@ struct uint96_t {
 
 template <>
 struct MortonIndex<12> {
-  using intType = uint32_t;
+  using intType = uint16_t;
 //  using type = uint96_t;
-  using type = boost::multiprecision::uint128_t;
+  using type = uint64_t;
 };
 
 template <>
