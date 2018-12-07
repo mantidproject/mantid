@@ -352,7 +352,8 @@ class SANSILLReduction(PythonAlgorithm):
                         if instrument in ['D22', 'D22lr', 'D33']:
                             self.log().information('Performing parallax correction')
                             if instrument == 'D33':
-                                components = ['back_detector', 'front_detector_top', 'front_detector_bottom', 'front_detector_left', 'front_detector_right']
+                                components = ['back_detector', 'front_detector_top', 'front_detector_bottom',
+                                              'front_detector_left', 'front_detector_right']
                             else:
                                 components = ['detector']
                             ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
