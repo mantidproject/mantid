@@ -76,7 +76,8 @@ public:
         "prefix>" // Same regex from facilities.xml, lots of "\"
                   // character escaping.
         "<windows "
-        "replacement=\"\\\\isis.cclrc.ac.uk\\inst$\\Instruments$\"></windows>"
+        "replacement=\"\\\\\\\\isis\\.cclrc\\.ac\\.uk\\\\inst\\$"
+        "\\\\Instruments\\$\"></windows>"
         "<linux replacement=\"/archive\"></linux>"
         "<mac replacement=\"/archive\"></mac>"
         "</filelocation>"
