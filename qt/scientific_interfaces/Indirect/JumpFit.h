@@ -38,11 +38,10 @@ protected:
   void setSaveResultEnabled(bool enabled) override;
 
 private slots:
-  void updateParameterFitTypes();
+  void updateAvailableFitTypes();
 
 private:
-  void addEISFFunctionsToFitTypeComboBox();
-  void addWidthFunctionsToFitTypeComboBox();
+	void addFunctions(std::vector<std::string> const &functions);
 
   void setPlotResultIsPlotting(bool plotting);
   void setButtonsEnabled(bool enabled);
