@@ -62,7 +62,7 @@ class StateGuiModel(object):
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def compatibility_mode(self):
-        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=False)
+        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=True)
 
     @compatibility_mode.setter
     def compatibility_mode(self, value):

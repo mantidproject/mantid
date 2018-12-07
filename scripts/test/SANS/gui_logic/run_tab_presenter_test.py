@@ -148,7 +148,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_max == 15.)
-        self.assertFalse(view.compatibility_mode)
+        self.assertTrue(view.compatibility_mode)
         self.assertTrue(view.show_transmission)
 
         # Assert that Beam Centre View is updated correctly
@@ -804,7 +804,6 @@ class RunTabPresenterTest(unittest.TestCase):
                       'test_file', '', '1.0', '']
         presenter.on_row_inserted(0, test_row_0)
 
-
         presenter.notify_progress(0, [0.0], [1.0])
 
         self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
@@ -826,6 +825,52 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
         self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, '')
+
+    def test_that_process_selected_does_nothing_if_no_states_selected(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[])
+        presenter.set_view(view)
+        presenter._process_rows = mock.MagicMock()
+
+        presenter.on_process_selected_clicked()
+        self.assertEqual(
+            presenter._process_rows.call_count, 0,
+            "Expected presenter._process_rows to not have been called. Called {} times.".format(
+                presenter._process_rows.call_count))
+
+    def test_that_process_selected_only_processes_selected_rows(self):
+        # Naive test. Doesn't check that we are processing the correct processed rows,
+        # just that we are processing the same number of rows as we have selected.
+        # This would only really fail if on_process_selected_clicked and on_process_all_clicked 
+        # get muddled-up
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+        
+        presenter.set_view(view)
+        presenter._table_model.reset_row_state = mock.MagicMock()
+
+        presenter.on_process_selected_clicked()
+        self.assertEqual(
+            presenter._table_model.reset_row_state.call_count, 3,
+            "Expected reset_row_state to have been called 3 times. Called {} times.".format(
+                presenter._table_model.reset_row_state.call_count))
+        
+    def test_that_process_all_ignores_selected_rows(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+        
+        presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
+        presenter.set_view(view)
+        presenter._table_model.reset_row_state = mock.MagicMock()
+        
+        presenter.on_process_all_clicked()
+        self.assertEqual(
+            presenter._table_model.reset_row_state.call_count, 7,
+            "Expected reset_row_state to have been called 7 times. Called {} times.".format(
+                presenter._table_model.reset_row_state.call_count))
 
     @staticmethod
     def _clear_property_manager_data_service():
