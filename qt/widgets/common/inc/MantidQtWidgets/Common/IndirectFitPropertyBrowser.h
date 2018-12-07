@@ -133,7 +133,7 @@ public:
 
   void setWorkspaceIndex(int i) override;
 
-  void updatePlotGuess(Mantid::API::MatrixWorkspace_sptr sampleWorkspace);
+  void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
 
 public slots:
   void fit() override;

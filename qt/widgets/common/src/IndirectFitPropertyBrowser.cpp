@@ -818,7 +818,7 @@ void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
  * @param sampleWorkspace :: The workspace loaded as sample
  */
 void IndirectFitPropertyBrowser::updatePlotGuess(
-    MatrixWorkspace_sptr sampleWorkspace) {
+    MatrixWorkspace_const_sptr sampleWorkspace) {
   if (sampleWorkspace && compositeFunction()->nFunctions() > 0)
     setPeakToolOn(true);
   else
