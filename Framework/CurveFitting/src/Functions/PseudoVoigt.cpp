@@ -28,10 +28,10 @@ DECLARE_FUNCTION(PseudoVoigt)
  * @brief PseudoVoigt::init declare peak parameters
  */
 void PseudoVoigt::init() {
-  declareParameter("Mixing", 1.0);
-  declareParameter("Intensity");
-  declareParameter("PeakCentre");
-  declareParameter("FWHM");
+  declareParameter("Mixing", 0.5);
+  declareParameter("Intensity", 1.);
+  declareParameter("PeakCentre", 0.);
+  declareParameter("FWHM", 1.);
 
   auto mixingConstraint =
       Kernel::make_unique<BoundaryConstraint>(this, "Mixing", 0.0, 1.0, true);
@@ -42,6 +42,10 @@ void PseudoVoigt::init() {
       Kernel::make_unique<BoundaryConstraint>(this, "FWHM", 1.E-20, true);
   fwhm_constraint->setPenaltyFactor(1e9);
   addConstraint(std::move(fwhm_constraint));
+
+  // init the peak height setup parameters
+  m_user_set_height = false; // if user set a peak height
+  m_height = 1.;             // peak height set by user
 }
 
 /** calculate pseudo voigt
@@ -133,6 +137,16 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
   }
 }
 
+void PseudoVoigt::setParameter(size_t i, const double &value,
+                               bool explicitlySet) {
+  API::IPeakFunction::setParameter(i, value, explicitlySet);
+}
+
+void PseudoVoigt::setParameter(const std::string &name, const double &value,
+                               bool explicitlySet) {
+  API::IPeakFunction::setParameter(name, value, explicitlySet);
+}
+
 /** calculate effective parameter: height
  * @return
  */
@@ -146,9 +160,32 @@ double PseudoVoigt::height() const {
   return height;
 }
 
+/** set non-native parameter peak height
+ * @brief PseudoVoigt::setHeight
+ * @param h
+ */
 void PseudoVoigt::setHeight(const double h) {
-  double intensity = h * 0.5; // FIXME - This is not correct!
-  setParameter("Intensity", intensity);
+  m_height = h;
+  m_user_set_height = true;
+
+  double gamma = getParameter("FWHM");
+  double eta = getParameter("Mixing");
+  double peak_intensity =
+      m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
+
+  setParameter("Intensity", peak_intensity);
+}
+
+void PseudoVoigt::setFwhm(const double w) {
+  setParameter("FWHM", w);
+
+  // recalcualte intensity
+  if (m_user_set_height) {
+    double eta = getParameter("Mixing");
+    double peak_intensity =
+        m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * w);
+    setParameter("Intensity", peak_intensity);
+  }
 }
 
 /** a_G = 2/gamma * sqrt(ln2/pi)

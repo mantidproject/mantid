@@ -42,10 +42,17 @@ public:
 
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
   void setHeight(const double h) override;
-  void setFwhm(const double w) override { setParameter("FWHM", w); }
+  void setFwhm(const double w) override;
 
   std::string name() const override { return "PseudoVoigt"; }
   const std::string category() const override { return "Peak"; }
+
+  /// Set i-th parameter
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
+  /// set by name
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySet = true) override;
 
 protected:
   void functionLocal(double *out, const double *xValues,
@@ -66,6 +73,9 @@ private:
   inline double cal_lorentzian(const double gamma_div_2,
                                const double gammasq_div_4,
                                const double xdiffsq) const;
+
+  bool m_user_set_height;
+  double m_height;
 };
 
 } // namespace Functions
