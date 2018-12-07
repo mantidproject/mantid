@@ -47,6 +47,9 @@ public:
                     bool ignoreZeros) override;
   void runConversion(API::Progress *pProgress) override;
 
+
+  static unsigned totalEventsConverted; //TODO tmp
+
 protected:
   DataObjects::EventWorkspace_const_sptr m_EventWS;
 private:
@@ -184,7 +187,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
   std::vector<MDEventType<ND>> mdEvents;
   mdEvents.reserve(numEvents);
 
-#pragma omp parallel for
+//#pragma omp parallel for
   for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra; ++workspaceIndex) {
     const auto& pws{m_OutWSWrapper->pWorkspace()};
     const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
@@ -222,15 +225,21 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
       if (!localQConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
         continue; // skip ND outside the range
 
-      MDEventType<ND> mdEvent = MDEventMaker<ND, MDEventType>::
-          makeMDEvent(signal, errorSq, runIndexLoc, detID, &locCoord[0]);
+      mdEventsForSpectrum.emplace_back(MDEventMaker<ND, MDEventType>::
+          makeMDEvent(signal, errorSq, runIndexLoc, detID, &locCoord[0]));
 
+      if(totalEventsConverted++ < 5) {
+        for (unsigned d = 0; d < ND; ++d) {
+          std::cerr << mdEventsForSpectrum.back().getCenter(d) << " ";
+        }
+        std::cerr << "\n";
+      }
 
       // Filter events before adding to the ndEvents vector to add in workspace
       // The bounds of the resulting WS have to be already defined
       bool isInOutWSBox = true;
       for(size_t ax = 0; ax < ND; ++ ax) {
-        const coord_t& coord{mdEvent.getCenter(ax)};
+        const coord_t& coord{mdEventsForSpectrum.back().getCenter(ax)};
         if (
          coord < pws->getDimension(ax)->getMinimum() ||
          coord >pws->getDimension(ax)->getMaximum()
@@ -238,11 +247,11 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
           isInOutWSBox = false;
       }
 
-      if(isInOutWSBox)
-        mdEventsForSpectrum.emplace_back();
+      if(!isInOutWSBox)
+        mdEventsForSpectrum.pop_back();
     }
 
-#pragma omp critical
+//#pragma omp critical
     {
       /* Add to event list */
       mdEvents.insert(mdEvents.cend(), mdEventsForSpectrum.begin(),
@@ -266,10 +275,11 @@ void ConvToMDEventsWSIndexing::convertToNativeBoxStructureRecursive(
   for(unsigned i = 0; i < sChildren.size(); ++i) {
     children.reserve(sChildren.size());
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
-    if(sChildren[i].isLeaf())
+    if(sChildren[i].isLeaf()) {
       children.emplace_back(makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::LEAF, space, bc, level));
-    else
+    } else {
       children.emplace_back(makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::GRID, space, bc, level));
+    }
   }
   nBoxCur.setChildren(children, 0, children.size());
   for(unsigned i = 0; i < children.size(); ++i) {
@@ -292,10 +302,6 @@ convertToNativeBoxStructure(const ConvToMDEventsWSIndexing::BoxStructureType<ND,
         static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND> *>
         (makeMDBox<ND, MDEventType>(mdBox, ConvToMDEventsWSIndexing::GRID, space, bc, 0))
         );
-    auto extents = res->getExtents(3);
-    std::cerr << "Box bounds: \n";
-    for(unsigned i = 0; i < 3; ++i)
-      std::cerr << extents.getMin() << " " << extents.getMax() << " ";
     convertToNativeBoxStructureRecursive<ND, MDEventType>(mdBox, *res, space, bc, 1);
     return res;
   }
@@ -308,7 +314,7 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(API::Progress *pProgres
                                                               const std::vector<MDEventType<ND>> &mdEvents) {
   auto rootMdBox =
       std::make_unique<ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>>(mdEvents.cbegin(), mdEvents.cend());
-  rootMdBox->distributeEvents(bc->getSplitThreshold(), bc->getMaxDepth());
+  rootMdBox->distributeEvents(bc->getSplitThreshold(), bc->getMaxDepth() + 1);
 
 
   std::cerr << bc->getSplitThreshold() << "    " << bc->getMaxDepth() << "\n";
@@ -353,6 +359,11 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
     mdEvents[i].retrieveCoordinates(space);
 
   m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure<ND, MDEventType>(*(rootMdBox.get()), space, bc));
+
+
+
+
+  std::cerr << "Structure box has " << rootMdBox->allBoxes().size() << " boxes\n";
   std::cerr << "Structure box has " << rootMdBox->leafs().size() << " leafs\n";
 
   std::vector<API::IMDNode *> tmp;
