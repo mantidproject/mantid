@@ -14,19 +14,17 @@ from mantid.api import MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, Workspace2D
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockWorkspace
 
 
 class MatrixWorkspaceDisplayModel(object):
     SPECTRUM_PLOT_LEGEND_STRING = '{}-{}'
     BIN_PLOT_LEGEND_STRING = '{}-bin-{}'
 
+    ALLOWED_WORKSPACE_TYPES = [MatrixWorkspace, Workspace2D, EventWorkspace]
+
     def __init__(self, ws):
-        if not isinstance(ws, MatrixWorkspace) \
-                and not isinstance(ws, Workspace2D) \
-                and not isinstance(ws, EventWorkspace) \
-                and not isinstance(ws, MockWorkspace):
-            raise ValueError("The workspace type is not supported: {0}".format(type(ws)))
+        if not any(isinstance(ws, allowed_type) for allowed_type in self.ALLOWED_WORKSPACE_TYPES):
+            raise ValueError("The workspace type is not supported: {0}".format(type(ws).__name__))
 
         self._ws = ws
 
@@ -35,5 +33,5 @@ class MatrixWorkspaceDisplayModel(object):
 
     def get_item_model(self):
         return MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x), \
-               MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y), \
-               MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e)
+            MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y), \
+            MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e)
