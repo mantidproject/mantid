@@ -94,9 +94,9 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
     def test_run_string_to_list_throws_for_incorrectly_placed_range_separator(self):
         run_strings = ["-1,2,3", "1,2,3-"]
         for run_string in run_strings:
-            with self.assertRaises(IndexError) as context:
+            with self.assertRaises(IndexError) as error:
                 utils.run_string_to_list(run_string)
-            self.assertTrue(run_string + " is not a valid run string" in str(context.exception))
+            self.assertTrue(run_string + " is not a valid run string" in str(error.exception))
 
     def test_run_string_to_list_throws_for_incorrectly_placed_delimiter(self):
         run_strings = [",1,2,3", "1,2,3,"]
