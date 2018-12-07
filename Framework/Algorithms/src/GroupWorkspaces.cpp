@@ -67,6 +67,16 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   const std::vector<std::string> inputWorkspaces =
       getProperty("InputWorkspaces");
   std::string globExpression = getProperty("GlobExpression");
+  std::string outputWorkspace = getProperty("OutputWorkspace");
+
+  // Peform a check that inputworkspaces cannot contain a workspace with the
+  // same name as the group/output workspace
+  for (const auto &ws : inputWorkspaces) {
+    if (ws == outputWorkspace) {
+      results["OutputWorkspace"] = "The Output workspace has the same name as "
+                                   "one of the input workspaces";
+    }
+  }
 
   for (auto it = globExpression.begin(); it < globExpression.end(); ++it) {
     if (*it == '\\') {

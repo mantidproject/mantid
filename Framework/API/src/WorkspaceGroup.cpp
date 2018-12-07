@@ -113,9 +113,13 @@ void WorkspaceGroup::sortMembersByName() {
  * workspace already exists give a warning.
  */
 void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
+  if (this->getName() != "" && workspace->getName() == this->getName()) {
+    throw std::runtime_error(
+        "A workspace cannot have the same name as it's group");
+  }
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   // check it's not there already
-  auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
+  const auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
   if (it == m_workspaces.end()) {
     m_workspaces.push_back(workspace);
   } else {

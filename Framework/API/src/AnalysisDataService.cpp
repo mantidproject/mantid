@@ -83,6 +83,19 @@ void AnalysisDataServiceImpl::add(
   auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   if (!group)
     return;
+
+  // Perform a check to confirm that a group being added's children don't
+  // already exist in the ADS
+  for (size_t i = 0; i < group->size(); ++i) {
+    const auto &ws = group->getItem(i);
+    const std::string &wsName = ws->getName();
+
+    if (doesExist(wsName) && !(ws == workspace)) {
+      throw std::runtime_error("Attempted to add a group which contains a "
+                               "child that already exists in the ADS");
+    }
+  }
+
   group->observeADSNotifications(true);
   for (size_t i = 0; i < group->size(); ++i) {
     auto ws = group->getItem(i);
@@ -130,7 +143,11 @@ void AnalysisDataServiceImpl::addOrReplace(
     if (wsName.empty()) {
       wsName = name + "_" + std::to_string(i + 1);
     } else if (doesExist(wsName)) { // if ws is already there do nothing
-      wsName.clear();
+      // Also compare pointer of the group item and the ws item if they are the
+      // same then don't clear the wsName
+      if (!(ws == workspace)) {
+        wsName.clear();
+      }
     }
     // add member workspace if needed
     if (!wsName.empty()) {
@@ -237,6 +254,11 @@ void AnalysisDataServiceImpl::addToGroup(const std::string &groupName,
     throw std::runtime_error("Workspace " + groupName +
                              " is not a workspace group.");
   }
+
+  if (groupName == wsName) {
+    throw std::runtime_error("The group name and workspace name are the same");
+  }
+
   auto ws = retrieve(wsName);
   group->addWorkspace(ws);
   notificationCenter.postNotification(new GroupUpdatedNotification(groupName));
