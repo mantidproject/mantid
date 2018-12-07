@@ -13,7 +13,7 @@ import inspect
 import six
 import traceback
 
-from qtpy.QtCore import QTimer
+from qtpy.QtCore import QTimer, QMetaObject, Qt
 from qtpy.QtWidgets import QApplication, QWidget
 
 from mantidqt.utils.qt.plugins import setup_library_paths
@@ -51,12 +51,13 @@ class ScriptRunner(object):
     Generator scripts can yield a positive number. It is treated as the number of seconds
     before the next iteration is called. During the wait time the event loop is running.
     """
-    def __init__(self, script, widget, close_on_finish, is_cli=False):
+    def __init__(self, script, widget, close_on_finish, script_timer, is_cli=False):
         """
         Initialise a runner.
         :param script: The script to run.
         :param widget: The widget to test.
         :param close_on_finish: If true close the widget after the script has finished.
+        :param script_timer: QTimer that schedules this ScriptRunner. It must be stopped after the script finishes.
         :param is_cli: If true the script is to be run from a command line tool. Exceptions are
             treated slightly differently in this case.
         """
@@ -71,6 +72,7 @@ class ScriptRunner(object):
         self.parent_iter = None
         self.pause_timer = QTimer()
         self.pause_timer.setSingleShot(True)
+        self.script_timer = script_timer
 
     def __call__(self):
         global app
@@ -78,7 +80,7 @@ class ScriptRunner(object):
             try:
                 if self.script_iter is None:
                     if self.close_on_finish:
-                        self.widget.close()
+                        QMetaObject.invokeMethod(self.widget, 'close', Qt.QueuedConnection)
                     return
                 # Run test script until the next 'yield'
                 ret = self.script_iter.next()
@@ -93,8 +95,11 @@ class ScriptRunner(object):
                 if self.parent_iter is not None:
                     self.script_iter = self.parent_iter
                     self.parent_iter = None
-                elif self.close_on_finish:
-                    self.widget.close()
+                else:
+                    self.script_iter = None
+                    self.script_timer.stop()
+                    if self.close_on_finish:
+                        QMetaObject.invokeMethod(self.widget, 'close', Qt.QueuedConnection)
             except Exception as e:
                 self.widget.close()
                 traceback.print_exc()
@@ -127,6 +132,10 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
         and the iterations of the main script continue.
     :param attach_debugger: If true pause to let the user to attache a debugger before starting
         application.
+    :param pause: A number of seconds to wait between the iterations.
+    :param close_on_finish: An option to close the widget after the script finishes.
+    :param is_cli: If true the script is to be run from a command line tool. Exceptions are
+        treated slightly differently in this case.
     """
     global app
     if attach_debugger:
@@ -149,13 +158,13 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
     script_runner = None
     if script is not None:
         try:
-            script_runner = ScriptRunner(script, widget, close_on_finish=close_on_finish, is_cli=is_cli)
             timer = QTimer()
+            script_runner = ScriptRunner(script, widget, close_on_finish=close_on_finish, script_timer=timer, is_cli=is_cli)
             if pause != 0:
                 timer.setInterval(pause * 1000)
-            # Zero-timeout timer runs idle() between Qt events
-            timer.timeout.connect(script_runner)
-            timer.start()
+            # Zero-timeout timer runs script_runner() between Qt events
+            timer.timeout.connect(script_runner, Qt.QueuedConnection)
+            QMetaObject.invokeMethod(timer, 'start', Qt.QueuedConnection)
         except Exception as e:
             if not is_cli:
                 raise e
