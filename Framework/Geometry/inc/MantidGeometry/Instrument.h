@@ -262,7 +262,7 @@ private:
 
   /// Hold a list of places where a chopper can be situated
   /// A pointer so that parameterized instruments are still fast to create.
-  std::vector<const ObjComponent *> *m_chopperPoints;
+  std::shared_ptr<std::vector<const ObjComponent *>> m_chopperPoints;
 
   /// Purpose to hold copy of samplePos component. For now assumed to be just
   /// one component
