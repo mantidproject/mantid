@@ -204,6 +204,10 @@ class SANSILLReduction(PythonAlgorithm):
                 raise RuntimeError('Normalise to timer requested, but timer information is not available.')
 
     def _dead_time_correction(self, ws):
+        """
+            Performs the dead time correction
+            @param ws : the input workspace
+        """
 
         instrument = mtd[ws].getInstrument()
         if instrument.hasParameter('tau'):
