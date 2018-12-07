@@ -16,7 +16,7 @@ import os
 from qtpy.QtWidgets import QMessageBox
 
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
-from mantid.api import AnalysisDataService as ADS, AnalysisDataServiceObserver
+from mantid.api import AnalysisDataService as ADS
 from mantidqt.project.project import Project
 
 if sys.version_info.major == 3:
