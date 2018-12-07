@@ -341,6 +341,18 @@ public:
   MortonT min() const { return m_lowerBound; }
   MortonT max() const { return m_upperBound; }
 
+  std::vector<std::reference_wrapper<MDBox>> allBoxes() {
+    std::vector<std::reference_wrapper<MDBox>> res;
+    size_t idx = 0;
+    res.emplace_back(*this);
+    while(idx != res.size()) {
+      for(auto& ch: res[idx].get().children())
+        res.emplace_back(ch);
+      ++idx;
+    }
+    return res;
+  }
+
   size_t eventCount() const { return std::distance(m_eventBegin, m_eventEnd); }
   ZCurveIterator eventBegin() const { return m_eventBegin; };
   ZCurveIterator eventEnd() const { return m_eventEnd; };
