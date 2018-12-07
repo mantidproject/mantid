@@ -5,7 +5,7 @@
             name="CG2"
             valid-from="2016-04-22 00:00:00"
             valid-to="2100-01-31 23:59:59"
-		        last-modified="2018-12-06 17:51:00.000">
+		        last-modified="2018-12-07 13:07:00.000">
 
   <defaults>
     <length unit="metre"/>
@@ -42,7 +42,7 @@
 		<id val="1" />
 	</idlist>
 
-	<!--MONITOR 2 -->
+	<!--MONITOR 2: Timer -->
 	<component type="timers" idlist="timer1">
 		<location/>
 	</component>
@@ -76,9 +76,16 @@
 
 <!-- ***************************************************************** -->
 <!-- Main Detector -->
-<component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
-    <location z='5' />
-</component>
+	<component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
+		<location name="detector1">
+			<parameter name="z">
+				<logfile eq="0.001*value" id="sdd"/>
+			</parameter>
+			<parameter name="x">
+				<logfile eq="0.001*value" id="detector-translation"/>
+			</parameter>
+		</location>
+	</component>
 
 <!-- Detector: -->
 <type name="detector1" is="rectangular_detector" type="pixel"
@@ -87,16 +94,6 @@
     <properties />
 </type>
 
-<!-- Pixel for Detector-->
-<!-- <type is="detector" name="pixel">
-    <cylinder id="cyl-approx">
-      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
-      <axis y="1.0" x="0.0" z="0.0"/>
-      <radius val="0.00275"/>
-      <height val="0.0043"/>
-    </cylinder>
-    <algebra val="cyl-approx"/>
-</type> -->
 	<!-- Pixel for Detectors: 5.5x4.3 mm -->
 	<type is="detector" name="pixel">
 		<cuboid id="pixel-shape">

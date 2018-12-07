@@ -71,7 +71,14 @@
 	<!-- ***************************************************************** -->
 	<!-- Main Detector -->
 	<component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
-		<location z='6' />
+		<location name="detector1">
+			<parameter name="z">
+				<logfile eq="0.001*value" id="sdd"/>
+			</parameter>
+			<parameter name="x">
+				<logfile eq="0.001*value" id="detector-translation"/>
+			</parameter>
+		</location>
 	</component>
 	
 	<!-- Detector: -->
