@@ -24,7 +24,7 @@ class MatrixWorkspaceDisplayModel(object):
 
     def __init__(self, ws):
         if not any(isinstance(ws, allowed_type) for allowed_type in self.ALLOWED_WORKSPACE_TYPES):
-            raise ValueError("The workspace type is not supported: {0}".format(type(ws).__name__))
+            raise ValueError("The workspace type is not supported: {0}".format(ws))
 
         self._ws = ws
 
@@ -32,6 +32,6 @@ class MatrixWorkspaceDisplayModel(object):
         return self._ws.name()
 
     def get_item_model(self):
-        return MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x), \
-            MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y), \
-            MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e)
+        return MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x),
+        MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y),
+        MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e)
