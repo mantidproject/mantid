@@ -10,10 +10,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
 
@@ -90,10 +90,11 @@ public:
   AnalysisDataServiceObserverTest()
       : ads(AnalysisDataService::Instance()),
         m_mockInheritingClass(std::make_unique<MockInheritingClass>()) {
-          // Loads the framework manager
-          const auto &localFrameWorkManager = Mantid::API::FrameworkManager::Instance();
-          UNUSED_ARG(localFrameWorkManager)
-        }
+    // Loads the framework manager
+    const auto &localFrameWorkManager =
+        Mantid::API::FrameworkManager::Instance();
+    UNUSED_ARG(localFrameWorkManager)
+  }
 
   void setUp() override {
     ads.clear();
@@ -157,7 +158,7 @@ public:
     addWorkspaceToADS("dummy");
 
     m_mockInheritingClass->observeRename();
-    IAlgorithm_sptr alg = 
+    IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged(
             "RenameWorkspace");
     alg->initialize();
