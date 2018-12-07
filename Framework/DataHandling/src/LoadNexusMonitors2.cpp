@@ -467,7 +467,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
     return;
   }
 
-  WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
+  WorkspaceGroup_sptr wsGroup=boost::make_shared<WorkspaceGroup>();
   size_t yLength = m_multiPeriodCounts[0].size() / numPeriods;
   size_t xLength = yLength + 1;
   size_t numSpectra = m_workspace->getNumberHistograms();
@@ -653,7 +653,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     // Use event monitors and create event workspace
 
     // only used if using event monitors
-    EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
+    EventWorkspace_sptr eventWS = boost::make_shared<EventWorkspace>();
     eventWS->initialize(m_monitorInfo.size(), 1, 1);
 
     // Set the units
