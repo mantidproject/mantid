@@ -155,6 +155,10 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
         def on_cut_rows(self):
             pass
 
+        @abstractmethod
+        def on_compatibility_unchecked(self):
+            pass
+
     def __init__(self):
         """
         Initialise the interface
@@ -197,6 +201,8 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
 
         self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
         self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
+
+        self.event_binning_group_box.clicked.connect(self.on_compatibility_unchecked)
 
         # Attach validators
         self._attach_validators()
@@ -459,6 +465,9 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
 
     def _on_insert_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_insert_row())
+
+    def _on_compatibility_unchecked(self):
+        self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
 
     def _on_help_button_clicked(self):
         pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
@@ -1943,3 +1952,7 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
         self.data_processor_table.hideColumn(15)
         self.data_processor_table.hideColumn(16)
         self.data_processor_table.hideColumn(17)
+
+    def on_compatibility_unchecked(self):
+        if not self.event_binning_group_box.isChecked():
+            self._on_compatibility_unchecked()
