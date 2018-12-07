@@ -9,10 +9,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#import "MantidAPI/AnalysisDataServiceObserver.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
+#include "MantidAPI/FrameworkManager.h"
+
+using namespace Mantid::API;
 
 class MockInheritingClass : public Mantid::API::AnalysisDataServiceObserver {
 
+public:
   MockInheritingClass()
       : m_anyChangeHandleCalled(false), m_addHandleCalled(false),
         m_replaceHandleCalled(false), m_deleteHandleCalled(false),
@@ -26,65 +33,97 @@ class MockInheritingClass : public Mantid::API::AnalysisDataServiceObserver {
 
   void anyChangeHandle() override { m_anyChangeHandleCalled = true; }
   void addHandle(const std::string &wsName, const Workspace_sptr ws) override {
+    UNUSED_ARG(wsName)
+    UNUSED_ARG(ws)
     m_addHandleCalled = true;
   }
   void replaceHandle(const std::string &wsName,
                      const Workspace_sptr ws) override {
+    UNUSED_ARG(wsName)
+    UNUSED_ARG(ws)
     m_replaceHandleCalled = true;
   }
   void deleteHandle(const std::string &wsName,
                     const Workspace_sptr ws) override {
+    UNUSED_ARG(wsName)
+    UNUSED_ARG(ws)
     m_deleteHandleCalled = true;
   }
-  void clearHandle() { m_clearHandleCalled = true; }
-  void renameHandle(const std::string &wsName, const std::string &newName) {
+  void clearHandle() override { m_clearHandleCalled = true; }
+  void renameHandle(const std::string &wsName,
+                    const std::string &newName) override {
+    UNUSED_ARG(wsName)
+    UNUSED_ARG(newName)
     m_renameHandleCalled = true;
   }
-  void groupHandle(const std::string &wsName, const Workspace_sptr ws) {
+  void groupHandle(const std::string &wsName,
+                   const Workspace_sptr ws) override {
+    UNUSED_ARG(wsName)
+    UNUSED_ARG(ws)
     m_groupHandleCalled = true;
   }
-  void unGroupHandle(const std::string &wsName, const Workspace_sptr ws) {
+  void unGroupHandle(const std::string &wsName,
+                     const Workspace_sptr ws) override {
+    UNUSED_ARG(wsName)
+    UNUSED_ARG(ws)
     m_unGroupHandleCalled = true;
   }
-  void groupUpdateHandle(const std::string &wsName, const Workspace_sptr ws) {
+  void groupUpdateHandle(const std::string &wsName,
+                         const Workspace_sptr ws) override {
+    UNUSED_ARG(wsName)
+    UNUSED_ARG(ws)
     m_groupUpdateHandleCalled = true;
   }
 
+public:
   bool m_anyChangeHandleCalled, m_addHandleCalled, m_replaceHandleCalled,
       m_deleteHandleCalled, m_clearHandleCalled, m_renameHandleCalled,
       m_groupHandleCalled, m_unGroupHandleCalled, m_groupUpdateHandleCalled;
-}
+};
 
 class AnalysisDataServiceObserverTest : public CxxTest::TestSuite {
 private:
   AnalysisDataServiceImpl &ads;
   std::unique_ptr<MockInheritingClass> m_mockInheritingClass;
 
-  void setUp() {
+public:
+  AnalysisDataServiceObserverTest()
+      : ads(AnalysisDataService::Instance()),
+        m_mockInheritingClass(std::make_unique<MockInheritingClass>()) {
+          // Loads the framework manager
+          const auto &localFrameWorkManager = Mantid::API::FrameworkManager::Instance();
+          UNUSED_ARG(localFrameWorkManager)
+        }
+
+  void setUp() override {
     ads.clear();
-    m_mockInheritingClass = std::make_unique<MockInheritingClass>()
+    m_mockInheritingClass = std::make_unique<MockInheritingClass>();
   }
 
   void addWorkspaceToADS(std::string name = "dummy") {
-    CreateSampleWorkspace alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setPropertyValue("OutputWorkspace", name);
-    alg.execute();
+    IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "CreateSampleWorkspace");
+    alg->setChild(true);
+    alg->initialize();
+    alg->setPropertyValue("OutputWorkspace", name);
+    alg->execute();
+    MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+    ads.addOrReplace(name, ws);
   }
 
   void test_anyChangeHandle_is_called_on_add() {
     m_mockInheritingClass->observeAll();
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
 
-    TS_ASSERT(m_mockInheritingClass.m_anyChangeHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_anyChangeHandleCalled)
   }
 
   void test_addHandle_is_called_on_add() {
     m_mockInheritingClass->observeAdd();
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
 
-    TS_ASSERT(m_mockInheritingClass.m_addHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_addHandleCalled)
   }
 
   void test_deleteHandle_is_called_on_delete() {
@@ -93,91 +132,101 @@ private:
     m_mockInheritingClass->observeDelete();
     ads.remove("dummy");
 
-    TS_ASSERT(m_mockInheritingClass.m_deleteHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_deleteHandleCalled)
   }
 
   void test_replaceHandle_is_called_on_replace() {
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
 
     m_mockInheritingClass->observeReplace();
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
 
-    TS_ASSERT(m_mockInheritingClass.m_replaceHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_replaceHandleCalled)
   }
 
   void test_clearHandle_is_called_on_clear() {
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
 
     m_mockInheritingClass->observeClear();
     ads.clear();
 
-    TS_ASSERT(m_mockInheritingClass.m_clearHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_clearHandleCalled)
   }
 
   void test_renameHandle_is_called_on_rename() {
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
 
     m_mockInheritingClass->observeRename();
-    Mantid::Algorithms::RenameWorkspace alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "dummy");
-    alg.setPropertyValue("OutputWorkspace", "dummy2");
-    alg.execute();
+    IAlgorithm_sptr alg = 
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "RenameWorkspace");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", "dummy");
+    alg->setPropertyValue("OutputWorkspace", "dummy2");
+    alg->execute();
 
-    TS_ASSERT(m_mockInheritingClass.m_renameHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_renameHandleCalled)
   }
 
   void test_groupHandle_is_called_on_group_made() {
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
     addWorkspaceToADS("dummy2");
 
     m_mockInheritingClass->observeGroup();
 
-    Mantid::Algorithms::GroupWorkspaces alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", "dummy,dummy2");
-    alg.setPropertyValue("OutputWorkspace", "newGroup");
-    alg.execute();
+    IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "GroupWorkspaces");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
+    alg->setPropertyValue("OutputWorkspace", "newGroup");
+    alg->execute();
 
-    TS_ASSERT(m_mockInheritingClass.m_groupHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_groupHandleCalled)
   }
 
   void test_unGroupHandle_is_called_on_un_grouping() {
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
     addWorkspaceToADS("dummy2");
 
-    Mantid::Algorithms::GroupWorkspaces alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", "dummy,dummy2");
-    alg.setPropertyValue("OutputWorkspace", "newGroup");
-    alg.execute();
+    IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "GroupWorkspaces");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
+    alg->setPropertyValue("OutputWorkspace", "newGroup");
+    alg->execute();
 
     m_mockInheritingClass->observeUnGroup();
 
-    Mantid::Algorithms::UnGroupWorkspaces alg2;
-    alg2.initialize();
-    alg2.setPropertyValue("InputWorkspace", "newGroup");
-    alg.exectute();
+    IAlgorithm_sptr alg2 =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "UnGroupWorkspace");
+    alg2->initialize();
+    alg2->setPropertyValue("InputWorkspace", "newGroup");
+    alg2->execute();
 
-    TS_ASSERT(m_mockInheritingClass.m_unGroupHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_unGroupHandleCalled)
   }
 
   void test_groupUpdated_is_called_on_group_updated() {
-    addWorkspaceToADS();
+    addWorkspaceToADS("dummy");
     addWorkspaceToADS("dummy2");
     addWorkspaceToADS("dummy3");
 
-    Mantid::Algorithms::GroupWorkspaces alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", "dummy,dummy2");
-    alg.setPropertyValue("OutputWorkspace", "newGroup");
-    alg.execute();
+    IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "GroupWorkspaces");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
+    alg->setPropertyValue("OutputWorkspace", "newGroup");
+    alg->execute();
 
-    m_mockInheritingClass->observeGroup();
+    m_mockInheritingClass->observeGroupUpdate();
 
     ads.addToGroup("newGroup", "dummy3");
 
-    TS_ASSERT(m_mockInheritingClass.m_groupUpdateHandleCalled)
+    TS_ASSERT(m_mockInheritingClass->m_groupUpdateHandleCalled)
   }
 };
 

@@ -376,6 +376,7 @@ set ( TEST_FILES
 	AlgorithmProxyTest.h
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
+	AnalysisDataServiceObserverTest.h
 	AsynchronousTest.h
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
