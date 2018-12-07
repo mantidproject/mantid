@@ -26,7 +26,7 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument)
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
@@ -49,6 +49,24 @@ row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Process
                                RowState.Error: '#accbff'}
 
 
+def log_times(func):
+    """
+    Generic decorator to time the execution of the function and
+    print it to the logger.
+    """
+
+    def run(*args, **kwargs):
+        t0 = time.time()
+        result = func(*args, **kwargs)
+        t1 = time.time()
+        time_taken = t1 - t0
+        # args[0] is the self parameter
+        args[0].sans_logger.information("The generation of all states took {}s".format(time_taken))
+        return result
+
+    return run
+
+
 class RunTabPresenter(object):
     class ConcreteRunTabListener(SANSDataProcessorGui.RunTabListener):
         def __init__(self, presenter):
@@ -64,8 +82,11 @@ class RunTabPresenter(object):
         def on_batch_file_load(self):
             self._presenter.on_batch_file_load()
 
-        def on_processed_clicked(self):
-            self._presenter.on_processed_clicked()
+        def on_process_selected_clicked(self):
+            self._presenter.on_process_selected_clicked()
+
+        def on_process_all_clicked(self):
+            self._presenter.on_process_all_clicked()
 
         def on_load_clicked(self):
             self._presenter.on_load_clicked()
@@ -136,7 +157,8 @@ class RunTabPresenter(object):
         self.set_view(view)
         self._processing = False
         self.work_handler = WorkHandler()
-        self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished,
+        self.batch_process_runner = BatchProcessRunner(self.notify_progress,
+                                                       self.on_processing_finished,
                                                        self.on_processing_error)
 
         # File information for the first input
@@ -151,11 +173,13 @@ class RunTabPresenter(object):
         self._table_model.subscribe_to_model_changes(self._masking_table_presenter)
 
         # Beam centre presenter
-        self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel, SANSCentreFinder)
+        self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel,
+                                                          SANSCentreFinder)
         self._table_model.subscribe_to_model_changes(self._beam_centre_presenter)
 
         # Workspace Diagnostic page presenter
-        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state,
+        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler,
+                                                                        run_integral, create_state,
                                                                         self._facility)
 
         # Check save dir for display
@@ -233,9 +257,11 @@ class RunTabPresenter(object):
             self._beam_centre_presenter.set_view(self._view.beam_centre)
 
             # Set the appropriate view for the diagnostic page
-            self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
+            self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page,
+                                                          self._view.instrument)
 
             self._view.setup_layout()
+
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
             self._view.set_out_default_user_file()
@@ -257,8 +283,9 @@ class RunTabPresenter(object):
             # 2. Get the full file path
             user_file_path = FileFinder.getFullPath(user_file_path)
             if not os.path.exists(user_file_path):
-                raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
-                                   " has been specified.".format(user_file_path))
+                raise RuntimeError(
+                    "The user path {} does not exist. Make sure a valid user file path"
+                    " has been specified.".format(user_file_path))
             self._table_model.user_file = user_file_path
             # Clear out the current view
             self._view.reset_all_fields_to_default()
@@ -297,8 +324,9 @@ class RunTabPresenter(object):
                 return
 
             if not os.path.exists(batch_file_path):
-                raise RuntimeError("The batch file path {} does not exist. Make sure a valid batch file path"
-                                   " has been specified.".format(batch_file_path))
+                raise RuntimeError(
+                    "The batch file path {} does not exist. Make sure a valid batch file path"
+                    " has been specified.".format(batch_file_path))
 
             self._table_model.batch_file = batch_file_path
 
@@ -331,24 +359,30 @@ class RunTabPresenter(object):
 
         # 1. Pull out the entries
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
-        sample_scatter_period = get_string_period(get_string_entry(BatchReductionEntry.SampleScatterPeriod, row))
+        sample_scatter_period = get_string_period(
+            get_string_entry(BatchReductionEntry.SampleScatterPeriod, row))
         sample_transmission = get_string_entry(BatchReductionEntry.SampleTransmission, row)
         sample_transmission_period = \
             get_string_period(get_string_entry(BatchReductionEntry.SampleTransmissionPeriod, row))
         sample_direct = get_string_entry(BatchReductionEntry.SampleDirect, row)
-        sample_direct_period = get_string_period(get_string_entry(BatchReductionEntry.SampleDirectPeriod, row))
+        sample_direct_period = get_string_period(
+            get_string_entry(BatchReductionEntry.SampleDirectPeriod, row))
         can_scatter = get_string_entry(BatchReductionEntry.CanScatter, row)
-        can_scatter_period = get_string_period(get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
+        can_scatter_period = get_string_period(
+            get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
         can_transmission = get_string_entry(BatchReductionEntry.CanTransmission, row)
-        can_transmission_period = get_string_period(get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
+        can_transmission_period = get_string_period(
+            get_string_entry(BatchReductionEntry.CanScatterPeriod, row))
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
-        can_direct_period = get_string_period(get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
+        can_direct_period = get_string_period(
+            get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
         output_name = get_string_entry(BatchReductionEntry.Output, row)
         user_file = get_string_entry(BatchReductionEntry.UserFile, row)
 
-        row_entry = [sample_scatter, sample_scatter_period, sample_transmission, sample_transmission_period,
-                     sample_direct, sample_direct_period, can_scatter, can_scatter_period, can_transmission,
-                     can_transmission_period,
+        row_entry = [sample_scatter, sample_scatter_period, sample_transmission,
+                     sample_transmission_period,
+                     sample_direct, sample_direct_period, can_scatter, can_scatter_period,
+                     can_transmission, can_transmission_period,
                      can_direct, can_direct_period,
                      output_name, user_file, '', '']
 
@@ -374,66 +408,108 @@ class RunTabPresenter(object):
 
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
+        self._view.change_row_color(row_state_to_colour_mapping[RowState.Unprocessed], row)
+        self._view.set_row_tooltip('', row)
+        self._beam_centre_presenter.on_update_rows()
+        self._masking_table_presenter.on_update_rows()
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
 
-    def on_processed_clicked(self):
-        """
-        Prepares the batch reduction.
+    # ----------------------------------------------------------------------------------------------
+    # Processing
+    # ----------------------------------------------------------------------------------------------
 
-        0. Validate rows and create dummy workspace if it does not exist
-        1. Sets up the states
-        2. Adds a dummy input workspace
-        3. Adds row index information
+    def _handle_get_states(self, rows):
+        """
+        Return the states for the supplied rows, calling on_processing_error for any errors
+        which occur.
+        """
+        states, errors = self.get_states(row_index=rows)
+        for row, error in errors.items():
+            self.on_processing_error(row, error)
+        return states
+
+    def _plot_graph(self):
+        """
+        Plot a graph if continuous output specified
+        """
+        # Create the graph if continuous output is specified
+        if mantidplot:
+            if self._view.plot_results and not mantidplot.graph(self.output_graph):
+                mantidplot.newGraph(self.output_graph)
+
+    def _set_progress_bar_min_max(self, min, max):
+        """
+        The progress of the progress bar is given by min / max
+        :param min: Current value of the progress bar.
+        :param max: The value at which the progress bar is full
+        """
+        setattr(self._view, 'progress_bar_value', min)
+        setattr(self._view, 'progress_bar_maximum', max)
+
+    def _process_rows(self, rows):
+        """
+        Processes a list of rows. Any errors cause the row to be coloured red.
         """
         try:
+            for row in rows:
+                self._table_model.reset_row_state(row)
+            self.update_view_from_table_model()
+
             self._view.disable_buttons()
             self._processing = True
             self.sans_logger.information("Starting processing of batch table.")
 
-            # 1. Set up the states and convert them into property managers
-            selected_rows = self._get_selected_rows()
-            states, errors = self.get_states(row_index=selected_rows)
-
-            for row, error in errors.items():
-                self.on_processing_error(row, error)
-
+            states = self._handle_get_states(rows)
             if not states:
-                self.sans_logger.warning("No states. Ending processing of batch table.")
-                self.on_processing_finished(None)
-                return
+                raise Exception("No states found")
 
-            # 4. Create the graph if continuous output is specified
-            if mantidplot:
-                if self._view.plot_results and not mantidplot.graph(self.output_graph):
-                    mantidplot.newGraph(self.output_graph)
-
-            # Check if optimizations should be used
-            use_optimizations = self._view.use_optimizations
-
-            # Get the output mode
-            output_mode = self._view.output_mode
-
-            # Check if results should be plotted
-            plot_results = self._view.plot_results
-
+            self._plot_graph()
+            self.progress = 0
+            self._set_progress_bar_min_max(self.progress, len(states))
             save_can = self._view.save_can
 
-            # Get the name of the graph to output to
-            output_graph = self.output_graph
-
-            self.progress = 0
-            setattr(self._view, 'progress_bar_value', self.progress)
-            setattr(self._view, 'progress_bar_maximum', len(states))
-
-            self.batch_process_runner.process_states(states, use_optimizations, output_mode, plot_results,
-                                                     output_graph, save_can)
+            self.batch_process_runner.process_states(states,
+                                                     self._view.use_optimizations,
+                                                     self._view.output_mode,
+                                                     self._view.plot_results,
+                                                     self.output_graph,
+                                                     save_can)
 
         except Exception as e:
-            self._view.enable_buttons()
+            self.on_processing_finished(None)
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
+
+    def on_process_all_clicked(self):
+        """
+        Process all entries in the table, regardless of selection.
+        """
+        all_rows = range(self._table_model.get_number_of_rows())
+        if all_rows:
+            self._process_rows(all_rows)
+
+    def on_process_selected_clicked(self):
+        """
+        Process selected table entries.
+        """
+        selected_rows = self._view.get_selected_rows()
+        if selected_rows:
+            self._process_rows(selected_rows)
+
+    def on_processing_error(self, row, error_msg):
+        """
+        An error occurs while processing the row with index row, error_msg is displayed as a
+        tooltip on the row.
+        """
+        self.increment_progress()
+        self._table_model.set_row_to_error(row, error_msg)
+        self.update_view_from_table_model()
+
+    def on_processing_finished(self, result):
+        self._view.enable_buttons()
+        self._processing = False
 
     def on_load_clicked(self):
         try:
@@ -477,35 +553,49 @@ class RunTabPresenter(object):
 
         self._table_model.set_row_to_processed(row, '')
 
-    def on_processing_finished(self, result):
-        self._view.enable_buttons()
-        self._processing = False
-
-    def on_processing_error(self, row, error_msg):
-        self.increment_progress()
-        self._table_model.set_row_to_error(row, error_msg)
-
     def increment_progress(self):
         self.progress = self.progress + 1
         setattr(self._view, 'progress_bar_value', self.progress)
 
+    # ----------------------------------------------------------------------------------------------
+    # Row manipulation
+    # ----------------------------------------------------------------------------------------------
+
+    def num_rows(self):
+        return self._table_model.get_number_of_rows()
+
     def on_row_inserted(self, index, row):
+        """
+        Insert a row at a selected point
+        """
         row_table_index = TableIndexModel(*row)
         self._table_model.add_table_entry(index, row_table_index)
 
     def on_insert_row(self):
+        """
+        Add an empty row to the table after the first selected row (or at the end of the table
+        if nothing is selected).
+        """
         selected_rows = self._view.get_selected_rows()
-        selected_row = selected_rows[0] + 1 if selected_rows else self._table_model.get_number_of_rows()
-        table_entry_row = self._table_model.create_empty_row()
-        self._table_model.add_table_entry(selected_row, table_entry_row)
+
+        selected_row = selected_rows[0] + 1 if selected_rows else self.num_rows()
+        empty_row = self._table_model.create_empty_row()
+        self._table_model.add_table_entry(selected_row, empty_row)
 
     def on_erase_rows(self):
+        """
+        Make all selected rows empty.
+        """
         selected_rows = self._view.get_selected_rows()
+        empty_row = self._table_model.create_empty_row()
         for row in selected_rows:
             empty_row = TableModel.create_empty_row()
             self._table_model.replace_table_entries([row], [empty_row])
 
     def on_rows_removed(self, rows):
+        """
+        Remove rows from the table
+        """
         self._table_model.remove_table_entries(rows)
 
     def on_copy_rows_requested(self):
@@ -523,7 +613,7 @@ class RunTabPresenter(object):
     def on_paste_rows_requested(self):
         if self._clipboard:
             selected_rows = self._view.get_selected_rows()
-            selected_rows = selected_rows if selected_rows else [self._table_model.get_number_of_rows()]
+            selected_rows = selected_rows if selected_rows else [self.num_rows()]
             replacement_table_index_models = [TableIndexModel(*x) for x in self._clipboard]
             self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
 
@@ -608,7 +698,7 @@ class RunTabPresenter(object):
         # TODO: think about enabling and disable some controls during reduction
         pass
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------------
     # Table Model and state population
     # ------------------------------------------------------------------------------------------------------------------
     def _get_selected_rows(self):
@@ -620,30 +710,26 @@ class RunTabPresenter(object):
 
         return selected_rows
 
+    @log_times
     def get_states(self, row_index=None, file_lookup=True):
         """
         Gathers the state information for all rows.
-        :param row_index: if a single row is selected, then only this row is returned, else all the state for all
-                             rows is returned
-        :return: a list of states
+        :param row_index: if a single row is selected, then only this row is returned,
+                          else all the state for all rows is returned.
+        :return: a list of states.
         """
-        start_time_state_generation = time.time()
-
         # 1. Update the state model
         state_model_with_view_update = self._get_state_model_with_view_update()
         # 2. Update the table model
         table_model = self._table_model
-
         # 3. Go through each row and construct a state object
+        states, errors = None, None
         if table_model and state_model_with_view_update:
-            states, errors = create_states(state_model_with_view_update, table_model, self._view.instrument
-                                           , self._facility, row_index=row_index, file_lookup=file_lookup)
-        else:
-            states = None
-            errors = None
-        stop_time_state_generation = time.time()
-        time_taken = stop_time_state_generation - start_time_state_generation
-        self.sans_logger.information("The generation of all states took {}s".format(time_taken))
+            states, errors = create_states(state_model_with_view_update, table_model,
+                                           self._view.instrument,
+                                           self._facility,
+                                           row_index=row_index,
+                                           file_lookup=file_lookup)
 
         if errors:
             self.sans_logger.warning("Errors in getting states...")
@@ -660,7 +746,8 @@ class RunTabPresenter(object):
         """
         states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup)
         if states is None:
-            self.sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
+            self.sans_logger.warning(
+                "There does not seem to be data for a row {}.".format(row_index))
             return None
 
         if row_index in list(states.keys()):
@@ -1027,7 +1114,10 @@ class RunTabPresenter(object):
         if instrument == SANSInstrument.NoInstrument:
             self._view.disable_process_buttons()
         else:
+            instrument_string = get_string_for_gui_from_instrument(instrument)
+            ConfigService["default.instrument"] = instrument_string
             self._view.enable_process_buttons()
+
         self._view.set_instrument_settings(instrument)
         self._beam_centre_presenter.on_update_instrument(instrument)
         self._workspace_diagnostic_presenter.set_instrument_settings(instrument)

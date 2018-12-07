@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from itertools import groupby
@@ -8,7 +14,7 @@ import re
 delimiter = ","
 range_separator = "-"
 run_string_regex = "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
-max_run_list_size = 1000
+max_run_list_size = 100
 valid_float_regex = "^[0-9]+([.][0-9]*)?$"
 valid_name_regex = "^\w+$"
 valid_alpha_regex = "^[0-9]*[.]?[0-9]+$"
@@ -41,10 +47,11 @@ def run_list_to_string(run_list):
     run_list = [i for i in run_list if i >= 0]
     run_list.sort()
     if len(run_list) > max_run_list_size:
-        raise IndexError("Too many runs (" + str(len(run_list)) + ") must be <" + str(max_run_list_size))
+        raise IndexError("Too many runs ({}) must be <{}".format(len(run_list), max_run_list_size))
 
     range_list = []
-    # use groupby to group run_list into sublists of sequential integers
+    # use groupby to group run_list into sublists of sequential integers. e.g. [50, 49, 48, 3, 2, 1] will turn into
+    # "1-3,48-50"
     for _, grouped_list in groupby(enumerate(run_list), key=lambda_tuple_unpacking(lambda i, x: i - x)):
         concurrent_range = list(map(itemgetter(1), grouped_list))
         if len(concurrent_range) > 1:
@@ -75,7 +82,7 @@ def run_string_to_list(run_string):
     :return: list of integers
     """
     if not validate_run_string(run_string):
-        raise IndexError(run_string + " is not a valid run string")
+        raise IndexError("{} is not a valid run string".format(run_string))
     run_list = []
     if run_string == "":
         return run_list
@@ -89,7 +96,7 @@ def run_string_to_list(run_string):
             range_min = int(split_runs[0])
             if (range_max - range_min) > max_run_list_size:
                 raise IndexError(
-                    "Too many runs (" + str(range_max - range_min) + ") must be <" + str(max_run_list_size))
+                    "Too many runs ({}) must be <{}".format(range_max - range_min, max_run_list_size))
             else:
                 run_list += [range_min + i for i in range(range_max - range_min + 1)]
     run_list = _remove_duplicates_from_list(run_list)
