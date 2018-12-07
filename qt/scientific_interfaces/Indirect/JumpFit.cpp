@@ -27,14 +27,14 @@ using namespace Mantid::API;
 namespace {
 
 std::vector<std::string> getEISFFunctions() {
-	return { "EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl" };
+  return {"EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"};
 }
 
 std::vector<std::string> getWidthFunctions() {
-	return { "ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater" };
+  return {"ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater"};
 }
 
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -61,8 +61,8 @@ void JumpFit::setupFitTab() {
   setSampleWSSuffices({"_Result"});
   setSampleFBSuffices({"_Result.nxs"});
 
-	addFunctions(getWidthFunctions());
-	addFunctions(getEISFFunctions());
+  addFunctions(getWidthFunctions());
+  addFunctions(getEISFFunctions());
 
   m_uiForm->cbParameter->setEnabled(false);
 
@@ -80,15 +80,16 @@ void JumpFit::updateAvailableFitTypes() {
   auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
   clearFitTypeComboBox();
   if (parameter == "Width")
-		addFunctions(getWidthFunctions());
+    addFunctions(getWidthFunctions());
   else if (parameter == "EISF")
-		addFunctions(getEISFFunctions());
+    addFunctions(getEISFFunctions());
 }
 
 void JumpFit::addFunctions(std::vector<std::string> const &functions) {
-	auto &factory = FunctionFactory::Instance();
-	for (auto const &function : functions)
-		addComboBoxFunctionGroup(QString::fromStdString(function), { factory.createFunction(function) });
+  auto &factory = FunctionFactory::Instance();
+  for (auto const &function : functions)
+    addComboBoxFunctionGroup(QString::fromStdString(function),
+                             {factory.createFunction(function)});
 }
 
 void JumpFit::updateModelFitTypeString() {

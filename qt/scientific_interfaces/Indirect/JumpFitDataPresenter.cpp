@@ -51,8 +51,8 @@ JumpFitDataPresenter::JumpFitDataPresenter(
           SLOT(updateAvailableParameters()));
   connect(view, SIGNAL(sampleLoaded(const QString &)), this,
           SLOT(updateParameterSelectionEnabled()));
-	connect(view, SIGNAL(sampleLoaded(const QString &)), this,
-		      SIGNAL(updateAvailableFitTypes()));
+  connect(view, SIGNAL(sampleLoaded(const QString &)), this,
+          SIGNAL(updateAvailableFitTypes()));
 
   updateParameterSelectionEnabled();
 }

@@ -29,7 +29,7 @@ public:
                        QLabel *lbParameterType, QLabel *lbParameter);
 
 signals:
-	void updateAvailableFitTypes();
+  void updateAvailableFitTypes();
 
 private slots:
   void hideParameterComboBoxes();

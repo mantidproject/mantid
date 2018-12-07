@@ -41,7 +41,7 @@ private slots:
   void updateAvailableFitTypes();
 
 private:
-	void addFunctions(std::vector<std::string> const &functions);
+  void addFunctions(std::vector<std::string> const &functions);
 
   void setPlotResultIsPlotting(bool plotting);
   void setButtonsEnabled(bool enabled);
