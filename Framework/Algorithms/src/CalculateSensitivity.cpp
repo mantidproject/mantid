@@ -45,10 +45,10 @@ void CalculateSensitivity::init() {
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty(
-      "MinEfficiency", EMPTY_DBL(), positiveDouble,
+      "MinSensitivity", EMPTY_DBL(), positiveDouble,
       "Minimum efficiency for a pixel to be considered (default: no minimum).");
   declareProperty(
-      "MaxEfficiency", EMPTY_DBL(), positiveDouble,
+      "MaxSensitivity", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
 }
 
@@ -58,9 +58,9 @@ void CalculateSensitivity::init() {
 void CalculateSensitivity::exec() {
 
   // Minimum efficiency. Pixels with lower efficiency will be masked
-  double min_eff = getProperty("MinEfficiency");
+  double min_eff = getProperty("MinSensitivity");
   // Maximum efficiency. Pixels with higher efficiency will be masked
-  double max_eff = getProperty("MaxEfficiency");
+  double max_eff = getProperty("MaxSensitivity");
 
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
