@@ -39,9 +39,9 @@ namespace Algorithms {
     Optional Properties:
     <UL>
 
-    <LI> MinEfficiency - Minimum efficiency for a pixel to be considered
+    <LI> MinSensitivity - Minimum efficiency for a pixel to be considered
  (default: no minimum)</LI>
-    <LI> MaxEfficiency - Maximum efficiency for a pixel to be considered
+    <LI> MaxSensitivity - Maximum efficiency for a pixel to be considered
  (default: no maximum)</LI>
     </UL>
 
