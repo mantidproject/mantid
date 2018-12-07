@@ -26,11 +26,11 @@ using namespace Mantid::API;
 
 namespace {
 
-std::vector<std::string> const &getEISFFunctions() {
+std::vector<std::string> getEISFFunctions() {
 	return { "EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl" };
 }
 
-std::vector<std::string> const &getWidthFunctions() {
+std::vector<std::string> getWidthFunctions() {
 	return { "ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater" };
 }
 
