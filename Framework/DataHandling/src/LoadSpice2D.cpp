@@ -567,10 +567,10 @@ void LoadSpice2D::setMetadataAsRunProperties(
  * the file
  * Last Changes:
  * If SDD tag is available in the metadata set that as sample detector distance
- * @return : sample_detector_distance
+ * Puts a numeric series in the log with the value of sample_detector_distance
  */
-void
-LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
+void LoadSpice2D::detectorDistance(
+    std::map<std::string, std::string> &metadata) {
 
   double sample_detector_distance = 0, sample_detector_distance_offset = 0,
          sample_si_window_distance = 0;
@@ -642,9 +642,11 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
   declareProperty("SampleDetectorDistance", sample_detector_distance,
                   Kernel::Direction::Output);
 }
-
-void
-LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
+/**
+ * Puts a numeric series in the log with the value of detector translation
+ */
+void LoadSpice2D::detectorTranslation(
+    std::map<std::string, std::string> &metadata) {
 
   // detectorTranslations
   double detectorTranslation = 0;
@@ -657,10 +659,9 @@ LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
   p->addValue(DateAndTime::getCurrentTime(), detectorTranslation);
   runDetails.addLogData(p);
 
-  g_log.debug() << "Detector Translation = " << detectorTranslation
-                << " mm." << '\n';
+  g_log.debug() << "Detector Translation = " << detectorTranslation << " mm."
+                << '\n';
 }
-
 
 /** Run the Child Algorithm LoadInstrument (as for LoadRaw)
  * @param inst_name :: The name written in the Nexus file
