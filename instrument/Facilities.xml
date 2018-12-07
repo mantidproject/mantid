@@ -16,7 +16,7 @@
     <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
     <filelocation>
       <prefix regex="\\\\isis(?:\.cclrc\.ac\.uk)?\\inst\$"></prefix>
-      <windows replacement="\\isis.cclrc.ac.uk\inst$"></windows>
+      <windows replacement="\\\\isis.cclrc.ac.uk\\inst$"></windows>
       <linux replacement="/archive"></linux>
       <mac replacement="/archive"></mac>
     </filelocation>
