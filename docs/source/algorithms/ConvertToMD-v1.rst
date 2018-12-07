@@ -80,10 +80,7 @@ plugin using `custom ConvertTo MD transformation <http://www.mantidproject.org/W
 Usage examples
 --------------
 
-The examples below demonstrate the usages of the algorithm in most
-common situations. They work with the data files which already used by
-Mantid for different testing tasks.
-
+.. include:: ../usagedata-note.txt
 
 **Example - Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures :**
 
@@ -123,7 +120,7 @@ Mantid for different testing tasks.
 
 .. testoutput:: ExConvertToMDNoQ
 
-   Resulting MD workspace has 805 events and 3 dimensions
+   Resulting MD workspace has 801 events and 3 dimensions
    --------------------------------------------
 
 **Example - Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:**

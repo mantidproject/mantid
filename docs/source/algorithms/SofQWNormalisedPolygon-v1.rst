@@ -61,16 +61,21 @@ that in places where there are no counts (:math:`Y=0`) and no acceptance
 (no fractional areas, :math:`F=0`), :math:`Y/F=`\ **nan**\ -s will
 result.
 
-The algorithm operates in non-PSD mode by default. This means that all
-azimuthal angles and widths are forced to zero. PSD mode will determine
-the azimuthal angles and widths from the instrument geometry. This mode
-is activated by placing the following named parameter in the instrument definition 
-file: *detector-neighbour-offset*. The integer value of this parameter
-should be the number of pixels that separates two pixels at the same
-vertical position in adjacent tubes. Note that in both non-PSD and PSD
-modes, the scattering angle widths are determined from the detector
-geometry and may vary from detector to detector as defined by the
-instrument definition files.
+The algorithm operates in *non-PSD mode* by default. This means that the 
+detectors are assumed to be infinitely thin and their 'width' in scattering 
+angle :math:`\Delta(2\theta)` is calculated from the detector's height only. 
+For grouped detectors, :math:`\Delta(2\theta)` is the span of all angular 
+widths of the detectors in the group.
+
+*PSD mode* will determine the :math:`\Delta(2\theat)` angular widths from the 
+instrument geometry. This mode is activated by placing the following named 
+parameter in the instrument definition file: *detector-neighbour-offset*. The 
+integer value of this parameter should be the number of pixels that separates 
+two pixels at the same vertical position in adjacent tubes.
+
+Note that in both non-PSD and PSD modes, the scattering angle widths are 
+determined from the detector geometry and may vary from detector to detector 
+as defined by the instrument definition files.
 
 See :ref:`algm-SofQWCentre` for centre-point binning or :ref:`algm-SofQWPolygon`
 for simpler and less precise but faster binning strategies. The speed-up

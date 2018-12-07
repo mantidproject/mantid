@@ -36,6 +36,7 @@ Bugfixes
 ########
 
 - Fixed a bug in :ref:`DirectILLCollectData <algm-DirectILLCollectData>` which prevented the *OutputIncidentEnergyWorkspace* being generated if *IncidentEnergyCalibration* was turned off.
+- Fixed the detector :math:`2\theta` width calculation in :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`. The algorithm was computing the angle between the detector center and top point, not the actual :math:`2\theta` width.
 
 Interfaces
 ----------
