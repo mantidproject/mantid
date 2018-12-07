@@ -10,7 +10,7 @@
 #include <map>
 #include <string>
 #include <vector>
-
+#include <memory>
 #include "MantidKernel/DllConfig.h"
 
 #include <Poco/Net/HTTPResponse.h>
@@ -111,8 +111,8 @@ private:
   static std::vector<Poco::Net::HTTPCookie> g_cookies;
   Poco::Net::NameValueCollection getCookies() const;
 
-  mutable Poco::Net::HTTPClientSession
-      *m_session; // Pointer to session object for all our HTTP requests
+  mutable std::unique_ptr<Poco::Net::HTTPClientSession>
+      m_session; // Pointer to session object for all our HTTP requests
                   // (Has to be a pointer because we allocate and delete
                   // it multiple times)
   Poco::Net::HTTPResponse
