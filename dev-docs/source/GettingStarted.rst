@@ -29,7 +29,7 @@ Install the following:
   * when the install has completed create a directory for storage of the LFS objects, e.g. ``C:\GitLFSStorage``
   * open up Git Bash and run ``git config --global lfs.storage C:/GitLFSStorage``
 
-* `CMake <https://cmake.org/download/>`_
+* `CMake <https://cmake.org/download/>`_ >= 3.7
 * `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
 
   * open the MikTeX console from the start menu
