@@ -670,8 +670,8 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
             std::ostringstream oss;
             oss << valuesPerWorkspace[0].toStdString();
 
-            for (size_t k = 1; k < valuesPerWorkspace.size(); k++) {
-              oss << "-" << valuesPerWorkspace[k].toStdString();
+            for (int k = 1; k < valuesPerWorkspace.size(); k++) {
+              oss << ", " << valuesPerWorkspace[k].toStdString();
               row << oss.str();
             }
           }
