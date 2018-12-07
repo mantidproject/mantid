@@ -126,9 +126,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         correction.setPropertyValue("OutputWorkspace", outputWS))
     TS_ASSERT_THROWS_NOTHING(
-        correction.setProperty<double>("MinEfficiency", 0.5))
+        correction.setProperty<double>("MinSensitivity", 0.5))
     TS_ASSERT_THROWS_NOTHING(
-        correction.setProperty<double>("MaxEfficiency", 1.50))
+        correction.setProperty<double>("MaxSensitivity", 1.50))
 
     TS_ASSERT_THROWS_NOTHING(correction.execute())
     TS_ASSERT(correction.isExecuted())
@@ -206,9 +206,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         correction.setPropertyValue("OutputWorkspace", outputWS))
     TS_ASSERT_THROWS_NOTHING(
-        correction.setProperty<double>("MinEfficiency", 0.5))
+        correction.setProperty<double>("MinSensitivity", 0.5))
     TS_ASSERT_THROWS_NOTHING(
-        correction.setProperty<double>("MaxEfficiency", 1.50))
+        correction.setProperty<double>("MaxSensitivity", 1.50))
 
     correction.execute();
 
