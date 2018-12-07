@@ -115,6 +115,11 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
 
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updatePlotGuess()));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceNameChanged(const QString &)),
+          this, SLOT(updatePlotGuess()));
+
   connect(m_plotPresenter.get(),
           SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
           SLOT(singleFit(std::size_t, std::size_t)));
@@ -838,12 +843,21 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
   m_fitPropertyBrowser->updateParameters();
 }
 
-/*
+/**
+ * Enables Plot Guess in the FitPropertyBrowser if a sample workspace is loaded
+ */
+void IndirectFitAnalysisTab::updatePlotGuess() {
+  auto const sampleWorkspace =
+      m_fittingModel->getWorkspace(getSelectedDataIndex());
+  m_fitPropertyBrowser->updatePlotGuess(sampleWorkspace);
+}
+
+/**
  * Saves the result workspace in the default save directory.
  */
 void IndirectFitAnalysisTab::saveResult() { m_fittingModel->saveResult(); }
 
-/*
+/**
  * Plots the result workspace with the specified name, using the specified
  * plot type. Plot type can either be 'None', 'All' or the name of a
  * parameter. In the case of 'None', nothing will be plotted. In the case of

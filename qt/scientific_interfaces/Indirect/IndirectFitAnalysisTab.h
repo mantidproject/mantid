@@ -215,6 +215,7 @@ protected slots:
   void saveResult();
 
 private slots:
+  void updatePlotGuess();
   void emitUpdateFitTypes();
 
 private:

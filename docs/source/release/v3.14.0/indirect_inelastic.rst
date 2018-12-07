@@ -58,6 +58,8 @@ Bugfixes
 - A bug where fixed parameters don't remain fixed when using the FABADA minimizer in ConvFit has been corrected.
 - The expression for the Fit type Yi in MSDFit was incorrect and has now been corrected.
 - The x-axis labels in the output plots for MSDFit are now correct.
+- An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading 
+  a reduced file.
 
 
 Data Corrections Interface
