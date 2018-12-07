@@ -1379,10 +1379,12 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
   {
     auto from = m_ties.lowerBound(prop);
     auto to = m_ties.upperBound(prop);
-    QList<QtProperty *> failedTies; // ties can become invalid after some editing
+    // ties can become invalid after some editing
+    QList<QtProperty *> failedTies;
     for (auto it = from; it != to; ++it) {
       auto const tie =
-          (it->paramName + "=" + m_tieManager->value(it.value().tieProp)).toStdString();
+          (it->paramName + "=" + m_tieManager->value(it.value().tieProp))
+              .toStdString();
       try {
         fun->addTies(tie);
       } catch (...) {
