@@ -165,6 +165,10 @@ class SANSDataProcessorGui(QMainWindow,
         def on_cut_rows(self):
             pass
 
+        @abstractmethod
+        def on_compatibility_unchecked(self):
+            pass
+
     def __init__(self):
         """
         Initialise the interface
@@ -235,7 +239,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.main_stacked_widget.setCurrentIndex(index)
 
     def _setup_add_runs_page(self):
-        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler()),
+        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(WorkHandler(), self.add_runs_page),
                                                        RunSelectorPresenterFactory('Runs To Sum',
                                                                                    SummableRunFinder(
                                                                                        SANSFileInformationFactory())),
@@ -494,6 +498,9 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_insert_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_insert_row())
+
+    def _on_compatibility_unchecked(self):
+        self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
 
     def _on_help_button_clicked(self):
         pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
@@ -961,6 +968,8 @@ class SANSDataProcessorGui(QMainWindow,
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
+        if not value:
+            self._on_compatibility_unchecked()
 
     @property
     def show_transmission(self):
