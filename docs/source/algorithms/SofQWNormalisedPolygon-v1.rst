@@ -67,7 +67,7 @@ angle :math:`\Delta(2\theta)` is calculated from the detector's height only.
 For grouped detectors, :math:`\Delta(2\theta)` is the span of all angular 
 widths of the detectors in the group.
 
-*PSD mode* will determine the :math:`\Delta(2\theat)` angular widths from the 
+*PSD mode* will determine the :math:`\Delta(2\theta)` angular widths from the 
 instrument geometry. This mode is activated by placing the following named 
 parameter in the instrument definition file: *detector-neighbour-offset*. The 
 integer value of this parameter should be the number of pixels that separates 
