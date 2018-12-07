@@ -787,10 +787,10 @@ void FitPropertyBrowser::createCompositeFunction(
   }
   setWorkspace(m_compositeFunction);
 
-  PropertyHandler *h = new PropertyHandler(
+  std::shared_ptr<PropertyHandler> h = std::make_shared<PropertyHandler>(
       m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
-  m_compositeFunction->setHandler(h);
-  setCurrentFunction(h);
+  m_compositeFunction->setHandler(std::move(h));
+  setCurrentFunction(h.get());
 
   if (m_auto_back) {
     addAutoBackground();

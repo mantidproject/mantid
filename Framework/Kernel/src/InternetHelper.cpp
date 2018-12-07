@@ -108,14 +108,7 @@ InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-InternetHelper::~InternetHelper() {
-  if (m_request != nullptr) {
-    delete m_request;
-  }
-  if (m_response != nullptr) {
-    delete m_response;
-  }
-}
+InternetHelper::~InternetHelper() {}
 
 void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
                                          const std::string &proxyUrl) {
@@ -127,17 +120,8 @@ void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
 }
 
 void InternetHelper::createRequest(Poco::URI &uri) {
-  if (m_request != nullptr) {
-    delete m_request;
-  }
-  if (m_response != nullptr) {
-    delete m_response;
-  }
-
-  m_request =
-      new HTTPRequest(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
-
-  m_response = new HTTPResponse();
+  m_request = std::make_unique<HTTPRequest>(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
+  m_response = std::make_unique<HTTPResponse>();
   if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);
   }
