@@ -4,7 +4,9 @@
 ::
 :: On exit the CM_GENERATOR variable will be set appropriately.
 :: If the previous compiler does not match this then the
-:: CLEANBUILD flag is also set to yes
+:: CLEANBUILD flag is also set to yes. It assumes it will be called from
+:: a parent with "setlocal enableextensions enabledelayedexpansion" are set
+:: in the parent
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :: Find grep
@@ -59,3 +61,7 @@ if EXIST %_builddir%\CMakeCache.txt (
     echo Previous build used the same compiler. No need to clean.
   )
 )
+
+:: Make sure we exit cleanly at this point as we could pick up the error
+:: state from the "failed grep" in the CLEABUILD=yes case
+exit /b 0
