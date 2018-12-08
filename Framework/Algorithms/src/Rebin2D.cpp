@@ -112,10 +112,11 @@ void Rebin2D::exec() {
   auto inputHasFA = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   // For MatrixWorkspace, only UseFractionalArea=False makes sense.
   if (useFractionalArea && !inputHasFA) {
-    g_log.warning("Fractional area tracking was requested but input workspace does "
-                  "not have calculated bin fractions. Assuming bins are exact "
-                  "(fractions are unity). The results may not be accurate if this "
-                  "workspace was previously rebinned.");
+    g_log.warning(
+        "Fractional area tracking was requested but input workspace does "
+        "not have calculated bin fractions. Assuming bins are exact "
+        "(fractions are unity). The results may not be accurate if this "
+        "workspace was previously rebinned.");
   }
   // For RebinnedOutput, should always use useFractionalArea to get the
   // correct signal and errors (so that weights of input ws is accounted for).
