@@ -157,7 +157,7 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call %BUILD_DIR%\buildenv.bat
-msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% /p:UseEnv=true Mantid.sln
+msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% /p:UseEnv=true /verbosity:minimal Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -194,7 +194,7 @@ echo Note: not running doc-test target as it currently takes too long
 
 if "%BUILDPKG%" == "yes" (
   :: Build offline documentation
-  msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% /p:UseEnv=true docs/docs-qthelp.vcxproj
+  msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% /p:UseEnv=true /verbosity:minimal docs/docs-qthelp.vcxproj
   :: Ignore errors as the exit code of msbuild is wrong here.
   :: It always marks the build as a failure even though MantidPlot exits correctly
   echo Building package
