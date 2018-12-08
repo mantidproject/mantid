@@ -21,6 +21,10 @@ Install the following:
 * `Visual Studio 2017 Community Edition <https://visualstudio.microsoft.com/downloads/>`_.
 
   * When asked about installation workloads choose ``Desktop development with C++``
+  * Under the "Installation details" section verify that the following are checked:
+
+    * ``Windows 8.1 SDK and UCRT SDK``
+    * The latest Windows 10 SDK
 
 
 * `Git <https://git-scm.com/>`_.
