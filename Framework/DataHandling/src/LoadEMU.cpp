@@ -524,18 +524,22 @@ public:
 DECLARE_FILELOADER_ALGORITHM(LoadEMUTar)
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEMUHdf)
 
+template <>
 const std::string LoadEMU<Kernel::FileDescriptor>::name() const {
   return "LoadEMUTar";
 }
 
+template <>
 const std::string LoadEMU<Kernel::FileDescriptor>::summary() const {
   return "Loads a merged EMU Hdf and event file into a workspace.";
 }
 
+template <>
 const std::string LoadEMU<Kernel::NexusDescriptor>::name() const {
   return "LoadEMUHdf";
 }
 
+template <>
 const std::string LoadEMU<Kernel::NexusDescriptor>::summary() const {
   return "Loads an EMU Hdf and linked event file into a workspace.";
 }
@@ -618,6 +622,7 @@ template <> void LoadEMU<Kernel::NexusDescriptor>::init() { init(true); }
  * path to the binary file if it is the hdf loader.
  */
 template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
+
   // Specify file extensions which can be associated with a specific file.
   std::vector<std::string> exts;
 
@@ -628,12 +633,12 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
     exts.emplace_back(".hdf");
   else
     exts.emplace_back(".tar");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  Base::declareProperty(Kernel::make_unique<API::FileProperty>(
                       FilenameStr, "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
 
   if (hdfLoader) {
-    declareProperty(PathToBinaryStr, "",
+    Base::declareProperty(PathToBinaryStr, "",
                     "Relative or absolute path to the compressed binary\n"
                     "event file linked to the HDF file, eg /storage/data/");
   }
@@ -641,48 +646,48 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
   // mask
   exts.clear();
   exts.emplace_back(".xml");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  Base::declareProperty(Kernel::make_unique<API::FileProperty>(
                       MaskStr, "", API::FileProperty::OptionalLoad, exts),
                   "The input filename of the mask data");
 
-  declareProperty(SelectDetectorTubesStr, "",
+  Base::declareProperty(SelectDetectorTubesStr, "",
                   "Comma separated range of detectors tubes to be loaded,\n"
                   "  eg 16,19-45,47");
 
-  declareProperty(
+  Base::declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output));
 
   if (hdfLoader) {
-    declareProperty(SelectDatasetStr, 0,
+    Base::declareProperty(SelectDatasetStr, 0,
                     "Select the index for the dataset to be loaded.");
   }
 
-  declareProperty(OverrideDopplerFreqStr, EMPTY_DBL(),
+  Base::declareProperty(OverrideDopplerFreqStr, EMPTY_DBL(),
                   "Override the Doppler frequency, in Hertz.");
 
-  declareProperty(OverrideDopplerPhaseStr, EMPTY_DBL(),
+  Base::declareProperty(OverrideDopplerPhaseStr, EMPTY_DBL(),
                   "Override the Doppler phase, in degrees.");
 
-  declareProperty(CalibrateDopplerPhaseStr, false,
+  Base::declareProperty(CalibrateDopplerPhaseStr, false,
                   "Calibrate the Doppler phase prior to TOF conversion,\n"
                   "ignored if imported as Doppler time or phase entered");
 
-  declareProperty(RawDopplerTimeStr, false,
+  Base::declareProperty(RawDopplerTimeStr, false,
                   "Import file as observed time relative the Doppler\n"
                   "drive, in microsecs.");
 
-  declareProperty(FilterByTimeStartStr, 0.0,
+  Base::declareProperty(FilterByTimeStartStr, 0.0,
                   "Only include events after the provided start time, in "
                   "seconds (relative to the start of the run).");
 
-  declareProperty(FilterByTimeStopStr, EMPTY_DBL(),
+  Base::declareProperty(FilterByTimeStopStr, EMPTY_DBL(),
                   "Only include events before the provided stop time, in "
                   "seconds (relative to the start of the run).");
 
   std::string grpOptional = "Filters";
-  setPropertyGroup(FilterByTimeStartStr, grpOptional);
-  setPropertyGroup(FilterByTimeStopStr, grpOptional);
+  Base::setPropertyGroup(FilterByTimeStartStr, grpOptional);
+  Base::setPropertyGroup(FilterByTimeStopStr, grpOptional);
 }
 
 /**
@@ -713,7 +718,7 @@ template <> void LoadEMU<Kernel::FileDescriptor>::exec() {
   /**
    * Opens the tar and extracts the hdf and event data to temporary files
    */
-  std::string filename = getPropertyValue(FilenameStr);
+  std::string filename = Base::getPropertyValue(FilenameStr);
   ANSTO::Tar::File tarFile(filename);
   if (!tarFile.good())
     throw std::invalid_argument("invalid EMU tar file");
@@ -771,8 +776,8 @@ template <> void LoadEMU<Kernel::NexusDescriptor>::exec() {
   namespace fs = boost::filesystem;
 
   // Open the hdf file and find the dirname and dataset number
-  std::string hdfFile = getPropertyValue(FilenameStr);
-  std::string evtPath = getPropertyValue(PathToBinaryStr);
+  std::string hdfFile = Base::getPropertyValue(FilenameStr);
+  std::string evtPath = Base::getPropertyValue(PathToBinaryStr);
   if (evtPath.empty())
     evtPath = "./";
 
@@ -783,7 +788,7 @@ template <> void LoadEMU<Kernel::NexusDescriptor>::exec() {
   }
 
   // dataset index to be loaded
-  m_datasetIndex = getProperty(SelectDatasetStr);
+  m_datasetIndex = Base::getProperty(SelectDatasetStr);
 
   // if path provided build the file path
   if (fs::is_directory(evtPath)) {
@@ -849,16 +854,16 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
 
   // Get the region of interest and filters and save to log
   //
-  std::string maskfile = getPropertyValue(MaskStr);
-  std::string seltubes = getPropertyValue(SelectDetectorTubesStr);
+  std::string maskfile = Base::getPropertyValue(MaskStr);
+  std::string seltubes = Base::getPropertyValue(SelectDetectorTubesStr);
   logManager.addProperty(SelectDetectorTubesStr, seltubes);
   logManager.addProperty(MaskStr, maskfile);
 
   std::vector<bool> roi = createRoiVector(seltubes, maskfile);
-  double timeMaxBoundary = getProperty(FilterByTimeStopStr);
-  if (isEmpty(timeMaxBoundary))
+  double timeMaxBoundary = Base::getProperty(FilterByTimeStopStr);
+  if (Base::isEmpty(timeMaxBoundary))
     timeMaxBoundary = std::numeric_limits<double>::infinity();
-  TimeLimits timeBoundary(getProperty(FilterByTimeStartStr), timeMaxBoundary);
+  TimeLimits timeBoundary(Base::getProperty(FilterByTimeStartStr), timeMaxBoundary);
 
   // lambda to simplify loading instrument parameters
   auto instr = m_localWorkspace->getInstrument();
@@ -932,7 +937,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   // perform the calibration and then convert to TOF
   Types::Core::DateAndTime startTime(m_startRun);
   auto start_nanosec = startTime.totalNanoseconds();
-  bool saveAsTOF = !getProperty(RawDopplerTimeStr);
+  bool saveAsTOF = !Base::getProperty(RawDopplerTimeStr);
   bool loadAsTOF = !m_calibrateDoppler && saveAsTOF;
   EMU::EventAssigner eventAssigner(roi, detMapIndex, PIXELS_PER_TUBE,
                                    framePeriod, gatePeriod, timeBoundary,
@@ -963,7 +968,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "frame_count",
                                         frame_count);
 
-  std::string filename = getPropertyValue(FilenameStr);
+  std::string filename = Base::getPropertyValue(FilenameStr);
   logManager.addProperty("filename", filename);
 
   Types::Core::time_duration duration = boost::posix_time::microseconds(
@@ -976,7 +981,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   // Finally add the time-series parameter explicitly
   loadEnvironParameters(hdfFile, logManager);
 
-  setProperty("OutputWorkspace", m_localWorkspace);
+  Base::setProperty("OutputWorkspace", m_localWorkspace);
 }
 
 // set up the detector masks
@@ -998,7 +1003,7 @@ void LoadEMU<FD>::setupDetectorMasks(std::vector<bool> &roi) {
       if (!roi[i])
         maskIndexList[maskIndex++] = i;
 
-    API::IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
+    API::IAlgorithm_sptr maskingAlg = Base::createChildAlgorithm("MaskDetectors");
     maskingAlg->setProperty("Workspace", m_localWorkspace);
     maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
     maskingAlg->executeAsChildAlg();
@@ -1039,8 +1044,8 @@ void LoadEMU<FD>::loadDopplerParameters(API::LogManager &logm) {
       logm.getTimeSeriesProperty<double>("DopplerAmplitude")->firstValue();
   m_dopplerRun =
       logm.getTimeSeriesProperty<int32_t>("DopplerRun")->firstValue();
-  m_dopplerFreq = getProperty(OverrideDopplerFreqStr);
-  if (isEmpty(m_dopplerFreq)) {
+  m_dopplerFreq = Base::getProperty(OverrideDopplerFreqStr);
+  if (Base::isEmpty(m_dopplerFreq)) {
     auto doppVel =
         logm.getTimeSeriesProperty<double>("DopplerVelocity")->firstValue();
     m_dopplerFreq = 0.5 * doppVel / (M_PI * m_dopplerAmpl);
@@ -1048,10 +1053,10 @@ void LoadEMU<FD>::loadDopplerParameters(API::LogManager &logm) {
   AddSinglePointTimeSeriesProperty<double>(logm, m_startRun, "DopplerFrequency",
                                            m_dopplerFreq);
 
-  m_dopplerPhase = getProperty(OverrideDopplerPhaseStr);
+  m_dopplerPhase = Base::getProperty(OverrideDopplerPhaseStr);
   m_calibrateDoppler =
-      getProperty(CalibrateDopplerPhaseStr) && isEmpty(m_dopplerPhase);
-  if (isEmpty(m_dopplerPhase)) {
+      Base::getProperty(CalibrateDopplerPhaseStr) && Base::isEmpty(m_dopplerPhase);
+  if (Base::isEmpty(m_dopplerPhase)) {
     // sinusoidal motion crossing a threshold with a delay
     double doppThreshold =
         instr->getNumberParameter("DopplerReferenceThreshold")[0];
@@ -1348,7 +1353,7 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
 
   // loads the IDF and parameter file
   API::IAlgorithm_sptr loadInstrumentAlg =
-      createChildAlgorithm("LoadInstrument");
+      Base::createChildAlgorithm("LoadInstrument");
   loadInstrumentAlg->setProperty("Workspace", m_localWorkspace);
   loadInstrumentAlg->setPropertyValue("InstrumentName", "EMUau");
   loadInstrumentAlg->setProperty("RewriteSpectraMap",

@@ -73,6 +73,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 template <typename FD> class DLLExport LoadEMU : public API::IFileLoader<FD> {
 
+  using Base = API::IFileLoader<FD>;
+
 public:
   // description
   int version() const override { return 1; }
