@@ -524,18 +524,15 @@ public:
 DECLARE_FILELOADER_ALGORITHM(LoadEMUTar)
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEMUHdf)
 
-template <>
-const std::string LoadEMU<Kernel::FileDescriptor>::name() const {
+template <> const std::string LoadEMU<Kernel::FileDescriptor>::name() const {
   return "LoadEMUTar";
 }
 
-template <>
-const std::string LoadEMU<Kernel::FileDescriptor>::summary() const {
+template <> const std::string LoadEMU<Kernel::FileDescriptor>::summary() const {
   return "Loads a merged EMU Hdf and event file into a workspace.";
 }
 
-template <>
-const std::string LoadEMU<Kernel::NexusDescriptor>::name() const {
+template <> const std::string LoadEMU<Kernel::NexusDescriptor>::name() const {
   return "LoadEMUHdf";
 }
 
@@ -634,25 +631,27 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
   else
     exts.emplace_back(".tar");
   Base::declareProperty(Kernel::make_unique<API::FileProperty>(
-                      FilenameStr, "", API::FileProperty::Load, exts),
-                  "The input filename of the stored data");
+                            FilenameStr, "", API::FileProperty::Load, exts),
+                        "The input filename of the stored data");
 
   if (hdfLoader) {
-    Base::declareProperty(PathToBinaryStr, "",
-                    "Relative or absolute path to the compressed binary\n"
-                    "event file linked to the HDF file, eg /storage/data/");
+    Base::declareProperty(
+        PathToBinaryStr, "",
+        "Relative or absolute path to the compressed binary\n"
+        "event file linked to the HDF file, eg /storage/data/");
   }
 
   // mask
   exts.clear();
   exts.emplace_back(".xml");
   Base::declareProperty(Kernel::make_unique<API::FileProperty>(
-                      MaskStr, "", API::FileProperty::OptionalLoad, exts),
-                  "The input filename of the mask data");
+                            MaskStr, "", API::FileProperty::OptionalLoad, exts),
+                        "The input filename of the mask data");
 
-  Base::declareProperty(SelectDetectorTubesStr, "",
-                  "Comma separated range of detectors tubes to be loaded,\n"
-                  "  eg 16,19-45,47");
+  Base::declareProperty(
+      SelectDetectorTubesStr, "",
+      "Comma separated range of detectors tubes to be loaded,\n"
+      "  eg 16,19-45,47");
 
   Base::declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
@@ -660,30 +659,30 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
 
   if (hdfLoader) {
     Base::declareProperty(SelectDatasetStr, 0,
-                    "Select the index for the dataset to be loaded.");
+                          "Select the index for the dataset to be loaded.");
   }
 
   Base::declareProperty(OverrideDopplerFreqStr, EMPTY_DBL(),
-                  "Override the Doppler frequency, in Hertz.");
+                        "Override the Doppler frequency, in Hertz.");
 
   Base::declareProperty(OverrideDopplerPhaseStr, EMPTY_DBL(),
-                  "Override the Doppler phase, in degrees.");
+                        "Override the Doppler phase, in degrees.");
 
   Base::declareProperty(CalibrateDopplerPhaseStr, false,
-                  "Calibrate the Doppler phase prior to TOF conversion,\n"
-                  "ignored if imported as Doppler time or phase entered");
+                        "Calibrate the Doppler phase prior to TOF conversion,\n"
+                        "ignored if imported as Doppler time or phase entered");
 
   Base::declareProperty(RawDopplerTimeStr, false,
-                  "Import file as observed time relative the Doppler\n"
-                  "drive, in microsecs.");
+                        "Import file as observed time relative the Doppler\n"
+                        "drive, in microsecs.");
 
   Base::declareProperty(FilterByTimeStartStr, 0.0,
-                  "Only include events after the provided start time, in "
-                  "seconds (relative to the start of the run).");
+                        "Only include events after the provided start time, in "
+                        "seconds (relative to the start of the run).");
 
   Base::declareProperty(FilterByTimeStopStr, EMPTY_DBL(),
-                  "Only include events before the provided stop time, in "
-                  "seconds (relative to the start of the run).");
+                        "Only include events before the provided stop time, in "
+                        "seconds (relative to the start of the run).");
 
   std::string grpOptional = "Filters";
   Base::setPropertyGroup(FilterByTimeStartStr, grpOptional);
@@ -863,7 +862,8 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   double timeMaxBoundary = Base::getProperty(FilterByTimeStopStr);
   if (Base::isEmpty(timeMaxBoundary))
     timeMaxBoundary = std::numeric_limits<double>::infinity();
-  TimeLimits timeBoundary(Base::getProperty(FilterByTimeStartStr), timeMaxBoundary);
+  TimeLimits timeBoundary(Base::getProperty(FilterByTimeStartStr),
+                          timeMaxBoundary);
 
   // lambda to simplify loading instrument parameters
   auto instr = m_localWorkspace->getInstrument();
@@ -1003,7 +1003,8 @@ void LoadEMU<FD>::setupDetectorMasks(std::vector<bool> &roi) {
       if (!roi[i])
         maskIndexList[maskIndex++] = i;
 
-    API::IAlgorithm_sptr maskingAlg = Base::createChildAlgorithm("MaskDetectors");
+    API::IAlgorithm_sptr maskingAlg =
+        Base::createChildAlgorithm("MaskDetectors");
     maskingAlg->setProperty("Workspace", m_localWorkspace);
     maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
     maskingAlg->executeAsChildAlg();
@@ -1054,8 +1055,8 @@ void LoadEMU<FD>::loadDopplerParameters(API::LogManager &logm) {
                                            m_dopplerFreq);
 
   m_dopplerPhase = Base::getProperty(OverrideDopplerPhaseStr);
-  m_calibrateDoppler =
-      Base::getProperty(CalibrateDopplerPhaseStr) && Base::isEmpty(m_dopplerPhase);
+  m_calibrateDoppler = Base::getProperty(CalibrateDopplerPhaseStr) &&
+                       Base::isEmpty(m_dopplerPhase);
   if (Base::isEmpty(m_dopplerPhase)) {
     // sinusoidal motion crossing a threshold with a delay
     double doppThreshold =
