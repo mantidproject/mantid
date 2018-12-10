@@ -11,10 +11,10 @@ using namespace Mantid::API;
 namespace {
 
 bool isWorkspaceLoaded(std::string const &workspaceName) {
-	return AnalysisDataService::Instance().doesExist(workspaceName);
+  return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -113,28 +113,31 @@ IndirectFitDataView::validateMultipleData(UserInputValidator &validator) {
 
 UserInputValidator &
 IndirectFitDataView::validateSingleData(UserInputValidator &validator) {
-	validator = validateSample(validator);
-	if (!isResolutionHidden()) 
-		validator = validateResolution(validator);
+  validator = validateSample(validator);
+  if (!isResolutionHidden())
+    validator = validateResolution(validator);
   return validator;
 }
 
-UserInputValidator &IndirectFitDataView::validateSample(UserInputValidator &validator) {
-	const auto sampleIsLoaded = isWorkspaceLoaded(getSelectedSample());
-	validator.checkDataSelectorIsValid("Sample Input", m_dataForm->dsSample);
+UserInputValidator &
+IndirectFitDataView::validateSample(UserInputValidator &validator) {
+  const auto sampleIsLoaded = isWorkspaceLoaded(getSelectedSample());
+  validator.checkDataSelectorIsValid("Sample Input", m_dataForm->dsSample);
 
-	if (!sampleIsLoaded)
-		emit sampleLoaded(QString::fromStdString(getSelectedSample()));
-	return validator;
+  if (!sampleIsLoaded)
+    emit sampleLoaded(QString::fromStdString(getSelectedSample()));
+  return validator;
 }
 
-UserInputValidator &IndirectFitDataView::validateResolution(UserInputValidator &validator) {
-	const auto resolutionIsLoaded = isWorkspaceLoaded(getSelectedResolution());
-	validator.checkDataSelectorIsValid("Resolution Input", m_dataForm->dsResolution);
+UserInputValidator &
+IndirectFitDataView::validateResolution(UserInputValidator &validator) {
+  const auto resolutionIsLoaded = isWorkspaceLoaded(getSelectedResolution());
+  validator.checkDataSelectorIsValid("Resolution Input",
+                                     m_dataForm->dsResolution);
 
-	if (!resolutionIsLoaded)
-		emit resolutionLoaded(QString::fromStdString(getSelectedResolution()));
-	return validator;
+  if (!resolutionIsLoaded)
+    emit resolutionLoaded(QString::fromStdString(getSelectedResolution()));
+  return validator;
 }
 
 void IndirectFitDataView::displayWarning(const std::string &warning) {

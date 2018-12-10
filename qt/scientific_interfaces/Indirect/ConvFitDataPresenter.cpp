@@ -8,17 +8,17 @@
 #include "ConvFitAddWorkspaceDialog.h"
 #include "ConvFitDataTablePresenter.h"
 
-#include "MantidKernel/make_unique.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/make_unique.h"
 
 namespace {
 using namespace Mantid::API;
 
 bool isWorkspaceLoaded(std::string const &workspaceName) {
-	return AnalysisDataService::Instance().doesExist(workspaceName);
+  return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
