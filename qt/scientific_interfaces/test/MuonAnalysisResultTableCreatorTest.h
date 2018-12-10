@@ -7,8 +7,8 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
 
-#include "../Muon/MuonAnalysisResultTableCreator.h"
 #include "../Muon/MuonAnalysisResultTableCreator.cpp"
+#include "../Muon/MuonAnalysisResultTableCreator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -85,43 +85,20 @@ public:
     m_startDiff_sec = 1310;
   }
 
-  void test_isNumberInt(){
-  TS_ASSERT(isNumber("12"));
-  }
+  void test_isNumberInt() { TS_ASSERT(isNumber("12")); }
 
+  void test_isNumberDouble() { TS_ASSERT(isNumber("1.2")); }
+  void test_isNumberNegInt() { TS_ASSERT(isNumber("-12")); }
 
-  void test_isNumberDouble(){
-  TS_ASSERT(isNumber("1.2"));
-  }
-  void test_isNumberNegInt(){
-  TS_ASSERT(isNumber("-12"));
-  }
+  void test_isNumberNegDouble() { TS_ASSERT(isNumber("-1.2")); }
 
+  void test_isNumberFail() { TS_ASSERT(!isNumber("ABC")); }
 
-  void test_isNumberNegDouble(){
-  TS_ASSERT(isNumber("-1.2"));
-  }
+  void test_isNumberFailMix() { TS_ASSERT(!isNumber("1BC4")); }
 
+  void test_isNumberFailRange() { TS_ASSERT(!isNumber("1-4")); }
 
-  void test_isNumberFail(){
-  TS_ASSERT(!isNumber("ABC"));
-  }
-
-
-  void test_isNumberFailMix(){
-  TS_ASSERT(!isNumber("1BC4"));
-  }
-
-
-  void test_isNumberFailRange(){
-  TS_ASSERT(!isNumber("1-4"));
-  }
-
-  void test_isNumberFailRange2(){
-  TS_ASSERT(!isNumber("1 to 4"));
-  }
-
-
+  void test_isNumberFailRange2() { TS_ASSERT(!isNumber("1 to 4")); }
 
   void test_createTable_throws_noWorkspaces() {
     const QStringList workspaces;
