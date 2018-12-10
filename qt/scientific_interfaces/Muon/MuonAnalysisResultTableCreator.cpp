@@ -556,8 +556,6 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
   for (const auto &wsName : paramsByLabel[labelName].keys()) {
     const auto &logValues = m_logValues->value(wsName);
     const auto &val = logValues[log];
-    auto a = log.toStdString();
-    auto b = val.toString().toStdString();
     // Special case: if log is time in sec, subtract the first start time
     if (log.endsWith(" (s)")) {
       auto seconds =
