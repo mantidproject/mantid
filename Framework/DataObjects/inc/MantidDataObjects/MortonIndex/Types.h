@@ -9,17 +9,17 @@
 
 #include <Eigen/Dense>
 
-template <size_t ND, typename IntT> using IntArray = Eigen::Array<IntT, ND, 1>;
+template <size_t ND, typename IntT> using IntArray = Eigen::Array<IntT, static_cast<int>(ND), 1>;
 
-template <size_t ND> using MDCoordinate = Eigen::Array<float, ND, 1>;
+template <size_t ND> using MDCoordinate = Eigen::Array<float, static_cast<int>(ND), 1>;
 
-template <size_t ND> using MDSpaceBounds = Eigen::Array<float, ND, 2>;
-template <size_t ND> using MDSpaceDimensions = Eigen::Array<float, ND, 1>;
-template <size_t ND> using MDSpaceSteps = Eigen::Array<float, ND, 1>;
+template <size_t ND> using MDSpaceBounds = Eigen::Array<float, static_cast<int>(ND), 2>;
+template <size_t ND> using MDSpaceDimensions = Eigen::Array<float, static_cast<int>(ND), 1>;
+template <size_t ND> using MDSpaceSteps = Eigen::Array<float, static_cast<int>(ND), 1>;
 
 template <typename CoordT, size_t ND>
-using AffineND = Eigen::Transform<CoordT, ND, Eigen::Affine>;
+using AffineND = Eigen::Transform<CoordT, static_cast<int>(ND), Eigen::Affine>;
 
-template <size_t ND> using BinIndices = Eigen::Matrix<size_t, 1, ND>;
+template <size_t ND> using BinIndices = Eigen::Matrix<size_t, 1, static_cast<int>(ND)>;
 
 #endif // MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_

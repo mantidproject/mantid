@@ -47,9 +47,6 @@ public:
                     bool ignoreZeros) override;
   void runConversion(API::Progress *pProgress) override;
 
-
-  static unsigned totalEventsConverted; //TODO tmp
-
 protected:
   DataObjects::EventWorkspace_const_sptr m_EventWS;
 private:
@@ -228,12 +225,6 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
       mdEventsForSpectrum.emplace_back(MDEventMaker<ND, MDEventType>::
           makeMDEvent(signal, errorSq, runIndexLoc, detID, &locCoord[0]));
 
-      if(totalEventsConverted++ < 5) {
-        for (unsigned d = 0; d < ND; ++d) {
-          std::cerr << mdEventsForSpectrum.back().getCenter(d) << " ";
-        }
-        std::cerr << "\n";
-      }
 
       // Filter events before adding to the ndEvents vector to add in workspace
       // The bounds of the resulting WS have to be already defined
@@ -425,7 +416,10 @@ ConvToMDEventsWSIndexing::makeMDBox(BoxStructureType<ND, MDEventType> sbox, cons
   }
   case GRID:
     return new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), level, extents);
+  default:
+    throw std::logic_error("Wrong MD box type detected.");
   }
+
 }
 
 } // namespace MDAlgorithms

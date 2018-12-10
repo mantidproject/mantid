@@ -84,6 +84,7 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
         return boost::make_shared<ConvToMDEventsWSIndexing>();
     }
   }
+
 }
 } // namespace MDAlgorithms
 } // namespace Mantid
