@@ -51,7 +51,7 @@ protected:
                                   const API::MatrixWorkspace &ws2,
                                   API::MatrixWorkspace &output) = 0;
 
-  API::Progress *m_progress; ///< Progress reporting object
+  std::unique_ptr<API::Progress> m_progress; ///< Progress reporting object
 };
 
 } // namespace Algorithms

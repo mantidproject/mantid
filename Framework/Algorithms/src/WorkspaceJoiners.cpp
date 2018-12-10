@@ -27,7 +27,7 @@ WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(nullptr) {}
 
 /** Destructor
  */
-WorkspaceJoiners::~WorkspaceJoiners() { delete m_progress; }
+WorkspaceJoiners::~WorkspaceJoiners() {}
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string WorkspaceJoiners::category() const {
@@ -53,7 +53,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
   auto XValues = ws1.refX(0);
 
   // Initialize the progress reporting object
-  m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, totalHists);
 
   // Loop over the input workspaces in turn copying the data into the output one
   const int64_t &nhist1 = ws1.getNumberHistograms();
@@ -134,7 +134,7 @@ WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
       create<EventWorkspace>(eventWs1, totalHists, eventWs1.binEdges(0));
 
   // Initialize the progress reporting object
-  m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, totalHists);
 
   const int64_t &nhist1 = eventWs1.getNumberHistograms();
   for (int64_t i = 0; i < nhist1; ++i) {
