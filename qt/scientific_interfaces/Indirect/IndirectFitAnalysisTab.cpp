@@ -1007,9 +1007,9 @@ void IndirectFitAnalysisTab::run() {
 }
 
 void IndirectFitAnalysisTab::enableFitAnalysisButtons(bool enable) {
-	setRunIsRunning(!enable);
-	setFitSingleSpectrumIsFitting(!enable);
-	m_fitPropertyBrowser->setFitEnabled(enable);
+  setRunIsRunning(!enable);
+  setFitSingleSpectrumIsFitting(!enable);
+  m_fitPropertyBrowser->setFitEnabled(enable);
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
