@@ -8,6 +8,14 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+bool isWorkspaceLoaded(std::string const &workspaceName) {
+	return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -105,11 +113,19 @@ IndirectFitDataView::validateMultipleData(UserInputValidator &validator) {
 
 UserInputValidator &
 IndirectFitDataView::validateSingleData(UserInputValidator &validator) {
+	const auto sampleIsLoaded = isWorkspaceLoaded(getSelectedSample());
   validator.checkDataSelectorIsValid("Sample Input", m_dataForm->dsSample);
+	
+	if (!sampleIsLoaded)
+	  emit sampleLoaded(QString::fromStdString(getSelectedSample()));
 
-  if (!isResolutionHidden())
-    validator.checkDataSelectorIsValid("Resolution Input",
-                                       m_dataForm->dsResolution);
+	if (!isResolutionHidden()) {
+		const auto resolutionIsLoaded = isWorkspaceLoaded(getSelectedResolution());
+		validator.checkDataSelectorIsValid("Resolution Input",
+			m_dataForm->dsResolution);
+		if (!resolutionIsLoaded)
+		  emit resolutionLoaded(QString::fromStdString(getSelectedResolution()));
+	}
   return validator;
 }
 

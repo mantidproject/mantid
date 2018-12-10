@@ -116,11 +116,15 @@ bool equivalentFunctions(IFunction_const_sptr func1,
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
-  auto addToStream = [&](std::size_t spectrum) {
-    stream << name << ",i" << spectrum << ";";
-  };
-  fitData->applySpectra(addToStream);
-  return stream;
+	if (!name.empty()) {
+		auto addToStream = [&](std::size_t spectrum) {
+			stream << name << ",i" << spectrum << ";";
+		};
+		fitData->applySpectra(addToStream);
+		return stream;
+	}
+	else
+		throw std::runtime_error("Workspace name is empty. The sample workspace may not be loaded.");
 }
 
 std::string constructInputString(
