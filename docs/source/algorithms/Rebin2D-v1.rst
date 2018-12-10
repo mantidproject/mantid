@@ -25,7 +25,7 @@ ratio of the overlap area of the new and old bin over the area of the
 old bin.
 
 If the input workspace is not of type: **RebinnedOutput**, and the
-`UseFractionalArea` option is set flag is set to `True`, the algorithm
+`UseFractionalArea` option is set to `True`, the algorithm
 will assume that the input fraction is unity. This is correct if this
 workspace has not been previously rebinned, but will give incorrect
 error (standard deviation) estimates if it has been rebinned.
