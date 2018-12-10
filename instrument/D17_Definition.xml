@@ -31,6 +31,8 @@
        Slit 2 to sample distance: 3.605 m
        Slit 3 to sample distance: 0.205 m
 
+       The workspace index and spectrum numbers start by 0 since spectrum numbers will be visualized and workspaces inidces will be reported.
+
        For more information, please visit
        https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/characteristics/
        -->
@@ -91,7 +93,7 @@
   <type name="slit3"/>
   <!--DETECTORS-->
   <!--64 TUBES FORM ONE DETECTOR-->
-  <component idfillbyfirst="x" idstart="1" idstepbyrow="1" type="detector">
+  <component idfillbyfirst="x" idstart="0" idstepbyrow="1" type="detector">
     <location x="0.0" y="0.0" z="3.1"/>
   </component>
   <!--PIXEL, EACH PIXEL IS A DETECTOR-->
