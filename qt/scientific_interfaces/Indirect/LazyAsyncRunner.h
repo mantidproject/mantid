@@ -20,7 +20,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport QtLazyAsyncRunnerBase : public QObject {
+class MANTIDQT_INDIRECT_DLL QtLazyAsyncRunnerBase : public QObject {
   Q_OBJECT
 
 signals:
@@ -35,7 +35,7 @@ protected:
 };
 
 template <typename Callback>
-class DLLExport QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
+class MANTIDQT_INDIRECT_DLL QtLazyAsyncRunner : public QtLazyAsyncRunnerBase {
 public:
   using ReturnType = typename std::result_of<Callback()>::type;
 

@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
-    : API::MantidWidget(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
+    : IIndirectFitPlotView(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
@@ -188,6 +188,10 @@ void IndirectFitPlotView::enableSpectrumSelection(bool enable) {
 
 void IndirectFitPlotView::enableFitRangeSelection(bool enable) {
   m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(enable);
+}
+
+void IndirectFitPlotView::setFitSingleSpectrumText(QString const &text) {
+  m_plotForm->pbFitSingle->setText(text);
 }
 
 void IndirectFitPlotView::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }

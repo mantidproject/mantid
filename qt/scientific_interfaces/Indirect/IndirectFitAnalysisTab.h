@@ -36,7 +36,7 @@ public:
                          QWidget *parent = nullptr);
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
-  void setPlotView(IndirectFitPlotView *view);
+  void setPlotView(IIndirectFitPlotView *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
@@ -112,6 +112,9 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
+public slots:
+  void setBrowserWorkspace() override;
+
 protected:
   IndirectFittingModel *fittingModel() const;
 
@@ -125,10 +128,9 @@ protected:
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
   void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
                      const std::string &parameter);
-  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace,
-               const std::size_t &index);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
-                     const std::string &parameter, const std::size_t &index);
+                     const std::string &parameter);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
                     const std::string &parameterToPlot);
@@ -147,12 +149,11 @@ protected:
   void setPlotOptions(QComboBox *cbPlotType,
                       const QSet<QString> &options) const;
 
-  virtual bool shouldEnablePlotResult() = 0;
-
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
 
   virtual void setRunIsRunning(bool running) = 0;
+  virtual void setFitSingleSpectrumIsFitting(bool fitting) = 0;
 
 signals:
   void functionChanged();
@@ -171,7 +172,6 @@ protected slots:
   void setBrowserStartX(double startX);
   void setBrowserEndX(double endX);
   void updateBrowserFittingRange();
-  void setBrowserWorkspace();
   void setBrowserWorkspace(std::size_t dataIndex);
   void setBrowserWorkspaceIndex(std::size_t spectrum);
   void setBrowserWorkspaceIndex(int spectrum);
@@ -213,6 +213,7 @@ protected slots:
   void saveResult();
 
 private slots:
+  void updatePlotGuess();
   void emitUpdateFitTypes();
 
 private:

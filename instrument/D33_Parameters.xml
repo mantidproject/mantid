@@ -1,23 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <parameter-file instrument = "D33" valid-from = "20th May 2010">
-    
-    <component-link name="D33">
-		
-		<parameter name="number-of-x-pixels">
-		  <value val="256"/>
-		</parameter>
 
-		<parameter name="number-of-y-pixels">
-		  <value val="128"/>
-		</parameter>
+  <!-- These parameters are used in ParallaxCorrection algorithm -->
 
-		<parameter name="x-pixel-size">
-		  <value val="5.5"/>
-		</parameter>
-		
-		<parameter name="y-pixel-size">
-		  <value val="4.297"/>
-		</parameter>
+  <component-link name="back_detector">
 
-    </component-link>
-</parameter-file>    
+    <parameter name="parallax" type="string">
+      <value val="(t * 180 / 3.14 &lt; 10) ? (1 + t * 180 / 3.14 * 0.0081615 / 1.0273) : (1 + 10 * 0.0081615 / 1.0273)"/>
+    </parameter>
+
+    <parameter name="direction" type="string">
+      <value val="x"/>
+    </parameter>
+
+  </component-link>
+
+  <component-link name="front_detector_right">
+
+    <parameter name="parallax" type="string">
+      <value val="(t * 180 / 3.14 &lt; 10) ? (1 + t * 180 / 3.14 * 0.005026 / 0.90814) : (1 + 10 * 0.005026 / 0.90814)"/>
+    </parameter>
+
+    <parameter name="direction" type="string">
+      <value val="y"/>
+    </parameter>
+
+  </component-link>
+
+  <component-link name="front_detector_left">
+
+    <parameter name="parallax" type="string">
+      <value val="(t * 180 / 3.14 &lt; 10) ? (1 + t * 180 / 3.14 * 0.005026 / 0.90814) : (1 + 10 * 0.005026 / 0.90814)"/>
+    </parameter>
+
+    <parameter name="direction" type="string">
+      <value val="y"/>
+    </parameter>
+
+  </component-link>
+
+  <component-link name="front_detector_top">
+
+    <parameter name="parallax" type="string">
+      <value val="(t * 180 / 3.14 &lt; 10) ? (1 + t * 180 / 3.14 * 0.0058296 / 0.98876) : (1 + 10 * 0.0058296 / 0.98876)"/>
+    </parameter>
+
+    <parameter name="direction" type="string">
+      <value val="x"/>
+    </parameter>
+
+  </component-link>
+
+  <component-link name="front_detector_bottom">
+
+    <parameter name="parallax" type="string">
+      <value val="(t * 180 / 3.14 &lt; 10) ? (1 + t * 180 / 3.14 * 0.0058296 / 0.98876) : (1 + 10 * 0.0058296 / 0.98876)"/>
+    </parameter>
+
+    <parameter name="direction" type="string">
+      <value val="x"/>
+    </parameter>
+
+  </component-link>
+
+</parameter-file>
