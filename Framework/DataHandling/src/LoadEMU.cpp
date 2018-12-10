@@ -312,7 +312,7 @@ class FileLoader {
   size_t _size;
 
 public:
-  FileLoader(const char *filename)
+  explicit FileLoader(const char *filename)
       : _ifs(filename, std::ios::binary | std::ios::in) {
     if (!_ifs.is_open() || _ifs.fail())
       throw std::runtime_error("unable to open file");
@@ -482,9 +482,10 @@ protected:
     // convert observation time to tof and set the pulse time
     // relative to the start of the doppler cycle
     double tof = tobs;
-    double pulse;
+
     if (m_saveAsTOF) {
-      if (x < DETECTOR_TUBES)
+      double pulse;      
+	  if (x < DETECTOR_TUBES)
         std::tie(pulse, tof) = m_convertTOF.analysedTOF(id, tobs);
       else
         std::tie(pulse, tof) = m_convertTOF.directTOF(id, tobs);
@@ -1140,11 +1141,11 @@ void LoadEMU<FD>::calibrateDopplerPhase(
     auto delta = (vmax - vmin) / NHIST;
     for (int i = 0; i < numEvents; i++) {
       auto v = nVel[i];
-      auto ix = static_cast<size_t>(std::floor((v - vmin) / delta));
-      histogram[ix]++;
-      if (histogram[ix] > maxHist)
-        maxHist = histogram[ix];
-      nMap[i] = ix;
+      auto j = static_cast<size_t>(std::floor((v - vmin) / delta));
+      histogram[j]++;
+      if (histogram[j] > maxHist)
+        maxHist = histogram[j];
+      nMap[i] = j;
     }
 
     // determine the points above the 25% threshold
