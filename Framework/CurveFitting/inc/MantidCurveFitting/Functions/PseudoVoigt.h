@@ -74,6 +74,13 @@ private:
                                const double gammasq_div_4,
                                const double xdiffsq) const;
 
+  /// historty of the order to be set
+  std::vector<size_t> m_set_history_distances;
+  void update_set_history(size_t set_index);
+  /// get the parameter (by index) to calculate according to parameter set
+  /// history
+  size_t get_parameter_to_calculate_from_set();
+
   bool m_user_set_height;
   double m_height;
 };

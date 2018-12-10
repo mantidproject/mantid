@@ -175,6 +175,56 @@ public:
     TS_ASSERT_EQUALS(fn.category(), "Peak");
   }
 
+  /** test setParameter such that H, I, eta and peak height shall be related
+   */
+  void New_testSetParameters() {
+    double peak_height = 2.0;
+
+    // create a Gaussian
+    Gaussian gaussian;
+    gaussian.initialize();
+    gaussian.setFwhm(0.5);
+    gaussian.setHeight(2.0);
+    double intensity = gaussian.intensity();
+
+    PseudoVoigt pv;
+    pv.initialize();
+
+    // set PV as a Gaussian and test inexplicitly calculating intensity
+    pv.setParameter("Mixing", 1.);
+    pv.setFwhm(0.5);
+    peak_height = pv.height();
+    pv.setHeight(2.0);
+    double pv_intensity = pv.intensity();
+    TS_ASSERT_DELTA(intensity, pv_intensity, 1.E-4);
+
+    // change mixing to Lorentzian
+    Lorentzian lr;
+    lr.initialize();
+    lr.setIntensity(pv_intensity);
+    lr.setFwhm(0.5);
+    double lr_height = lr.height();
+
+    pv.setHeight(lr_height);
+    double lr_mixing = pv.getParameter("Mixing");
+    TS_ASSERT_DELTA(lr_mixing, 0., 1E-5);
+
+    // set intensity again to modify the peak width
+    pv.setIntensity(2 * pv_intensity);
+    double pv_fwhm = pv.fwhm();
+    TS_ASSERT_DELTA(pv_fwhm, 1.0, 1.E-5);
+
+    // increase height again to modify peak width
+    pv.setHeight(2. * peak_height);
+    pv_fwhm = pv.fwhm();
+    TS_ASSERT_DELTA(pv_fwhm, 0.75, 1.E-5);
+
+    // make it even taller peak to change mixing
+    pv.setHeight(4. * peak_height);
+    double new_mixing = pv.getParameter("Mixing");
+    TS_ASSERT_DELTA(new_mixing, 0.25, 1.E-5);
+  }
+
   /** Test against with pure Gaussian
    * @brief testGaussianEdge
    */
