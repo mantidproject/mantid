@@ -29,6 +29,7 @@ Improvements
 ############
 
 - The Run button is now above the output options, and is disabled during fitting along with the output buttons.
+- The Run button in the Data Analysis tabs is now above the output options, and is disabled during fitting.
 - The Fit Single Spectrum buttons in the Data Analysis tabs MSDFit, ConvFit, I(Q,t)Fit and F(Q)Fit are now disabled
   during fitting.
 - When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle
@@ -48,6 +49,8 @@ Improvements
 Bugfixes
 ########
 
+- The workspace(s) loaded into F(Q) Fit are checked for EISF or Width values, and an error message is displayed
+  if neither are present. This prevents an unexpected crash.
 - The parameter values for a selected spectrum are now updated properly when a Fit is run using the Fit String
   option in ConvFit.
 - An unexpected crash is prevented when Plot Current Preview is clicked when no data is loaded. A meaningful error
