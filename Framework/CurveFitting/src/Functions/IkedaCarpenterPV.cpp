@@ -52,9 +52,10 @@ IkedaCarpenterPV::IkedaCarpenterPV()
       m_gamma_index(6), m_center_index(7) {}
 
 void IkedaCarpenterPV::init() {
-  declareParameter("I", 0.0, "The integrated intensity of the peak. I.e. "
-                             "approximately equal to HWHM times height of "
-                             "peak");
+  declareParameter("I", 0.0,
+                   "The integrated intensity of the peak. I.e. "
+                   "approximately equal to HWHM times height of "
+                   "peak");
   this->lowerConstraint0("I");
   declareParameter("Alpha0", 1.6, "Used to model fast decay constant");
   this->lowerConstraint0("Alpha0");
@@ -101,6 +102,11 @@ double IkedaCarpenterPV::height() const {
   return h0[0];
 }
 
+double IkedaCarpenterPV::heightUncertainty() const {
+  // TODO - 20181210 - Need equation!
+  return 1.;
+}
+
 double IkedaCarpenterPV::fwhm() const {
   double sigmaSquared = getParameter("SigmaSquared");
   double gamma = getParameter("Gamma");
@@ -123,6 +129,11 @@ double IkedaCarpenterPV::fwhm() const {
     ;
   }
   return sqrt(8.0 * M_LN2 * sigmaSquared) + gamma;
+}
+
+double IkedaCarpenterPV::fwhmUncertainty() const {
+  // TODO - 20181210 - Need equation!
+  return 1.;
 }
 
 void IkedaCarpenterPV::setFwhm(const double w) {

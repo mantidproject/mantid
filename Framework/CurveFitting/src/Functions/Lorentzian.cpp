@@ -40,6 +40,25 @@ double Lorentzian::height() const {
   }
 }
 
+double Lorentzian::heightUncertainty() const {
+  double gamma = getParameter(2);
+
+  // special case for gamma is equal to 0 (unphysical)
+  double uncertainty{1.};
+  if (gamma > 0.0) {
+    double intensity = getParameter(0);
+    double intensity_error = getError(0);
+    double gamma_error = getError(2);
+    double intensity_gamma_error = getCovariance(0, 2);
+    double t1 = intensity_error / intensity;
+    double t2 = gamma_error / gamma;
+    double t3 = intensity_gamma_error / (intensity * gamma);
+    uncertainty = (2./M_PI) * sqrt(t1*t1 + t2*t2 - 2* t3);
+  }
+
+  return uncertainty;
+}
+
 void Lorentzian::setHeight(const double h) {
   double gamma = getParameter("FWHM");
   if (gamma == 0.0) {
@@ -61,6 +80,13 @@ void Lorentzian::setFwhm(const double w) {
   }
   setParameter("FWHM", w);
 }
+
+double Lorentzian::fwhmUncertainty() const {
+  double gamma_error = getError(2);
+  return gamma_error;
+}
+
+
 
 void Lorentzian::fixCentre(bool isDefault) {
   fixParameter("PeakCentre", isDefault);

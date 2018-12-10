@@ -50,6 +50,11 @@ public:
   /// Calls 'setHeight' method in Python
   void setHeight(const double h) override;
 
+  // TODO - 20181210 - Find out how to implement
+  double heightUncertainty() const override;
+  double intensityUncertainty() const override;
+  double fwhmUncertainty() const override;
+
   /// Calls Python fwhm method
   double fwhm() const override;
   /// Called by framework when the width is changed

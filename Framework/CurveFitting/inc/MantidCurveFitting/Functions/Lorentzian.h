@@ -40,9 +40,9 @@ public:
   /// Return the peak FWHM uncertainty
   double fwhmUncertainty() const override;
   /// Return the peak intensity uncertainty
-  virtual double intensityUncertainty() const override;
+  double intensityUncertainty() const override {return getError(0);}
   /// Return the peak height uncertainty
-  virtual double heightUncertainty() const override;
+  double heightUncertainty() const override;
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
   void setHeight(const double h) override;
   void setFwhm(const double w) override;

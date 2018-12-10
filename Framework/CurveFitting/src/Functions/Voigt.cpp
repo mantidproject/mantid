@@ -150,6 +150,11 @@ double Voigt::height() const {
   return h;
 }
 
+double Voigt::heightUncertainty() const {
+  // TODO - 20181210: Implement ASAP
+  return 0;
+}
+
 /**
  * Gives the FWHM of the peak. This is estimated as
  * 0.5*(LorentzFWHM + GaussianFWHM)
@@ -157,6 +162,15 @@ double Voigt::height() const {
  */
 double Voigt::fwhm() const {
   return (getParameter(LORENTZ_FWHM) + getParameter(GAUSSIAN_FWHM));
+}
+
+/** uncertainy for FWHM (effecitve)
+ * @return
+ */
+double Voigt::fwhmUncertainty() const {
+  double lorenz_fwhm_error = getError(2);
+  double gaussian_fwhm_error = getError(3);
+  return sqrt(lorenz_fwhm_error*lorenz_fwhm_error + gaussian_fwhm_error * gaussian_fwhm_error);
 }
 
 /**
@@ -216,6 +230,27 @@ double Voigt::intensity() const {
     return 0.0;
   }
   return M_PI * getParameter(LORENTZ_AMP) * getParameter(LORENTZ_FWHM) / 2.0;
+}
+
+/** Calcualte uncertainty of effective peak intensity
+ * @brief Voigt::intensityUncertainty :: calcualte uncertainty of effective peak intensity
+ * @return :: uncertainty (if Gaussian FWHM, then set to 1 instead)
+ */
+double Voigt::intensityUncertainty() const {
+  if (getParameter(GAUSSIAN_FWHM) == 0.0) {
+    return 1.0;
+  }
+  // TODO FIXME - 20181210 - Is the original intensity equaiton correct?
+  double lorent_amp = getParameter(LORENTZ_AMP);
+  double lorent_amp_error = getError(0);
+  double lorent_fwhm = getParameter(LORENTZ_FWHM);
+  double lorent_fwhm_error = getError(2);
+  double t1 = lorent_amp_error / lorent_amp;
+  double t2 = lorent_fwhm_error / lorent_fwhm;
+  double t3 = getCovariance(0, 2) / (lorent_amp * lorent_fwhm);
+  double uncertainty = (M_PI * 0.5) * sqrt(t1 * t1 + t2 * t2 + 2 * t3);
+
+  return uncertainty;
 }
 
 /**
