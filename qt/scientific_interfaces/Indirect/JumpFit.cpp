@@ -107,17 +107,35 @@ void JumpFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
+void JumpFit::runClicked() { runTab(); }
+
 void JumpFit::plotClicked() {
   setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
   setPlotResultIsPlotting(false);
 }
 
-bool JumpFit::shouldEnablePlotResult() {
-  for (auto i = 0u; i < m_jumpFittingModel->numberOfWorkspaces(); ++i)
-    if (m_jumpFittingModel->getNumberOfSpectra(i) > 1)
-      return true;
-  return false;
+void JumpFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void JumpFit::setFitSingleSpectrumIsFitting(bool fitting) {
+  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
+      fitting ? "Fitting..." : "Fit Single Spectrum");
+  setButtonsEnabled(!fitting);
+}
+
+void JumpFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void JumpFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
 }
 
 void JumpFit::setRunEnabled(bool enabled) {
@@ -136,25 +154,6 @@ void JumpFit::setFitSingleSpectrumEnabled(bool enabled) {
 void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
-
-void JumpFit::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
-  setFitSingleSpectrumEnabled(enabled);
-}
-
-void JumpFit::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
-void JumpFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
-void JumpFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

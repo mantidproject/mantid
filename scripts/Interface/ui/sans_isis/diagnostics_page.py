@@ -197,3 +197,16 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
     @detector.setter
     def detector(self, value):
         self.detector_combo_box.currentText(value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Activate buttons
+    # ------------------------------------------------------------------------------------------------------------------
+    def enable_integrals(self):
+        self.horizontal_button.setEnabled(True)
+        self.vertical_button.setEnabled(True)
+        self.time_button.setEnabled(True)
+
+    def disable_integrals(self):
+        self.horizontal_button.setEnabled(False)
+        self.vertical_button.setEnabled(False)
+        self.time_button.setEnabled(False)

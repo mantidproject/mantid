@@ -133,6 +133,8 @@ public:
 
   void setWorkspaceIndex(int i) override;
 
+  void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
+
 public slots:
   void fit() override;
   void sequentialFit() override;
@@ -151,8 +153,6 @@ protected slots:
   void clear() override;
 
   void clearAllCustomFunctions();
-
-  void updatePlotGuess();
 
   void browserVisibilityChanged(bool isVisible);
 
