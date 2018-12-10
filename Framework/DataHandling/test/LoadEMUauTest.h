@@ -17,22 +17,22 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::DataHandling;
+using namespace Mantid;
 using namespace Mantid::DataObjects;
 
-extern template class LoadEMU<FileDescriptor>;
+extern template class DataHandling::LoadEMU<FileDescriptor>;
 
 class LoadEMUauTest : public CxxTest::TestSuite {
 public:
   void test_load_emu_algorithm_init() {
-    LoadEMUTar algToBeTested;
+    DataHandling::LoadEMUTar algToBeTested;
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
     TS_ASSERT(algToBeTested.isInitialized());
   }
 
   void test_load_emu_algorithm() {
-    LoadEMUTar algToBeTested;
+    DataHandling::LoadEMUTar algToBeTested;
 
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
