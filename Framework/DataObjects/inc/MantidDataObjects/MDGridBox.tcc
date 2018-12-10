@@ -65,7 +65,7 @@ TMDE(MDGridBox)::MDGridBox(
 }
 
 template <typename MDE, size_t nd>
-template <typename EventIterator>
+//template <typename EventIterator>
 MDGridBox<MDE, nd>::MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,
                               const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
                               &extentsVector, EventIterator begin, EventIterator end) :
@@ -97,22 +97,19 @@ MDGridBox<MDE, nd>::MDGridBox(Mantid::API::BoxController *const bc, const uint32
     auto evSignal = it->getSignal();
     signal += evSignal;
     errorSq += it->getErrorSquared();
-    ///
-    //TODO other stuff for weighted events and so on
+    /// Weight processing
     ++weight;
-//    for (auto d = 0; d < nd; d++) {
-//      // Total up the coordinate weighted by the signal.
-//      centroid[d] += it->getCenter(d) * static_cast<coord_t>(evSignal);
-//    }
+    for (auto d = 0; d < nd; d++) {
+      // Total up the coordinate weighted by the signal.
+      centroid[d] += it->getCenter(d) * static_cast<coord_t>(evSignal);
+    }
   }
 
-//  // Normalize by the total signal
-//  const coord_t reciprocal = 1.0f / static_cast<coord_t>(signal);
-//  for (size_t d = 0; d < nd; ++d) {
-//    centroid[d] *= reciprocal;
-//  }
-
-
+  // Normalize by the total signal
+  const coord_t reciprocal = 1.0f / static_cast<coord_t>(signal);
+  for (size_t d = 0; d < nd; ++d) {
+    centroid[d] *= reciprocal;
+  }
 }
 
 

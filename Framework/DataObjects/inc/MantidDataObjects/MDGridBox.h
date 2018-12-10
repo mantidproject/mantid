@@ -50,7 +50,8 @@ public:
             const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
                 &extentsVector);
 
-  template <typename EventIterator>
+  using EventIterator = typename std::vector<MDE>::const_iterator;
+//  template <typename EventIterator>
   MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,
             const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
             &extentsVector, EventIterator begin, EventIterator end);

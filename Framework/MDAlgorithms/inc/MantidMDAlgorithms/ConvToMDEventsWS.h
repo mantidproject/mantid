@@ -267,16 +267,20 @@ void ConvToMDEventsWSIndexing::convertToNativeBoxStructureRecursive(
     children.reserve(sChildren.size());
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
     if(sChildren[i].isLeaf()) {
+      bc->incBoxesCounter(level);
       children.emplace_back(makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::LEAF, space, bc, level));
     } else {
+      bc->incGridBoxesCounter(level);
       children.emplace_back(makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::GRID, space, bc, level));
     }
   }
   nBoxCur.setChildren(children, 0, children.size());
+
+  ++level;
   for(unsigned i = 0; i < children.size(); ++i) {
     if (!sChildren[i].isLeaf())
       ConvToMDEventsWSIndexing::convertToNativeBoxStructureRecursive<ND, MDEventType>(sChildren[i],
-          *(static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND> *>(children[i])), space, bc, ++level);
+          *(static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND> *>(children[i])), space, bc, level);
   }
 }
 
@@ -415,7 +419,8 @@ ConvToMDEventsWSIndexing::makeMDBox(BoxStructureType<ND, MDEventType> sbox, cons
     return res;
   }
   case GRID:
-    return new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), level, extents);
+//    return new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), level, extents);
+    return new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), level, extents, sbox.eventBegin(), sbox.eventEnd());
   default:
     throw std::logic_error("Wrong MD box type detected.");
   }
