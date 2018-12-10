@@ -129,6 +129,7 @@ public slots:
 
 private slots:
   void setPolCorPageForIndex(int index);
+  void floodCorComboBoxChanged(const QString &text);
 
 private:
   /// Initialise the interface

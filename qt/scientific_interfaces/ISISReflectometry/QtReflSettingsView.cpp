@@ -61,6 +61,8 @@ void QtReflSettingsView::initLayout() {
           SLOT(setDetectorCorrectionEnabled(bool)));
   connect(m_ui.polCorrComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setPolCorPageForIndex(int)));
+  connect(m_ui.floodCorComboBox, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(floodCorComboBoxChanged(const QString &)));
 }
 
 void QtReflSettingsView::initOptionsTable() {
@@ -431,6 +433,12 @@ void QtReflSettingsView::addPerAngleOptionsTableRow() {
   m_ui.optionsTable->setRowCount(numRows);
   // Select the first cell in the new row
   m_ui.optionsTable->setCurrentCell(numRows - 1, 0);
+}
+
+void QtReflSettingsView::floodCorComboBoxChanged(const QString & text) {
+  auto const showWorkspaceSelector = text == "Workspace";
+  m_ui.floodWorkspaceWsSelector->setVisible(showWorkspaceSelector);
+  m_ui.floodWorkspaceWsSelectorLabel->setVisible(showWorkspaceSelector);
 }
 
 std::string QtReflSettingsView::getText(QLineEdit const &lineEdit) const {
