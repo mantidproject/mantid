@@ -303,13 +303,15 @@ boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
   textAxis->setLabel(0, "Data");
   textAxis->setLabel(1, "Calc");
   textAxis->setLabel(2, "Diff");
-
+  std::unordered_map<std::string, int> functionCount;
   // Add each calculated function
   auto iend = functionsToDisplay.end();
   size_t wsIndex(1); // Zero reserved for data
   for (auto it = functionsToDisplay.begin(); it != iend; ++it) {
-    if (wsIndex > 2)
-      textAxis->setLabel(wsIndex, (*it)->name());
+    if (wsIndex > 2) {
+      std::string name = (*it)->name();
+       ++functionCount[name];
+      textAxis->setLabel(wsIndex, name + " "+std::to_string(functionCount[name]));}
     addFunctionValuesToWS(*it, ws, wsIndex, domain, values);
     if (it == functionsToDisplay.begin())
       wsIndex += 2; // Skip difference histogram for now
