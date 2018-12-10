@@ -1477,7 +1477,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void xtest_flood_correction_parameter_file() {
+  void test_flood_correction_parameter_file() {
 
     std::string const name = "input";
     prepareInputGroup(name, "Flood");
