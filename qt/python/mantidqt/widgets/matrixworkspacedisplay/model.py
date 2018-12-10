@@ -32,6 +32,6 @@ class MatrixWorkspaceDisplayModel(object):
         return self._ws.name()
 
     def get_item_model(self):
-        return MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x),
-        MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y),
-        MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e)
+        return (MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x),
+                MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y),
+                MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e))

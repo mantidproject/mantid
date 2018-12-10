@@ -13,8 +13,8 @@ import unittest
 
 from mock import Mock
 
-from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
+from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockQModelIndex, \
     MockWorkspace
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedisplay import \
