@@ -397,7 +397,8 @@ public:
 
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), stitched2->x(0).rawData())
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), stitched2->y(0).rawData())
-    TS_ASSERT_EQUALS(stitched->e(0).rawData(), stitched2->e(0).rawData())
+    // The final rebin causes accuracy problems, thus 1.e-9 tolerance
+    TS_ASSERT_DELTA(stitched->e(0).rawData(), stitched2->e(0).rawData(), 1.e-9)
 
     // Check workspaces in ADS
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
@@ -1237,9 +1238,9 @@ public:
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 4)
     TS_ASSERT_DELTA(scales[0], 0.9375000008, 1.e-9)
-    TS_ASSERT_DELTA(scales[1], 0.6249999993, 1.e-9)
+    TS_ASSERT_DELTA(scales[1], 0.9374999997, 1.e-9)
     TS_ASSERT_DELTA(scales[2], 0.9375000008, 1.e-9)
-    TS_ASSERT_DELTA(scales[3], 0.6249999993, 1.e-9)
+    TS_ASSERT_DELTA(scales[3], 0.9374999997, 1.e-9)
     // Check workspaces in ADS
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
     // In ADS: group1, group2, grou3, ws1, ws2, ws3, ws4, ws5, ws6 and

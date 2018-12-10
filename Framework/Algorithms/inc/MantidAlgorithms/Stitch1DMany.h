@@ -56,10 +56,16 @@ private:
 
   std::vector<double> m_startOverlaps;
   std::vector<double> m_endOverlaps;
+  /// The parameters for final rebinning
   std::vector<double> m_params;
+  /// The rebinning step for intermediate workspaces
+  std::vector<double> m_params_step;
   std::vector<double> m_scaleFactors;
   std::vector<double> m_manualScaleFactors;
   API::Workspace_sptr m_outputWorkspace;
+
+  void rebin(const std::string &wsName);
+  void rebin(API::Workspace_sptr &ws);
 
   bool m_scaleRHSWorkspace = true;
   bool m_useManualScaleFactors = false;

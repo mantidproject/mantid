@@ -16,6 +16,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include <boost/make_shared.hpp>
+#include <boost/pointer_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -188,6 +189,12 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       m_endOverlaps = this->getProperty("EndOverlaps");
       m_scaleRHSWorkspace = this->getProperty("ScaleRHSWorkspace");
       m_params = this->getProperty("Params");
+      if (m_params.size() == 1)
+        m_params_step.emplace_back(m_params[0]);
+      else if (m_params.size() == 3)
+        m_params_step.emplace_back(m_params[1]);
+      else // Stitch1D is responsible
+        m_params_step = m_params;
 
       // Either stitch MatrixWorkspaces or workspaces of the group
       size_t numStitchableWS = (workspaces.size() == inputWorkspacesStr.size())
@@ -230,6 +237,40 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   return issues;
 }
 
+/** Runs the Rebin Algorithm as a child
+ @param wsName :: The name of the input workspace
+ */
+void Stitch1DMany::rebin(const std::string &wsName) {
+  if (!isDefault("Params")) {
+    auto rebin = this->createChildAlgorithm("Rebin");
+    rebin->setPropertyValue("InputWorkspace", wsName);
+    rebin->setProperty("Params", m_params);
+    std::stringstream ssParams;
+    ssParams << Mantid::Kernel::Strings::join(m_params.begin(), m_params.end(),
+                                              ",");
+    g_log.information("Rebinning Params: " + ssParams.str());
+    rebin->execute();
+  }
+}
+
+/** Runs the Rebin Algorithm as a child
+ @param ws :: The input workspace
+ */
+void Stitch1DMany::rebin(Workspace_sptr &ws) {
+  if (!isDefault("Params")) {
+    auto rebin = this->createChildAlgorithm("Rebin");
+    rebin->setProperty("InputWorkspace", ws);
+    rebin->setProperty("Params", m_params);
+    std::stringstream ssParams;
+    ssParams << Mantid::Kernel::Strings::join(m_params.begin(), m_params.end(),
+                                              ",");
+    g_log.information("Rebinning Params: " + ssParams.str());
+    rebin->execute();
+    MatrixWorkspace_sptr rebinWS = rebin->getProperty("OutputWorkspace");
+    ws = boost::dynamic_pointer_cast<Workspace>(rebinWS);
+  }
+}
+
 /// Execute the algorithm.
 void Stitch1DMany::exec() {
   if (m_inputWSMatrix.size() > 1) {   // groups
@@ -249,6 +290,8 @@ void Stitch1DMany::exec() {
         std::vector<double> scaleFactors;
         doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors);
 
+        // Rebin, if desired
+        rebin(outName);
         // Add the resulting workspace to the list to be grouped together
         toGroup.emplace_back(outName);
 
@@ -274,6 +317,8 @@ void Stitch1DMany::exec() {
         outName = groupName;
         Workspace_sptr outStitchedWS;
         doStitch1D(inMatrix, periodScaleFactors, outStitchedWS, outName);
+        // Rebin, if desired
+        rebin(outStitchedWS);
         // Add name of stitched workspaces to group list and ADS
         toGroup.emplace_back(outName);
         AnalysisDataService::Instance().addOrReplace(outName, outStitchedWS);
@@ -293,6 +338,8 @@ void Stitch1DMany::exec() {
     std::string tempOutName;
     doStitch1D(m_inputWSMatrix.front(), m_manualScaleFactors, m_outputWorkspace,
                tempOutName);
+    // Rebin, if desired
+    rebin(m_outputWorkspace);
   }
   // Save output
   this->setProperty("OutputWorkspace", m_outputWorkspace);
@@ -325,7 +372,7 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
       alg->setProperty("StartOverlap", m_startOverlaps[i - 1]);
       alg->setProperty("EndOverlap", m_endOverlaps[i - 1]);
     }
-    alg->setProperty("Params", m_params);
+    alg->setProperty("Params", m_params_step);
     alg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
     alg->setProperty("UseManualScaleFactor", m_useManualScaleFactors);
     if (m_useManualScaleFactors)
@@ -379,7 +426,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period,
     alg->setProperty("OutputWorkspace", outName);
   alg->setProperty("StartOverlaps", m_startOverlaps);
   alg->setProperty("EndOverlaps", m_endOverlaps);
-  alg->setProperty("Params", m_params);
+  alg->setProperty("Params", m_params_step);
   alg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
   alg->setProperty("UseManualScaleFactors", useManualScaleFactors);
   if (useManualScaleFactors)

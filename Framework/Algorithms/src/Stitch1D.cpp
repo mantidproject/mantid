@@ -496,13 +496,14 @@ void Stitch1D::exec() {
   MatrixWorkspace_sptr result;
   if (lhsWS->isHistogramData()) { // If the input workspaces are histograms ...
     size_t a1 = 0;
-    size_t a2 = 0;
-    a1 = lhs->binIndexOf(startOverlap + params[1]);
+    size_t a2 = lhs->blocksize();
+    try {
+      a1 = lhs->binIndexOf(startOverlap + params[1]);
+    } catch (std::out_of_range) {
+    }
     try {
       a2 = lhs->binIndexOf(endOverlap);
     } catch (std::out_of_range) {
-      // This happens for end overlap = last bin
-      a2 = lhs->blocksize();
     }
     if (a1 >= a2) {
       g_log.warning("The Params you have provided for binning yield a "

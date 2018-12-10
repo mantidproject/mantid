@@ -40,6 +40,11 @@ We can specify manual scale factors to use by setting
 of scale factors from the selected period. These scale factors are then applied
 to all other periods when stitching.
 
+The rebin parameters :literal:`Params` are used for rebinning the resulting output
+workspace according to desired begin and end bin boundaries. The rebin step is used
+for stitching two workspaces. Thus, sensible start and end overlap values are
+obtained if not provided.
+
 Workflow
 --------
 
