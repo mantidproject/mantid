@@ -790,7 +790,8 @@ void FitPropertyBrowser::createCompositeFunction(
   auto h = std::make_unique<PropertyHandler>(
       m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
   m_compositeFunction->setHandler(std::move(h));
-  setCurrentFunction(static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
+  setCurrentFunction(
+      static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
 
   if (m_auto_back) {
     addAutoBackground();

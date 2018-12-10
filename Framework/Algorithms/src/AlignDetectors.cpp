@@ -111,8 +111,7 @@ const std::string AlignDetectors::summary() const {
 }
 
 /// (Empty) Constructor
-AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
-}
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
 
 /// Destructor
 AlignDetectors::~AlignDetectors() {}

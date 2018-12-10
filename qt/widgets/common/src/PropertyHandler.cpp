@@ -422,8 +422,6 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   h->setAttribute("EndX", m_browser->endX());
   f->setHandler(std::move(h));
 
-  
-
   // enable the change slots
   m_browser->m_changeSlotsEnabled = true;
   m_browser->setFitEnabled(true);

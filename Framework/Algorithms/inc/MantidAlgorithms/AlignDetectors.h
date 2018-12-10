@@ -83,7 +83,6 @@ private:
 
   /// number of spectra in input workspace
   int64_t m_numberOfSpectra;
-
 };
 
 } // namespace Algorithms
