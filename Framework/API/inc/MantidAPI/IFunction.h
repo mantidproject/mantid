@@ -534,7 +534,7 @@ public:
   bool isParallel() const { return m_isParallel; }
 
   /// Set a function handler
-  void setHandler(std::shared_ptr<FunctionHandler> handler);
+  void setHandler(boost::shared_ptr<FunctionHandler> handler);
   /// Return the handler
   FunctionHandler *getHandler() const { return m_handler.get(); }
 
@@ -597,7 +597,7 @@ protected:
   bool m_isParallel;
 
   /// Pointer to a function handler
-  std::shared_ptr<FunctionHandler> m_handler;
+  boost::shared_ptr<FunctionHandler> m_handler;
 
   /// Pointer to the progress handler
   boost::shared_ptr<Kernel::ProgressBase> m_progReporter;

@@ -118,8 +118,8 @@ void PropertyHandler::init() {
         throw std::runtime_error(
             "IFunction expected but func function of another type");
       }
-      std::shared_ptr<PropertyHandler> h =
-          std::make_shared<PropertyHandler>(f, m_cf, m_browser);
+      boost::shared_ptr<PropertyHandler> h =
+          boost::make_shared<PropertyHandler>(f, m_cf, m_browser);
       f->setHandler(std::move(h));
     }
   }
@@ -418,8 +418,8 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     return nullptr;
   }
 
-  std::shared_ptr<PropertyHandler> h =
-      std::make_shared<PropertyHandler>(f, m_cf, m_browser);
+  boost::shared_ptr<PropertyHandler> h =
+      boost::make_shared<PropertyHandler>(f, m_cf, m_browser);
   f->setHandler(h);
   h->setAttribute("StartX", m_browser->startX());
   h->setAttribute("EndX", m_browser->endX());
@@ -1040,8 +1040,8 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     emit m_browser->removePlotSignal(this);
 
     Mantid::API::IFunction_sptr f_old = function();
-    std::shared_ptr<PropertyHandler> h =
-        std::make_shared<PropertyHandler>(f, m_parent, m_browser, m_item);
+    boost::shared_ptr<PropertyHandler> h =
+        boost::make_shared<PropertyHandler>(f, m_parent, m_browser, m_item);
     if (this == m_browser->m_autoBackground) {
       if (dynamic_cast<Mantid::API::IBackgroundFunction *>(f.get())) {
         m_browser->m_autoBackground = h.get();

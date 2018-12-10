@@ -787,7 +787,7 @@ void FitPropertyBrowser::createCompositeFunction(
   }
   setWorkspace(m_compositeFunction);
 
-  std::shared_ptr<PropertyHandler> h = std::make_shared<PropertyHandler>(
+  boost::shared_ptr<PropertyHandler> h = boost::make_shared<PropertyHandler>(
       m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
   m_compositeFunction->setHandler(std::move(h));
   setCurrentFunction(h.get());

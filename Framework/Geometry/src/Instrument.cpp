@@ -47,14 +47,14 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
 /// Default constructor
 Instrument::Instrument()
     : CompAssembly(), m_detectorCache(), m_sourceCache(nullptr),
-      m_chopperPoints(std::make_shared<std::vector<const ObjComponent *>>()),
+      m_chopperPoints(boost::make_shared<std::vector<const ObjComponent *>>()),
       m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(boost::make_shared<ReferenceFrame>()) {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string &name)
     : CompAssembly(name), m_detectorCache(), m_sourceCache(nullptr),
-      m_chopperPoints(std::make_shared<std::vector<const ObjComponent *>>()),
+      m_chopperPoints(boost::make_shared<std::vector<const ObjComponent *>>()),
       m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(boost::make_shared<ReferenceFrame>()) {}
 
@@ -65,7 +65,7 @@ Instrument::Instrument(const std::string &name)
 Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
                        boost::shared_ptr<ParameterMap> map)
     : CompAssembly(instr.get(), map.get()), m_sourceCache(instr->m_sourceCache),
-      m_chopperPoints(std::shared_ptr<std::vector<const ObjComponent *>>(
+      m_chopperPoints(boost::shared_ptr<std::vector<const ObjComponent *>>(
           instr->m_chopperPoints.get())),
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
@@ -84,7 +84,7 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
  */
 Instrument::Instrument(const Instrument &instr)
     : CompAssembly(instr), m_sourceCache(nullptr),
-      m_chopperPoints(std::make_shared<std::vector<const ObjComponent *>>()),
+      m_chopperPoints(boost::make_shared<std::vector<const ObjComponent *>>()),
       m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
       m_defaultView(instr.m_defaultView),
