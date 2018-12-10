@@ -19,20 +19,22 @@ if sys.version_info.major == 3:
 else:
     import mock
 
-class MockInheritingClass(AnalysisDataServiceObserver):
+
+class FakeInheritingClass(AnalysisDataServiceObserver):
     def anyChangeHandle(self):
-        # Going to be mocked out anyways
+        # This method is going to be mocked out but needs to be present to actually get the hook from the C++ side
         pass
 
 
 class AnalysisDataServiceObserverTest(unittest.TestCase):
     def setUp(self):
-        self.mock_class = MockInheritingClass()
+        self.mock_class = FakeInheritingClass()
         self.mock_class.observeAll(True)
         self.mock_class.anyChangeHandle = mock.MagicMock()
 
     def tearDown(self):
         self.mock_class.observeAll(False)
+        ADS.clear()
 
     def test_observeAll_calls_anyChangeHandle_when_set_on_ads_add(self):
         CreateSampleWorkspace(OutputWorkspace="ws")
@@ -76,9 +78,7 @@ class AnalysisDataServiceObserverTest(unittest.TestCase):
         RenameWorkspace(InputWorkspace="ws", OutputWorkspace="ws1")
         # One for the rename
         expected_count += 1
-        # One for removing original named workspace
-        expected_count += 1
-        # One for adding new workspace
+        # One for replacing original named workspace
         expected_count += 1
 
         self.assertEqual(self.mock_class.anyChangeHandle.call_count, expected_count)

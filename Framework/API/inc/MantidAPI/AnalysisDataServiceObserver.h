@@ -68,9 +68,10 @@ protected:
                                  const Workspace_sptr ws);
 
 private:
-  bool m_observingAdd, m_observingReplace, m_observingDelete, m_observingClear,
-      m_observingRename, m_observingGroup, m_observingUnGroup,
-      m_observingGroupUpdate;
+  bool m_observingAdd{false}, m_observingReplace{false},
+      m_observingDelete{false}, m_observingClear{false},
+      m_observingRename{false}, m_observingGroup{false},
+      m_observingUnGroup{false}, m_observingGroupUpdate{false};
 
   void _addHandle(
       const Poco::AutoPtr<AnalysisDataServiceImpl::AddNotification> &pNf);
