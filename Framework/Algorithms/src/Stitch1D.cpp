@@ -241,6 +241,8 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
       result = inputParams; // user has provided params. Use those.
     }
   }
+  if (result[1] < 0.)
+    throw(std::runtime_error("The rebin step must be greater than zero."));
   return result;
 }
 
