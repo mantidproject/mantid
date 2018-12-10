@@ -86,16 +86,6 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager,
   logManager.addProperty(p);
 }
 
-template <typename T>
-void MapNeXusToSeries(NeXus::NXEntry &entry, const std::string &path,
-                      const T &defval, API::LogManager &logManager,
-                      const std::string &time, const std::string &name,
-                      const T &factor, int32_t index) {
-
-  T value = GetNeXusValue<T>(entry, path, defval, index);
-  AddSinglePointTimeSeriesProperty<T>(logManager, time, name, value * factor);
-}
-
 // Utility functions for loading values with defaults
 // Single value properties only support int, double, string and bool
 template <typename Type>
@@ -159,6 +149,16 @@ void MapNeXusToProperty<std::string>(NeXus::NXEntry &entry,
 
   std::string value = GetNeXusValue<std::string>(entry, path, defval, index);
   logManager.addProperty<std::string>(name, value);
+}
+
+template <typename T>
+void MapNeXusToSeries(NeXus::NXEntry &entry, const std::string &path,
+                      const T &defval, API::LogManager &logManager,
+                      const std::string &time, const std::string &name,
+                      const T &factor, int32_t index) {
+
+  T value = GetNeXusValue<T>(entry, path, defval, index);
+  AddSinglePointTimeSeriesProperty<T>(logManager, time, name, value * factor);
 }
 
 // map the comma separated range of indexes to the vector via a lambda function
@@ -288,7 +288,7 @@ double maskedMean(std::vector<double> &vec, std::vector<bool> &mask) {
   }
   if (count == 0)
     throw std::runtime_error("mean of empty vector");
-  return sum / count;
+  return sum / static_cast<double>(count);
 }
 
 // calculate stdev fro a subset of the vector
@@ -303,7 +303,7 @@ double maskedStdev(std::vector<double> &vec, std::vector<bool> &mask) {
     sum += (vec[i] - avg) * (vec[i] - avg);
     count++;
   }
-  return std::sqrt(sum / count);
+  return std::sqrt(sum / static_cast<double>(count));
 }
 
 // Simple reader that is compatible with the ASNTO event file loader
@@ -1139,7 +1139,7 @@ void LoadEMU<FD>::calibrateDopplerPhase(
     int maxHist = 0;
     std::fill(histogram.begin(), histogram.end(), 0);
     auto delta = (vmax - vmin) / NHIST;
-    for (int i = 0; i < numEvents; i++) {
+    for (size_t i = 0; i < numEvents; i++) {
       auto v = nVel[i];
       auto j = static_cast<size_t>(std::floor((v - vmin) / delta));
       histogram[j]++;
