@@ -960,7 +960,8 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
                                    framePeriod, gatePeriod, timeBoundary,
                                    directLimits, analysedLimits, convertTOF,
                                    eventVectors, start_nanosec, loadAsTOF);
-  EMU::loadEvents(prog, "loading neutron events (TOF)", eventFile, eventAssigner);
+  EMU::loadEvents(prog, "loading neutron events (TOF)", eventFile,
+                  eventAssigner);
 
   // perform a calibration and then TOF conversion if necessary
   // and update the tof limits
