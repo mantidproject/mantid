@@ -84,6 +84,9 @@
 			<parameter name="x">
 				<logfile eq="0.001*value" id="detector-translation"/>
 			</parameter>
+      <parameter name="y">
+        <value val="0.0"/>
+      </parameter>
 		</location>
 	</component>
 
