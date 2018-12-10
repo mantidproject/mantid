@@ -484,8 +484,8 @@ protected:
     double tof = tobs;
 
     if (m_saveAsTOF) {
-      double pulse;      
-	  if (x < DETECTOR_TUBES)
+      double pulse;
+      if (x < DETECTOR_TUBES)
         std::tie(pulse, tof) = m_convertTOF.analysedTOF(id, tobs);
       else
         std::tie(pulse, tof) = m_convertTOF.directTOF(id, tobs);
