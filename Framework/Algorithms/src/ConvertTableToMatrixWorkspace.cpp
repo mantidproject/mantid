@@ -59,8 +59,7 @@ void ConvertTableToMatrixWorkspace::exec() {
   auto X = inputWorkspace->getColumn(columnX)->numeric_fill<>();
   auto Y = inputWorkspace->getColumn(columnY)->numeric_fill<>();
 
-  MatrixWorkspace_sptr outputWorkspace =
-      create<Workspace2D>(1, Points(nrows));
+  MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(1, Points(nrows));
 
   outputWorkspace->mutableX(0).assign(X.begin(), X.end());
   outputWorkspace->mutableY(0).assign(Y.begin(), Y.end());

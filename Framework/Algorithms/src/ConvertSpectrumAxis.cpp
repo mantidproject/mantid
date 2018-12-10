@@ -158,7 +158,8 @@ void ConvertSpectrumAxis::exec() {
   builder.setX(nxBins);
   builder.setY(nBins);
   builder.setDistribution(inputWS->isDistribution());
-  MatrixWorkspace_sptr outputWS = create<MatrixWorkspace>(*inputWS, indexMap.size(), builder.build());
+  MatrixWorkspace_sptr outputWS =
+      create<MatrixWorkspace>(*inputWS, indexMap.size(), builder.build());
   // Now set up a new, numeric axis holding the theta values corresponding to
   // each spectrum
   auto const newAxis = new NumericAxis(indexMap.size());

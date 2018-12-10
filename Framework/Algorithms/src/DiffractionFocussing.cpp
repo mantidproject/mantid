@@ -138,7 +138,7 @@ void DiffractionFocussing::exec() {
   // copy them in
   int64_t newSize = tmpW->blocksize();
   API::MatrixWorkspace_sptr outputW = DataObjects::create<API::MatrixWorkspace>(
-       *tmpW, resultIndeces.size(), BinEdges(newSize + 1));
+      *tmpW, resultIndeces.size(), BinEdges(newSize + 1));
 
   std::vector<Indexing::SpectrumNumber> specNums;
   const auto &tmpIndices = tmpW->indexInfo();

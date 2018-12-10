@@ -160,9 +160,9 @@ void Integration::exec() {
   }
 
   // Create the 2D workspace (with 1 bin) for the output
- 
+
   MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(
-    *localworkspace, maxWsIndex-minWsIndex+1, BinEdges(2));
+      *localworkspace, maxWsIndex - minWsIndex + 1, BinEdges(2));
   auto rebinned_input =
       boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
   auto rebinned_output =

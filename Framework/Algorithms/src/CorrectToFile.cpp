@@ -57,7 +57,7 @@ void CorrectToFile::exec() {
   // Only create the output workspace if it's not the same as the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != toCorrect) {
-        if (toCorrect->id() == "EventWorkspace") {
+    if (toCorrect->id() == "EventWorkspace") {
       outputWS = create<Workspace2D>(*toCorrect);
     } else {
       outputWS = create<HistoWorkspace>(*toCorrect);
