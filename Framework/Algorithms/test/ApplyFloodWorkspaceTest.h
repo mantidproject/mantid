@@ -38,10 +38,10 @@ public:
     alg.setProperty("OutputWorkspace", "dummy");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(out->y(0)[0], 2.8571428575, 0.000001);
-    TS_ASSERT_DELTA(out->y(1)[0], 2.0, 0.000001);
-    TS_ASSERT_DELTA(out->y(2)[0], 2.5, 0.000001);
-    TS_ASSERT_DELTA(out->y(3)[0], 2.2222222222, 0.000001);
+    TS_ASSERT_DELTA(out->y(0)[0], 2.8571428575, 1e-9);
+    TS_ASSERT_DELTA(out->y(1)[0], 2.0, 1e-9);
+    TS_ASSERT_DELTA(out->y(2)[0], 2.5, 1e-9);
+    TS_ASSERT_DELTA(out->y(3)[0], 2.2222222222, 1e-9);
     AnalysisDataService::Instance().clear();
   }
 
@@ -58,10 +58,10 @@ public:
     alg.setProperty("OutputWorkspace", "dummy");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(out->y(0)[0], 2.8571428575, 0.000001);
-    TS_ASSERT_DELTA(out->y(1)[0], 2.0, 0.000001);
-    TS_ASSERT_DELTA(out->y(2)[0], 2.5, 0.000001);
-    TS_ASSERT_DELTA(out->y(3)[0], 2.2222222222, 0.000001);
+    TS_ASSERT_DELTA(out->y(0)[0], 2.8571428575, 1e-9);
+    TS_ASSERT_DELTA(out->y(1)[0], 2.0, 1e-9);
+    TS_ASSERT_DELTA(out->y(2)[0], 2.5, 1e-9);
+    TS_ASSERT_DELTA(out->y(3)[0], 2.2222222222, 1e-9);
     AnalysisDataService::Instance().clear();
   }
 
