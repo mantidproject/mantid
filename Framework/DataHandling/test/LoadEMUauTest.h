@@ -20,6 +20,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
+
+extern template class LoadEMU<FileDescriptor>;
+
 class LoadEMUauTest : public CxxTest::TestSuite {
 public:
   void test_load_emu_algorithm_init() {
