@@ -112,11 +112,10 @@ const std::string AlignDetectors::summary() const {
 
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
-  this->tofToDmap = nullptr;
 }
 
 /// Destructor
-AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }
+AlignDetectors::~AlignDetectors() {}
 
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

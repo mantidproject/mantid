@@ -38,7 +38,7 @@ ScaleX::ScaleX()
 /**
  * Destructor
  */
-ScaleX::~ScaleX() { delete m_progress; }
+ScaleX::~ScaleX() {}
 
 /**
  * Initialisation method. Declares properties to be used in algorithm.
@@ -99,7 +99,7 @@ void ScaleX::exec() {
   API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
   // Get number of histograms
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
-  m_progress = new API::Progress(this, 0.0, 1.0, histnumber + 1);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, histnumber + 1);
   m_progress->report("Scaling X");
   m_wi_min = 0;
   m_wi_max = histnumber - 1;

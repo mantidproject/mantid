@@ -84,8 +84,6 @@ private:
   /// number of spectra in input workspace
   int64_t m_numberOfSpectra;
 
-  /// Map of conversion factors for TOF to d-Spacing conversion
-  std::map<detid_t, double> *tofToDmap;
 };
 
 } // namespace Algorithms

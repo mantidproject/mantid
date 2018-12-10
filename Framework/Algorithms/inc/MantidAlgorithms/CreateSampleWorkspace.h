@@ -72,7 +72,7 @@ private:
   void addChopperParameters(API::MatrixWorkspace_sptr &ws);
 
   /// A pointer to the random number generator
-  Kernel::PseudoRandomNumberGenerator *m_randGen;
+  std::unique_ptr<Kernel::PseudoRandomNumberGenerator> m_randGen;
   std::map<std::string, std::string> m_preDefinedFunctionmap;
 };
 
