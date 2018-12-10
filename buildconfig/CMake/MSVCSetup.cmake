@@ -89,7 +89,7 @@ set ( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 # Configure IDE/commandline startup scripts
 ###########################################################################
 set ( WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows )
-configure_file ( ${WINDOWS_BUILDCONFIG}/buildenv.bat.in ${PROJECT_BINARY_DIR}/buildenv.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/thirdpartypaths.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY )
 
 if ( MSVC_VERSION LESS 1911 )
     get_filename_component ( MSVC_VAR_LOCATION "$ENV{VS140COMNTOOLS}/../../VC/" ABSOLUTE)
@@ -100,13 +100,6 @@ else ()
     set ( MSVC_VAR_LOCATION "${MSVC_IDE_LOCATION}/VC/Auxiliary/Build")
     set ( MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/Common7/IDE")
 endif()
-
-if ( ${CMAKE_SYSTEM_VERSION} MATCHES "^8" )
-  set ( SDK_VERSION ${CMAKE_SYSTEM_VERSION} )
-else ()
-  # append patch version to get SDK version
-  set ( SDK_VERSION ${CMAKE_SYSTEM_VERSION}.0 )
-endif ()
 
 configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat.in ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
 # The IDE may not be installed as we could be just using the build tools

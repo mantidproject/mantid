@@ -13,6 +13,26 @@ setlocal enableextensions enabledelayedexpansion
 call cmake.exe --version
 echo %sha1%
 
+:: Set cmake generator
+call %~dp0cmakegenerator.bat
+
+:: Find grep
+for /f "delims=" %%I in ('where git') do (
+  @set _grep_exe=%%~dpI..\usr\bin\grep.exe
+  @echo Checking for grep at: !_grep_exe!
+  if EXIST "!_grep_exe!" (
+    goto :endfor
+  ) else (
+    @set _grep_exe=""
+  )
+)
+:endfor
+if !_grep_exe! == "" (
+  @echo Unable to find grep.exe
+  exit /b 1
+)
+@echo Using grep: !_grep_exe!
+
 :: ParaView version
 set PARAVIEW_DIR=%PARAVIEW_DIR%
 
@@ -77,7 +97,19 @@ if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR_REL=build
 set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
-call %~dp0setupcompiler.bat %BUILD_DIR%
+
+if EXIST %BUILD_DIR%\CMakeCache.txt (
+  call "%_grep_exe%" CMAKE_GENERATOR:INTERNAL %BUILD_DIR%\CMakeCache.txt > %BUILD_DIR%\cmake_generator.log
+  call "%_grep_exe%" -q "%CM_GENERATOR%" %BUILD_DIR%\cmake_generator.log
+  if ERRORLEVEL 1 (
+    set CLEANBUILD=yes
+    echo Previous build used a different compiler. Performing a clean build.
+  ) else (
+    set CLEANBUILD=no
+    echo Previous build used the same compiler. No need to clean.
+  )
+)
+
 
 if "!CLEANBUILD!" == "yes" (
   echo Removing build directory for a clean build
@@ -149,15 +181,15 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=ON
 )
 
-call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=ON -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=ON -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-call %BUILD_DIR%\buildenv.bat
-msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_CONFIG% /p:UseEnv=true /verbosity:minimal Mantid.sln
+call %BUILD_DIR%\thirdpartypaths.bat
+cmake --build . -- /nologo /m:%BUILD_THREADS% /verbosity:minimal /p:Configuration=%BUILD_CONFIG%
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
