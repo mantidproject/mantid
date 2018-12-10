@@ -1,5 +1,4 @@
 
-#include "MantidDataHandling/LoadEMU.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -7,6 +6,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadANSTOEventFile.h"
+#include "MantidDataHandling/LoadEMU.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -739,7 +739,6 @@ template <> void LoadEMU<Kernel::FileDescriptor>::exec() {
       tarFile.select(itf->c_str());
   };
   auto extractFile = [&](Poco::TemporaryFile &tfile) {
-
     boost::shared_ptr<FILE> handle(fopen(tfile.path().c_str(), "wb"), fclose);
     if (handle) {
       // copy content
@@ -1099,7 +1098,6 @@ void LoadEMU<FD>::calibrateDopplerPhase(
 
   // define the cost function to optimize phase
   auto costFn = [&, this](double phase) {
-
     ConvertTOF convTOF(m_dopplerAmpl * m_dopplerRun, m_dopplerFreq, phase, l1,
                        v2, m_detectorL2);
 
@@ -1364,7 +1362,7 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
 
 // read counts/events from binary file
 template <typename FD>
-template <class EventProcessor>
+template <typename EventProcessor>
 void LoadEMU<FD>::loadEvents(API::Progress &prog, const char *progMsg,
                              const std::string &eventFile,
                              EventProcessor &eventProcessor) {

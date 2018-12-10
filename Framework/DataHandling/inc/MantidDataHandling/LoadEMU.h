@@ -133,7 +133,7 @@ private:
   void setupDetectorMasks(std::vector<bool> &roi);
 
   // binary file access
-  template <class Processor>
+  template <typename Processor>
   static void loadEvents(API::Progress &prog, const char *progMsg,
                          const std::string &eventFile,
                          Processor &eventProcessor);
