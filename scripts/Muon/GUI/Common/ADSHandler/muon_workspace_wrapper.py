@@ -117,7 +117,7 @@ class MuonWorkspaceWrapper(object):
             self._workspace = value
         else:
             raise AttributeError("Attempting to set object of type {}, must be"
-                                 "a Mantid Workspace type")
+                                 " a Mantid Workspace type".format(type(value)))
 
     def show(self, name):
         """
