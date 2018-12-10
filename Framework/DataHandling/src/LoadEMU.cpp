@@ -518,6 +518,24 @@ public:
   double tofMin() const { return m_tofMin <= m_tofMax ? m_tofMin : 0.0; }
   double tofMax() const { return m_tofMin <= m_tofMax ? m_tofMax : 0.0; }
 };
+
+template <typename EP>
+void loadEvents(API::Progress &prog, const char *progMsg,
+                const std::string &eventFile, EP &eventProcessor) {
+
+  using namespace ANSTO;
+
+  prog.doReport(progMsg);
+
+  FileLoader loader(eventFile.c_str());
+
+  // for progress notifications
+  ANSTO::ProgressTracker progTracker(prog, progMsg, loader.size(),
+                                     Progress_LoadBinFile);
+
+  ReadEventFile(loader, eventProcessor, progTracker, 100, false);
+}
+
 } // namespace EMU
 
 // register the algorithm into the AlgorithmFactory
@@ -926,7 +944,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   EMU::EventCounter eventCounter(roi, detMapIndex, PIXELS_PER_TUBE, framePeriod,
                                  gatePeriod, timeBoundary, directLimits,
                                  analysedLimits, eventCounts);
-  loadEvents(prog, "loading neutron counts", eventFile, eventCounter);
+  EMU::loadEvents(prog, "loading neutron counts", eventFile, eventCounter);
   ANSTO::ProgressTracker progTracker(prog, "creating neutron event lists",
                                      numberHistograms, Progress_ReserveMemory);
   prepareEventStorage(progTracker, eventCounts, eventVectors);
@@ -942,7 +960,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
                                    framePeriod, gatePeriod, timeBoundary,
                                    directLimits, analysedLimits, convertTOF,
                                    eventVectors, start_nanosec, loadAsTOF);
-  loadEvents(prog, "loading neutron events (TOF)", eventFile, eventAssigner);
+  EMU::loadEvents(prog, "loading neutron events (TOF)", eventFile, eventAssigner);
 
   // perform a calibration and then TOF conversion if necessary
   // and update the tof limits
@@ -1358,26 +1376,6 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
   loadInstrumentAlg->setProperty("RewriteSpectraMap",
                                  Mantid::Kernel::OptionalBool(false));
   loadInstrumentAlg->executeAsChildAlg();
-}
-
-// read counts/events from binary file
-template <typename FD>
-template <typename EventProcessor>
-void LoadEMU<FD>::loadEvents(API::Progress &prog, const char *progMsg,
-                             const std::string &eventFile,
-                             EventProcessor &eventProcessor) {
-
-  using namespace ANSTO;
-
-  prog.doReport(progMsg);
-
-  FileLoader loader(eventFile.c_str());
-
-  // for progress notifications
-  ANSTO::ProgressTracker progTracker(prog, progMsg, loader.size(),
-                                     Progress_LoadBinFile);
-
-  ReadEventFile(loader, eventProcessor, progTracker, 100, false);
 }
 
 // finally instantiate the two loaders

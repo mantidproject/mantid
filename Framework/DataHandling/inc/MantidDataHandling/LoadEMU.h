@@ -132,12 +132,6 @@ private:
   // set up the detector masks
   void setupDetectorMasks(std::vector<bool> &roi);
 
-  // binary file access
-  template <typename Processor>
-  static void loadEvents(API::Progress &prog, const char *progMsg,
-                         const std::string &eventFile,
-                         Processor &eventProcessor);
-
   // shared member variables
   DataObjects::EventWorkspace_sptr m_localWorkspace;
   std::vector<double> m_detectorL2;
