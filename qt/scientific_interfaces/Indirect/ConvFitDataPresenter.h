@@ -16,10 +16,8 @@ namespace IDA {
 
 class ConvFitAddWorkspaceDialog;
 
-/**
-  A presenter.
-*/
-class DLLExport ConvFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter
+    : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
   ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);

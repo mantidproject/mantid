@@ -18,10 +18,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/**
-  A presenter.
-*/
-class DLLExport JumpFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INDIRECT_DLL JumpFitDataPresenter
+    : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
   JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
