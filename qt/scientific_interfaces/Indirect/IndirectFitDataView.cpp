@@ -113,20 +113,28 @@ IndirectFitDataView::validateMultipleData(UserInputValidator &validator) {
 
 UserInputValidator &
 IndirectFitDataView::validateSingleData(UserInputValidator &validator) {
-	const auto sampleIsLoaded = isWorkspaceLoaded(getSelectedSample());
-  validator.checkDataSelectorIsValid("Sample Input", m_dataForm->dsSample);
-	
-	if (!sampleIsLoaded)
-	  emit sampleLoaded(QString::fromStdString(getSelectedSample()));
-
-	if (!isResolutionHidden()) {
-		const auto resolutionIsLoaded = isWorkspaceLoaded(getSelectedResolution());
-		validator.checkDataSelectorIsValid("Resolution Input",
-			m_dataForm->dsResolution);
-		if (!resolutionIsLoaded)
-		  emit resolutionLoaded(QString::fromStdString(getSelectedResolution()));
-	}
+	validator = validateSample(validator);
+	if (!isResolutionHidden()) 
+		validator = validateResolution(validator);
   return validator;
+}
+
+UserInputValidator &IndirectFitDataView::validateSample(UserInputValidator &validator) {
+	const auto sampleIsLoaded = isWorkspaceLoaded(getSelectedSample());
+	validator.checkDataSelectorIsValid("Sample Input", m_dataForm->dsSample);
+
+	if (!sampleIsLoaded)
+		emit sampleLoaded(QString::fromStdString(getSelectedSample()));
+	return validator;
+}
+
+UserInputValidator &IndirectFitDataView::validateResolution(UserInputValidator &validator) {
+	const auto resolutionIsLoaded = isWorkspaceLoaded(getSelectedResolution());
+	validator.checkDataSelectorIsValid("Resolution Input", m_dataForm->dsResolution);
+
+	if (!resolutionIsLoaded)
+		emit resolutionLoaded(QString::fromStdString(getSelectedResolution()));
+	return validator;
 }
 
 void IndirectFitDataView::displayWarning(const std::string &warning) {
