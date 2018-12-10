@@ -57,7 +57,7 @@ ISIS Reflectometry Interface
 New
 ###
 
-
+- Flood correction options have been added to the interface.
 
 Improved
 ########
