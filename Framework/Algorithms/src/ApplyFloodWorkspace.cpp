@@ -5,12 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
+#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 namespace {
@@ -31,6 +34,29 @@ void correctEvents(MatrixWorkspace *ws) {
       eventWS->getSpectrum(i).switchTo(EventType::WEIGHTED);
     }
   }
+}
+
+/// Make sure that the returned flood workspace match the input workspace
+/// in number and order of the spectra.
+MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input, const MatrixWorkspace_sptr& flood) {
+  auto newFlood = WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
+  auto const table = BinaryOperation::buildBinaryOperationTable(input, flood);
+  const ISpectrum *missingSpectrum = nullptr;
+  for(size_t i = 0; i < table->size(); ++i) {
+    auto const j = (*table)[i];
+    if (j < 0) {
+      if (missingSpectrum) {
+        newFlood->getSpectrum(i).copyDataFrom(*missingSpectrum);
+      } else {
+        newFlood->dataY(i).assign(flood->blocksize(), 1.0);
+        newFlood->dataE(i).assign(flood->blocksize(), 0.0);
+        missingSpectrum = &newFlood->getSpectrum(i);
+      }
+    } else {
+      newFlood->getSpectrum(i).copyDataFrom(flood->getSpectrum(j));
+    }
+  }
+  return newFlood;
 }
 } // namespace
 
@@ -77,6 +103,10 @@ void ApplyFloodWorkspace::exec() {
   MatrixWorkspace_sptr input = getProperty(Prop::INPUT_WORKSPACE);
   MatrixWorkspace_sptr flood = getProperty(Prop::FLOOD_WORKSPACE);
 
+  if (input->size() != flood->size()) {
+    flood = makeEqualSizes(input, flood);
+  }
+
   auto const inputXUnitId = input->getAxis(0)->unit()->unitID();
   bool const doConvertUnits =
       flood->getAxis(0)->unit()->unitID() != inputXUnitId;
@@ -102,7 +132,6 @@ void ApplyFloodWorkspace::exec() {
   auto divide = createChildAlgorithm("Divide", 0, 1);
   divide->setProperty("LHSWorkspace", input);
   divide->setProperty("RHSWorkspace", flood);
-  divide->setProperty("AllowDifferentNumberSpectra", true);
   divide->setProperty("OutputWorkspace", "dummy");
   divide->execute();
   MatrixWorkspace_sptr output = divide->getProperty("OutputWorkspace");

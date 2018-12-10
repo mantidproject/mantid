@@ -179,7 +179,7 @@ public:
     TS_ASSERT_EQUALS(outWS->readY(1)[0], 1.0);
     TS_ASSERT_EQUALS(outWS->readY(2)[0], 1.0);
     TS_ASSERT_EQUALS(outWS->readY(3)[0], 1.0);
-    TS_ASSERT_EQUALS(outWS->readY(4)[0], 2.0); // Doesn't change
+    TS_ASSERT_EQUALS(outWS->readY(4)[0], 0.0);
     }
   }
 
