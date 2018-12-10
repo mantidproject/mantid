@@ -459,6 +459,7 @@ void JobTreeView::appendAndEditAtChildRow() {
 
 void JobTreeView::appendAndEditAtRowBelow() {
   auto current = currentIndex();
+  try {
   auto const below = findOrMakeCellBelow(fromFilteredModel(current));
   auto index = below.first;
   auto isNew = below.second;
@@ -466,6 +467,8 @@ void JobTreeView::appendAndEditAtRowBelow() {
   editAt(index);
   if (isNew)
     m_notifyee->notifyRowInserted(rowLocation().atIndex(mapToMainModel(index)));
+  } catch (std::runtime_error e) {
+  }
 }
 
 void JobTreeView::editAtRowAbove() {
