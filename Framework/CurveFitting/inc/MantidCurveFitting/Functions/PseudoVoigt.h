@@ -43,6 +43,9 @@ public:
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
   void setHeight(const double h) override;
   void setFwhm(const double w) override;
+  void setIntensity(const double newIntensity) override {
+    setParameter("Intensity", newIntensity);
+  }
 
   std::string name() const override { return "PseudoVoigt"; }
   const std::string category() const override { return "Peak"; }
@@ -80,6 +83,7 @@ private:
   /// get the parameter (by index) to calculate according to parameter set
   /// history
   size_t get_parameter_to_calculate_from_set();
+  void estimate_parameter_value();
 
   bool m_user_set_height;
   double m_height;

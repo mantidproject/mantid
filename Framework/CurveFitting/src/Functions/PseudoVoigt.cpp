@@ -170,53 +170,72 @@ void PseudoVoigt::setParameter(size_t i, const double &value,
                                bool explicitlySet) {
   API::IPeakFunction::setParameter(i, value, explicitlySet);
 
+  std::cout << "Set " << i << "-th parameter with value " << value << "\n";
+
   // explicitly set means that there is a chance that some parameter shall be
   // re-calculated
   // peak center shall be excluded as it does nothing to do with height, H,
   // intensity and mixing
   if (explicitlySet && i != 2) {
-    // peak center
-    size_t to_calculate_index = get_parameter_to_calculate_from_set();
-    if (to_calculate_index == 0) {
-      // calculate mixings
-      double peak_intensity = getParameter(1);
-      double gamma = getParameter(3);
-      double mixing = (m_height / (2 * M_PI * gamma * peak_intensity) - 1) /
-                      (sqrt(M_PI * M_LN2) - 1);
-      if (mixing < 0) {
-        std::cout << "Calculated mixing (eta) = " << mixing
-                  << " < 0.  Set to 0 instead"
-                  << "\n";
-        mixing = 0;
-      } else if (mixing > 1) {
-        std::cout << "Calculated mixing (eta) = " << mixing
-                  << " > 1. Set to 1 instead"
-                  << "\n";
-        mixing = 1;
-      }
-      setParameter(
-          0, mixing,
-          false); // no explicitly set: won't cause further re-calcualting
-    } else if (to_calculate_index == 1) {
-      // calculate intensity
-      double eta = getParameter(0);
-      double gamma = getParameter(3);
-      double intensity =
-          m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
-      setParameter(1, intensity, false);
-    } else if (to_calculate_index == 3) {
-      // calculate peak width
-      double eta = getParameter(0);
-      double intensity = getParameter(1);
-      double gamma = intensity / m_height * 2 *
-                     (1 + (sqrt(M_PI * M_LN2) - 1) * eta) / M_PI;
-      if (gamma < 1.E-10) {
-        std::cout << "Peak width (H or Gamma) = " << gamma
-                  << ". Set 1.E-2 instead"
-                  << "\n";
-      }
-      setParameter(3, gamma, false);
+    std::cout << "Update set history for " << i << "-th parameter"
+              << "\n";
+    update_set_history(i);
+    estimate_parameter_value();
+  }
+
+  return;
+}
+
+void PseudoVoigt::estimate_parameter_value() {
+  // peak center
+  size_t to_calculate_index = get_parameter_to_calculate_from_set();
+  std::cout << "Time to calculate " << to_calculate_index << "-th parameter"
+            << "\n";
+
+  if (to_calculate_index == 0) {
+    // calculate mixings
+    double peak_intensity = getParameter(1);
+    double gamma = getParameter(3);
+    double mixing = (m_height * 0.5 * M_PI * gamma / peak_intensity - 1) /
+                    (sqrt(M_PI * M_LN2) - 1);
+    if (mixing < 0) {
+      std::cout << "Calculated mixing (eta) = " << mixing
+                << " < 0.  Set to 0 instead"
+                << "\n";
+      mixing = 0;
+    } else if (mixing > 1) {
+      std::cout << "Calculated mixing (eta) = " << mixing
+                << " > 1. Set to 1 instead"
+                << "\n";
+      mixing = 1;
     }
+
+    setParameter(
+        0, mixing,
+        false); // no explicitly set: won't cause further re-calcualting
+  } else if (to_calculate_index == 1) {
+    // calculate intensity
+    double eta = getParameter(0);
+    double gamma = getParameter(3);
+    double intensity =
+        m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
+    setParameter(1, intensity, false);
+    std::cout << "Estimate peak intensity = " << intensity << "\n";
+  } else if (to_calculate_index == 3) {
+    // calculate peak width
+    double eta = getParameter(0);
+    double intensity = getParameter(1);
+
+    std::cout << "Intensity = " << intensity << ", height = " << m_height
+              << ", mixing = " << eta << "\n";
+    double gamma = intensity * 2 * (1 + (sqrt(M_PI * M_LN2) - 1) * eta) /
+                   (M_PI * m_height);
+    if (gamma < 1.E-10) {
+      std::cout << "Peak width (H or Gamma) = " << gamma
+                << ". Set 1.E-2 instead"
+                << "\n";
+    }
+    setParameter(3, gamma, false);
   }
 
   return;
@@ -225,7 +244,7 @@ void PseudoVoigt::setParameter(size_t i, const double &value,
 /** The purpose of this is to track which user-specified parameter is outdated
  * and to be calculated
  * @brief PseudoVoigt::update_set_history
- * @param set_index:: 0 mixing, 1 intensity, 2 fwhm, 3 height
+ * @param set_index:: 0 mixing, 1 intensity, 2 height, 3 fwhm
  */
 void PseudoVoigt::update_set_history(size_t set_index) {
   if (set_index > 3)
@@ -235,7 +254,7 @@ void PseudoVoigt::update_set_history(size_t set_index) {
   for (size_t i = 0; i < 4; ++i) {
     // no operation on any never-set or out-dated index
     if (m_set_history_distances[i] >= 3)
-      return;
+      continue;
 
     // only increase the historoy distance by 1 in case
     // the other parameters with those with distance less than the previous one
@@ -262,7 +281,10 @@ size_t PseudoVoigt::get_parameter_to_calculate_from_set() {
   size_t largest_distance{0};
   size_t num_been_set{0};
 
+  // std::cout << "distances size = " << m_set_history_distances.size() << "\n";
   for (size_t i = 0; i < m_set_history_distances.size(); ++i) {
+    std::cout << "distance[" << i << "] = " << m_set_history_distances[i]
+              << "\n";
     if (m_set_history_distances[i] >= largest_distance) {
       // for those to set for: any number counts
       index_largest_distance = i;
@@ -275,7 +297,7 @@ size_t PseudoVoigt::get_parameter_to_calculate_from_set() {
   }
 
   // signal for no enough index been set up
-  if (num_been_set >= 3)
+  if (num_been_set < 3)
     index_largest_distance = 128;
 
   return index_largest_distance;
@@ -304,15 +326,18 @@ void PseudoVoigt::setHeight(const double h) {
 
   double gamma = getParameter("FWHM");
   double eta = getParameter("Mixing");
-  double peak_intensity =
-      m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
 
-  //  m_calculate_mixing = false;
-  //  m_calculate_fwhm = false;
+  update_set_history(2);
+  std::cout << "Peak height is set"
+            << "\n";
+  estimate_parameter_value();
 
-  setParameter("Intensity", peak_intensity, false);
-  //  m_calculate_mixing = false;
-  //  m_calculate_fwhm = false;
+  //  size_t param_index_to_update = get_parameter_to_calculate_from_set();
+
+  //  double peak_intensity =
+  //      m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
+
+  //  setParameter("Intensity", peak_intensity, false);
 }
 
 void PseudoVoigt::setFwhm(const double w) {
