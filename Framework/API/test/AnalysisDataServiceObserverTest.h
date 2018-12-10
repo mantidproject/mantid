@@ -87,6 +87,15 @@ private:
   std::unique_ptr<MockInheritingClass> m_mockInheritingClass;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AnalysisDataServiceObserverTest *createSuite() {
+    return new AnalysisDataServiceObserverTest();
+  }
+  static void destroySuite(AnalysisDataServiceObserverTest *suite) {
+    delete suite;
+  }
+
   AnalysisDataServiceObserverTest()
       : ads(AnalysisDataService::Instance()),
         m_mockInheritingClass(std::make_unique<MockInheritingClass>()) {

@@ -130,19 +130,19 @@ void AnalysisDataServiceObserver::observeGroupUpdate(bool turnOn) {
 // Virtual Methods
 // ------------------------------------------------------------
 void AnalysisDataServiceObserver::addHandle(
-    const std::string &wsName, const Mantid::API::Workspace_sptr ws) {
+    const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
 void AnalysisDataServiceObserver::replaceHandle(
-    const std::string &wsName, const Mantid::API::Workspace_sptr ws) {
+    const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
 void AnalysisDataServiceObserver::deleteHandle(
-    const std::string &wsName, const Mantid::API::Workspace_sptr ws) {
+    const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
@@ -156,19 +156,19 @@ void AnalysisDataServiceObserver::renameHandle(const std::string &wsName,
 }
 
 void AnalysisDataServiceObserver::groupHandle(const std::string &wsName,
-                                              const Workspace_sptr ws) {
+                                              const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
 void AnalysisDataServiceObserver::unGroupHandle(const std::string &wsName,
-                                                const Workspace_sptr ws) {
+                                                const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
 void AnalysisDataServiceObserver::groupUpdateHandle(const std::string &wsName,
-                                                    const Workspace_sptr ws) {
+                                                    const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
