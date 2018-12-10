@@ -5,11 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
-#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;
@@ -38,11 +38,13 @@ void correctEvents(MatrixWorkspace *ws) {
 
 /// Make sure that the returned flood workspace match the input workspace
 /// in number and order of the spectra.
-MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input, const MatrixWorkspace_sptr& flood) {
-  auto newFlood = WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
+MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input,
+                                    const MatrixWorkspace_sptr &flood) {
+  auto newFlood =
+      WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
   auto const table = BinaryOperation::buildBinaryOperationTable(input, flood);
   const ISpectrum *missingSpectrum = nullptr;
-  for(size_t i = 0; i < table->size(); ++i) {
+  for (size_t i = 0; i < table->size(); ++i) {
     auto const j = (*table)[i];
     if (j < 0) {
       if (missingSpectrum) {

@@ -752,7 +752,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       int64_t rhs_wi = i;
       if (mismatchedSpectra && table) {
         rhs_wi = (*table)[i];
-         if (rhs_wi < 0)
+        if (rhs_wi < 0)
           continue;
       } else {
         // Check for masking except when mismatched sizes

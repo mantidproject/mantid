@@ -1442,7 +1442,9 @@ public:
     std::string const name = "input";
     prepareInputGroup(name, "Fredrikze");
     applyPolarizationEfficiencies(name);
-    auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name + "_1");
+    auto const inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name +
+                                                                    "_1");
     auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
 
     ReflectometryReductionOneAuto2 alg;
@@ -1479,7 +1481,9 @@ public:
 
     std::string const name = "input";
     prepareInputGroup(name, "Flood");
-    auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name + "_1");
+    auto const inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name +
+                                                                    "_1");
     auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
 
     ReflectometryReductionOneAuto2 alg;

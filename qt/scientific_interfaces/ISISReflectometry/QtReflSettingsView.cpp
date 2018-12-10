@@ -435,7 +435,7 @@ void QtReflSettingsView::addPerAngleOptionsTableRow() {
   m_ui.optionsTable->setCurrentCell(numRows - 1, 0);
 }
 
-void QtReflSettingsView::floodCorComboBoxChanged(const QString & text) {
+void QtReflSettingsView::floodCorComboBoxChanged(const QString &text) {
   auto const showWorkspaceSelector = text == "Workspace";
   m_ui.floodWorkspaceWsSelector->setVisible(showWorkspaceSelector);
   m_ui.floodWorkspaceWsSelectorLabel->setVisible(showWorkspaceSelector);
