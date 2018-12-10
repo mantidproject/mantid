@@ -32,12 +32,10 @@ protected slots:
   void runClicked();
 
 protected:
-  bool shouldEnablePlotResult() override;
-
+  void setRunIsRunning(bool running) override;
+  void setFitSingleSpectrumIsFitting(bool fitting) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
-
-  void setRunIsRunning(bool running) override;
 
 private slots:
   void updateParameterFitTypes();
@@ -46,10 +44,10 @@ private:
   void addEISFFunctionsToFitTypeComboBox();
   void addWidthFunctionsToFitTypeComboBox();
 
+  void setPlotResultIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setPlotResultIsPlotting(bool plotting);
 
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
