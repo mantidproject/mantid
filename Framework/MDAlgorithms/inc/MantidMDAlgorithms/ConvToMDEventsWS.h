@@ -370,8 +370,8 @@ template <size_t ND>
 struct ConvToMDEventsWSIndexing::MDEventMaker<ND, Mantid::DataObjects::MDLeanEvent> {
   static Mantid::DataObjects::MDLeanEvent<ND> makeMDEvent(const double &sig,
                                                          const double &err,
-                                                         const uint16_t &run_index,
-                                                         const uint32_t &det_id,
+                                                         const uint16_t,
+                                                         const uint32_t,
                                                          coord_t *coord) {
     return Mantid::DataObjects::MDLeanEvent<ND>(sig, err, coord);
   }

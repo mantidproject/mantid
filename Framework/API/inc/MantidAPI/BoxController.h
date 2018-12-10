@@ -281,6 +281,16 @@ public:
     return ((eventsAdded / numMDBoxes) > m_SplitThreshold);
   }
   //-----------------------------------------------------------------------------------
+
+  void incGridBoxesCounter(size_t depth, size_t inc=1) {
+    m_numMDGridBoxes[depth] += inc;
+  }
+
+  void incBoxesCounter(size_t depth, size_t inc=1) {
+    m_numMDBoxes[depth] += inc;
+  }
+
+
   /** Call to track the number of MDBoxes are contained in the MDEventWorkspace
    * This should be called when a MDBox gets split into a MDGridBox.
    * The number of MDBoxes at [depth] is reduced by one

@@ -63,6 +63,59 @@ TMDE(MDGridBox)::MDGridBox(
       numBoxes(0), m_Children(), diagonalSquared(0.f), nPoints(0) {
   initGridBox();
 }
+
+template <typename MDE, size_t nd>
+template <typename EventIterator>
+MDGridBox<MDE, nd>::MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,
+                              const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+                              &extentsVector, EventIterator begin, EventIterator end) :
+    MDBoxBase<MDE, nd>(bc, depth, 0, extentsVector), split(), splitCumul(),
+    m_SubBoxSize(), numBoxes(0), m_Children(), diagonalSquared(0.f),
+    nPoints(0) {
+  size_t totalSize = initGridBox();
+  double volume = 1;
+  double diagSq = 0;
+  for(auto x = 0; x < nd; ++x) {
+    auto sz = extentsVector[x].getSize();
+    volume *= sz;
+    diagSq += sz*sz;
+  }
+  MDBoxBase<MDE, nd>::m_inverseVolume = 1.0/volume;
+  diagonalSquared = diagSq;
+
+
+  nPoints = std::distance(begin, end);
+  auto& signal = MDBoxBase<MDE, nd>::m_signal;
+  signal = 0;
+  auto& errorSq = MDBoxBase<MDE, nd>::m_errorSquared;
+  errorSq = 0;
+  auto& weight = MDBoxBase<MDE, nd>::m_totalWeight;
+  weight = 0;
+  coord_t* centroid = MDBoxBase<MDE, nd>::m_centroid;
+  std::fill_n(centroid, nd, 0.0f);
+  for(auto it = begin; it != end; ++it) {
+    auto evSignal = it->getSignal();
+    signal += evSignal;
+    errorSq += it->getErrorSquared();
+    ///
+    //TODO other stuff for weighted events and so on
+    ++weight;
+//    for (auto d = 0; d < nd; d++) {
+//      // Total up the coordinate weighted by the signal.
+//      centroid[d] += it->getCenter(d) * static_cast<coord_t>(evSignal);
+//    }
+  }
+
+//  // Normalize by the total signal
+//  const coord_t reciprocal = 1.0f / static_cast<coord_t>(signal);
+//  for (size_t d = 0; d < nd; ++d) {
+//    centroid[d] *= reciprocal;
+//  }
+
+
+}
+
+
 /// common part of MDGridBox contstructor;
 template <typename MDE, size_t nd> size_t MDGridBox<MDE, nd>::initGridBox() {
   if (!this->m_BoxController)
