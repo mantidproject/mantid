@@ -8,14 +8,16 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
-using namespace Mantid::API;
+using namespace API;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorrectToFile)
@@ -55,7 +57,11 @@ void CorrectToFile::exec() {
   // Only create the output workspace if it's not the same as the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != toCorrect) {
-    outputWS = WorkspaceFactory::Instance().create(toCorrect);
+        if (toCorrect->id() == "EventWorkspace") {
+      outputWS = create<Workspace2D>(*toCorrect);
+    } else {
+      outputWS = create<HistoWorkspace>(*toCorrect);
+    }
   }
   const std::string operation = getProperty("WorkspaceOperation");
 

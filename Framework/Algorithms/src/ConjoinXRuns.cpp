@@ -11,12 +11,13 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
@@ -36,6 +37,8 @@ namespace Algorithms {
 using namespace API;
 using namespace Kernel;
 using namespace RunCombinationOptions;
+using namespace DataObjects;
+using namespace HistogramData;
 
 namespace {
 static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
@@ -425,8 +428,7 @@ void ConjoinXRuns::exec() {
   // now get the size of the output
   size_t numSpec = first->getNumberHistograms();
 
-  m_outWS = WorkspaceFactory::Instance().create(first, numSpec, outBlockSize,
-                                                outBlockSize);
+  m_outWS = create<MatrixWorkspace>(*first, numSpec, Points(outBlockSize));
 
   // copy over the merged sample logs from the temp
   m_outWS->mutableRun() = temp->run();

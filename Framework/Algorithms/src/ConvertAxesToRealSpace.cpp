@@ -7,9 +7,10 @@
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -22,6 +23,7 @@ namespace Algorithms {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertAxesToRealSpace)
@@ -100,8 +102,8 @@ void ConvertAxesToRealSpace::exec() {
 
   // Create the output workspace. Can't re-use the input one because we'll be
   // re-ordering the spectra.
-  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(
-      inputWs, axisVector[1].bins, axisVector[0].bins, axisVector[0].bins);
+  MatrixWorkspace_sptr outputWs = create<MatrixWorkspace>(
+      *inputWs, axisVector[1].bins, Points(axisVector[0].bins));
 
   // first integrate the data
   IAlgorithm_sptr alg = this->createChildAlgorithm("Integration", 0, 0.4);
