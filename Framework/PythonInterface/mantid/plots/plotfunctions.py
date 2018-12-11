@@ -380,12 +380,8 @@ def pcolormesh(axes, workspace, *args, **kwargs):
 
 def _skimage_version():
     import skimage
-    version = [int(value) for value in skimage.__version__.split('.')]
-    if  version[0] > 0:
-        return true
-    if version[0] == 0 and version[1] > 13:
-        return true
-    return false
+    from distutils.version import LooseVersion
+    return LooseVersion(skimage.__version__) >= LooseVersion('1.4.0')
 
 
 class ScalingAxesImage(mimage.AxesImage):
