@@ -88,7 +88,7 @@ void FFTDerivative::execComplexFFT() {
     fft->setProperty("Imaginary", 4);
     fft->setProperty("Transform", "Backward");
     fft->execute();
-  
+
     transWS = fft->getProperty("OutputWorkspace");
 
     // If the input was histogram data, convert the output to histogram data too
