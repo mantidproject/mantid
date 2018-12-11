@@ -58,8 +58,8 @@ void FFTDerivative::execComplexFFT() {
   // possible edge effects.
 
   HistogramBuilder builder;
-  builder.setX(std::move(nx + ny));
-  builder.setY(std::move(nx + ny));
+  builder.setX(nx + ny);
+  builder.setY(ny + ny);
   builder.setDistribution(inWS->isDistribution());
   MatrixWorkspace_sptr copyWS =
       create<MatrixWorkspace>(*inWS, 1, builder.build());
@@ -88,7 +88,7 @@ void FFTDerivative::execComplexFFT() {
     fft->setProperty("Imaginary", 4);
     fft->setProperty("Transform", "Backward");
     fft->execute();
-
+  
     transWS = fft->getProperty("OutputWorkspace");
 
     // If the input was histogram data, convert the output to histogram data too
