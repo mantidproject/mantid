@@ -49,7 +49,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Catalog PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+target_include_directories ( Catalog PUBLIC inc/ )
 
 target_link_libraries ( Catalog LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${OPENSSL_LIBRARIES} ${JSONCPP_LIBRARIES})
 

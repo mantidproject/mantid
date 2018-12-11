@@ -14,7 +14,7 @@
 # !!!!!!!!!  REPLACE THE "XXX" OR else !!!!!!!!!!
 
 
-# import stresstesting
+# import systemtesting
 from __future__ import (absolute_import, division, print_function)
 import numpy
 from numpy import matrix
@@ -28,7 +28,7 @@ from mantid.simpleapi import *
 # TODO premultiply cases, fix up.. Maybe not needed Cause Conv cell was "Nigglied"
 # TODO: SWitch cases, if use approx inequality, may get error cause low level code
 # [does Not](does) premult but when it [should](should not)
-class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
+class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
     conventionalUB = numpy.zeros(shape=(3, 3))
     Cubic = [1, 3, 5]
     Tetr = [6, 7, 11, 15, 18, 21]

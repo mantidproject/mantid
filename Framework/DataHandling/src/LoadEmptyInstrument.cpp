@@ -9,6 +9,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadGeometry.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -16,8 +17,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
@@ -31,26 +30,6 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 using namespace HistogramData;
-
-namespace {
-bool isIDF(const std::string &filename, const std::string &instrumentname) {
-  if (!filename.empty()) {
-    FileDescriptor descriptor(filename);
-    return ((descriptor.isAscii() && descriptor.extension() == ".xml"));
-  }
-  return !instrumentname.empty();
-}
-
-bool isNexus(const std::string &filename) {
-  if (!filename.empty() && !FileDescriptor(filename).isAscii(filename)) {
-    NexusDescriptor descriptor(filename);
-    return descriptor.isHDF(filename) &&
-           (descriptor.classTypeExists("NXcylindrical_geometry") ||
-            descriptor.classTypeExists("NXoff_geometry"));
-  }
-  return false;
-}
-} // namespace
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -82,10 +61,9 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
-  const std::vector<std::string> extensions{".xml", ".nxs", ".hdf5"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                extensions),
+                                LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "
@@ -132,15 +110,10 @@ void LoadEmptyInstrument::exec() {
   const std::string instrumentname = getPropertyValue("InstrumentName");
   Instrument_const_sptr instrument;
   Progress prog(this, 0.0, 1.0, 10);
-  if (isNexus(filename)) {
-    prog.reportIncrement(0, "Loading geometry from file");
-    instrument = NexusGeometry::NexusGeometryParser::createInstrument(filename);
-  } else if (isIDF(filename, instrumentname)) {
-    MatrixWorkspace_sptr ws = this->runLoadInstrument(filename, instrumentname);
-    instrument = ws->getInstrument();
-  } else {
-    throw std::invalid_argument("Input " + filename + " cannot be read");
-  }
+
+  // Call LoadIstrument as a child algorithm
+  MatrixWorkspace_sptr ws = this->runLoadInstrument(filename, instrumentname);
+  instrument = ws->getInstrument();
 
   // Get number of detectors stored in instrument
   const size_t number_spectra = instrument->getNumberDetectors();

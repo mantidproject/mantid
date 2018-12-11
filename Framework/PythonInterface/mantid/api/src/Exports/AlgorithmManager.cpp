@@ -18,6 +18,26 @@ using Mantid::PythonInterface::AlgorithmIDProxy;
 using namespace boost::python;
 
 namespace {
+
+std::once_flag INIT_FLAG;
+
+/**
+ * Returns a reference to the AlgorithmManager object, creating it
+ * if necessary. In addition to creating the object the first call also:
+ *   - register AlgorithmManager.shutdown as an atexit function
+ * @return A reference to the AlgorithmManager instance
+ */
+AlgorithmManagerImpl &instance() {
+  // start the framework (if necessary)
+  auto &mgr = AlgorithmManager::Instance();
+  std::call_once(INIT_FLAG, []() {
+    PyRun_SimpleString("import atexit\n"
+                       "from mantid.api import AlgorithmManager\n"
+                       "atexit.register(lambda: AlgorithmManager.clear())");
+  });
+  return mgr;
+}
+
 /**
  * Return the algorithm identified by the given ID. A wrapper version that takes
  * a
@@ -107,7 +127,7 @@ void export_AlgorithmManager() {
            "Clears the current list of managed algorithms")
       .def("cancelAll", &AlgorithmManagerImpl::cancelAll, arg("self"),
            "Requests that all currently running algorithms be cancelled")
-      .def("Instance", &AlgorithmManager::Instance,
+      .def("Instance", instance,
            return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
       .staticmethod("Instance");

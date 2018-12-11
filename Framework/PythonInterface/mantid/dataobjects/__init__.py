@@ -25,5 +25,10 @@ from __future__ import (absolute_import, division,
 ###############################################################################
 # Load the C++ library and register the C++ class exports
 ###############################################################################
-from . import _dataobjects
-from ._dataobjects import *
+# Load library dependencies
+from ..kernel import _shared_cextension
+import mantid.api
+
+with _shared_cextension():
+    from . import _dataobjects
+    from ._dataobjects import *

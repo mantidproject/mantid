@@ -10,7 +10,7 @@ from mantid.simpleapi import config, Load
 from mantid.api import FrameworkManager
 import os
 import re
-import stresstesting
+import systemtesting
 
 BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 '80_tubes_Top_and_Bottom_May_2016.xml',
@@ -183,7 +183,7 @@ def useFile(direc, filename):
     return True, filename
 
 
-class LoadLotsOfFiles(stresstesting.MantidStressTest):
+class LoadLotsOfFiles(systemtesting.MantidSystemTest):
     def __getDataFileList__(self):
         # get a list of directories to look in
         dirs = config['datasearch.directories'].split(';')
