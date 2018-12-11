@@ -1384,8 +1384,8 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
 }
 
 // finally instantiate the two loaders
-template class LoadEMU<Kernel::FileDescriptor>;
-template class LoadEMU<Kernel::NexusDescriptor>;
+template class DLLExport LoadEMU<Kernel::FileDescriptor>;
+template class DLLExport LoadEMU<Kernel::NexusDescriptor>;
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -20,6 +20,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 
+extern template class DLLExport DataHandling::LoadEMU<FileDescriptor>;
+
 using LoadEMUTar = DataHandling::LoadEMU<Kernel::FileDescriptor>;
 
 class LoadEMUauTest : public CxxTest::TestSuite {

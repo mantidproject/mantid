@@ -98,7 +98,7 @@ private:
   void exec(const std::string &hdfFile, const std::string &eventFile);
 
   // region of intreset
-  static std::vector<bool> createRoiVector(const std::string &seltubes,
+  std::vector<bool> createRoiVector(const std::string &seltubes,
                                            const std::string &maskfile);
 
   // load parameters from input file
