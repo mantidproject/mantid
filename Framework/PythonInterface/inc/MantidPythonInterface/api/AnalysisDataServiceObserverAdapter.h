@@ -28,7 +28,7 @@ public:
       const AnalysisDataServiceObserverAdapter &) = delete;
   AnalysisDataServiceObserverAdapter &
   operator=(const AnalysisDataServiceObserverAdapter &) = delete;
-  
+
   void anyChangeHandle() override;
   void addHandle(const std::string &wsName, const Workspace_sptr &ws) override;
   void replaceHandle(const std::string &wsName,
