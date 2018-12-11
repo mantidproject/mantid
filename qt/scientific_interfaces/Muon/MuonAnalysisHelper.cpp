@@ -72,6 +72,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
+
 /**
  * Sets double validator for specified field.
  * @param field :: Field to set validator for
@@ -368,6 +369,17 @@ void WidgetAutoSaver::beginGroup(const QString &name) {
  * Ends the scope of the previous begin group.
  */
 void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
+/**
+ * Checks if a string is a numeric value
+ * @param string:: string to test
+ * @returns :: bool if it is a string
+ */
+bool isNumber(const QString &string){
+  bool isNumber = false;
+  auto value = string.toDouble(&isNumber);
+  UNUSED_ARG(value);
+  return isNumber;
+}
 
 /**
  * Get a run label for the workspace.
@@ -659,7 +671,6 @@ void groupWorkspaces(const std::string &groupName,
     groupingAlg->execute();
   }
 }
-
 /**
  * Replaces the named log value in the given workspace with the given value
  * @param wsName :: [input] Name of workspace
