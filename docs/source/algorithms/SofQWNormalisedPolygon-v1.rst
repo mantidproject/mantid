@@ -62,8 +62,21 @@ that in places where there are no counts (:math:`Y=0`) and no acceptance
 result.
 
 The algorithm operates in *non-PSD mode* by default. This means that the 
-detectors are assumed to be infinitely thin and their 'width' in scattering 
-angle :math:`\Delta(2\theta)` is calculated from the detector's height only. 
+'width' in scattering angle :math:`\Delta(2\theta)` is calculated for each 
+detector individually. In a nuthsell, :math:`2\theta` is calculated for the 
+detector center point and three points on its sides as shown schematically in 
+the figure below. The angular width is then
+
+.. math::
+
+   \Delta(2\theta) = \max\limits_{i = 1, 2, 3}|2\theta_{C} - 2\theta_{i}|,
+
+where :math:`C` refers to the center point :math:`i` to the three points on 
+the sides.
+
+.. figure:: /images/SofQWNormalisedPolygon_detector_angular_width.png
+   :align: center
+
 For grouped detectors, :math:`\Delta(2\theta)` is the span of all angular 
 widths of the detectors in the group.
 

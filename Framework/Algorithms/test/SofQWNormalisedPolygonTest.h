@@ -48,23 +48,23 @@ public:
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(6), 2.0);
 
     constexpr double delta(1e-08);
-    TS_ASSERT_DELTA(result->y(0)[1160], 21.7520993124, delta);
-    TS_ASSERT_DELTA(result->e(0)[1160], 0.3661963331, delta);
+    TS_ASSERT_DELTA(result->y(0)[1160], 21.7492665499, delta);
+    TS_ASSERT_DELTA(result->e(0)[1160], 0.3661303434, delta);
 
-    TS_ASSERT_DELTA(result->y(1)[1145], 8.4138755126, delta);
-    TS_ASSERT_DELTA(result->e(1)[1145], 0.1878620548, delta);
+    TS_ASSERT_DELTA(result->y(1)[1145], 8.4143946314, delta);
+    TS_ASSERT_DELTA(result->e(1)[1145], 0.1878948997, delta);
 
-    TS_ASSERT_DELTA(result->y(2)[1200], 2.1953146211, delta);
-    TS_ASSERT_DELTA(result->e(2)[1200], 0.0908974232, delta);
+    TS_ASSERT_DELTA(result->y(2)[1200], 2.1954044126, delta);
+    TS_ASSERT_DELTA(result->e(2)[1200], 0.0909131832, delta);
 
-    TS_ASSERT_DELTA(result->y(3)[99], 0.0419979335, delta);
-    TS_ASSERT_DELTA(result->e(3)[99], 0.0235662509, delta);
+    TS_ASSERT_DELTA(result->y(3)[99], 0.0419982252, delta);
+    TS_ASSERT_DELTA(result->e(3)[99], 0.0235660816, delta);
 
-    TS_ASSERT_DELTA(result->y(4)[1654], 0.0172577389, delta);
-    TS_ASSERT_DELTA(result->e(4)[1654], 0.0056296512, delta);
+    TS_ASSERT_DELTA(result->y(4)[1654], 0.0172573768, delta);
+    TS_ASSERT_DELTA(result->e(4)[1654], 0.0056298227, delta);
 
-    TS_ASSERT_DELTA(result->y(5)[1025], 0.0819037897, delta);
-    TS_ASSERT_DELTA(result->e(5)[1025], 0.0240486539, delta);
+    TS_ASSERT_DELTA(result->y(5)[1025], 0.0819132030, delta);
+    TS_ASSERT_DELTA(result->e(5)[1025], 0.0240475922, delta);
 
     // Spectra-detector mapping
     constexpr size_t nspectra(6);

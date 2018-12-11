@@ -25,34 +25,33 @@ using Mantid::Geometry::rad2deg;
 
 namespace {
 /**
- * @brief Calculate the min and max 2theta of a detector.
- * The 2theta are calculated only for the centre point and the 'top'
- * point, assuming that the width is zero. This works adequately well
- * for high aspect ratio detectors.
+ * @brief Calculate the min and max 2theta for given direction.
+ * The 2theta are calculated for the centre point and a point in the
+ * center of given side.
  * @param detInfo a DetectorInfo object
  * @param detIndex index of the detector within detInfo
  * @param samplePos a V3D pointing to the sample position
  * @param beamDir a unit vector pointing along the beam axis
- * @param upDir a unit vector pointing up
+ * @param sideDir a unit vector pointing to the chosen side
  * @return a pair (min(2theta), max(2theta)
  */
 std::pair<double, double>
 minMaxTheta(const Mantid::Geometry::DetectorInfo &detInfo,
             const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
             const Mantid::Kernel::V3D &beamDir,
-            const Mantid::Kernel::V3D &upDir) {
+            const Mantid::Kernel::V3D &sideDir) {
   const auto shape = detInfo.detector(detIndex).shape();
   const Mantid::Geometry::BoundingBox bbox = shape->getBoundingBox();
   const auto maxPoint = bbox.maxPoint() - samplePos;
-  auto top = maxPoint * upDir;
+  auto side = maxPoint * sideDir;
   const auto rotation = detInfo.rotation(detIndex);
   const auto position = detInfo.position(detIndex);
-  rotation.rotate(top);
-  top += position;
-  const auto topAngle = top.angle(beamDir);
+  rotation.rotate(side);
+  side += position;
+  const auto sideAngle = side.angle(beamDir);
   const auto centre = position - samplePos;
   const auto centreAngle = centre.angle(beamDir);
-  return std::minmax(topAngle, centreAngle);
+  return std::minmax(sideAngle, centreAngle);
 }
 } // namespace
 
@@ -250,6 +249,8 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
   const auto referenceFrame = inst->getReferenceFrame();
   const auto beamDir = referenceFrame->vecPointingAlongBeam();
   const auto upDir = referenceFrame->vecPointingUp();
+  const auto horizontalDir = referenceFrame->vecPointingHorizontal();
+  const std::array<const V3D * const, 3>dirs{&beamDir, &upDir, &horizontalDir};
 
   const auto &detectorInfo = workspace.detectorInfo();
   const auto &spectrumInfo = workspace.spectrumInfo();
@@ -282,10 +283,12 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
       double minTheta{std::numeric_limits<double>::max()};
       double maxTheta{std::numeric_limits<double>::lowest()};
       for (const auto id : ids) {
-        const auto thetas = minMaxTheta(detectorInfo, detectorInfo.indexOf(id),
-                                        samplePos, beamDir, upDir);
-        minTheta = std::min(minTheta, thetas.first);
-        maxTheta = std::max(maxTheta, thetas.second);
+        for (const auto dir : dirs) {
+          const auto thetas = minMaxTheta(detectorInfo, detectorInfo.indexOf(id),
+                                          samplePos, beamDir, *dir);
+          minTheta = std::min(minTheta, thetas.first);
+          maxTheta = std::max(maxTheta, thetas.second);
+        }
       }
       m_thetaWidths[i] = 2. * (maxTheta - minTheta);
       if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
