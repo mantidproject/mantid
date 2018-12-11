@@ -578,17 +578,14 @@ void LoadSpice2D::detectorDistance(
   // check if it's the new format
   if (metadata.find("Motor_Positions/sample_det_dist") != metadata.end()) {
     // Old Format
-
     from_string<double>(sample_detector_distance,
                         metadata["Motor_Positions/sample_det_dist"], std::dec);
     sample_detector_distance *= 1000.0;
     addRunProperty<double>("sample-detector-distance", sample_detector_distance,
                            "mm");
-
     sample_detector_distance_offset =
         addRunProperty<double>(metadata, "Header/tank_internal_offset",
                                "sample-detector-distance-offset", "mm");
-
     sample_si_window_distance = addRunProperty<double>(
         metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
 
@@ -597,12 +594,9 @@ void LoadSpice2D::detectorDistance(
     from_string<double>(sample_detector_distance,
                         metadata["Motor_Positions/flange_det_dist"], std::dec);
     sample_detector_distance *= 1000.0;
-
     addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
-
     addRunProperty<double>("sample-detector-distance", sample_detector_distance,
                            "mm");
-
     sample_si_window_distance = addRunProperty<double>(
         metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
   }
