@@ -146,9 +146,6 @@ private:
   bool m_calibrateDoppler;
 };
 
-using LoadEMUHdf = LoadEMU<Kernel::NexusDescriptor>;
-using LoadEMUTar = LoadEMU<Kernel::FileDescriptor>;
-
 } // namespace DataHandling
 } // namespace Mantid
 

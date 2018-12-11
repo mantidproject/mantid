@@ -20,19 +20,19 @@ using namespace Mantid::Kernel;
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 
-extern template class DataHandling::LoadEMU<FileDescriptor>;
+using LoadEMUTar = DataHandling::LoadEMU<Kernel::FileDescriptor>;
 
 class LoadEMUauTest : public CxxTest::TestSuite {
 public:
   void test_load_emu_algorithm_init() {
-    DataHandling::LoadEMUTar algToBeTested;
+    LoadEMUTar algToBeTested;
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
     TS_ASSERT(algToBeTested.isInitialized());
   }
 
   void test_load_emu_algorithm() {
-    DataHandling::LoadEMUTar algToBeTested;
+    LoadEMUTar algToBeTested;
 
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();

@@ -539,6 +539,9 @@ void loadEvents(API::Progress &prog, const char *progMsg,
 
 } // namespace EMU
 
+using LoadEMUHdf = LoadEMU<Kernel::NexusDescriptor>;
+using LoadEMUTar = LoadEMU<Kernel::FileDescriptor>;
+
 // register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadEMUTar)
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEMUHdf)
