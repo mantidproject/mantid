@@ -45,7 +45,6 @@ void PseudoVoigt::init() {
   addConstraint(std::move(fwhm_constraint));
 
   // init the peak height setup parameters
-  m_user_set_height = false; // if user set a peak height
   m_height = 1.;             // peak height set by user
 
   // parameter set history: all start from an arbitary out of boundary value
@@ -321,35 +320,17 @@ double PseudoVoigt::height() const {
  * @param h
  */
 void PseudoVoigt::setHeight(const double h) {
+  // set height
   m_height = h;
-  m_user_set_height = true;
-
-  double gamma = getParameter("FWHM");
-  double eta = getParameter("Mixing");
-
   update_set_history(2);
-  std::cout << "Peak height is set"
-            << "\n";
   estimate_parameter_value();
-
-  //  size_t param_index_to_update = get_parameter_to_calculate_from_set();
-
-  //  double peak_intensity =
-  //      m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
-
-  //  setParameter("Intensity", peak_intensity, false);
 }
 
+/** set FWHM
+ * @param w
+ */
 void PseudoVoigt::setFwhm(const double w) {
   setParameter("FWHM", w);
-
-  // recalcualte intensity
-  if (m_user_set_height) {
-    double eta = getParameter("Mixing");
-    double peak_intensity =
-        m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * w);
-    setParameter("Intensity", peak_intensity);
-  }
 }
 
 /** a_G = 2/gamma * sqrt(ln2/pi)

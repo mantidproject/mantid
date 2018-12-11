@@ -85,7 +85,6 @@ private:
   size_t get_parameter_to_calculate_from_set();
   void estimate_parameter_value();
 
-  bool m_user_set_height;
   double m_height;
 };
 

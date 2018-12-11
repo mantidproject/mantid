@@ -232,6 +232,7 @@ public:
     FunctionDomain1DVector domain(m_xValues);
     //    FunctionValues valuesGaussian(domain);
 
+    // set up and calculate Psuedo-voigt
     const double center{-1.0};
     const double intensity{2.0};
     const double fwhm{2.0};
@@ -241,36 +242,25 @@ public:
 
     pv->function(domain, valuesPV);
 
-    // check integration
+    // check integration between numerical and analytical
     double num_intensity =
         numerical_integrate_pv(center, intensity, fwhm, mixing);
-    std::cout << "Integrated = " << num_intensity << "\n";
+    TS_ASSERT_DELTA(num_intensity, 2.0, 1.E-5);
 
-    //    for (size_t i = 0; i < valuesPV.size(); ++i) {
-    //        std::cout << m_xValues[i] << "    " << valuesPV[i] << "\n";
-    //    }
+    // check with Gaussian at same center value, same intensity and peak width
+    // This is a non-normalized Gaussian
+    Gaussian gaussian;
+    gaussian.initialize();
+    gaussian.setCentre(-1.);
+    gaussian.setIntensity(2.0);
+    gaussian.setFwhm(2.);
 
-    TS_ASSERT(true);
+    FunctionValues valuesGaussian(domain);
+    gaussian.function(domain, valuesGaussian);
 
-    // TODO - Calcualte sigma for Gaussian and compare
-
-    //    // This is a non-normalized Gaussian
-    //    Gaussian gaussian;
-    //    gaussian.initialize();
-    //    gaussian.setCentre(1.0);
-    //    gaussian.setHeight(4.78);
-    //    gaussian.setFwhm(0.05);
-
-    //    FunctionDomain1DVector domain(m_xValues);
-    //    FunctionValues valuesPV(domain);
-    //    FunctionValues valuesGaussian(domain);
-
-    //    pv->function(domain, valuesPV);
-    //    gaussian.function(domain, valuesGaussian);
-
-    //    for (size_t i = 0; i < valuesPV.size(); ++i) {
-    //      TS_ASSERT_DELTA(valuesPV[i], valuesGaussian[i], 1e-15);
-    //    }
+    for (size_t i = 0; i < valuesPV.size(); ++i) {
+      TS_ASSERT_DELTA(valuesPV[i], valuesGaussian[i], 1e-15);
+    }
   }
 
   void testLorentzianEdge() {
