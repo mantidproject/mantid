@@ -370,13 +370,13 @@ void WidgetAutoSaver::beginGroup(const QString &name) {
  */
 void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
 /**
- * Checks if a string is a numeric value
- * @param string:: string to test
- * @returns :: bool if it is a string
+ * Checks if a QString is a numeric value
+ * @param string:: QString to test
+ * @returns :: bool if it is a number
  */
-bool isNumber(const QString &string){
+bool isNumber(const QString &qstring){
   bool isNumber = false;
-  auto value = string.toDouble(&isNumber);
+  auto value = qstring.toDouble(&isNumber);
   UNUSED_ARG(value);
   return isNumber;
 }
