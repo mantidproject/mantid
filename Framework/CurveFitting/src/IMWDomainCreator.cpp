@@ -310,8 +310,10 @@ boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
   for (auto it = functionsToDisplay.begin(); it != iend; ++it) {
     if (wsIndex > 2) {
       std::string name = (*it)->name();
-       ++functionCount[name];
-      textAxis->setLabel(wsIndex, name + " "+std::to_string(functionCount[name]));}
+      ++functionCount[name];
+      textAxis->setLabel(wsIndex,
+                         name + " " + std::to_string(functionCount[name]));
+    }
     addFunctionValuesToWS(*it, ws, wsIndex, domain, values);
     if (it == functionsToDisplay.begin())
       wsIndex += 2; // Skip difference histogram for now
