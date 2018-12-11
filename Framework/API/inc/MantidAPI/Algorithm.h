@@ -442,14 +442,16 @@ private:
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
   std::unique_ptr<Poco::ActiveMethod<bool, Poco::Void, Algorithm,
-                     Poco::ActiveStarter<Algorithm>>> m_executeAsync;
+                                     Poco::ActiveStarter<Algorithm>>>
+      m_executeAsync;
 
   /// Sends notifications to observers. Observers can subscribe to
   /// notificationCenter
   /// using Poco::NotificationCenter::addObserver(...);
   mutable std::unique_ptr<Poco::NotificationCenter> m_notificationCenter;
   /// Child algorithm progress observer
-  mutable std::unique_ptr<Poco::NObserver<Algorithm, ProgressNotification>> m_progressObserver;
+  mutable std::unique_ptr<Poco::NObserver<Algorithm, ProgressNotification>>
+      m_progressObserver;
 
   bool m_isInitialized;         ///< Algorithm has been initialized flag
   bool m_isExecuted;            ///< Algorithm is executed flag

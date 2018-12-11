@@ -16,10 +16,10 @@
 #include <boost/optional/optional.hpp>
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>

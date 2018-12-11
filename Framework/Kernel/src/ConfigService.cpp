@@ -169,7 +169,8 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
       m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
-  m_pSysConfig =std::make_unique<WrappedObject<Poco::Util::SystemConfiguration>>();
+  m_pSysConfig =
+      std::make_unique<WrappedObject<Poco::Util::SystemConfiguration>>();
   m_pConf = nullptr;
 
   // Register StdChannel with Poco
@@ -426,7 +427,9 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
 
   // use the cached property string to initialise the POCO property file
   std::istringstream istr(m_PropertyString);
-  m_pConf= std::make_unique<WrappedObject<Poco::Util::PropertyFileConfiguration>>(istr);
+  m_pConf =
+      std::make_unique<WrappedObject<Poco::Util::PropertyFileConfiguration>>(
+          istr);
 }
 
 /**
