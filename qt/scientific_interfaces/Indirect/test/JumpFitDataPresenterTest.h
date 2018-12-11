@@ -10,9 +10,82 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "IIndirectFitDataView.h"
+#include "JumpFitDataPresenter.h"
+#include "JumpFitModel.h"
+
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::IDA;
+using namespace testing;
+
+namespace {
+
+QStringList const &getJumpParameters() {
+  QStringList parameters;
+  parameters << "1"
+             << "2";
+  return parameters;
+}
+
+QStringList const &getJumpParameterTypes() {
+  QStringList parameterTypes;
+  parameterTypes << "Width"
+                 << "EISF";
+  return parameterTypes;
+}
+
+} // namespace
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+/// Mock object to mock the view
+class MockJumpFitDataView : public IIndirectFitDataView {
+public:
+  /// Signals
+  void emitSampleLoaded(QString const &name) { emit sampleLoaded(name); }
+
+  /// Public Methods
+  MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
+  MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
+  MOCK_CONST_METHOD0(isResolutionHidden, bool());
+  MOCK_METHOD1(setResolutionHidden, void(bool hide));
+  MOCK_METHOD0(disableMultipleDataTab, void());
+
+  MOCK_CONST_METHOD0(getSelectedSample, std::string());
+  MOCK_CONST_METHOD0(getSelectedResolution, std::string());
+
+  MOCK_CONST_METHOD0(getSampleWSSuffices, QStringList());
+  MOCK_CONST_METHOD0(getSampleFBSuffices, QStringList());
+  MOCK_CONST_METHOD0(getResolutionWSSuffices, QStringList());
+  MOCK_CONST_METHOD0(getResolutionFBSuffices, QStringList());
+
+  MOCK_METHOD1(setSampleWSSuffices, void(QStringList const &suffices));
+  MOCK_METHOD1(setSampleFBSuffices, void(QStringList const &suffices));
+  MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
+  MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
+
+  MOCK_METHOD1(readSettings, void(QSettings const &settings));
+  MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
+
+  /// Public slots
+  MOCK_METHOD1(displayWarning, void(std::string const &warning));
+};
+
+/// Mock object to mock the model
+class MockJumpFitModel : public JumpFitModel {
+public:
+  /// Public Methods
+  // MOCK_CONST_METHOD0(isMultiFit, bool());
+  // MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
+
+  // MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
+};
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class JumpFitDataPresenterTest : public CxxTest::TestSuite {
 public:
@@ -23,34 +96,72 @@ public:
     return new JumpFitDataPresenterTest();
   }
 
-  static void destroySuite(JumpFitDataPresenterTest *suite) {
-    delete suite;
+  static void destroySuite(JumpFitDataPresenterTest *suite) { delete suite; }
+
+  void setUp() override {
+    m_view = std::make_unique<NiceMock<MockJumpFitDataView>>();
+    m_model = std::make_unique<NiceMock<MockJumpFitModel>>();
+
+    m_dataTable = createEmptyTableWidget(6, 5);
+    m_ParameterTypeCombo = createComboBox(getJumpParameterTypes());
+    m_ParameterCombo = createComboBox(getJumpParameters());
+    m_ParameterTypeLabel = createLabel("Fit Parameter:");
+    m_ParameterLabel = createLabel("Width:");
+
+    ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
+
+    m_presenter = std::make_unique<JumpFitDataPresenter>(
+        std::move(m_model.get()), std::move(m_view.get()),
+        std::move(m_ParameterTypeCombo.get()),
+        std::move(m_ParameterCombo.get()),
+        std::move(m_ParameterTypeLabel.get()),
+        std::move(m_ParameterLabel.get()));
+
+    // SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
+    // m_model->addWorkspace("WorkspaceName");
   }
 
-  // void setUp() override {
-  //  m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
-  //  m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
-  //  m_table = createEmptyTableWidget(5, 5);
+  void tearDown() override {
+    // AnalysisDataService::Instance().clear();
 
-  //  m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
-  //      std::move(m_model.get()), std::move(m_table.get()));
-  //  m_presenter = std::make_unique<IndirectFitDataPresenter>(
-  //      std::move(m_model.get()), std::move(m_view.get()),
-  //      std::move(m_dataTablePresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
 
-  //  SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
-  //  m_model->addWorkspace("WorkspaceName");
-  //}
-
-  // void tearDown() override {
-  //  AnalysisDataService::Instance().clear();
-
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
-
-  //  deleteSetup();
-  //}
+    m_presenter.reset();
+    m_model.reset();
+    m_view.reset();
+  }
 
   void test_test() {}
+
+private:
+  /// Used in setup
+  std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
+    auto table = std::make_unique<QTableWidget>(columns, rows);
+    for (auto column = 0; column < columns; ++column)
+      for (auto row = 0; row < rows; ++row)
+        table->setItem(row, column, new QTableWidgetItem("item"));
+    return table;
+  }
+
+  std::unique_ptr<QComboBox> createComboBox(QStringList const &items) {
+    auto combBox = std::make_unique<QComboBox>();
+    combBox->addItems(items);
+    return combBox;
+  }
+
+  std::unique_ptr<QLabel> createLabel(QString const &text) {
+    return std::make_unique<QLabel>(text);
+  }
+
+  std::unique_ptr<QTableWidget> m_dataTable;
+  std::unique_ptr<QComboBox> m_ParameterTypeCombo;
+  std::unique_ptr<QComboBox> m_ParameterCombo;
+  std::unique_ptr<QLabel> m_ParameterTypeLabel;
+  std::unique_ptr<QLabel> m_ParameterLabel;
+
+  std::unique_ptr<MockJumpFitDataView> m_view;
+  std::unique_ptr<MockJumpFitModel> m_model;
+  std::unique_ptr<JumpFitDataPresenter> m_presenter;
 };
 #endif
