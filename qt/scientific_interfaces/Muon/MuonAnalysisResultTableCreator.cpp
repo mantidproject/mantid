@@ -508,7 +508,8 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         valueToWrite = val.toString();
       }
 
-      if (MuonAnalysisHelper::isNumber(val.toString()) && !log.endsWith(" (text)")) {
+      if (MuonAnalysisHelper::isNumber(val.toString()) &&
+          !log.endsWith(" (text)")) {
         row << valueToWrite.toDouble();
       } else {
         row << valueToWrite.toStdString();

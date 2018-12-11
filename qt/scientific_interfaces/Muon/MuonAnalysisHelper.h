@@ -73,8 +73,7 @@ getRunLabel(const Mantid::API::Workspace_sptr &ws);
 MANTIDQT_MUONINTERFACE_DLL std::string
 getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
 
-MANTIDQT_MUONINTERFACE_DLL bool
-isNumber(const QString &string);
+MANTIDQT_MUONINTERFACE_DLL bool isNumber(const QString &string);
 /// Get a run label given instrument and run numbers
 MANTIDQT_MUONINTERFACE_DLL std::string
 getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);

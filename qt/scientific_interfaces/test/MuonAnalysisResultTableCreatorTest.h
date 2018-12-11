@@ -84,7 +84,7 @@ public:
     m_startDiff_sec = 1310;
   }
 
- void test_createTable_throws_noWorkspaces() {
+  void test_createTable_throws_noWorkspaces() {
     const QStringList workspaces;
     this->setUpLogs(QStringList{"EMU00020918; Pair; long; Asym; #1",
                                 "EMU00020919; Pair; long; Asym; #1"});

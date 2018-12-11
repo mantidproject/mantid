@@ -72,7 +72,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
-
 /**
  * Sets double validator for specified field.
  * @param field :: Field to set validator for
@@ -374,7 +373,7 @@ void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
  * @param string:: QString to test
  * @returns :: bool if it is a number
  */
-bool isNumber(const QString &qstring){
+bool isNumber(const QString &qstring) {
   bool isNumber = false;
   auto value = qstring.toDouble(&isNumber);
   UNUSED_ARG(value);
