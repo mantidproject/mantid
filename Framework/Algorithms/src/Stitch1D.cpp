@@ -204,6 +204,8 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
       if (rhsMax < endOverlap)
         issues["EndOverlap"] = "Must be smaller or equal than the maximum x "
                                "value of the RHS workspace";
+      if (rhsMin > lhsMax)
+        issues["LHSWorkspace"] = "LHS and RHS workspaces must overlap";
     }
   }
   return issues;
@@ -241,8 +243,6 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
       result = inputParams; // user has provided params. Use those.
     }
   }
-  if (result[1] < 0.)
-    throw(std::runtime_error("The rebin step must be greater than zero."));
   return result;
 }
 
@@ -466,13 +466,13 @@ void Stitch1D::exec() {
   const bool useManualScaleFactor = this->getProperty("UseManualScaleFactor");
   MatrixWorkspace_sptr lhs = lhsWS->clone();
   MatrixWorkspace_sptr rhs = rhsWS->clone();
-  replaceSpecialValues(lhs);
-  replaceSpecialValues(rhs);
   const MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
   if (lhsWS->isHistogramData()) {
     rebin(lhs, params);
     rebin(rhs, params);
   }
+  replaceSpecialValues(lhs);
+  replaceSpecialValues(rhs);
   if (useManualScaleFactor) {
     MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(m_scaleFactor);
     if (scaleRHS)

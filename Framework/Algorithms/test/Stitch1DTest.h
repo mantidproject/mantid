@@ -461,7 +461,7 @@ public:
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
-    double demanded_step_size = 0.2;
+    const double demanded_step_size = 0.2;
     auto ret = do_stitch1D(ws1, ws2, 0.4, 1.0, {demanded_step_size});
 
     // Check the ranges on the output workspace against the param inputs.
