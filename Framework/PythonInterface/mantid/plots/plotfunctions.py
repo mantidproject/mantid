@@ -378,8 +378,18 @@ def pcolormesh(axes, workspace, *args, **kwargs):
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
 
+def _skimage_version():
+    import skimage
+    version = [int(value) for value in skimage.__version__.split('.')]
+    if  version[0] > 0:
+        return true
+    if version[0] == 0 and version[1] > 13:
+        return true
+    return false
+
+
 class ScalingAxesImage(mimage.AxesImage):
-    def __init__(self, ax, 
+    def __init__(self, ax,
                  cmap=None,
                  norm=None,
                  interpolation=None,
@@ -409,7 +419,10 @@ class ScalingAxesImage(mimage.AxesImage):
         max_dims = (3840,2160) # 4K resolution
         if dims[0] > max_dims[0] or dims[1] > max_dims[1]:
             new_dims = numpy.minimum(dims, max_dims)
-            self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
+            if(_skimage_version()):
+                self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
+            else:
+                self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan)
         else:
             self.unsampled_data = A
         super(mimage.AxesImage, self).set_data(A)
@@ -425,7 +438,10 @@ class ScalingAxesImage(mimage.AxesImage):
         if dx != self.dx or dy != self.dy:
             if dims[0] > dx or dims[1] > dy:
                 new_dims = numpy.minimum(dims,[dx,dy])
-                sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
+                if(_skimage_version()):
+                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
+                else:
+                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan)
                 self.dx = dx
                 self.dy = dy
                 super(mimage.AxesImage, self).set_data(sampled_data)

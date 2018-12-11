@@ -195,21 +195,23 @@ def pcolormesh_from_names(names, fig=None):
         LOGGER.warning(format(str(exc)))
         return None
 
+
 def use_imshow(ws):
     if not ws.isCommonBins():
         return False
 
     x = ws.dataX(0)
     difference = np.diff(x)
-    if not np.all(np.isclose(x, x[0])):
+    if not np.all(np.isclose(difference, difference[0])):
         return False
 
     y = ws.getAxis(1).extractValues()
     difference = np.diff(y)
-    if not np.all(np.isclose(y, y[0])):
+    if not np.all(np.isclose(difference, difference[0])):
         return False
 
     return True
+
 
 def pcolormesh(workspaces, fig=None):
     """
