@@ -4,7 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <regex>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -26,15 +25,7 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 
 namespace {
-/**
- * Checks if a string is a numeric value
- * @param string:: string to test
- * @returns :: bool if it is a string
- */
-bool isNumber(const std::string &string) {
-  return std::regex_match(
-      string, std::regex(("((\\+|-)?[[:digit:]]+)(\\.(([[:digit:]]+)?))?")));
-}
+
 /**
  * Converts QStringList -> std::vector<std::string>
  * @param qsl :: [input] QStringList to convert
@@ -101,7 +92,16 @@ MuonAnalysisResultTableCreator::MuonAnalysisResultTableCreator(
         "Log values passed in to result table creator are null!");
   }
 }
-
+/**
+ * Checks if a string is a numeric value
+ * @param string:: string to test
+ * @returns :: bool if it is a string
+ */
+bool MuonAnalysisResultTableCreator::isNumber(const QString &string) const {
+  bool isNumber = false;
+  auto value = string.toDouble(&isNumber);
+  return isNumber;
+}
 /**
  * Create a results table with the given options
  * @returns :: results table workspace
@@ -144,7 +144,7 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
     // multiple files use strings due to x-y format
     if (dashIndex != 0 && dashIndex != -1) {
       addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-    } else if (isNumber(val.toString().toStdString()) &&
+    } else if (isNumber(val.toString()) &&
                !log.endsWith(" (text)")) {
       addColumnToResultsTable(table, wsParamsByLabel, log); //
 
@@ -512,14 +512,14 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
-      } else if (isNumber(val.toString().toStdString()) &&
+      } else if (isNumber(val.toString()) &&
                  !log.endsWith(" (text)")) {
         valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
       }
 
-      if (isNumber(val.toString().toStdString()) && !log.endsWith(" (text)")) {
+      if (isNumber(val.toString()) && !log.endsWith(" (text)")) {
         row << valueToWrite.toDouble();
       } else {
         row << valueToWrite.toStdString();
@@ -561,7 +561,7 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
       auto seconds =
           val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
       valuesPerWorkspace.append(QString::number(seconds));
-    } else if (isNumber(val.toString().toStdString()) &&
+    } else if (isNumber(val.toString()) &&
                !log.endsWith(" (text)")) {
 
       valuesPerWorkspace.append(QString::number(val.toDouble()));
@@ -624,7 +624,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
           valuesPerWorkspace.append(QString::number(seconds));
         } else if (dashIndex != 0 && dashIndex != -1) {
           valuesPerWorkspace.append(logValues[log].toString());
-        } else if (isNumber(val.toString().toStdString()) &&
+        } else if (isNumber(val.toString()) &&
                    !log.endsWith(" (text)")) {
 
           valuesPerWorkspace.append(QString::number(val.toDouble()));
@@ -648,7 +648,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
         row << oss.str();
 
       } else {
-        if (isNumber(valuesPerWorkspace.front().toStdString())) {
+        if (isNumber(valuesPerWorkspace.front())) {
           const auto &min = valuesPerWorkspace.front().toDouble();
           const auto &max = valuesPerWorkspace.back().toDouble();
           if (min == max) {

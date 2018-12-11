@@ -41,6 +41,7 @@ protected:
       const Mantid::API::ITableWorkspace_sptr table) const;
 
 private:
+  bool isNumber(const QString &string) const;
   /// Get map of label to workspaces
   std::map<QString, std::vector<std::string>> getWorkspacesByLabel() const;
   /// Get parameter table from workspace/label name
