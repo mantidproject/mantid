@@ -24,7 +24,7 @@
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Points.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Unit.h"
 #include <math.h>
 
 using namespace Mantid::API;
@@ -81,7 +81,7 @@ private:
       ws->dataY(1) = yData2;
       ws->dataE(0) = eData1;
       ws->dataE(1) = eData2;
-      ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+      ws->getAxis(0)->setUnit("Wavelength");
     } else {
       // Concatenate data vectors into one vector
       xData1.insert(xData1.end(), xData2.begin(), xData2.end());
@@ -340,6 +340,7 @@ public:
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws)
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 17)
     const double y0Scaled = 1.1 * scale0;
@@ -394,7 +395,7 @@ public:
     alg2.setProperty("OutputWorkspace", "outws");
     alg2.execute();
     MatrixWorkspace_sptr stitched2 = alg2.getProperty("OutputWorkspace");
-
+    TS_ASSERT_EQUALS(stitched2->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), stitched2->x(0).rawData())
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), stitched2->y(0).rawData())
     // The final rebin causes accuracy problems, thus 1.e-9 tolerance
@@ -436,6 +437,7 @@ public:
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws)
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     const auto y0 = stitched->y(0);
@@ -567,6 +569,7 @@ public:
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws)
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     const auto y0 = stitched->y(0);
@@ -676,6 +679,7 @@ public:
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws)
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     const auto y0 = stitched->y(0);
@@ -812,6 +816,7 @@ public:
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1)
     auto stitched =
         boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     // First spectrum, Y values
@@ -880,6 +885,7 @@ public:
     // First item in the output group
     auto stitched =
         boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // Y values
@@ -897,22 +903,23 @@ public:
     TS_ASSERT_DELTA(stitched->e(1)[16], 1.79063, 0.00001);
 
     // Second item in the output group
-    stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
-    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(stitched->blocksize(), 17);
+    stitched2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    TS_ASSERT_EQUALS(stitched2->getAxis(0)->unit()->unitID() , "Wavelength")
+    TS_ASSERT_EQUALS(stitched2->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched2->blocksize(), 17);
     // Y values
     for (size_t i = 0; i < 17; ++i) {
-      TS_ASSERT_DELTA(stitched->y(0)[i], 1.5, 1.e-9);
-      TS_ASSERT_DELTA(stitched->y(1)[0], 2.5, 1.e-9);
+      TS_ASSERT_DELTA(stitched2->y(0)[i], 1.5, 1.e-9);
+      TS_ASSERT_DELTA(stitched2->y(1)[0], 2.5, 1.e-9);
     }
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->e(0)[0], 1.22474, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(0)[9], 0.95883, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(0)[16], 1.54110, 0.00001);
+    TS_ASSERT_DELTA(stitched2->e(0)[0], 1.22474, 0.00001);
+    TS_ASSERT_DELTA(stitched2->e(0)[9], 0.95883, 0.00001);
+    TS_ASSERT_DELTA(stitched2->e(0)[16], 1.54110, 0.00001);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->e(1)[0], 1.58114, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(1)[9], 1.24263, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(1)[16], 2.00959, 0.00001);
+    TS_ASSERT_DELTA(stitched2->e(1)[0], 1.58114, 0.00001);
+    TS_ASSERT_DELTA(stitched2->e(1)[9], 1.24263, 0.00001);
+    TS_ASSERT_DELTA(stitched2->e(1)[16], 2.00959, 0.00001);
 
     // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
@@ -971,6 +978,7 @@ public:
     // First item in the output group
     auto stitched =
         boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -991,17 +999,18 @@ public:
     TS_ASSERT_DELTA(stitched->e(1)[16], 0.72456, 0.00001);
 
     // Second item in the output group
-    stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
-    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(stitched->blocksize(), 17);
+    stitched2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    TS_ASSERT_EQUALS(stitched2->getAxis(0)->unit()->unitID() , "Wavelength")
+    TS_ASSERT_EQUALS(stitched2->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched2->blocksize(), 17);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->y(0)[0], 1.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(0)[9], 0.94736, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(0)[16], 0.8, 0.00001);
+    TS_ASSERT_DELTA(stitched2->y(0)[0], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched2->y(0)[9], 0.94736, 0.00001);
+    TS_ASSERT_DELTA(stitched2->y(0)[16], 0.8, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->y(1)[0], 2.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(1)[9], 1.54762, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(1)[16], 1.3, 0.00001);
+    TS_ASSERT_DELTA(stitched2->y(1)[0], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched2->y(1)[9], 1.54762, 0.00001);
+    TS_ASSERT_DELTA(stitched2->y(1)[16], 1.3, 0.00001);
     // First spectrum, E values
     TS_ASSERT_DELTA(stitched->e(0)[0], 1.22474, 0.00001);
     TS_ASSERT_DELTA(stitched->e(0)[9], 0.56195, 0.00001);
@@ -1069,6 +1078,7 @@ public:
     // First item in the output group
     auto stitched =
         boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -1186,6 +1196,7 @@ public:
     // First item in the output group
     auto stitched =
         boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -1313,6 +1324,7 @@ public:
     // First item in the output group
     auto stitched =
         boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     // First spectrum, Y values
@@ -1375,6 +1387,7 @@ public:
     // Test output ws
     auto stitched =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
 
     // Test the algorithm histories
     auto histNames = getHistory(stitched);
@@ -1428,6 +1441,7 @@ public:
     // First item in the output group
     auto stitched =
         boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
@@ -1487,6 +1501,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     auto stitched =
         boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
@@ -1558,6 +1573,7 @@ public:
     Workspace_sptr outws = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outws);
     const auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     const std::vector<double> x_values{0.2, 0.23, 0.9, 1.3, 1.6, 2.6};
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
     const std::vector<double> y_values{56., 1.1, 77., 2., 48., 3.7};

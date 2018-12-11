@@ -22,7 +22,7 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Points.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -54,7 +54,7 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
     outWS->setPointStandardDeviations(i, Dx);
   }
 
-  outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  outWS->getAxis(0)->setUnit("Wavelength");
 
   return outWS;
 }
@@ -65,7 +65,7 @@ MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
   outWS->initialize(1, xData.size(), yData.size());
   outWS->mutableY(0) = yData;
   outWS->mutableX(0) = xData;
-  outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  outWS->getAxis(0)->setUnit("Wavelength");
   return outWS;
 }
 } // namespace
@@ -144,6 +144,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
   }
@@ -161,6 +162,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
   }
@@ -186,6 +188,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
   }
@@ -208,6 +211,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
   }
@@ -665,7 +669,7 @@ public:
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
     // Run it again with some zeros
-    e.back() = 1;
+    e.back() = 1.;
     ws = createWorkspace(x, y, e, dx, 1);
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }
@@ -689,7 +693,7 @@ public:
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
     // Run it again with some zeros
-    e.back() = 1;
+    e.back() = 1.;
     ws = createWorkspace(x, y, e, dx, nspectrum);
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }
@@ -713,7 +717,7 @@ public:
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
-    double scaleFactor = ret.get<1>();
+    const double scaleFactor = ret.get<1>();
 
     TSM_ASSERT("ScaleFactor should not be NAN", !std::isnan(scaleFactor));
   }
@@ -737,7 +741,7 @@ public:
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
-    double scaleFactor = ret.get<1>();
+    const double scaleFactor = ret.get<1>();
 
     TSM_ASSERT("ScaleFactor should not be Infinity", !std::isinf(scaleFactor));
   }
