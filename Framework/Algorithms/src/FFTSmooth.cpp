@@ -64,10 +64,10 @@ void FFTSmooth::exec() {
 
   HistogramBuilder builder;
   builder.setX(m_inWS->x(0).size());
-  builder.setY(m_inWS->y(0).size());
+  builder.setY(m_inWS->y(0).size() + dn);
   builder.setDistribution(m_inWS->isDistribution());
   API::MatrixWorkspace_sptr symmWS =
-      create<MatrixWorkspace>(*m_inWS, 1, builder.build());
+      create<Workspace2D>(*m_inWS, 1, builder.build());
 
   double dx = (m_inWS->x(spec).back() - m_inWS->x(spec).front()) /
               static_cast<double>(m_inWS->x(spec).size() - 1);
