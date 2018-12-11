@@ -90,6 +90,7 @@ set ( SRC_FILES
 	src/PropertyManagerProperty.cpp
 	src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
+	src/PropertyWithValueJSONDecoder.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
 	src/Quat.cpp
@@ -163,7 +164,7 @@ set ( INC_FILES
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ConfigObserver.h
 	inc/MantidKernel/ConfigPropertyObserver.h
-        inc/MantidKernel/DateAndTime.h
+	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTimeHelpers.h
@@ -242,7 +243,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-        inc/MantidKernel/normal_distribution.h
+	inc/MantidKernel/normal_distribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -260,6 +261,7 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyManager_fwd.h
 	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
+	inc/MantidKernel/PropertyWithValueJSONDecoder
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
 	inc/MantidKernel/QuasiRandomNumberSequence.h
@@ -410,6 +412,7 @@ set ( TEST_FILES
 	PropertyNexusTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
+  PropertyWithValueJSONDecoderTest.h
 	ProxyInfoTest.h
 	QuatTest.h
 	ReadLockTest.h
