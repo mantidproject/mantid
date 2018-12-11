@@ -59,9 +59,6 @@ class QuickEditWidget(object):
     def set_plot_y_range(self,range):
         self._presenter.set_plot_y_range(range)
 
-    def set_y_autoscale(self,state):
-        self._presenter.set_auto(state)
-
     def set_errors(self,state):
         self._presenter.set_errors(state)
 

@@ -11,7 +11,6 @@ class QuickEditPresenter(object):
     def __init__(self,view,model):
         self._view = view
         self._model = model
-        self._view.connect_autoscale_changed(self.autoscale_changed)
         self._view.connect_x_range_changed(self.updateContext)
 
     @property
@@ -26,13 +25,6 @@ class QuickEditPresenter(object):
 
     def connect_errors_changed(self,slot):
         self._view.connect_errors_changed(slot)
-
-    def autoscale_changed(self,state):
-        print("presenter",state)
-        if state:
-           self._view.hide()
-        else:
-           self._view.show()
 
     def connect_x_range_changed(self,slot):
         self._view.connect_x_range_changed(slot)
@@ -67,9 +59,3 @@ class QuickEditPresenter(object):
          if previous == state:
             return 
          self._view.set_errors(state)
-
-    def set_auto(self,state):
-         previous = self._view.get_auto()
-         if previous == state:
-            return 
-         self._view.set_y_autoscale(state)

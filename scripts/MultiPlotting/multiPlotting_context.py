@@ -19,8 +19,10 @@ def setUpSubplot():
     yData=np.sin(5.2*xData)
     eData = 0.1*np.sin(1.*xData)
     result = (1-yData )*3.1
-    ws= mantid.CreateWorkspace(DataX=xData, DataY=result,DataE=eData, OutputWorkspace="ws")
-    return ws   
+    #ws= mantid.CreateWorkspace(DataX=xData, DataY=result,DataE=eData, OutputWorkspace="ws")
+    ws=mantid.Load("MUSR00015089",OutputWorkspace="ws") 
+    #ws = mtd['ws_1']
+    return ws 
 
 class PlottingContext(object):
     def __init__(self):
@@ -31,11 +33,18 @@ class PlottingContext(object):
         self.context[xBounds] =[0.,0.]
         self.context[yBounds] =[0.,0.]
 
-    def addSubplot(self, name):
-         self.subplots[name] = subPlotContext(name)
+    def addSubplot(self, name,subplot):
+         self.subplots[name] = subPlotContext(name,subplot)
 
-    def addLine(self,subplot, label, lines,workspace):
-        self.subplots[subplot].addLine(label, lines, workspace) 
+    def addLine(self,subplot, workspace,specNum):
+	    try:
+             if len(workspace) >1:
+                  self.subplots[subplot].addLine(workspace.OutputWorkspace,specNum) 
+             else:
+                  self.subplots[subplot].addLine(workspace,specNum) 
+	    except:
+              pass # add error message
+
 
     def get(self, key):
         return self.context[key]

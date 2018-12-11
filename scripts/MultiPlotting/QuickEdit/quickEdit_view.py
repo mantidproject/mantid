@@ -12,7 +12,6 @@ from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
 class QuickEditView(QtWidgets.QWidget):
     error_signal = QtCore.Signal(object)
-    auto_signal = QtCore.Signal(object)
 
     def __init__(self, subcontext, parent = None):
         super(QuickEditView,self).__init__(parent)
@@ -23,8 +22,8 @@ class QuickEditView(QtWidgets.QWidget):
 
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
 
-        self.autoscale = QtWidgets.QCheckBox("Autoscale y")
-        self.autoscale.stateChanged.connect(self._emit_auto)
+        self.autoscale = QtWidgets.QPushButton("Autoscale y")
+        self.autoscale.setStyleSheet("background-color:lightgrey")
 
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
 
@@ -79,27 +78,9 @@ class QuickEditView(QtWidgets.QWidget):
         return self.y_axis_changer.get_bounds()
 
     """ auto scale selection """
-    # need our own signal that sends a bool
-    def _emit_auto(self):
-        state = self.get_auto()
-        self.auto_signal.emit(state)
-
     def connect_autoscale_changed(self,slot):
-        self.auto_signal.connect(slot)
+        self.autoscale.clicked.connect(slot)
 
-    def set_y_autoscale(self,state):
-        self.autoscale.setChecked(state)
-
-    def get_auto(self):
-        return self.autoscale.isChecked()
-
-    def change_autoscale(self,state):
-        self.y_axis_changer.set_enabled(state)
-
-    def hide(self):
-        self.y_axis_changer.hide()
-    def show(self):
-        self.y_axis_changer.show()
     """ errors selection """
 
     # need our own signal that sends a bool

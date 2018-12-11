@@ -33,9 +33,9 @@ class plotTestGui(QtGui.QMainWindow):
         self.test.add_subplot("test",311)
         self.test.add_subplot("bob",312)
         self.test.add_subplot("moo",313)
-        self.test.plot("test",self._context.ws)
-        self.test.plot("bob",self._context.ws)
-        self.test.plot("moo",self._context.ws)
+        self.test.plot("test",self._context.ws,specNum = 26)
+        self.test.plot("bob",self._context.ws,specNum = 1)
+        self.test.plot("moo",self._context.ws,specNum = 42)
         self.test.set_all_values()
         self.setCentralWidget(self.test)
 
