@@ -402,16 +402,13 @@ public:
       // compare
       for (size_t i = 0; i < vec_eta.size(); ++i) {
         TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-3);
-        //        std::cout << vec_eta[i] << "    " << vec_numeric_deriv[i] << "
-        //        "
-        //                  << vec_jocob_deriv[i] << "\n";
       }
     }
 
     return;
   }
 
-  void Passed_testPseudoVoigtDerivativesVaringIntensity() {
+  void testPseudoVoigtDerivativesVaringIntensity() {
     double x0 = -1.;
     double min_intensity = 0.9;
     double max_intensity = 1.1;
