@@ -28,7 +28,22 @@ public:
       const AnalysisDataServiceObserverAdapter &) = delete;
   AnalysisDataServiceObserverAdapter &
   operator=(const AnalysisDataServiceObserverAdapter &) = delete;
+
   void anyChangeHandle() override;
+  void addHandle(const std::string &wsName, const Workspace_sptr &ws) override;
+  void replaceHandle(const std::string &wsName,
+                     const Workspace_sptr &ws) override;
+  void deleteHandle(const std::string &wsName,
+                    const Workspace_sptr &ws) override;
+  void clearHandle() override;
+  void renameHandle(const std::string &wsName,
+                    const std::string &newName) override;
+  void groupHandle(const std::string &wsName,
+                   const Workspace_sptr &ws) override;
+  void unGroupHandle(const std::string &wsName,
+                     const Workspace_sptr &ws) override;
+  void groupUpdateHandle(const std::string &wsName,
+                         const Workspace_sptr &ws) override;
 
 private:
   /// Return the PyObject that owns this wrapper, i.e. self

@@ -52,25 +52,25 @@ public:
   void observeGroupUpdate(bool turnOn = true);
 
   virtual void anyChangeHandle() {}
-
-protected:
-  virtual void addHandle(const std::string &wsName, const Workspace_sptr ws);
+  virtual void addHandle(const std::string &wsName, const Workspace_sptr &ws);
   virtual void replaceHandle(const std::string &wsName,
-                             const Workspace_sptr ws);
-  virtual void deleteHandle(const std::string &wsName, const Workspace_sptr ws);
+                             const Workspace_sptr &ws);
+  virtual void deleteHandle(const std::string &wsName,
+                            const Workspace_sptr &ws);
   virtual void clearHandle();
   virtual void renameHandle(const std::string &wsName,
                             const std::string &newName);
-  virtual void groupHandle(const std::string &wsName, const Workspace_sptr ws);
+  virtual void groupHandle(const std::string &wsName, const Workspace_sptr &ws);
   virtual void unGroupHandle(const std::string &wsName,
-                             const Workspace_sptr ws);
+                             const Workspace_sptr &ws);
   virtual void groupUpdateHandle(const std::string &wsName,
-                                 const Workspace_sptr ws);
+                                 const Workspace_sptr &ws);
 
 private:
-  bool m_observingAdd, m_observingReplace, m_observingDelete, m_observingClear,
-      m_observingRename, m_observingGroup, m_observingUnGroup,
-      m_observingGroupUpdate;
+  bool m_observingAdd{false}, m_observingReplace{false},
+      m_observingDelete{false}, m_observingClear{false},
+      m_observingRename{false}, m_observingGroup{false},
+      m_observingUnGroup{false}, m_observingGroupUpdate{false};
 
   void _addHandle(
       const Poco::AutoPtr<AnalysisDataServiceImpl::AddNotification> &pNf);
