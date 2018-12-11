@@ -141,7 +141,6 @@ class TOFTOFSetupWidget(BaseWidget):
         self.vanRuns   = tip(QLineEdit(), self.TIP_vanRuns)
         self.vanCmnt   = tip(QLineEdit(), self.TIP_vanCmnt)
         self.vanTemp   = tip(DoubleEdit(), self.TIP_vanTemp)
-        # self.vanEcFactor see below
 
         self.ecRuns    = tip(SmallQLineEdit(), self.TIP_ecRuns)
         self.ecTemp    = tip(DoubleEdit(), self.TIP_ecTemp)
@@ -180,7 +179,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnSaveDir          = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
-        self.vanEcFactor  = setEnabled(tip(QDoubleSpinBox(), self.TIP_vanEcFactor), self.chkSubtractECVan)
+        self.vanEcFactor  	 = setEnabled(tip(QDoubleSpinBox(), self.TIP_vanEcFactor), self.chkSubtractECVan)
         set_spin(self.vanEcFactor, 0, 1)
         self.chkReplaceNaNs      = setEnabled(tip(QCheckBox(u'Replace special values in S(Q, ω) with 0'), self.TIP_chkReplaceNaNs),
                                               self.binEon)
