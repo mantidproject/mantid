@@ -24,16 +24,16 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setBrowserWorkspace() override{};
 
   bool isErrorsEnabled();
 
-  Mantid::API::MatrixWorkspace_const_sptr
-  getADSWorkspace(std::string const &name) const;
-  std::size_t getOutWsNumberOfSpectra() const;
   std::size_t getXMinIndex(Mantid::MantidVec const &firstSpectraYData,
                            std::vector<double>::const_iterator iter);
   double getXMinValue(Mantid::API::MatrixWorkspace_const_sptr workspace,
                       std::size_t const &index);
+
+  void plotResult(QString const &workspaceName);
 
   void setRunEnabled(bool enabled);
   void setPlotSpectrumEnabled(bool enabled);

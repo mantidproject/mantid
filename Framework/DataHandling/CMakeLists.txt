@@ -136,6 +136,7 @@
 	src/PatchBBY.cpp
 	src/ProcessBankData.cpp
 	src/RawFileInfo.cpp
+	src/ReadMaterial.cpp
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
@@ -329,6 +330,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/PatchBBY.h
 	inc/MantidDataHandling/ProcessBankData.h
 	inc/MantidDataHandling/RawFileInfo.h
+	inc/MantidDataHandling/ReadMaterial.h
 	inc/MantidDataHandling/RemoveLogs.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
@@ -511,6 +513,7 @@ set ( TEST_FILES
 	ORNLDataArchiveTest.h
 	PDLoadCharacterizationsTest.h
 	RawFileInfoTest.h
+	ReadMaterialTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
 	RotateInstrumentComponentTest.h

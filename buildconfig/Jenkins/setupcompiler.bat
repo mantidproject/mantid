@@ -8,9 +8,23 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :: Find grep
-for /f "delims=" %%I in ('where git') do @set _git_root_dir=%%~dpI
+for /f "delims=" %%I in ('where git') do (
 set _git_root_dir=%_git_root_dir:~0,-4%
+  @set _grep_exe=%%~dpI..\usr\bin\grep.exe
 set _grep_exe=%_git_root_dir%\usr\bin\grep.exe
+  @echo Checking for grep at: !_grep_exe!
+  if EXIST "!_grep_exe!" (
+    goto :endfor
+  ) else (
+    @set _grep_exe=""
+  )
+)
+:endfor
+if !_grep_exe! == "" (
+  @echo Unable to find grep.exe
+  exit /b 1
+)
+@echo Using grep: !_grep_exe!
 
 :: 8.1 is backwards compatible with Windows 7. It allows us to target Windows 7
 :: when building on newer versions of Windows. This value must be supplied

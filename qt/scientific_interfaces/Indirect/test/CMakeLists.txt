@@ -5,6 +5,7 @@ set ( TEST_FILES
   IndirectFitDataTest.h
   IndirectFitOutputTest.h
   IndirectFitPlotModelTest.h
+  IndirectFitPlotPresenterTest.h
   IndirectFittingModelTest.h
   IndirectSpectrumSelectionPresenterTest.h
 )
@@ -37,6 +38,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesIndirect
     MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
   PARENT_DEPENDENCIES
     GUITests
 )
