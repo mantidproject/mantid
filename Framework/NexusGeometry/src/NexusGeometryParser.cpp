@@ -147,10 +147,9 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   // Open data set
   DataSet data = group.openDataSet(dataset);
   auto dataType = data.getDataType();
-  auto nCharacters = dataType.getSize();
-  std::vector<char> value(nCharacters);
-  data.read(value.data(), dataType, data.getSpace());
-  return std::string(value.begin(), value.end());
+  H5std_string buffer;
+  data.read(buffer, dataType, data.getSpace());
+  return buffer;
 }
 
 /** Open subgroups of parent group
