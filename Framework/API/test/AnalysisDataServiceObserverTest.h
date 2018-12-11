@@ -32,19 +32,19 @@ public:
   ~MockInheritingClass() { this->observeAll(false); }
 
   void anyChangeHandle() override { m_anyChangeHandleCalled = true; }
-  void addHandle(const std::string &wsName, const Workspace_sptr ws) override {
+  void addHandle(const std::string &wsName, const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_addHandleCalled = true;
   }
   void replaceHandle(const std::string &wsName,
-                     const Workspace_sptr ws) override {
+                     const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_replaceHandleCalled = true;
   }
   void deleteHandle(const std::string &wsName,
-                    const Workspace_sptr ws) override {
+                    const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_deleteHandleCalled = true;
@@ -57,19 +57,19 @@ public:
     m_renameHandleCalled = true;
   }
   void groupHandle(const std::string &wsName,
-                   const Workspace_sptr ws) override {
+                   const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_groupHandleCalled = true;
   }
   void unGroupHandle(const std::string &wsName,
-                     const Workspace_sptr ws) override {
+                     const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_unGroupHandleCalled = true;
   }
   void groupUpdateHandle(const std::string &wsName,
-                         const Workspace_sptr ws) override {
+                         const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_groupUpdateHandleCalled = true;
