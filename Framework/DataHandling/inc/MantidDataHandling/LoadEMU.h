@@ -99,7 +99,7 @@ private:
 
   // region of intreset
   std::vector<bool> createRoiVector(const std::string &seltubes,
-                                           const std::string &maskfile);
+                                    const std::string &maskfile);
 
   // load parameters from input file
   void loadParameters(const std::string &hdfFile, API::LogManager &logm);
