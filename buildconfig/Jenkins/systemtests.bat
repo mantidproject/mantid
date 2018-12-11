@@ -50,9 +50,9 @@ if not EXIST %WORKSPACE%\build\CMakeCache.txt (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-call cmake.exe --build --target StandardTestData -- /nologo /p:Configuration=Release /verbosity:minimal
+call cmake.exe --build . --target StandardTestData -- /nologo /p:Configuration=Release /verbosity:minimal
 if ERRORLEVEL 1 exit /b %ERRORLEVEL%
-call cmake.exe --build --target SystemTestData -- /nologo /p:Configuration=Release /verbosity:minimal
+call cmake.exe --build . --target SystemTestData -- /nologo /p:Configuration=Release /verbosity:minimal
 if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
