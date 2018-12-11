@@ -493,9 +493,9 @@ def parse_event_slice_setting(string_to_parse):
         line = re.sub(range_marker_pattern, "", line)
         value = float(line)
         if is_lower_bound:
-            return [value, -1]
+            return [value, -1.]
         else:
-            return [-1, value]
+            return [-1., value]
 
     # Check if the input actually exists.
     if not string_to_parse:
