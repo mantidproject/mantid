@@ -75,6 +75,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.os_patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.os')
         self.addCleanup(self.os_patcher.stop)
+        self.os_patcher.start()
         self.osMock = self.os_patcher.start()
 
         self.thickness_patcher = mock.patch('sans.gui_logic.models.table_model.create_file_information')
@@ -265,6 +266,22 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Clean up
         self._remove_files(user_file_path=user_file_path)
+        self.os_patcher.start()
+
+    def test_batch_file_dir_not_added_to_config(self):
+        self.os_patcher.stop()
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        user_file_path = create_user_file(sample_user_file)
+        view, settings_diagnostic_tab, masking_table = create_mock_view(user_file_path, "A/Path/batch_file.csv")
+        presenter.set_view(view)
+
+        presenter.on_batch_file_load()
+        config_dirs = config["datasearch.directories"]
+        result = "A/Path/" in config_dirs
+
+        self.assertFalse(result, "We do not expect A/Path/ to be added to config, "
+                                 "datasearch.directories is now {}".format(config_dirs))
+
         self.os_patcher.start()
 
     def test_that_gets_states_from_view(self):

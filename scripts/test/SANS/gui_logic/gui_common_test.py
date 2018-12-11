@@ -82,8 +82,7 @@ class GuiCommonTest(unittest.TestCase):
         result = get_batch_file_dir_from_path(a_path)
 
         expected_result = "A/Test/Path/"
-        self.assertEqual(result, expected_result, "Expected path to be {}, was {} instead.".format(expected_result,
-                                                                                                   result))
+        self.assertEqual(result, expected_result)
 
     def test_datasearch_directories_updated(self):
         current_dirs = "A/Path/"
@@ -91,7 +90,7 @@ class GuiCommonTest(unittest.TestCase):
         _, result = add_dir_to_datasearch(batch_file, current_dirs)
 
         expected_result = "A/Path/;A/Path/To/Batch/File/"
-        self.assertEqual(expected_result, result, "Expected {}, got {}".format(expected_result, result))
+        self.assertEqual(expected_result, result)
 
     def test_empty_string_not_added_to_datasearch_directories(self):
         current_dirs = "A/Path/"
@@ -99,7 +98,7 @@ class GuiCommonTest(unittest.TestCase):
         _, result = add_dir_to_datasearch(batch_file, current_dirs)
 
         expected_result = "A/Path/"
-        self.assertEqual(expected_result, result, "Expected {}, got {}".format(expected_result, result))
+        self.assertEqual(expected_result, result)
 
     def test_existing_directory_not_added_to_datasearch_directories(self):
         current_dirs = "A/Path/;A/Path/Already/Added/"
@@ -107,7 +106,7 @@ class GuiCommonTest(unittest.TestCase):
         _, result = add_dir_to_datasearch(batch_file, current_dirs)
 
         expected_result = "A/Path/;A/Path/Already/Added/"
-        self.assertEqual(expected_result, result, "Expected {}, got {}".format(expected_result, result))
+        self.assertEqual(expected_result, result)
 
     def test_directories_unchanged_when_removing_empty_string(self):
         current_dirs = "A/Path/;Another/Path/"
@@ -115,7 +114,7 @@ class GuiCommonTest(unittest.TestCase):
         result = remove_dir_from_datasearch(file_to_remove, current_dirs)
 
         expected_result = "A/Path/;Another/Path/"
-        self.assertEqual(result, expected_result, "Expected {}, got {}".format(expected_result, result))
+        self.assertEqual(result, expected_result)
 
     def test_correct_directory_removed(self):
         current_dirs = "A/Path/;Another/Path/;A/Final/Path/"
@@ -123,7 +122,7 @@ class GuiCommonTest(unittest.TestCase):
         result = remove_dir_from_datasearch(file_to_remove, current_dirs)
 
         expected_result = "A/Path/;A/Final/Path/"
-        self.assertEqual(expected_result, result, "Expected {}, got {}".format(expected_result, result))
+        self.assertEqual(expected_result, result)
 
 
 if __name__ == '__main__':

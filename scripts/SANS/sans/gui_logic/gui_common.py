@@ -4,7 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import config
 from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
 from qtpy.QtWidgets import (QFileDialog)  # noqa
 from qtpy.QtCore import (QSettings)  # noqa
