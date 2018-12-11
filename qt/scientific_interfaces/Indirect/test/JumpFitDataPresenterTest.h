@@ -27,14 +27,14 @@ using namespace testing;
 
 namespace {
 
-QStringList const &getJumpParameters() {
+QStringList getJumpParameters() {
   QStringList parameters;
   parameters << "f1.f1.FWHM"
              << "f2.f1.FWHM";
   return parameters;
 }
 
-QStringList const &getJumpParameterTypes() {
+QStringList getJumpParameterTypes() {
   QStringList parameterTypes;
   parameterTypes << "Width"
                  << "EISF";
@@ -124,9 +124,9 @@ public:
         std::move(m_ParameterTypeLabel.get()),
         std::move(m_ParameterLabel.get()));
 
-    SetUpADSWithWorkspace m_ads(
-        "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
-    m_model->addWorkspace("WorkspaceName");
+    //SetUpADSWithWorkspace m_ads(
+    //    "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
+    //m_model->addWorkspace("WorkspaceName");
   }
 
   void tearDown() override {
@@ -138,6 +138,12 @@ public:
     m_presenter.reset();
     m_model.reset();
     m_view.reset();
+
+    m_dataTable.reset();
+    m_ParameterTypeCombo.reset();
+    m_ParameterCombo.reset();
+    m_ParameterTypeLabel.reset();
+    m_ParameterLabel.reset();
   }
 
   ///----------------------------------------------------------------------
@@ -148,6 +154,19 @@ public:
     TS_ASSERT(m_presenter);
     TS_ASSERT(m_model);
     TS_ASSERT(m_view);
+  }
+
+  void test_that_the_comboboxes_contain_the_items_specified_during_the_setup() {
+    TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemData(0), "Width");
+    TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemData(1), "EISF");
+
+    TS_ASSERT_EQUALS(m_ParameterCombo->itemData(0), "f1.f1.FWHM");
+    TS_ASSERT_EQUALS(m_ParameterCombo->itemData(1), "f2.f1.FWHM");
+  }
+
+  void test_that_the_labels_have_the_correct_text_after_setup() {
+    TS_ASSERT_EQUALS(m_ParameterTypeLabel->text(), "Fit Parameter:");
+    TS_ASSERT_EQUALS(m_ParameterLabel->text(), "Width:");
   }
 
   void
