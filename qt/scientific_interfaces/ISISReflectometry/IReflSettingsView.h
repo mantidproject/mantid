@@ -55,6 +55,8 @@ public:
   virtual std::string getCAlpha() const = 0;
   virtual std::string getCAp() const = 0;
   virtual std::string getCPp() const = 0;
+  virtual std::string getFloodCorrection() const = 0;
+  virtual std::string getFloodWorkspace() const = 0;
   /// Instrument settings
   virtual std::string getIntMonCheck() const = 0;
   virtual std::string getMonitorIntegralMin() const = 0;

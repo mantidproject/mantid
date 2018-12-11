@@ -27,6 +27,15 @@ public:
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
 
+  /// ConjoinXRuns parameter names of the paramter file for sample log merging
+  static const std::string SUM_MERGE;
+  static const std::string TIME_SERIES_MERGE;
+  static const std::string LIST_MERGE;
+  static const std::string WARN_MERGE;
+  static const std::string WARN_MERGE_TOLERANCES;
+  static const std::string FAIL_MERGE;
+  static const std::string FAIL_MERGE_TOLERANCES;
+
 protected:
   void fillHistory() override;
 

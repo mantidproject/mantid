@@ -6,14 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
 #include "MantidQtWidgets/Common/MantidTreeModel.h"
-#include <MantidQtWidgets/Common/MantidTreeWidget.h>
-#include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
 
-#include <MantidAPI/AlgorithmManager.h>
-#include <MantidAPI/FileProperty.h>
-#include <MantidAPI/ITableWorkspace.h>
-#include <MantidAPI/MatrixWorkspace.h>
-#include <MantidAPI/WorkspaceGroup.h>
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QMenu>
 #include <QSignalMapper>
@@ -88,7 +89,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     } catch (Exception::NotFoundError &) {
       return;
     }
-    if (boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+    if (auto matrixWS =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       QMenu *plotSubMenu(new QMenu("Plot", menu));
       plotSubMenu->addAction(m_plotSpectrum);
       plotSubMenu->addAction(m_overplotSpectrum);
@@ -100,6 +102,9 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addSeparator();
       menu->addAction(m_showData);
       menu->addAction(m_showInstrument);
+      m_showInstrument->setEnabled(
+          matrixWS->getInstrument() &&
+          !matrixWS->getInstrument()->getName().empty());
       menu->addSeparator();
     }
     menu->addAction(m_rename);
