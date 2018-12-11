@@ -12,6 +12,10 @@ using namespace Mantid::IndirectFitDataCreationHelper;
 
 namespace {
 
+std::vector<std::string> getTextAxisLabels() {
+  return {"f0.Width", "f1.Width", "f2.EISF"};
+}
+
 void storeWorkspaceInADS(std::string const &workspaceName,
                          MatrixWorkspace_sptr workspace) {
   SetUpADSWithWorkspace ads(workspaceName, workspace);
@@ -63,6 +67,12 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
+  void test_that_the_constant_variables_have_the_values_expected() {
+    TS_ASSERT_EQUALS(START_X_COLUMN, 2);
+    TS_ASSERT_EQUALS(END_X_COLUMN, 3);
+    TS_ASSERT_EQUALS(EXCLUDE_REGION_COLUMN, 4);
+  }
+
   void
   test_that_createWorkspace_returns_a_workspace_with_the_number_of_spectra_specified() {
     auto const workspace = createWorkspace(10);
@@ -75,6 +85,31 @@ public:
     auto const workspace = createInstrumentWorkspace(6, 5);
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 6);
+  }
+
+  void
+  test_that_createWorkspaceWithTextAxis_returns_a_workspace_with_the_number_of_spectra_specified() {
+    auto const workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 6);
+  }
+
+  void
+  test_that_createWorkspaceWithTextAxis_returns_a_workspace_with_the_text_axis_labels_specified() {
+    auto const labels = getTextAxisLabels();
+    auto const workspace = createWorkspaceWithTextAxis(6, labels);
+
+    auto const yAxis = workspace->getAxis(1);
+
+    for (auto index = 0; index < workspace->getNumberHistograms(); ++index)
+      TS_ASSERT_EQUALS(yAxis->label(index), labels[index]);
+  }
+
+  void
+  test_that_createWorkspaceWithTextAxis_throws_when_the_number_of_spectra_is_not_equal_to_the_number_of_labels() {
+    auto const labels = std::vector<std::string>({"f0.Width", "f1.EISF"});
+    TS_ASSERT_THROWS(createWorkspaceWithTextAxis(6, labels),
+                     std::runtime_error);
   }
 
   void

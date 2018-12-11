@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidHistogramData/BinEdges.h"
 
 #include <string>
@@ -28,6 +29,13 @@ int const EXCLUDE_REGION_COLUMN(4);
 Mantid::API::MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra);
 Mantid::API::MatrixWorkspace_sptr createInstrumentWorkspace(int const &xLength,
                                                             int const &yLength);
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithTextAxis(int const &numberOfSpectra,
+                            std::vector<std::string> const &labels);
+
+Mantid::API::TextAxis *getTextAxis(int const &numberOfSpectra,
+                                   std::vector<std::string> const &labels);
+
 Mantid::API::MatrixWorkspace_sptr
 setWorkspaceEFixed(Mantid::API::MatrixWorkspace_sptr workspace,
                    int const &xLength);

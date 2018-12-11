@@ -15,9 +15,12 @@
 #include "JumpFitModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
+using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
@@ -26,8 +29,8 @@ namespace {
 
 QStringList const &getJumpParameters() {
   QStringList parameters;
-  parameters << "1"
-             << "2";
+  parameters << "f1.f1.FWHM"
+             << "f2.f1.FWHM";
   return parameters;
 }
 
@@ -36,6 +39,10 @@ QStringList const &getJumpParameterTypes() {
   parameterTypes << "Width"
                  << "EISF";
   return parameterTypes;
+}
+
+std::vector<std::string> getTextAxisLabels() {
+  return {"f0.Width", "f1.Width", "f2.Width", "f0.EISF", "f1.EISF", "f2.EISF"};
 }
 
 } // namespace
@@ -117,12 +124,13 @@ public:
         std::move(m_ParameterTypeLabel.get()),
         std::move(m_ParameterLabel.get()));
 
-    // SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
-    // m_model->addWorkspace("WorkspaceName");
+    SetUpADSWithWorkspace m_ads(
+        "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
+    m_model->addWorkspace("WorkspaceName");
   }
 
   void tearDown() override {
-    // AnalysisDataService::Instance().clear();
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
@@ -130,6 +138,21 @@ public:
     m_presenter.reset();
     m_model.reset();
     m_view.reset();
+  }
+
+  ///----------------------------------------------------------------------
+  /// Unit tests to check for successful mock object instantiation
+  ///----------------------------------------------------------------------
+
+  void test_that_the_presenter_and_mock_objects_have_been_created() {
+    TS_ASSERT(m_presenter);
+    TS_ASSERT(m_model);
+    TS_ASSERT(m_view);
+  }
+
+  void
+  test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
   }
 
   void test_test() {}
