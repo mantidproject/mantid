@@ -8,8 +8,8 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -32,6 +32,7 @@ using namespace Geometry;
 using HistogramData::interpolateLinearInplace;
 using namespace Kernel;
 using namespace Mantid::PhysicalConstants;
+using namespace Mantid::DataObjects;
 
 AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
@@ -109,8 +110,7 @@ void AbsorptionCorrection::exec() {
   retrieveBaseProperties();
 
   // Create the output workspace
-  MatrixWorkspace_sptr correctionFactors =
-      WorkspaceFactory::Instance().create(m_inputWS);
+  MatrixWorkspace_sptr correctionFactors = create<MatrixWorkspace>(*m_inputWS);
   correctionFactors->setDistribution(
       true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
