@@ -30,6 +30,7 @@ Improved
 * Added a "process all" and "process selected" button to the batch table in place of "process" button.
 * Added a load button to load selected workspaces without processing.
 * Added save_can option to output unsubtracted can and sample workspaces.
+* File path to batch file will be added to your directories automatically upon loading
 
 Bug fixes
 #########
