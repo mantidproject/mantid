@@ -812,28 +812,25 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
 }
 
 /** Set sample position
-*
-* @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
-*/
+ *
+ * @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
+ */
 void Peak::setSamplePos(double samX, double samY, double samZ) {
 
   this->samplePos[0] = samX;
   this->samplePos[1] = samY;
   this->samplePos[2] = samZ;
-
 }
 
-
 /** Set sample position
-*
-* @param XYZ :: vector x,y,z-> samplePos(x), samplePos(y), samplePos(z)
-*/
-void Peak::setSamplePos(const Mantid::Kernel::V3D & XYZ) {
+ *
+ * @param XYZ :: vector x,y,z-> samplePos(x), samplePos(y), samplePos(z)
+ */
+void Peak::setSamplePos(const Mantid::Kernel::V3D &XYZ) {
 
   this->samplePos[0] = XYZ[0];
   this->samplePos[1] = XYZ[1];
   this->samplePos[2] = XYZ[2];
-
 }
 //----------------------------------------------------------------------------------------------
 /** Return the # of counts in the bin at its peak*/

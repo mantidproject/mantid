@@ -92,9 +92,11 @@ void export_IPeak() {
       .def("setHKL", (void (IPeak::*)(double, double, double)) & IPeak::setHKL,
            (arg("self"), arg("h"), arg("k"), arg("l")),
            "Set the HKL values of this peak")
-      .def("setSamplePos", (void (IPeak::*)(double, double, double)) & IPeak::setSamplePos,
+      .def("setSamplePos",
+           (void (IPeak::*)(double, double, double)) & IPeak::setSamplePos,
            (arg("self"), arg("samX"), arg("samY"), arg("samZ")),
-           "Set the samplePos value of this peak.  It does not set the instrument sample position.")
+           "Set the samplePos value of this peak.  It does not set the "
+           "instrument sample position.")
       .def("setH", &IPeak::setH, (arg("self"), arg("h")),
            "Get the H index of the peak")
       .def("setK", &IPeak::setK, (arg("self"), arg("k")),
