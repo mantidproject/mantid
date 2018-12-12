@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from PyQt4.QtCore import pyqtSignal
 import Muon.GUI.Common.message_box as message_box
 
@@ -57,7 +57,6 @@ class BrowseFileWidgetView(QtGui.QWidget):
         self.file_path_edit.setObjectName("filePathEdit")
 
         self.setStyleSheet("QLineEdit {background: #d7d6d5}")
-
 
         self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")

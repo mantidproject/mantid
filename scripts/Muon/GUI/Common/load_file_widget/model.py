@@ -13,6 +13,7 @@ from mantid.api import WorkspaceGroup
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
+
 def is_workspace_group(workspace):
     return isinstance(workspace, WorkspaceGroup)
 
