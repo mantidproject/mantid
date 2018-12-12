@@ -18,10 +18,11 @@ from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay
 from mantidqt.widgets.tableworkspacedisplay.model import TableWorkspaceDisplayModel
 
 
-# from mantid.simpleapi import CreateSampleWorkspace
-
-
 class TableWorkspaceDisplayModelTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Allow the MockWorkspace to work within the model
+        TableWorkspaceDisplayModel.ALLOWED_WORKSPACE_TYPES.append(MockWorkspace)
 
     def test_get_name(self):
         ws = MockWorkspace()
@@ -35,17 +36,26 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         self.assertRaises(ValueError, lambda: TableWorkspaceDisplayModel([]))
         self.assertRaises(ValueError, lambda: TableWorkspaceDisplayModel(1))
         self.assertRaises(ValueError, lambda: TableWorkspaceDisplayModel("test_string"))
- 
-    # def test_no_raise_with_supported_workspace(self):
-    #     ws = MockWorkspace()
-    #     expected_name = "TEST_WORKSPACE"
-    #     ws.name = Mock(return_value=expected_name)
-    #
-    #     # no need to assert anything - if the constructor raises the test will fail
-    #     TableWorkspaceDisplayModel(ws)
-    #
-    #     ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
-    #     TableWorkspaceDisplayModel(ws)
+
+
+class TableWorkspaceDisplayModelTestWithFramework(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # Allow the MockWorkspace to work within the model
+        TableWorkspaceDisplayModel.ALLOWED_WORKSPACE_TYPES.append(MockWorkspace)
+
+    def test_no_raise_with_supported_workspace(self):
+        from mantid.simpleapi import CreateSampleWorkspace  # noqa
+        ws = MockWorkspace()
+        expected_name = "TEST_WORKSPACE"
+        ws.name = Mock(return_value=expected_name)
+
+        # no need to assert anything - if the constructor raises the test will fail
+        TableWorkspaceDisplayModel(ws)
+
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+        TableWorkspaceDisplayModel(ws)
 
 
 if __name__ == '__main__':

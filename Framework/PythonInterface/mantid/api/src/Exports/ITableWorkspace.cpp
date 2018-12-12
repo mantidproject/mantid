@@ -297,6 +297,28 @@ PyObject *row(ITableWorkspace &self, int row) {
 }
 
 /**
+ * Access a cell and return a corresponding Python type
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ * @param row An integer giving the row
+ */
+PyObject *columnTypes(ITableWorkspace &self) {
+  int numCols = static_cast<int>(self.columnCount());
+
+  PyObject *list = PyList_New(numCols);
+
+  for (int col = 0; col < numCols; col++) {
+    Mantid::API::Column_const_sptr column = self.getColumn(col);
+    const std::type_info &typeID = column->get_type_info();
+    if (PyList_SetItem(list, col, PyString_FromString(typeID.name()))) {
+      throw std::runtime_error("Error while building list");
+    }
+  }
+
+  return list;
+}
+
+/**
  * Adds a new row in the table, where the items are given in a dictionary
  * object mapping {column name:value}. It must contain a key-value entry for
  * every column in the row, otherwise the insert will fail.
@@ -628,6 +650,9 @@ void export_ITableWorkspace() {
 
       .def("row", &row, (arg("self"), arg("row")),
            "Return all values of a specific row as a dict.")
+
+      .def("columnTypes", &columnTypes, arg("self"),
+           "Return the types of the columns as a list")
 
       // FromSequence must come first since it takes an object parameter
       // Otherwise, FromDict will never be called as object accepts anything

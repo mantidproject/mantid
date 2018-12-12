@@ -43,6 +43,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.resize(600, 400)
         self.show()
 
+
     def doubleClickedHeader(self):
         print("Double clicked WOO")
 
@@ -114,8 +115,8 @@ class TableWorkspaceDisplayView(QTableWidget):
         set_as_y = QAction(self.TBD, "Set as Y", menu_main)
         set_as_y.triggered.connect(self.presenter.action_set_as_y)
 
-        set_as_nein = QAction(self.TBD, "Set as None", menu_main)
-        set_as_nein.triggered.connect(self.presenter.action_set_as_none)
+        set_as_none = QAction(self.TBD, "Set as None", menu_main)
+        set_as_none.triggered.connect(self.presenter.action_set_as_none)
 
         statistics_on_columns = QAction(self.STATISTICS_ON_ROW, "Statistics on Columns", menu_main)
         statistics_on_columns.triggered.connect(self.presenter.action_statistics_on_columns)
@@ -137,21 +138,24 @@ class TableWorkspaceDisplayView(QTableWidget):
         menu_main.addAction(set_as_x)
         menu_main.addAction(set_as_y)
 
-        # get the columns marked as Y
         marked_y_cols = self.presenter.get_columns_marked_as_y()
         num_y_cols = len(marked_y_cols)
+
+        # If any columns are marked as Y then generate the set error menu
         if num_y_cols > 0:
             menu_set_as_y_err = QMenu("Set error for Y...")
             for col in range(num_y_cols):
-                # get the real index of the column
-                # display the real index in the menu
                 set_as_y_err = QAction(self.TBD, "Y{}".format(col), menu_main)
+                # the column index of the column relative to the whole table, this is necessary
+                # so that later the data of the column marked as error can be retrieved
                 real_column_index = marked_y_cols[col]
+                # col here holds the index in the LABEL (multiple Y columns have labels Y0, Y1, YN...)
+                # this is NOT the same as the column relative to the WHOLE table
                 set_as_y_err.triggered.connect(partial(self.presenter.action_set_as_y_err, real_column_index, col))
                 menu_set_as_y_err.addAction(set_as_y_err)
             menu_main.addMenu(menu_set_as_y_err)
 
-        menu_main.addAction(set_as_nein)
+        menu_main.addAction(set_as_none)
         menu_main.addAction(self.make_separator(menu_main))
         menu_main.addAction(statistics_on_columns)
         menu_main.addAction(self.make_separator(menu_main))

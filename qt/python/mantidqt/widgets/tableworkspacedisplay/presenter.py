@@ -14,6 +14,7 @@ from functools import partial
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QTableWidgetItem
 
+from mantid.kernel import V3D
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
 from mantidqt.widgets.common.table_copying import copy_cells, show_mouse_toast, show_no_selection_to_copy_toast
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
@@ -22,13 +23,35 @@ from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
-class TableItem(QTableWidgetItem):
+class WorkbenchTableWidgetItem(QTableWidgetItem):
+    def __init__(self, data, editable=False):
+        # if not editable just initialise the ItemWidget as string
+        if not editable:
+            QTableWidgetItem.__init__(self, str(data))
+            self.setFlags(self.flags() & ~Qt.ItemIsEditable)
+            return
+
+        QTableWidgetItem.__init__(self)
+
+        if isinstance(data, V3D) or isinstance(data, float):
+            data = str(data)
+
+        self.original_data = data
+        # this will correctly turn all number cells into number types
+        self.reset()
+
     def __lt__(self, other):
         try:
             # if the data can be parsed as numbers then compare properly, otherwise default to the Qt implementation
             return float(self.data(Qt.DisplayRole)) < float(other.data(Qt.DisplayRole))
         except:
-            return super(TableItem, self).__lt__(other)
+            return super(WorkbenchTableWidgetItem, self).__lt__(other)
+
+    def reset(self):
+        self.setData(Qt.DisplayRole, self.original_data)
+
+    def update(self):
+        self.original_data = self.data(Qt.DisplayRole)
 
 
 class TableWorkspaceDisplay(object):
@@ -50,6 +73,28 @@ class TableWorkspaceDisplay(object):
 
         self.update_column_headers()
         self.load_data(self.view)
+
+        # connect to cellChanged signal after the data has been loaded
+        # all consecutive triggers will be from user actions
+        self.view.itemChanged.connect(self.handleItemChanged)
+
+    def handleItemChanged(self, item):
+        """
+        :type item: WorkbenchTableWidgetItem
+        :param item:
+        :return:
+        """
+        print("Changed data in cell:", item, "ops:", dir(item))
+
+        try:
+            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole))
+            item.update()
+        except ValueError:
+            show_mouse_toast("Error: Trying to set non-numeric data into a numeric column.")
+        except Exception as x:
+            show_mouse_toast("Unknown error occurred: {}".format(x))
+        finally:
+            item.reset()
 
     def update_column_headers(self):
         """
@@ -75,10 +120,14 @@ class TableWorkspaceDisplay(object):
         table.setRowCount(num_rows)
 
         num_cols = self.model.get_number_of_columns()
+
+        # the table should be editable if the ws is not PeaksWS
+        editable = not self.model.is_peaks_workspace()
+
         for col in range(num_cols):
             column_data = self.model.get_column(col)
             for row in range(num_rows):
-                item = TableItem(str(column_data[row]))
+                item = WorkbenchTableWidgetItem(column_data[row], editable=editable)
                 table.setItem(row, col, item)
 
     def action_copy_cells(self):
@@ -272,7 +321,7 @@ class TableWorkspaceDisplay(object):
             except ValueError as e:
                 #     TODO log error?
                 self.view.show_warning(
-                    "One or more of the columns being plotted contain invalid data for MatPlotLib." \
+                    "One or more of the columns being plotted contain invalid data for MatPlotLib."
                     "\n\nError message:\n{}".format(e), "Invalid data - Mantid Workbench")
                 return
 
