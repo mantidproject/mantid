@@ -16,10 +16,11 @@ from mantid.kernel import PropertyManagerDataService
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
                                RangeStepType, FitType, SANSInstrument, RowState)
-from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
+from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF,
+                                                    sample_user_file_with_instrument)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file)
-from sans.common.enums import BatchReductionEntry
+from sans.common.enums import BatchReductionEntry, SANSInstrument
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
@@ -67,7 +68,6 @@ class MultiPeriodMock(object):
 class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
         config.setFacility("ISIS")
-        config.setString("default.instrument", "SANS2D")
 
         patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.BatchCsvParser')
         self.addCleanup(patcher.stop)
@@ -89,7 +89,11 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.set_view(view)
 
         # Act
-        presenter.on_user_file_load()
+        try:
+            presenter.on_user_file_load()
+        except RuntimeError:
+            # Assert that RuntimeError from no instrument is caught
+            self.fail("on_user_file_load raises a RuntimeError which should be caught")
 
         # Assert
         # Note that the event slices are not set in the user file
@@ -144,7 +148,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_max == 15.)
-        self.assertFalse(view.compatibility_mode)
+        self.assertTrue(view.compatibility_mode)
         self.assertTrue(view.show_transmission)
 
         # Assert that Beam Centre View is updated correctly
@@ -800,7 +804,6 @@ class RunTabPresenterTest(unittest.TestCase):
                       'test_file', '', '1.0', '']
         presenter.on_row_inserted(0, test_row_0)
 
-
         presenter.notify_progress(0, [0.0], [1.0])
 
         self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
@@ -822,6 +825,52 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
         self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, '')
+
+    def test_that_process_selected_does_nothing_if_no_states_selected(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[])
+        presenter.set_view(view)
+        presenter._process_rows = mock.MagicMock()
+
+        presenter.on_process_selected_clicked()
+        self.assertEqual(
+            presenter._process_rows.call_count, 0,
+            "Expected presenter._process_rows to not have been called. Called {} times.".format(
+                presenter._process_rows.call_count))
+
+    def test_that_process_selected_only_processes_selected_rows(self):
+        # Naive test. Doesn't check that we are processing the correct processed rows,
+        # just that we are processing the same number of rows as we have selected.
+        # This would only really fail if on_process_selected_clicked and on_process_all_clicked 
+        # get muddled-up
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+        
+        presenter.set_view(view)
+        presenter._table_model.reset_row_state = mock.MagicMock()
+
+        presenter.on_process_selected_clicked()
+        self.assertEqual(
+            presenter._table_model.reset_row_state.call_count, 3,
+            "Expected reset_row_state to have been called 3 times. Called {} times.".format(
+                presenter._table_model.reset_row_state.call_count))
+        
+    def test_that_process_all_ignores_selected_rows(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+        
+        presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
+        presenter.set_view(view)
+        presenter._table_model.reset_row_state = mock.MagicMock()
+        
+        presenter.on_process_all_clicked()
+        self.assertEqual(
+            presenter._table_model.reset_row_state.call_count, 7,
+            "Expected reset_row_state to have been called 7 times. Called {} times.".format(
+                presenter._table_model.reset_row_state.call_count))
 
     @staticmethod
     def _clear_property_manager_data_service():

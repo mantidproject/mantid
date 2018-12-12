@@ -33,6 +33,13 @@ class MuonLoadDataTest(unittest.TestCase):
 
         self.assertEqual(load_data.num_items(), 0)
 
+    def populate_loaded_data(self):
+        data = MuonLoadData()
+        data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
+        data.add_data(run=1235, workspace=[2], filename="C:\\dir1\\file2.nxs")
+        data.add_data(run=1236, workspace=[3], filename="C:\\dir1\\file3.nxs")
+        return data
+
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
     # ------------------------------------------------------------------------------------------------------------------
@@ -51,10 +58,8 @@ class MuonLoadDataTest(unittest.TestCase):
         self.assertEqual(data.contains_n(filename="C:\\dir1\\file1.nxs"), 1)
 
     def test_that_clear_empties_the_data_of_all_entries(self):
-        data = MuonLoadData()
-        data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
-        data.add_data(run=1235, workspace=[2], filename="C:\\dir1\\file2.nxs")
-        data.add_data(run=1236, workspace=[3], filename="C:\\dir1\\file3.nxs")
+        data = self.populate_loaded_data()
+        self.assertEqual(data.num_items(), 3)
 
         data.clear()
 
@@ -64,7 +69,9 @@ class MuonLoadDataTest(unittest.TestCase):
         data = MuonLoadData()
 
         data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
+        self.assertEqual(data.num_items(), 1)
         data.remove_data(run=1234)
+
         self.assert_empty(data)
 
         data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
@@ -81,17 +88,15 @@ class MuonLoadDataTest(unittest.TestCase):
         data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
         data.add_data(run=1234, workspace=[2], filename="C:\\dir1\\file2.nxs")
         data.add_data(run=1234, workspace=[3], filename="C:\\dir1\\file3.nxs")
+        self.assertEqual(data.num_items(), 3)
 
         data.remove_data(run=1234)
 
         self.assert_empty(data)
 
     def test_that_remove_method_applies_OR_to_multiple_keyword_arguments(self):
-        data = MuonLoadData()
-
-        data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
-        data.add_data(run=1235, workspace=[2], filename="C:\\dir1\\file2.nxs")
-        data.add_data(run=1236, workspace=[3], filename="C:\\dir1\\file3.nxs")
+        data = self.populate_loaded_data()
+        self.assertEqual(data.num_items(), 3)
 
         data.remove_data(run=1234, workspace=[2], filename="C:\\dir1\\file3.nxs")
 
@@ -145,11 +150,7 @@ class MuonLoadDataTest(unittest.TestCase):
         self.assertEqual(data.contains_n(run=1234, workspace=[2], filename="C:\\dir1\\file4.nxs"), 4)
 
     def test_iterator_behaviour_of_data(self):
-        data = MuonLoadData()
-
-        data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
-        data.add_data(run=1235, workspace=[2], filename="C:\\dir1\\file2.nxs")
-        data.add_data(run=1236, workspace=[3], filename="C:\\dir1\\file3.nxs")
+        data = self.populate_loaded_data()
 
         check = [{"run": 1234, "workspace": [1], "filename": "C:\\dir1\\file1.nxs"},
                  {"run": 1235, "workspace": [2], "filename": "C:\\dir1\\file2.nxs"},
@@ -159,11 +160,7 @@ class MuonLoadDataTest(unittest.TestCase):
             self.assertEqual(data_item, check.pop(0))
 
     def test_that_remove_current_data_removes_the_most_recently_added_data(self):
-        data = MuonLoadData()
-
-        data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
-        data.add_data(run=1235, workspace=[2], filename="C:\\dir1\\file2.nxs")
-        data.add_data(run=1236, workspace=[3], filename="C:\\dir1\\file3.nxs")
+        data = self.populate_loaded_data()
 
         data.remove_current_data()
 
@@ -174,11 +171,7 @@ class MuonLoadDataTest(unittest.TestCase):
             self.assertEqual(data_item, check.pop(0))
 
     def test_that_remove_last_added_data_removes_the_previous_data_item_before_the_most_recent(self):
-        data = MuonLoadData()
-
-        data.add_data(run=1234, workspace=[1], filename="C:\\dir1\\file1.nxs")
-        data.add_data(run=1235, workspace=[2], filename="C:\\dir1\\file2.nxs")
-        data.add_data(run=1236, workspace=[3], filename="C:\\dir1\\file3.nxs")
+        data = self.populate_loaded_data()
 
         data.remove_last_added_data()
 

@@ -62,6 +62,8 @@ protected slots:
 private:
   UserInputValidator &validateMultipleData(UserInputValidator &validator);
   UserInputValidator &validateSingleData(UserInputValidator &validator);
+  UserInputValidator &validateSample(UserInputValidator &validator);
+  UserInputValidator &validateResolution(UserInputValidator &validator);
 
   std::unique_ptr<Ui::IndirectFitDataForm> m_dataForm;
 };

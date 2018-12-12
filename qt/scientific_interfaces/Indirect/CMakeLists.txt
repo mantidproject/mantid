@@ -67,7 +67,7 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
-    DllConfig.h
+	DllConfig.h
 	AbsorptionCorrections.h
 	ApplyAbsorptionCorrections.h
 	CalculatePaalmanPings.h
@@ -81,6 +81,7 @@ set ( INC_FILES
 	DensityOfStates.h
 	Elwin.h
 	IAddWorkspaceDialog.h
+	IIndirectFitPlotView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
@@ -147,6 +148,7 @@ set ( MOC_FILES
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
+    IIndirectFitPlotView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
     IndirectBayes.h

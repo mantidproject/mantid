@@ -49,7 +49,10 @@ class UserConfig(object):
         # fixup the values of booleans - they do not evaluate correctly when read from the config file
         # TODO come up with a unit test for this
         for key in self.all_keys():
-            value = self.get(key)
+            try:
+                value = self.get(key)
+            except KeyError:
+                continue
             if value == 'true':
                 self.set(key, True)
             elif value == 'false':

@@ -53,12 +53,12 @@ class MuonFileUtilsTest(unittest.TestCase):
 
         self.assertEqual(instrument, 'MUSR')
 
-    def test_default_instrument_returns_none_if_default_instrument_is_not_muon_instrument(self):
+    def test_default_instrument_returns_MUSR_if_default_instrument_is_not_muon_instrument(self):
         ConfigService['default.instrument'] = 'LOQ'
 
         instrument = utils.get_default_instrument()
 
-        self.assertEqual(instrument, 'None')
+        self.assertEqual(instrument, 'MUSR')
 
     def test_that_load_dead_time_from_filename_places_table_in_ADS(self):
         filename = 'MUSR00022725.nsx'

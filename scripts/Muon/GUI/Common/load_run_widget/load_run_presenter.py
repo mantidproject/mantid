@@ -6,6 +6,7 @@ from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
+import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
@@ -188,7 +189,7 @@ class LoadRunWidgetPresenter(object):
         return_ws = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"]
         for run in run_list[1:]:
             ws = self._model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
-            running_total = load_utils.run_Plus({
+            running_total = algorithm_utils.run_Plus({
                 "LHSWorkspace": running_total,
                 "RHSWorkspace": ws,
                 "AllowDifferentNumberSpectra": False}

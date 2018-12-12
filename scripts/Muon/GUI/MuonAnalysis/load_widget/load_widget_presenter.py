@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
+from mantid import ConfigService
 
 
 class LoadWidgetPresenter(object):
@@ -98,7 +99,7 @@ class LoadWidgetPresenter(object):
         self._model.clear_data()
         self.handle_run_widget_data_changed()
         self.handle_run_widget_data_changed()
-        self.load_run_widget.set_current_instrument("Instrument")
+        self.load_run_widget.set_current_instrument(ConfigService.getInstrument().name())
         self.loadNotifier.notify_subscribers()
 
     @property
