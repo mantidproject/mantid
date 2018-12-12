@@ -43,7 +43,6 @@ class ConversionFactors;
 class DLLExport AlignDetectors : public API::Algorithm {
 public:
   AlignDetectors();
-  ~AlignDetectors() override;
 
   /// Algorithms name for identification. @see Algorithm::name
   const std::string name() const override;

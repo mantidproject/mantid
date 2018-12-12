@@ -44,7 +44,7 @@ ForegroundModel::ForegroundModel(const API::IFunction &fittingFunction)
 
 /**
  */
-ForegroundModel::~ForegroundModel() {}
+ForegroundModel::~ForegroundModel() = default;
 
 /**
  * Set a reference to the convolved fitting function. Required as we need a

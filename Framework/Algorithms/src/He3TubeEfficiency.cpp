@@ -47,9 +47,6 @@ He3TubeEfficiency::He3TubeEfficiency()
   m_shapeCache.clear();
 }
 
-/// Destructor
-He3TubeEfficiency::~He3TubeEfficiency() {}
-
 /**
  * Declare algorithm properties
  */

@@ -25,10 +25,6 @@ using namespace DataObjects;
  */
 WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(nullptr) {}
 
-/** Destructor
- */
-WorkspaceJoiners::~WorkspaceJoiners() {}
-
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string WorkspaceJoiners::category() const {
   return "Transforms\\Merging";

@@ -60,7 +60,7 @@ ThreadPool::ThreadPool(ThreadScheduler *scheduler, size_t numThreads,
 //--------------------------------------------------------------------------------
 /** Destructor. Deletes the ThreadScheduler.
  */
-ThreadPool::~ThreadPool() {}
+ThreadPool::~ThreadPool() = default;
 
 //--------------------------------------------------------------------------------
 /** Return the number of physical cores available on the system.

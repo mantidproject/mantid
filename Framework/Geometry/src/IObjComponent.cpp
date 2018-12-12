@@ -26,7 +26,7 @@ IObjComponent::IObjComponent(GeometryHandler *the_handler) {
 
 // Looking to get rid of the first of these constructors in due course (and
 // probably add others)
-IObjComponent::~IObjComponent() {}
+IObjComponent::~IObjComponent() = default;
 
 /**
  * Set the geometry handler for IObjComponent

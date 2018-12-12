@@ -50,10 +50,6 @@ DECLARE_ALGORITHM(CreateSampleWorkspace)
  */
 CreateSampleWorkspace::CreateSampleWorkspace() : m_randGen(nullptr) {}
 
-/** Destructor
- */
-CreateSampleWorkspace::~CreateSampleWorkspace() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateSampleWorkspace::name() const {
   return "CreateSampleWorkspace";

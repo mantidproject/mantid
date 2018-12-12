@@ -57,7 +57,7 @@ Sample::Sample(const Sample &copy)
 }
 
 /// Destructor
-Sample::~Sample() {}
+Sample::~Sample() = default;
 
 /** Assignment operator
  * @param rhs :: const reference to the sample object

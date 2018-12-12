@@ -113,9 +113,6 @@ const std::string AlignDetectors::summary() const {
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
 
-/// Destructor
-AlignDetectors::~AlignDetectors() {}
-
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   // Workspace unit must be TOF.

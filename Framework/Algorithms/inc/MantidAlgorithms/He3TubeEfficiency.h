@@ -50,8 +50,7 @@ class DLLExport He3TubeEfficiency : public API::Algorithm {
 public:
   /// Default constructor
   He3TubeEfficiency();
-  /// Virtual destructor
-  ~He3TubeEfficiency() override;
+
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "He3TubeEfficiency"; }
   /// Summary of algorithms purpose

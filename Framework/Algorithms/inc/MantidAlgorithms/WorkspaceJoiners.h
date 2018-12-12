@@ -25,7 +25,6 @@ namespace Algorithms {
 class DLLExport WorkspaceJoiners : public API::Algorithm {
 public:
   WorkspaceJoiners();
-  ~WorkspaceJoiners() override;
 
   const std::string category() const override;
 

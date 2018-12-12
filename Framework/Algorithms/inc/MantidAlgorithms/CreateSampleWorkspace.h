@@ -24,7 +24,6 @@ namespace Algorithms {
 class DLLExport CreateSampleWorkspace : public API::Algorithm {
 public:
   CreateSampleWorkspace();
-  ~CreateSampleWorkspace() override;
 
   const std::string name() const override;
   int version() const override;

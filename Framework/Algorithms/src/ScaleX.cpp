@@ -36,11 +36,6 @@ ScaleX::ScaleX()
       m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1) {}
 
 /**
- * Destructor
- */
-ScaleX::~ScaleX() {}
-
-/**
  * Initialisation method. Declares properties to be used in algorithm.
  */
 void ScaleX::init() {
