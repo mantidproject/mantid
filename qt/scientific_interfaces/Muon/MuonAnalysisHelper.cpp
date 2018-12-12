@@ -370,7 +370,7 @@ void WidgetAutoSaver::beginGroup(const QString &name) {
 void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
 /**
  * Checks if a QString is a numeric value
- * @param string:: QString to test
+ * @param qstring:: QString to test
  * @returns :: bool if it is a number
  */
 bool isNumber(const QString &qstring) {
