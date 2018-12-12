@@ -31,8 +31,16 @@ private slots:
   void runClicked();
   void plotClicked();
   void saveClicked();
+  void algorithmComplete(bool error);
 
 private:
+  void setRunIsRunning(bool running);
+  void setPlotIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enabled);
+  void setRunEnabled(bool enabled);
+  void setPlotEnabled(bool enabled);
+  void setSaveEnabled(bool enabled);
+
   // The ui form
   Ui::IndirectMolDyn m_uiForm;
 };
