@@ -39,7 +39,7 @@ MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
   m_serviceBaseUrl = "https://fermi.ornl.gov/MantidRemote";
 }
 
-MantidWebServiceAPIHelper::~MantidWebServiceAPIHelper() =default;
+MantidWebServiceAPIHelper::~MantidWebServiceAPIHelper() = default;
 
 std::istream &MantidWebServiceAPIHelper::httpGet(
     const std::string &path, const std::string &query_str,
