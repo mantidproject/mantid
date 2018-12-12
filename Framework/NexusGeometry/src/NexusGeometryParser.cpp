@@ -143,13 +143,40 @@ std::vector<ValueType> get1DDataset(const H5File &file,
   return extractVector<ValueType>(data);
 }
 
+unsigned int makeComparibleVersionNumber(unsigned int maj, unsigned int min,
+                                         unsigned int relnum) {
+  return 100000 * maj + 1000 * min + relnum;
+}
+
+void doFeatureCheck() {
+  unsigned int maj = 0;
+  unsigned int min = 0;
+  unsigned int relnum = 0;
+  H5get_libversion(&maj, &min, &relnum);
+  const auto actual = makeComparibleVersionNumber(maj, min, relnum);
+  const auto expected =
+      makeComparibleVersionNumber(1, 8, 16); // Minimum expected
+  if (actual < expected) {
+    throw std::runtime_error(
+        "Only versions 1.8.16 + of hdf5 support the variable string feature");
+  }
+}
+
 std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   // Open data set
   DataSet data = group.openDataSet(dataset);
   auto dataType = data.getDataType();
-  H5std_string buffer;
-  data.read(buffer, dataType, data.getSpace());
-  return buffer;
+  if (dataType.isVariableStr()) {
+    doFeatureCheck();
+    H5std_string buffer;
+    data.read(buffer, dataType, data.getSpace());
+    return buffer;
+  } else {
+    auto nCharacters = dataType.getSize();
+    std::vector<char> value(nCharacters);
+    data.read(value.data(), dataType, data.getSpace());
+    return std::string(value.begin(), value.end());
+  }
 }
 
 /** Open subgroups of parent group
