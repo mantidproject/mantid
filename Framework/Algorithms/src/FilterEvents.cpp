@@ -81,7 +81,9 @@ void FilterEvents::init() {
                   "An input SpilltersWorskpace for filtering");
 
   declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
-                  "The base name to use for the output workspace");
+                  "The base name to use for the output workspace. The output "
+                  "workspace names are a combination of this and the index in "
+                  "splitter.");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
@@ -184,17 +186,22 @@ std::map<std::string, std::string> FilterEvents::validateInputs() {
   std::map<std::string, std::string> result;
 
   // check the splitters workspace for special behavior
-  API::Workspace_const_sptr wksp = this->getProperty(SPLITER_PROP_NAME);
+  API::Workspace_const_sptr splitter = this->getProperty(SPLITER_PROP_NAME);
   // SplittersWorkspace is a special type that needs no further checking
-  if (!bool(boost::dynamic_pointer_cast<const SplittersWorkspace>(wksp))) {
-    const auto table = boost::dynamic_pointer_cast<const TableWorkspace>(wksp);
+  if (bool(boost::dynamic_pointer_cast<const SplittersWorkspace>(splitter))) {
+    if (boost::dynamic_pointer_cast<const SplittersWorkspace>(splitter)
+            ->rowCount() == 0)
+      result[SPLITER_PROP_NAME] = "SplittersWorkspace must have rows defined";
+  } else {
+    const auto table =
+        boost::dynamic_pointer_cast<const TableWorkspace>(splitter);
     const auto matrix =
-        boost::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
+        boost::dynamic_pointer_cast<const MatrixWorkspace>(splitter);
     if (bool(table)) {
       if (table->columnCount() != 3)
         result[SPLITER_PROP_NAME] = "TableWorkspace must have 3 columns";
       else if (table->rowCount() == 0)
-        result[SPLITER_PROP_NAME] = "TableWorkspace must rows defined";
+        result[SPLITER_PROP_NAME] = "TableWorkspace must have rows defined";
     } else if (bool(matrix)) {
       if (matrix->getNumberHistograms() == 1) {
         if (!matrix->isHistogramData())
@@ -207,6 +214,30 @@ std::map<std::string, std::string> FilterEvents::validateInputs() {
       result[SPLITER_PROP_NAME] = "Incompatible workspace type";
     }
   }
+
+  const string correctiontype = getPropertyValue("CorrectionToSample");
+  if (correctiontype == "Direct") {
+    double ei = getProperty("IncidentEnergy");
+    if (isEmpty(ei)) {
+      EventWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+      if (!inputWS->run().hasProperty("Ei")) {
+        const string msg(
+            "InputWorkspace does not have Ei. Must specify IncidentEnergy");
+        result["CorrectionToSample"] = msg;
+        result["IncidentEnergy"] = msg;
+      }
+    }
+  } else if (correctiontype == "Customized") {
+    TableWorkspace_const_sptr correctionWS =
+        getProperty("DetectorTOFCorrectionWorkspace");
+    if (!correctionWS) {
+      const string msg(
+          "Must specify correction workspace with CorrectionToSample=Custom");
+      result["CorrectionToSample"] = msg;
+      result["DetectorTOFCorrectionWorkspace"] = msg;
+    }
+  }
+  // "None" and "Elastic" and "Indirect" don't require extra information
 
   return result;
 }
@@ -437,14 +468,6 @@ void FilterEvents::processAlgorithmProperties() {
     g_log.error() << "Correction type '" << correctiontype
                   << "' is not supported. \n";
     throw runtime_error("Impossible situation!");
-  }
-
-  if (m_tofCorrType == CustomizedCorrect) {
-    // Customized correciton
-    m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
-    if (!m_detCorrectWorkspace)
-      throw runtime_error("In case of customized TOF correction, correction "
-                          "workspace must be given!");
   }
 
   // Spectrum skip
@@ -953,6 +976,14 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   return;
 }
 
+namespace {
+// offset_ns - an offset from the GPS epoch
+int64_t timeInSecondsToNanoseconds(const int64_t offset_ns,
+                                   const double time_sec) {
+  return offset_ns + static_cast<int64_t>(time_sec * 1.E9);
+}
+} // anonymous namespace
+
 //----------------------------------------------------------------------------------------------
 /** process the input splitters given by a TableWorkspace
  * The method will transfer the start/stop time to "m_vecSplitterTime"
@@ -961,8 +992,6 @@ void FilterEvents::processMatrixSplitterWorkspace() {
  *"m_wsGroupIndexTargetMap".
  * Also, "m_maxTargetIndex" is set up to record the highest target group/index,
  * i.e., max value of m_vecSplitterGroup
- *
- * @brief FilterEvents::processTableSplittersWorkspace
  */
 void FilterEvents::processTableSplittersWorkspace() {
   // check input workspace's validity
@@ -988,27 +1017,26 @@ void FilterEvents::processTableSplittersWorkspace() {
   size_t num_rows = m_splitterTableWorkspace->rowCount();
   for (size_t irow = 0; irow < num_rows; ++irow) {
     // get start and stop time in second
-    double start_time = m_splitterTableWorkspace->cell_cast<double>(irow, 0);
-    double stop_time = m_splitterTableWorkspace->cell_cast<double>(irow, 1);
-    std::string target = m_splitterTableWorkspace->cell<std::string>(irow, 2);
-
-    int64_t start_64 =
-        filter_shift_time + static_cast<int64_t>(start_time * 1.E9);
-    int64_t stop_64 =
-        filter_shift_time + static_cast<int64_t>(stop_time * 1.E9);
+    const auto start_time = timeInSecondsToNanoseconds(
+        filter_shift_time,
+        m_splitterTableWorkspace->cell_cast<double>(irow, 0));
+    const auto stop_time = timeInSecondsToNanoseconds(
+        filter_shift_time,
+        m_splitterTableWorkspace->cell_cast<double>(irow, 1));
+    const auto target = m_splitterTableWorkspace->cell<std::string>(irow, 2);
 
     if (m_vecSplitterTime.empty()) {
       // first splitter: push the start time to vector
-      m_vecSplitterTime.push_back(start_64);
-    } else if (start_64 - m_vecSplitterTime.back() > TOLERANCE) {
+      m_vecSplitterTime.push_back(start_time);
+    } else if (start_time - m_vecSplitterTime.back() > TOLERANCE) {
       // the start time is way behind previous splitter's stop time
       // create a new splitter and set the time interval in the middle to target
       // -1
-      m_vecSplitterTime.push_back(start_64);
+      m_vecSplitterTime.push_back(start_time);
       // NOTE: use index = 0 for un-defined slot
       m_vecSplitterGroup.push_back(UNDEFINED_SPLITTING_TARGET);
       found_undefined_splitter = true;
-    } else if (abs(start_64 - m_vecSplitterTime.back()) < TOLERANCE) {
+    } else if (abs(start_time - m_vecSplitterTime.back()) < TOLERANCE) {
       // new splitter's start time is same (within tolerance) as the stop time
       // of the previous
       ;
@@ -1019,21 +1047,12 @@ void FilterEvents::processTableSplittersWorkspace() {
     }
 
     // convert string-target to integer target
-    bool addnew = false;
     int int_target(-1);
-    if (m_targetIndexMap.empty()) {
-      addnew = true;
-    } else {
-      std::map<std::string, int>::iterator mapiter =
-          m_targetIndexMap.find(target);
-      if (mapiter == m_targetIndexMap.end())
-        addnew = true;
-      else
-        int_target = mapiter->second;
-    }
+    const auto &mapiter = m_targetIndexMap.find(target);
 
-    // add a new ordered-integer-target
-    if (addnew) {
+    if (mapiter != m_targetIndexMap.end()) {
+      int_target = mapiter->second;
+    } else {
       // target is not in map
       int_target = max_target_index;
       m_targetIndexMap.insert(std::pair<std::string, int>(target, int_target));
@@ -1043,7 +1062,7 @@ void FilterEvents::processTableSplittersWorkspace() {
     }
 
     // add start time, stop time and 'target
-    m_vecSplitterTime.push_back(stop_64);
+    m_vecSplitterTime.push_back(stop_time);
     m_vecSplitterGroup.push_back(int_target);
   } // END-FOR (irow)
 
@@ -1415,16 +1434,16 @@ TimeAtSampleStrategy *FilterEvents::setupElasticTOFCorrection() const {
 TimeAtSampleStrategy *FilterEvents::setupDirectTOFCorrection() const {
 
   // Get incident energy Ei
-  double ei = 0.;
-  if (m_eventWS->run().hasProperty("Ei")) {
-    Kernel::Property *eiprop = m_eventWS->run().getProperty("Ei");
-    ei = boost::lexical_cast<double>(eiprop->value());
-    g_log.debug() << "Using stored Ei value " << ei << "\n";
-  } else {
-    ei = getProperty("IncidentEnergy");
-    if (isEmpty(ei))
+  double ei = getProperty("IncidentEnergy");
+  if (isEmpty(ei)) {
+    if (m_eventWS->run().hasProperty("Ei")) {
+      ei = m_eventWS->run().getLogAsSingleValue("Ei");
+      g_log.debug() << "Using stored Ei value " << ei << "\n";
+    } else {
       throw std::invalid_argument(
           "No Ei value has been set or stored within the run information.");
+    }
+  } else {
     g_log.debug() << "Using user-input Ei value " << ei << "\n";
   }
 
