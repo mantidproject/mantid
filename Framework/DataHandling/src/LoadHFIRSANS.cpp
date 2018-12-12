@@ -47,8 +47,8 @@
 #include <utility>
 #include <vector>
 
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
 namespace Mantid {
@@ -143,16 +143,16 @@ void LoadHFIRSANS::exec() {
   setWavelength();
   createWorkspace();
   storeMetaDataIntoWS();
-  runLoadInstrument();
   // ugly hack for Biosans wing detector:
   // it tests if there is metadata tagged with the wing detector
   // if so, puts the detector in the right angle
   if (m_metadata.find("Motor_Positions/det_west_wing_rot") !=
       m_metadata.end()) {
     rotateDetector();
-    runLoadInstrument();
   }
   moveDetector();
+  runLoadInstrument();
+  // This needs parameters from IDF! Run load instrument before!
   setBeamDiameter();
   setProperty("OutputWorkspace", m_workspace);
 }
@@ -383,7 +383,20 @@ void LoadHFIRSANS::createWorkspace() {
 template <class T>
 void LoadHFIRSANS::addRunProperty(const std::string &name, const T &value,
                                   const std::string &units) {
+  g_log.debug() << "Adding Property to the Run: " << name << " -> " << value
+                << "\n";
   m_workspace->mutableRun().addProperty(name, value, units, true);
+}
+
+template <class T>
+void LoadHFIRSANS::addRunTimeSeriesProperty(const std::string &name,
+                                            const T &value) {
+  g_log.debug() << "Adding Time Series Property to the Run: " << name << " -> "
+                << value << "\n";
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p = new Mantid::Kernel::TimeSeriesProperty<T>(name);
+  p->addValue(DateAndTime::getCurrentTime(), value);
+  runDetails.addLogData(p);
 }
 
 /**
@@ -544,15 +557,8 @@ void LoadHFIRSANS::rotateDetector() {
   // The angle is negative!
   double angle = -boost::lexical_cast<double>(
       m_metadata["Motor_Positions/det_west_wing_rot"]);
-
   g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
-
-  API::Run &runDetails = m_workspace->mutableRun();
-  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
-  //	auto p = boost::make_shared <Mantid::Kernel::TimeSeriesProperty<double>
-  //>("rotangle");
-  p->addValue(DateAndTime::getCurrentTime(), angle);
-  runDetails.addLogData(p);
+  addRunTimeSeriesProperty<double>("rotangle", angle);
 }
 
 /**
@@ -599,7 +605,7 @@ void LoadHFIRSANS::setDetectorDistance() {
                 << " mm." << '\n';
   addRunProperty<double>("sample-detector-distance", m_sampleDetectorDistance,
                          "mm");
-  // return m_sampleDetectorDistance;
+  addRunTimeSeriesProperty<double>("sdd", m_sampleDetectorDistance);
 }
 
 /**
@@ -608,36 +614,12 @@ void LoadHFIRSANS::setDetectorDistance() {
 void LoadHFIRSANS::moveDetector() {
 
   setDetectorDistance();
-  double translation_distance =
+  double translationDistance =
       boost::lexical_cast<double>(m_metadata["Motor_Positions/detector_trans"]);
-  translation_distance /= 1000.0;
-  g_log.debug() << "Detector Translation = " << translation_distance
+  translationDistance /= 1000.0;
+  g_log.debug() << "Detector Translation = " << translationDistance
                 << " meters." << '\n';
-
-  // Move the detector to the right position
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
-
-  // Finding the name of the detector object.
-  std::string detID =
-      m_workspace->getInstrument()->getStringParameter("detector-name")[0];
-
-  g_log.information() << "Moving: " << detID
-                      << " Z=" << m_sampleDetectorDistance / 1000.0
-                      << " X=" << translation_distance << '\n';
-  try {
-    mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
-    mover->setProperty("ComponentName", detID);
-    mover->setProperty("Z", m_sampleDetectorDistance / 1000.0);
-    mover->setProperty("X", -translation_distance);
-    mover->execute();
-  } catch (std::invalid_argument &e) {
-    g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
-    g_log.error(e.what());
-  } catch (std::runtime_error &e) {
-    g_log.error(
-        "Unable to successfully run MoveInstrumentComponent Child Algorithm");
-    g_log.error(e.what());
-  }
+  addRunTimeSeriesProperty<double>("detector-translation", translationDistance);
 }
 
 /**
@@ -723,15 +705,17 @@ void LoadHFIRSANS::setBeamDiameter() {
     SourceToSampleDistance = getSourceToSampleDistance();
     m_workspace->mutableRun().addProperty("source-sample-distance",
                                           SourceToSampleDistance, "mm", true);
-    g_log.information() << "Computed SSD from number of guides: "
-                        << SourceToSampleDistance << " mm \n";
+    g_log.information()
+        << "Computed SSD from number of guides in the parameters file: "
+        << SourceToSampleDistance << " mm \n";
   } catch (...) {
     Mantid::Kernel::Property *prop =
         m_workspace->run().getProperty("source-sample-distance");
     Mantid::Kernel::PropertyWithValue<double> *dp =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     SourceToSampleDistance = *dp;
-    g_log.warning() << "Could not compute SSD from number of guides, taking: "
+    g_log.warning() << "Could not compute SSD from number of guides in the "
+                       "parameters file, taking: "
                     << SourceToSampleDistance << " mm \n";
   }
 
