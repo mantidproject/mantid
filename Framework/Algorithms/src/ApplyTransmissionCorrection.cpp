@@ -24,7 +24,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace HistogramData;
-using namespace Mantid::DataObjects;
+using namespace DataObjects;
 
 void ApplyTransmissionCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
