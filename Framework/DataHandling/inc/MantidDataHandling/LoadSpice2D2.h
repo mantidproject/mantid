@@ -105,6 +105,9 @@ private:
   void addRunProperty(const std::string &name, const T &value,
                                  const std::string &units="");
   void storeMetaDataIntoWS();
+  void runLoadInstrument();
+  void rotateDetector();
+  void moveDetector();
   
 
 
