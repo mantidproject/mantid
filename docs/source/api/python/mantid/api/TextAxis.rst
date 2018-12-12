@@ -2,7 +2,7 @@
  TextAxis
 ==========
 
-This a python binding to the C++ class Mantid::API::TextAxis.
+This is a Python binding to the C++ class Mantid::API::TextAxis.
 
 *bases:* :py:obj:`mantid.api.MantidAxis`
 

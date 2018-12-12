@@ -48,12 +48,15 @@ set ( SRC_FILES
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
 	src/Instrument/ComponentInfo.cpp
+	src/Instrument/ComponentInfoBankHelpers.cpp
 	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorGroup.cpp
 	src/Instrument/DetectorInfo.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
+	src/Instrument/GridDetector.cpp
+	src/Instrument/GridDetectorPixel.cpp
 	src/Instrument/IDFObject.cpp
 	src/Instrument/InstrumentDefinitionParser.cpp
 	src/Instrument/InstrumentVisitor.cpp
@@ -63,7 +66,6 @@ set ( SRC_FILES
 	src/Instrument/Parameter.cpp
 	src/Instrument/ParameterMap.cpp
 	src/Instrument/RectangularDetector.cpp
-	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/SampleEnvironment.cpp
 	src/Instrument/SampleEnvironmentFactory.cpp
@@ -104,8 +106,9 @@ set ( SRC_FILES
 	src/Objects/BoundingBox.cpp
 	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
-        src/Objects/MeshObject2D.cpp
+	src/Objects/MeshObject2D.cpp
 	src/Objects/MeshObject.cpp
+	src/Objects/MeshObjectCommon.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
@@ -194,13 +197,18 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h
 	inc/MantidGeometry/Instrument/ComponentInfo.h
+	inc/MantidGeometry/Instrument/ComponentInfoBankHelpers.h
 	inc/MantidGeometry/Instrument/ComponentVisitor.h
 	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/DetectorInfo.h
+	inc/MantidGeometry/Instrument/DetectorInfoItem.h
+	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
+        inc/MantidGeometry/Instrument/GridDetector.h
+	inc/MantidGeometry/Instrument/GridDetectorPixel.h
 	inc/MantidGeometry/Instrument/IDFObject.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/InstrumentVisitor.h
@@ -211,7 +219,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ParameterFactory.h
 	inc/MantidGeometry/Instrument/ParameterMap.h
 	inc/MantidGeometry/Instrument/RectangularDetector.h
-	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/SampleEnvironment.h
 	inc/MantidGeometry/Instrument/SampleEnvironmentFactory.h
@@ -220,8 +227,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/StructuredDetector.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/Instrument_fwd.h
-	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
-	inc/MantidGeometry/Instrument/DetectorInfoItem.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/GeneralFrame.h
 	inc/MantidGeometry/MDGeometry/HKL.h
@@ -263,6 +268,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
 	inc/MantidGeometry/Objects/MeshObject.h
 	inc/MantidGeometry/Objects/MeshObject2D.h
+	inc/MantidGeometry/Objects/MeshObjectCommon.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
@@ -300,6 +306,7 @@ set ( TEST_FILES
 	CSGObjectTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
+	ComponentInfoBankHelpersTest.h
 	ComponentInfoTest.h
 	ComponentParserTest.h
 	ComponentTest.h
@@ -314,11 +321,14 @@ set ( TEST_FILES
 	CyclicGroupTest.h
 	CylinderTest.h
 	DetectorGroupTest.h
+	DetectorInfoIteratorTest.h
 	DetectorTest.h
 	FitParameterTest.h
 	GeneralFrameTest.h
 	GeneralTest.h
 	GoniometerTest.h
+        GridDetectorTest.h
+	GridDetectorPixelTest.h
 	GroupTest.h
 	GroupTransformationTest.h
 	HKLFilterTest.h
@@ -348,7 +358,8 @@ set ( TEST_FILES
 	MathSupportTest.h
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
-        MeshObject2DTest.h
+	MeshObject2DTest.h
+	MeshObjectCommonTest.h
 	MeshObjectTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h
@@ -376,7 +387,6 @@ set ( TEST_FILES
 	QLabTest.h
 	QSampleTest.h
 	QuadrilateralTest.h
-	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h
 	ReducedCellTest.h
 	ReferenceFrameTest.h
@@ -417,7 +427,6 @@ set ( TEST_FILES
 	UnitCellTest.h
 	V3RTest.h
 	XMLInstrumentParameterTest.h
-	DetectorInfoIteratorTest.h
 )
 
 set ( GMOCK_TEST_FILES

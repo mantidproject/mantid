@@ -75,7 +75,8 @@ The algorithm workflow for point data is as follows:
 #. Alternatively, if :literal:`UseManualScaleFactor` was set to true, the scale factor is applied
    to the right-hand-side workspace (left-hand-side workspace if :literal:`ScaleRHSWorkspace` was
    set to false).
-#. The output workspace will be created by joining and sorted to guarantee ascending x values.
+#. The output workspace will be created by joining using :ref:`algm-ConjoinXRuns` and sorting using
+   :ref:`algm-SortXAxis`.
    Dx values will be present in the output workspace.
 
 Error propagation

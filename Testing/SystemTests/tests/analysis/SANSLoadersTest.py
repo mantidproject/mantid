@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 """
 Check the loaders of ISIS SANS reduction. It is created as systemtest because it does
@@ -7,7 +13,7 @@ currently available inside the systemtests.
 
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import isis_reduction_steps as steps
 import ISISCommandInterface as ici
@@ -141,7 +147,7 @@ class LoadSampleTest(unittest.TestCase):
             self.assertAlmostEqual(cur_pos[1], -0.002)
 
 
-class LoadSampleTestStressTest(stresstesting.MantidStressTest):
+class LoadSampleTestSystemTest(systemtesting.MantidSystemTest):
     def runTest(self):
         self._success = False
         suite = unittest.TestSuite()
@@ -159,9 +165,9 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
         return self._success
 
 
-class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
+class LoadAddedEventDataSampleTestSystemTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

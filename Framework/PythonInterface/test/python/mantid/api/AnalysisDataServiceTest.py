@@ -1,11 +1,23 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService, AnalysisDataServiceImpl, MatrixWorkspace, Workspace
+from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl,
+                        FrameworkManagerImpl, MatrixWorkspace, Workspace)
 from mantid import mtd
 
+
 class AnalysisDataServiceTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
 
     def tearDown(self):
       AnalysisDataService.Instance().clear()

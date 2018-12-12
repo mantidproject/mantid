@@ -1,6 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto2.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
+#include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
@@ -47,7 +54,7 @@ void CreateTransmissionWorkspaceAuto2::init() {
   // Processing instructions
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
-                  "Grouping pattern of workspace indices to yield only the"
+                  "Grouping pattern of spectrum numbers to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
 
   // Wavelength range
@@ -96,7 +103,8 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   populateMonitorProperties(alg, instrument);
 
   // Processing instructions
-  populateProcessingInstructions(alg, instrument, firstWS);
+  convertProcessingInstructions(instrument, firstWS);
+  alg->setProperty("ProcessingInstructions", m_processingInstructions);
 
   alg->execute();
   MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
