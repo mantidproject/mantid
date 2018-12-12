@@ -14,7 +14,7 @@ from functools import partial
 from qtpy import QtGui
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import (QAction, QHeaderView, QMenu, QMessageBox, QTableView, QTableWidget)
+from qtpy.QtWidgets import (QAction, QHeaderView, QMenu, QMessageBox, QTableWidget)
 
 import mantidqt.icons
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
@@ -43,13 +43,16 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.resize(600, 400)
         self.show()
 
-
     def doubleClickedHeader(self):
         print("Double clicked WOO")
 
     def keyPressEvent(self, event):
         if event.matches(QKeySequence.Copy):
-            self.presenter.action_keypress_copy(self)
+            self.presenter.action_keypress_copy()
+            return
+        elif event.key() == Qt.Key_F2 or event.key() == Qt.Key_Enter:
+            self.edit(self.currentIndex())
+            return
 
     def set_context_menu_actions(self, table):
         """

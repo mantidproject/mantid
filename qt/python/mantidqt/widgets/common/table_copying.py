@@ -3,13 +3,13 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtGui
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QCursor, QFont, QFontMetrics
-from qtpy.QtWidgets import (QMessageBox, QTableView, QToolTip)
+from qtpy.QtWidgets import (QMessageBox, QToolTip)
 
 NO_SELECTION_MESSAGE = "No selection"
 COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
 
 """
-This module contains the common copying functionality between 
+This module contains the common copying functionality between
 the MatrixWorkspaceDisplay and the TableWorkspaceDisplay.
 """
 
@@ -94,9 +94,9 @@ def copy_cells(table):
     index = selectionModel.currentIndex()
     for i in range(top, bottom + 1):
         for j in range(left, right):
-            data.append(index.sibling(i, j).data())
+            data.append(str(index.sibling(i, j).data()))
             data.append("\t")
-        data.append(index.sibling(i, right).data())
+        data.append(str(index.sibling(i, right).data()))
         data.append("\n")
 
     # strip the string to remove the trailing new line

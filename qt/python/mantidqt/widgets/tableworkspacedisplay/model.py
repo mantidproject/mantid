@@ -10,12 +10,11 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
+import six
 
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
-from mantidqt.widgets.tableworkspacedisplay.marked_columns import MarkedColumns
 from mantid.kernel import V3D
-
-import six
+from mantidqt.widgets.tableworkspacedisplay.marked_columns import MarkedColumns
 
 if six.PY2:
     from functools32 import lru_cache
@@ -41,14 +40,19 @@ class TableWorkspaceDisplayModel:
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
 
-    def _get_bool_from_str(self, string):
-        string = string.lower()
-        if string == "true":
-            return True
-        elif string == "false":
-            return False
+    def _get_bool_from_str(self, obj):
+        if isinstance(obj, bool):
+            return obj
+        elif isinstance(obj, str):
+            obj = obj.lower()
+            if obj == "true":
+                return True
+            elif obj == "false":
+                return False
+            else:
+                raise ValueError("'{}' is not a valid bool string.".format(obj))
         else:
-            raise ValueError("'{}' is not a valid bool string.".format(string))
+            raise ValueError("Type '{}' cannot be converted to bool.".format(obj))
 
     def _get_v3d_from_str(self, string):
         if '[' in string and ']' in string:
