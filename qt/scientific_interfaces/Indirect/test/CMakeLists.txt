@@ -2,6 +2,7 @@
 # Testing
 ###########################################################################
 set ( TEST_FILES
+  ConvFitDataPresenterTest.h
   IndirectDataTablePresenterTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h

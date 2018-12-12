@@ -15,7 +15,6 @@
 #include "JumpFitModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -73,9 +72,6 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 /// Mock object to mock the view
 class MockJumpFitDataView : public IIndirectFitDataView {
 public:
-  /// Signals
-  void emitSampleLoaded(QString const &name) { emit sampleLoaded(name); }
-
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
