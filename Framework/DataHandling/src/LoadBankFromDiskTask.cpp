@@ -287,7 +287,16 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     m_loadError = true;
   }
 
-  file.getSlab(event_time_of_flight.get(), m_loadStart, m_loadSize);
+  if (file.getInfo().type == ::NeXus::UINT32) {
+    std::vector<uint32_t> event_time_of_flight_uint32(m_loadSize[0]);
+    file.getSlab(event_time_of_flight_uint32.data(), m_loadStart, m_loadSize);
+    std::transform(event_time_of_flight_uint32.begin(),
+                   event_time_of_flight_uint32.end(),
+                   event_time_of_flight.get(),
+                   [](uint32_t a) { return static_cast<float>(a); });
+  } else {
+    file.getSlab(event_time_of_flight.get(), m_loadStart, m_loadSize);
+  }
   file.closeData();
   return event_time_of_flight;
 }
