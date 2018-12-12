@@ -23,6 +23,8 @@ public:
   std::size_t getNumberHistograms(std::size_t index) const;
   Mantid::API::MatrixWorkspace_sptr getResolution(std::size_t index) const;
 
+  std::vector<std::string> getSpectrumDependentAttributes() const override;
+
   void setFitFunction(Mantid::API::IFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
 

@@ -6,11 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QFrame)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_absolute_units_script import AbsoluteUnitsScript
 import reduction_gui.widgets.util as util
-import ui.inelastic.ui_dgs_absolute_units
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("SampleSetupWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class AbsoluteUnitsWidget(BaseWidget):
@@ -26,10 +32,10 @@ class AbsoluteUnitsWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(AbsoluteUnitsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class AbsUnitsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_absolute_units.Ui_AbsUnitsFrame):
+        class AbsUnitsFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/inelastic/dgs_absolute_units.ui', baseinstance=self)
 
         self._content = AbsUnitsFrame(self)
         self._layout.addWidget(self._content)
@@ -55,17 +61,14 @@ class AbsoluteUnitsWidget(BaseWidget):
                 self._content.errorbar_crit_edit,
         ]:
 
-            dvp = QtGui.QDoubleValidator(widget)
+            dvp = QDoubleValidator(widget)
             dvp.setBottom(0.0)
             widget.setValidator(dvp)
 
         # Connections
-        self.connect(self._content.absunits_van_browse, QtCore.SIGNAL("clicked()"),
-                     self._absunits_van_browse)
-        self.connect(self._content.absunits_detvan_browse, QtCore.SIGNAL("clicked()"),
-                     self._absunits_detvan_browse)
-        self.connect(self._content.grouping_file_browse, QtCore.SIGNAL("clicked()"),
-                     self._grouping_file_browse)
+        self._content.absunits_van_browse.clicked.connect(self._absunits_van_browse)
+        self._content.absunits_detvan_browse.clicked.connect(self._absunits_detvan_browse)
+        self._content.grouping_file_browse.clicked.connect(self._grouping_file_browse)
 
     def _absunits_van_browse(self):
         fname = self.data_browse_dialog()

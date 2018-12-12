@@ -116,11 +116,15 @@ bool equivalentFunctions(IFunction_const_sptr func1,
 std::ostringstream &addInputString(IndirectFitData *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
-  auto addToStream = [&](std::size_t spectrum) {
-    stream << name << ",i" << spectrum << ";";
-  };
-  fitData->applySpectra(addToStream);
-  return stream;
+  if (!name.empty()) {
+    auto addToStream = [&](std::size_t spectrum) {
+      stream << name << ",i" << spectrum << ";";
+    };
+    fitData->applySpectra(addToStream);
+    return stream;
+  } else
+    throw std::runtime_error(
+        "Workspace name is empty. The sample workspace may not be loaded.");
 }
 
 std::string constructInputString(
@@ -418,7 +422,12 @@ std::size_t IndirectFittingModel::numberOfWorkspaces() const {
 }
 
 std::size_t IndirectFittingModel::getNumberOfSpectra(std::size_t index) const {
-  return m_fittingData[index]->numberOfSpectra();
+  if (index < m_fittingData.size())
+    return m_fittingData[index]->numberOfSpectra();
+  else
+    throw std::runtime_error(
+        "Cannot find the number of spectra for a workspace: the workspace "
+        "index provided is too large.");
 }
 
 std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
@@ -513,8 +522,17 @@ void IndirectFittingModel::addNewWorkspace(MatrixWorkspace_sptr workspace,
       createDefaultParameters(m_fittingData.size() - 1));
 }
 
+void IndirectFittingModel::removeWorkspaceFromFittingData(
+    std::size_t const &index) {
+  if (m_fittingData.size() > index)
+    removeFittingData(index);
+  else
+    throw std::runtime_error("Cannot remove a workspace from the fitting data: "
+                             "the workspace index provided is too large.");
+}
+
 void IndirectFittingModel::removeWorkspace(std::size_t index) {
-  removeFittingData(index);
+  removeWorkspaceFromFittingData(index);
 
   if (index > 0 && m_fittingData.size() > index) {
     const auto previousWS = m_fittingData[index - 1]->workspace();

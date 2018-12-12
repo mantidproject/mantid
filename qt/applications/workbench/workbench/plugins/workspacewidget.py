@@ -10,16 +10,19 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
-import functools
+from functools import partial
 
 # third-party library imports
 from mantid.api import AnalysisDataService
+from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
+from mantidqt.widgets.samplelogs.presenter import SampleLogs
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names
+from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names, plot
 
 
 class WorkspaceWidget(PluginWidget):
@@ -37,15 +40,20 @@ class WorkspaceWidget(PluginWidget):
         self.setLayout(layout)
 
         # behaviour
-        self.workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                           errors=False, overplot=False))
-        self.workspacewidget.overplotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                               errors=False, overplot=True))
-        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                                     errors=True, overplot=False))
-        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                                         errors=True, overplot=True))
+        self.workspacewidget.plotSpectrumClicked.connect(partial(self._do_plot_spectrum,
+                                                                 errors=False, overplot=False))
+        self.workspacewidget.overplotSpectrumClicked.connect(partial(self._do_plot_spectrum,
+                                                                     errors=False, overplot=True))
+        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(partial(self._do_plot_spectrum,
+                                                                           errors=True, overplot=False))
+        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(partial(self._do_plot_spectrum,
+                                                                               errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
+        self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
+        self.workspacewidget.showDataClicked.connect(self._do_show_data)
+        self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
+
+        self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
     # ----------------- Plugin API --------------------
 
@@ -55,7 +63,10 @@ class WorkspaceWidget(PluginWidget):
     def get_plugin_title(self):
         return "Workspaces"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass
 
     # ----------------- Behaviour --------------------
@@ -88,3 +99,32 @@ class WorkspaceWidget(PluginWidget):
         except BaseException:
             import traceback
             traceback.print_exc()
+
+    def _do_sample_logs(self, names):
+        """
+        Show the sample log window for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            SampleLogs(ws=ws, parent=self)
+
+    def _do_show_instrument(self, names):
+        """
+        Show an instrument widget for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            presenter = InstrumentViewPresenter(ws, parent=self)
+            presenter.view.show()
+
+    def _do_show_data(self, names):
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            # the plot function is being injected in the presenter
+            # this is done so that the plotting library is mockable in testing
+            presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
+            presenter.view.show()
+
+    def _action_double_click_workspace(self, name):
+        self._do_show_data([name])

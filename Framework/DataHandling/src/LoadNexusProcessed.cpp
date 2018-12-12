@@ -1473,6 +1473,9 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   } else if (mtd_entry.containsGroup("offsets_workspace")) {
     workspaceType = "OffsetsWorkspace";
     group_name = "offsets_workspace";
+  } else if (mtd_entry.containsGroup("mask_workspace")) {
+    workspaceType = "MaskWorkspace";
+    group_name = "mask_workspace";
   }
 
   // Get workspace characteristics

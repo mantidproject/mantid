@@ -19,6 +19,7 @@ and use it to access the settings
 from __future__ import (absolute_import, unicode_literals)
 
 from workbench.config.user import UserConfig
+from qtpy.QtCore import QSettings
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -30,14 +31,15 @@ APPNAME = 'mantidworkbench'
 # Iterable containing defaults for each configurable section of the code
 # General application settings are in the main section
 DEFAULTS = {
-    'main': {
-      'high_dpi_scaling': True,
-      'window/size': (1260, 740),
-      'window/position': (10, 10),
+    'high_dpi_scaling': True,
+    'MainWindow': {
+        'size': (1260, 740),
+        'position': (10, 10),
     }
 }
 
 # -----------------------------------------------------------------------------
 # 'Singleton' instance
 # -----------------------------------------------------------------------------
+QSettings.setDefaultFormat(QSettings.IniFormat)
 CONF = UserConfig(ORGANIZATION, APPNAME, defaults=DEFAULTS)

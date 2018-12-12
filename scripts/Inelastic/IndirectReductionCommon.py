@@ -592,12 +592,11 @@ def get_group_from_string(grouping_string):
         return [int(grouping_string)]
 
 
-def create_group_from_string(input_workspace, grouping_string):
-    from mantid.simpleapi import GroupDetectors
-    return GroupDetectors(InputWorkspace=input_workspace,
-                          Behaviour='Average',
-                          SpectraList=get_group_from_string(grouping_string),
-                          StoreInADS=False)
+def create_group_from_string(group_detectors, grouping_string):
+    group_detectors.setProperty("WorkspaceIndexList", get_group_from_string(grouping_string))
+    group_detectors.setProperty("OutputWorkspace", "__temp")
+    group_detectors.execute()
+    return group_detectors.getProperty("OutputWorkspace").value
 
 
 def conjoin_workspaces(*workspaces):
@@ -609,9 +608,9 @@ def conjoin_workspaces(*workspaces):
     return conjoined
 
 
-def group_on_string(input_workspace, grouping_string):
+def group_on_string(group_detectors, grouping_string):
     grouping_string.replace(' ', '')
-    groups = [create_group_from_string(input_workspace, group) for group in grouping_string.split(',')]
+    groups = [create_group_from_string(group_detectors, group) for group in grouping_string.split(',')]
     return conjoin_workspaces(*groups)
 
 
@@ -710,7 +709,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         # Mask detectors if required
         if len(masked_detectors) > 0:
             _mask_detectors(workspace, masked_detectors)
-        return group_on_string(workspace, group_string)
+        return group_on_string(group_detectors, group_string)
 
     else:
         raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))

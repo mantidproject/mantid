@@ -11,6 +11,7 @@
 #include "IndirectSpectrumSelectionView.h"
 
 #include "../General/UserInputValidator.h"
+#include "DllConfig.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -22,9 +23,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/** IndirectSpectrumSelectionPresenter
- */
-class DLLExport IndirectSpectrumSelectionPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenter
+    : public QObject {
   Q_OBJECT
 public:
   IndirectSpectrumSelectionPresenter(IndirectFittingModel *model,
@@ -34,9 +34,9 @@ public:
 
 signals:
   void spectraChanged(std::size_t);
-  void maskChanged(const std::string &);
-  void invalidSpectraString(const QString &errorMessage);
-  void invalidMaskBinsString(const QString &errorMessage);
+  void maskChanged(std::string const &);
+  void invalidSpectraString(QString const &errorMessage);
+  void invalidMaskBinsString(QString const &errorMessage);
 
 public slots:
   void setActiveModelIndex(std::size_t index);
@@ -47,15 +47,16 @@ public slots:
   void enableView();
 
 private slots:
-  void setBinMask(const std::string &maskString);
-  void setMaskSpectraList(const std::string &spectraList);
-  void updateSpectraList(const std::string &spectraList);
+  void setBinMask(std::string const &maskString);
+  void setMaskSpectraList(std::string const &spectraList);
+  void updateSpectraList(std::string const &spectraList);
   void updateSpectraRange(std::size_t minimum, std::size_t maximum);
+  void displaySpectraList(std::string const &spectra);
   void setMaskIndex(int index);
 
 private:
   void setSpectraRange(std::size_t minimum, std::size_t maximum);
-  void setModelSpectra(const Spectra &spectra);
+  void setModelSpectra(Spectra const &spectra);
 
   UserInputValidator validateSpectraString();
   UserInputValidator &validateSpectraString(UserInputValidator &validator);

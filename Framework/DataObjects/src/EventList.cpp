@@ -2924,9 +2924,7 @@ double EventList::getTofMin() const {
  */
 double EventList::getTofMax() const {
   // set up as the minimum available double
-  double tMax =
-      -1. *
-      std::numeric_limits<double>::max(); // min is a small number, not negative
+  double tMax = std::numeric_limits<double>::lowest();
 
   // no events is a soft error
   if (this->empty())

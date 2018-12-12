@@ -24,6 +24,18 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+std::vector<std::string> getEISFFunctions() {
+  return {"EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"};
+}
+
+std::vector<std::string> getWidthFunctions() {
+  return {"ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater"};
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -49,22 +61,8 @@ void JumpFit::setupFitTab() {
   setSampleWSSuffices({"_Result"});
   setSampleFBSuffices({"_Result.nxs"});
 
-  auto &functionFactory = FunctionFactory::Instance();
-  auto chudleyElliot = functionFactory.createFunction("ChudleyElliot");
-  auto hallRoss = functionFactory.createFunction("HallRoss");
-  auto fickDiffusion = functionFactory.createFunction("FickDiffusion");
-  auto teixeiraWater = functionFactory.createFunction("TeixeiraWater");
-  auto eisfDiffCylinder = functionFactory.createFunction("EISFDiffCylinder");
-  auto eisfDiffSphere = functionFactory.createFunction("EISFDiffSphere");
-  auto eisfDiffSphereAklyl =
-      functionFactory.createFunction("EISFDiffSphereAlkyl");
-  addComboBoxFunctionGroup("ChudleyElliot", {chudleyElliot});
-  addComboBoxFunctionGroup("HallRoss", {hallRoss});
-  addComboBoxFunctionGroup("FickDiffusion", {fickDiffusion});
-  addComboBoxFunctionGroup("TeixeiraWater", {teixeiraWater});
-  addComboBoxFunctionGroup("EISFDiffCylinder", {eisfDiffCylinder});
-  addComboBoxFunctionGroup("EISFDiffSphere", {eisfDiffSphere});
-  addComboBoxFunctionGroup("EISFDiffSphereAlkyl", {eisfDiffSphereAklyl});
+  addFunctions(getWidthFunctions());
+  addFunctions(getEISFFunctions());
 
   m_uiForm->cbParameter->setEnabled(false);
 
@@ -74,6 +72,24 @@ void JumpFit::setupFitTab() {
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
+  connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateAvailableFitTypes()));
+}
+
+void JumpFit::updateAvailableFitTypes() {
+  auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
+  clearFitTypeComboBox();
+  if (parameter == "Width")
+    addFunctions(getWidthFunctions());
+  else if (parameter == "EISF")
+    addFunctions(getEISFFunctions());
+}
+
+void JumpFit::addFunctions(std::vector<std::string> const &functions) {
+  auto &factory = FunctionFactory::Instance();
+  for (auto const &function : functions)
+    addComboBoxFunctionGroup(QString::fromStdString(function),
+                             {factory.createFunction(function)});
 }
 
 void JumpFit::updateModelFitTypeString() {
@@ -84,17 +100,35 @@ void JumpFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
+void JumpFit::runClicked() { runTab(); }
+
 void JumpFit::plotClicked() {
   setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
   setPlotResultIsPlotting(false);
 }
 
-bool JumpFit::shouldEnablePlotResult() {
-  for (auto i = 0u; i < m_jumpFittingModel->numberOfWorkspaces(); ++i)
-    if (m_jumpFittingModel->getNumberOfSpectra(i) > 1)
-      return true;
-  return false;
+void JumpFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void JumpFit::setFitSingleSpectrumIsFitting(bool fitting) {
+  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
+      fitting ? "Fitting..." : "Fit Single Spectrum");
+  setButtonsEnabled(!fitting);
+}
+
+void JumpFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void JumpFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
 }
 
 void JumpFit::setRunEnabled(bool enabled) {
@@ -113,21 +147,6 @@ void JumpFit::setFitSingleSpectrumEnabled(bool enabled) {
 void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
-
-void JumpFit::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
-  setFitSingleSpectrumEnabled(!running);
-}
-
-void JumpFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
-}
-
-void JumpFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

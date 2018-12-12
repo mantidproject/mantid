@@ -905,3 +905,7 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
   else
     return Script::Serialised;
 }
+
+const Script &ScriptingWindow::getCurrentScriptRunner() {
+  return m_manager->currentInterpreter()->getRunner();
+}

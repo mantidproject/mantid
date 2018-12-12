@@ -20,7 +20,7 @@ Test was first created to apply to Mantid Release 3.0.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import isis_reducer
 import ISISCommandInterface as i
@@ -36,7 +36,7 @@ def s(obj):
     print('!'+str(obj)+'!',type(obj))
 
 
-class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):
+class SANS2DMinimalBatchReduction(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in batch mode
   """
 

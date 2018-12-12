@@ -17,7 +17,7 @@
 namespace {
 using namespace Mantid::API;
 
-// The name of the conjoined input and guess name -- required for
+// The name of the conjoined input and guess workspaces -- required for
 // creating an external guess plot.
 const std::string INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
 
@@ -124,11 +124,13 @@ void IndirectFitPlotModel::setActiveSpectrum(std::size_t spectrum) {
 }
 
 void IndirectFitPlotModel::setStartX(double startX) {
-  m_fittingModel->setStartX(startX, m_activeIndex, m_activeSpectrum);
+  if (getRange().second > startX)
+    m_fittingModel->setStartX(startX, m_activeIndex, m_activeSpectrum);
 }
 
 void IndirectFitPlotModel::setEndX(double endX) {
-  m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
+  if (getRange().first < endX)
+    m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
 }
 
 void IndirectFitPlotModel::setFWHM(double fwhm) {
@@ -182,7 +184,9 @@ std::size_t IndirectFitPlotModel::numberOfWorkspaces() const {
 }
 
 std::string IndirectFitPlotModel::getFitDataName(std::size_t index) const {
-  return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
+  if (m_fittingModel->getWorkspace(index))
+    return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
+  return "";
 }
 
 std::string IndirectFitPlotModel::getFitDataName() const {
@@ -190,7 +194,10 @@ std::string IndirectFitPlotModel::getFitDataName() const {
 }
 
 std::string IndirectFitPlotModel::getLastFitDataName() const {
-  return getFitDataName(m_fittingModel->numberOfWorkspaces() - 1);
+  auto const numberOfWorkspaces = m_fittingModel->numberOfWorkspaces();
+  if (numberOfWorkspaces > 0)
+    return getFitDataName(numberOfWorkspaces - 1);
+  return "";
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {

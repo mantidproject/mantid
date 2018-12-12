@@ -29,15 +29,16 @@ class Gem(AbstractInst):
     # Public API
 
     def focus(self, **kwargs):
-        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
+
         return self._focus(
             run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
-        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
@@ -49,6 +50,9 @@ class Gem(AbstractInst):
             exception_msg="The argument containing sample details was not found. Please"
                           " set the following argument: " + kwarg_name)
         self._sample_details = sample_details_obj
+
+    def should_subtract_empty_inst(self):
+        return self._inst_settings.subtract_empty_inst
 
     # Private methods
 
@@ -176,8 +180,10 @@ class Gem(AbstractInst):
         if mode is None and hasattr(self._inst_settings, "texture_mode"):
             mode = self._inst_settings.texture_mode
         save_all = not hasattr(self._inst_settings, "save_all")
-        self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_mode_specific_variables(mode,
-                                                                                                              save_all),
+        adv_config_variables = gem_advanced_config.get_mode_specific_variables(mode, save_all)
+        if self.should_subtract_empty_inst() is None:
+            adv_config_variables.update({"subtract_empty_instrument": True})
+        self._inst_settings.update_attributes(advanced_config=adv_config_variables,
                                               suppress_warnings=True)
 
 

@@ -1,53 +1,55 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "BIOSANS" valid-from="1900-01-31 23:59:59" valid-to="2012-01-31 23:59:59">
-
-<component-link name = "BIOSANS">
-
-<parameter name="detector-name" type="string">
-  <value val="detector1"/>
-</parameter>
-
-<parameter name="default-incident-timer-spectrum">
-  <value val="2"/>
-</parameter>
-
-<parameter name="default-incident-monitor-spectrum">
-  <value val="1"/>
-</parameter>
-
-<parameter name="number-of-x-pixels">
-  <value val="192"/>
-</parameter>
-
-<parameter name="number-of-y-pixels">
-  <value val="192"/>
-</parameter>
-
-<parameter name="number-of-monitors">
-  <value val="2"/>
-</parameter>
-
-<parameter name="x-pixel-size">
-  <value val="5.1000000"/>
-</parameter>
-
-<parameter name="y-pixel-size">
-  <value val="5.1000000"/>
-</parameter>
-
-<parameter name="detector-distance-offset">
-  <value val="837.9"/>
-</parameter>
-
-<!-- Aperture distances for 8 guides to 0 guides -->
-<parameter name="aperture-distances" type="string">
-  <value val="2018.0, 3426.9, 5449.1, 7473.8, 9497.2, 11527.1, 13546.6, 15568.2, 17594.6" />
-</parameter>
-
-<parameter name="source-distance-offset">
-  <value val="-171.0"/>
-</parameter>
-
-</component-link>
-
+<parameter-file instrument = "BIOSANS"
+				valid-from="2016-04-27 00:00:00"
+				valid-to="2100-01-31 23:59:59">
+	
+	<component-link name = "BIOSANS">
+		
+		<parameter name="detector-name" type="string">
+			<value val="detector1"/>
+		</parameter>
+		
+		<parameter name="default-incident-timer-spectrum">
+			<value val="2"/>
+		</parameter>
+		
+		<parameter name="default-incident-monitor-spectrum">
+			<value val="1"/>
+		</parameter>
+		
+		<parameter name="number-of-x-pixels">
+			<value val="192"/>
+		</parameter>
+		
+		<parameter name="number-of-y-pixels">
+			<value val="256"/>
+		</parameter>
+		
+		<parameter name="number-of-monitors">
+			<value val="2"/>
+		</parameter>
+		
+		<parameter name="x-pixel-size">
+			<value val="5.5"/>
+		</parameter>
+		
+		<parameter name="y-pixel-size">
+			<value val="4.0"/>
+		</parameter>
+		
+		<parameter name="detector-distance-offset">
+			<value val="837.9"/>
+		</parameter>
+		
+		<!-- Aperture distances for 8 guides to 0 guides -->
+		<parameter name="aperture-distances" type="string">
+			<value val="2018.0, 3426.9, 5449.1, 7473.8, 9497.2, 11527.1, 13546.6, 15568.2, 17594.6"/>
+		</parameter>
+		
+		<parameter name="source-distance-offset">
+			<value val="-171.0"/>
+		</parameter>
+		
+	</component-link>
+	
 </parameter-file>

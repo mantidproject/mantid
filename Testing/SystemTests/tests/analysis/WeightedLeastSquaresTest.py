@@ -24,7 +24,7 @@
 #      made available to Mantid users)
 #
 
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace
 
@@ -246,7 +246,7 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
         compare_relative_errors(fitted_params, expected_params, tolerance=1e-4)
 
 
-class WeightedLeastSquaresTest(stresstesting.MantidStressTest):
+class WeightedLeastSquaresTest(systemtesting.MantidSystemTest):
 
     _success = False
 

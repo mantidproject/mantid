@@ -254,6 +254,12 @@ MANTID_KERNEL_DLL std::string replaceAll(const std::string &input,
                                          const std::string &charStr,
                                          const std::string &substitute);
 
+/// Converts string to all lowercase
+MANTID_KERNEL_DLL std::string toLower(const std::string &input);
+
+/// Converts string to all uppercase
+MANTID_KERNEL_DLL std::string toUpper(const std::string &input);
+
 /// determine if a character group exists in a string
 MANTID_KERNEL_DLL int confirmStr(const std::string &S,
                                  const std::string &fullPhrase);

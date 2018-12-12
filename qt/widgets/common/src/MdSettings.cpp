@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
-#include "boost/scoped_ptr.hpp"
 #include <QSettings>
 #include <QString>
 

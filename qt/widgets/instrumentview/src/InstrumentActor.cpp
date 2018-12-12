@@ -5,7 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
@@ -90,11 +92,18 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
   setupPhysicalInstrumentIfExists();
 
+  m_hasGrid = false;
+  m_numGridLayers = 0;
   for (size_t i = 0; i < componentInfo().size(); ++i) {
     if (!componentInfo().isDetector(i))
       m_components.push_back(i);
     else if (detectorInfo().isMonitor(i))
       m_monitors.push_back(i);
+    if (componentInfo().componentType(i) ==
+        Mantid::Beamline::ComponentType::Grid) {
+      m_hasGrid = true;
+      m_numGridLayers = componentInfo().children(i).size();
+    }
   }
 
   m_isCompVisible.assign(componentInfo().size(), true);
@@ -194,7 +203,7 @@ void InstrumentActor::setupPhysicalInstrumentIfExists() {
 }
 
 void InstrumentActor::setComponentVisible(size_t componentIndex) {
-  setChildVisibility(false);
+  setAllComponentsVisibility(false);
   const auto &compInfo = componentInfo();
   auto children = compInfo.componentsInSubtree(componentIndex);
   m_isCompVisible[componentIndex] = true;
@@ -204,7 +213,7 @@ void InstrumentActor::setComponentVisible(size_t componentIndex) {
   resetColors();
 }
 
-void InstrumentActor::setChildVisibility(bool on) {
+void InstrumentActor::setAllComponentsVisibility(bool on) {
   std::fill(m_isCompVisible.begin(), m_isCompVisible.end(), on);
 }
 
@@ -589,16 +598,16 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
         Mantid::API::AnalysisDataService::Instance().retrieve(outName));
     Mantid::API::AnalysisDataService::Instance().remove(outName);
 
-    const auto &X = ws->x(0);
-    const auto &Y = ws->y(0);
-    x.assign(X.begin(), X.end());
-    y.assign(Y.begin(), Y.end());
+    const auto &commonX = ws->points(0);
+    const auto &firstY = ws->y(0);
+    x.assign(std::cbegin(commonX), std::cend(commonX));
+    y.assign(std::cbegin(firstY), std::cend(firstY));
 
     // add the spectra
     for (size_t i = 0; i < nSpec; ++i) {
-      const auto &Y = ws->y(i);
-      std::transform(y.begin(), y.end(), Y.begin(), y.begin(),
-                     std::plus<double>());
+      const auto &specY = ws->y(i);
+      std::transform(std::cbegin(y), std::cend(y), std::cbegin(specY),
+                     std::begin(y), std::plus<double>());
     }
   } catch (std::invalid_argument &) {
     // wrong Params for any reason
@@ -672,7 +681,7 @@ const std::vector<Mantid::detid_t> &InstrumentActor::getAllDetIDs() const {
  * @param type :: 0 - linear, 1 - log10.
  */
 void InstrumentActor::changeScaleType(int type) {
-  m_renderer->changeScaleType(type);
+  m_renderer->changeScaleType(ColorMap::ScaleType(type));
   resetColors();
 }
 
@@ -684,10 +693,10 @@ void InstrumentActor::changeNthPower(double nth_power) {
 void InstrumentActor::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
-  m_scaleType = static_cast<GraphOptions::ScaleType>(
-      settings.value("ScaleType", 0).toInt());
+  m_scaleType = ColorMap::ScaleType(settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentCMap = settings.value("ColormapFile", "").toString();
+  m_currentCMap =
+      settings.value("ColormapFile", ColorMap::defaultColorMap()).toString();
   // Set values from settings
   m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
@@ -697,7 +706,8 @@ void InstrumentActor::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
   settings.setValue("ColormapFile", m_currentCMap);
-  settings.setValue("ScaleType", (int)m_renderer->getColorMap().getScaleType());
+  settings.setValue("ScaleType",
+                    static_cast<int>(m_renderer->getColorMap().getScaleType()));
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
 }
@@ -1171,6 +1181,7 @@ InstrumentActor::getStringParameter(const std::string &name,
  * @return string representing the current state of the instrumet actor.
  */
 std::string InstrumentActor::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   const std::string currentColorMap = getCurrentColorMap().toStdString();
 
@@ -1179,6 +1190,10 @@ std::string InstrumentActor::saveToProject() const {
 
   tsv.writeSection("binmasks", m_maskBinsData.saveToProject());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 /**
@@ -1186,6 +1201,7 @@ std::string InstrumentActor::saveToProject() const {
  * @param lines :: string representing the current state of the instrumet actor.
  */
 void InstrumentActor::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
   if (tsv.selectLine("FileName")) {
     QString filename;
@@ -1198,6 +1214,27 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
     tsv >> binMaskLines;
     m_maskBinsData.loadFromProject(binMaskLines);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
+}
+
+bool InstrumentActor::hasGridBank() const { return m_hasGrid; }
+
+size_t InstrumentActor::getNumberOfGridLayers() const {
+  return m_numGridLayers;
+}
+
+void InstrumentActor::setGridLayer(bool isUsingLayer, int layer) const {
+  m_renderer->enableGridBankLayers(isUsingLayer, layer);
+  m_renderer->reset();
+  emit colorMapChanged();
+}
+
+const InstrumentRenderer &InstrumentActor::getInstrumentRenderer() const {
+  return *m_renderer;
 }
 
 /** If instrument.geometry.view is set to Default or Physical, then the physical

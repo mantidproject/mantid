@@ -22,7 +22,7 @@ harness and others load data from a file. Take the example of
 workspace with 10 detectors using
 ``WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument()``. In
 the second test, testComplex, it reads a file
-``IDFs_for_UNIT_TESTING/MAPS_Definition_Reduced.xml``, which contains
+``unit_testing/MAPS_Definition_Reduced.xml``, which contains
 the definition of a MAPS instrument with the number of detectors reduced
 much to ensure it is read quickly but preserving the other properties of
 this instrument. However, new tests should avoid even loading of this
@@ -103,7 +103,7 @@ There are two places files may be found:
 
 - `.../Testing/Data/ <https://github.com/mantidproject/mantid/tree/master/Testing/Data>`__
   for :ref:`unit test <RunningTheUnitTests>`, :ref:`doc test <DocumentationGuideForDevs>`, and :ref:`system test <SystemTests>` data
-- `.../instrument/IDFs_for_UNIT_TESTING <https://github.com/mantidproject/mantid/tree/master/instrument/IDFs_for_UNIT_TESTING>`__
+- `.../instrument/unit_testing <https://github.com/mantidproject/mantid/tree/master/instrument/unit_testing>`__
   for test :ref:`IDF <InstrumentDefinitionFile>` files
 
 
