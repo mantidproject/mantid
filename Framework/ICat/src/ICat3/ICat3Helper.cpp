@@ -195,11 +195,10 @@ void CICatHelper::saveInvestigationIncludesResponse(
           std::string creationTime;
           creationTime.resize(format.size());
           const time_t crtime = *(*datafile_citr)->datafileCreateTime;
-          strftime(const_cast<char *>(creationTime.data()), creationTime.size(),format.data(),
-                   localtime(&crtime));
+          strftime(const_cast<char *>(creationTime.data()), creationTime.size(),
+                   format.data(), localtime(&crtime));
           savetoTableWorkspace(creationTime.data(), t);
         }
-        
 
         //
         savetoTableWorkspace((*datafile_citr)->id, t);
