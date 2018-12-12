@@ -58,9 +58,11 @@ const std::size_t DIMS(3);
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoids::qListFromEventWS(
-    Integrate3DEvents &integrator, Progress &prog, EventWorkspace_sptr &wksp,
-    DblMatrix const &UBinv, bool hkl_integ) {
+void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
+                                           Progress &prog,
+                                           EventWorkspace_sptr &wksp,
+                                           DblMatrix const &UBinv,
+                                           bool hkl_integ) {
   // loop through the eventlists
 
   int numSpectra = static_cast<int>(wksp->getNumberHistograms());
@@ -128,9 +130,11 @@ void IntegrateEllipsoids::qListFromEventWS(
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoids::qListFromHistoWS(
-    Integrate3DEvents &integrator, Progress &prog, Workspace2D_sptr &wksp,
-    DblMatrix const &UBinv, bool hkl_integ) {
+void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
+                                           Progress &prog,
+                                           Workspace2D_sptr &wksp,
+                                           DblMatrix const &UBinv,
+                                           bool hkl_integ) {
 
   // loop through the eventlists
 
@@ -686,8 +690,7 @@ void IntegrateEllipsoids::exec() {
  *
  * @param wksp The workspace to get information from.
  */
-void IntegrateEllipsoids::initTargetWSDescr(
-    MatrixWorkspace_sptr &wksp) {
+void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
   m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
                           std::vector<double>(3, 2000.));
   m_targWSDescr.buildFromMatrixWS(wksp, Q3D, ELASTIC);

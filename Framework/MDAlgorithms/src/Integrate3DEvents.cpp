@@ -1066,9 +1066,9 @@ void Integrate3DEvents::addModEvent(std::pair<double, V3D> event_Q,
       if (hklmnp_key % 10000 == 0) {
         if (event_Q.second.norm() < m_radius)
           m_event_lists[hklmnp_key].push_back(event_Q);
-      } else if (event_Q.second.norm() < s_radius){
+      } else if (event_Q.second.norm() < s_radius) {
         m_event_lists[hklmnp_key].push_back(event_Q);
-    }
+      }
     }
   }
 }

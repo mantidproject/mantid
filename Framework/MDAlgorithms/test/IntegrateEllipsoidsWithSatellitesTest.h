@@ -66,13 +66,13 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
   // Set the oriented lattice for a cubic crystal
   OrientedLattice ol(6, 6, 6, 90, 90, 90);
   ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
-   Matrix<double> modUB(3, 3, false);
+  Matrix<double> modUB(3, 3, false);
   Matrix<double> UB = ol.getUB();
-   modUB[0][0] = 0.2;
-   //modUB = UB.Invert() * modUB;
-    ol.setModUB(modUB);
-    ol.setMaxOrder(1);
-    ol.setCrossTerm(false);
+  modUB[0][0] = 0.2;
+  // modUB = UB.Invert() * modUB;
+  ol.setModUB(modUB);
+  ol.setMaxOrder(1);
+  ol.setCrossTerm(false);
   ol.setModHKL(0, 0.5, 0., 0., 0., 0., 0., 0., 0.);
 
   peaksWS->mutableSample().setOrientedLattice(&ol);
@@ -263,19 +263,19 @@ public:
                       m_peaksWS->getNumberPeaks());
 
     do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
-   /*const auto &peak1 = integratedPeaksWS->getPeak(7);
-   const auto &peak2 = integratedPeaksWS->getPeak(8);
-   const auto &peak3 = integratedPeaksWS->getPeak(9);
-   const auto &peak4 = integratedPeaksWS->getPeak(13);
-   const auto &peak5 = integratedPeaksWS->getPeak(14);
-   const auto &peak6 = integratedPeaksWS->getPeak(15);
+    /*const auto &peak1 = integratedPeaksWS->getPeak(7);
+    const auto &peak2 = integratedPeaksWS->getPeak(8);
+    const auto &peak3 = integratedPeaksWS->getPeak(9);
+    const auto &peak4 = integratedPeaksWS->getPeak(13);
+    const auto &peak5 = integratedPeaksWS->getPeak(14);
+    const auto &peak6 = integratedPeaksWS->getPeak(15);
 
-   TS_ASSERT_DELTA(peak1.getIntensity(), 1., 1e-6);
-   TS_ASSERT_DELTA(peak2.getIntensity(), 3., 1e-6);
-   TS_ASSERT_DELTA(peak3.getIntensity(), 1., 1e-6);
-   TS_ASSERT_DELTA(peak4.getIntensity(), 14., 1e-6);
-   TS_ASSERT_DELTA(peak5.getIntensity(), 0., 1e-6);
-   TS_ASSERT_DELTA(peak6.getIntensity(), 11., 1e-6);*/
+    TS_ASSERT_DELTA(peak1.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak2.getIntensity(), 3., 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak4.getIntensity(), 14., 1e-6);
+    TS_ASSERT_DELTA(peak5.getIntensity(), 0., 1e-6);
+    TS_ASSERT_DELTA(peak6.getIntensity(), 11., 1e-6);*/
   }
 
   void test_execution_histograms() {
@@ -496,19 +496,19 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
                       integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
-   const auto &peak1 = integratedPeaksWS->getPeak(7);
-   const auto &peak2 = integratedPeaksWS->getPeak(8);
-   const auto &peak3 = integratedPeaksWS->getPeak(9);
-   const auto &peak4 = integratedPeaksWS->getPeak(13);
-   const auto &peak5 = integratedPeaksWS->getPeak(14);
-   const auto &peak6 = integratedPeaksWS->getPeak(15);
+    const auto &peak1 = integratedPeaksWS->getPeak(7);
+    const auto &peak2 = integratedPeaksWS->getPeak(8);
+    const auto &peak3 = integratedPeaksWS->getPeak(9);
+    const auto &peak4 = integratedPeaksWS->getPeak(13);
+    const auto &peak5 = integratedPeaksWS->getPeak(14);
+    const auto &peak6 = integratedPeaksWS->getPeak(15);
 
-   TS_ASSERT_DELTA(peak1.getIntensity(), 1., 1e-6);
-   TS_ASSERT_DELTA(peak2.getIntensity(), 3., 1e-6);
-   TS_ASSERT_DELTA(peak3.getIntensity(), 1., 1e-6);
-   TS_ASSERT_DELTA(peak4.getIntensity(), 14., 1e-6);
-   TS_ASSERT_DELTA(peak5.getIntensity(), 0., 1e-6);
-   TS_ASSERT_DELTA(peak6.getIntensity(), 11., 1e-6);
+    TS_ASSERT_DELTA(peak1.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak2.getIntensity(), 3., 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak4.getIntensity(), 14., 1e-6);
+    TS_ASSERT_DELTA(peak5.getIntensity(), 0., 1e-6);
+    TS_ASSERT_DELTA(peak6.getIntensity(), 11., 1e-6);
   }
 
   void test_execution_histograms() {
