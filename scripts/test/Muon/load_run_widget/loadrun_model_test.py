@@ -80,13 +80,14 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(model.loaded_runs[1], 19490)
         self.assertEqual(model.loaded_runs[2], 19491)
 
-    def test_model_is_cleared_correctly(self):
+    @mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+    def test_model_is_cleared_correctly(self, load_utils_mock):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
         load_return_vals = [([1, 2, 3], filename, 19489 + i) for i, filename in enumerate(files)]
 
         model = LoadRunWidgetModel(MuonLoadData())
-        model.load_workspace_from_filename = mock.Mock()
-        model.load_workspace_from_filename.side_effect = load_return_vals
+        load_utils_mock.load_workspace_from_filename = mock.Mock()
+        load_utils_mock.load_workspace_from_filename.side_effect = load_return_vals
 
         model.loadData(files)
         model.execute()
