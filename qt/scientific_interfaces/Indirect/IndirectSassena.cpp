@@ -16,9 +16,10 @@ IndirectSassena::IndirectSassena(QWidget *parent)
   m_uiForm.setupUi(parent);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(handleAlgorithmFinish(bool)));
-  // Handle plotting and saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 void IndirectSassena::setup() {}
@@ -91,6 +92,8 @@ void IndirectSassena::handleAlgorithmFinish(bool error) {
 void IndirectSassena::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
 }
+
+void IndirectSassena::runClicked() { runTab(); }
 
 /**
  * Handle mantid plotting of workspace

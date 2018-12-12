@@ -26,7 +26,8 @@ IndirectMolDyn::IndirectMolDyn(QWidget *parent)
           SLOT(setEnabled(bool)));
   connect(m_uiForm.cbVersion, SIGNAL(currentIndexChanged(const QString &)),
           this, SLOT(versionSelected(const QString &)));
-  // Handle plotting and saving
+
+	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
@@ -124,6 +125,9 @@ void IndirectMolDyn::versionSelected(const QString &version) {
   bool version4(version == "4");
   m_uiForm.mwRun->isForDirectory(version4);
 }
+
+void IndirectMolDyn::runClicked() { runTab(); }
+
 /**
  * Handle plotting of mantid workspace
  */

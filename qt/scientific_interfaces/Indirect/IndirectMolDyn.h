@@ -28,7 +28,7 @@ public:
 
 private slots:
   void versionSelected(const QString &);
-  // Handle plotting and saving
+  void runClicked();
   void plotClicked();
   void saveClicked();
 

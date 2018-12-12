@@ -28,9 +28,10 @@ DensityOfStates::DensityOfStates(QWidget *parent)
 
   connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this,
           SLOT(handleFileChange()));
-  // Handle plot and save
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
@@ -246,6 +247,8 @@ void DensityOfStates::ionLoadComplete(bool error) {
 void DensityOfStates::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
 }
+
+void DensityOfStates::runClicked() { runTab(); }
 
 /**
  * Handle mantid plotting of workspace

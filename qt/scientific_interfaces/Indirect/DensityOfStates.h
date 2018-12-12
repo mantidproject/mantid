@@ -31,7 +31,7 @@ private slots:
   void dosAlgoComplete(bool error);
   void handleFileChange();
   void ionLoadComplete(bool error);
-  /// Handle plotting and saving
+  void runClicked();
   void plotClicked();
   void saveClicked();
 
