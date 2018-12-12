@@ -45,7 +45,7 @@ void PseudoVoigt::init() {
   addConstraint(std::move(fwhm_constraint));
 
   // init the peak height setup parameters
-  m_height = 1.;             // peak height set by user
+  m_height = 1.; // peak height set by user
 
   // parameter set history: all start from an arbitary out of boundary value
   // (100 as easy). if set, order set to 0
@@ -329,9 +329,7 @@ void PseudoVoigt::setHeight(const double h) {
 /** set FWHM
  * @param w
  */
-void PseudoVoigt::setFwhm(const double w) {
-  setParameter("FWHM", w);
-}
+void PseudoVoigt::setFwhm(const double w) { setParameter("FWHM", w); }
 
 /** a_G = 2/gamma * sqrt(ln2/pi)
  * @param gamma :: FWHM
