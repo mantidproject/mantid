@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -24,6 +25,13 @@
 using Mantid::Geometry::rad2deg;
 
 namespace {
+namespace Prop {
+const std::string ANGULAR_WIDTHS{"AngularWidths"};
+}
+namespace Col {
+const std::string DET_ID{"Detector ID"};
+const std::string THETA_WIDTH{"Two theta width"};
+} // namespace Col
 /**
  * @brief Calculate the min and max 2theta for given direction.
  * The 2theta are calculated for the centre point and a point in the
@@ -49,9 +57,25 @@ minMaxTheta(const Mantid::Geometry::DetectorInfo &detInfo,
   rotation.rotate(side);
   side += position;
   const auto sideAngle = side.angle(beamDir);
-  const auto centre = position - samplePos;
-  const auto centreAngle = centre.angle(beamDir);
+  const auto centreAngle = detInfo.twoTheta(detIndex);
   return std::minmax(sideAngle, centreAngle);
+}
+
+double thetaWidth(const Mantid::detid_t detID,
+                  const std::vector<int> &detectorIDs,
+                  const std::vector<double> &angularWidths) {
+  const auto range = std::equal_range(detectorIDs.cbegin(), detectorIDs.cend(),
+                                      static_cast<int>(detID));
+  if (std::distance(range.first, range.second) > 1) {
+    throw std::invalid_argument("Duplicate detector IDs in " +
+                                Prop::ANGULAR_WIDTHS + " table.");
+  }
+  if (range.first == detectorIDs.cend()) {
+    throw std::invalid_argument("No 2theta width found for detector ID " +
+                                std::to_string(detID));
+  }
+  const auto widthIndex = std::distance(detectorIDs.cbegin(), range.first);
+  return angularWidths[widthIndex];
 }
 } // namespace
 
@@ -93,6 +117,15 @@ const std::string SofQWNormalisedPolygon::category() const {
  */
 void SofQWNormalisedPolygon::init() {
   SofQW::createCommonInputProperties(*this);
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          Prop::ANGULAR_WIDTHS, "", Direction::Input, PropertyMode::Optional),
+      "A table workspace with a '" + Col::DET_ID +
+          "' column listing detector IDs and "
+          "a '" +
+          Col::THETA_WIDTH +
+          "' column listing corresponding 2theta widths in "
+          "radians.");
 }
 
 /**
@@ -124,15 +157,20 @@ void SofQWNormalisedPolygon::exec() {
   const size_t nreports(nHistos * nEnergyBins);
   m_progress = boost::make_shared<API::Progress>(this, 0.0, 1.0, nreports);
 
-  std::vector<double> par =
-      inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
-  if (par.empty()) {
-    // Index theta cache
-    this->initAngularCachesNonPSD(*inputWS);
+  // Index theta cache
+  TableWorkspace_sptr widthTable = getProperty(Prop::ANGULAR_WIDTHS);
+  if (widthTable) {
+    initAngularCachesTable(*inputWS, *widthTable);
   } else {
-    g_log.debug() << "Offset: " << par[0] << '\n';
-    this->m_detNeighbourOffset = static_cast<int>(par[0]);
-    this->initAngularCachesPSD(*inputWS);
+    std::vector<double> par = inputWS->getInstrument()->getNumberParameter(
+        "detector-neighbour-offset");
+    if (par.empty()) {
+      this->initAngularCachesNonPSD(*inputWS);
+    } else {
+      g_log.debug() << "Offset: " << par[0] << '\n';
+      this->m_detNeighbourOffset = static_cast<int>(par[0]);
+      this->initAngularCachesPSD(*inputWS);
+    }
   }
   const auto &X = inputWS->x(0);
 
@@ -250,7 +288,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
   const auto beamDir = referenceFrame->vecPointingAlongBeam();
   const auto upDir = referenceFrame->vecPointingUp();
   const auto horizontalDir = referenceFrame->vecPointingHorizontal();
-  const std::array<const V3D * const, 3>dirs{&beamDir, &upDir, &horizontalDir};
+  const std::array<const V3D *const, 3> dirs{&beamDir, &upDir, &horizontalDir};
 
   const auto &detectorInfo = workspace.detectorInfo();
   const auto &spectrumInfo = workspace.spectrumInfo();
@@ -284,8 +322,8 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
       double maxTheta{std::numeric_limits<double>::lowest()};
       for (const auto id : ids) {
         for (const auto dir : dirs) {
-          const auto thetas = minMaxTheta(detectorInfo, detectorInfo.indexOf(id),
-                                          samplePos, beamDir, *dir);
+          const auto thetas = minMaxTheta(
+              detectorInfo, detectorInfo.indexOf(id), samplePos, beamDir, *dir);
           minTheta = std::min(minTheta, thetas.first);
           maxTheta = std::max(maxTheta, thetas.second);
         }
@@ -357,5 +395,51 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
   }
 }
 
+void SofQWNormalisedPolygon::initAngularCachesTable(
+    const MatrixWorkspace &workspace, const TableWorkspace &widthTable) {
+  constexpr double skipDetector{-1.};
+  const size_t nhist = workspace.getNumberHistograms();
+  this->m_theta = std::vector<double>(nhist, skipDetector);
+  this->m_thetaWidths = std::vector<double>(nhist, skipDetector);
+  const auto &detIDs = widthTable.getColVector<int>(Col::DET_ID);
+  const auto &widths = widthTable.getColVector<double>(Col::THETA_WIDTH);
+  const auto &spectrumInfo = workspace.spectrumInfo();
+  for (size_t i = 0; i < nhist; ++i) {
+    m_progress->report("Reading detector angles");
+
+    // If no detector found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
+      continue;
+    }
+
+    const auto &det = spectrumInfo.detector(i);
+    // Check to see if there is an EFixed, if not skip it
+    try {
+      m_EmodeProperties.getEFixed(det);
+    } catch (std::runtime_error &) {
+      continue;
+    }
+
+    this->m_theta[i] = spectrumInfo.twoTheta(i);
+
+    if (spectrumInfo.hasUniqueDetector(i)) {
+      m_thetaWidths[i] = thetaWidth(det.getID(), detIDs, widths);
+    } else {
+      const auto &group = dynamic_cast<const DetectorGroup &>(det);
+      const auto ids = group.getDetectorIDs();
+      double width{std::numeric_limits<double>::lowest()};
+      for (const auto id : ids) {
+        width = std::max(width, thetaWidth(id, detIDs, widths));
+      }
+      m_thetaWidths[i] = width;
+      if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+        g_log.debug() << "Detector at spectrum = "
+                      << workspace.getSpectrum(i).getSpectrumNo()
+                      << ", width = " << m_thetaWidths[i] * rad2deg
+                      << " degrees\n";
+      }
+    }
+  }
+}
 } // namespace Algorithms
 } // namespace Mantid

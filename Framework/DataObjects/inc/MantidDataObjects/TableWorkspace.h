@@ -134,7 +134,7 @@ public:
                                "cast to proper TableCol type");
     }
   }
-  /** get access to the column vecotor for column with given name .
+  /** get access to the column vector for column with given name .
    *
    *  The operation is unsafe with regards to the operaitons resizing obtained
    *vector.
@@ -154,7 +154,7 @@ public:
                                "to proper TableCol type");
     }
   }
-  /** get access to column vecotor for column with given name  */
+  /** get access to column vector for column with given name  */
   template <class T>
   const std::vector<T> &getColVector(const std::string &name) const {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
