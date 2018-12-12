@@ -29,7 +29,8 @@ void HardThresholdBackground::configureIterator(
 
 bool HardThresholdBackground::isBackground(
     Mantid::API::IMDIterator *iterator) const {
-  return iterator->getNormalizedSignal() <= m_thresholdSignal;
+  auto signal = iterator->getNormalizedSignal();
+  return signal <= m_thresholdSignal || std::isnan(signal);
 }
 
 } // namespace Crystal

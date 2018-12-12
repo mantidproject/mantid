@@ -19,7 +19,17 @@ using namespace MantidQt::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
 }
+
+bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
+  return workspace->y(0).size() > 1;
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -256,8 +266,9 @@ void Elwin::unGroupInput(bool error) {
       ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
       ungroupAlg->execute();
     }
-    setPlotResultEnabled(true);
-    setSaveResultEnabled(true);
+  } else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
   }
 }
 
@@ -364,9 +375,8 @@ void Elwin::newInputFiles() {
 
   // Default to the first file
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
-  QString wsname = m_uiForm.cbPreviewFile->currentText();
-  auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsname.toStdString());
+  QString const wsname = m_uiForm.cbPreviewFile->currentText();
+  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
   setInputWorkspace(inputWs);
 }
 
@@ -391,9 +401,8 @@ void Elwin::newPreviewFileSelected(int index) {
     return;
   }
 
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsName.toStdString());
-  int numHist = static_cast<int>(ws->getNumberHistograms()) - 1;
+  auto const ws = getADSMatrixWorkspace(wsName.toStdString());
+  int const numHist = static_cast<int>(ws->getNumberHistograms()) - 1;
 
   m_uiForm.spPreviewSpec->setMaximum(numHist);
   m_uiForm.spPreviewSpec->setValue(0);
@@ -471,26 +480,26 @@ void Elwin::updateRS(QtProperty *prop, double val) {
 void Elwin::plotClicked() {
   setPlotResultIsPlotting(true);
 
-  auto workspaceBaseName =
+  auto const workspaceBaseName =
       getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
-                                   true))
-    plotSpectrum(workspaceBaseName + "_eq");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
-                                   true))
-    plotSpectrum(workspaceBaseName + "_eq2");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
-                                   true))
-    plotSpectrum(workspaceBaseName + "_elf");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   true, false))
-    plotSpectrum(workspaceBaseName + "_elt");
+  plotResult(workspaceBaseName + "_eq");
+  plotResult(workspaceBaseName + "_eq2");
+  plotResult(workspaceBaseName + "_elf");
+  plotResult(workspaceBaseName + "_elt");
 
   setPlotResultIsPlotting(false);
+}
+
+void Elwin::plotResult(QString const &workspaceName) {
+  auto const name = workspaceName.toStdString();
+  if (checkADSForPlotSaveWorkspace(name, true)) {
+    if (isWorkspacePlottable(getADSMatrixWorkspace(name)))
+      plotSpectrum(workspaceName);
+    else
+      showMessageBox("Plotting a spectrum of the workspace " + workspaceName +
+                     " failed : Workspace only has one data point");
+  }
 }
 
 /**
@@ -529,16 +538,20 @@ void Elwin::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
+void Elwin::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
 void Elwin::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void Elwin::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void Elwin::runClicked() { runTab(); }

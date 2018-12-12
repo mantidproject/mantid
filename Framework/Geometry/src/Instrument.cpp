@@ -8,12 +8,13 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -321,21 +322,22 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
 }
 
 /** Fill a vector with all the detectors contained (at any depth) in a named
- *component. For example,
- * you might have a bank10 with 4 tubes with 100 pixels each; this will return
- *the
- * 400 contained Detector objects.
+ * component. For example, you might have a bank10 with 4 tubes with 100
+ * pixels each; this will return the 400 contained Detector objects.
  *
  * @param[out] dets :: vector filled with detector pointers
  * @param bankName :: name of the parent component assembly that contains
- *detectors.
- *        The name must be unique, otherwise the first matching component
- *(getComponentByName)
- *        is used.
+ * detectors. The name must be unique, otherwise the first matching component
+ * (getComponentByName) is used.
+ * @throws NotFoundError if the given bank does not exist.
  */
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                                     const std::string &bankName) const {
   boost::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
+  if (!comp) {
+    throw Kernel::Exception::NotFoundError("Could not find component",
+                                           bankName);
+  }
   getDetectorsInBank(dets, *comp);
 }
 
@@ -1294,7 +1296,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     const int64_t parentIndex = componentInfo.parent(i);
     const bool makeTransform = parentIndex != oldParentIndex;
-    bool isRectangularDetectorPixel = false;
+    bool isDetFixedInBank = false;
 
     if (makeTransform) {
       oldParentIndex = parentIndex;
@@ -1311,15 +1313,15 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       const boost::shared_ptr<const IDetector> &baseDet =
           std::get<1>(baseInstr.m_detectorCache[i]);
 
-      isRectangularDetectorPixel = bool(
-          boost::dynamic_pointer_cast<const RectangularDetectorPixel>(baseDet));
+      isDetFixedInBank =
+          ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, i);
       if (detectorInfo.isMasked(i)) {
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
 
       if (makeTransform) {
-        // Special case: scaling for RectangularDetectorPixel.
-        if (isRectangularDetectorPixel) {
+        // Special case: scaling for GridDetectorPixel.
+        if (isDetFixedInBank) {
 
           size_t panelIndex = componentInfo.parent(parentIndex);
           const auto panelID = componentInfo.componentID(panelIndex);
@@ -1353,9 +1355,9 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
-      if (isRectangularDetectorPixel) {
+      if (isDetFixedInBank) {
         throw std::runtime_error("Cannot create legacy ParameterMap: Position "
-                                 "parameters for RectangularDetectorPixel are "
+                                 "parameters for GridDetectorPixel are "
                                  "not supported");
       }
       pmap->addV3D(componentId, ParameterMap::pos(), Kernel::toV3D(relPos));
@@ -1409,7 +1411,6 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto compInfo = componentInfo.cloneWithoutDetectorInfo();
   auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
-  detInfo->m_detectorInfo->setComponentInfo(compInfo->m_componentInfo.get());
   const auto parInstrument = ParComponentFactory::createInstrument(
       boost::shared_ptr<const Instrument>(this, NoDeleting()),
       boost::shared_ptr<ParameterMap>(&pmap, NoDeleting()));

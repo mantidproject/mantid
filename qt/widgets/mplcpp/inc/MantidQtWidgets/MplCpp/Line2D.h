@@ -1,23 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MPLCPP_LINE2D_H
 #define MPLCPP_LINE2D_H
-/*
- Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
 
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-*/
 #include "MantidQtWidgets/MplCpp/Artist.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
+#include <QColor>
 #include <vector>
 
 namespace MantidQt {
@@ -34,13 +26,15 @@ class MANTID_MPLCPP_DLL Line2D : public Artist {
 public:
   Line2D(Python::Object obj, std::vector<double> xdataOwner,
          std::vector<double> ydataOwner);
-  ~Line2D();
+  ~Line2D() noexcept;
   // not copyable
   Line2D(const Line2D &) = delete;
   Line2D &operator=(const Line2D &) = delete;
   // movable
   Line2D(Line2D &&) = default;
   Line2D &operator=(Line2D &&) = default;
+
+  QColor getColor() const;
 
 private:
   // Containers that own the data making up the line

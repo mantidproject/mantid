@@ -17,6 +17,7 @@ from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
+# from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
 class AlgorithmSelector(PluginWidget):
@@ -31,6 +32,10 @@ class AlgorithmSelector(PluginWidget):
         layout.addWidget(self.algorithm_selector)
         self.setLayout(layout)
 
+    def refresh(self):
+        """Refreshes the algorithm list"""
+        self.algorithm_selector.refresh()
+
 # ----------------- Plugin API --------------------
 
     def register_plugin(self):
@@ -39,5 +44,8 @@ class AlgorithmSelector(PluginWidget):
     def get_plugin_title(self):
         return "Algorithms"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass

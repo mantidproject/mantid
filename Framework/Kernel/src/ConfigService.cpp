@@ -51,7 +51,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/regex.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -2010,7 +2009,6 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
   // If this is already a full path, nothing to do
   if (Poco::Path(fName).isAbsolute())
     return fName;
-
   // First try the path relative to the current directory. Can throw in some
   // circumstances with extensions that have wild cards
   try {
@@ -2019,9 +2017,13 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
       return fullPath.path();
   } catch (std::exception &) {
   }
-
-  for (const auto &searchPath :
-       Kernel::ConfigService::Instance().getDataSearchDirs()) {
+  Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
+  std::vector<std::string> directoryNames = configService.getDataSearchDirs();
+  std::vector<std::string> instrDirectories =
+      configService.getInstrumentDirectories();
+  directoryNames.insert(directoryNames.end(), instrDirectories.begin(),
+                        instrDirectories.end());
+  for (const auto &searchPath : directoryNames) {
     g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
 // On windows globbing is not working properly with network drives
 // for example a network drive containing a $

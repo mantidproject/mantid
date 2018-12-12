@@ -2,7 +2,7 @@
  AlgorithmFactoryImpl
 ======================
 
-This a python binding to the C++ class Mantid::API::AlgorithmFactoryImpl.
+This is a Python binding to the C++ class Mantid::API::AlgorithmFactoryImpl.
 
 
 .. module:`mantid.api`

@@ -8,7 +8,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {
@@ -112,10 +113,14 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  if (dynamic_cast<const Geometry::RectangularDetectorPixel *>(comp.get())) {
+  const auto &componentInfo =
+      inputW ? inputW->componentInfo() : inputP->componentInfo();
+  auto compIndex = componentInfo.indexOf(comp->getComponentID());
+  if (ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo,
+                                                      compIndex)) {
     // DetectorInfo makes changing positions possible but we keep the old
-    // behavior of ignoring position changes for RectangularDetectorPixel.
-    g_log.warning("Component is a RectangularDetectorPixel, moving is not "
+    // behavior of ignoring position changes for Structured banks.
+    g_log.warning("Component is fixed within a structured bank, moving is not "
                   "possible, doing nothing.");
     return;
   }

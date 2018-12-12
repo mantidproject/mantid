@@ -11,9 +11,14 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
@@ -26,6 +31,25 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceHistory");
+struct AlgorithmHistorySearch {
+  bool operator()(const AlgorithmHistory_sptr &lhs,
+                  const AlgorithmHistory_sptr &rhs) {
+    return (*lhs) < (*rhs);
+  }
+};
+struct AlgorithmHistoryHasher {
+  size_t operator()(const AlgorithmHistory_sptr &x) const {
+    std::size_t nameAsSeed = std::hash<std::string>{}(x->name());
+    boost::hash_combine(nameAsSeed, x->executionDate().totalNanoseconds());
+    return nameAsSeed;
+  }
+};
+struct AlgorithmHistoryComparator {
+  bool operator()(const AlgorithmHistory_sptr &a,
+                  const AlgorithmHistory_sptr &b) const {
+    return a->uuid() == b->uuid();
+  }
+};
 } // namespace
 
 /// Default Constructor
@@ -64,12 +88,25 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
   // Merge the histories
   const AlgorithmHistories &otherAlgorithms =
       otherHistory.getAlgorithmHistories();
-  m_algorithms.insert(otherAlgorithms.begin(), otherAlgorithms.end());
+
+  for (const auto &algHistory : otherAlgorithms) {
+    this->addHistory(algHistory);
+  }
+
+  std::unordered_set<AlgorithmHistory_sptr, AlgorithmHistoryHasher,
+                     AlgorithmHistoryComparator>
+      set;
+  for (auto i : m_algorithms)
+    set.insert(i);
+  m_algorithms.assign(set.begin(), set.end());
+  std::sort(m_algorithms.begin(), m_algorithms.end(), AlgorithmHistorySearch());
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
 void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory) {
-  m_algorithms.insert(std::move(algHistory));
+  // Assume it is always sorted as algorithm history should only be inserted in
+  // the correct order
+  m_algorithms.emplace_back(std::move(algHistory));
 }
 
 /*
@@ -336,14 +373,16 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
     NAME = 0,      //< algorithms name
     EXEC_TIME = 1, //< when the algorithm was run
     EXEC_DUR = 2,  //< execution time for the algorithm
-    PARAMS = 3     //< the algorithm's parameters
+    UUID = 3,      //< the universal unique id of the algorithm
+    PARAMS = 4     //< the algorithm's parameters
   };
 
   std::vector<std::string> info;
   boost::split(info, rawData, boost::is_any_of("\n"));
 
   const size_t nlines = info.size();
-  if (nlines < 4) { // ignore badly formed history entries
+  if (nlines < 4) { // ignore badly formed history entries still at 4 so that
+                    // legacy files can be loaded, 5 is ideal for newer files
     throw std::runtime_error(
         "Malformed history record: Incorrect record size.");
   }
@@ -362,16 +401,24 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   // Get the execution date/time
   std::string date, time;
   getWordsInString(info[EXEC_TIME], dummy, dummy, date, time);
-  Poco::DateTime start_timedate;
-  // This is needed by the Poco parsing function
-  int tzdiff(-1);
   Mantid::Types::Core::DateAndTime utc_start;
-  if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
-                                      start_timedate, tzdiff)) {
-    g_log.warning() << "Error parsing start time in algorithm history entry."
-                    << "\n";
-    utc_start = Types::Core::DateAndTime::defaultTime();
+  // If not legacy version construct normally else Parse in the legacy data
+  if (std::isdigit(date[6])) {
+    Mantid::Types::Core::DateAndTime timeConstruction(date + "T" + time);
+    utc_start = timeConstruction;
+  } else {
+    Poco::DateTime start_timedate;
+    // This is needed by the Poco parsing function
+    int tzdiff(-1);
+    if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
+                                        start_timedate, tzdiff)) {
+      g_log.warning() << "Error parsing start time in algorithm history entry."
+                      << "\n";
+      utc_start = Types::Core::DateAndTime::defaultTime();
+    }
+    utc_start.set_from_time_t(start_timedate.timestamp().epochTime());
   }
+
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
   double dur = boost::lexical_cast<double>(temp);
@@ -380,16 +427,28 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
                     << "\n";
     dur = -1.0;
   }
-  // Convert the timestamp to time_t to DateAndTime
-  utc_start.set_from_time_t(start_timedate.timestamp().epochTime());
+
+  /// To allow legacy files we must check if it is parameters and set the
+  /// variables accordingly. If legacy generate a new UUID for it.
+  std::string uuid;
+  size_t paramNum;
+  if (info[3] != "Parameters:") {
+    uuid = info[UUID];
+    uuid.erase(uuid.find("UUID: "), 6);
+    paramNum = PARAMS;
+  } else {
+    uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    paramNum = 3;
+  }
+
   // Create the algorithm history
-  API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,
+  API::AlgorithmHistory alg_hist(algName, version, uuid, utc_start, dur,
                                  Algorithm::g_execCount);
   // Simulate running an algorithm
   ++Algorithm::g_execCount;
 
   // Add property information
-  for (size_t index = static_cast<size_t>(PARAMS) + 1; index < nlines;
+  for (size_t index = static_cast<size_t>(paramNum) + 1; index < nlines;
        ++index) {
     const std::string line = info[index];
     std::string::size_type colon = line.find(':');
@@ -430,6 +489,10 @@ boost::shared_ptr<HistoryView> WorkspaceHistory::createView() const {
 std::ostream &operator<<(std::ostream &os, const WorkspaceHistory &WH) {
   WH.printSelf(os);
   return os;
+}
+
+bool WorkspaceHistory::operator==(const WorkspaceHistory &otherHistory) const {
+  return m_algorithms == otherHistory.m_algorithms;
 }
 
 } // namespace API

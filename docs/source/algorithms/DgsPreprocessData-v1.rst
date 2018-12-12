@@ -14,7 +14,7 @@ beam parameter. This parameter, IncidentBeamNormalisation, is controlled
 from the reduction property manager. It can have the values *None*,
 *ByCurrent* or *ByMonitor*. For SNS, monitor workspaces need to be
 passed. Parameters in italics are controlled by the
-`instrument parameter file (IPF) <http://www.mantidproject.org/InstrumentParameterFile>`_
+:ref:`instrument parameter file (IPF) <InstrumentParameterFile>`
 unless provided to the algorithm via a property manager. The mappings are given
 below.
 

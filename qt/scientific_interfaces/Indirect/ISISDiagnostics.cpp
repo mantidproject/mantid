@@ -124,9 +124,17 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
-  // Handles plotting and saving
+  // Handles running, plotting and saving
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 
   // Set default UI state
   sliceTwoRanges(nullptr, false);
@@ -445,17 +453,16 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
  * Called when a user starts to type / edit the runs to load.
  */
 void ISISDiagnostics::pbRunEditing() {
-  emit updateRunButton(false, "Editing...",
-                       "Run numbers are curently being edited.");
+  updateRunButton(false, "unchanged", "Editing...",
+                  "Run numbers are curently being edited.");
 }
 
 /**
  * Called when the FileFinder starts finding the files.
  */
 void ISISDiagnostics::pbRunFinding() {
-  emit updateRunButton(
-      false, "Finding files...",
-      "Searchig for data files for the run numbers entered...");
+  updateRunButton(false, "unchanged", "Finding files...",
+                  "Searchig for data files for the run numbers entered...");
   m_uiForm.dsInputFiles->setEnabled(false);
 }
 
@@ -463,23 +470,29 @@ void ISISDiagnostics::pbRunFinding() {
  * Called when the FileFinder has finished finding the files.
  */
 void ISISDiagnostics::pbRunFinished() {
-  if (!m_uiForm.dsInputFiles->isValid()) {
-    emit updateRunButton(
-        false, "Invalid Run(s)",
+  if (!m_uiForm.dsInputFiles->isValid())
+    updateRunButton(
+        false, "unchanged", "Invalid Run(s)",
         "Cannot find data files for some of the run numbers enetered.");
-  } else {
-    emit updateRunButton();
-  }
+  else
+    updateRunButton();
 
   m_uiForm.dsInputFiles->setEnabled(true);
 }
 
 /**
+ * Handle when Run is clicked
+ */
+void ISISDiagnostics::runClicked() { runTab(); }
+
+/**
  * Handles mantid plotting
  */
 void ISISDiagnostics::plotClicked() {
+  setPlotIsPlotting(true);
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
     plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -490,5 +503,43 @@ void ISISDiagnostics::saveClicked() {
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }
+
+void ISISDiagnostics::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ISISDiagnostics::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+
+void ISISDiagnostics::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void ISISDiagnostics::setOutputButtonsEnabled(
+    std::string const &enableOutputButtons) {
+  bool enable = enableOutputButtons == "enable" ? true : false;
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void ISISDiagnostics::updateRunButton(bool enabled,
+                                      std::string const &enableOutputButtons,
+                                      QString const message,
+                                      QString const tooltip) {
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
+  if (enableOutputButtons != "unchanged")
+    setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void ISISDiagnostics::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

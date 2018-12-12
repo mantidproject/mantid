@@ -35,18 +35,24 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidgetSimple
     : public WorkspaceTreeWidget {
   Q_OBJECT
 public:
-  explicit WorkspaceTreeWidgetSimple(QWidget *parent = nullptr);
+  explicit WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *parent = nullptr);
   ~WorkspaceTreeWidgetSimple();
 
   // Context Menu Handlers
   void popupContextMenu() override;
 
 signals:
-  void plotSpectrumClicked(const QStringList &workspaceName);
-  void overplotSpectrumClicked(const QStringList &workspaceName);
-  void plotSpectrumWithErrorsClicked(const QStringList &workspaceName);
-  void overplotSpectrumWithErrorsClicked(const QStringList &workspaceName);
-  void plotColorfillClicked(const QStringList &workspaceName);
+  void plotSpectrumClicked(const QStringList &workspaceNames);
+  void overplotSpectrumClicked(const QStringList &workspaceNames);
+  void plotSpectrumWithErrorsClicked(const QStringList &workspaceNames);
+  void overplotSpectrumWithErrorsClicked(const QStringList &workspaceNames);
+  void plotColorfillClicked(const QStringList &workspaceNames);
+  void sampleLogsClicked(const QStringList &workspaceName);
+  void showInstrumentClicked(const QStringList &workspaceNames);
+  void showDataClicked(const QStringList &workspaceNames);
+
+  void workspaceDoubleClicked(const QString &workspaceName);
+  void treeSelectionChanged();
 
 private slots:
   void onPlotSpectrumClicked();
@@ -54,10 +60,14 @@ private slots:
   void onPlotSpectrumWithErrorsClicked();
   void onOverplotSpectrumWithErrorsClicked();
   void onPlotColorfillClicked();
+  void onSampleLogsClicked();
+  void onShowInstrumentClicked();
+  void onShowDataClicked();
 
 private:
   QAction *m_plotSpectrum, *m_overplotSpectrum, *m_plotSpectrumWithErrs,
-      *m_overplotSpectrumWithErrs, *m_plotColorfill;
+      *m_overplotSpectrumWithErrs, *m_plotColorfill, *m_sampleLogs,
+      *m_showInstrument, *m_showData;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -53,6 +53,9 @@ public:
                           const bool load_det_cal,
                           const std::string &det_cal_file,
                           const std::string &det_cal_file2);
+  bool convertToHKL(const std::string &ev_ws_name,
+                    const std::string &md_ws_name, const double minQ,
+                    const double maxQ);
 
   /// Find peaks in MD workspace and set peaks into peaks workspace
   bool findPeaks(const std::string &ev_ws_name, const std::string &md_ws_name,

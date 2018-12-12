@@ -128,6 +128,7 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
+  ConfigService::Instance();
   g_log.notice() << Mantid::welcomeMessage() << '\n';
   loadPlugins();
   disableNexusOutput();

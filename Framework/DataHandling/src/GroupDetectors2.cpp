@@ -40,6 +40,7 @@ using namespace DataObjects;
 using std::size_t;
 
 namespace { // anonymous namespace
+enum class Behaviour { SUM, AVERAGE };
 
 /**
  * Translate the PerformIndexOperations processing instructions from a vector
@@ -958,70 +959,83 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
                                    const double prog4Copy, const bool keepAll,
                                    const std::set<int64_t> &unGroupedSet,
                                    Indexing::IndexInfo &indexInfo) {
-  // get "Behaviour" string
-  const std::string behaviour = getProperty("Behaviour");
-  int bhv = 0;
-  if (behaviour == "Average")
-    bhv = 1;
-
-  API::MatrixWorkspace_sptr beh = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", static_cast<int>(m_GroupWsInds.size()), 1, 1);
-
-  g_log.debug() << name() << ": Preparing to group spectra into "
-                << m_GroupWsInds.size() << " groups\n";
-
-  // where we are copying spectra to, we start copying to the start of the
-  // output workspace
+  const std::string behaviourChoice = getProperty("Behaviour");
+  const auto behaviour =
+      behaviourChoice == "Sum" ? Behaviour::SUM : Behaviour::AVERAGE;
   size_t outIndex = 0;
-  // Only used for averaging behaviour. We may have a 1:1 map where a Divide
-  // would be waste as it would be just dividing by 1
-  bool requireDivide(false);
   const auto &spectrumInfo = inputWS->spectrumInfo();
-
+  const auto nFinalHistograms =
+      m_GroupWsInds.size() + (keepAll ? unGroupedSet.size() : 0);
   auto spectrumGroups = std::vector<std::vector<size_t>>();
+  spectrumGroups.reserve(nFinalHistograms);
   auto spectrumNumbers = std::vector<Indexing::SpectrumNumber>();
+  spectrumNumbers.reserve(nFinalHistograms);
 
-  for (storage_map::const_iterator it = m_GroupWsInds.begin();
-       it != m_GroupWsInds.end(); ++it) {
+  for (const auto &group : m_GroupWsInds) {
     // This is the grouped spectrum
     auto &outSpec = outputWS->getSpectrum(outIndex);
 
     // The spectrum number of the group is the key
-    spectrumNumbers.push_back(it->first);
+    spectrumNumbers.emplace_back(group.first);
     // Start fresh with no detector IDs
     outSpec.clearDetectorIDs();
 
     // Copy over X data from first spectrum, the bin boundaries for all spectra
     // are assumed to be the same here
     outSpec.setSharedX(inputWS->sharedX(0));
-    auto outputHistogram = outSpec.histogram();
 
     // Keep track of number of detectors required for masking
-    size_t nonMaskedSpectra(0);
-    auto spectrumGroup = std::vector<size_t>();
+    std::vector<size_t> spectrumGroup;
+    spectrumGroup.reserve(group.second.size());
 
-    for (auto originalWI : it->second) {
-      // detectors to add to firstSpecNum
-      const auto &inputSpectrum = inputWS->getSpectrum(originalWI);
-
-      outputHistogram += inputSpectrum.histogram();
-      outSpec.addDetectorIDs(inputSpectrum.getDetectorIDs());
-
-      if (!isMaskedDetector(spectrumInfo, originalWI))
-        ++nonMaskedSpectra;
-
-      spectrumGroup.push_back(originalWI);
+    auto &Ys = outSpec.mutableY();
+    auto &Es = outSpec.mutableE();
+    std::vector<double> sum(Ys.size(), 0.);
+    std::vector<double> errorSum(Ys.size(), 0.);
+    std::vector<int> count(Ys.size(), 0);
+    for (auto originalWI : group.second) {
+      const auto &inSpec = inputWS->getSpectrum(originalWI);
+      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
+      spectrumGroup.emplace_back(originalWI);
+      if (spectrumInfo.hasDetectors(originalWI) &&
+          spectrumInfo.isMasked(originalWI)) {
+        continue;
+      }
+      const auto &Ys = inputWS->y(originalWI);
+      const auto &Es = inputWS->e(originalWI);
+      if (inputWS->hasMaskedBins(originalWI)) {
+        const auto &maskedBins = inputWS->maskedBins(originalWI);
+        for (size_t binIndex = 0; binIndex < Ys.size(); ++binIndex) {
+          if (maskedBins.count(binIndex) == 0) {
+            sum[binIndex] += Ys[binIndex];
+            errorSum[binIndex] += Es[binIndex] * Es[binIndex];
+            count[binIndex] += 1;
+          }
+        }
+      } else {
+        for (size_t binIndex = 0; binIndex < Ys.size(); ++binIndex) {
+          sum[binIndex] += Ys[binIndex];
+          errorSum[binIndex] += Es[binIndex] * Es[binIndex];
+          count[binIndex] += 1;
+        }
+      }
     }
-
-    spectrumGroups.push_back(spectrumGroup);
-
-    outSpec.setHistogram(outputHistogram);
-
-    if (nonMaskedSpectra == 0)
-      ++nonMaskedSpectra; // Avoid possible divide by zero
-    if (!requireDivide)
-      requireDivide = (nonMaskedSpectra > 1);
-    beh->mutableY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
+    spectrumGroups.emplace_back(std::move(spectrumGroup));
+    for (size_t binIndex = 0; binIndex < sum.size(); ++binIndex) {
+      errorSum[binIndex] = std::sqrt(errorSum[binIndex]);
+      if (behaviour == Behaviour::AVERAGE) {
+        const auto n = static_cast<double>(count[binIndex]);
+        if (n != 0) {
+          sum[binIndex] /= n;
+          errorSum[binIndex] /= n;
+        } else {
+          sum[binIndex] = 0;
+          errorSum[binIndex] = 0;
+        }
+      }
+      Ys[binIndex] = sum[binIndex];
+      Es[binIndex] = errorSum[binIndex];
+    }
 
     // make regular progress reports and check for cancelling the algorithm
     if (outIndex % INTERVAL == 0) {
@@ -1042,28 +1056,15 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       if (originalWI < 0)
         continue;
 
-      spectrumGroups.push_back(std::vector<size_t>(1, originalWI));
+      spectrumGroups.emplace_back(std::vector<size_t>(1, originalWI));
 
       auto spectrumNumber = inputWS->getSpectrum(originalWI).getSpectrumNo();
-      spectrumNumbers.push_back(spectrumNumber);
+      spectrumNumbers.emplace_back(spectrumNumber);
     }
   }
 
   indexInfo = Indexing::group(inputWS->indexInfo(), std::move(spectrumNumbers),
                               spectrumGroups);
-
-  if (bhv == 1 && requireDivide) {
-    g_log.debug() << "Running Divide algorithm to perform averaging.\n";
-    Mantid::API::IAlgorithm_sptr divide = createChildAlgorithm("Divide");
-    divide->initialize();
-    divide->setProperty<API::MatrixWorkspace_sptr>("LHSWorkspace", outputWS);
-    divide->setProperty<API::MatrixWorkspace_sptr>("RHSWorkspace", beh);
-    divide->setProperty<API::MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
-    divide->execute();
-  }
-
-  g_log.debug() << name() << " created " << outIndex
-                << " new grouped spectra\n";
   return outIndex;
 }
 
@@ -1126,7 +1127,8 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
 
       // detectors to add to the output spectrum
       outEL.addDetectorIDs(fromEL.getDetectorIDs());
-      if (!isMaskedDetector(spectrumInfo, originalWI)) {
+      if (!spectrumInfo.hasDetectors(originalWI) ||
+          !spectrumInfo.isMasked(originalWI)) {
         ++nonMaskedSpectra;
       }
     }
@@ -1160,16 +1162,6 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   g_log.debug() << name() << " created " << outIndex
                 << " new grouped spectra\n";
   return outIndex;
-}
-
-bool GroupDetectors2::isMaskedDetector(const API::SpectrumInfo &spectrum,
-                                       const size_t index) const {
-  if (spectrum.hasDetectors(index)) {
-    return spectrum.isMasked(index);
-  } else {
-    // Can't be masked if it doesn't exist
-    return false;
-  }
 }
 
 // RangeHelper
@@ -1256,7 +1248,7 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
 
   const std::string pattern = getPropertyValue("GroupingPattern");
 
-  boost::regex re(
+  static const boost::regex re(
       R"(^\s*[0-9]+\s*$|^(\s*,*[0-9]+(\s*(,|:|\+|\-)\s*)*[0-9]*)*$)");
 
   try {

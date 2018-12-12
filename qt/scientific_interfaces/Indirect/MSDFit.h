@@ -29,20 +29,18 @@ protected slots:
   void updateModelFitTypeString();
 
 protected:
-  bool shouldEnablePlotResult() override;
-
+  void setRunIsRunning(bool running) override;
+  void setFitSingleSpectrumIsFitting(bool fitting) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
-
-  void setRunIsRunning(bool running) override;
 
 private:
   void setupFitTab() override;
 
+  void setPlotResultIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
-
-  void setPlotResultIsPlotting(bool plotting);
 
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::MSDFit> m_uiForm;

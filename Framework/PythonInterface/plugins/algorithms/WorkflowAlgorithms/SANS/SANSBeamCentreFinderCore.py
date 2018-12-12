@@ -107,10 +107,9 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # Change cloned state
         # --------
         # Remove phi Masking
-        if state.mask.phi_min:
-            state.mask.phi_min = 0.0
-        if state.mask.phi_max:
-            state.mask.phi_max = 0.0
+        state.mask.phi_min = 90.0
+        state.mask.phi_max = -90.0
+        state.mask.use_mask_phi_mirror = True
 
         # Set compatibility mode
         #state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value

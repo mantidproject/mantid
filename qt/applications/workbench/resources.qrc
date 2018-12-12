@@ -1,5 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/images">
     <file alias="MantidSplashScreen.png">../../../images/MantidSplashScreen.png</file>
+    <file alias="MantidSplashScreen_4k.jpg">../../../images/MantidSplashScreen_4k.jpg</file>
+    <file alias="MantidIcon.ico">../../../images/mantid_workbench.ico</file>
 </qresource>
 </RCC>

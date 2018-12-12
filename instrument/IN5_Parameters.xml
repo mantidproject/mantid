@@ -7,14 +7,16 @@
 			<value val="direct" />
 		</parameter>
 
-		<!-- Distance between sample and equatorial line of the detector. Mandatory 
+		<!-- Distance between sample and equatorial line of the detector. Mandatory
 			if you want to correct the flight paths. -->
 		<parameter name="l2" type="string">
 			<value val="4.0" />
 		</parameter>
-
-		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser 
-			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
+		<parameter name="natural-angle-step" type="float">
+			<value val="0.3724" />
+		</parameter>
+		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
+			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->
 		<parameter name="formula_eff" type="string">
 			<value val="1-exp(-5.6/sqrt(e))" />
@@ -73,7 +75,9 @@
 		<parameter name="sample_logs_fail_tolerances" type="string">
 			<value val="0, 0, 0" />
 		</parameter>
-
+		<parameter name="temperature_sample_log" type="string">
+			<value val="sample.temperature" />
+		</parameter>
 	</component-link>
 
 </parameter-file>

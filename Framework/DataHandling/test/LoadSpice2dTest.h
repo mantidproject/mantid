@@ -173,7 +173,7 @@ public:
     TS_ASSERT_EQUALS(*np, 4);
 
     // Check detector position
-    prop = ws2d->run().getProperty("sample-detector-distance");
+    prop = ws2d->run().getProperty("total-sample-detector-distance");
     Mantid::Kernel::PropertyWithValue<double> *tsdd =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     TS_ASSERT_EQUALS(i->getComponentByName("detector1")->getPos().Z(),
