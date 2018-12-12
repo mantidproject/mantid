@@ -2,7 +2,7 @@
  UIntPropertyWithValue
 =======================
 
-This a python binding to the C++ class Mantid::Kernel::UIntPropertyWithValue.
+This is a Python binding to the C++ class Mantid::Kernel::UIntPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 Test some features of MDWorkspaces, such as
@@ -5,7 +11,7 @@ file-backed MDWorkspaces.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import os
 from mantid.simpleapi import *
 from mantid.api import *
@@ -15,7 +21,7 @@ from six.moves import range
 ###############################################################################
 
 
-class PlusMDTest(stresstesting.MantidStressTest):
+class PlusMDTest(systemtesting.MantidSystemTest):
 
     _saved_filename = None
     original_binned = None
@@ -134,7 +140,7 @@ class PlusMDTest(stresstesting.MantidStressTest):
 ###############################################################################
 
 
-class MergeMDTest(stresstesting.MantidStressTest):
+class MergeMDTest(systemtesting.MantidSystemTest):
 
     _saved_filenames = []
 

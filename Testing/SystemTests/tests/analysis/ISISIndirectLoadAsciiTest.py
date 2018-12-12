@@ -1,12 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import mantid.simpleapi as ms
 
 #====================================================================================================
 
 
-class IN10SiliconTest(stresstesting.MantidStressTest):
+class IN10SiliconTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         import IndirectNeutron as Main
@@ -29,7 +35,7 @@ class IN10SiliconTest(stresstesting.MantidStressTest):
 #====================================================================================================
 
 
-class IN13CaFTest(stresstesting.MantidStressTest):
+class IN13CaFTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         import IndirectNeutron as Main
@@ -79,7 +85,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
 
 
 #====================================================================================================
-class IN16SiliconTest(stresstesting.MantidStressTest):
+class IN16SiliconTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         import IndirectNeutron as Main

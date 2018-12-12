@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -22,6 +28,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include <H5Cpp.h>
 #include <boost/function.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
@@ -44,6 +51,17 @@ using namespace API;
 using namespace DataObjects;
 using Types::Core::DateAndTime;
 
+/**
+ * Based on the current group in the file, does the named sub-entry exist?
+ * @param file : File handle. This is not modified, but cannot be const
+ * @param name : sub entry name to look for
+ * @return true only if it exists
+ */
+bool exists(::NeXus::File &file, const std::string &name) {
+  auto entries = file.getEntries();
+  return entries.find(name) != entries.end();
+}
+
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor
  */
@@ -51,8 +69,7 @@ LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0),
       longest_tof(0), shortest_tof(0), bad_tofs(0), discarded_events(0),
       compressTolerance(0), m_instrument_loaded_correctly(false),
-      loadlogs(false), m_logs_loaded_correctly(false), event_id_is_spec(false) {
-}
+      loadlogs(false), event_id_is_spec(false) {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -76,7 +93,7 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialisation method.
  */
 void LoadEventNexus::init() {
-  const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
+  const std::vector<std::string> exts{".nxs.h5", ".nxs", "_event.nxs"};
   this->declareProperty(
       Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
                                         exts),
@@ -383,12 +400,69 @@ void LoadEventNexus::exec() {
   }
 }
 
+std::pair<DateAndTime, DateAndTime>
+firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
+  file.openData("event_time_zero");
+
+  if (!file.hasAttr("offset"))
+    throw std::runtime_error("No ISO8601 offset attribute provided");
+
+  const auto heldTimeZeroType = file.getInfo().type;
+  // Nexus only requires event_time_zero to be a NXNumber, we support two
+  // possibilities for held type
+
+  std::string isooffset; // ISO8601 offset
+  file.getAttr("offset", isooffset);
+  DateAndTime offset(isooffset);
+  std::string unit; // time units
+  if (file.hasAttr("unit"))
+    file.getAttr("unit", unit);
+  file.closeData();
+
+  // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
+  if (heldTimeZeroType == ::NeXus::UINT64) {
+    if (unit != "ns")
+      logger.warning(
+          "event_time_zero is uint64_t, but units not in ns. Found to be: " +
+          unit);
+    std::vector<uint64_t> nanoseconds;
+    file.readData("event_time_zero", nanoseconds);
+    if (nanoseconds.empty())
+      throw std::runtime_error(
+          "No event time zeros. Cannot establish run start or end");
+    auto absoluteFirst = DateAndTime(int64_t(0), int64_t(nanoseconds.front())) +
+                         offset.totalNanoseconds();
+    auto absoluteLast = DateAndTime(int64_t(0), int64_t(nanoseconds.back())) +
+                        offset.totalNanoseconds();
+    return std::make_pair(absoluteFirst, absoluteLast);
+  } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
+    if (unit != "second")
+      logger.warning("event_time_zero is double_t, but units not in seconds. "
+                     "Found to be: " +
+                     unit);
+    std::vector<double> seconds;
+    file.readData("event_time_zero", seconds);
+    if (seconds.empty())
+      throw std::runtime_error(
+          "No event time zeros. Cannot establish run start or end");
+    auto absoluteFirst =
+        DateAndTime(seconds.front(), double(0)) + offset.totalNanoseconds();
+    auto absoluteLast =
+        DateAndTime(seconds.back(), double(0)) + offset.totalNanoseconds();
+    return std::make_pair(absoluteFirst, absoluteLast);
+  }
+
+  else {
+    throw std::runtime_error("Unrecognised type for event_time_zero");
+  }
+} // namespace DataHandling
+
 /**
  * Get the number of events in the currently opened group.
  *
  * @param file The handle to the nexus file opened to the group to look at.
- * @param hasTotalCounts Whether to try looking at the total_counts field. This
- * variable will be changed if the field is not there.
+ * @param hasTotalCounts Whether to try looking at the total_counts field.
+ * This variable will be changed if the field is not there.
  * @param oldNeXusFileNames Whether to try using old names. This variable will
  * be changed if it is determined that old names are being used.
  *
@@ -398,12 +472,20 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
                       bool &oldNeXusFileNames) {
   // try getting the value of total_counts
   if (hasTotalCounts) {
-    try {
-      uint64_t numEvents;
-      file.readData("total_counts", numEvents);
-      return numEvents;
-    } catch (::NeXus::Exception &) {
-      hasTotalCounts = false; // carry on with the field not existing
+    hasTotalCounts = false;
+    if (exists(file, "total_counts")) {
+      try {
+        file.openData("total_counts");
+        auto info = file.getInfo();
+        file.closeData();
+        if (info.type == NeXus::UINT64) {
+          uint64_t numEvents;
+          file.readData("total_counts", numEvents);
+          hasTotalCounts = true;
+          return numEvents;
+        }
+      } catch (::NeXus::Exception &) {
+      }
     }
   }
 
@@ -435,8 +517,8 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
  * @param localWorkspace :: Templated workspace in which to put the instrument
  *geometry
  * @param alg :: Handle of the algorithm
- * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
- *otherwise NULL.
+ * @param returnpulsetimes :: flag to return shared pointer for
+ *BankPulseTimes, otherwise NULL.
  * @param nPeriods : Number of periods (write to)
  * @param periodLog : Period logs DateAndTime to int map.
  *
@@ -480,13 +562,13 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     }
 
     // If successful, we can try to load the pulse times
-    Kernel::TimeSeriesProperty<double> *log =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            localWorkspace->mutableRun().getProperty("proton_charge"));
     std::vector<Types::Core::DateAndTime> temp;
-    if (log)
-      temp = log->timesAsVector();
-    // if (returnpulsetimes) out = new BankPulseTimes(temp);
+    if (localWorkspace->run().hasProperty("proton_charge")) {
+      auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+          localWorkspace->mutableRun().getProperty("proton_charge"));
+      if (log)
+        temp = log->timesAsVector();
+    }
     if (returnpulsetimes)
       out = boost::make_shared<BankPulseTimes>(temp);
 
@@ -530,8 +612,8 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
  *instrument
  *geometry
  * @param alg :: Handle of the algorithm
- * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
- *otherwise NULL.
+ * @param returnpulsetimes :: flag to return shared pointer for
+ *BankPulseTimes, otherwise NULL.
  * @param nPeriods : Number of periods (write to)
  * @param periodLog : Period logs DateAndTime to int map.
  *
@@ -570,36 +652,45 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0, 0);
+  bool takeTimesFromEvents = false;
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
   auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
-  if (!m_logs_loaded_correctly) {
-    if (loadlogs) {
-      prog->doReport("Loading DAS logs");
+  if (loadlogs) {
+    prog->doReport("Loading DAS logs");
 
-      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
-          m_filename, m_ws, *this, true, nPeriods, periodLog);
+    m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
+        m_filename, m_ws, *this, true, nPeriods, periodLog);
 
+    try {
       run_start = m_ws->getFirstPulseTime();
-      m_logs_loaded_correctly = true;
-    } else {
-      g_log.information() << "Skipping the loading of sample logs!\n"
-                          << "Reading the start time directly from /"
-                          << m_top_entry_name << "/start_time\n";
-      // start_time is read and set
-      m_file->openPath("/");
-      m_file->openGroup(m_top_entry_name, "NXentry");
-      std::string tmp;
-      m_file->readData("start_time", tmp);
-      m_file->closeGroup();
-      run_start = createFromSanitizedISO8601(tmp);
-      m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
-                                     true);
+    } catch (Kernel::Exception::NotFoundError &) {
+      /*
+        This is added to (a) support legacy behaviour of continuing to take
+        times from the proto_charge log, but (b) allowing a fall back of
+        getting run start and end from actual pulse times within the
+        NXevent_data group. Note that the latter is better Nexus compliant.
+      */
+      takeTimesFromEvents = true;
     }
+  } else {
+    g_log.information() << "Skipping the loading of sample logs!\n"
+                        << "Reading the start time directly from /"
+                        << m_top_entry_name << "/start_time\n";
+    // start_time is read and set
+    m_file->openPath("/");
+    m_file->openGroup(m_top_entry_name, "NXentry");
+    std::string tmp;
+    m_file->readData("start_time", tmp);
+    m_file->closeGroup();
+    run_start = createFromSanitizedISO8601(tmp);
+    m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
+                                   true);
   }
   m_ws->setNPeriods(
-      nPeriods, periodLog); // This is how many workspaces we are going to make.
+      static_cast<size_t>(nPeriods),
+      periodLog); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == nullptr) {
@@ -610,12 +701,19 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   if (!m_ws->getInstrument() || !m_instrument_loaded_correctly) {
     // Load the instrument (if not loaded before)
     prog->report("Loading instrument");
+    // Note that closing an re-opening the file is needed here for loading
+    // instruments directly from the nexus file containing the event data.
+    // This may not be needed in the future if both LoadEventNexus and
+    // LoadInstrument are made to use the same Nexus/HDF5 library
+    m_file->close();
     m_instrument_loaded_correctly =
         loadInstrument(m_filename, m_ws, m_top_entry_name, this);
 
     if (!m_instrument_loaded_correctly)
-      throw std::runtime_error(
-          "Instrument was not initialized correctly! Loading cannot continue.");
+      throw std::runtime_error("Instrument was not initialized correctly! "
+                               "Loading cannot continue.");
+    // reopen file
+    safeOpenFile(m_filename);
   }
 
   // top level file information
@@ -633,30 +731,40 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool oldNeXusFileNames(false);
   bool hasTotalCounts(true);
   bool haveWeights = false;
+  auto firstPulseT = DateAndTime::maximum();
   for (; it != entries.end(); ++it) {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
+
     if (entry_class == classType) {
       // open the group
       m_file->openGroup(entry_name, classType);
 
+      if (takeTimesFromEvents) {
+        /* If we are here, we are loading logs, but have failed to establish
+         * the run_start from the proton_charge log. We are going to get this
+         * from our event_time_zero instead
+         */
+        auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
+        firstPulseT = std::min(firstPulseT, localFirstLast.first);
+      }
       // get the number of events
       std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);
       bankNames.push_back(entry_name);
       bankNumEvents.push_back(num);
 
       // Look for weights in simulated file
-      try {
+      if (exists(*m_file, "event_weight")) {
         m_file->openData("event_weight");
         haveWeights = true;
         m_file->closeData();
-      } catch (::NeXus::Exception &) {
-        // Swallow exception since flag is already false;
       }
 
       m_file->closeGroup();
     }
   }
+  if (takeTimesFromEvents)
+    run_start = firstPulseT;
 
   loadSampleDataISIScompatibility(*m_file, *m_ws);
 
@@ -959,9 +1067,9 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
     if (det) {
       detList.push_back(det);
     } else {
-      // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-      // We are not doing a full recursive search since that will be very long
-      // for lots of pixels.
+      // Also, look in the first sub-level for RectangularDetectors (e.g.
+      // PG3). We are not doing a full recursive search since that will be
+      // very long for lots of pixels.
       assem = boost::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
       if (assem) {
         for (int j = 0; j < assem->nelements(); j++) {
@@ -970,10 +1078,9 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
             detList.push_back(det);
 
           } else {
-            // Also, look in the second sub-level for RectangularDetectors (e.g.
-            // PG3).
-            // We are not doing a full recursive search since that will be very
-            // long for lots of pixels.
+            // Also, look in the second sub-level for RectangularDetectors
+            // (e.g. PG3). We are not doing a full recursive search since that
+            // will be very long for lots of pixels.
             assem2 = boost::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
@@ -1028,11 +1135,9 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
 }
 //-----------------------------------------------------------------------------
 /**
- * Create the required spectra mapping. If the file contains an isis_vms_compat
- * block then
- * the mapping is read from there, otherwise a 1:1 map with the instrument is
- * created (along
- * with the associated spectra axis)
+ * Create the required spectra mapping. If the file contains an
+ * isis_vms_compat block then the mapping is read from there, otherwise a 1:1
+ * map with the instrument is created (along with the associated spectra axis)
  * @param nxsfile :: The name of a nexus file to load the mapping from
  * @param monitorsOnly :: Load only the monitors is true
  * @param bankNames :: An optional bank name for loading specified banks
@@ -1069,7 +1174,8 @@ void LoadEventNexus::createSpectraMapping(
 //-----------------------------------------------------------------------------
 /**
  * Returns whether the file contains monitors with events in them
- * @returns True if the file contains monitors with event data, false otherwise
+ * @returns True if the file contains monitors with event data, false
+ * otherwise
  */
 bool LoadEventNexus::hasEventMonitors() {
   bool result(false);
@@ -1162,7 +1268,8 @@ void LoadEventNexus::runLoadMonitors() {
  * an isis_vms_compat block in the file, if it exists it pulls out the spectra
  * mapping listed there
  * @param entry_name :: name of the NXentry to open.
- * @returns True if the mapping was loaded or false if the block does not exist
+ * @returns True if the mapping was loaded or false if the block does not
+ * exist
  */
 std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
 LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
@@ -1175,7 +1282,8 @@ LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
     return nullptr; // Doesn't exist
   }
 
-  // The ISIS spectrum mapping is defined by 2 arrays in isis_vms_compat block:
+  // The ISIS spectrum mapping is defined by 2 arrays in isis_vms_compat
+  // block:
   //   UDET - An array of detector IDs
   //   SPEC - An array of spectrum numbers
   // There sizes must match. Hardware allows more than one detector ID to be
@@ -1225,8 +1333,8 @@ LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
 
 /**
  * Set the filters on TOF.
- * @param monitors :: If true check the monitor properties else use the standard
- * ones
+ * @param monitors :: If true check the monitor properties else use the
+ * standard ones
  */
 void LoadEventNexus::setTimeFilters(const bool monitors) {
   // Get the limits to the filter
@@ -1320,8 +1428,8 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
   }
 }
 
-/// The parallel loader currently has no support for a series of special cases,
-/// as indicated by the return value of this method.
+/// The parallel loader currently has no support for a series of special
+/// cases, as indicated by the return value of this method.
 bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
                                           const bool oldNeXusFileNames,
                                           const std::string &classType) const {
@@ -1360,6 +1468,5 @@ Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(
   static_cast<void>(storageModes);
   return Parallel::ExecutionMode::Distributed;
 }
-
 } // namespace DataHandling
 } // namespace Mantid

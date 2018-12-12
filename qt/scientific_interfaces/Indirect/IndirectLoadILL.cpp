@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectLoadILL.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -12,6 +18,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 IndirectLoadILL::IndirectLoadILL(QWidget *parent) : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
+
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   connect(m_uiForm.mwRun, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
   connect(m_uiForm.chkUseMap, SIGNAL(toggled(bool)), m_uiForm.mwMapFile,
@@ -142,6 +150,8 @@ void IndirectLoadILL::handleFilesFound() {
     m_uiForm.iicInstrumentConfiguration->setInstrument(fnameParts[0]);
   }
 }
+
+void IndirectLoadILL::runClicked() { runTab(); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

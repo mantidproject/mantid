@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The settings diagnostic tab view.
 
 The settings diagnostic tab allows to display the state information in a tree view. The user can select the data
@@ -15,7 +21,7 @@ from six import with_metaclass
 from PyQt4 import QtGui
 
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
-import ui_settings_diagnostic_tab
+from . import ui_settings_diagnostic_tab
 
 if six.PY3:
     unicode = str

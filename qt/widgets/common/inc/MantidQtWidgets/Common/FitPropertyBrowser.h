@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FITPROPERTYBROWSER_H_
 #define FITPROPERTYBROWSER_H_
 
@@ -92,6 +98,8 @@ public:
   boost::shared_ptr<const Mantid::API::IFunction> theFunction() const;
   /// Update the function parameters
   void updateParameters();
+  /// Update the function attributes
+  void updateAttributes();
   /// Get function parameter values
   QList<double> getParameterValues() const;
   /// Get function parameter names
@@ -110,6 +118,9 @@ public:
 
   /// Return the fitting function
   Mantid::API::IFunction_sptr getFittingFunction() const;
+  /// Return a function at a specific index in the composite function
+  Mantid::API::IFunction_sptr
+  getFunctionAtIndex(std::size_t const &index) const;
 
   /// Get the default function type
   std::string defaultFunctionType() const;
@@ -265,7 +276,8 @@ signals:
   void currentChanged() const;
   void functionRemoved();
   void algorithmFinished(const QString &);
-  void workspaceIndexChanged(int i);
+  void workspaceIndexChanged(int index);
+  void updatePlotSpectrum(int index);
   void workspaceNameChanged(const QString &);
 
   void wsChangePPAssign(const QString &);

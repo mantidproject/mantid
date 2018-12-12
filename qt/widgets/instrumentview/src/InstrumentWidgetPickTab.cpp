@@ -1,5 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -7,8 +15,6 @@
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
-
-#include "MantidQtWidgets/InstrumentView/MiniPlotQwt.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -85,10 +91,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_selectionInfoDisplay = new QTextEdit(this);
 
   // set up the plot widget
-  m_plot = new MiniPlotQwt(this);
-  m_plot->setYAxisLabelRotation(-90);
-  m_plot->setXScale(0, 1);
-  m_plot->setYScale(-1.2, 1.2);
+  m_plot = new MiniPlot(this);
   connect(m_plot, SIGNAL(showContextMenu()), this, SLOT(plotContextMenu()));
 
   // Plot context menu actions
@@ -291,7 +294,7 @@ bool InstrumentWidgetPickTab::canUpdateTouchedDetector() const {
  * Display the miniplot's context menu.
  */
 void InstrumentWidgetPickTab::plotContextMenu() {
-  QMenu context(this);
+  QMenu context(m_plot);
 
   auto plotType = m_plotController->getPlotType();
 
@@ -594,6 +597,11 @@ void InstrumentWidgetPickTab::initSurface() {
       static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache));
   m_plotController->setPlotType(
       static_cast<DetectorPlotController::PlotType>(m_plotTypeCache));
+  // miniplot X unit
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  // default X axis label
+  m_plot->setXLabel(QString::fromStdString(
+      actor.getWorkspace()->getAxis(0)->unit()->unitID()));
 }
 
 /**
@@ -761,6 +769,7 @@ void InstrumentWidgetPickTab::savePlotToWorkspace() {
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("picktab"))
@@ -782,12 +791,18 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
     tab >> value;
     button->setChecked(value);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "MaskBinsData::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the pick tab to a Mantid project file
  * @return a string representing the state of the pick tab
  */
 std::string InstrumentWidgetPickTab::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv, tab;
 
   // save active push button
@@ -803,6 +818,10 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
 
   tsv.writeSection("picktab", tab.outputLines());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "MaskBinsData::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 //=====================================================================================//
@@ -1078,7 +1097,7 @@ void ComponentInfoController::clear() { m_selectionInfoDisplay->clear(); }
  */
 DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
                                                InstrumentWidget *instrWidget,
-                                               MiniPlotQwt *plot)
+                                               MiniPlot *plot)
     : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot),
       m_plotType(Single), m_enabled(true), m_tubeXUnits(DETECTOR_ID),
       m_currentPickID(std::numeric_limits<size_t>::max()) {
@@ -1092,13 +1111,12 @@ DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
  * @param pickID :: A pick ID of an instrument component.
  */
 void DetectorPlotController::setPlotData(size_t pickID) {
-  m_currentPickID = std::numeric_limits<size_t>::max();
-
   if (m_plotType == DetectorSum) {
     m_plotType = Single;
   }
 
   if (!m_enabled) {
+    m_currentPickID = std::numeric_limits<size_t>::max();
     m_plot->clearCurve();
     return;
   }
@@ -1107,14 +1125,18 @@ void DetectorPlotController::setPlotData(size_t pickID) {
   const auto &componentInfo = actor.componentInfo();
   if (componentInfo.isDetector(pickID)) {
     if (m_plotType == Single) {
-      m_currentPickID = pickID;
-      plotSingle(pickID);
+      if (m_currentPickID != pickID) {
+        m_currentPickID = pickID;
+        plotSingle(pickID);
+      }
     } else if (m_plotType == TubeSum || m_plotType == TubeIntegral) {
+      m_currentPickID = std::numeric_limits<size_t>::max();
       plotTube(pickID);
     } else {
       throw std::logic_error("setPlotData: Unexpected plot type.");
     }
   } else {
+    m_currentPickID = std::numeric_limits<size_t>::max();
     m_plot->clearCurve();
   }
 }
@@ -1133,10 +1155,11 @@ void DetectorPlotController::setPlotData(
   actor.sumDetectors(detIndices, x, y, static_cast<size_t>(m_plot->width()));
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
-    m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                    actor.getWorkspace()->getAxis(0)->unit()->unitID());
+    m_plot->setData(std::move(x), std::move(y),
+                    QString::fromStdString(
+                        actor.getWorkspace()->getAxis(0)->unit()->unitID()),
+                    "multiple");
   }
-  m_plot->setLabel("multiple");
 }
 
 /**
@@ -1168,10 +1191,11 @@ void DetectorPlotController::plotSingle(size_t detindex) {
 
   const auto &actor = m_instrWidget->getInstrumentActor();
   // set the data
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
   auto detid = actor.getDetID(detindex);
-  m_plot->setLabel("Detector " + QString::number(detid));
+  m_plot->setData(std::move(x), std::move(y),
+                  QString::fromStdString(
+                      actor.getWorkspace()->getAxis(0)->unit()->unitID()),
+                  "Detector " + QString::number(detid));
 
   // find any markers
   auto surface = m_tab->getSurface();
@@ -1238,9 +1262,10 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
   auto detid = actor.getDetID(detindex);
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(detid) + ") Sum";
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
-  m_plot->setLabel(label);
+  m_plot->setData(std::move(x), std::move(y),
+                  QString::fromStdString(
+                      actor.getWorkspace()->getAxis(0)->unit()->unitID()),
+                  std::move(label));
 }
 
 /**
@@ -1267,15 +1292,14 @@ void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
   if (!xAxisUnits.isEmpty()) {
     xAxisCaption += " (" + xAxisUnits + ")";
   }
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  xAxisCaption.toStdString());
   auto parent = componentInfo.parent(detindex);
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(actor.getDetID(detindex)) + ") Integrals/" +
                   getTubeXUnitsName();
-  m_plot->setLabel(label);
+  m_plot->setData(std::move(x), std::move(y), std::move(xAxisCaption),
+                  std::move(label));
 }
 
 /**
@@ -1653,7 +1677,6 @@ QString DetectorPlotController::getTubeXUnitsUnits() const {
   default:
     return "";
   }
-  return "";
 }
 
 /**

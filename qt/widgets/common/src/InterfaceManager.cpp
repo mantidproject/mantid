@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
 //----------------------------------
@@ -225,8 +231,7 @@ void InterfaceManager::registerHelpWindowFactory(
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   if (m_helpViewer == nullptr) {
     g_log.error("InterfaceManager::createHelpWindow is null.");
-    throw Mantid::Kernel::Exception::NullPointerException(
-        "InterfaceManager::createHelpWindow", "m_helpViewer");
+    return nullptr;
   } else {
     MantidHelpInterface *interface =
         this->m_helpViewer->createUnwrappedInstance();

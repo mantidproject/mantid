@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType)
-from sans.user_file.user_file_parser import (DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
+from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
+from sans.user_file.user_file_parser import (InstrParser, DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
                                              TubeCalibFileParser, QResolutionParser, FitParser, GravityParser,
                                              MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
                                              UserFileParser, LARMORParser, CompatibilityParser)
@@ -50,6 +56,32 @@ def do_test(parser, valid_settings, invalid_settings, assert_true, assert_raises
 # # -----------------------------------------------------------------
 # # --- Tests -------------------------------------------------------
 # # -----------------------------------------------------------------
+class InstrParserTest(unittest.TestCase):
+    def test_that_gets_type(self):
+        self.assertTrue(InstrParser.get_type(), "INSTR")
+
+    def test_that_instruments_are_recognised(self):
+        self.assertTrue(InstrParser.get_type_pattern("LOQ"))
+        self.assertTrue(InstrParser.get_type_pattern("SANS2D"))
+        self.assertTrue(InstrParser.get_type_pattern("ZOOM"))
+        self.assertTrue(InstrParser.get_type_pattern("LARMOR"))
+        self.assertFalse(InstrParser.get_type_pattern("Not an instrument"))
+        self.assertFalse(InstrParser.get_type_pattern("SANS2D/something else"))
+
+    def test_that_instruments_are_parsed_correctly(self):
+        valid_settings = {"SANS2D": {DetectorId.instrument: SANSInstrument.SANS2D},
+                          "LOQ": {DetectorId.instrument: SANSInstrument.LOQ},
+                          "ZOOM": {DetectorId.instrument: SANSInstrument.ZOOM},
+                          "LARMOR": {DetectorId.instrument: SANSInstrument.LARMOR}}
+
+        invalid_settings = {"NOINSTRUMENT": RuntimeError,
+                            "SANS2D/HAB": RuntimeError,
+                            "!LOQ": RuntimeError}
+
+        instr_parser = InstrParser()
+        do_test(instr_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+
+
 class DetParserTest(unittest.TestCase):
     def test_that_gets_type(self):
         self.assertTrue(DetParser.get_type(), "DET")
@@ -1058,13 +1090,13 @@ class UserFileParserTest(unittest.TestCase):
         result = user_file_parser.parse_line("BACK / M3 /OFF")
         assert_valid_result(result, {BackId.monitor_off: 3}, self.assertTrue)
 
-        # SANS2DParser
+        # Instrument parser
         result = user_file_parser.parse_line("SANS2D")
-        self.assertTrue(not result)
+        assert_valid_result(result, {DetectorId.instrument: SANSInstrument.SANS2D}, self.assertTrue)
 
-        # LOQParser
-        result = user_file_parser.parse_line("LOQ")
-        self.assertTrue(not result)
+        # Instrument parser - whitespace
+        result = user_file_parser.parse_line("     ZOOM      ")
+        assert_valid_result(result, {DetectorId.instrument: SANSInstrument.ZOOM}, self.assertTrue)
 
     def test_that_non_existent_parser_throws(self):
         # Arrange
