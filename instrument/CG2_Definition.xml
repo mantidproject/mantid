@@ -5,7 +5,7 @@
             name="CG2"
             valid-from="2016-04-22 00:00:00"
             valid-to="2100-01-31 23:59:59"
-		        last-modified="2018-12-07 13:07:00.000">
+            last-modified="2018-12-07 13:07:00.000">
 
   <defaults>
     <length unit="metre"/>
