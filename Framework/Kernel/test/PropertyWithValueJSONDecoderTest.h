@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <jsoncpp/json/value.h>
 
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValueJSONDecoder.h"
 
@@ -39,6 +40,26 @@ public:
     doSimpleObjectDecodeTest("BoolProperty", false);
   }
 
+  void testDecodeArrayValueAsArrayProperty() {
+    const auto propName{"ArrayProperty"};
+    const std::vector<double> propValue{1.0, 2.0, 3.0};
+
+    Json::Value arrayItem(Json::arrayValue);
+    for (const auto &elem : propValue)
+      arrayItem.append(elem);
+    Json::Value root;
+    root[propName] = arrayItem;
+
+    using Mantid::Kernel::decode;
+    auto property = decode(root);
+    TSM_ASSERT("Decode failed to create a Property. ", property);
+    using Mantid::Kernel::ArrayProperty;
+    auto typedProperty = dynamic_cast<ArrayProperty<double> *>(property.get());
+    TSM_ASSERT("Property has unexpected type ", typedProperty);
+    TS_ASSERT_EQUALS(propName, typedProperty->name());
+    TS_ASSERT_EQUALS(propValue, (*typedProperty)());
+  }
+
   // ----------------------- Failure tests -----------------------
 
   void testDecodeThrowsWithEmptyValue() {
@@ -62,6 +83,28 @@ public:
     using Mantid::Kernel::decode;
     TSM_ASSERT_THROWS("Expected decode to throw with non-object type",
                       decode(Json::Value(10)), std::invalid_argument);
+  }
+
+  void testDecodeEmptyArrayValueThrows() {
+    Json::Value root;
+    root["EmptyArray"] = Json::Value(Json::arrayValue);
+
+    using Mantid::Kernel::decode;
+    TSM_ASSERT_THROWS("Expected an empty json array to throw", decode(root),
+                      std::invalid_argument);
+  }
+
+  void testDecodeHeterogenousArrayValueThrows() {
+    Json::Value mixedArray(Json::arrayValue);
+    mixedArray.append(1);
+    mixedArray.append(true);
+    mixedArray.append("hello");
+    Json::Value root;
+    root["MixedArray"] = mixedArray;
+
+    using Mantid::Kernel::decode;
+    TSM_ASSERT_THROWS("Expected an empty json array to throw", decode(root),
+                      std::invalid_argument);
   }
 
 private:
