@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import WorkspaceGroup
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-import Muon.GUI.Common.load_utils as load_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 def is_workspace_group(workspace):

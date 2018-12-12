@@ -1,16 +1,21 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import copy
 
 from Muon.GUI.Common import thread_model
-import Muon.GUI.Common.run_string_utils as run_utils
-import Muon.GUI.Common.muon_file_utils as file_utils
-import Muon.GUI.Common.load_utils as load_utils
-from Muon.GUI.Common.muon_workspace import MuonWorkspace
+import Muon.GUI.Common.utilities.run_string_utils as run_utils
+import Muon.GUI.Common.utilities.muon_file_utils as file_utils
+import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class LoadRunWidgetPresenter(object):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -188,7 +193,7 @@ class LoadRunWidgetPresenter(object):
         return_ws = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"]
         for run in run_list[1:]:
             ws = self._model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
-            running_total = load_utils.run_Plus({
+            running_total = algorithm_utils.run_Plus({
                 "LHSWorkspace": running_total,
                 "RHSWorkspace": ws,
                 "AllowDifferentNumberSpectra": False}
@@ -197,7 +202,7 @@ class LoadRunWidgetPresenter(object):
             self._model._loaded_data_store.remove_data(run=run)
         self._model._loaded_data_store.remove_data(run=run_list[0])
         # run_string = runUtils.run_list_to_string(run_list)
-        return_ws["OutputWorkspace"] = MuonWorkspace(running_total)
+        return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
         self._model._loaded_data_store.add_data(run=self.flatten_run_list(run_list), workspace=return_ws,
                                                 filename="Co-added")
 

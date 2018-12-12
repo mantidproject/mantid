@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import sys
 import os
 
@@ -31,19 +37,10 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
         return run_twice
 
-    class Runner:
-
-        def __init__(self, thread):
-            self.QT_APP = QT_APP
-            if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
-                if self._thread.isRunning():
-                    self.QT_APP.exec_()
-
-        def finished(self):
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
+    def wait_for_thread(self, thread_model):
+        if thread_model:
+            thread_model._thread.wait()
+            QT_APP.processEvents()
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
@@ -56,12 +53,16 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.presenter.enable_multiple_files(False)
         self.presenter.set_current_instrument("EMU")
 
+        patcher = mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+        self.addCleanup(patcher.stop)
+        self.load_utils_patcher = patcher.start()
+
     def tearDown(self):
         self.obj = None
 
     def mock_loading_via_user_input_run(self, workspace, filename, run):
-        self.model.load_workspace_from_filename = mock.Mock(
-            return_value=(workspace, filename, run))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
+            return_value=(workspace, run, filename))
         self.view.set_run_edit_text("1234")
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -81,7 +82,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.mock_loading_via_user_input_run([1, 2, 3], "EMU00001234.nxs", 1234)
 
         self.presenter.handle_run_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, ["EMU00001234.nxs"])
         self.assertEqual(self.presenter.runs, [1234])
@@ -94,7 +95,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.view.set_run_edit_text("1234,1235,1236")
 
         self.presenter.handle_run_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
@@ -105,13 +106,13 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         # Load some data
         self.mock_loading_via_user_input_run([1], "1234.nxs", 1234)
         self.presenter.handle_run_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.view.warning_popup = mock.Mock()
         self.view.set_run_edit_text("1234,1235,1236")
 
         self.presenter.handle_run_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, ["1234.nxs"])
         self.assertEqual(self.presenter.runs, [1234])
@@ -128,19 +129,10 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
         return run_twice
 
-    class Runner:
-
-        def __init__(self, thread):
-            self.QT_APP = QT_APP
-            if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
-                if self._thread.isRunning():
-                    self.QT_APP.exec_()
-
-        def finished(self):
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
+    def wait_for_thread(self, thread_model):
+        if thread_model:
+            thread_model._thread.wait()
+            QT_APP.processEvents()
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
@@ -155,6 +147,10 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.enable_multiple_files(False)
         self.presenter.set_current_instrument("EMU")
 
+        patcher = mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+        self.addCleanup(patcher.stop)
+        self.load_utils_patcher = patcher.start()
+
         self.load_single_run()
 
     def tearDown(self):
@@ -165,11 +161,11 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self._loaded_filename = "EMU00001234.nxs"
         self._loaded_workspace = [1, 2, 3]
 
-        self.model.load_workspace_from_filename = mock.Mock(
-            return_value=(self._loaded_workspace, self._loaded_filename, self._loaded_run))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
+            return_value=(self._loaded_workspace, self._loaded_run, self._loaded_filename))
         self.view.set_run_edit_text(str(self._loaded_run))
         self.presenter.handle_run_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
     def mock_model_to_load_single_run(self):
         self._loaded_run = 1234
@@ -194,9 +190,6 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def mock_model_to_throw(self):
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
-    def load_failure(self):
-        raise ValueError("Error text")
-
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : Test the increment/decrement buttons in single file mode (can only load one run at a time)
     # ------------------------------------------------------------------------------------------------------------------
@@ -204,35 +197,35 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_that_decrement_run_attempts_to_load_the_correct_run(self):
         new_filename = "EMU00001233.nxs"
-        load_call_count = self.model.load_workspace_from_filename.call_count
+        load_call_count = self.load_utils_patcher.load_workspace_from_filename.call_count
 
         self.presenter.handle_decrement_run()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.model.load_workspace_from_filename.call_count, load_call_count + 1)
-        filename = self.model.load_workspace_from_filename.call_args[0][0]
+        self.assertEqual(self.load_utils_patcher.load_workspace_from_filename.call_count, load_call_count + 1)
+        filename = self.load_utils_patcher.load_workspace_from_filename.call_args[0][0]
         self.assertEqual(os.path.basename(filename), new_filename)
 
     @run_test_with_and_without_threading
     def test_that_increment_run_attempts_to_load_the_correct_run(self):
         new_filename = "EMU00001235.nxs"
-        load_call_count = self.model.load_workspace_from_filename.call_count
+        load_call_count = self.load_utils_patcher.load_workspace_from_filename.call_count
 
         self.presenter.handle_increment_run()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.model.load_workspace_from_filename.call_count, load_call_count + 1)
-        filename = self.model.load_workspace_from_filename.call_args[0][0]
+        self.assertEqual(self.load_utils_patcher.load_workspace_from_filename.call_count, load_call_count + 1)
+        filename = self.load_utils_patcher.load_workspace_from_filename.call_args[0][0]
         self.assertEqual(os.path.basename(filename), new_filename)
 
     @run_test_with_and_without_threading
     def test_that_decrement_run_loads_the_data_correctly_by_overwriting_previous_run(self):
         new_run = self._loaded_run - 1
         new_filename = "EMU00001233.nxs"
-        self.model.load_workspace_from_filename = mock.Mock(return_value=([1], new_filename, new_run))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], new_run, new_filename))
 
         self.presenter.handle_decrement_run()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, [new_filename])
         self.assertEqual(self.presenter.runs, [new_run])
@@ -244,10 +237,10 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def test_that_increment_run_loads_the_data_correctly_by_overwriting_previous_run(self):
         new_run = self._loaded_run + 1
         new_filename = "EMU00001235.nxs"
-        self.model.load_workspace_from_filename = mock.Mock(return_value=([1], new_filename, new_run))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], new_run, new_filename))
 
         self.presenter.handle_increment_run()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, [new_filename])
         self.assertEqual(self.presenter.runs, [new_run])
@@ -257,64 +250,39 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_the_data_are_returned_to_previous_state(self):
-        def load_failure():
-            raise ValueError("Error text")
-
-        self.model.load_workspace_from_filename = mock.Mock(side_effect=load_failure)
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.handle_decrement_run()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
+
+        self.assert_model_has_not_changed()
+        self.assert_view_has_not_changed()
+#
+    @run_test_with_and_without_threading
+    def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+
+        self.presenter.handle_increment_run()
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assert_model_has_not_changed()
         self.assert_view_has_not_changed()
 
     @run_test_with_and_without_threading
-    def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
-        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
-
-        self.presenter.handle_increment_run()
-        self.Runner(self.presenter._load_thread)
-
-        self.assert_model_has_not_changed()
-        self.assert_view_has_not_changed()
-
     def test_that_if_decrement_run_fails_warning_message_is_displayed(self):
-        with mock.patch("Muon.GUI.Common.message_box.warning") as mock_warning:
-            self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
-
-            self.presenter.handle_decrement_run()
-            self.Runner(self.presenter._load_thread)
-
-            self.assertEqual(mock_warning.call_count, 1)
-
-    def test_that_if_increment_run_fails_warning_message_is_displayed(self):
-        with mock.patch("Muon.GUI.Common.message_box.warning") as mock_warning:
-            self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
-
-            self.presenter.handle_increment_run()
-            self.Runner(self.presenter._load_thread)
-
-            self.assertEqual(mock_warning.call_count, 1)
-
-    def test_that_if_decrement_run_fails_warning_message_is_displayed_with_no_threading(self):
-        """These tests have to be constructed separately for no threading, as the thread_model forces the use
-        of the message_box file; conversely the no threading code cannot do this as it would create Qt imports in the
-        presenter. Instead it calls a warning pop-up in the view. This is how thread_model should operate as the view
-        handles the parenting of the warning box correctly."""
-        self.presenter._use_threading = False
-        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.handle_decrement_run()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
-    def test_that_if_increment_run_fails_warning_message_is_displayed_with_no_threading(self):
-        self.presenter._use_threading = False
-        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+    @run_test_with_and_without_threading
+    def test_that_if_increment_run_fails_warning_message_is_displayed(self):
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.handle_increment_run()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
 

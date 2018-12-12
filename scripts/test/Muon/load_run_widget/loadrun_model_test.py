@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import sys
 
 from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
@@ -55,23 +61,21 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(model.loaded_filenames, [])
         self.assertEqual(model.loaded_runs, [])
 
-    def test_execute_successfully_loads_valid_files(self):
+    @mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+    def test_execute_successfully_loads_valid_files(self, load_utils_mock):
         # Mock the load algorithm
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
-        load_return_vals = [([1, 2, 3], filename, 19489 + i) for i, filename in enumerate(files)]
+        load_return_vals = [([1, 2, 3], 19489 + i, filename) for i, filename in enumerate(files)]
 
         model = LoadRunWidgetModel(MuonLoadData())
-        model.load_workspace_from_filename = mock.Mock()
-        model.load_workspace_from_filename.side_effect = load_return_vals
+        load_utils_mock.load_workspace_from_filename = mock.MagicMock()
+        load_utils_mock.load_workspace_from_filename.side_effect = load_return_vals
 
         model.loadData(files)
         model.execute()
         self.assertEqual(len(model.loaded_workspaces), len(model.loaded_runs))
         self.assertEqual(len(model.loaded_workspaces), len(model.loaded_filenames))
         self.assertEqual(len(model.loaded_workspaces), 3)
-        self.assertEqual(model.loaded_filenames[0], files[0])
-        self.assertEqual(model.loaded_filenames[1], files[1])
-        self.assertEqual(model.loaded_filenames[2], files[2])
         self.assertEqual(model.loaded_runs[0], 19489)
         self.assertEqual(model.loaded_runs[1], 19490)
         self.assertEqual(model.loaded_runs[2], 19491)
@@ -91,14 +95,15 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(model.loaded_filenames, [])
         self.assertEqual(model.loaded_runs, [])
 
-    def test_execute_throws_if_one_file_does_not_load_correctly_but_still_loads_other_files(self):
+    @mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+    def test_execute_throws_if_one_file_does_not_load_correctly_but_still_loads_other_files(self, load_utils_mock):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
-        load_return_vals = [([1, 2, 3], filename, 19489 + i) for i, filename in enumerate(files)]
+        load_return_vals = [([1, 2, 3], 19489 + i, filename) for i, filename in enumerate(files)]
 
         model = LoadRunWidgetModel(MuonLoadData())
-        model.load_workspace_from_filename = mock.Mock()
+        load_utils_mock.load_workspace_from_filename = mock.MagicMock()
 
-        model.load_workspace_from_filename.side_effect = iter(IteratorWithException(load_return_vals, [1]))
+        load_utils_mock.load_workspace_from_filename.side_effect = iter(IteratorWithException(load_return_vals, [1]))
 
         model.loadData(files)
         with self.assertRaises(ValueError):
