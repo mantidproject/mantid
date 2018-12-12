@@ -58,34 +58,34 @@ class INTERReductionTest(systemtesting.MantidSystemTest):
         return (self.result_workspace, self.reference_result_file)
 
     def runTest(self):
-        SetupInstrument()
+        setupInstrument()
         Load(self.runs_file, OutputWorkspace=self.runs_workspace)
         workspaces_to_exclude_from_result = AnalysisDataService.Instance().getObjectNames()
-        CreateTransmissionWorkspaces(self.first_transmission_run_names,
+        createTransmissionWorkspaces(self.first_transmission_run_names,
                                      self.second_transmission_run_names,
                                      self.transmission_workspace_names)
 
-        TestEventDataTimeSlicing(self.event_run_numbers)
-        TestReductionOfThreeAngleFringedSolidLiquidExample([45222,45223,45224])
-        TestReductionOfTwoAngleAirLiquidExample([44984,44985])
-        TestFittingOfReducedData(44990,44991,self.expected_fit_params,self.expected_fit_covariance)
+        testEventDataTimeSlicing(self.event_run_numbers)
+        testReductionOfThreeAngleFringedSolidLiquidExample([45222, 45223, 45224])
+        testReductionOfTwoAngleAirLiquidExample([44984, 44985])
+        testFittingOfReducedData(44990, 44991, self.expected_fit_params, self.expected_fit_covariance)
 
-        RemoveWorkspaces(workspaces_to_exclude_from_result)
+        removeWorkspaces(workspaces_to_exclude_from_result)
         GroupWorkspaces(InputWorkspaces=AnalysisDataService.Instance().getObjectNames(),
                         OutputWorkspace=self.result_workspace)
         mtd[self.result_workspace].sortByName()
 
     @staticmethod
     def regenerateRunsFile():
-        SetupInstrument()
-        RegenerateRunsFile(INTERReductionTest.first_transmission_run_names +
+        setupInstrument()
+        regenerateRunsFile(INTERReductionTest.first_transmission_run_names +
                            INTERReductionTest.second_transmission_run_names,
                            INTERReductionTest.run_numbers,
                            INTERReductionTest.event_run_numbers)
 
     @staticmethod
     def regenerateReferenceFileByReducing():
-        SetupInstrument()
+        setupInstrument()
         test = INTERReductionTest()
         test.runTest()
         SaveNexus(InputWorkspace=INTERReductionTest.result_workspace,
@@ -93,26 +93,26 @@ class INTERReductionTest(systemtesting.MantidSystemTest):
 
     @staticmethod
     def regenerateReferenceFileFromDirectory(reference_file_directory):
-        SetupInstrument()
-        RegenerateReferenceFile(reference_file_directory, INTERReductionTest.reference_result_file)
+        setupInstrument()
+        regenerateReferenceFile(reference_file_directory, INTERReductionTest.reference_result_file)
 
 
-def SetupInstrument():
+def setupInstrument():
     configI = ConfigService.Instance()
     configI.setString("default.instrument", "INTER")
     configI.setString("default.facility", "ISIS")
 
 
-def RemoveWorkspaces(to_remove):
+def removeWorkspaces(to_remove):
     for workspace_name in to_remove:
         AnalysisDataService.Instance().remove(workspace_name)
 
 
-def WorkspaceName(file_path):
+def workspaceName(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
 
-def RegenerateReferenceFile(reference_file_directory, output_filename):
+def regenerateReferenceFile(reference_file_directory, output_filename):
     '''Generate the reference file from a given folder of output workspaces'''
     files = os.listdir(reference_file_directory)
     workspace_names = []
@@ -127,7 +127,7 @@ def RegenerateReferenceFile(reference_file_directory, output_filename):
     SaveNexus(InputWorkspace=output_workspace_name, Filename=output_filename)
 
 
-def RegenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers):
+def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers):
     '''Generate the test input file from a range of run numbers and transmission runs.'''
     # Load transmission runs
     for run in transmission_run_names:
@@ -148,7 +148,8 @@ def RegenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers):
     SaveNexus(InputWorkspace='Input', Filename='INTERReductionTestRuns.nxs')
 
 
-def CreateTransmissionWorkspaces(runs1, runs2, output_names):
+def createTransmissionWorkspaces(runs1, runs2, output_names):
+    '''Create a transmission workspace for each pair of input runs with the given output names'''
     for run1, run2, name in zip(runs1, runs2, output_names):
         CreateTransmissionWorkspaceAuto(
             FirstTransmissionRun=run1,
@@ -161,8 +162,9 @@ def CreateTransmissionWorkspaces(runs1, runs2, output_names):
         DeleteWorkspace('TRANS_LAM_'+run2)
 
 
-def EventRef(run_number,angle,start=0,stop=0,DB='TRANS'):
-    '''Event data time-slicing'''
+def eventRef(run_number, angle, start=0, stop=0, DB='TRANS'):
+    '''Perform reflectometry reduction on a slice of the given run for the given
+    start/stop times'''
     # Filter the input workspace by the given start/stop time (or end time
     # if stop time is not given)
     run_name=str(run_number)
@@ -179,21 +181,21 @@ def EventRef(run_number,angle,start=0,stop=0,DB='TRANS'):
     total_proton_charge = run_workspace.getRun().getLogData('gd_prtn_chrg').value
     fraction = slice_proton_charge/total_proton_charge
     duration = filter_workspace.getRun().getLogData('duration').value
-    print('Fraction:',fraction)
-    print('Slice:',slice)
-    print('Duration:',duration)
+    print('Fraction:', fraction)
+    print('Slice:', slice_proton_charge)
+    print('Duration:', duration)
     # Scale monitors by proton charge and add them to the slice workspace
-    Scale(InputWorkspace=run_name+'_monitors',Factor=fraction,OutputWorkspace='mon_slice')
-    Rebin(InputWorkspace='mon_slice', OutputWorkspace='mon_rebin', Params='0,100,100000', PreserveEvents=False)
+    Scale(InputWorkspace=run_name+'_monitors', Factor=fraction, OutputWorkspace='mon_slice')
+    Rebin(InputWorkspace='mon_slice', OutputWorkspace='mon_rebin', Params='0, 100, 100000', PreserveEvents=False)
     slice_name = str(run_number) + '_' + str(start) + '_' + str(stop)
-    Rebin(InputWorkspace=filter_ws_name, OutputWorkspace=slice_name, Params='0,100,100000', PreserveEvents=False)
+    Rebin(InputWorkspace=filter_ws_name, OutputWorkspace=slice_name, Params='0, 100, 100000', PreserveEvents=False)
     AppendSpectra(InputWorkspace1='mon_rebin', InputWorkspace2=slice_name,
                   OutputWorkspace=slice_name, MergeLogs=False)
     # Reduce this slice
     ReflectometryReductionOneAuto(InputWorkspace=slice_name, FirstTransmissionRun=DB,
                                   OutputWorkspaceBinned=slice_name+'_ref_binned',
                                   OutputWorkspace=slice_name+'_ref',
-                                  OutputWorkspaceWavelength=slice_name+'_lam',Debug=True)
+                                  OutputWorkspaceWavelength=slice_name+'_lam', Debug=True)
     # Delete interim workspaces
     DeleteWorkspace(slice_name+'_lam')
     DeleteWorkspace(slice_name)
@@ -202,7 +204,7 @@ def EventRef(run_number,angle,start=0,stop=0,DB='TRANS'):
     DeleteWorkspace('mon_rebin')
 
 
-def StitchedWorkspaceName(run1_number,run2_number):
+def stitchedWorkspaceName(run1_number, run2_number):
     '''Gets the name of the stitched workspace based on the two input workspace names'''
     run1_name=str(run1_number)
     run2_name=str(run2_number)
@@ -210,75 +212,71 @@ def StitchedWorkspaceName(run1_number,run2_number):
     return run1_name+'_'+run2_short_name
 
 
-def QuickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
-    '''Use of "QuickRef" - scripted reduction'''
-    list=''
-    if not angles:
-        for run_index in range(len(run_numbers)):
-            run_number=run_numbers[run_index]
-            run_name=str(run_number)
-            trans_workspace_name=str(trans_workspace_names[run_index])
-            ReflectometryReductionOneAuto(InputWorkspace=run_name+'.raw', FirstTransmissionRun=trans_workspace_name,
-                                          OutputWorkspaceBinned=run_name+'_IvsQ_binned', OutputWorkspace=run_name+'_IvsQ',
-                                          OutputWorkspaceWavelength=run_name+'_IvsLam',Debug=True)
-            list=list+run_name+'_IvsQ_binned'+','
-    else:
-        for run_index in range(len(run_numbers)):
-            run_number=run_numbers[run_index]
-            run_name=str(run_number)
-            trans_workspace_name=str(trans_workspace_names[run_index])
+def quickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
+    '''Perform reflectometry reduction on each input run, and stitch the
+    reduced workspaces together'''
+    reduced_runs=''
+    for run_index in range(len(run_numbers)):
+        # Set up the reduction properties
+        run_name=str(run_numbers[run_index])
+        properties = {'InputWorkspace': run_name+'.raw',
+                      'FirstTransmissionRun': str(trans_workspace_names[run_index]),
+                      'OutputWorkspaceBinned': run_name+'_IvsQ_binned',
+                      'OutputWorkspace': run_name+'_IvsQ',
+                      'OutputWorkspaceWavelength': run_name+'_IvsLam',
+                      'Debug':True}
+        # Set ThetaIn if the angles are given
+        if angles:
             theta=angles[run_index]
+            properties['ThetaIn']=theta
+            # Special case to set WavelengthMin for a specific angle
             if theta == 0.8:
-                ReflectometryReductionOneAuto(InputWorkspace=run_name+'.raw', FirstTransmissionRun=trans_workspace_name,
-                                              OutputWorkspaceBinned=run_name+'_IvsQ_binned', OutputWorkspace=run_name+'_IvsQ',
-                                              OutputWorkspaceWavelength=run_name+'_IvsLam', ThetaIn=theta, WavelengthMin=2.6,Debug=True)
-            else:
-                ReflectometryReductionOneAuto(InputWorkspace=run_name+'.raw', FirstTransmissionRun=trans_workspace_name,
-                                              OutputWorkspaceBinned=run_name+'_IvsQ_binned', OutputWorkspace=run_name+'_IvsQ',
-                                              OutputWorkspaceWavelength=run_name+'_IvsLam', ThetaIn=theta,Debug=True)
-            if run_index == len(run_numbers)-1:
-                list=list+run_name+'_IvsQ_binned'
-            else:
-                list=list+run_name+'_IvsQ_binned'+','
+                properties['WavelengthMin']=2.6
+        # Do the reduction
+        ReflectometryReductionOneAuto(**properties)
+        reduced_runs=reduced_runs+run_name+'_IvsQ_binned'
+        if run_index < len(run_numbers)-1:
+            reduced_runs=reduced_runs+','
+    # Stitch the results
     first_run_name=str(run_numbers[0])
     dqq = NRCalculateSlitResolution(Workspace=first_run_name+'_IvsQ')
-    stitched_name=StitchedWorkspaceName(run_numbers[0],run_numbers[-1])
-    Stitch1DMany(InputWorkspaces=list, OutputWorkspace=stitched_name, Params='-'+str(dqq), ScaleRHSWorkspace=1)
+    stitched_name=stitchedWorkspaceName(run_numbers[0], run_numbers[-1])
+    Stitch1DMany(InputWorkspaces=reduced_runs, OutputWorkspace=stitched_name, Params='-'+str(dqq), ScaleRHSWorkspace=1)
 
 
-def TwoAngleFit(run1_number,run2_number,scalefactor,expected_fit_params,expected_fit_covariance):
-    stitched_name=StitchedWorkspaceName(run1_number, run2_number)
+def twoAngleFit(workspace_name, scalefactor, expected_fit_params, expected_fit_covariance):
+    '''Perform a fit on the given workspace and compare to the given results'''
     # Scale and fit
-    Scale(InputWorkspace=stitched_name, OutputWorkspace=stitched_name+'_scaled', Factor=(1.0/scalefactor))
-    function_name='name=ReflectivityMulf,nlayer=1,Theta=2.3,ScaleFactor=1,AirSLD=0,BulkSLD=0,Roughness=0,BackGround=6.8e-06,'\
-        'Resolution=5.0,SLD_Layer0=1.0e-6,d_Layer0=20.0,Rough_Layer0=0.0,constraints=(0<SLD_Layer0,0<d_Layer0),'\
-        'ties=(Theta=2.3,AirSLD=0,BulkSLD=0,Resolution=5.0,ScaleFactor=1.0,Roughness=0,Rough_Layer0=0)'
+    Scale(InputWorkspace=workspace_name, OutputWorkspace=workspace_name+'_scaled', Factor=(1.0/scalefactor))
+    function_name='name=ReflectivityMulf, nlayer=1, Theta=2.3, ScaleFactor=1, AirSLD=0, BulkSLD=0, Roughness=0, BackGround=6.8e-06,'\
+        'Resolution=5.0, SLD_Layer0=1.0e-6, d_Layer0=20.0, Rough_Layer0=0.0, constraints=(0<SLD_Layer0, 0<d_Layer0),'\
+        'ties=(Theta=2.3, AirSLD=0, BulkSLD=0, Resolution=5.0, ScaleFactor=1.0, Roughness=0, Rough_Layer0=0)'
     Fit(Function=function_name,
-        InputWorkspace=stitched_name+'_scaled',IgnoreInvalidData='1',
-        Output=stitched_name+'_fit',OutputCompositeMembers='1',ConvolveMembers='1')
+        InputWorkspace=workspace_name+'_scaled', IgnoreInvalidData='1',
+        Output=workspace_name+'_fit', OutputCompositeMembers='1', ConvolveMembers='1')
     # Get output tables
-    params_table=mtd[stitched_name+'_fit_Parameters']
-    covariance_table=mtd[stitched_name+'_fit_NormalisedCovarianceMatrix']
+    params_table=mtd[workspace_name+'_fit_Parameters']
+    covariance_table=mtd[workspace_name+'_fit_NormalisedCovarianceMatrix']
     # Print output info
-    sld=round(params_table.cell(7,1),9)
-    thick=round(params_table.cell(8,1),2)
+    sld=round(params_table.cell(7, 1), 9)
+    thick=round(params_table.cell(8, 1), 2)
     dNb=sld*thick
-    print('run ',str(run1_number))
-    print('dNb ',dNb)
-    print('SLD ',sld)
-    print('Thick ',thick)
+    print('dNb ', dNb)
+    print('SLD ', sld)
+    print('Thick ', thick)
     print('-----------')
     # Annoyingly, fitting/gsl seems unstable across different platforms so the results don't match
     # accurately. To get around this remove the offending workspaces from the reference and check
     # manually here instead with a more generous tolerance. This isn't ideal but should be enough.
     tolerance=1e-2
-    CompareFitResults(params_table, expected_fit_params, tolerance)
-    CompareFitResults(covariance_table, expected_fit_covariance, tolerance)
-    RemoveWorkspaces([stitched_name+'_fit_Parameters', stitched_name+'_fit_NormalisedCovarianceMatrix'])
+    compareFitResults(params_table.toDict(), expected_fit_params, tolerance)
+    compareFitResults(covariance_table.toDict(), expected_fit_covariance, tolerance)
+    removeWorkspaces([workspace_name+'_fit_Parameters', workspace_name+'_fit_NormalisedCovarianceMatrix'])
 
 
-def CompareFitResults(results_table, reference_dict, tolerance):
-    results_dict=results_table.toDict()
+def compareFitResults(results_dict, reference_dict, tolerance):
+    '''Compare the fit results to the reference. The output table workspaces from the fit
+    should be converted to dicts before calling this function'''
     for key in reference_dict:
         if key == 'Name':
             continue
@@ -304,41 +302,44 @@ def CompareFitResults(results_table, reference_dict, tolerance):
                                    "messages for details")
 
 
-def GenerateTimeSlices(run_number):
-    '''Generate 60sec time slices'''
+def generateTimeSlices(run_number):
+    '''Generate 60 second time slices of the given run, and perform reflectometry
+    reduction on each slice'''
     for slice_index in range(5):
         start=slice_index*60
         stop=(slice_index+1)*60
-        EventRef(run_number,0.5,start,stop,DB='TRANS')
+        eventRef(run_number, 0.5, start, stop, DB='TRANS')
 
 
-def TestEventDataTimeSlicing(event_run_numbers):
+def testEventDataTimeSlicing(event_run_numbers):
     for run_number in event_run_numbers:
-        GenerateTimeSlices(run_number)
+        generateTimeSlices(run_number)
 
 
-def TestReductionOfThreeAngleFringedSolidLiquidExample(run_numbers):
-    QuickRef(run_numbers,['TRANS','TRANS','TRANS'])
+def testReductionOfThreeAngleFringedSolidLiquidExample(run_numbers):
+    quickRef(run_numbers,['TRANS','TRANS','TRANS'])
 
 
-def TestReductionOfTwoAngleAirLiquidExample(run_numbers):
-    QuickRef(run_numbers,['TRANS_SM','TRANS_noSM'], angles=[0.8,2.3])
+def testReductionOfTwoAngleAirLiquidExample(run_numbers):
+    quickRef(run_numbers,['TRANS_SM','TRANS_noSM'], angles=[0.8, 2.3])
 
 
-def TestFittingOfReducedData(run1_number,run2_number,expected_fit_params,expected_fit_covariance):
+def testFittingOfReducedData(run1_number, run2_number, expected_fit_params, expected_fit_covariance):
     #D2O run:
     CloneWorkspace(InputWorkspace='44984_85', OutputWorkspace='D2O_IvsQ_binned')
     #fit d2o to get scalefactor
-    function_name='name=ReflectivityMulf,nlayer=0,Theta=2.3,ScaleFactor=1.0,AirSLD=0,BulkSLD=6.35e-6,Roughness=2.5,'\
-        'BackGround=3.0776e-06,Resolution=5.0,ties=(Theta=2.3,AirSLD=0,BulkSLD=6.35e-6,Resolution=5.0,Roughness=2.5)'
+    function_name='name=ReflectivityMulf, nlayer=0, Theta=2.3, ScaleFactor=1.0, AirSLD=0, BulkSLD=6.35e-6, Roughness=2.5,'\
+        'BackGround=3.0776e-06, Resolution=5.0, ties=(Theta=2.3, AirSLD=0, BulkSLD=6.35e-6, Resolution=5.0, Roughness=2.5)'
     Fit(Function=function_name,
-        InputWorkspace='D2O_IvsQ_binned',IgnoreInvalidData='1',Minimizer='Simplex',Output='D2O_fit',
-        OutputCompositeMembers='1',ConvolveMembers='1',StartX='0.0015',EndX='0.3359')
-    scalefactor=round(mtd['D2O_fit_Parameters'].cell(1,1),3)
+        InputWorkspace='D2O_IvsQ_binned', IgnoreInvalidData='1', Minimizer='Simplex', Output='D2O_fit',
+        OutputCompositeMembers='1', ConvolveMembers='1', StartX='0.0015', EndX='0.3359')
+    scalefactor=round(mtd['D2O_fit_Parameters'].cell(1, 1), 3)
     #Create reduced workspace for test:
-    QuickRef([run1_number,run2_number],['TRANS_SM','TRANS_noSM'], angles=[0.8,2.3])
-    #Test fitting:
-    TwoAngleFit(run1_number,run2_number,scalefactor,expected_fit_params,expected_fit_covariance)
+    quickRef([run1_number, run2_number],['TRANS_SM','TRANS_noSM'], angles=[0.8, 2.3])
+    #Test fitting of the result:
+    print('run ', str(run1_number))
+    stitched_name=stitchedWorkspaceName(run1_number, run2_number)
+    twoAngleFit(stitched_name, scalefactor, expected_fit_params, expected_fit_covariance)
 
 
 # If you want to re-run the test and save the result as a reference...
