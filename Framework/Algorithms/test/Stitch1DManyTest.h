@@ -343,43 +343,32 @@ public:
     TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID(), "Wavelength")
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 17)
-    const double y0Scaled = 1.1 * scale0;
-    const double e0Scaled = std::sqrt(1.1) * scale0E;
-    const double y1Scaled = 2.1 * scale1;
-    const double e1Scaled = std::sqrt(2.1) * scale1E;
     const auto &y0 = stitched->y(0);
     const auto &y1 = stitched->y(1);
     const auto &e0 = stitched->e(0);
     const auto &e1 = stitched->e(1);
-    const auto ysp0 = ((1. / std::sqrt(1.)) + (y0Scaled / e0Scaled)) *
-                      ((std::sqrt(1.) * e0Scaled / (std::sqrt(1.) + e0Scaled)));
-    const auto esp0 =
-        std::sqrt((std::sqrt(1.) * e0Scaled) / (std::sqrt(1.) + e0Scaled));
-    const auto ysp1 = ((2. / std::sqrt(2.)) + (y1Scaled / e1Scaled)) *
-                      ((std::sqrt(2.) * e1Scaled / (std::sqrt(2.) + e1Scaled)));
-    const auto esp1 =
-        std::sqrt((std::sqrt(2.) * e1Scaled) / (std::sqrt(2.) + e1Scaled));
     std::string istr;
     for (size_t i = 0; i < 7; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], 1., 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], 2., 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], std::sqrt(1.), 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], std::sqrt(2.), 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1., 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2., 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], std::sqrt(1.), 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], std::sqrt(2.), 1.e-9)
     }
-    for (size_t i = 7; i < 10; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], ysp0, 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], ysp1, 1.e-9)
-      // TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], esp0, 1.e-9)
-      // TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], esp1, 1.e-9)
+    // Get value 7 -> must be the same for interval
+    for (size_t i = 8; i < 10; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[7], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[7], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[7], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[7], 1.e-9)
     }
     for (size_t i = 10; i < 17; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], y0Scaled, 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], y1Scaled, 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], e0Scaled, 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], e1Scaled, 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1.1 * scale0, 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2.1 * scale1, 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], std::sqrt(1.1) * scale0E, 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], std::sqrt(2.1) * scale1E, 1.e-9)
     }
 
     // Cross-check that the result of using Stitch1DMany with two workspaces
@@ -444,67 +433,46 @@ public:
     const auto y1 = stitched->y(1);
     const auto e0 = stitched->e(0);
     const auto e1 = stitched->e(1);
-    const double y0Scaled = 1.1 * scales.front();
-    const double e0Scaled = std::sqrt(1.1) * 1.;
-    const double y1Scaled = 2.1 * scales.back();
-    const double e1Scaled = std::sqrt(2.1) * 1.;
-    const auto ysp0s1 =
-        ((1. / std::sqrt(1.)) + (y0Scaled / e0Scaled)) *
-        ((std::sqrt(1.) * e0Scaled / (std::sqrt(1.) + e0Scaled)));
-    const auto esp0s1 =
-        std::sqrt((std::sqrt(1.) * e0Scaled) / (std::sqrt(1.) + e0Scaled));
-    const auto ysp1s1 =
-        ((2. / std::sqrt(2.)) + (y1Scaled / e1Scaled)) *
-        ((std::sqrt(2.) * e1Scaled / (std::sqrt(2.) + e1Scaled)));
-    const auto esp1s1 =
-        std::sqrt((std::sqrt(2.) * e1Scaled) / (std::sqrt(2.) + e1Scaled));
     std::string istr;
     for (size_t i = 0; i < 7; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], 1., 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], 2., 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], std::sqrt(1.), 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], std::sqrt(2.), 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1., 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2., 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], std::sqrt(1.), 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], std::sqrt(2.), 1.e-9)
     }
-    for (size_t i = 7; i < 10; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], ysp0s1, 1.e-9)
-      // TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], ysp1s1, 1.e-9)
-      // TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], esp0s1, 1.e-9)
-      // TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], esp1s1, 1.e-9)
+    // Get value 7 -> must be the same for interval
+    for (size_t i = 8; i < 10; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[7], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[7], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[7], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[7], 1.e-9)
     }
     for (size_t i = 10; i < 15; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], y0Scaled, 1.e-9)
-      // TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], y1Scaled, 1.e-9)
-      // TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], e0Scaled, 1.e-9)
-      // TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], e1Scaled, 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1.1 * scales.front(), 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2.1 * 0.9523809523809523, 1.e-9)
+      TSM_ASSERT_DELTA("E(0)[" + istr, e0[i],
+                       std::sqrt(1.1) * 1.1853095289660616, 1.e-9)
+      TSM_ASSERT_DELTA("E(1)[" + istr, e1[i],
+                       std::sqrt(2.1) * 1.2356508223215246, 1.e-9)
     }
-    const auto ysp0s2 =
-        ((1.1 / std::sqrt(1.1)) + (1.5 / std::sqrt(1.5))) *
-        ((std::sqrt(1.1) * std::sqrt(1.5) / (std::sqrt(1.1) + std::sqrt(1.5))));
-    const auto esp0s2 = std::sqrt(std::sqrt(1.1) * std::sqrt(1.5) /
-                                  (std::sqrt(1.1) + std::sqrt(1.5)));
-    const auto ysp1s2 =
-        ((2.1 / std::sqrt(2.1)) + (2.5 / std::sqrt(2.5))) *
-        ((std::sqrt(2.) * std::sqrt(2.5) / (std::sqrt(2.1) + std::sqrt(2.5))));
-    const auto esp1s2 = std::sqrt(std::sqrt(2.1) * std::sqrt(2.5) /
-                                  (std::sqrt(2.1) + std::sqrt(2.5)));
-    for (size_t i = 15; i < 17; ++i) {
-      istr = std::to_string(i);
-      // TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], ysp0s2, 1.e-9)
-      // TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], ysp1s2, 1.e-9)
-      // TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], esp0s2, 1.e-9)
-      // TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], esp1s2, 1.e-9)
+    // Get value 15 -> must be the same for interval
+    for (size_t i = 16; i < 17; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[15], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[15], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[15], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[15], 1.e-9)
     }
-    for (size_t i = 17; i < 25; ++i) {
-      istr = std::to_string(i);
-      // TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], 1.5 * 0.5, 1.e-9)
-      // TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], 2.5 * 0.5, 1.e-9)
-      // TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], std::sqrt(1.5) *
-      // 0.5, 1.e-9)  TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i],
-      // std::sqrt(2.5)
-      // * 0.5, 1.e-9)
+    // Take value 17 -> must be the same for interval
+    for (size_t i = 18; i < 25; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[17], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[17], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[17], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[17], 1.e-9)
     }
 
     // Check workspaces in ADS
@@ -576,82 +544,44 @@ public:
     const auto y1 = stitched->y(1);
     const auto e0 = stitched->e(0);
     const auto e1 = stitched->e(1);
-    const double y0Scaled = 1.1 * 0.5;
-    const double e0Scaled = std::sqrt(1.1) * 0.5;
-    const double y1Scaled = 2.1 * 0.5;
-    const double e1Scaled = std::sqrt(2.1) * 0.5;
-    const auto ysp0s1 =
-        ((1. / (std::sqrt(1.) * std::sqrt(1.))) +
-         (y0Scaled / (e0Scaled * e0Scaled))) *
-        ((std::sqrt(1.) * std::sqrt(1.) * e0Scaled * e0Scaled /
-          (std::sqrt(1.) * std::sqrt(1.) + e0Scaled * e0Scaled)));
-    const auto esp0s1 =
-        std::sqrt((std::sqrt(1.) * std::sqrt(1.) * e0Scaled * e0Scaled) /
-                  (std::sqrt(1.) * std::sqrt(1.) + e0Scaled * e0Scaled));
-    const auto ysp1s1 =
-        ((2. / std::sqrt(2.) * std::sqrt(2.)) +
-         (y1Scaled / e1Scaled * e1Scaled)) *
-        ((std::sqrt(2.) * std::sqrt(2.) * e1Scaled * e1Scaled /
-          (std::sqrt(2.) * std::sqrt(2.) + e1Scaled * e1Scaled)));
-    const auto esp1s1 =
-        std::sqrt((std::sqrt(2.) * std::sqrt(2.) * e1Scaled * e1Scaled) /
-                  (std::sqrt(2.) * std::sqrt(2.) + e1Scaled * e1Scaled));
     std::string istr;
     for (size_t i = 0; i < 7; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], 1., 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], 2., 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], std::sqrt(1.), 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], std::sqrt(2.), 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1., 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2., 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], std::sqrt(1.), 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], std::sqrt(2.), 1.e-9)
     }
-    for (size_t i = 7; i < 10; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], ysp0s1, 1.e-9)
-      // TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], ysp1s1, 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], esp0s1, 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], esp1s1, 1.e-9)
+    // Get value 7 -> must be the same for interval
+    for (size_t i = 8; i < 10; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[7], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[7], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[7], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[7], 1.e-9)
     }
     for (size_t i = 10; i < 15; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], y0Scaled, 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], y1Scaled, 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], e0Scaled, 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], e1Scaled, 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1.1 * 0.5, 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2.1 * 0.5, 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], std::sqrt(1.1) * 0.5, 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], std::sqrt(2.1) * 0.5, 1.e-9)
     }
-    const double y0Scaled2 = 1.5 * 0.5;
-    const double e0Scaled2 = std::sqrt(1.5) * 0.5;
-    const double y1Scaled2 = 2.5 * 0.5;
-    const double e1Scaled2 = std::sqrt(2.5) * 0.5;
-    const auto ysp0s2 =
-        ((1.1 / std::pow(std::sqrt(1.1), 2)) +
-         (std::pow(y0Scaled2, 2) / std::pow(e0Scaled2, 2))) *
-        ((std::pow(std::sqrt(1.1), 2) * std::pow(e0Scaled2, 2) /
-          (std::pow(std::sqrt(1.1), 2) + std::pow(e0Scaled2, 2))));
-    const auto esp0s2 =
-        std::sqrt((std::pow(std::sqrt(1.), 2) * std::pow(e0Scaled2, 2)) /
-                  (std::pow(std::sqrt(1.), 2) + std::pow(e0Scaled2, 2)));
-    const auto ysp1s2 =
-        ((2.1 / std::pow(std::sqrt(2.1), 2)) +
-         (std::pow(y1Scaled2, 2) / std::pow(e1Scaled2, 2))) *
-        ((std::pow(std::sqrt(2.1), 2) * std::pow(e1Scaled2, 2) /
-          (std::pow(std::sqrt(2.1), 2) + std::pow(e1Scaled2, 2))));
-    const auto esp1s2 =
-        std::sqrt((std::pow(std::sqrt(2.1), 2) * std::pow(e1Scaled2, 2)) /
-                      std::pow(std::sqrt(2.1), 2) +
-                  std::pow(e1Scaled2, 2));
-    for (size_t i = 17; i < 17; ++i) { // 15, 16?
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], ysp0s2, 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], ysp1s2, 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], esp0s2, 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], esp1s2, 1.e-9)
+    // Get value 15 -> must be the same for interval
+    for (size_t i = 16; i < 17; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[15], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[15], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[15], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[15], 1.e-9)
     }
-    for (size_t i = 17; i < 25; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], y0Scaled2, 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], y1Scaled2, 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], e0Scaled2, 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], e1Scaled2, 1.e-9)
+    // Get value 17 -> must be the same for interval
+    for (size_t i = 18; i < 25; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[17], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[17], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[17], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[17], 1.e-9)
     }
 
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
@@ -699,77 +629,43 @@ public:
     const auto y1 = stitched->y(1);
     const auto e0 = stitched->e(0);
     const auto e1 = stitched->e(1);
-    const double y0Scaled = 1.1 * 0.5;
-    const double e0Scaled = std::sqrt(1.1) * 0.5;
-    const double y1Scaled = 2.1 * 0.5;
-    const double e1Scaled = std::sqrt(2.1) * 0.5;
-    const auto ysp0s1 =
-        ((1. / std::pow(std::sqrt(1.), 2)) +
-         (y0Scaled / std::pow(e0Scaled, 2))) *
-        ((std::pow(std::sqrt(1.), 2) * std::pow(e0Scaled, 2) /
-          (std::pow(std::sqrt(1.), 2) + std::pow(e0Scaled, 2))));
-    const auto esp0s1 =
-        std::sqrt((std::pow(std::sqrt(1.), 2) * std::pow(e0Scaled, 2)) /
-                  (std::pow(std::sqrt(1.), 2) + std::pow(e0Scaled, 2)));
-    const auto ysp1s1 =
-        ((2. / std::pow(std::sqrt(2.), 2)) +
-         (y1Scaled / std::pow(e1Scaled, 2))) *
-        ((std::pow(std::sqrt(2.), 2) * std::pow(e1Scaled, 2) /
-          (std::pow(std::sqrt(2.), 2) + std::pow(e1Scaled, 2))));
-    const auto esp1s1 =
-        std::sqrt((std::pow(std::sqrt(2.), 2) * std::pow(e1Scaled, 2)) /
-                  (std::pow(std::sqrt(2.), 2) + std::pow(e1Scaled, 2)));
     std::string istr;
     for (size_t i = 0; i < 7; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], 1., 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], 2., 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], std::sqrt(1.), 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], std::sqrt(2.), 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1., 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2., 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], std::sqrt(1.), 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], std::sqrt(2.), 1.e-9)
     }
-    for (size_t i = 7; i < 10; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], ysp0s1, 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], ysp1s1, 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], esp0s1, 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], esp1s1, 1.e-9)
+    // Get value 7 -> must be the same for interval
+    for (size_t i = 8; i < 10; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[7], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[7], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[7], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[7], 1.e-9)
     }
     for (size_t i = 10; i < 15; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], y0Scaled, 1.e-9)
-      // TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], y1Scaled, 1.e-9)
-      // TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], e0Scaled,
-      //                 1.e-9)
-      // TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], e1Scaled,
-      //                 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1.1 * 0.5, 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2.1 * 0.5, 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], std::sqrt(1.1) * 0.5, 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], std::sqrt(2.1) * 0.5, 1.e-9)
     }
-    const double y0Scaled2 = 1.5 * 0.7;
-    const double e0Scaled2 = std::sqrt(1.5) * 0.7;
-    const double y1Scaled2 = 2.5 * 0.7;
-    const double e1Scaled2 = std::sqrt(2.5) * 0.7;
-    const auto ysp0s2 =
-        ((1.5 / std::sqrt(1.5)) + (y0Scaled2 / e0Scaled2)) *
-        ((std::sqrt(1.5) * e0Scaled2 / (std::sqrt(1.5) + e0Scaled2)));
-    const auto esp0s2 =
-        std::sqrt((std::sqrt(1.) * e0Scaled2) / (std::sqrt(1.) + e0Scaled2));
-    const auto ysp1s2 =
-        ((2.5 / std::sqrt(2.5)) + (y1Scaled2 / e1Scaled2)) *
-        ((std::sqrt(2.5) * e1Scaled2 / (std::sqrt(2.5) + e1Scaled2)));
-    const auto esp1s2 =
-        std::sqrt((std::sqrt(2.5) * e1Scaled2) / (std::sqrt(2.5) + e1Scaled2));
-    for (size_t i = 15; i < 17; ++i) {
-      istr = std::to_string(i);
-      // TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], ysp0s2, 1.e-9)
-      // TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], ysp1s2, 1.e-9)
-      // TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], esp0s2, 1.e-9)
-      // TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], esp1s2, 1.e-9)
+    // Get value 15 -> must be the same for interval
+    for (size_t i = 16; i < 17; ++i) {
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], y0[15], 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], y1[15], 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], e0[15], 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], e1[15], 1.e-9)
     }
     for (size_t i = 17; i < 25; ++i) {
-      istr = std::to_string(i);
-      TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], y0Scaled2, 1.e-9)
-      TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], y1Scaled2, 1.e-9)
-      TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], e0Scaled2, 1.e-9)
-      TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], e1Scaled2, 1.e-9)
+      istr = "[" + std::to_string(i) + "]";
+      TSM_ASSERT_DELTA("Y(0)" + istr, y0[i], 1.5 * 0.7, 1.e-9)
+      TSM_ASSERT_DELTA("Y(1)" + istr, y1[i], 2.5 * 0.7, 1.e-9)
+      TSM_ASSERT_DELTA("E(0)" + istr, e0[i], std::sqrt(1.5) * 0.7, 1.e-9)
+      TSM_ASSERT_DELTA("E(1)" + istr, e1[i], std::sqrt(2.5) * 0.7, 1.e-9)
     }
 
     // Check workspaces in ADS

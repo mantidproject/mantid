@@ -144,7 +144,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID(), "Wavelength")
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
   }
@@ -162,7 +162,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID(), "Wavelength")
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
   }
@@ -188,7 +188,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID(), "Wavelength")
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
   }
@@ -211,7 +211,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID() , "Wavelength")
+    TS_ASSERT_EQUALS(stitched->getAxis(0)->unit()->unitID(), "Wavelength")
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
   }
