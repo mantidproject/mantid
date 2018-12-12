@@ -27,6 +27,14 @@ using namespace testing;
 
 namespace {
 
+std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
+  auto table = std::make_unique<QTableWidget>(columns, rows);
+  for (auto column = 0; column < columns; ++column)
+    for (auto row = 0; row < rows; ++row)
+      table->setItem(row, column, new QTableWidgetItem("item"));
+  return table;
+}
+
 struct TableItem {
   TableItem(std::string const &value) : m_str(value), m_dbl(0.0) {}
   TableItem(double const &value)
@@ -270,15 +278,6 @@ public:
   }
 
 private:
-  /// Used in setup
-  std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
-    auto table = std::make_unique<QTableWidget>(columns, rows);
-    for (auto column = 0; column < columns; ++column)
-      for (auto row = 0; row < rows; ++row)
-        table->setItem(row, column, new QTableWidgetItem("item"));
-    return table;
-  }
-
   void deleteSetup() {
     m_presenter.reset();
     m_model.reset();
