@@ -193,6 +193,8 @@ std::map<std::string, std::string> FilterEvents::validateInputs() {
     if (bool(table)) {
       if (table->columnCount() != 3)
         result[SPLITER_PROP_NAME] = "TableWorkspace must have 3 columns";
+      else if (table->rowCount() == 0)
+        result[SPLITER_PROP_NAME] = "TableWorkspace must rows defined";
     } else if (bool(matrix)) {
       if (matrix->getNumberHistograms() == 1) {
         if (!matrix->isHistogramData())
@@ -221,9 +223,9 @@ void FilterEvents::exec() {
   // Parse splitters
   m_progress = 0.0;
   progress(m_progress, "Processing SplittersWorkspace.");
-  if (m_useSplittersWorkspace)
+  if (m_useSplittersWorkspace) // SplittersWorkspace the class in nanoseconds
     processSplittersWorkspace();
-  else if (m_useArbTableSplitters)
+  else if (m_useArbTableSplitters) // TableWorkspace in seconds
     processTableSplittersWorkspace();
   else
     processMatrixSplitterWorkspace();
