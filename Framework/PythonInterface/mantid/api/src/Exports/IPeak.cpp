@@ -98,7 +98,7 @@ void export_IPeak() {
            "Set the samplePos value of this peak.  It does not set the "
            "instrument sample position.")
       .def("setSamplePos",
-           (void (IPeak::*)(const Mantid::Kernel::V3D&)) & IPeak::setSamplePos,
+           (void (IPeak::*)(const Mantid::Kernel::V3D &)) & IPeak::setSamplePos,
            (arg("self"), arg("newPos")),
            "Set the samplePos value of this peak.  It does not set the "
            "instrument sample position.")
