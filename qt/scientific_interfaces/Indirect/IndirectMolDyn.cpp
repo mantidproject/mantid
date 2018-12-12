@@ -14,6 +14,15 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 IndirectMolDyn::IndirectMolDyn(QWidget *parent)
@@ -141,28 +150,28 @@ void IndirectMolDyn::runClicked() { runTab(); }
  * Handle plotting of mantid workspace
  */
 void IndirectMolDyn::plotClicked() {
+  setPlotIsPlotting(true);
 
-  QString filename = m_uiForm.mwRun->getFirstFilename();
-  QFileInfo fi(filename);
-  QString baseName = fi.baseName();
+  QString const filename = m_uiForm.mwRun->getFirstFilename();
+  QString const baseName = QFileInfo(filename).baseName();
 
   if (checkADSForPlotSaveWorkspace(baseName.toStdString(), true)) {
 
-    WorkspaceGroup_sptr diffResultsGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            baseName.toStdString());
+    auto const diffResultsGroup = getADSWorkspaceGroup(baseName.toStdString());
 
-    auto names = diffResultsGroup->getNames();
-    auto plotType = m_uiForm.cbPlot->currentText();
+    auto const names = diffResultsGroup->getNames();
+    auto const plotType = m_uiForm.cbPlot->currentText();
 
-    for (const auto &wsName : names) {
+    for (auto const &name : names) {
       if (plotType == "Spectra" || plotType == "Both")
-        plotSpectrum(QString::fromStdString(wsName));
+        plotSpectrum(QString::fromStdString(name));
 
       if (plotType == "Contour" || plotType == "Both")
-        plot2D(QString::fromStdString(wsName));
+        plot2D(QString::fromStdString(name));
     }
   }
+
+  setPlotIsPlotting(false);
 }
 
 /**
