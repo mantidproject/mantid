@@ -836,7 +836,7 @@ public:
     // Y values
     for (size_t i = 0; i < 17; ++i) {
       TS_ASSERT_DELTA(stitched->y(0)[i], 1., 1.e-9);
-      TS_ASSERT_DELTA(stitched->y(1)[0], 2., 1.e-9);
+      TS_ASSERT_DELTA(stitched->y(1)[i], 2., 1.e-9);
     }
     // First spectrum, E values
     TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
@@ -856,7 +856,7 @@ public:
     // Y values
     for (size_t i = 0; i < 17; ++i) {
       TS_ASSERT_DELTA(stitched2->y(0)[i], 1.5, 1.e-9);
-      TS_ASSERT_DELTA(stitched2->y(1)[0], 2.5, 1.e-9);
+      TS_ASSERT_DELTA(stitched2->y(1)[i], 2.5, 1.e-9);
     }
     // First spectrum, E values
     TS_ASSERT_DELTA(stitched2->e(0)[0], 1.22474, 0.00001);

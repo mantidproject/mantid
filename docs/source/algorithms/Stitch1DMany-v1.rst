@@ -114,7 +114,7 @@ Usage
 
     # Stitch the histograms together
     workspaces = ws1.name() + "," + ws2.name() + "," + ws3.name()
-    stitched, scale = Stitch1DMany(InputWorkspaces=workspaces, Params=[0.02])
+    stitched, scale = Stitch1DMany(InputWorkspaces=workspaces, StartOverlaps=[0.4, 1.2], EndOverlaps=[0.6, 1.4], Params=[0.02])
 
 Output:
 
@@ -157,7 +157,7 @@ Output:
 
     # Stitch together workspaces from each group
     workspaceNames = gws1.name() + "," + gws2.name() + "," + gws3.name()
-    stitched, scale = Stitch1DMany(InputWorkspaces=workspaceNames, StartOverlaps=[0.3, 1.4], EndOverlaps=[3.3, 4.6], Params=[0.02])
+    stitched, scale = Stitch1DMany(InputWorkspaces=workspaceNames, Params=[0.02])
 
 Output:
 
