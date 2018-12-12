@@ -15,6 +15,7 @@ from __future__ import (absolute_import, division, print_function)
 # == for testing conda build of mantid-framework ==========
 import os
 if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
+    # conda build of mantid-framework sometimes require importing matplotlib before mantid
     import matplotlib
 # =========================================================
 from six import PY3

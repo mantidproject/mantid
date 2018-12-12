@@ -311,7 +311,7 @@ class CondaInstaller(MantidInstaller):
         package = os.path.basename(self.mantidInstaller)
         self.conda_prefix = os.path.expanduser('~/jenkins-systemtests-opt/miniconda2')
         self.conda_mantid_env_prefix = install_prefix = os.path.join(self.conda_prefix, 'envs', 'mantid')
-        self.mantidPlotPath = "conda mantid-framework does not include mantidplot"
+        self.mantidPlotPath = None # conda mantid-framework does not include mantidplot
         self.python_cmd = install_prefix + '/bin/python'
 
     def do_install(self):
