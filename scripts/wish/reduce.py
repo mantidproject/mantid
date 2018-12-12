@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from mantid import logger
 import mantid.simpleapi as mantid
 import os
 import numpy as n
@@ -76,16 +77,16 @@ class Wish:
     def startup(self, cycle='14_3'):
         user_data_directory = os.path.normpath(self.use_folder + cycle)
         self.set_data_directory(user_data_directory)
-        print("Raw Data in :   ", user_data_directory)
+        logger.notice("Raw Data in :   {}".format(user_data_directory))
         user_data_processed = self.out_folder
         self.set_user_directory(directory=user_data_processed)
-        print("Processed Data in :   ", user_data_processed)
+        logger.notice("Processed Data in :   {}".format(user_data_processed))
 
     def get_cycle(self, run_number):
         for cycle_pair in self.cycle_mapping:
             if run_number in range(cycle_pair[1][0], cycle_pair[1][1]):
                 return cycle_pair[0]
-        print("Failed to find cycle")
+        logger.notice("Failed to find cycle")
 
     # Returns the calibration filename
     def get_cal(self):
@@ -124,7 +125,7 @@ class Wish:
     def read(self, number, panel, extension):
         if type(number) is int:
             filename = self.datafile
-            print("will be reading filename...", filename)
+            logger.notice("will be reading filename...{}".format(filename))
             spectra_min, spectra_max = self.return_panel_van.get(panel) if self.is_vanadium else \
                 self.return_panel.get(panel)
             if panel != 0:
@@ -175,7 +176,7 @@ class Wish:
 
     def load_multi_run_part(self, extension, run, panel):
         filename = self.get_file_name(run, extension)
-        print("reading filename...", filename)
+        logger.notice("reading filename... {}".format(filename))
         spectra_min, spectra_max = self.return_panel.get(panel)
         output1 = "w{0}-{1}".format(run, panel)
         mantid.LoadRaw(Filename=filename, OutputWorkspace=output1, SpectrumMin=str(spectra_min),
@@ -238,7 +239,8 @@ class Wish:
             for panel_i in range(Wish.NUM_PANELS):
                 focused_ws = "w{0}-{1}foc".format(number, panel_i)
                 mantid.CropWorkspace(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, XMin=d_min, XMax=d_max)
-                print("will try to load a vanadium with the name:", self.get_vanadium(panel_i, cycle_vana))
+                logger.notice("will try to load a vanadium with the name: {}".format(self.get_vanadium
+                                                                                     (panel_i, cycle_vana)))
                 self.apply_vanadium_corrections(cycle_vana, panel_i, focused_ws)
                 mantid.SaveGSS(InputWorkspace=focused_ws,
                                Filename=save_location.format(number, panel_i, extension, "gss"),
@@ -246,7 +248,8 @@ class Wish:
                 mantid.SaveFocusedXYE(focused_ws, save_location.format(number, panel_i, extension, "dat"))
                 mantid.SaveNexusProcessed(focused_ws, save_location.format(number, panel_i, extension, "nxs"))
         else:
-            print("will try to load a vanadium with the name:", self.get_vanadium(panel, cycle_vana))
+            logger.notice("will try to load a vanadium with the name: {}".format(self.get_vanadium
+                                                                                 (panel, cycle_vana)))
             self.apply_vanadium_corrections(cycle_vana, panel, focused_ws)
             mantid.SaveGSS(InputWorkspace=focused_ws,
                            Filename=save_location.format(number, panel, extension, "gss"),
