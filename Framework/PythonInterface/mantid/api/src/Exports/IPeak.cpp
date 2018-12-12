@@ -97,6 +97,11 @@ void export_IPeak() {
            (arg("self"), arg("samX"), arg("samY"), arg("samZ")),
            "Set the samplePos value of this peak.  It does not set the "
            "instrument sample position.")
+      .def("setSamplePos",
+           (void (IPeak::*)(const Mantid::Kernel::V3D&)) & IPeak::setSamplePos,
+           (arg("self"), arg("newPos")),
+           "Set the samplePos value of this peak.  It does not set the "
+           "instrument sample position.")
       .def("setH", &IPeak::setH, (arg("self"), arg("h")),
            "Get the H index of the peak")
       .def("setK", &IPeak::setK, (arg("self"), arg("k")),
