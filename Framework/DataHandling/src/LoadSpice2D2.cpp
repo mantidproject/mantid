@@ -141,7 +141,15 @@ void LoadSpice2D2::exec() {
   setWavelength();
   createWorkspace();
   storeMetaDataIntoWS();
-  
+  runLoadInstrument();
+
+  // ugly hack for Biosans wing detector:
+  // it tests if there is metadata tagged with the wing detector
+  // if so, puts the detector in the right angle
+  if (m_metadata.find("Motor_Positions/det_west_wing_rot") != m_metadata.end()) {
+    rotateDetector();
+    runLoadInstrument();
+  }
 
 
   setProperty("OutputWorkspace", m_workspace);
@@ -361,12 +369,206 @@ void LoadSpice2D2::addRunProperty(const std::string &name, const T &value,
   m_workspace->mutableRun().addProperty(name, value, units, true);
 }
 
+/**
+ * Add all metadata parsed values as log entries
+ * Add any other metadata needed
+ * */
 void LoadSpice2D2::storeMetaDataIntoWS(){
+
+  for (const auto &keyValuePair : m_metadata) {
+    std::string key = keyValuePair.first;
+    std::replace(key.begin(), key.end(), '/', '_');
+    m_workspace->mutableRun().addProperty(key, keyValuePair.second, true);
+  }
+
   addRunProperty<double>("wavelength", m_wavelength, "Angstrom");
   addRunProperty<double>("wavelength-spread", m_dwavelength, "Angstrom");
   addRunProperty<double>("wavelength-spread-ratio",
                          m_dwavelength / m_wavelength);
+}
 
+
+/** 
+ * Run the Child Algorithm LoadInstrument
+ */
+void LoadSpice2D2::runLoadInstrument() {
+
+
+  const std::string &instrumentName = m_metadata["Header/Instrument"];
+  
+  API::IAlgorithm_sptr loadInstrumentAlgorithm = createChildAlgorithm("LoadInstrument");
+
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try {
+    loadInstrumentAlgorithm->setPropertyValue("InstrumentName", instrumentName);
+    loadInstrumentAlgorithm->setProperty<API::MatrixWorkspace_sptr>("Workspace",
+                                                     m_workspace);
+    loadInstrumentAlgorithm->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(true));
+    loadInstrumentAlgorithm->execute();
+  } catch (std::invalid_argument &) {
+    g_log.information("Invalid argument to LoadInstrument Child Algorithm");
+  } catch (std::runtime_error &) {
+    g_log.information(
+        "Unable to successfully run LoadInstrument Child Algorithm");
+  }
+}
+
+
+
+/**
+ * This will rotate the detector named componentName around z-axis
+ *
+ * @param angle in degrees
+ */ 
+void LoadSpice2D2::rotateDetector(){
+
+  double angle = boost::lexical_cast<double>(
+        metadata["Motor_Positions/det_west_wing_rot"]);
+
+  g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
+
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+  //	auto p = boost::make_shared <Mantid::Kernel::TimeSeriesProperty<double>
+  //>("rotangle");
+  p->addValue(DateAndTime::getCurrentTime(), angle);
+  runDetails.addLogData(p);
+}
+
+
+/**
+ * Calculates the detector distances and sets them as Run properties
+ * Here fog starts:
+ * GPSANS: distance = sample_det_dist + offset!
+ * BioSANS: distance = sample_det_dist + offset + sample_to_flange!
+ * Mathieu is using sample_det_dist to move the detector later
+ * So I'll do the same (Ricardo)
+ * June 14th 2016:
+ * New changes:
+ * sample_det_dist is not available
+ * flange_det_dist is new = old sample_det_dist + offset
+ * offset is not used
+ * GPSANS: distance = flange_det_dist! (sample_to_flange is 0 for GPSANS)
+ * BioSANS: distance = flange_det_dist + sample_to_flange!
+ * For back compatibility I'm setting the offset to 0 and not reading it from
+ * the file
+ * Last Changes:
+ * If SDD tag is available in the metadata set that as sample detector distance
+ * @return : sample_detector_distance
+ */
+double
+LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
+
+  double sample_detector_distance = 0, 
+  sample_detector_distance_offset = 0,
+         sample_si_window_distance = 0;
+
+  // check if it's the new format
+  if (metadata.find("Motor_Positions/sample_det_dist") != metadata.end()) {
+    // Old Format
+
+    from_string<double>(sample_detector_distance,
+                        metadata["Motor_Positions/sample_det_dist"], std::dec);
+    sample_detector_distance *= 1000.0;
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
+
+    sample_detector_distance_offset =
+        addRunProperty<double>(metadata, "Header/tank_internal_offset",
+                               "sample-detector-distance-offset", "mm");
+
+    sample_si_window_distance = addRunProperty<double>(
+        metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+
+  } else {
+    // New format:
+    from_string<double>(sample_detector_distance,
+                        metadata["Motor_Positions/flange_det_dist"], std::dec);
+    sample_detector_distance *= 1000.0;
+
+    addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
+
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
+
+    sample_si_window_distance = addRunProperty<double>(
+        metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+  }
+
+  double total_sample_detector_distance;
+  if (metadata.find("Motor_Positions/sdd") != metadata.end()) {
+
+    // When sdd exists overrides all the distances
+    from_string<double>(total_sample_detector_distance,
+                        metadata["Motor_Positions/sdd"], std::dec);
+    total_sample_detector_distance *= 1000.0;
+    sample_detector_distance = total_sample_detector_distance;
+
+    addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
+    addRunProperty<double>("sample-si-window-distance", 0, "mm");
+
+    g_log.debug() << "Sample-Detector-Distance from SDD tag = "
+                  << total_sample_detector_distance << '\n';
+
+  } else {
+    total_sample_detector_distance = sample_detector_distance +
+                                     sample_detector_distance_offset +
+                                     sample_si_window_distance;
+  }
+  addRunProperty<double>("total-sample-detector-distance",
+                         total_sample_detector_distance, "mm");
+
+  // Store sample-detector distance
+  declareProperty("SampleDetectorDistance", sample_detector_distance,
+                  Kernel::Direction::Output);
+
+  return sample_detector_distance;
+}
+
+
+
+/**
+ * Places the detector at the right sample_detector_distance
+ */
+void LoadSpice2D2::moveDetector() {
+
+
+  double sample_detector_distance = detectorDistance();
+  double translation_distance = = boost::lexical_cast<double>(
+                      m_metadata["Motor_Positions/detector_trans"]);
+  translation_distance /= 1000.0;
+  g_log.debug() << "Detector Translation = " << translation_distance
+                << " meters." << '\n';
+
+  // Some tests fail if the detector is moved here.
+  // TODO: Move the detector here and not the SANSLoad
+  UNUSED_ARG(translation_distance);
+
+  // Move the detector to the right position
+  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+
+  // Finding the name of the detector object.
+  std::string detID =
+      m_workspace->getInstrument()->getStringParameter("detector-name")[0];
+
+  g_log.information("Moving " + detID);
+  try {
+    mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
+    mover->setProperty("ComponentName", detID);
+    mover->setProperty("Z", sample_detector_distance / 1000.0);
+    // mover->setProperty("X", -translation_distance);
+    mover->execute();
+  } catch (std::invalid_argument &e) {
+    g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
+    g_log.error(e.what());
+  } catch (std::runtime_error &e) {
+    g_log.error(
+        "Unable to successfully run MoveInstrumentComponent Child Algorithm");
+    g_log.error(e.what());
+  }
 }
 
 } // namespace DataHandling
