@@ -414,17 +414,18 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   std::string isooffset; // ISO8601 offset
   file.getAttr("offset", isooffset);
   DateAndTime offset(isooffset);
-  std::string unit; // time units
-  if (file.hasAttr("unit"))
-    file.getAttr("unit", unit);
+  std::string units; // time units
+  if (file.hasAttr("units")) {
+    file.getAttr("units", units);
+  }
   file.closeData();
 
   // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
   if (heldTimeZeroType == ::NeXus::UINT64) {
-    if (unit != "ns")
+    if (units != "ns")
       logger.warning(
           "event_time_zero is uint64_t, but units not in ns. Found to be: " +
-          unit);
+          units);
     std::vector<uint64_t> nanoseconds;
     file.readData("event_time_zero", nanoseconds);
     if (nanoseconds.empty())
@@ -436,10 +437,10 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
                         offset.totalNanoseconds();
     return std::make_pair(absoluteFirst, absoluteLast);
   } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
-    if (unit != "second")
+    if (units != "second")
       logger.warning("event_time_zero is double_t, but units not in seconds. "
                      "Found to be: " +
-                     unit);
+                     units);
     std::vector<double> seconds;
     file.readData("event_time_zero", seconds);
     if (seconds.empty())
