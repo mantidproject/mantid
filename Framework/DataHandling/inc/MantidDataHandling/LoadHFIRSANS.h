@@ -103,6 +103,8 @@ private:
   template <class T>
   void addRunProperty(const std::string &name, const T &value,
                       const std::string &units = "");
+  template <class T>
+  void addRunTimeSeriesProperty(const std::string &name, const T &value);
   void setBeamTrapRunProperty();
   void storeMetaDataIntoWS();
   void runLoadInstrument();
