@@ -41,6 +41,11 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 /// Mock object to mock the view
 class MockConvFitDataView : public IIndirectFitDataView {
 public:
+  /// Signals
+  void emitResolutionLoaded(QString const &workspaceName) {
+    emit resolutionLoaded(workspaceName);
+  }
+
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
@@ -69,10 +74,7 @@ public:
 };
 
 /// Mock object to mock the model
-class MockConvFitModel : public ConvFitModel {
-public:
-  /// Public Methods - None currently
-};
+class MockConvFitModel : public ConvFitModel {};
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
@@ -117,7 +119,25 @@ public:
   /// Unit tests to check for successful mock object instantiation
   ///----------------------------------------------------------------------
 
-  void test_test() {}
+  void test_that_the_presenter_and_mock_objects_have_been_created() {
+    TS_ASSERT(m_presenter);
+    TS_ASSERT(m_model);
+    TS_ASSERT(m_view);
+  }
+
+  void test_that_the_data_table_is_the_size_specified() {
+    TS_ASSERT_EQUALS(m_dataTable->rowCount(), 6);
+    TS_ASSERT_EQUALS(m_dataTable->columnCount(), 6);
+  }
+
+  void
+  test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
+  }
+
+  ///----------------------------------------------------------------------
+  /// Unit Tests that test the signals, methods and slots of the presenter
+  ///----------------------------------------------------------------------
 
 private:
   std::unique_ptr<QTableWidget> m_dataTable;

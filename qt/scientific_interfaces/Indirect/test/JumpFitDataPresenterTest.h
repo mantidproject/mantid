@@ -100,10 +100,7 @@ public:
 };
 
 /// Mock object to mock the model
-class MockJumpFitModel : public JumpFitModel {
-public:
-  /// Public Methods - None currently
-};
+class MockJumpFitModel : public JumpFitModel {};
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
