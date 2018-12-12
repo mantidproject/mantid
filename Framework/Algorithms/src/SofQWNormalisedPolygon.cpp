@@ -312,8 +312,9 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
     this->m_theta[i] = spectrumInfo.twoTheta(i);
 
     if (spectrumInfo.hasUniqueDetector(i)) {
-      const auto thetas =
-          minMaxTheta(detectorInfo, i, samplePos, beamDir, upDir);
+      const auto id = det.getID();
+      const auto thetas = minMaxTheta(detectorInfo, detectorInfo.indexOf(id),
+                                      samplePos, beamDir, upDir);
       m_thetaWidths[i] = 2. * (thetas.second - thetas.first);
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
