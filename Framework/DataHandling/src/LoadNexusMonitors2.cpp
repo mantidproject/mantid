@@ -426,11 +426,11 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
  **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
-  std::unique_ptr<::NeXus::File> f = nullptr;
+  std::unique_ptr<::NeXus::File> filePointer;
   try {
-    f = std::make_unique<::NeXus::File>(fname);
-    if (f)
-      f->getEntries();
+    filePointer = std::make_unique<::NeXus::File>(fname);
+    if (filePointer)
+      filePointer->getEntries();
   } catch (::NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname
                   << "', error description: " << e.what() << '\n';
@@ -467,7 +467,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
     return;
   }
 
-  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
   size_t yLength = m_multiPeriodCounts[0].size() / numPeriods;
   size_t xLength = yLength + 1;
   size_t numSpectra = m_workspace->getNumberHistograms();
@@ -653,7 +653,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     // Use event monitors and create event workspace
 
     // only used if using event monitors
-    EventWorkspace_sptr eventWS = boost::make_shared<EventWorkspace>();
+    EventWorkspace_sptr eventWS = EventWorkspace_sptr(new EventWorkspace());
     eventWS->initialize(m_monitorInfo.size(), 1, 1);
 
     // Set the units
