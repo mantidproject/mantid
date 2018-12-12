@@ -189,8 +189,9 @@ class IPeakTest(unittest.TestCase):
 
     def test_set_modulation_vector(self):
         testVector = V3D(0.5,0,0.2)
+        testVectorOut = V3D(1, 0, 0)
         self._peak.setIntMNP(testVector)
-        self.assertEqual(self._peak.getIntMNP(), testVector)
+        self.assertEqual(self._peak.getIntMNP(), testVectorOut)
 
     def test_set_get_inthkl(self):
         testVector = V3D(0.5,0,0.2)
