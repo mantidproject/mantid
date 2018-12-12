@@ -27,6 +27,9 @@ using namespace testing;
 
 namespace {
 
+QString const PARAMETER_TYPE_LABEL("Fit Parameter:");
+QString const PARAMETER_LABEL("Width:");
+
 QStringList getJumpParameters() {
   QStringList parameters;
   parameters << "f1.f1.FWHM"
@@ -43,6 +46,24 @@ QStringList getJumpParameterTypes() {
 
 std::vector<std::string> getTextAxisLabels() {
   return {"f0.Width", "f1.Width", "f2.Width", "f0.EISF", "f1.EISF", "f2.EISF"};
+}
+
+std::unique_ptr<QLabel> createLabel(QString const &text) {
+  return std::make_unique<QLabel>(text);
+}
+
+std::unique_ptr<QComboBox> createComboBox(QStringList const &items) {
+  auto combBox = std::make_unique<QComboBox>();
+  combBox->addItems(items);
+  return combBox;
+}
+
+std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
+  auto table = std::make_unique<QTableWidget>(columns, rows);
+  for (auto column = 0; column < columns; ++column)
+    for (auto row = 0; row < rows; ++row)
+      table->setItem(row, column, new QTableWidgetItem("item"));
+  return table;
 }
 
 } // namespace
@@ -85,11 +106,7 @@ public:
 /// Mock object to mock the model
 class MockJumpFitModel : public JumpFitModel {
 public:
-  /// Public Methods
-  // MOCK_CONST_METHOD0(isMultiFit, bool());
-  // MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
-
-  // MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
+  /// Public Methods - None currently
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -112,8 +129,8 @@ public:
     m_dataTable = createEmptyTableWidget(6, 5);
     m_ParameterTypeCombo = createComboBox(getJumpParameterTypes());
     m_ParameterCombo = createComboBox(getJumpParameters());
-    m_ParameterTypeLabel = createLabel("Fit Parameter:");
-    m_ParameterLabel = createLabel("Width:");
+    m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
+    m_ParameterLabel = createLabel(PARAMETER_LABEL);
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
@@ -124,9 +141,9 @@ public:
         std::move(m_ParameterTypeLabel.get()),
         std::move(m_ParameterLabel.get()));
 
-    //SetUpADSWithWorkspace m_ads(
-    //    "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
-    //m_model->addWorkspace("WorkspaceName");
+    SetUpADSWithWorkspace m_ads(
+        "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
+    m_model->addWorkspace("WorkspaceName");
   }
 
   void tearDown() override {
@@ -157,16 +174,18 @@ public:
   }
 
   void test_that_the_comboboxes_contain_the_items_specified_during_the_setup() {
-    TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemData(0), "Width");
-    TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemData(1), "EISF");
+    auto const parameterTypes = getJumpParameterTypes();
+    auto const parameters = getJumpParameters();
 
-    TS_ASSERT_EQUALS(m_ParameterCombo->itemData(0), "f1.f1.FWHM");
-    TS_ASSERT_EQUALS(m_ParameterCombo->itemData(1), "f2.f1.FWHM");
+    TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemText(0), parameterTypes[0]);
+    TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemText(1), parameterTypes[1]);
+    TS_ASSERT_EQUALS(m_ParameterCombo->itemText(0), parameters[0]);
+    TS_ASSERT_EQUALS(m_ParameterCombo->itemText(1), parameters[1]);
   }
 
   void test_that_the_labels_have_the_correct_text_after_setup() {
-    TS_ASSERT_EQUALS(m_ParameterTypeLabel->text(), "Fit Parameter:");
-    TS_ASSERT_EQUALS(m_ParameterLabel->text(), "Width:");
+    TS_ASSERT_EQUALS(m_ParameterTypeLabel->text(), PARAMETER_TYPE_LABEL);
+    TS_ASSERT_EQUALS(m_ParameterLabel->text(), PARAMETER_LABEL);
   }
 
   void
@@ -174,28 +193,11 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
   }
 
-  void test_test() {}
+  ///----------------------------------------------------------------------
+  /// Unit Tests that test the signals, methods and slots of the presenter
+  ///----------------------------------------------------------------------
 
 private:
-  /// Used in setup
-  std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
-    auto table = std::make_unique<QTableWidget>(columns, rows);
-    for (auto column = 0; column < columns; ++column)
-      for (auto row = 0; row < rows; ++row)
-        table->setItem(row, column, new QTableWidgetItem("item"));
-    return table;
-  }
-
-  std::unique_ptr<QComboBox> createComboBox(QStringList const &items) {
-    auto combBox = std::make_unique<QComboBox>();
-    combBox->addItems(items);
-    return combBox;
-  }
-
-  std::unique_ptr<QLabel> createLabel(QString const &text) {
-    return std::make_unique<QLabel>(text);
-  }
-
   std::unique_ptr<QTableWidget> m_dataTable;
   std::unique_ptr<QComboBox> m_ParameterTypeCombo;
   std::unique_ptr<QComboBox> m_ParameterCombo;
