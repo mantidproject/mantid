@@ -89,12 +89,21 @@ LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
   file.openData("event_index");
   // Must be uint64
   std::vector<uint64_t> event_index;
-  if (file.getInfo().type == ::NeXus::UINT64)
+
+  if (file.getInfo().type == ::NeXus::UINT32) {
+    std::vector<uint32_t> event_index_uint32;
+    file.getData(event_index_uint32);
+    event_index.resize(event_index_uint32.size());
+    std::transform(event_index_uint32.begin(), event_index_uint32.end(),
+                   event_index.begin(),
+                   [](uint32_t a) { return static_cast<uint64_t>(a); });
+  } else if (file.getInfo().type == ::NeXus::UINT64) {
     file.getData(event_index);
-  else {
+  } else {
     m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
-        << "'s event_index field is not UINT64! It will be skipped.\n";
+        << "'s event_index field is not UINT32 or UINT64! "
+           "It will be skipped.\n";
     m_loadError = true;
   }
   file.closeData();
