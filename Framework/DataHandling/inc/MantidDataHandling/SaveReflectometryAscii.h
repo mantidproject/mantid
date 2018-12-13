@@ -62,6 +62,8 @@ private:
   void outputval(std::string val);
   /// Retrieve sample log information
   std::string sampleInfo(const std::string &logName);
+  /// Retrieve sample log unit
+  std::string sampleUnit(const std::string &logName);
   /// Write one header line
   void writeInfo(const std::string logName, const std::string logValue = "");
   /// Write header

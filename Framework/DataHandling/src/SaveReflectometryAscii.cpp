@@ -37,10 +37,6 @@ using namespace API;
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveReflectometryAscii)
 
-auto visibleWhenFileExtension(const std::string s) {
-  return make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, s);
-}
-
 /// Initialise the algorithm
 void SaveReflectometryAscii::init() {
   declareProperty(
@@ -53,28 +49,31 @@ void SaveReflectometryAscii::init() {
   declareProperty("FileExtension", ".mft",
                   boost::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
-  auto mft = visibleWhenFileExtension(".mft");
-  auto cus = visibleWhenFileExtension("custom");
-  auto vis1 =
-      make_unique<VisibleWhenProperty>(std::move(mft), std::move(cus), OR);
-  auto vis2 = visibleWhenFileExtension("custom");
-  auto vis3 = visibleWhenFileExtension("custom");
-  auto vis4 = visibleWhenFileExtension("custom");
+  auto mft =
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "mft");
+  auto cus =
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
   declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
-  setPropertySettings("LogList", std::move(vis1));
+  setPropertySettings("LogList", make_unique<VisibleWhenProperty>(
+                                     std::move(mft), std::move(cus), OR));
   declareProperty("WriteHeader", false, "Whether to write header lines.");
-  setPropertySettings("WriteHeader", std::move(vis2));
+  setPropertySettings(
+      "WriteHeader",
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
   std::vector<std::string> separator = {"comma", "space", "tab"};
   declareProperty(
       "WriteResolution", true,
       "Whether to compute resolution values and write them as fourth "
       "data column.");
-  setPropertySettings("WriteResolution", std::move(vis3));
+  setPropertySettings(
+      "WriteResolution",
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
   declareProperty("Separator", "tab",
                   boost::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");
-  setPropertySettings("Separator", std::move(vis4));
+  setPropertySettings("Separator", make_unique<VisibleWhenProperty>(
+                                       "FileExtension", IS_EQUAL_TO, "custom"));
 }
 
 /// Input validation for single MatrixWorkspace
@@ -187,11 +186,23 @@ std::string SaveReflectometryAscii::sampleInfo(const std::string &logName) {
   return "Not defined";
 }
 
+/// Retrieve sample log unit
+std::string SaveReflectometryAscii::sampleUnit(const std::string &logName) {
+  auto run = m_ws->run();
+  try {
+    return " " +
+           boost::lexical_cast<std::string>(run.getLogData(logName)->units());
+  } catch (Exception::NotFoundError &) {
+  }
+  return "";
+}
+
 /// Write one header line
 void SaveReflectometryAscii::writeInfo(const std::string logName,
                                        const std::string logValue) {
   if (!logValue.empty())
-    m_file << logName << " : " << sampleInfo(logValue) << '\n';
+    m_file << logName << " : " << sampleInfo(logValue) << sampleUnit(logValue)
+           << '\n';
   else
     m_file << logName << " : " << sampleInfo(logName) << '\n';
 }
