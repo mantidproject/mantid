@@ -3,6 +3,7 @@ import unittest
 
 
 class TestCase(unittest.TestCase):
+
     def test_sequoia(self):
         assert sequoia('B1') == 38
         assert sequoia('B37') == 74
