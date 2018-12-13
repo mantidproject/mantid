@@ -540,7 +540,6 @@ void loadEvents(API::Progress &prog, const char *progMsg,
 
 } // namespace EMU
 
-
 /// Declares the properties for the two loader variants. Adds the path option
 /// to the binary file and dataset set index if it is the \p hdfLoader.
 template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
@@ -1193,9 +1192,7 @@ const std::vector<std::string> LoadEMUHdf::seeAlso() const {
   return {"Load", "LoadQKK"};
 }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadEMUHdf::category() const {
-  return "DataHandling\\ANSTO";
-}
+const std::string LoadEMUHdf::category() const { return "DataHandling\\ANSTO"; }
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadEMUHdf::name() const { return "LoadEMUHdf"; }
@@ -1290,9 +1287,7 @@ const std::vector<std::string> LoadEMUTar::seeAlso() const {
   return {"Load", "LoadQKK"};
 }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadEMUTar::category() const {
-  return "DataHandling\\ANSTO";
-}
+const std::string LoadEMUTar::category() const { return "DataHandling\\ANSTO"; }
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadEMUTar::name() const { return "LoadEMUTar"; }

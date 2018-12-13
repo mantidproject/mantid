@@ -55,8 +55,8 @@ protected:
   void exec(const std::string &hdfFile, const std::string &eventFile);
 
 private:
-  using Base::init;
   using Base::exec;
+  using Base::init;
   // region of intreset
   std::vector<bool> createRoiVector(const std::string &seltubes,
                                     const std::string &maskfile);
