@@ -204,41 +204,33 @@ void SaveReflectometryAscii::writeInfo(const std::string logName,
     m_file << logName << " : " << sampleInfo(logValue) << sampleUnit(logValue)
            << '\n';
   else
-    m_file << logName << " : " << sampleInfo(logName) << '\n';
+    m_file << logName << " : " << sampleInfo(logName) << sampleUnit(logName)
+           << '\n';
 }
 
 /// Write header lines
 void SaveReflectometryAscii::header() {
   m_file << std::setfill(' ');
   m_file << "MFT\n";
-  std::map<std::string, std::string> logs;
-  logs["Instrument"] = "instrument.name";
-  logs["User-local contact"] = "user.namelocalcontact";
-  logs["Title"] = "title";
-  logs["Subtitle"] = "";
-  logs["Start date + time"] = "start_time";
-  logs["End date + time"] = "end_time";
-  logs["Theta 1 + dir + ref numbers"] = "";
-  logs["Theta 2 + dir + ref numbers"] = "";
-  logs["Theta 3 + dir + ref numbers"] = "";
+  std::vector<std::string> logs{"instrument.name", "user.namelocalcontact",
+                                "title", "start_time", "end_time"};
   writeInfo("Instrument", "instrument.name");
   writeInfo("User-local contact", "user.namelocalcontact");
   writeInfo("Title", "title");
-  writeInfo("Subtitle", "");
+  writeInfo("Subtitle");
   writeInfo("Start date + time", "start_time");
   writeInfo("End date + time", "end_time");
-  writeInfo("Theta 1 + dir + ref numbers", "");
-  writeInfo("Theta 2 + dir + ref numbers", "");
-  writeInfo("Theta 3 + dir + ref numbers", "");
+  writeInfo("Theta 1 + dir + ref numbers");
+  writeInfo("Theta 2 + dir + ref numbers");
+  writeInfo("Theta 3 + dir + ref numbers");
   const std::vector<std::string> logList = getProperty("LogList");
-  int nlogs = 0;
   for (const auto &log : logList) {
-    if (logs.find(log) == logs.end()) {
+    if (find(logs.cbegin(), logs.cend(), log) ==
+        logs.end()) { // do not repeat a log
       writeInfo(log);
-      ++nlogs;
     }
   }
-  for (auto i = nlogs + 1; i < 10; ++i)
+  for (auto i = logList.size(); i < 9; ++i)
     writeInfo("Parameter ");
   m_file << "Number of file format : "
          << "40\n";

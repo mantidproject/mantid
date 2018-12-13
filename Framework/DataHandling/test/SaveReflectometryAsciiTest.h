@@ -364,8 +364,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("LogList", std::vector<std::string>{"a"}))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogList", "a, b"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
@@ -393,9 +392,9 @@ public:
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Theta 3 + dir + ref numbers : Not defined")
     std::getline(in, line);
-    TS_ASSERT_EQUALS(line, "a : 5")
+    TS_ASSERT_EQUALS(line, "a : 5 ")
     std::getline(in, line);
-    TS_ASSERT_EQUALS(line, "b : 3.4382 MyUnit")
+    TS_ASSERT_EQUALS(line, "b : 3.4382000000000001 MyUnit")
     for (int i = 0; i < 7; ++i) {
       std::getline(in, line);
       TS_ASSERT_EQUALS(line, "Parameter  : Not defined")
