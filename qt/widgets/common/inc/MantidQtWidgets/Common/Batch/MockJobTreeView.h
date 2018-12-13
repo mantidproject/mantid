@@ -18,7 +18,7 @@ namespace Batch {
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class EXPORT_OPT_MANTIDQT_COMMON MockJobTreeView : public IJobTreeView {
+class DLLExport MockJobTreeView : public IJobTreeView {
 public:
   MockJobTreeView() : m_deadCell("", "white", 0, "transparent", 0, false) {
     ON_CALL(*this, deadCell()).WillByDefault(Return(m_deadCell));

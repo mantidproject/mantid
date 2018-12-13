@@ -375,6 +375,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
   inc/MantidQtWidgets/Common/Batch/JobTreeView.h
+  inc/MantidQtWidgets/Common/Batch/MockJobTreeView.h
   inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
