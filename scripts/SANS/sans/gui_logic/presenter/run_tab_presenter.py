@@ -37,6 +37,8 @@ from sans.gui_logic.models.diagnostics_page_model import run_integral, create_st
 from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
+from ui.sans_isis import SANSSaveOtherWindow
+from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 
 try:
     import mantidplot
@@ -123,6 +125,9 @@ class RunTabPresenter(object):
 
         def on_cut_rows(self):
             self._presenter.on_cut_rows_requested()
+
+        def on_save_other(self):
+            self._presenter.on_save_other()
 
         def on_sample_geometry_selection(self, show_geometry):
             self._presenter.on_sample_geometry_view_changed(show_geometry)
@@ -675,6 +680,12 @@ class RunTabPresenter(object):
         :return: True if the row is empty.
         """
         return self._table_model.is_empty_row(row)
+
+    def on_save_other(self):
+        self.save_other_presenter = SaveOtherPresenter(parent_presenter=self)
+        save_other_view = SANSSaveOtherWindow.SANSSaveOtherDialog(self._view)
+        self.save_other_presenter.set_view(save_other_view)
+        self.save_other_presenter.show()
 
     # def _validate_rows(self):
     #     """

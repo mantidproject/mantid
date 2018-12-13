@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import copy
@@ -5,13 +11,11 @@ import copy
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-import Muon.GUI.Common.utilities.load_utils as load_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class LoadRunWidgetPresenter(object):
-
     def __init__(self, view, model):
         self._view = view
         self._model = model
@@ -21,7 +25,7 @@ class LoadRunWidgetPresenter(object):
         self._use_threading = True
         self._multiple_file_mode = "Co-add"
 
-        self._instrument = "Instrument"
+        self._instrument = ""
         self._view.set_current_instrument(self._instrument)
 
         self._set_connections()
@@ -79,11 +83,6 @@ class LoadRunWidgetPresenter(object):
     # used by parent widget
     def update_view_from_model(self, run_list):
         self.set_run_edit_from_list(run_list)
-        instrument = self._model.get_instrument()
-        if instrument is None:
-            # if instrument cannot be extracted from loaded workspace, return to its current value
-            instrument = self._view.get_instrument_label()
-        self.set_current_instrument(instrument)
 
     def update_multiple_loading_behaviour(self, text):
         self._multiple_file_mode = text

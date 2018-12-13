@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import WorkspaceGroup
@@ -60,26 +66,12 @@ class LoadRunWidgetModel(object):
             message = exception_message_for_failed_files(failed_files)
             raise ValueError(message)
 
-    # Used with load thread
+    # This is needed to work with thread model
     def output(self):
         pass
 
-    # Used with load thread
     def cancel(self):
         pass
-
-    def get_instrument(self):
-        instrument = None
-        try:
-            workspace = self.loaded_workspaces[0]["OutputWorkspace"]
-            if isinstance(workspace, list):
-                instrument = workspace[0].workspace.getInstrument().getName()
-            else:
-                instrument = workspace.workspace.getInstrument().getName()
-        except IndexError:
-            pass
-            #instrument = self._loaded_data_store.instrument
-        return instrument
 
     def clear_loaded_data(self):
         self._loaded_data_store.clear()

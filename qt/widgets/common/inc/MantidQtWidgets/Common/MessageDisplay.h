@@ -104,6 +104,12 @@ private slots:
   void showContextMenu(const QPoint &event);
   /// Set the global logging level
   void setLogLevel(int priority);
+  /// Set the number of blocks kept by the display
+  void setScrollbackLimit();
+  /// Return the maximum number of lines displayed
+  int maximumLineCount() const;
+  /// Set the maximum number of lines displayed
+  void setMaximumLineCount(int count);
 
 private:
   /// Setup the actions
