@@ -85,9 +85,9 @@ boost::variant<RangeInQ, std::vector<int>>
 parseQRange(std::string const &min, std::string const &max,
             std::string const &step) {
   auto invalidParams = std::vector<int>();
-  boost::optional<double> minimum = boost::none;
-  boost::optional<double> maximum = boost::none;
-  boost::optional<double> stepValue = boost::none;
+  auto minimum = boost::make_optional(false, double());
+  auto maximum = boost::make_optional(false, double());
+  auto stepValue = boost::make_optional(false, double());
 
   // If any values are set, check they parse ok
   if (!isEntirelyWhitespace(min)) {
