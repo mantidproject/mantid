@@ -42,11 +42,19 @@ operator=(const PropertyManagerOwner &po) {
  *  @param doc :: A description of the property that may be displayed to users
  *  @throw Exception::ExistsError if a property with the given name already
  * exists
- *  @throw std::invalid_argument  if the property declared has an empty name.
  */
 void PropertyManagerOwner::declareProperty(std::unique_ptr<Property> p,
                                            const std::string &doc) {
   m_properties->declareProperty(std::move(p), doc);
+}
+
+/** Add or replace property in the list of managed properties
+ *  @param p :: The property object to add
+ *  @param doc :: A description of the property that may be displayed to users
+ */
+void PropertyManagerOwner::declareOrReplaceProperty(std::unique_ptr<Property> p,
+                                                    const std::string &doc) {
+  m_properties->declareOrReplaceProperty(std::move(p), doc);
 }
 
 /** Set the ordered list of properties by one string of values, separated by
@@ -57,23 +65,28 @@ void PropertyManagerOwner::declareProperty(std::unique_ptr<Property> p,
  *  @param propertiesJson :: The string of property values
  *  @param ignoreProperties :: A set of names of any properties NOT to set
  *      from the propertiesArray
+ *  @param createMissing :: If the property does not exist then create it
  *  @throw invalid_argument if error in parameters
  */
 void PropertyManagerOwner::setProperties(
     const std::string &propertiesJson,
-    const std::unordered_set<std::string> &ignoreProperties) {
-  m_properties->setProperties(propertiesJson, this, ignoreProperties);
+    const std::unordered_set<std::string> &ignoreProperties,
+    bool createMissing) {
+  m_properties->setProperties(propertiesJson, this, ignoreProperties,
+                              createMissing);
 }
 
 /** Sets all the declared properties from a json object
   @param jsonValue :: A json name value pair collection
   @param ignoreProperties :: A set of names of any properties NOT to set
   from the propertiesArray
-  */
+  @param createMissing :: If the property does not exist then create it
+*/
 void PropertyManagerOwner::setProperties(
     const ::Json::Value &jsonValue,
-    const std::unordered_set<std::string> &ignoreProperties) {
-  m_properties->setProperties(jsonValue, this, ignoreProperties);
+    const std::unordered_set<std::string> &ignoreProperties,
+    bool createMissing) {
+  m_properties->setProperties(jsonValue, this, ignoreProperties, createMissing);
 }
 
 /** Sets all the declared properties from a string.

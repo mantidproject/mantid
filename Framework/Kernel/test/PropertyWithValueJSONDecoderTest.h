@@ -26,19 +26,19 @@ public:
   }
 
   void testDecodeSingleJSONIntAsProperty() {
-    doSingleValueObjecteDecodeTest("IntProperty", 10);
+    doSingleValueObjectDecodeTest("IntProperty", 10);
   }
 
   void testDecodeSingleJSONDoubleAsProperty() {
-    doSingleValueObjecteDecodeTest("DoubleProperty", 10.5);
+    doSingleValueObjectDecodeTest("DoubleProperty", 10.5);
   }
 
   void testDecodeSingleJSONStringAsProperty() {
-    doSingleValueObjecteDecodeTest("StringProperty", std::string("My value"));
+    doSingleValueObjectDecodeTest("StringProperty", std::string("My value"));
   }
 
   void testDecodeSingleJSONBoolAsProperty() {
-    doSingleValueObjecteDecodeTest("BoolProperty", false);
+    doSingleValueObjectDecodeTest("BoolProperty", false);
   }
 
   void testDecodeArrayValueAsArrayProperty() {
@@ -47,12 +47,10 @@ public:
     Json::Value arrayItem(Json::arrayValue);
     for (const auto &elem : propValue)
       arrayItem.append(elem);
-    Json::Value root;
-    root[propName] = arrayItem;
 
     using Mantid::Kernel::ArrayProperty;
     auto typedProperty =
-        doBasicDecodeTest<ArrayProperty<double>>(propName, root);
+        doBasicDecodeTest<ArrayProperty<double>>(propName, arrayItem);
   }
 
   void testDecodeSingleObjectValuePropertyManagerProperty() {
@@ -62,12 +60,10 @@ public:
     Json::Value dict(Json::objectValue);
     dict[intKey] = intValue;
     dict[realKey] = realValue;
-    Json::Value root;
-    root[propName] = dict;
 
     using Mantid::Kernel::PropertyManagerProperty;
     auto typedProperty =
-        doBasicDecodeTest<PropertyManagerProperty>(propName, root);
+        doBasicDecodeTest<PropertyManagerProperty>(propName, dict);
 
     using Mantid::Kernel::PropertyManager_sptr;
     PropertyManager_sptr propMgr{(*typedProperty)()};
@@ -90,12 +86,10 @@ public:
     outerDict[outerIntKey] = outerIntValue;
     outerDict[outerRealKey] = outerRealValue;
     outerDict[outerDictKey] = innerDict;
-    Json::Value root;
-    root[propName] = outerDict;
 
     using Mantid::Kernel::PropertyManagerProperty;
     auto typedProperty =
-        doBasicDecodeTest<PropertyManagerProperty>(propName, root);
+        doBasicDecodeTest<PropertyManagerProperty>(propName, outerDict);
 
     using Mantid::Kernel::PropertyManager_sptr;
     PropertyManager_sptr propMgr{(*typedProperty)()};
@@ -108,34 +102,20 @@ public:
   // ----------------------- Failure tests -----------------------
 
   void testDecodeThrowsWithEmptyValue() {
-    using Mantid::Kernel::decode;
+    using Mantid::Kernel::decodeAsProperty;
     Json::Value root;
-    TSM_ASSERT_THROWS("Expected decode to throw for empty value", decode(root),
+    TSM_ASSERT_THROWS("Expected decode to throw for empty value",
+                      decodeAsProperty("NullValue", root),
                       std::invalid_argument);
-  }
-
-  void testDecodeThrowsWithGreaterThanOneMember() {
-    using Mantid::Kernel::decode;
-    Json::Value root;
-    root["one"] = 1;
-    root["two"] = 2;
-
-    TSM_ASSERT_THROWS("Expected decode to throw with more than 1 member",
-                      decode(root), std::invalid_argument);
-  }
-
-  void testDecodeThrowsWithNonObjectValue() {
-    using Mantid::Kernel::decode;
-    TSM_ASSERT_THROWS("Expected decode to throw with non-object type",
-                      decode(Json::Value(10)), std::invalid_argument);
   }
 
   void testDecodeEmptyArrayValueThrows() {
     Json::Value root;
     root["EmptyArray"] = Json::Value(Json::arrayValue);
 
-    using Mantid::Kernel::decode;
-    TSM_ASSERT_THROWS("Expected an empty json array to throw", decode(root),
+    using Mantid::Kernel::decodeAsProperty;
+    TSM_ASSERT_THROWS("Expected an empty json array to throw",
+                      decodeAsProperty("EmptyArray", root),
                       std::invalid_argument);
   }
 
@@ -144,20 +124,18 @@ public:
     mixedArray.append(1);
     mixedArray.append(true);
     mixedArray.append("hello");
-    Json::Value root;
-    root["MixedArray"] = mixedArray;
 
-    using Mantid::Kernel::decode;
-    TSM_ASSERT_THROWS("Expected an empty json array to throw", decode(root),
+    using Mantid::Kernel::decodeAsProperty;
+    TSM_ASSERT_THROWS("Expected an empty json array to throw",
+                      decodeAsProperty("Mixed", mixedArray),
                       std::invalid_argument);
   }
 
 private:
   template <typename ValueType>
-  void doSingleValueObjecteDecodeTest(const std::string &propName,
-                                      const ValueType &propValue) {
-    Json::Value root;
-    root[propName] = propValue;
+  void doSingleValueObjectDecodeTest(const std::string &propName,
+                                     const ValueType &propValue) {
+    Json::Value root(propValue);
 
     using Mantid::Kernel::PropertyWithValue;
     auto typedProperty =
@@ -168,8 +146,8 @@ private:
   template <typename PropertyType>
   std::unique_ptr<PropertyType>
   doBasicDecodeTest(const std::string &propName, const Json::Value &jsonValue) {
-    using Mantid::Kernel::decode;
-    auto property = decode(jsonValue);
+    using Mantid::Kernel::decodeAsProperty;
+    auto property = decodeAsProperty(propName, jsonValue);
     TSM_ASSERT("Decode failed to create a Property. ", property);
     auto typedProperty = std::unique_ptr<PropertyType>{
         dynamic_cast<PropertyType *>(property.release())};

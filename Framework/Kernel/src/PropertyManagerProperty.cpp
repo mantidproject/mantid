@@ -88,7 +88,9 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
   }
   std::ostringstream msg;
   try {
-    value->setProperties(strValue);
+    const std::unordered_set<std::string> ignored;
+    bool createMissing{true};
+    value->setProperties(strValue, ignored, createMissing);
     m_dataServiceKey.clear();
   } catch (std::invalid_argument &exc) {
     msg << "Error setting value from string.\n"

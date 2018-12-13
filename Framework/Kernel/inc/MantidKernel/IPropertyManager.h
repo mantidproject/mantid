@@ -65,6 +65,10 @@ public:
   virtual void declareProperty(std::unique_ptr<Property> p,
                                const std::string &doc = "") = 0;
 
+  /// Function to declare properties (i.e. store them)
+  virtual void declareOrReplaceProperty(std::unique_ptr<Property> p,
+                                        const std::string &doc = "") = 0;
+
   /// Removes the property from management
   virtual void removeProperty(const std::string &name,
                               const bool delproperty = true) = 0;
@@ -80,26 +84,30 @@ public:
       const std::unordered_set<std::string> &ignoreProperties =
           std::unordered_set<std::string>()) = 0;
 
-  /** Sets all the declared properties from a string.
+  /** Sets all properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted
         as a json name value pair collection
       @param ignoreProperties :: A set of names of any properties NOT to set
       from the propertiesArray
+      @param createMissing :: If the property does not exist then create it
    */
   virtual void
   setProperties(const std::string &propertiesJson,
                 const std::unordered_set<std::string> &ignoreProperties =
-                    std::unordered_set<std::string>()) = 0;
+                    std::unordered_set<std::string>(),
+                bool createMissing = false) = 0;
 
-  /** Sets all the declared properties from a json object
+  /** Sets all the properties from a json object
      @param jsonValue :: A json name value pair collection
      @param ignoreProperties :: A set of names of any properties NOT to set
      from the propertiesArray
+     @param createMissing :: If the property does not exist then create it
   */
   virtual void
   setProperties(const ::Json::Value &jsonValue,
                 const std::unordered_set<std::string> &ignoreProperties =
-                    std::unordered_set<std::string>()) = 0;
+                    std::unordered_set<std::string>(),
+                bool createMissing = false) = 0;
 
   /** Sets property value from a string
       @param name :: Property name

@@ -112,6 +112,20 @@ public:
     TS_ASSERT(prop()->existsProperty("Prop1"));
   }
 
+  void test_Property_Set_With_Json_String_Declares_Missing_Values() {
+    PropertyManagerProperty prop("Test");
+    const std::string jsonString =
+        R"({"APROP":"equation=12+3","anotherProp":"1.3,2.5"})";
+
+    TS_ASSERT_THROWS_NOTHING(prop.setValue(jsonString));
+
+    auto mgr = prop();
+    TS_ASSERT_EQUALS("equation=12+3",
+                     static_cast<std::string>(mgr->getProperty("APROP")));
+    TS_ASSERT_EQUALS("1.3,2.5",
+                     static_cast<std::string>(mgr->getProperty("anotherProp")));
+  }
+
   void test_Property_Set_With_String_Checks_PropertyManager_DataService() {
     using Mantid::Kernel::PropertyManagerDataService;
     auto globalMgr = createPropMgrWithInt();
@@ -168,15 +182,6 @@ public:
   //----------------------------------------------------------------------------
   void test_Empty_Name_Is_Not_Accepted() {
     TS_ASSERT_THROWS(PropertyManagerProperty(""), std::invalid_argument);
-  }
-
-  void test_Empty_Property_Set_With_Json_String_Returns_Error() {
-    PropertyManagerProperty prop("Test");
-
-    auto json = createPropMgrWithInt()->asString(true);
-    std::string msg;
-    TS_ASSERT_THROWS_NOTHING(msg = prop.setValue(json));
-    TS_ASSERT(msg.length() > 0);
   }
 
   void test_String_Not_Holding_Valid_Json_or_Global_PM_Name_Returns_Error() {

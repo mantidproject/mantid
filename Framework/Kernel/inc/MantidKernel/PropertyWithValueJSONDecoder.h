@@ -18,8 +18,9 @@ namespace Mantid {
 namespace Kernel {
 class Property;
 
-/// Attempt to create a Property from a Json value object
-MANTID_KERNEL_DLL std::unique_ptr<Property> decode(const Json::Value &value);
+/// Attempt to create a Property from a string name and Json value object
+MANTID_KERNEL_DLL std::unique_ptr<Property>
+decodeAsProperty(const std::string &name, const Json::Value &value);
 
 } // namespace Kernel
 } // namespace Mantid

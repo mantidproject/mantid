@@ -160,22 +160,19 @@ std::unique_ptr<Property> createKeyValueProperty(const std::string &name,
 } // namespace
 
 /**
+ * @param name The name of the new property
  * @param value A value as a Json serialized quantity
  * @return A pointer to a new Property if the underlying value can
  * be converted to a known C++ type
  * @throws std::invalid_argument If the value cannot be transformed to
  * a Property object
  */
-std::unique_ptr<Property> decode(const Json::Value &keyValue) {
-  if (!keyValue.isObject() || keyValue.size() != 1) {
-    StreamWriterBuilder wbuilder;
-    throw std::invalid_argument(
-        "Expected Json::Value with a single member. Found " +
-        writeString(wbuilder, keyValue));
+std::unique_ptr<Property> decodeAsProperty(const std::string &name,
+                                           const Json::Value &value) {
+  if (value.isNull()) {
+    throw std::invalid_argument("decodeAsProperty(): Found null Json value.");
   }
-  Value::Members members(keyValue.getMemberNames());
-  const auto &name{members.front()};
-  const auto &value{keyValue[name]};
+
   if (!value.isObject()) {
     return createSingleTypeProperty(name, value);
   } else {
