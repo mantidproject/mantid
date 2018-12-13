@@ -73,8 +73,13 @@ bool operator==(CustomSlicingByList const &lhs,
 std::ostream &operator<<(std::ostream &os, CustomSlicingByList const &slicing) {
   os << "slices at the following times\n";
   auto const &sliceTimes = slicing.sliceTimes();
-  for (auto iter = sliceTimes.cbegin() + 1; iter != sliceTimes.cend(); ++iter) {
-    os << "  " << *prev(iter) << " to " << *iter << " seconds,\n";
+  if (sliceTimes.size() < 2) {
+    os << "  no slices\n";
+  } else {
+    for (auto iter = sliceTimes.cbegin() + 1; iter != sliceTimes.cend();
+         ++iter) {
+      os << "  " << *prev(iter) << " to " << *iter << " seconds,\n";
+    }
   }
   return os;
 }
@@ -103,9 +108,13 @@ std::ostream &operator<<(std::ostream &os, SlicingByEventLog const &slicing) {
   os << "slices at the times when the log value for the block '"
      << slicing.blockName() << "' is between\n";
   auto const &logValueBreakpoints = slicing.sliceAtValues();
-  for (auto iter = logValueBreakpoints.cbegin() + 1;
-       iter != logValueBreakpoints.cend(); ++iter) {
-    os << "  " << *prev(iter) << " and " << *iter << ",\n";
+  if (logValueBreakpoints.size() < 2) {
+    os << "  no slices\n";
+  } else {
+    for (auto iter = logValueBreakpoints.cbegin() + 1;
+         iter != logValueBreakpoints.cend(); ++iter) {
+      os << "  " << *prev(iter) << " and " << *iter << ",\n";
+    }
   }
   return os;
 }
