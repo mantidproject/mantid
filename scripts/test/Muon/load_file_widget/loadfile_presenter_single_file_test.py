@@ -88,17 +88,21 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter = BrowseFileWidgetPresenter(self.view, self.model)
         self.presenter.enable_multiple_files(False)
 
+        patcher = mock.patch('Muon.GUI.Common.load_file_widget.model.load_utils')
+        self.addCleanup(patcher.stop)
+        self.load_utils_patcher = patcher.start()
+
     def mock_browse_button_to_return_files(self, files):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value=files)
 
     def mock_user_input_text(self, text):
         self.view.get_file_edit_text = mock.Mock(return_value=text)
 
-    def mock_model_to_load_workspaces(self, workspaces, runs):
-        self.model.load_workspace_from_filename = mock.Mock(side_effect=zip(workspaces, runs))
+    def mock_model_to_load_workspaces(self, workspaces, runs, filenames):
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=zip(workspaces, runs, filenames))
 
     def load_workspaces_into_model_and_view_from_browse(self, workspaces, runs, files):
-        self.mock_model_to_load_workspaces(workspaces, runs)
+        self.mock_model_to_load_workspaces(workspaces, runs, files)
         self.mock_browse_button_to_return_files(files)
 
         self.presenter.on_browse_button_clicked()
@@ -122,13 +126,13 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_loading_not_initiated_if_no_file_selected_from_browser(self):
-        self.mock_model_to_load_workspaces([], [])
+        self.mock_model_to_load_workspaces([], [], [])
         self.mock_browse_button_to_return_files([])
 
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.model.load_workspace_from_filename.call_count, 0)
+        self.assertEqual(self.load_utils_patcher.load_workspace_from_filename.call_count, 0)
 
     @run_test_with_and_without_threading
     def test_buttons_disabled_while_load_thread_running(self):
@@ -152,7 +156,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_files_not_loaded_into_model_if_multiple_files_selected_from_browse_in_single_file_mode(self):
-        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235])
+        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
         self.mock_browse_button_to_return_files(["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
         self.model.execute = mock.Mock()
 
@@ -166,7 +170,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_files_not_loaded_into_model_if_multiple_files_entered_by_user_in_single_file_mode(self):
         self.mock_user_input_text("C:/dir1/file1.nxs;C:/dir2/file2.nxs")
-        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235])
+        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
         self.model.execute = mock.Mock()
 
         self.presenter.handle_file_changed_by_user()
@@ -179,7 +183,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_warning_shown_if_multiple_files_selected_from_browse_in_single_file_mode(self):
         self.mock_browse_button_to_return_files(["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235])
+        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
 
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
@@ -189,7 +193,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_warning_shown_if_multiple_files_entered_by_user_in_single_file_mode(self):
         self.mock_user_input_text("C:/dir1/file1.nxs;C:/dir2/file2.nxs")
-        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235])
+        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235], ["C:/dir1/file1.nxs;C:/dir2/file2.nxs"])
 
         self.presenter.handle_file_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)
@@ -199,7 +203,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_single_file_from_browse_loaded_into_model_and_view_in_single_file_mode(self):
         self.mock_browse_button_to_return_files(["C:/dir1/file1.nxs"])
-        self.mock_model_to_load_workspaces([[1]], [1234])
+        self.mock_model_to_load_workspaces([[1]], [1234], ["C:/dir1/file1.nxs"])
         self.view.set_file_edit = mock.Mock()
 
         self.presenter.on_browse_button_clicked()
@@ -214,7 +218,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_single_file_from_user_input_loaded_into_model_and_view_in_single_file_mode(self):
         self.view.set_file_edit = mock.Mock()
-        self.mock_model_to_load_workspaces([[1]], [1234])
+        self.mock_model_to_load_workspaces([[1]], [1234], ["C:/dir1/file1.nxs"])
         self.mock_user_input_text("C:/dir1/file1.nxs")
 
         self.presenter.handle_file_changed_by_user()
@@ -229,7 +233,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_that_if_invalid_file_selected_in_browser_view_does_not_change(self):
         self.mock_browse_button_to_return_files(["not_a_file"])
-        self.mock_model_to_load_workspaces([[1]], [1234])
+        self.mock_model_to_load_workspaces([[1]], [1234], ["not_a_file"])
 
         self.view.set_file_edit = mock.Mock()
         self.view.reset_edit_to_cached_value = mock.Mock()
@@ -237,7 +241,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         set_file_edit_count = self.view.set_file_edit.call_count
         self.presenter.on_browse_button_clicked()
@@ -266,7 +270,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     def test_that_model_and_interface_revert_to_previous_values_if_load_fails_from_browse(self):
         self.load_workspaces_into_model_and_view_from_browse([[1]], [1234], ["C:/dir1/EMU0001234.nxs"])
 
-        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
@@ -282,7 +286,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     def test_that_model_and_interface_revert_to_previous_values_if_load_fails_from_user_input(self):
         self.load_workspaces_into_model_and_view_from_browse([[1]], [1234], ["C:/dir1/EMU0001234.nxs"])
 
-        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
         self.view.set_file_edit("C:\dir2\EMU000123.nxs")
 
         self.presenter.handle_file_changed_by_user()
