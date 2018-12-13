@@ -7,8 +7,8 @@
 #include "MantidQtWidgets/Common/Batch/CellDelegate.h"
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
-#include <QPainter>
 #include <QKeyEvent>
+#include <QPainter>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,7 +46,7 @@ void CellDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 }
 
 bool CellDelegate::eventFilter(QObject *object, QEvent *event) {
-  QWidget *editor = qobject_cast<QWidget*>(object);
+  QWidget *editor = qobject_cast<QWidget *>(object);
   if (!editor)
     return false;
   if (event->type() == QEvent::KeyPress) {

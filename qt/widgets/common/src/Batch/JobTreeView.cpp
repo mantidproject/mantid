@@ -483,39 +483,39 @@ void JobTreeView::enableFiltering() {
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
   switch (event->key()) {
-    case Qt::Key_Return: {
-      if (event->modifiers() & Qt::ControlModifier) {
-        appendAndEditAtChildRow();
-      } else if (event->modifiers() & Qt::ShiftModifier) {
-        editAtRowAbove();
-      } else {
-        appendAndEditAtRowBelow();
-      }
-      break;
+  case Qt::Key_Return: {
+    if (event->modifiers() & Qt::ControlModifier) {
+      appendAndEditAtChildRow();
+    } else if (event->modifiers() & Qt::ShiftModifier) {
+      editAtRowAbove();
+    } else {
+      appendAndEditAtRowBelow();
     }
-    case Qt::Key_Delete:
-      removeSelectedRequested();
-      break;
-    case Qt::Key_C: {
-      if (event->modifiers() & Qt::ControlModifier) {
-        copySelectedRequested();
-      }
-      break;
+    break;
+  }
+  case Qt::Key_Delete:
+    removeSelectedRequested();
+    break;
+  case Qt::Key_C: {
+    if (event->modifiers() & Qt::ControlModifier) {
+      copySelectedRequested();
     }
-    case Qt::Key_V: {
-      if (event->modifiers() & Qt::ControlModifier) {
-        pasteSelectedRequested();
-      }
-      break;
+    break;
+  }
+  case Qt::Key_V: {
+    if (event->modifiers() & Qt::ControlModifier) {
+      pasteSelectedRequested();
     }
-    case Qt::Key_X: {
-      if (event->modifiers() & Qt::ControlModifier) {
-        cutSelectedRequested();
-      }
-      break;
+    break;
+  }
+  case Qt::Key_X: {
+    if (event->modifiers() & Qt::ControlModifier) {
+      cutSelectedRequested();
     }
-    default:
-      QTreeView::keyPressEvent(event);
+    break;
+  }
+  default:
+    QTreeView::keyPressEvent(event);
   }
 }
 
