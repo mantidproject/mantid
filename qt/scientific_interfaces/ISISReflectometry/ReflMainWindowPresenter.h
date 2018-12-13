@@ -39,7 +39,7 @@ private:
   void showHelp();
   IReflMainWindowView *m_view;
   ReflBatchPresenterFactory m_batchPresenterFactory;
-  std::vector<std::unique_ptr<IReflBatchPresenter>> m_batchPresenters;
+  std::vector<std::shared_ptr<IReflBatchPresenter>> m_batchPresenters;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
