@@ -50,7 +50,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         if event.matches(QKeySequence.Copy):
             self.presenter.action_keypress_copy()
             return
-        elif event.key() == Qt.Key_F2 or event.key() == Qt.Key_Enter:
+        elif event.key() == Qt.Key_F2 or event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             self.edit(self.currentIndex())
             return
 
