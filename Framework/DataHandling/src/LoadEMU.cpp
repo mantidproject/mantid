@@ -1292,7 +1292,8 @@ const std::string LoadEMUTar::name() const { return "LoadEMU"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadEMUTar::summary() const {
-  return "Loads an EMU tar file, that contains the Hdf and event file, into a workspace.";
+  return "Loads an EMU tar file, that contains the Hdf and event file, into a "
+         "workspace.";
 }
 
 /// Return the confidence as an integer value that this algorithm can
