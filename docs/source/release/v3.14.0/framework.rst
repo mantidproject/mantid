@@ -32,11 +32,21 @@ Nexus Geometry Loading
 The changes above have also been encorporated directly into :ref:`LoadEventNexus <algm-LoadEventNexus>`, so it is possible to store data and geometry together for the first time in a NeXus compliant format for Mantid. These changes have made it possible to load experimental ESS event data files directly into Mantid.
 
 
-Archive Searching / ONCat
--------------------------
+Archive Searching
+-----------------
+
+SNS / ONCat
+###########
 
 - For HFIR instruments that write out raw files with run numbers, we have enabled functionality that allows for the searching of file locations by making calls to ONCat.  To use this, make sure that the "Search Data Archive" option is checked in your "Manage User Directories" settings.  The ``FileFinder`` and algorithms such as :ref:`Load <algm-Load>`  will then accept inputs such as "``HB2C_143210``".
 - In the short term, for SNS instruments, the default "out of the box" behaviour will be to continue using ICAT for archive searching.  This can be manually overridden by changing ``<archiveSearch plugin="SNSDataSearch" />`` to ``<archiveSearch plugin="ORNLDataSearch" />`` in your ``Facilities.xml`` file.  Existing functionality should be almost completely unaffected, except that you may find that archive searching is a little quicker and slightly more robust.  ``ORNLDataSearch`` will become the default option at SNS in a future version of Mantid.
+
+ISIS / ICat
+###########
+
+- The path returned by ICat starting ``\\isis\inst$`` is now overridden by the fully-qualified path starting ``\\isis.cclrc.ac.uk\inst$`` on Windows machines. This makes accessing the archive more reliable over the VPN.
+- On Linux and Mac machines, it is overridden by a path starting ``/archive``.
+- On all machines, you can override this locally by setting ``icatDownload.mountPoint=<my_path>`` in your ``Mantid.user.properties`` file.
 
 Stability
 ---------

@@ -128,10 +128,9 @@ protected:
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
   void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
                      const std::string &parameter);
-  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace,
-               const std::size_t &index);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
-                     const std::string &parameter, const std::size_t &index);
+                     const std::string &parameter);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
                     const std::string &parameterToPlot);
@@ -150,18 +149,16 @@ protected:
   void setPlotOptions(QComboBox *cbPlotType,
                       const QSet<QString> &options) const;
 
-  virtual bool shouldEnablePlotResult() = 0;
-
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
 
   virtual void setRunIsRunning(bool running) = 0;
+  virtual void setFitSingleSpectrumIsFitting(bool fitting) = 0;
 
 signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *);
   void customBoolChanged(const QString &key, bool value);
-  void updateFitTypes();
 
 protected slots:
 
@@ -215,7 +212,7 @@ protected slots:
   void saveResult();
 
 private slots:
-  void emitUpdateFitTypes();
+  void updatePlotGuess();
 
 private:
   /// Overidden by child class.
@@ -229,6 +226,8 @@ private:
   void connectFitBrowserAndPlotPresenter();
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
+
+  void enableFitAnalysisButtons(bool enable);
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;

@@ -169,7 +169,8 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
       m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
-  m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
+  m_pSysConfig =
+      std::make_unique<WrappedObject<Poco::Util::SystemConfiguration>>();
   m_pConf = nullptr;
 
   // Register StdChannel with Poco
@@ -280,8 +281,6 @@ ConfigServiceImpl::ConfigServiceImpl()
 ConfigServiceImpl::~ConfigServiceImpl() {
   // std::cerr << "ConfigService destroyed.\n";
   Kernel::Logger::shutdown();
-  delete m_pSysConfig;
-  delete m_pConf; // potential double delete???
   clearFacilities();
 }
 
@@ -387,7 +386,7 @@ std::string checkForBadConfigOptions(const std::string &filename,
  */
 void ConfigServiceImpl::loadConfig(const std::string &filename,
                                    const bool append) {
-  delete m_pConf;
+
   if (!append) {
     // remove the previous property string
     m_PropertyString = "";
@@ -428,7 +427,9 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
 
   // use the cached property string to initialise the POCO property file
   std::istringstream istr(m_PropertyString);
-  m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(istr);
+  m_pConf =
+      std::make_unique<WrappedObject<Poco::Util::PropertyFileConfiguration>>(
+          istr);
 }
 
 /**
@@ -462,7 +463,7 @@ void ConfigServiceImpl::configureLogging() {
   try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
-    configurator.configure(m_pConf);
+    configurator.configure(m_pConf.get());
   } catch (std::exception &e) {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << '\n';

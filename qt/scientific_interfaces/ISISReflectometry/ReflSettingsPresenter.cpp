@@ -239,6 +239,8 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
       addIfNotEmpty(options, "CAp", m_view->getCAp());
       addIfNotEmpty(options, "CPp", m_view->getCPp());
     }
+    addIfNotEmpty(options, "FloodCorrection", m_view->getFloodCorrection());
+    addIfNotEmpty(options, "FloodWorkspace", m_view->getFloodWorkspace());
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
 
