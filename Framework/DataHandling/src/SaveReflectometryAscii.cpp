@@ -212,8 +212,16 @@ void SaveReflectometryAscii::writeInfo(const std::string logName,
 void SaveReflectometryAscii::header() {
   m_file << std::setfill(' ');
   m_file << "MFT\n";
-  std::vector<std::string> logs{"instrument.name", "user.namelocalcontact",
-                                "title", "start_time", "end_time"};
+  std::map<std::string, std::string> logs;
+  logs["Instrument"] = "instrument.name";
+  logs["User-local contact"] = "user.namelocalcontact";
+  logs["Title"] = "title";
+  logs["Subtitle"] = "";
+  logs["Start date + time"] = "start_time";
+  logs["End date + time"] = "end_time";
+  logs["Theta 1 + dir + ref numbers"] = "";
+  logs["Theta 2 + dir + ref numbers"] = "";
+  logs["Theta 3 + dir + ref numbers"] = "";
   writeInfo("Instrument", "instrument.name");
   writeInfo("User-local contact", "user.namelocalcontact");
   writeInfo("Title", "title");
@@ -224,16 +232,15 @@ void SaveReflectometryAscii::header() {
   writeInfo("Theta 2 + dir + ref numbers");
   writeInfo("Theta 3 + dir + ref numbers");
   const std::vector<std::string> logList = getProperty("LogList");
-  int existingLogs = 0;
+  int nLogs = 0;
   for (const auto &log : logList) {
-    if (find(logs.cbegin(), logs.cend(), log) ==
-        logs.end()) { // do not repeat a log
+    if (logs.find(log) == logs.end()) { // do not repeat a log
       writeInfo(log);
-      ++existingLogs;
+      ++nLogs;
     }
   }
   // Write "Parameter : Not defined" 9 times minus the number of new user logs
-  for (auto i = logList.size() - existingLogs; i < 9; ++i)
+  for (auto i = nLogs; i < 9; ++i)
     writeInfo("Parameter ");
   m_file << "Number of file format : "
          << "40\n";

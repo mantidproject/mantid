@@ -87,7 +87,7 @@ Usage
 
     # Save with mft extension and using the option LogList: Title will be added to a required header line and d will be additionally added
     # to the first parameter field.
-    SaveReflectometryAscii(InputWorkspace=ws, Filename=file, LogList=['title', 'd'])
+    SaveReflectometryAscii(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
 
     if os.path.exists(file + ".mft"):
       myFile = open((file + ".mft"), 'r')
