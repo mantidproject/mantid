@@ -11,7 +11,8 @@
 #include <jsoncpp/json/value.h>
 
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyWithValueJSONDecoder.h"
 
 class PropertyWithValueJSONDecoderTest : public CxxTest::TestSuite {
@@ -25,39 +26,83 @@ public:
   }
 
   void testDecodeSingleJSONIntAsProperty() {
-    doSimpleObjectDecodeTest("IntProperty", 10);
+    doSingleValueObjecteDecodeTest("IntProperty", 10);
   }
 
   void testDecodeSingleJSONDoubleAsProperty() {
-    doSimpleObjectDecodeTest("DoubleProperty", 10.5);
+    doSingleValueObjecteDecodeTest("DoubleProperty", 10.5);
   }
 
   void testDecodeSingleJSONStringAsProperty() {
-    doSimpleObjectDecodeTest("StringProperty", std::string("My value"));
+    doSingleValueObjecteDecodeTest("StringProperty", std::string("My value"));
   }
 
   void testDecodeSingleJSONBoolAsProperty() {
-    doSimpleObjectDecodeTest("BoolProperty", false);
+    doSingleValueObjecteDecodeTest("BoolProperty", false);
   }
 
   void testDecodeArrayValueAsArrayProperty() {
     const auto propName{"ArrayProperty"};
     const std::vector<double> propValue{1.0, 2.0, 3.0};
-
     Json::Value arrayItem(Json::arrayValue);
     for (const auto &elem : propValue)
       arrayItem.append(elem);
     Json::Value root;
     root[propName] = arrayItem;
 
-    using Mantid::Kernel::decode;
-    auto property = decode(root);
-    TSM_ASSERT("Decode failed to create a Property. ", property);
     using Mantid::Kernel::ArrayProperty;
-    auto typedProperty = dynamic_cast<ArrayProperty<double> *>(property.get());
-    TSM_ASSERT("Property has unexpected type ", typedProperty);
-    TS_ASSERT_EQUALS(propName, typedProperty->name());
-    TS_ASSERT_EQUALS(propValue, (*typedProperty)());
+    auto typedProperty =
+        doBasicDecodeTest<ArrayProperty<double>>(propName, root);
+  }
+
+  void testDecodeSingleObjectValuePropertyManagerProperty() {
+    const auto propName{"SinglePropertyManager"}, intKey("k1"), realKey("k2");
+    const int intValue(1);
+    const double realValue(5.3);
+    Json::Value dict(Json::objectValue);
+    dict[intKey] = intValue;
+    dict[realKey] = realValue;
+    Json::Value root;
+    root[propName] = dict;
+
+    using Mantid::Kernel::PropertyManagerProperty;
+    auto typedProperty =
+        doBasicDecodeTest<PropertyManagerProperty>(propName, root);
+
+    using Mantid::Kernel::PropertyManager_sptr;
+    PropertyManager_sptr propMgr{(*typedProperty)()};
+    TS_ASSERT_EQUALS(intValue, static_cast<int>(propMgr->getProperty(intKey)));
+    TS_ASSERT_EQUALS(realValue,
+                     static_cast<double>(propMgr->getProperty(realKey)));
+  }
+
+  void testDecodeNestedObjectValuesAsNestedPropertyManagerProperty() {
+    const auto propName{"NestedPropertyManager"}, outerIntKey("k1"),
+        innerIntKey("ik1"), outerRealKey("k2"), innerRealKey("ik2"),
+        outerDictKey("ik3");
+    const int outerIntValue(1), innerIntValue(10);
+    const double outerRealValue(5.3), innerRealValue(15.3);
+
+    Json::Value innerDict(Json::objectValue);
+    innerDict[innerIntKey] = innerIntValue;
+    innerDict[innerRealKey] = innerRealValue;
+    Json::Value outerDict(Json::objectValue);
+    outerDict[outerIntKey] = outerIntValue;
+    outerDict[outerRealKey] = outerRealValue;
+    outerDict[outerDictKey] = innerDict;
+    Json::Value root;
+    root[propName] = outerDict;
+
+    using Mantid::Kernel::PropertyManagerProperty;
+    auto typedProperty =
+        doBasicDecodeTest<PropertyManagerProperty>(propName, root);
+
+    using Mantid::Kernel::PropertyManager_sptr;
+    PropertyManager_sptr propMgr{(*typedProperty)()};
+    TS_ASSERT_EQUALS(outerIntValue,
+                     static_cast<int>(propMgr->getProperty(outerIntKey)));
+    TS_ASSERT_EQUALS(outerRealValue,
+                     static_cast<double>(propMgr->getProperty(outerRealKey)));
   }
 
   // ----------------------- Failure tests -----------------------
@@ -109,20 +154,29 @@ public:
 
 private:
   template <typename ValueType>
-  void doSimpleObjectDecodeTest(const std::string &propName,
-                                const ValueType &propValue) {
+  void doSingleValueObjecteDecodeTest(const std::string &propName,
+                                      const ValueType &propValue) {
     Json::Value root;
     root[propName] = propValue;
 
-    using Mantid::Kernel::decode;
-    auto property = decode(root);
-    TSM_ASSERT("Decode failed to create a Property. ", property);
     using Mantid::Kernel::PropertyWithValue;
     auto typedProperty =
-        dynamic_cast<PropertyWithValue<ValueType> *>(property.get());
+        doBasicDecodeTest<PropertyWithValue<ValueType>>(propName, root);
+    TS_ASSERT_EQUALS(propValue, (*typedProperty)());
+  }
+
+  template <typename PropertyType>
+  std::unique_ptr<PropertyType>
+  doBasicDecodeTest(const std::string &propName, const Json::Value &jsonValue) {
+    using Mantid::Kernel::decode;
+    auto property = decode(jsonValue);
+    TSM_ASSERT("Decode failed to create a Property. ", property);
+    auto typedProperty = std::unique_ptr<PropertyType>{
+        dynamic_cast<PropertyType *>(property.release())};
     TSM_ASSERT("Property has unexpected type ", typedProperty);
     TS_ASSERT_EQUALS(propName, typedProperty->name());
-    TS_ASSERT_EQUALS(propValue, (*typedProperty)());
+
+    return typedProperty;
   }
 };
 
