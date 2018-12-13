@@ -13,7 +13,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 namespace {
-Group &findOrMakeGroupWithName(Jobs &jobs, std::string const &groupName) {
+Group &findOrMakeGroupWithName(ReductionJobs &jobs,
+                               std::string const &groupName) {
   auto maybeGroupIndex = jobs.indexOfGroupWithName(groupName);
   if (maybeGroupIndex.is_initialized())
     return jobs.groups()[maybeGroupIndex.get()];
@@ -22,68 +23,73 @@ Group &findOrMakeGroupWithName(Jobs &jobs, std::string const &groupName) {
 } // unnamed
 } // namespace
 
-Jobs::Jobs(std::vector<Group> groups)
+ReductionJobs::ReductionJobs(std::vector<Group> groups)
     : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
 
-Jobs::Jobs() : m_groupNameSuffix(1) {}
+ReductionJobs::ReductionJobs() : m_groupNameSuffix(1) {}
 
-Group &Jobs::appendGroup(Group group) {
+Group &ReductionJobs::appendGroup(Group group) {
   assertOrThrow(group.name().empty() || !hasGroupWithName(group.name()),
                 "Cannot have multiple groups with a matching non-empty name.");
   m_groups.emplace_back(std::move(group));
   return m_groups.back();
 }
 
-boost::optional<int> Jobs::indexOfGroupWithName(std::string const &groupName) {
+boost::optional<int>
+ReductionJobs::indexOfGroupWithName(std::string const &groupName) {
   return indexOf(m_groups, [&groupName](Group const &group) -> bool {
     return group.name() == groupName;
   });
 }
 
-Group &Jobs::insertGroup(Group group, int beforeIndex) {
+Group &ReductionJobs::insertGroup(Group group, int beforeIndex) {
   assertOrThrow(group.name().empty() || !hasGroupWithName(group.name()),
                 "Cannot have multiple groups with a matching non-empty name.");
   return *m_groups.insert(m_groups.begin() + beforeIndex, std::move(group));
 }
 
-bool Jobs::hasGroupWithName(std::string const &groupName) const {
+bool ReductionJobs::hasGroupWithName(std::string const &groupName) const {
   return std::any_of(m_groups.crbegin(), m_groups.crend(),
                      [&groupName](Group const &group) -> bool {
                        return group.name() == groupName;
                      });
 }
 
-void Jobs::removeGroup(int index) { m_groups.erase(m_groups.begin() + index); }
+void ReductionJobs::removeGroup(int index) {
+  m_groups.erase(m_groups.begin() + index);
+}
 
-std::vector<Group> &Jobs::groups() { return m_groups; }
+std::vector<Group> &ReductionJobs::groups() { return m_groups; }
 
-std::vector<Group> const &Jobs::groups() const { return m_groups; }
+std::vector<Group> const &ReductionJobs::groups() const { return m_groups; }
 
-std::string Jobs::nextEmptyGroupName() {
+std::string ReductionJobs::nextEmptyGroupName() {
   std::string name = "Group" + std::to_string(m_groupNameSuffix);
   m_groupNameSuffix++;
   return name;
 }
 
-void removeGroup(Jobs &jobs, int groupIndex) { jobs.removeGroup(groupIndex); }
+void removeGroup(ReductionJobs &jobs, int groupIndex) {
+  jobs.removeGroup(groupIndex);
+}
 
-void appendEmptyRow(Jobs &jobs, int groupIndex) {
+void appendEmptyRow(ReductionJobs &jobs, int groupIndex) {
   jobs.groups()[groupIndex].appendEmptyRow();
 }
 
-void appendEmptyGroup(Jobs &jobs) {
+void appendEmptyGroup(ReductionJobs &jobs) {
   jobs.appendGroup(Group(jobs.nextEmptyGroupName()));
 }
 
-void insertEmptyGroup(Jobs &jobs, int beforeGroup) {
+void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup) {
   jobs.insertGroup(Group(jobs.nextEmptyGroupName()), beforeGroup);
 }
 
-void insertEmptyRow(Jobs &jobs, int groupIndex, int beforeRow) {
+void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow) {
   jobs.groups()[groupIndex].insertRow(boost::none, beforeRow);
 }
 
-void updateRow(Jobs &jobs, int groupIndex, int rowIndex,
+void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
                boost::optional<Row> const &newValue) {
   if (newValue.is_initialized()) {
     jobs.groups()[groupIndex].updateRow(rowIndex, newValue);
@@ -92,8 +98,8 @@ void updateRow(Jobs &jobs, int groupIndex, int rowIndex,
   }
 }
 
-void mergeRowIntoGroup(Jobs &jobs, Row const &row, double thetaTolerance,
-                       std::string const &groupName) {
+void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
+                       double thetaTolerance, std::string const &groupName) {
   auto &group = findOrMakeGroupWithName(jobs, groupName);
   auto indexOfRowToUpdate =
       group.indexOfRowWithTheta(row.theta(), thetaTolerance);
@@ -106,11 +112,12 @@ void mergeRowIntoGroup(Jobs &jobs, Row const &row, double thetaTolerance,
   }
 }
 
-void removeRow(Jobs &jobs, int groupIndex, int rowIndex) {
+void removeRow(ReductionJobs &jobs, int groupIndex, int rowIndex) {
   jobs.groups()[groupIndex].removeRow(rowIndex);
 }
 
-bool setGroupName(Jobs &jobs, int groupIndex, std::string const &newValue) {
+bool setGroupName(ReductionJobs &jobs, int groupIndex,
+                  std::string const &newValue) {
   auto &group = jobs.groups()[groupIndex];
   if (group.name() != newValue) {
     if (newValue.empty() || !jobs.hasGroupWithName(newValue)) {
@@ -122,18 +129,20 @@ bool setGroupName(Jobs &jobs, int groupIndex, std::string const &newValue) {
   return true;
 }
 
-std::string groupName(Jobs const &jobs, int groupIndex) {
+std::string groupName(ReductionJobs const &jobs, int groupIndex) {
   return jobs[groupIndex].name();
 }
 
-void prettyPrintModel(Jobs const & /*jobs*/) {
-  std::cout << "Jobs:\n";
+void prettyPrintModel(ReductionJobs const & /*jobs*/) {
+  std::cout << "ReductionJobs:\n";
   //  for (auto &&group : jobs.groups()) {
   //    std::cout << group;
   //  }
   std::cout << std::endl;
 }
 
-Group const &Jobs::operator[](int index) const { return m_groups[index]; }
+Group const &ReductionJobs::operator[](int index) const {
+  return m_groups[index];
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

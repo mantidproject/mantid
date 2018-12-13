@@ -15,10 +15,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Jobs {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs {
 public:
-  Jobs();
-  Jobs(std::vector<Group> groups);
+  ReductionJobs();
+  ReductionJobs(std::vector<Group> groups);
   Group &appendGroup(Group group);
   Group &insertGroup(Group group, int beforeIndex);
   bool hasGroupWithName(std::string const &groupName) const;
@@ -35,26 +35,27 @@ private:
   size_t m_groupNameSuffix;
 };
 
-void appendEmptyRow(Jobs &jobs, int groupIndex);
-void insertEmptyRow(Jobs &jobs, int groupIndex, int beforeRow);
-void removeRow(Jobs &jobs, int groupIndex, int rowIndex);
-void updateRow(Jobs &jobs, int groupIndex, int rowIndex,
+void appendEmptyRow(ReductionJobs &jobs, int groupIndex);
+void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow);
+void removeRow(ReductionJobs &jobs, int groupIndex, int rowIndex);
+void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
                boost::optional<Row> const &newValue);
 
-void appendEmptyGroup(Jobs &jobs);
-void insertEmptyGroup(Jobs &jobs, int beforeGroup);
-void removeGroup(Jobs &jobs, int groupIndex);
+void appendEmptyGroup(ReductionJobs &jobs);
+void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup);
+void removeGroup(ReductionJobs &jobs, int groupIndex);
 
-bool setGroupName(Jobs &jobs, int groupIndex, std::string const &newValue);
-std::string groupName(Jobs const &jobs, int groupIndex);
-void prettyPrintModel(Jobs const &jobs);
+bool setGroupName(ReductionJobs &jobs, int groupIndex,
+                  std::string const &newValue);
+std::string groupName(ReductionJobs const &jobs, int groupIndex);
+void prettyPrintModel(ReductionJobs const &jobs);
 
-void mergeRowIntoGroup(Jobs &jobs, Row const &row, double thetaTolerance,
-                       std::string const &groupName);
+void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
+                       double thetaTolerance, std::string const &groupName);
 
 template <typename ModificationListener>
-void mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
-                   ModificationListener &listener) {
+void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
+                   double thetaTolerance, ModificationListener &listener) {
   for (auto const &group : fromHere.groups()) {
     auto maybeGroupIndex = intoHere.indexOfGroupWithName(group.name());
     if (maybeGroupIndex.is_initialized()) {

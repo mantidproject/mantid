@@ -51,8 +51,8 @@ public:
   }
 
   void testMergeEmptyModels() {
-    auto target = Jobs();
-    auto addition = Jobs();
+    auto target = ReductionJobs();
+    auto addition = ReductionJobs();
     NiceMock<MockModificationListener> listener;
     mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
@@ -60,8 +60,8 @@ public:
   }
 
   void testMergeJobsIntoEmpty() {
-    auto target = Jobs();
-    auto addition = Jobs();
+    auto target = ReductionJobs();
+    auto addition = ReductionJobs();
     NiceMock<MockModificationListener> listener;
     addition.appendGroup(Group("A"));
 
@@ -73,9 +73,9 @@ public:
 
   void testMergeJobsIntoExisting() {
     NiceMock<MockModificationListener> listener;
-    auto target = Jobs();
+    auto target = ReductionJobs();
     target.appendGroup(Group("A"));
-    auto addition = Jobs();
+    auto addition = ReductionJobs();
     addition.appendGroup(Group("B"));
 
     mergeJobsInto(target, addition, m_thetaTolerance, listener);
@@ -86,9 +86,9 @@ public:
 
   void testCallsAppendWhenAddingGroup() {
     NiceMock<MockModificationListener> listener;
-    auto target = Jobs();
+    auto target = ReductionJobs();
     target.appendGroup(Group("A"));
-    auto addition = Jobs();
+    auto addition = ReductionJobs();
     addition.appendGroup(Group("B"));
 
     EXPECT_CALL(listener, groupAppended(1, _));
@@ -99,9 +99,9 @@ public:
 
   void testMergeJobsIntoExistingWhenNameClashButNoRows() {
     MockModificationListener listener;
-    auto target = Jobs();
+    auto target = ReductionJobs();
     target.appendGroup(Group("A"));
-    auto addition = Jobs();
+    auto addition = ReductionJobs();
     addition.appendGroup(Group("A"));
 
     mergeJobsInto(target, addition, m_thetaTolerance, listener);
@@ -112,9 +112,9 @@ public:
 
   void testMergeJobsIntoExistingWhenNameClashButRowsWithDifferentAngles() {
     MockModificationListener listener;
-    auto target = Jobs();
+    auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithAngle(0.1)}));
-    auto addition = Jobs();
+    auto addition = ReductionJobs();
     addition.appendGroup(Group("A", {rowWithAngle(0.2)}));
 
     mergeJobsInto(target, addition, m_thetaTolerance, listener);
@@ -126,9 +126,9 @@ public:
 
   void testCallsAppendWhenAddingRow() {
     MockModificationListener listener;
-    auto target = Jobs();
+    auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithAngle(0.1)}));
-    auto addition = Jobs();
+    auto addition = ReductionJobs();
     addition.appendGroup(Group("A", {rowWithAngle(0.2)}));
 
     EXPECT_CALL(listener, rowAppended(0, 1, _)).Times(1);
@@ -142,9 +142,9 @@ public:
 
   void testMergeJobsIntoExistingWhenNameClashAndRowsHaveSameAngles() {
     MockModificationListener listener;
-    auto target = Jobs();
+    auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithNameAndAngle("C", 0.1)}));
-    auto addition = Jobs();
+    auto addition = ReductionJobs();
     addition.appendGroup(Group("A", {rowWithNameAndAngle("D", 0.1)}));
 
     mergeJobsInto(target, addition, m_thetaTolerance, listener);
@@ -158,9 +158,9 @@ public:
 
   void testCallsModifiedWhenMergingRow() {
     MockModificationListener listener;
-    auto target = Jobs();
+    auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithNameAndAngle("C", 0.1)}));
-    auto addition = Jobs();
+    auto addition = ReductionJobs();
     addition.appendGroup(Group("A", {rowWithNameAndAngle("D", 0.1)}));
 
     EXPECT_CALL(listener, rowModified(0, 0, _));
@@ -173,7 +173,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
 
-  bool haveEqualRunNumbers(Jobs const &lhs, Jobs const &rhs) {
+  bool haveEqualRunNumbers(ReductionJobs const &lhs, ReductionJobs const &rhs) {
     if (lhs.groups().size() == rhs.groups().size()) {
       for (auto groupPair : zip_range(lhs.groups(), rhs.groups())) {
         for (auto rowPair : zip_range(boost::get<0>(groupPair).rows(),
@@ -203,7 +203,7 @@ public:
 
   void testMergeIntoSelfResultsInNoChange() {
     MockModificationListener listener;
-    auto target = Jobs();
+    auto target = ReductionJobs();
     target.appendGroup(
         Group("S1 SI/ D20 ", {rowWithNameAndAngle("47450", 0.7),
                               rowWithNameAndAngle("47451", 2.3)}));

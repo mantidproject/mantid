@@ -23,15 +23,18 @@ namespace CustomInterfaces {
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
-    double thetaTolerance, Jobs jobs)
+    double thetaTolerance, ReductionJobs jobs)
     : m_view(view), m_instruments(instruments), m_model(std::move(jobs)),
       m_thetaTolerance(thetaTolerance), m_jobViewUpdater(m_view->jobs()) {
   m_view->subscribe(this);
 }
 
-Jobs const &RunsTablePresenter::reductionJobs() const { return m_model; }
+ReductionJobs const &RunsTablePresenter::reductionJobs() const {
+  return m_model;
+}
 
-void RunsTablePresenter::mergeAdditionalJobs(Jobs const &additionalJobs) {
+void RunsTablePresenter::mergeAdditionalJobs(
+    ReductionJobs const &additionalJobs) {
   std::cout << "Before Transfer:" << std::endl;
   prettyPrintModel(m_model);
 

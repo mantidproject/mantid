@@ -38,15 +38,15 @@ public:
                ReductionWorkspaces({}, {"", ""}, "", "", "", ""));
   }
 
-  Jobs twoEmptyGroupsModel() {
-    auto reductionJobs = Jobs();
+  ReductionJobs twoEmptyGroupsModel() {
+    auto reductionJobs = ReductionJobs();
     reductionJobs.appendGroup(Group("Group 1"));
     reductionJobs.appendGroup(Group("Group 2"));
     return reductionJobs;
   }
 
-  Jobs twoGroupsWithARowModel() {
-    auto reductionJobs = Jobs();
+  ReductionJobs twoGroupsWithARowModel() {
+    auto reductionJobs = ReductionJobs();
     auto group1 = Group("Group 1");
     group1.appendRow(basicRow());
     reductionJobs.appendGroup(std::move(group1));
@@ -58,8 +58,8 @@ public:
     return reductionJobs;
   }
 
-  Jobs oneGroupWithTwoRowsModel() {
-    auto reductionJobs = Jobs();
+  ReductionJobs oneGroupWithTwoRowsModel() {
+    auto reductionJobs = ReductionJobs();
     auto group1 = Group("Group 1");
     group1.appendRow(basicRow());
     group1.appendRow(basicRow());
@@ -87,7 +87,7 @@ public:
     ON_CALL(mockJobs, selectedRowLocations()).WillByDefault(Return(locations));
   }
 
-  Jobs const &jobsFromPresenter(RunsTablePresenter &presenter) {
+  ReductionJobs const &jobsFromPresenter(RunsTablePresenter &presenter) {
     return presenter.reductionJobs();
   }
 
@@ -98,10 +98,10 @@ public:
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view) {
-    return RunsTablePresenter(&view, {}, 0.01, Jobs());
+    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs());
   }
 
-  RunsTablePresenter makePresenter(IRunsTableView &view, Jobs jobs) {
+  RunsTablePresenter makePresenter(IRunsTableView &view, ReductionJobs jobs) {
     return RunsTablePresenter(&view, {}, 0.01, std::move(jobs));
   }
 

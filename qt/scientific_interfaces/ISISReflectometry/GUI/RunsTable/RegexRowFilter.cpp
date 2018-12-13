@@ -13,7 +13,7 @@ using MantidQt::MantidWidgets::Batch::IJobTreeView;
 using MantidQt::MantidWidgets::Batch::RowLocation;
 
 RegexFilter::RegexFilter(boost::regex regex, IJobTreeView const &view,
-                         Jobs const &jobs)
+                         ReductionJobs const &jobs)
     : m_filter(std::move(regex)), m_view(view), m_jobs(jobs) {}
 
 bool RegexFilter::rowMeetsCriteria(RowLocation const &location) const {
@@ -33,7 +33,7 @@ bool RegexFilter::rowMeetsCriteria(RowLocation const &location) const {
 
 std::unique_ptr<RegexFilter> filterFromRegexString(std::string const &regex,
                                                    IJobTreeView const &view,
-                                                   Jobs const &jobs) {
+                                                   ReductionJobs const &jobs) {
   return Mantid::Kernel::make_unique<RegexFilter>(boost::regex(regex), view,
                                                   jobs);
 }

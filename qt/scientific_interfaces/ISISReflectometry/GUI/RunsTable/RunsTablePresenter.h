@@ -23,7 +23,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter
 public:
   RunsTablePresenter(IRunsTableView *view,
                      std::vector<std::string> const &instruments,
-                     double thetaTolerance, Jobs reductionJobs);
+                     double thetaTolerance, ReductionJobs reductionJobs);
 
   void notifyProcessRequested() override;
   void notifyPauseRequested() override;
@@ -48,8 +48,8 @@ public:
   void notifyDeleteRowRequested() override;
   void notifyDeleteGroupRequested() override;
 
-  void mergeAdditionalJobs(Jobs const &jobs);
-  Jobs const &reductionJobs() const;
+  void mergeAdditionalJobs(ReductionJobs const &jobs);
+  ReductionJobs const &reductionJobs() const;
 
 private:
   void
@@ -101,7 +101,7 @@ private:
   std::vector<std::string> m_instruments;
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
       m_clipboard;
-  Jobs m_model;
+  ReductionJobs m_model;
   double m_thetaTolerance;
   JobsViewUpdater m_jobViewUpdater;
 };

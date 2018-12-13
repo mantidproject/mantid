@@ -115,14 +115,14 @@ operator()(std::vector<std::string> const &cellText) {
   }
 }
 
-RowValidationResult validateRow(Jobs const &,
+RowValidationResult validateRow(ReductionJobs const &,
                                 std::vector<std::string> const &cells) {
   auto validate = RowValidator();
   RowValidationResult result = validate(cells);
   return result;
 }
 
-boost::optional<Row> validateRowFromRunAndTheta(Jobs const &jobs,
+boost::optional<Row> validateRowFromRunAndTheta(ReductionJobs const &jobs,
                                                 std::string const &run,
                                                 std::string const &theta) {
   std::vector<std::string> cells = {run, theta, "", "", "", "", "", "", ""};

@@ -40,10 +40,10 @@ private:
 
 using RowValidationResult = ValidationResult<Row, std::vector<int>>;
 
-RowValidationResult validateRow(Jobs const &jobs,
+RowValidationResult validateRow(ReductionJobs const &jobs,
                                 std::vector<std::string> const &cellText);
 
-boost::optional<Row> validateRowFromRunAndTheta(Jobs const &jobs,
+boost::optional<Row> validateRowFromRunAndTheta(ReductionJobs const &jobs,
                                                 std::string const &run,
                                                 std::string const &theta);
 } // namespace CustomInterfaces
