@@ -158,7 +158,6 @@ void IndirectMolDyn::plotClicked() {
   if (checkADSForPlotSaveWorkspace(baseName.toStdString(), true)) {
 
     auto const diffResultsGroup = getADSWorkspaceGroup(baseName.toStdString());
-
     auto const names = diffResultsGroup->getNames();
     auto const plotType = m_uiForm.cbPlot->currentText();
 
@@ -194,7 +193,7 @@ void IndirectMolDyn::setRunIsRunning(bool running) {
 }
 
 void IndirectMolDyn::setPlotIsPlotting(bool running) {
-  m_uiForm.pbRun->setText(running ? "Plotting..." : "Plot");
+  m_uiForm.pbPlot->setText(running ? "Plotting..." : "Plot");
   setButtonsEnabled(!running);
 }
 
