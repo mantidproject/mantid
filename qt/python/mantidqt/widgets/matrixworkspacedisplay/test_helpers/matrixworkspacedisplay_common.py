@@ -125,11 +125,16 @@ class MockWorkspace:
         self.maskedBinsIndices = None
         self.isCommonBins = Mock(return_value=True)
 
+        self.column_types = ["int", "float", "string", "v3d", "bool"]
+        self.columnTypes = Mock(return_value=self.column_types)
+
         self.mock_spectrum = MockSpectrum()
         self.getSpectrum = Mock(return_value=self.mock_spectrum)
 
         self.mock_axis = MockMantidAxis()
         self.getAxis = Mock(return_value=self.mock_axis)
+
+        self.setCell = Mock()
 
         self.name = None
 

@@ -12,46 +12,14 @@ from __future__ import absolute_import, division, print_function
 from functools import partial
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QTableWidgetItem
 
-from mantid.kernel import V3D
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
 from mantidqt.widgets.common.table_copying import copy_cells, show_mouse_toast, show_no_selection_to_copy_toast
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
+from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
 from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
-
-
-class WorkbenchTableWidgetItem(QTableWidgetItem):
-    def __init__(self, data, editable=False):
-        # if not editable just initialise the ItemWidget as string
-        if not editable:
-            QTableWidgetItem.__init__(self, str(data))
-            self.setFlags(self.flags() & ~Qt.ItemIsEditable)
-            return
-
-        QTableWidgetItem.__init__(self)
-
-        if isinstance(data, V3D) or isinstance(data, float):
-            data = str(data)
-
-        self.original_data = data
-        # this will correctly turn all number cells into number types
-        self.reset()
-
-    def __lt__(self, other):
-        try:
-            # if the data can be parsed as numbers then compare properly, otherwise default to the Qt implementation
-            return float(self.data(Qt.DisplayRole)) < float(other.data(Qt.DisplayRole))
-        except:
-            return super(WorkbenchTableWidgetItem, self).__lt__(other)
-
-    def reset(self):
-        self.setData(Qt.DisplayRole, self.original_data)
-
-    def update(self):
-        self.original_data = self.data(Qt.DisplayRole)
 
 
 class TableWorkspaceDisplay(object):
@@ -63,6 +31,17 @@ class TableWorkspaceDisplay(object):
     NO_COLUMN_MARKED_AS_X = "No columns marked as X."
 
     def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None):
+        """
+        Creates a display for the provided workspace.
+
+        :param ws: Workspace to be displayed
+        :param parent: Parent of the widget
+        :param plot: Plotting function that will be used to plot workspaces. This requires MatPlotLib directly.
+                     Passed in as parameter to allow mocking
+        :param model: Model to be used by the widget. Passed in as parameter to allow mocking
+        :param view: View to be used by the widget. Passed in as parameter to allow mocking
+        :param name: Custom name for the window
+        """
         # Create model and view, or accept mocked versions
         self.model = model if model else TableWorkspaceDisplayModel(ws)
         self.name = self.model.get_name() if name is None else name
@@ -78,14 +57,21 @@ class TableWorkspaceDisplay(object):
         # all consecutive triggers will be from user actions
         self.view.itemChanged.connect(self.handleItemChanged)
 
+    @classmethod
+    def supports(cls, ws):
+        """
+        Checks that the provided workspace is supported by this display.
+        :param ws: Workspace to be checked for support
+        :raises ValueError: if the workspace is not supported
+        """
+        return TableWorkspaceDisplayModel.supports(ws)
+
     def handleItemChanged(self, item):
         """
         :type item: WorkbenchTableWidgetItem
         :param item:
         :return:
         """
-        print("Changed data in cell:", item, "ops:", dir(item))
-
         try:
             self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole))
             item.update()
@@ -295,7 +281,6 @@ class TableWorkspaceDisplay(object):
         self._do_plot(selected_columns, selected_x, plot_type)
 
     def _do_plot(self, selected_columns, selected_x, plot_type):
-
         if plot_type == PlotType.LINEAR_WITH_ERR:
             yerr = self.model.marked_columns.find_yerr(selected_columns)
             if len(yerr) != len(selected_columns):
@@ -304,6 +289,7 @@ class TableWorkspaceDisplay(object):
         x = self.model.get_column(selected_x)
 
         fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
+        fig.canvas.set_window_title(self.model.get_name())
         ax.set_xlabel(self.model.get_column_header(selected_x))
 
         plot_func = self._get_plot_function_from_type(ax, plot_type)

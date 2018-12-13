@@ -14,12 +14,12 @@ import matplotlib
 
 matplotlib.use('Qt5Agg')
 
+
 from qtpy.QtWidgets import QApplication  # noqa: F402
 
 from mantid.simpleapi import Load  # noqa: F402
 from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay  # noqa: F402
-# from workbench.plotting.functions import plot  # noqa: F402
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # noqa: F402
 
 app = QApplication([])
 DEEE_WS_MON = Load("SavedTableWorkspace.nxs")
