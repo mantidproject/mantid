@@ -42,6 +42,33 @@ except ImportError:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 
+def plot_decorator(func):
+    def wrapper(self, *args, **kwargs):
+        func_value = func(self, *args, **kwargs)
+        # Saves saving it on array objects
+        if mantid.plots.helperfunctions.validate_args(*args, **kwargs):
+            # Fill out kwargs with the values of args
+            for index, arg in enumerate(args):
+                if index is 0:
+                    kwargs["workspaces"] = arg.name()
+                if index is 1:
+                    kwargs["spectrum_nums"] = arg
+                if index is 2:
+                    kwargs["wksp_indices"] = arg
+                if index is 3:
+                    kwargs["errors"] = arg
+                if index is 4:
+                    kwargs["overplot"] = arg
+                # ignore 5 as no need to save the fig object
+                if index is 6:
+                    kwargs["plot_kwargs"] = arg
+            if hasattr(self, "creation_args"):
+                self.creation_args.append(kwargs)
+            else:
+                self.creation_args = [kwargs]
+        return func_value
+    return wrapper
+
 
 class MantidAxes(Axes):
     '''
@@ -66,6 +93,7 @@ class MantidAxes(Axes):
     HORIZONTAL = BIN = 0
     VERTICAL = SPECTRUM = 1
 
+    @plot_decorator
     def plot(self, *args, **kwargs):
         '''
         If the **mantid** projection is chosen, it can be
@@ -266,6 +294,7 @@ class MantidAxes(Axes):
         else:
             return Axes.contour(self, *args, **kwargs)
 
+    @plot_decorator
     def contourf(self, *args, **kwargs):
         '''
         If the **mantid** projection is chosen, it can be

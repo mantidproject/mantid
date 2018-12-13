@@ -11,33 +11,40 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from matplotlib import ticker
 import matplotlib.colors
 
-
-global_args = {}
+from mantid import logger
 
 
 class PlotsSaver(object):
-    def save_plots(self, plots):
+    def save_plots(self, plot_dict):
         plot_list = []
-        for plot in plots:
-            (plot.num ,plot_list.append(self.get_dict_from_fig(plot.canvas.figure)))
+        for index in plot_dict:
+            try:
+                (index, plot_list.append(self.get_dict_from_fig(plot_dict[index].canvas.figure)))
+            except BaseException as e:
+                # Catch all errors in here so it can fail silently-ish
+                if isinstance(e, KeyboardInterrupt):
+                    raise KeyboardInterrupt
+                logger.warning("A plot was unable to be saved")
         return plot_list
 
     def get_dict_from_fig(self, fig):
-        fig_dict = {"creationArguements": global_args}
-
         axes_list = []
+        create_list = []
         for ax in fig.axes:
+            create_list.append(ax.creation_args)
             axes_list.append(self.get_dict_for_axes(ax))
-        fig_dict["axes"] = axes_list
 
-        fig_dict["properties"] = self.get_dict_from_fig_properties(fig)
+        fig_dict = {"creationArguments": create_list,
+                    "axes": axes_list,
+                    "label": fig._label,
+                    "properties": self.get_dict_from_fig_properties(fig)}
         return fig_dict
 
     def get_dict_for_axes(self, ax):
         ax_dict = {"properties": self.get_dict_from_axes_properties(ax),
-                   "title": self.get_dict_from_text(ax.title),
-                   "xAxisTitle": self.get_dict_from_text(ax.xaxis.label),
-                   "yAxisTitle": self.get_dict_from_text(ax.yaxis.label)}
+                   "title": ax.get_title(),
+                   "xAxisTitle": ax.get_xlabel(),
+                   "yAxisTitle": ax.get_ylabel()}
 
         # Get lines from the axes and store it's data
         lines_list = []
@@ -82,10 +89,10 @@ class PlotsSaver(object):
                 "yLim": ax.get_ylim()}
 
     def get_dict_from_axis_properties(self, ax):
-        prop_dict = {"majorticklocator": type(ax.get_major_locator()).__name__,
-                     "minorticklocator": type(ax.get_minor_locator()).__name__,
-                     "majortickformatter": type(ax.get_major_formatter()).__name__,
-                     "minortickformatter": type(ax.get_minor_formatter()).__name__,
+        prop_dict = {"majorTickLocator": type(ax.get_major_locator()).__name__,
+                     "minorTickLocator": type(ax.get_minor_locator()).__name__,
+                     "majorTickFormatter": type(ax.get_major_formatter()).__name__,
+                     "minorTickFormatter": type(ax.get_minor_formatter()).__name__,
                      "gridStyle": self.get_dict_for_grid_style(ax),
                      "visible": ax.get_visible()}
         label1On = ax._major_tick_kw.get('label1On', True)
@@ -170,8 +177,9 @@ class PlotsSaver(object):
     def get_dict_from_text(self, text):
         text_dict = {"text": text.get_text()}
         if text_dict["text"]:
-            text_dict["transform"] = text.get_transform()
+            # text_dict["transform"] = text.get_transform()
             text_dict["position"] = text.get_position()
+            text_dict["useTeX"] = text.get_usetex()
             text_dict["style"] = self.get_dict_from_text_style(text)
         return text_dict
 
@@ -201,11 +209,3 @@ class PlotsSaver(object):
     @staticmethod
     def get_dict_from_fig_properties(fig):
         return {"figWidth": fig.get_figwidth(), "figHeight": fig.get_figheight(), "dpi": fig.dpi}
-
-
-def plot_decorator(func):
-    def wrapper(*args, **kwargs):
-        global global_args
-        global_args.append(args, kwargs)
-        return func(*args, **kwargs)
-    return wrapper

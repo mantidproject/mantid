@@ -19,7 +19,7 @@ from mantidqt.project.projectsaver import ProjectSaver
 
 
 class Project(AnalysisDataServiceObserver):
-    def __init__(self):
+    def __init__(self, globalfiguremanager_instance):
         super(Project, self).__init__()
         # Has the project been saved, to Access this call .saved
         self.__saved = True
@@ -31,6 +31,8 @@ class Project(AnalysisDataServiceObserver):
 
         self.project_file_ext = ".mtdproj"
 
+        self.plot_gfm = globalfiguremanager_instance
+
     def save(self):
         if self.last_project_location is None:
             self.save_as()
@@ -39,9 +41,10 @@ class Project(AnalysisDataServiceObserver):
             self._clear_unused_workspaces(self.last_project_location)
             # Actually save
             workspaces_to_save = AnalysisDataService.getObjectNames()
+            plots_to_save = self.plot_gfm.figs
             project_saver = ProjectSaver(self.project_file_ext)
             project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                       interfaces_to_save=None)
+                                       interfaces_to_save=None, plots_to_save=plots_to_save)
             self.__saved = True
 
     def save_as(self):
@@ -54,8 +57,10 @@ class Project(AnalysisDataServiceObserver):
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = directory
         workspaces_to_save = AnalysisDataService.getObjectNames()
+        plots_to_save = self.plot_gfm.figs
         project_saver = ProjectSaver(self.project_file_ext)
-        project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save, interfaces_to_save=None)
+        project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save, interfaces_to_save=None,
+                                   plots_to_save=plots_to_save)
         self.__saved = True
 
     @staticmethod

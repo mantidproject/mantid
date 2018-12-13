@@ -212,7 +212,8 @@ class MainWindow(QMainWindow):
 
         # Set up the project object
         from mantidqt.project.project import Project
-        self.project = Project()
+        from workbench.plotting.globalfiguremanager import GlobalFigureManager
+        self.project = Project(GlobalFigureManager)
 
         # uses default configuration as necessary
         self.readSettings(CONF)
