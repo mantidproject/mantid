@@ -106,7 +106,7 @@ Usage
    Theta 1 + dir + ref numbers : Not defined
    Theta 2 + dir + ref numbers : Not defined
    Theta 3 + dir + ref numbers : Not defined
-   d : 0.29999999999999999
+   d : 0.29999999999999999 mm
    Parameter  : Not defined
    Parameter  : Not defined
    Parameter  : Not defined
