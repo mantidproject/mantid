@@ -271,7 +271,7 @@ def combine_loaded_runs(model, run_list):
     model._loaded_data_store.remove_data(run=run_list[0])
     return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
-                                            filename="Co-added")
+                                      filename="Co-added")
 
 
 def flatten_run_list(run_list):
