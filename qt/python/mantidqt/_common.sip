@@ -282,4 +282,8 @@ public:
     void setStartX(double start);
     double endX() const;
     void setEndX(double end);
+    void setXRange(double start, double end);
+signals:
+    void startXChanged(double);
+    void endXChanged(double);
 };

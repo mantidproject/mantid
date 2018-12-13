@@ -7,13 +7,12 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
+from __future__ import (print_function, absolute_import, unicode_literals)
 
 import numpy as np
 
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
-import matplotlib.patheffects as path_effects
 from qtpy.QtCore import QObject, Signal, Qt
 from qtpy.QtGui import QGuiApplication, QCursor
 
@@ -32,6 +31,8 @@ class FitPropertyBrowser(BaseBrowser):
         self.init()
         self.canvas = canvas
         self.tool = None
+        self.startXChanged.connect(self.move_start_x)
+        self.endXChanged.connect(self.move_end_x)
 
     def closeEvent(self, event):
         self.closing.emit()
@@ -39,10 +40,9 @@ class FitPropertyBrowser(BaseBrowser):
 
     def show(self):
         self.tool = FitInteractiveTool(self.canvas)
-        self.tool.fit_start_x_moved.connect(self.move_start_x)
-        self.tool.fit_end_x_moved.connect(self.move_end_x)
-        self.setStartX(self.tool.fit_start_x.x)
-        self.setEndX(self.tool.fit_end_x.x)
+        self.tool.fit_start_x_moved.connect(self.setStartX)
+        self.tool.fit_end_x_moved.connect(self.setEndX)
+        self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
         super(FitPropertyBrowser, self).show()
 
     def hide(self):
@@ -53,10 +53,12 @@ class FitPropertyBrowser(BaseBrowser):
         super(FitPropertyBrowser, self).hide()
 
     def move_start_x(self, xd):
-        self.setStartX(xd)
+        if self.tool is not None:
+            self.tool.move_start_x(xd)
 
     def move_end_x(self, xd):
-        self.setEndX(xd)
+        if self.tool is not None:
+            self.tool.move_end_x(xd)
 
 
 class VerticalMarker(QObject):
@@ -69,9 +71,7 @@ class VerticalMarker(QObject):
         self.ax = canvas.figure.get_axes()[0]
         y0, y1 = self.ax.get_ylim()
         path = Path([(x, y0), (x, y1)], [Path.MOVETO, Path.LINETO])
-        self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=5, linewidth=2.0, animated=True,
-                               # path_effects=[path_effects.SimpleLineShadow(), path_effects.Normal()]
-                               )
+        self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=5, linewidth=2.0, animated=True)
         self.ax.add_patch(self.patch)
         self.is_moving = False
 
@@ -96,10 +96,13 @@ class VerticalMarker(QObject):
     def stop(self):
         self.is_moving = False
 
-    def move(self, xd):
+    def mouse_move(self, xd):
         if self.is_moving:
             self.x = xd
             self.moved.emit(xd)
+
+    def should_override_cursor(self, x):
+        return self.is_moving or self.is_above(x)
 
 
 class FitInteractiveTool(QObject):
@@ -128,6 +131,8 @@ class FitInteractiveTool(QObject):
         self._cids.append(canvas.mpl_connect('button_press_event', self.on_click))
         self._cids.append(canvas.mpl_connect('button_release_event', self.on_release))
 
+        self.is_cursor_overridden = False
+
     def disconnect(self):
         for cid in self._cids:
             self.canvas.mpl_disconnect(cid)
@@ -135,17 +140,24 @@ class FitInteractiveTool(QObject):
         self.fit_end_x.remove()
 
     def draw_callback(self, event):
+        if self.fit_start_x.x > self.fit_end_x.x:
+            x = self.fit_start_x.x
+            self.fit_start_x.x = self.fit_end_x.x
+            self.fit_end_x.x = x
         self.fit_start_x.redraw()
         self.fit_end_x.redraw()
 
     def motion_notify_callback(self, event):
         x = event.x
-        if x is not None and (self.fit_start_x.is_above(x) or self.fit_end_x.is_above(x)):
-            QGuiApplication.setOverrideCursor(QCursor(Qt.SizeHorCursor))
+        if x is not None and (self.fit_start_x.should_override_cursor(x) or self.fit_end_x.should_override_cursor(x)):
+            if not self.is_cursor_overridden:
+                QGuiApplication.setOverrideCursor(QCursor(Qt.SizeHorCursor))
+            self.is_cursor_overridden = True
         else:
             QGuiApplication.restoreOverrideCursor()
-        self.fit_start_x.move(event.xdata)
-        self.fit_end_x.move(event.xdata)
+            self.is_cursor_overridden = False
+        self.fit_start_x.mouse_move(event.xdata)
+        self.fit_end_x.mouse_move(event.xdata)
         self.canvas.draw()
 
     def on_click(self, event):
@@ -156,3 +168,11 @@ class FitInteractiveTool(QObject):
     def on_release(self, event):
         self.fit_start_x.stop()
         self.fit_end_x.stop()
+
+    def move_start_x(self, xd):
+        self.fit_start_x.x = xd
+        self.canvas.draw()
+
+    def move_end_x(self, xd):
+        self.fit_end_x.x = xd
+        self.canvas.draw()

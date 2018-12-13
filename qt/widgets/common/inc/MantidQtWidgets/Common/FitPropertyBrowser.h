@@ -178,6 +178,8 @@ public:
   double endX() const;
   /// Set the end X
   void setEndX(double end) override;
+  /// Set both start and end X
+  void setXRange(double start, double end);
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString &lv = "");
   /// Get LogValue

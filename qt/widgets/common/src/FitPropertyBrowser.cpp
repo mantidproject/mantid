@@ -1898,6 +1898,11 @@ void FitPropertyBrowser::setEndX(double value) {
   m_doubleManager->setValue(m_endX, value);
 }
 
+void FitPropertyBrowser::setXRange(double start, double end) {
+  m_doubleManager->setValue(m_startX, start);
+  m_doubleManager->setValue(m_endX, end);
+}
+
 ///
 QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent,
                                             QtProperty *prop) const {
