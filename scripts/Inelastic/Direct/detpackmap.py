@@ -1,3 +1,4 @@
+
 def sequoia(name):
     rows = 'BCD'
     startindexes = dict(B=37, C=74, D=113)
@@ -11,12 +12,16 @@ def sequoia(name):
     if row == 'C':
         if len(name) == 4:
             assert name[-1] in 'TB', "Invalid pack name %r" % name
-            if name[3] == 'B': extra = 2
-        if col>26: extra = 2
+            if name[3] == 'B':
+                extra = 2
+        if col>26:
+            extra = 2
     return start + col + extra
 
 
-import unittest
+import unittest # noqa: E402
+
+
 class TestCase(unittest.TestCase):
     def test_sequoia(self):
         assert sequoia('B1') == 38
@@ -31,6 +36,5 @@ class TestCase(unittest.TestCase):
         return
 
 
-if __name__ == '__main__': unittest.main()
-
-    
+if __name__ == '__main__':
+    unittest.main()
