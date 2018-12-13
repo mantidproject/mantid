@@ -30,8 +30,8 @@ public:
 
   void testCanAddEmptyRowToGroup() {
     auto group = Group("Group1", {});
-    auto run = Row({"000000", "000002"}, 0.02, {"", ""}, RangeInQ(0, 1, 10),
-                   1.2, {}, workspaceNames());
+    auto run = Row({"000000", "000002"}, 0.02, {"", ""},
+                   RangeInQ(0.0, 1.0, 10.0), 1.2, {}, workspaceNames());
     group.appendRow(run);
     TS_ASSERT_EQUALS(run.runNumbers(), group[0].get().runNumbers());
   }
