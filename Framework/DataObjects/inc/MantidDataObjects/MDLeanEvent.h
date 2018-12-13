@@ -60,24 +60,17 @@ struct MortonIndex<8> {
   using type = uint64_t;
 };
 
-#pragma pack(push, 1)
-struct uint96_t {
-  uint64_t int64;
-  uint32_t int32;
-};
-#pragma pack(pop)
 
 template <>
 struct MortonIndex<12> {
-  using intType = uint16_t;
-//  using type = uint96_t;
-  using type = uint64_t;
+  using intType = uint32_t ;
+  using type = Morton96;
 };
 
 template <>
 struct MortonIndex<16> {
   using intType = uint32_t;
-  using type = boost::multiprecision::uint128_t;
+  using type = uint128_t;
 };
 
 template <>
@@ -138,18 +131,21 @@ protected:
 
   /** The N-dimensional coordinates of the center of the event.
    * A simple fixed-sized array of (floats or doubles).
+   * Second member is an index that can be utilized for faster
+   * creating the box structure
    */
+#pragma pack(push ,1)
   union {
     coord_t center[nd];
     MortonT index;
   };
-
+#pragma pack(pop)
 public:
   static MDCoordinate<nd> indexToCoordinates(const MortonT& idx, const MDSpaceBounds<nd>& space) {
-    return ConvertCoordinatesFromIntegerRange<nd, IntT>(space, deinterleave<nd, IntT, MortonT>(idx));
+    return ConvertCoordinatesFromIntegerRange<nd, IntT>(space, Interleaver<nd, IntT, MortonT>::deinterleave(idx));
   }
   void retrieveIndex(const MDSpaceBounds<nd>& space) {
-    index = interleave<nd, IntT, MortonT>(ConvertCoordinatesToIntegerRange<nd, IntT>(space, center));
+      index = Interleaver<nd, IntT, MortonT>::interleave(ConvertCoordinatesToIntegerRange<nd, IntT>(space, center));
   }
   void retrieveCoordinates(const MDSpaceBounds<nd>& space) {
     auto coords = indexToCoordinates(index, space);

@@ -124,7 +124,7 @@ private:
   MortonT CalculateDefaultBound(IntT intBound) {
     IntArray<ND, IntT> minCoord;
     minCoord.fill(intBound);
-    return interleave<ND, IntT, MortonT>(minCoord);
+    return Interleaver<ND, IntT, MortonT>::interleave(minCoord);
   }
 
   void leafs(std::vector<Leaf>& lf, unsigned& level) {
@@ -239,7 +239,7 @@ public:
       const auto boxLower = m_lowerBound + ((childBoxWidth + 1) * i);
 
       /* Upper child box bound is lower plus child box width */
-      const auto boxUpper = boxLower + childBoxWidth;
+      const auto boxUpper = childBoxWidth + boxLower;
 
       const auto boxEventStart = eventIt;
 

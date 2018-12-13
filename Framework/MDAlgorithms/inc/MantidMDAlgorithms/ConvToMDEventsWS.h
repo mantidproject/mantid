@@ -330,7 +330,6 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(API::Progress *pProgres
 
 template<typename EventType, size_t ND, template <size_t> class MDEventType>
 void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
-  std::cerr << __PRETTY_FUNCTION__ << " started\n";
   std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
   MDSpaceBounds<ND> space;
   const auto& pws{m_OutWSWrapper->pWorkspace()};
@@ -354,19 +353,6 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
     mdEvents[i].retrieveCoordinates(space);
 
   m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure<ND, MDEventType>(*(rootMdBox.get()), space, bc));
-
-
-
-
-  std::cerr << "Structure box has " << rootMdBox->allBoxes().size() << " boxes\n";
-  std::cerr << "Structure box has " << rootMdBox->leafs().size() << " leafs\n";
-
-  std::vector<API::IMDNode *> tmp;
-  m_OutWSWrapper->pWorkspace()->getBoxes(tmp, 100, true);
-  std::cerr << "Real box has " << tmp.size() << " leafs\n";
-
-  std::cerr << "\n";
-  std::cerr << __PRETTY_FUNCTION__ << " finished\n";
 }
 
 

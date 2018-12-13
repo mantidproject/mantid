@@ -310,6 +310,11 @@ MortonT interleave(const IntArray<ND, IntT> &coord) {
   return retVal;
 }
 
+template <size_t ND, typename IntT>
+Morton96 interleave(const IntArray<3, uint32_t> &coord) {
+  return Morton96(interleave<ND, IntT, uint128_t>(coord));
+}
+
 /**
  * Deinterleaves a Morton number into an integer coordinate.
  *
@@ -327,5 +332,34 @@ IntArray<ND, IntT> deinterleave(const MortonT z) {
   }
   return retVal;
 }
+
+template <size_t ND, typename IntT>
+IntArray<ND, IntT> deinterleave(const Morton96& z) {
+  return deinterleave<ND, IntT, uint128_t >(z.to_uint128_t());
+}
+
+template <size_t ND, typename IntT, typename MortonT>
+struct Interleaver {
+  static MortonT interleave(const IntArray<ND, IntT> &coord) {
+    return ::interleave<ND, IntT, MortonT>(coord);
+  }
+
+  static IntArray<ND, IntT> deinterleave(const MortonT z) {
+    return ::deinterleave<ND, IntT, MortonT>(z);
+  }
+};
+
+template <size_t ND, typename IntT>
+struct Interleaver<ND, IntT, Morton96> {
+  static Morton96 interleave(const IntArray<ND, IntT> &coord) {
+    return ::interleave<ND, IntT>(coord);
+  }
+
+  static IntArray<ND, IntT> deinterleave(const Morton96 z) {
+    return ::deinterleave<ND, IntT>(z);
+  }
+};
+
+
 
 #endif //MANTID_DATAOBJECTS_MORTONINDEX_BITINTERLEAVING_H_
