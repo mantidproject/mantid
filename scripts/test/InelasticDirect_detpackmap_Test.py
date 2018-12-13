@@ -11,6 +11,7 @@ class TestCase(unittest.TestCase):
         assert sequoia('C26T') == 100
         assert sequoia('C25B') == 101
         assert sequoia('C26B') == 102
+        assert sequoia('C37') == 113
         assert sequoia('D1') == 114
         assert sequoia('D37') == 150
         return
