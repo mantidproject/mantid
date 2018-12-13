@@ -5,8 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/FractionalRebinning.h"
@@ -30,40 +32,38 @@ const std::string ANGULAR_WIDTHS{"AngularWidths"};
 }
 namespace Col {
 const std::string DET_ID{"Detector ID"};
-const std::string THETA_WIDTH{"Two theta width"};
+const std::string LOWER_2THETA{"Lower two theta"};
+const std::string UPPER_2THETA{"Upper two theta"};
 } // namespace Col
 /**
- * @brief Calculate the min and max 2theta for given direction.
- * The 2theta are calculated for the centre point and a point in the
- * center of given side.
+ * Calculate the 2theta at detector surface for a given direction.
  * @param detInfo a DetectorInfo object
  * @param detIndex index of the detector within detInfo
  * @param samplePos a V3D pointing to the sample position
  * @param beamDir a unit vector pointing along the beam axis
- * @param sideDir a unit vector pointing to the chosen side
- * @return a pair (min(2theta), max(2theta)
+ * @param sideDir a unit vector pointing to the chosen direction
+ * @return the 2theta in radians
  */
-std::pair<double, double>
-minMaxTheta(const Mantid::Geometry::DetectorInfo &detInfo,
-            const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
-            const Mantid::Kernel::V3D &beamDir,
-            const Mantid::Kernel::V3D &sideDir) {
+double twoTheta(const Mantid::Geometry::DetectorInfo &detInfo,
+                const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
+                const Mantid::Kernel::V3D &beamDir,
+                const Mantid::Kernel::V3D &sideDir) {
   const auto shape = detInfo.detector(detIndex).shape();
   const Mantid::Geometry::BoundingBox bbox = shape->getBoundingBox();
-  const auto maxPoint = bbox.maxPoint() - samplePos;
+  const auto maxPoint = bbox.maxPoint();
   auto side = maxPoint * sideDir;
   const auto rotation = detInfo.rotation(detIndex);
   const auto position = detInfo.position(detIndex);
   rotation.rotate(side);
   side += position;
+  side -= samplePos;
   const auto sideAngle = side.angle(beamDir);
-  const auto centreAngle = detInfo.twoTheta(detIndex);
-  return std::minmax(sideAngle, centreAngle);
+  return sideAngle;
 }
 
-double thetaWidth(const Mantid::detid_t detID,
-                  const std::vector<int> &detectorIDs,
-                  const std::vector<double> &angularWidths) {
+std::pair<double, double> twoThetasFromTable(
+    const Mantid::detid_t detID, const std::vector<int> &detectorIDs,
+    const std::vector<double> &lowers, const std::vector<double> &uppers) {
   const auto range = std::equal_range(detectorIDs.cbegin(), detectorIDs.cend(),
                                       static_cast<int>(detID));
   if (std::distance(range.first, range.second) > 1) {
@@ -74,8 +74,8 @@ double thetaWidth(const Mantid::detid_t detID,
     throw std::invalid_argument("No 2theta width found for detector ID " +
                                 std::to_string(detID));
   }
-  const auto widthIndex = std::distance(detectorIDs.cbegin(), range.first);
-  return angularWidths[widthIndex];
+  const auto index = std::distance(detectorIDs.cbegin(), range.first);
+  return std::make_pair(lowers[index], uppers[index]);
 }
 } // namespace
 
@@ -121,10 +121,9 @@ void SofQWNormalisedPolygon::init() {
       Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
           Prop::ANGULAR_WIDTHS, "", Direction::Input, PropertyMode::Optional),
       "A table workspace with a '" + Col::DET_ID +
-          "' column listing detector IDs and "
-          "a '" +
-          Col::THETA_WIDTH +
-          "' column listing corresponding 2theta widths in "
+          "' column listing detector IDs as well as '" + Col::LOWER_2THETA +
+          "' and '" + Col::UPPER_2THETA +
+          "' columns listing corresponding min and max 2thetas in "
           "radians.");
 }
 
@@ -189,14 +188,8 @@ void SofQWNormalisedPolygon::exec() {
     const auto *det =
         m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
 
-    const double theta = this->m_theta[i];
-    const double thetaWidth = this->m_thetaWidths[i];
-
-    // Compute polygon points
-    const double thetaHalfWidth = 0.5 * thetaWidth;
-
-    const double thetaLower = theta - thetaHalfWidth;
-    const double thetaUpper = theta + thetaHalfWidth;
+    const double thetaLower = m_twoThetaLowers[i];
+    const double thetaUpper = m_twoThetaUppers[i];
 
     const auto specNo = static_cast<specnum_t>(inputIndices.spectrumNumber(i));
     std::stringstream logStream;
@@ -214,8 +207,8 @@ void SofQWNormalisedPolygon::exec() {
       const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
       const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
       if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-        logStream << "Spectrum=" << specNo << ", theta=" << theta
-                  << ",thetaWidth=" << thetaWidth << ". QE polygon: ll=" << ll
+        logStream << "Spectrum=" << specNo << ", lower theta=" << thetaLower
+                  << ", upper theta=" << thetaUpper << ". QE polygon: ll=" << ll
                   << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
       }
 
@@ -280,15 +273,16 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
     const MatrixWorkspace &workspace) {
   const size_t nhist = workspace.getNumberHistograms();
   constexpr double skipDetector{-1.};
-  this->m_theta = std::vector<double>(nhist, skipDetector);
-  this->m_thetaWidths = std::vector<double>(nhist, skipDetector);
+  m_twoThetaLowers = std::vector<double>(nhist, skipDetector);
+  m_twoThetaUppers = std::vector<double>(nhist, skipDetector);
 
   auto inst = workspace.getInstrument();
   const auto referenceFrame = inst->getReferenceFrame();
   const auto beamDir = referenceFrame->vecPointingAlongBeam();
   const auto upDir = referenceFrame->vecPointingUp();
   const auto horizontalDir = referenceFrame->vecPointingHorizontal();
-  const std::array<const V3D *const, 3> dirs{&beamDir, &upDir, &horizontalDir};
+  const std::array<const V3D, 6> dirs{beamDir, -beamDir,      upDir,
+                                      -upDir,  horizontalDir, -horizontalDir};
 
   const auto &detectorInfo = workspace.detectorInfo();
   const auto &spectrumInfo = workspace.spectrumInfo();
@@ -309,35 +303,57 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
       continue;
     }
 
-    this->m_theta[i] = spectrumInfo.twoTheta(i);
-
+    double minTwoTheta{spectrumInfo.twoTheta(i)};
+    double maxTwoTheta{minTwoTheta};
     if (spectrumInfo.hasUniqueDetector(i)) {
-      const auto id = det.getID();
-      const auto thetas = minMaxTheta(detectorInfo, detectorInfo.indexOf(id),
-                                      samplePos, beamDir, upDir);
-      m_thetaWidths[i] = 2. * (thetas.second - thetas.first);
+      const auto detInfoIndex = detectorInfo.indexOf(det.getID());
+      for (const auto &dir : dirs) {
+        const auto current =
+            twoTheta(detectorInfo, detInfoIndex, samplePos, beamDir, dir);
+        minTwoTheta = std::min(minTwoTheta, current);
+        maxTwoTheta = std::max(maxTwoTheta, current);
+      }
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto ids = group.getDetectorIDs();
-      double minTheta{std::numeric_limits<double>::max()};
-      double maxTheta{std::numeric_limits<double>::lowest()};
       for (const auto id : ids) {
-        for (const auto dir : dirs) {
-          const auto thetas = minMaxTheta(
-              detectorInfo, detectorInfo.indexOf(id), samplePos, beamDir, *dir);
-          minTheta = std::min(minTheta, thetas.first);
-          maxTheta = std::max(maxTheta, thetas.second);
+        const auto detInfoIndex = detectorInfo.indexOf(id);
+        for (const auto &dir : dirs) {
+          const auto current =
+              twoTheta(detectorInfo, detInfoIndex, samplePos, beamDir, dir);
+          minTwoTheta = std::min(minTwoTheta, current);
+          maxTwoTheta = std::max(maxTwoTheta, current);
         }
       }
-      m_thetaWidths[i] = 2. * (maxTheta - minTheta);
-      if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-        g_log.debug() << "Detector at spectrum = "
-                      << workspace.getSpectrum(i).getSpectrumNo()
-                      << ", width = " << m_thetaWidths[i] * rad2deg
-                      << " degrees\n";
-      }
+    }
+    m_twoThetaLowers[i] = minTwoTheta;
+    m_twoThetaUppers[i] = maxTwoTheta;
+    if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug() << "Detector at spectrum = "
+                    << workspace.getSpectrum(i).getSpectrumNo()
+                    << ", lower 2theta = " << m_twoThetaLowers[i] * rad2deg
+                    << ", upper 2theta = " << m_twoThetaUppers[i] * rad2deg
+                    << " degrees\n";
     }
   }
+  // TODO remove this debug output table from production release.
+  auto table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  table->addColumn("double", "Two theta");
+  table->getColumn(0)->setPlotType(1);
+  table->addColumn("double", Col::LOWER_2THETA);
+  table->getColumn(1)->setPlotType(2);
+  table->addColumn("double", Col::UPPER_2THETA);
+  table->getColumn(2)->setPlotType(2);
+  table->addColumn("double", "Width");
+  table->getColumn(3)->setPlotType(2);
+  table->setRowCount(m_twoThetaLowers.size());
+  for (size_t i = 0; i < m_twoThetaLowers.size(); ++i) {
+    table->Double(i, 0) = spectrumInfo.twoTheta(i);
+    table->Double(i, 1) = m_twoThetaLowers[i];
+    table->Double(i, 2) = m_twoThetaUppers[i];
+    table->Double(i, 3) = m_twoThetaUppers[i] - m_twoThetaLowers[i];
+  }
+  AnalysisDataService::Instance().addOrReplace("out_width_table", table);
 }
 
 /**
@@ -355,8 +371,8 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
   WorkspaceNearestNeighbourInfo neighbourInfo(workspace, ignoreMasked,
                                               numNeighbours);
 
-  this->m_theta.resize(nHistos);
-  this->m_thetaWidths.resize(nHistos);
+  m_twoThetaLowers.resize(nHistos);
+  m_twoThetaUppers.resize(nHistos);
 
   const auto &spectrumInfo = workspace.spectrumInfo();
 
@@ -387,8 +403,8 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
         thetaWidth = std::max(thetaWidth, dTheta);
       }
     }
-    this->m_theta[i] = theta;
-    this->m_thetaWidths[i] = thetaWidth;
+    m_twoThetaLowers[i] = theta - thetaWidth / 2.;
+    m_twoThetaUppers[i] = theta + thetaWidth / 2.;
     if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << "Detector at spectrum = " << inSpec
                     << ", width = " << thetaWidth * rad2deg << " degrees\n";
@@ -400,45 +416,47 @@ void SofQWNormalisedPolygon::initAngularCachesTable(
     const MatrixWorkspace &workspace, const TableWorkspace &widthTable) {
   constexpr double skipDetector{-1.};
   const size_t nhist = workspace.getNumberHistograms();
-  this->m_theta = std::vector<double>(nhist, skipDetector);
-  this->m_thetaWidths = std::vector<double>(nhist, skipDetector);
+  m_twoThetaLowers = std::vector<double>(nhist, skipDetector);
+  m_twoThetaUppers = std::vector<double>(nhist, skipDetector);
   const auto &detIDs = widthTable.getColVector<int>(Col::DET_ID);
-  const auto &widths = widthTable.getColVector<double>(Col::THETA_WIDTH);
+  const auto &lowers = widthTable.getColVector<double>(Col::LOWER_2THETA);
+  const auto &uppers = widthTable.getColVector<double>(Col::UPPER_2THETA);
   const auto &spectrumInfo = workspace.spectrumInfo();
   for (size_t i = 0; i < nhist; ++i) {
     m_progress->report("Reading detector angles");
-
-    // If no detector found, skip onto the next spectrum
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-
     const auto &det = spectrumInfo.detector(i);
-    // Check to see if there is an EFixed, if not skip it
     try {
       m_EmodeProperties.getEFixed(det);
     } catch (std::runtime_error &) {
       continue;
     }
 
-    this->m_theta[i] = spectrumInfo.twoTheta(i);
-
     if (spectrumInfo.hasUniqueDetector(i)) {
-      m_thetaWidths[i] = thetaWidth(det.getID(), detIDs, widths);
+      const auto twoThetas = twoThetasFromTable(det.getID(), detIDs, lowers, uppers);
+      m_twoThetaLowers[i] = twoThetas.first;
+      m_twoThetaUppers[i] = twoThetas.second;
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto ids = group.getDetectorIDs();
-      double width{std::numeric_limits<double>::lowest()};
+      double minTwoTheta{spectrumInfo.twoTheta(i)};
+      double maxTwoTheta{minTwoTheta};
       for (const auto id : ids) {
-        width = std::max(width, thetaWidth(id, detIDs, widths));
+        const auto twoThetas = twoThetasFromTable(id, detIDs, lowers, uppers);
+        minTwoTheta = std::min(minTwoTheta, twoThetas.first);
+        maxTwoTheta = std::max(maxTwoTheta, twoThetas.second);
       }
-      m_thetaWidths[i] = width;
-      if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-        g_log.debug() << "Detector at spectrum = "
-                      << workspace.getSpectrum(i).getSpectrumNo()
-                      << ", width = " << m_thetaWidths[i] * rad2deg
-                      << " degrees\n";
-      }
+      m_twoThetaLowers[i] = minTwoTheta;
+      m_twoThetaUppers[i] = maxTwoTheta;
+    }
+    if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug() << "Detector at spectrum = "
+                    << workspace.getSpectrum(i).getSpectrumNo()
+                    << ", lower 2theta = " << m_twoThetaLowers[i] * rad2deg
+                    << ", upper 2theta = " << m_twoThetaUppers[i] * rad2deg
+                    << " degrees\n";
     }
   }
 }

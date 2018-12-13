@@ -74,10 +74,10 @@ private:
   SofQCommon m_EmodeProperties;
   /// Output Q axis
   std::vector<double> m_Qout;
-  /// Array for the two theta angles
-  std::vector<double> m_theta;
-  /// Array for the theta widths
-  std::vector<double> m_thetaWidths;
+  /// Array for the lower 2theta angles, in radians
+  std::vector<double> m_twoThetaLowers;
+  /// Array for the upper 2theta angles, in radians
+  std::vector<double> m_twoThetaUppers;
   /// Offset for finding neighbor in nearest tube
   int m_detNeighbourOffset{-1};
 };
