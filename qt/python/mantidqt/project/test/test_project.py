@@ -25,9 +25,15 @@ else:
     import mock
 
 
+class FakeGlobalFigureManager(object):
+    pass
+
+
 class ProjectTest(unittest.TestCase):
     def setUp(self):
-        self.project = Project()
+        self.fgfm = FakeGlobalFigureManager()
+        self.fgfm.figs = []
+        self.project = Project(self.fgfm)
 
     def tearDown(self):
         ADS.clear()

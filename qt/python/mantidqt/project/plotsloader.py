@@ -120,7 +120,6 @@ class PlotsLoader(object):
             ax.legend()
             self.update_legend(ax, dic["legend"])
 
-
     @staticmethod
     def create_text_from_dict(dic):
         if dic["text"]:

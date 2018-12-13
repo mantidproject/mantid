@@ -197,15 +197,6 @@ class PlotsSaver(object):
             style_dict["alpha"] = 1
         return style_dict
 
-    def get_list_of_legend_children(self, legend):
-        legend_list = []
-        if hasattr(legend, 'get_children') and len(legend.get_children()) > 0:
-            for child in legend.get_children():
-                legend_list.append(self.get_list_of_legend_children(child))
-        else:
-            legend_list.append(legend)
-        return legend_list
-
     @staticmethod
     def get_dict_from_fig_properties(fig):
         return {"figWidth": fig.get_figwidth(), "figHeight": fig.get_figheight(), "dpi": fig.dpi}
