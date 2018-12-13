@@ -41,7 +41,7 @@ set_target_properties ( Catalog PROPERTIES OUTPUT_NAME MantidCatalog
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(Catalog PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties(Catalog PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
   set_target_properties(Catalog PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
