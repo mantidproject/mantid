@@ -43,7 +43,7 @@ class PlotsLoader(object):
         # Make initial plot
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
 
-        plot(workspace=workspace, axes=ax, **creation_args[0][0])
+        self.plot_func(workspace, ax, creation_args[0][0])
 
         # If an overplot is necessary plot onto the same figure
         self.plot_extra_lines(creation_args=creation_args, ax=ax)
@@ -55,7 +55,10 @@ class PlotsLoader(object):
         fig.show()
 
     @staticmethod
-    def plot_extra_lines(creation_args, ax):
+    def plot_func( workspace, axes, creation_arg):
+        plot(workspace=workspace, axes=axes, **creation_arg)
+
+    def plot_extra_lines(self, creation_args, ax):
         """
         This method currently only considers single matplotlib.axes.Axes based figures as that is the most common case,
         to make it more than that the lines creation_args[0] needs to be rewrote to handle multiple axes args.
@@ -68,7 +71,7 @@ class PlotsLoader(object):
             for ii in range(1, len(creation_args[0])):
                 workspace_name = creation_args[0][ii].pop('workspaces')
                 workspace = ADS.retrieve(workspace_name)
-                plot(workspace=workspace, axes=ax, **creation_args[0][ii])
+                self.plot_func(workspace, ax, creation_args[0][ii])
 
     def restore_figure_data(self, fig, dic):
         self.restore_fig_properties(fig, dic["properties"])
@@ -103,10 +106,10 @@ class PlotsLoader(object):
         # Update/set text
         text_list = dic["texts"]
         for index, text in enumerate(text_list):
-           try:
-               ax.texts[index] = self.create_text_from_dict(text)
-           except IndexError:
-               ax.text(self.create_text_from_dict(text))
+            try:
+                ax.texts[index] = self.create_text_from_dict(text)
+            except IndexError:
+                ax.text(self.create_text_from_dict(text))
 
         # Update artists that are text
         for artist in dic["textFromArtists"]:
