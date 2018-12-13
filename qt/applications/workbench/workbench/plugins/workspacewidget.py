@@ -12,17 +12,19 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 from functools import partial
 
-# third-party library imports
-from mantid.api import AnalysisDataService
-from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
-from mantidqt.widgets.samplelogs.presenter import SampleLogs
-from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
-from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+import matplotlib.pyplot
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
+# third-party library imports
+from mantid.api import AnalysisDataService
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
+from mantidqt.widgets.samplelogs.presenter import SampleLogs
+from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
+from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+from workbench.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names, plot
 
 
 class WorkspaceWidget(PluginWidget):
@@ -121,10 +123,19 @@ class WorkspaceWidget(PluginWidget):
 
     def _do_show_data(self, names):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            # the plot function is being injected in the presenter
-            # this is done so that the plotting library is mockable in testing
-            presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
-            presenter.view.show()
+            try:
+                MatrixWorkspaceDisplay.supports(ws)
+                # the plot function is being injected in the presenter
+                # this is done so that the plotting library is mockable in testing
+                presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
+                presenter.view.show()
+            except ValueError:
+                try:
+                    TableWorkspaceDisplay.supports(ws)
+                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self)
+                    presenter.view.show()
+                except ValueError as x:
+                    raise x
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])
