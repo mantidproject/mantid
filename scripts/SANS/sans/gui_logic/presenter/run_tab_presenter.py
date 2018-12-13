@@ -324,14 +324,14 @@ class RunTabPresenter(object):
             if not batch_file_path:
                 return
 
+            datasearch_dirs = ConfigService["datasearch.directories"]
+            batch_file_directory, datasearch_dirs = add_dir_to_datasearch(batch_file_path, datasearch_dirs)
+            ConfigService["datasearch.directories"] = datasearch_dirs
+
             if not os.path.exists(batch_file_path):
                 raise RuntimeError(
                     "The batch file path {} does not exist. Make sure a valid batch file path"
                     " has been specified.".format(batch_file_path))
-
-            datasearch_dirs = ConfigService["datasearch.directories"]
-            batch_file_directory, datasearch_dirs = add_dir_to_datasearch(batch_file_path, datasearch_dirs)
-            ConfigService["datasearch.directories"] = datasearch_dirs
 
             self._table_model.batch_file = batch_file_path
 
