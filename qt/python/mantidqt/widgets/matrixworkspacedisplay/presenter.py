@@ -24,6 +24,15 @@ class MatrixWorkspaceDisplay(object):
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
     def __init__(self, ws, plot=None, parent=None, model=None, view=None):
+        """
+        Creates a display for the provided workspace.
+
+        :param ws: Workspace to be displayed
+        :param plot: Plotting function that will be used to plot workspaces. Passed in as parameter to allow mocking
+        :param parent: Parent of the widget
+        :param model: Model to be used by the widget. Passed in as parameter to allow mocking
+        :param view: View to be used by the widget. Passed in as parameter to allow mocking
+        """
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
         self.view = view if view else MatrixWorkspaceDisplayView(self,
@@ -36,6 +45,15 @@ class MatrixWorkspaceDisplay(object):
         self.view.set_context_menu_actions(self.view.table_y)
         self.view.set_context_menu_actions(self.view.table_x)
         self.view.set_context_menu_actions(self.view.table_e)
+
+    @classmethod
+    def supports(cls, ws):
+        """
+        Checks that the provided workspace is supported by this display.
+        :param ws: Workspace to be checked for support
+        :raises ValueError: if the workspace is not supported
+        """
+        return MatrixWorkspaceDisplayModel.supports(ws)
 
     def setup_tables(self):
         # unpacks the list of models returned from getItemModel

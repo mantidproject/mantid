@@ -28,15 +28,29 @@ class TableWorkspaceDisplayModel:
 
     ALLOWED_WORKSPACE_TYPES = [PeaksWorkspace, TableWorkspace]
 
-    def __init__(self, ws):
-        if not any(isinstance(ws, allowed_type) for allowed_type in self.ALLOWED_WORKSPACE_TYPES):
+    @classmethod
+    def supports(cls, ws):
+        """
+        Checks that the provided workspace is supported by this display.
+        :param ws: Workspace to be checked for support
+        :raises ValueError: if the workspace is not supported
+        """
+        if not any(isinstance(ws, allowed_type) for allowed_type in cls.ALLOWED_WORKSPACE_TYPES):
             raise ValueError("The workspace type is not supported: {0}".format(ws))
+
+    def __init__(self, ws):
+        """
+        Initialise the model with the workspace
+        :param ws: Workspace to be used for providing data
+        :raises ValueError: if the workspace is not supported
+        """
+        self.supports(ws)
 
         self.ws = ws
         self.ws_num_rows = self.ws.rowCount()
         self.ws_num_cols = self.ws.columnCount()
         self.ws_column_types = self.ws.columnTypes()
-        self.convert_types = self.map_from_type_name(self.ws_column_types)
+        self.conversion_functions = self.map_from_type_names(self.ws_column_types)
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
 
@@ -62,7 +76,13 @@ class TableWorkspaceDisplayModel:
         else:
             raise RuntimeError("'{}' is not a valid V3D string.".format(string))
 
-    def map_from_type_name(self, column_types):
+    def map_from_type_names(self, column_types):
+        """
+        :type column_types: list[str]
+        :param column_types: List of all columns' types
+        :raises ValueError: If the type cannot be mapped to.
+        :return: List of functions to convert the data to the correct type
+        """
         convert_types = []
         for type in column_types:
             type = type.lower()
@@ -110,5 +130,7 @@ class TableWorkspaceDisplayModel:
         return isinstance(self.ws, PeaksWorkspace)
 
     def set_cell_data(self, row, col, data):
-        data = self.convert_types[col](data)
+        # convert the data to the correct Python type,
+        # so that it can be bound to the correct C++ type by Boost
+        data = self.conversion_functions[col](data)
         self.ws.setCell(row, col, data)

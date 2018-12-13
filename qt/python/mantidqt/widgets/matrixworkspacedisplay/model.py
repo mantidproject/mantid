@@ -22,10 +22,23 @@ class MatrixWorkspaceDisplayModel(object):
 
     ALLOWED_WORKSPACE_TYPES = [MatrixWorkspace, Workspace2D, EventWorkspace]
 
-    def __init__(self, ws):
-        if not any(isinstance(ws, allowed_type) for allowed_type in self.ALLOWED_WORKSPACE_TYPES):
+    @classmethod
+    def supports(cls, ws):
+        """
+        Checks that the provided workspace is supported by this display.
+        :param ws: Workspace to be checked for support
+        :raises ValueError: if the workspace is not supported
+        """
+        if not any(isinstance(ws, allowed_type) for allowed_type in cls.ALLOWED_WORKSPACE_TYPES):
             raise ValueError("The workspace type is not supported: {0}".format(ws))
 
+    def __init__(self, ws):
+        """
+        Initialise the model with the workspace
+        :param ws: Workspace to be used for providing data
+        :raises ValueError: if the workspace is not supported
+        """
+        self.supports(ws)
         self._ws = ws
 
     def get_name(self):
