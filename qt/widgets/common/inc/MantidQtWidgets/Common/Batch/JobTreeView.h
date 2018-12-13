@@ -150,7 +150,6 @@ private:
   QModelIndexForFilteredModel
   expanded(QModelIndexForFilteredModel const &index);
   void editAt(QModelIndexForFilteredModel const &index);
-  void makeThreadSafe(QModelIndex const &index);
 
   QtTreeCursorNavigationResult
   moveNextUntilEditable(QModelIndex const &startingPoint);
@@ -171,7 +170,6 @@ private:
   QModelIndexForMainModel m_lastEdited;
   bool m_hasEditorOpen;
 };
-
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -37,7 +37,7 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
 }
 
 void JobTreeView::commitData(QWidget *editor) {
-  auto current_f = fromFilteredModel(currentIndex());
+  auto current_filtered_index = fromFilteredModel(currentIndex());
   auto cellTextBefore =
       m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
                       QTreeView::commitData(editor);
@@ -49,7 +49,7 @@ void JobTreeView::commitData(QWidget *editor) {
     m_notifyee->notifyCellTextChanged(rowLocation().atIndex(m_lastEdited),
                                       m_lastEdited.column(), cellTextBefore,
                                       cellText);
-    editAt(current_f);
+    editAt(current_filtered_index);
   }
 }
 
