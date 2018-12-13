@@ -1176,13 +1176,11 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
   loadInstrumentAlg->executeAsChildAlg();
 }
 
-//----------------- explicit instantiation and class specialization
-//--------------
+//--- explicit instantiation and class specialization -------
 
-/// Instantiate base class for LoadEMUTar
-template class DLLExport LoadEMU<Kernel::FileDescriptor>;
-/// Instantiate base class for LoadEMUHdf
-template class DLLExport LoadEMU<Kernel::NexusDescriptor>;
+// Instantiate base class for LoadEMU's
+template class LoadEMU<Kernel::FileDescriptor>;
+template class LoadEMU<Kernel::NexusDescriptor>;
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadEMUHdf::version() const { return 1; }
@@ -1290,11 +1288,11 @@ const std::vector<std::string> LoadEMUTar::seeAlso() const {
 const std::string LoadEMUTar::category() const { return "DataHandling\\ANSTO"; }
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadEMUTar::name() const { return "LoadEMUTar"; }
+const std::string LoadEMUTar::name() const { return "LoadEMU"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadEMUTar::summary() const {
-  return "Loads a merged EMU Hdf and event file into a workspace.";
+  return "Loads an EMU tar file, that contains the Hdf and event file, into a workspace.";
 }
 
 /// Return the confidence as an integer value that this algorithm can
