@@ -23,10 +23,5 @@
 # class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 #     def assertNotCalled(self, mock):
 #         self.assertEqual(0, mock.call_count)
-
-
-
-
-
 # if __name__ == '__main__':
 #     unittest.main()

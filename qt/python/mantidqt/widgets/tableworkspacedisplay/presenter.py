@@ -169,6 +169,7 @@ class TableWorkspaceDisplay(object):
             selected_columns = self._get_selected_columns()
         except ValueError:
             return
+
         stats = StatisticsOfTableWorkspace(self.model.ws, selected_columns)
         TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
 
@@ -241,12 +242,6 @@ class TableWorkspaceDisplay(object):
         except ValueError:
             return
 
-        # TODO check if the selected column for plotting is YERR and NOPE out if so
-        # better check: if the selected columns ARE NOT Y then nope out
-        # currently it silently ignores it -> maybe we want to do that so people can spam PLOT EVERYTHING
-        # if -> a column in the selection is X or YErr ABORT MISSION with a toast :cheer:
-        # it should be possible to reuse the check below as it is similar
-        # (is it really tho -> only part of it is similar)
         x_cols = list(set(selected_columns).intersection(self.model.marked_columns.as_x))
         num_x_cols = len(x_cols)
         # if there is more than 1 column marked as X in the selection

@@ -1,6 +1,3 @@
-from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
-
-
 class MarkedColumns:
     X_LABEL = "[X{}]"
     Y_LABEL = "[Y{}]"
@@ -9,8 +6,7 @@ class MarkedColumns:
     def __init__(self):
         self.as_x = []
         self.as_y = []
-        self.as_y_err = []  # type: list[ErrorColumn]
-        # self.as_x_err = []
+        self.as_y_err = []
 
     def _add(self, col_index, add_to, remove_from):
         assert all(
@@ -45,7 +41,6 @@ class MarkedColumns:
         self._add(col_index, self.as_y, [self.as_x, self.as_y_err])
 
     def add_y_err(self, err_column):
-        # TODO consider adding checks of err_column.error_for_column is already in X or YErr and then error
         if err_column.error_for_column in self.as_x:
             raise ValueError("Trying to add YErr for column marked as X.")
         elif err_column.error_for_column in self.as_y_err:

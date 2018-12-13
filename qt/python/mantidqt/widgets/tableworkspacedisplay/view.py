@@ -31,12 +31,6 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
         self.TBD = mantidqt.icons.get_icon('fa.question')
 
-        # change the default color of the rows - makes them light blue
-        # monitors and masked rows are colored in the table's custom model
-        # palette = self.palette()
-        # palette.setColor(QtGui.QPalette.Base, QtGui.QColor(128, 255, 255))
-        # self.setPalette(palette)
-
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
 
@@ -70,7 +64,6 @@ class TableWorkspaceDisplayView(QTableWidget):
         horizontalHeader = table.horizontalHeader()
         horizontalHeader.setContextMenuPolicy(Qt.CustomContextMenu)
         horizontalHeader.customContextMenuRequested.connect(self.custom_context_menu)
-        # horizontalHeader.setSectionResizeMode(QHeaderView.Fixed)
 
         verticalHeader = table.verticalHeader()
         verticalHeader.setContextMenuPolicy(Qt.ActionsContextMenu)

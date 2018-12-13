@@ -297,10 +297,9 @@ PyObject *row(ITableWorkspace &self, int row) {
 }
 
 /**
- * Access a cell and return a corresponding Python type
+ * Return the C++ types for all columns
  * @param self A reference to the TableWorkspace python object that we were
  * called on
- * @param row An integer giving the row
  */
 PyObject *columnTypes(ITableWorkspace &self) {
   int numCols = static_cast<int>(self.columnCount());

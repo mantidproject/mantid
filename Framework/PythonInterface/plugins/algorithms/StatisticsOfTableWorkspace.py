@@ -76,12 +76,6 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
             ('Maximum', collections.OrderedDict()),
             ('Mean', collections.OrderedDict()),
         ])
-        # PYTHON_ROOT = "c:/users/qbr77747/apps/miniconda3"
-        # import os
-        # import sys
-        # sys.path.append(os.path.join(PYTHON_ROOT, "lib/site-packages"))
-        # import pydevd
-        # pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
 
         for index in indices_list:
             column_name = column_names[index]

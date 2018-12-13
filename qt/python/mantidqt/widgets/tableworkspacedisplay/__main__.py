@@ -22,9 +22,6 @@ from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDispl
 import matplotlib.pyplot as plt  # noqa: F402
 
 app = QApplication([])
-DEEE_WS_MON = Load("SavedTableWorkspace.nxs")
-# DEEE_WS_MON = Load("TOPAZ_3007.peaks.nxs")
-# DEEE_WS_MON = Load("SmallPeakWS10_vals.nxs")
-# DEEE_WS_MON = Load(r"C:\Users\qbr77747\Documents\dasdas\37828_peak_table_nuclear.nxs")
-window = TableWorkspaceDisplay(DEEE_WS_MON, plt)
+ws = Load("SavedTableWorkspace.nxs")
+window = TableWorkspaceDisplay(ws, plt)
 app.exec_()
