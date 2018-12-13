@@ -7,6 +7,8 @@
 #include "PerThetaDefaultsTableValidator.h"
 #include "../../Reduction/ValidatePerThetaDefaults.h"
 
+#include <cmath>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -79,9 +81,9 @@ bool PerThetaDefaultsTableValidator::hasUniqueThetas(
   auto thetasWithinTolerance =
       [tolerance](PerThetaDefaults const &lhs,
                   PerThetaDefaults const &rhs) -> bool {
-    double const difference = std::abs(static_cast<double>(
-        lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get()));
-    return difference < tolerance;
+    double const difference =
+        lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get();
+    return std::abs(difference) < tolerance;
   };
 
   bool foundDuplicate = false;
