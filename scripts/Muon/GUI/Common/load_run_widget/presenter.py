@@ -11,7 +11,7 @@ import copy
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
@@ -98,19 +98,6 @@ class LoadRunWidgetPresenter(object):
         run_string = run_utils.run_list_to_string(new_list)
         self._view.set_run_edit_text(run_string)
 
-    def flatten_run_list(self, run_list):
-        """
-        run list might be [1,2,[3,4]] where the [3,4] are co-added
-        """
-        new_list = []
-        for run_item in run_list:
-            if isinstance(run_item, int):
-                new_list += [run_item]
-            elif isinstance(run_item, list):
-                for run in run_item:
-                    new_list += [run]
-        return new_list
-
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from user input
     # ------------------------------------------------------------------------------------------------------------------
@@ -173,32 +160,10 @@ class LoadRunWidgetPresenter(object):
         self.set_run_edit_from_list(run_list)
 
         if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
-            self.combine_loaded_runs(run_list)
+            load_utils.combine_loaded_runs(self._model, run_list)
 
         self._view.notify_loading_finished()
         self.enable_loading()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Co-adding
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def combine_loaded_runs(self, run_list):
-        return_ws = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"]
-        running_total = return_ws["OutputWorkspace"].workspace
-
-        for run in run_list[1:]:
-            ws = self._model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
-            running_total = algorithm_utils.run_Plus({
-                "LHSWorkspace": running_total,
-                "RHSWorkspace": ws,
-                "AllowDifferentNumberSpectra": False}
-            )
-            # remove the single loaded filename
-            self._model._loaded_data_store.remove_data(run=run)
-        self._model._loaded_data_store.remove_data(run=run_list[0])
-        return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
-        self._model._loaded_data_store.add_data(run=self.flatten_run_list(run_list), workspace=return_ws,
-                                                filename="Co-added")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from current run button
@@ -274,7 +239,7 @@ class LoadRunWidgetPresenter(object):
         """
         Updates list of runs by adding a run equal to 1 after to the highest run.
         """
-        run_list = self.flatten_run_list(copy.copy(self.runs))
+        run_list = load_utils.flatten_run_list(copy.copy(self.runs))
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
@@ -287,7 +252,7 @@ class LoadRunWidgetPresenter(object):
         """
         Updates list of runs by adding a run equal to 1 before to the lowest run.
         """
-        run_list = self.flatten_run_list(copy.copy(self.runs))
+        run_list = load_utils.flatten_run_list(copy.copy(self.runs))
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:

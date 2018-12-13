@@ -15,6 +15,7 @@ from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 
 class LoadUtils(object):
@@ -252,3 +253,36 @@ def get_table_workspace_names_from_ADS():
     names = api.AnalysisDataService.Instance().getObjectNames()
     table_names = [name for name in names if isinstance(mtd[name], ITableWorkspace)]
     return table_names
+
+
+def combine_loaded_runs(model, run_list):
+    return_ws = model._loaded_data_store.get_data(run=run_list[0])["workspace"]
+    running_total = return_ws["OutputWorkspace"].workspace
+
+    for run in run_list[1:]:
+        ws = model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
+        running_total = algorithm_utils.run_Plus({
+            "LHSWorkspace": running_total,
+            "RHSWorkspace": ws,
+            "AllowDifferentNumberSpectra": False}
+        )
+        # remove the single loaded filename
+        model._loaded_data_store.remove_data(run=run)
+    model._loaded_data_store.remove_data(run=run_list[0])
+    return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
+    model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
+                                            filename="Co-added")
+
+
+def flatten_run_list(run_list):
+    """
+    run list might be [1,2,[3,4]] where the [3,4] are co-added
+    """
+    new_list = []
+    for run_item in run_list:
+        if isinstance(run_item, int):
+            new_list += [run_item]
+        elif isinstance(run_item, list):
+            for run in run_item:
+                new_list += [run]
+    return new_list
