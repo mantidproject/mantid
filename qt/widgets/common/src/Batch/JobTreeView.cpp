@@ -40,7 +40,7 @@ void JobTreeView::commitData(QWidget *editor) {
   auto current_filtered_index = fromFilteredModel(currentIndex());
   auto cellTextBefore =
       m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
-                      QTreeView::commitData(editor);
+  QTreeView::commitData(editor);
   auto cellText =
       m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
   if (cellText != cellTextBefore) {
