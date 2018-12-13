@@ -118,8 +118,8 @@ void PropertyHandler::init() {
         throw std::runtime_error(
             "IFunction expected but func function of another type");
       }
-      PropertyHandler *h = new PropertyHandler(f, m_cf, m_browser);
-      f->setHandler(h);
+      auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
+      f->setHandler(std::move(h));
     }
   }
 
@@ -417,10 +417,10 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     return nullptr;
   }
 
-  PropertyHandler *h = new PropertyHandler(f, m_cf, m_browser);
-  f->setHandler(h);
+  auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
   h->setAttribute("StartX", m_browser->startX());
   h->setAttribute("EndX", m_browser->endX());
+  f->setHandler(std::move(h));
 
   // enable the change slots
   m_browser->m_changeSlotsEnabled = true;
@@ -431,9 +431,10 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     m_browser->setDefaultBackgroundType(f->name());
   }
   m_browser->setFocus();
-  m_browser->setCurrentFunction(h);
+  auto return_ptr = static_cast<PropertyHandler *>(f->getHandler());
+  m_browser->setCurrentFunction(return_ptr);
 
-  return h;
+  return return_ptr;
 }
 
 // Removes handled function from its parent function and
@@ -1038,10 +1039,11 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     emit m_browser->removePlotSignal(this);
 
     Mantid::API::IFunction_sptr f_old = function();
-    PropertyHandler *h = new PropertyHandler(f, m_parent, m_browser, m_item);
+    std::unique_ptr<PropertyHandler> h =
+        std::make_unique<PropertyHandler>(f, m_parent, m_browser, m_item);
     if (this == m_browser->m_autoBackground) {
       if (dynamic_cast<Mantid::API::IBackgroundFunction *>(f.get())) {
-        m_browser->m_autoBackground = h;
+        m_browser->m_autoBackground = h.get();
         h->fit();
 
       } else {
@@ -1051,12 +1053,12 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     if (m_parent) {
       m_parent->replaceFunctionPtr(f_old, f);
     }
-    f->setHandler(h);
     // calculate the baseline
     if (h->pfun()) {
       h->setCentre(h->centre()); // this sets m_ci
       h->calcBase();
     }
+    f->setHandler(std::move(h));
     // at this point this handler does not exist any more. only return is
     // possible
     return f;
