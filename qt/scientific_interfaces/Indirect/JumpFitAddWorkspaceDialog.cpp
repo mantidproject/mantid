@@ -23,6 +23,9 @@ JumpFitAddWorkspaceDialog::JumpFitAddWorkspaceDialog(QWidget *parent)
   connect(m_uiForm.cbParameterType,
           SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitParameterTypeChanged(const QString &)));
+  connect(m_uiForm.buttonBox, SIGNAL(accepted()), this,
+          SIGNAL(addDialogData()));
+  connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SIGNAL(cancelDialog()));
 }
 
 std::string JumpFitAddWorkspaceDialog::workspaceName() const {
@@ -76,6 +79,10 @@ void JumpFitAddWorkspaceDialog::emitWorkspaceChanged(const QString &name) {
 
 void JumpFitAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
   emit parameterTypeChanged(this, type.toStdString());
+}
+
+bool JumpFitAddWorkspaceDialog::isKeepOpenChecked() const {
+  return m_uiForm.ckKeepOpen->isChecked();
 }
 
 } // namespace IDA

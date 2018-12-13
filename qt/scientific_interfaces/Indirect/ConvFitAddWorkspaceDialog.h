@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_CONVFITADDWORKSPACEDIALOG_H_
 
 #include "IAddWorkspaceDialog.h"
+#include "IndirectFitDataPresenter.h"
 #include "ui_ConvFitAddWorkspaceDialog.h"
 
 namespace MantidQt {
@@ -27,6 +28,8 @@ public:
   void setFBSuffices(const QStringList &suffices) override;
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
+
+  bool isKeepOpenChecked() const override;
 
 private slots:
   void selectAllSpectra(int state);

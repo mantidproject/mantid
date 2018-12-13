@@ -80,6 +80,9 @@ ConvFitAddWorkspaceDialog::ConvFitAddWorkspaceDialog(QWidget *parent)
           SLOT(workspaceChanged(const QString &)));
   connect(m_uiForm.ckAllSpectra, SIGNAL(stateChanged(int)), this,
           SLOT(selectAllSpectra(int)));
+  connect(m_uiForm.buttonBox, SIGNAL(accepted()), this,
+          SIGNAL(addDialogData()));
+  connect(m_uiForm.buttonBox, SIGNAL(rejected()), this, SIGNAL(cancelDialog()));
 }
 
 std::string ConvFitAddWorkspaceDialog::workspaceName() const {
@@ -137,6 +140,10 @@ void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
 
 void ConvFitAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
   m_uiForm.ckAllSpectra->setEnabled(doEnable);
+}
+
+bool ConvFitAddWorkspaceDialog::isKeepOpenChecked() const {
+  return m_uiForm.ckKeepOpen->isChecked();
 }
 
 } // namespace IDA

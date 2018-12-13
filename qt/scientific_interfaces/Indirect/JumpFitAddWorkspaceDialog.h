@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_JUMPFITADDWORKSPACEDIALOG_H_
 
 #include "IAddWorkspaceDialog.h"
+#include "IndirectFitDataPresenter.h"
 #include "ui_JumpFitAddWorkspaceDialog.h"
 
 namespace MantidQt {
@@ -30,6 +31,8 @@ public:
 
   void enableParameterSelection();
   void disableParameterSelection();
+
+  bool isKeepOpenChecked() const override;
 
 public slots:
   void emitWorkspaceChanged(const QString &name);

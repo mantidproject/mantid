@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTADDWORKSPACEDIALOG_H_
 
 #include "IAddWorkspaceDialog.h"
+#include "IndirectFitDataPresenter.h"
 #include "ui_IndirectAddWorkspaceDialog.h"
 
 namespace MantidQt {
@@ -24,6 +25,8 @@ public:
 
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
+
+  bool isKeepOpenChecked() const override;
 
 private slots:
   void selectAllSpectra(int state);

@@ -147,22 +147,33 @@ IndirectFitDataPresenter::validate(UserInputValidator &validator) {
 }
 
 void IndirectFitDataPresenter::showAddWorkspaceDialog() {
-  const auto dialog = getAddWorkspaceDialog(m_view->parentWidget());
-  dialog->setWSSuffices(m_view->getSampleWSSuffices());
-  dialog->setFBSuffices(m_view->getSampleFBSuffices());
-  dialogExecuted(dialog.get(),
-                 static_cast<QDialog::DialogCode>(dialog->exec()));
-}
-
-void IndirectFitDataPresenter::dialogExecuted(IAddWorkspaceDialog const *dialog,
-                                              QDialog::DialogCode result) {
-  if (result == QDialog::Accepted)
-    addData(dialog);
+  m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
+  m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
+  m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
+  m_addWorkspaceDialog->show();
+  connect(m_addWorkspaceDialog.get(), SIGNAL(addDialogData()), this,
+          SLOT(addData()));
+  connect(m_addWorkspaceDialog.get(), SIGNAL(cancelDialog()), this,
+          SLOT(cancelDialog()));
 }
 
 std::unique_ptr<IAddWorkspaceDialog>
 IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   return Mantid::Kernel::make_unique<AddWorkspaceDialog>(parent);
+}
+
+void IndirectFitDataPresenter::addData() {
+  addData(m_addWorkspaceDialog.get());
+  if (!m_addWorkspaceDialog->isKeepOpenChecked())
+    m_addWorkspaceDialog->close();
+}
+
+void IndirectFitDataPresenter::cancelDialog() {
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addDialogData()), this,
+             SLOT(addData()));
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(cancelDialog()), this,
+             SLOT(cancelDialog()));
+  m_addWorkspaceDialog->close();
 }
 
 void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
