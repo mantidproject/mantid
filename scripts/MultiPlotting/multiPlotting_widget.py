@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets, QtCore
-
+from copy import deepcopy
 from MultiPlotting.subplot.subPlot import subPlot
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
@@ -27,7 +27,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
         # add some dummy plot
         self.plots = subPlot(self._context)
-        self.plots.connect_quick_edit_signal(self.update_quick_edit)
+        self.plots.connect_quick_edit_signal(self._update_quick_edit)
 
         # create GUI layout
         splitter.addWidget(self.plots)
@@ -35,6 +35,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         layout.addWidget(splitter)
         self.setLayout(layout)
 
+    """ plotting """
     def add_subplot(self, name,code):
         self.plots.add_subplot(name,code)
         self.quickEdit.add_subplot(name)
@@ -42,30 +43,34 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def plot(self,subplotName,ws,specNum=1):
         self.plots.plot(subplotName, ws,specNum=specNum)
 
+    # gets inital values for quickEdit
     def set_all_values(self):
         names = self.quickEdit.get_selection()
-        xrange = self._context.subplots[names[0]].xbounds
-        yrange = self._context.subplots[names[0]].ybounds
+        xrange = list(self._context.subplots[names[0]].xbounds)
+        yrange = list(self._context.subplots[names[0]].ybounds)
         for name in names:
             xbounds = self._context.subplots[name].xbounds
             ybounds = self._context.subplots[name].ybounds
             if xrange[0] > xbounds[0]:
-	           xrange[0] = xbounds[0]
-            if xrange[1] > xbounds[1]:
-	           xrange[1] = xbounds[1]
+	           xrange[0] = deepcopy(xbounds[0])
+            if xrange[1] < xbounds[1]:
+	           xrange[1] = deepcopy(xbounds[1])
             if yrange[0] > ybounds[0]:
-	           yrange[0] = ybounds[0]
-            if yrange[1] > ybounds[1]:
-	           yrange[1] = ybounds[1]
+               yrange[0] = deepcopy(ybounds[0])
+            if yrange[1] < ybounds[1]:
+               yrange[1] = deepcopy(ybounds[1])
+
         self._context.set("xBounds",xrange)
         self._context.set("yBounds",yrange)
+        self._x_range_changed(xrange)
+        self._y_range_changed(yrange)
         # get tick boxes correct
         errors = self._check_all_errors(names) 
         self.quickEdit.set_errors(errors)
         self._change_errors(errors,names)
 
-
-    def update_quick_edit(self,subplotName):
+    """ update GUI """
+    def _update_quick_edit(self,subplotName):
         names = self.quickEdit.get_selection()
         xrange = self._context.subplots[subplotName].xbounds
         yrange = self._context.subplots[subplotName].ybounds
@@ -105,12 +110,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
            self._x_range_changed(xrange)
            self._y_range_changed(yrange)
 
-    def _check_all_errors(self, names):
-       for name in names:
-           if self._context.subplots[name].errors is False:
-              return False
-       return True
-
     def _autoscale_changed(self,state):
         names = self.quickEdit.get_selection()
         self.plots.set_y_autoscale(names,True)
@@ -136,6 +135,11 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.plots.set_plot_y_range(names, range)
         self.quickEdit.set_plot_y_range(range)
 
+    def _check_all_errors(self, names):
+       for name in names:
+           if self._context.subplots[name].errors is False:
+              return False
+       return True
 
 
 

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 from qtpy import QtWidgets, QtCore
-
+import qtpy
 from MultiPlotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
@@ -18,8 +18,12 @@ class QuickEditView(QtWidgets.QWidget):
 
         button_layout = QtWidgets.QHBoxLayout()
         self.plot_selector = QtWidgets.QComboBox()
-        self.plot_selector.addItem("All")
+        self.plot_selector.setEditable(True)
+        self.plot_selector.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
+        if qtpy.PYQT5:
+            self.plot_selector.completer().setFilterMode(QtCore.Qt.MatchContains)
 
+        self.plot_selector.addItem("All")
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
 
         self.autoscale = QtWidgets.QPushButton("Autoscale y")

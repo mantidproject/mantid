@@ -21,7 +21,7 @@ class QuickEditWidget(object):
     @property
     def widget(self):
         return self._presenter.widget
-
+    """ connect statements"""
     def connect_autoscale_changed(self,slot):
         self._presenter.connect_autoscale_changed(slot)
 
@@ -36,14 +36,7 @@ class QuickEditWidget(object):
 
     def connect_plot_selection(self,slot):
         self._presenter.connect_plot_selection(slot)
-
-    def loadFromContext(self):
-        model = self._presenter.model
-        sub_context = model.getSubContext()
-        # update the view with the subcontext
-        view = self._presenter.widget
-        view.loadFromContext(sub_context)
-
+    # add subplot
     def add_subplot(self,name):
         self._presenter.add_subplot(name)
 
@@ -62,6 +55,3 @@ class QuickEditWidget(object):
     def set_errors(self,state):
         self._presenter.set_errors(state)
 
-    def get_y_bounds(self):
-        view = self._presenter.widget
-        return view.get_y_bounds()
