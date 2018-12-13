@@ -58,7 +58,7 @@ set ( SRC_FILES
 	src/SaveLauenorm.cpp
 	src/SelectCellOfType.cpp
 	src/SelectCellWithForm.cpp
-    src/SetCrystalLocation.cpp
+	src/SetCrystalLocation.cpp
 	src/SetGoniometer.cpp
 	src/SetSpecialCoordinates.cpp
 	src/SetUB.cpp
@@ -201,7 +201,7 @@ set ( TEST_FILES
 	SaveLauenormTest.h
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h
-    SetCrystalLocation.h
+	SetCrystalLocation.h
 	SetGoniometerTest.h
 	SetSpecialCoordinatesTest.h
 	SetUBTest.h
