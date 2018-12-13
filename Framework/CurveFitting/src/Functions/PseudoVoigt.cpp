@@ -145,6 +145,7 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
 /// override because setParameter(size_t i ...) is overriden
 void PseudoVoigt::setParameter(const std::string &name, const double &value,
                                bool explicitlySet) {
+  std::cout << "[PV] Set " << name << " as " << value << "\n";
   API::IPeakFunction::setParameter(name, value, explicitlySet);
 }
 
@@ -169,7 +170,7 @@ void PseudoVoigt::setParameter(size_t i, const double &value,
                                bool explicitlySet) {
   API::IPeakFunction::setParameter(i, value, explicitlySet);
 
-  std::cout << "Set " << i << "-th parameter with value " << value << "\n";
+  std::cout << "[PV] Set " << i << "-th parameter with value " << value << "\n";
 
   // explicitly set means that there is a chance that some parameter shall be
   // re-calculated
@@ -323,13 +324,14 @@ void PseudoVoigt::setHeight(const double h) {
   // set height
   m_height = h;
   update_set_history(2);
+  std::cout << "PV: set height = " << m_height << "\n";
   estimate_parameter_value();
 }
 
 /** set FWHM
  * @param w
  */
-void PseudoVoigt::setFwhm(const double w) { setParameter("FWHM", w); }
+void PseudoVoigt::setFwhm(const double w) { setParameter("FWHM", w, true); }
 
 /** a_G = 2/gamma * sqrt(ln2/pi)
  * @param gamma :: FWHM
