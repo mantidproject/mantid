@@ -10,20 +10,17 @@ import six
 from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common import mock_widget
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 import unittest
 from PyQt4 import QtGui
-from PyQt4.QtGui import QApplication
 
 if sys.version_info.major == 3:
     from unittest import mock
 else:
     import mock
-
-# global QApplication (get errors if > 1 instance in the code)
-QT_APP = QApplication([])
 
 
 class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
@@ -39,9 +36,10 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QT_APP.processEvents()
+            self._qapp.processEvents()
 
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
@@ -140,11 +138,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_the_data_are_returned_to_previous_state(self):
-        def load_failure():
-            raise ValueError("Error text")
 
         self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=load_failure)
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
@@ -157,11 +153,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
-        def load_failure():
-            raise ValueError("Error text")
 
         self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=load_failure)
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)

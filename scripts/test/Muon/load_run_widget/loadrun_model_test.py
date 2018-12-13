@@ -91,6 +91,7 @@ class LoadRunWidgetModelTest(unittest.TestCase):
 
         model.loadData(files)
         model.execute()
+        self.assertEqual(len(model.loaded_runs), 3)
         model.clear_loaded_data()
         self.assertEqual(model.loaded_workspaces, [])
         self.assertEqual(model.loaded_filenames, [])
