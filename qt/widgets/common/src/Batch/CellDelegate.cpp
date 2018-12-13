@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include <QPainter>
+#include <QKeyEvent>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -42,6 +43,20 @@ void CellDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
   painter->setPen(pen);
   painter->drawRect(option.rect.adjusted(1, 1, -1, -1));
   painter->restore();
+}
+
+bool CellDelegate::eventFilter(QObject *object, QEvent *event) {
+  QWidget *editor = qobject_cast<QWidget*>(object);
+  if (!editor)
+    return false;
+  if (event->type() == QEvent::KeyPress) {
+    QKeyEvent *keyPress = static_cast<QKeyEvent *>(event);
+    if (keyPress->key() == Qt::Key_Return) {
+      auto current_filtered_index = m_view.currentIndex();
+      emit commitData(editor);
+    }
+  }
+  return false;
 }
 } // namespace Batch
 } // namespace MantidWidgets

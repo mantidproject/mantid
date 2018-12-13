@@ -37,9 +37,10 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
 }
 
 void JobTreeView::commitData(QWidget *editor) {
+  auto current_f = fromFilteredModel(currentIndex());
   auto cellTextBefore =
       m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
-  QTreeView::commitData(editor);
+                      QTreeView::commitData(editor);
   auto cellText =
       m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
   if (cellText != cellTextBefore) {
@@ -48,6 +49,7 @@ void JobTreeView::commitData(QWidget *editor) {
     m_notifyee->notifyCellTextChanged(rowLocation().atIndex(m_lastEdited),
                                       m_lastEdited.column(), cellTextBefore,
                                       cellText);
+    editAt(current_f);
   }
 }
 
@@ -453,22 +455,19 @@ void JobTreeView::appendAndEditAtChildRow() {
   resetFilter();
   auto const parent = mapToMainModel(fromFilteredModel(currentIndex()));
   auto const child = m_adaptedMainModel.appendEmptyChildRow(parent);
-  editAt(expanded(mapToFilteredModel(child)));
   m_notifyee->notifyRowInserted(rowLocation().atIndex(child));
+  editAt(expanded(mapToFilteredModel(child)));
 }
 
 void JobTreeView::appendAndEditAtRowBelow() {
   auto current = currentIndex();
-  try {
   auto const below = findOrMakeCellBelow(fromFilteredModel(current));
   auto index = below.first;
   auto isNew = below.second;
 
-  editAt(index);
   if (isNew)
     m_notifyee->notifyRowInserted(rowLocation().atIndex(mapToMainModel(index)));
-  } catch (std::runtime_error e) {
-  }
+  editAt(index);
 }
 
 void JobTreeView::editAtRowAbove() {
@@ -483,30 +482,40 @@ void JobTreeView::enableFiltering() {
 }
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
-  if (event->key() == Qt::Key_Return) {
-    if (event->modifiers() & Qt::ControlModifier) {
-      appendAndEditAtChildRow();
-    } else if (event->modifiers() & Qt::ShiftModifier) {
-      editAtRowAbove();
-    } else {
-      appendAndEditAtRowBelow();
+  switch (event->key()) {
+    case Qt::Key_Return: {
+      if (event->modifiers() & Qt::ControlModifier) {
+        appendAndEditAtChildRow();
+      } else if (event->modifiers() & Qt::ShiftModifier) {
+        editAtRowAbove();
+      } else {
+        appendAndEditAtRowBelow();
+      }
+      break;
     }
-  } else if (event->key() == Qt::Key_Delete) {
-    removeSelectedRequested();
-  } else if (event->key() == Qt::Key_C) {
-    if (event->modifiers() & Qt::ControlModifier) {
-      copySelectedRequested();
+    case Qt::Key_Delete:
+      removeSelectedRequested();
+      break;
+    case Qt::Key_C: {
+      if (event->modifiers() & Qt::ControlModifier) {
+        copySelectedRequested();
+      }
+      break;
     }
-  } else if (event->key() == Qt::Key_V) {
-    if (event->modifiers() & Qt::ControlModifier) {
-      pasteSelectedRequested();
+    case Qt::Key_V: {
+      if (event->modifiers() & Qt::ControlModifier) {
+        pasteSelectedRequested();
+      }
+      break;
     }
-  } else if (event->key() == Qt::Key_X) {
-    if (event->modifiers() & Qt::ControlModifier) {
-      cutSelectedRequested();
+    case Qt::Key_X: {
+      if (event->modifiers() & Qt::ControlModifier) {
+        cutSelectedRequested();
+      }
+      break;
     }
-  } else {
-    QTreeView::keyPressEvent(event);
+    default:
+      QTreeView::keyPressEvent(event);
   }
 }
 

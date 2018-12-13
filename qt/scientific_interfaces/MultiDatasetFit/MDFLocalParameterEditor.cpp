@@ -201,6 +201,9 @@ void LocalParameterEditor::setToLog() { emit setValueToLog(m_index); }
 bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn) {
   if (evn->type() == QEvent::KeyPress) {
     auto keyEvent = static_cast<QKeyEvent *>(evn);
+    if (keyEvent->key() == Qt::Key_Return) {
+      return true;
+    }
     if (keyEvent->key() == Qt::Key_F &&
         keyEvent->modifiers() == Qt::ControlModifier && m_tie.isEmpty()) {
       fixParameter();
