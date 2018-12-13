@@ -39,7 +39,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm sets the sample location of the "
-           "input peaks workspace.";
+           "input event workspace.";
   }
 
   int version() const override { return 1; };
