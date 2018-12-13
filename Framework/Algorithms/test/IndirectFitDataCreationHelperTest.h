@@ -89,15 +89,15 @@ public:
 
   void
   test_that_createWorkspaceWithTextAxis_returns_a_workspace_with_the_number_of_spectra_specified() {
-    auto const workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
+    auto const workspace = createWorkspaceWithTextAxis(3, getTextAxisLabels());
     TS_ASSERT(workspace);
-    TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 3);
   }
 
   void
   test_that_createWorkspaceWithTextAxis_returns_a_workspace_with_the_text_axis_labels_specified() {
     auto const labels = getTextAxisLabels();
-    auto const workspace = createWorkspaceWithTextAxis(6, labels);
+    auto const workspace = createWorkspaceWithTextAxis(3, labels);
 
     auto const yAxis = workspace->getAxis(1);
 
