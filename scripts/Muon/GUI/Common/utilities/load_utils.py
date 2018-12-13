@@ -254,6 +254,7 @@ def get_table_workspace_names_from_ADS():
     table_names = [name for name in names if isinstance(mtd[name], ITableWorkspace)]
     return table_names
 
+
 # ------------------------------------------------------------------------------------------------------------------
 # Co-adding
 # ------------------------------------------------------------------------------------------------------------------
@@ -287,4 +288,4 @@ def combine_loaded_runs(model, run_list):
     model._loaded_data_store.remove_data(run=run_list[0])
     return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
-                                            filename="Co-added")
+                                      filename="Co-added")

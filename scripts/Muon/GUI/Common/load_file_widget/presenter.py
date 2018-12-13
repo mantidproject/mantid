@@ -11,7 +11,6 @@ import copy
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class BrowseFileWidgetPresenter(object):
