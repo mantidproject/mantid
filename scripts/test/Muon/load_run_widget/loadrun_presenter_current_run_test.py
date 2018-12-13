@@ -8,6 +8,7 @@ import sys
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common import mock_widget
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 import Muon.GUI.Common.utilities.muon_file_utils as fileUtils
@@ -21,9 +22,6 @@ else:
 
 from PyQt4 import QtGui
 from PyQt4.QtGui import QApplication
-
-# global QApplication (get errors if > 1 instance in the code)
-QT_APP = QApplication([])
 
 
 class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
@@ -42,9 +40,10 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QT_APP.processEvents()
+            self._qapp.processEvents()
 
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 

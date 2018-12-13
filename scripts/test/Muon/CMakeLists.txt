@@ -15,6 +15,8 @@ set ( TEST_PY_FILES
    load_file_widget/loadfile_presenter_single_file_test.py
    load_file_widget/loadfile_presenter_multiple_file_test.py
    load_file_widget/loadfile_view_test.py
+   load_run_widget/loadrun_presenter_increment_decrement_test.py
+   load_run_widget/loadrun_view_test.py
    LoadWidgetModel_test.py
    LoadWidgetPresenter_test.py
    LoadWidgetView_test.py

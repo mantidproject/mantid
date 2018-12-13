@@ -43,7 +43,6 @@ class LoadRunWidgetModel(object):
         self._loaded_data_store = loaded_data_store
         self._current_run = None
 
-    # TODO : remove the need for this function
     def remove_previous_data(self):
         self._loaded_data_store.remove_last_added_data()
 

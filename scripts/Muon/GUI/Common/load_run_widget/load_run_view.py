@@ -76,25 +76,6 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
         self.horizontal_layout.setMargin(0)
 
-    def set_item_sizes(self):
-        button_height = self.loadCurrentRunButton.height()
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHeightForWidth(True)
-
-        self.loadCurrentRunButton.setMinimumSize(QtCore.QSize(0, button_height))
-        self.loadCurrentRunButton.setSizePolicy(sizePolicy)
-
-        self.incrementRunButton.setMinimumSize(QtCore.QSize(button_height, button_height))
-        self.incrementRunButton.setSizePolicy(sizePolicy)
-
-        self.decrementRunButton.setMinimumSize(QtCore.QSize(button_height, button_height))
-        self.decrementRunButton.setSizePolicy(sizePolicy)
-
-        self.run_edit.setMinimumSize(QtCore.QSize(50, button_height))
-        self.run_edit.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed))
-
-        self.instrumentLabel.setSizePolicy(sizePolicy)
-
     def getLayout(self):
         return self.horizontalLayout
 
@@ -144,7 +125,7 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.instrument_label.setText(instrument)
 
     def set_run_edit_regex(self):
-        # "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
+        # The regular expression string here is "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
         regex = QtCore.QRegExp(run_utils.run_string_regex)
         validator = QtGui.QRegExpValidator(regex)
         self.run_edit.setValidator(validator)
