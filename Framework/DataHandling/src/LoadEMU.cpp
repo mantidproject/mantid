@@ -1,5 +1,4 @@
 
-#include "MantidDataHandling/LoadEMU.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -7,6 +6,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadANSTOEventFile.h"
+#include "MantidDataHandling/LoadEMU.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -35,7 +35,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-using namespace Kernel;
+// using LoadEMUHdf = LoadEMU<Kernel::NexusDescriptor>;
+// using LoadEMUTar = LoadEMU<Kernel::FileDescriptor>;
 
 namespace {
 
@@ -539,107 +540,37 @@ void loadEvents(API::Progress &prog, const char *progMsg,
 
 } // namespace EMU
 
-using LoadEMUHdf = LoadEMU<Kernel::NexusDescriptor>;
-using LoadEMUTar = LoadEMU<Kernel::FileDescriptor>;
+/// Algorithm's version for identification. @see Algorithm::version
+template <typename FD> int LoadEMU<FD>::version() const { return 1; }
 
-// register the algorithm into the AlgorithmFactory
-DECLARE_FILELOADER_ALGORITHM(LoadEMUTar)
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEMUHdf)
-
-template <> const std::string LoadEMU<Kernel::FileDescriptor>::name() const {
-  return "LoadEMUTar";
+/// Similar algorithms. @see Algorithm::seeAlso
+template <typename FD>
+const std::vector<std::string> LoadEMU<FD>::seeAlso() const {
+  return {"Load", "LoadQKK"};
+}
+/// Algorithm's category for identification. @see Algorithm::category
+template <typename FD> const std::string LoadEMU<FD>::category() const {
+  return "DataHandling\\ANSTO";
 }
 
-template <> const std::string LoadEMU<Kernel::FileDescriptor>::summary() const {
-  return "Loads a merged EMU Hdf and event file into a workspace.";
+template <typename FD> const std::string LoadEMU<FD>::name() const {
+  throw std::runtime_error("unexpected call to template instance");
+}
+template <typename FD> const std::string LoadEMU<FD>::summary() const {
+  throw std::runtime_error("unexpected call to template instance");
+}
+template <typename FD> int LoadEMU<FD>::confidence(FD &descriptor) const {
+  throw std::runtime_error("unexpected call to template instance");
+}
+template <typename FD> void LoadEMU<FD>::init() {
+  throw std::runtime_error("unexpected call to template instance");
+}
+template <typename FD> void LoadEMU<FD>::exec() {
+  throw std::runtime_error("unexpected call to template instance");
 }
 
-template <> const std::string LoadEMU<Kernel::NexusDescriptor>::name() const {
-  return "LoadEMUHdf";
-}
-
-template <>
-const std::string LoadEMU<Kernel::NexusDescriptor>::summary() const {
-  return "Loads an EMU Hdf and linked event file into a workspace.";
-}
-
-/**
- * Return the confidence value that this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
-template <>
-int LoadEMU<Kernel::FileDescriptor>::confidence(
-    Kernel::FileDescriptor &descriptor) const {
-  if (descriptor.extension() != ".tar")
-    return 0;
-
-  ANSTO::Tar::File file(descriptor.filename());
-  if (!file.good())
-    return 0;
-
-  size_t hdfFiles = 0;
-  size_t binFiles = 0;
-  const std::vector<std::string> &subFiles = file.files();
-  for (const auto &subFile : subFiles) {
-    auto len = subFile.length();
-    if ((len > 4) &&
-        (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((subFile.rfind(".hdf") == len - 4) &&
-          (subFile.compare(0, 3, "EMU") == 0))
-        hdfFiles++;
-      else if (subFile.rfind(".bin") == len - 4)
-        binFiles++;
-    }
-  }
-
-  return (hdfFiles == 1) && (binFiles == 1) ? 50 : 0;
-}
-
-/**
- * Return the confidence value that this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
-template <>
-int LoadEMU<Kernel::NexusDescriptor>::confidence(
-    Kernel::NexusDescriptor &descriptor) const {
-  if (descriptor.extension() != ".hdf")
-    return 0;
-
-  if (descriptor.pathExists("/entry1/site_name") &&
-      descriptor.pathExists("/entry1/instrument/doppler/ctrl/velocity") &&
-      descriptor.pathExists("/entry1/instrument/doppler/ctrl/amplitude") &&
-      descriptor.pathExists("/entry1/instrument/detector/daq_dirname") &&
-      descriptor.pathExists("/entry1/instrument/detector/dataset_number") &&
-      descriptor.pathExists("/entry1/data/hmm_total_t_ds0") &&
-      descriptor.pathExists("/entry1/data/hmm_total_t_ds1") &&
-      descriptor.pathExists("/entry1/data/hmm_total_xt_ds0") &&
-      descriptor.pathExists("/entry1/data/hmm_total_xt_ds1")) {
-    return 80;
-  } else {
-    return 0;
-  }
-}
-
-/**
- * Initialise the algorithm. Declare properties which can be set before
- * execution (input) and read from after the execution (output).
- */
-template <> void LoadEMU<Kernel::FileDescriptor>::init() { init(false); }
-
-/**
- * Initialise the algorithm. Declare properties which can be set before
- * execution (input) and read from after the execution (output).
- */
-template <> void LoadEMU<Kernel::NexusDescriptor>::init() { init(true); }
-
-/**
- * Declares the properties for the two loader variants. Adds the path option
- * path to the binary file if it is the hdf loader.
- */
+/// Declares the properties for the two loader variants. Adds the path option
+/// to the binary file and dataset set index if it is the \p hdfLoader.
 template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
 
   // Specify file extensions which can be associated with a specific file.
@@ -711,9 +642,7 @@ template <typename FD> void LoadEMU<FD>::init(bool hdfLoader) {
   Base::setPropertyGroup(FilterByTimeStopStr, grpOptional);
 }
 
-/**
- * Creates an event workspace and sets the title.
- */
+/// Creates an event workspace and sets the \p title.
 template <typename FD>
 void LoadEMU<FD>::createWorkspace(const std::string &title) {
 
@@ -730,125 +659,14 @@ void LoadEMU<FD>::createWorkspace(const std::string &title) {
   m_localWorkspace->setTitle(title);
 }
 
-/**
- * Execute the algorithm. Extracts the hdf and event file from the tar
- * and invokes the invokes the common exec() function that works with
- * the two files.
- */
-template <> void LoadEMU<Kernel::FileDescriptor>::exec() {
-  /**
-   * Opens the tar and extracts the hdf and event data to temporary files
-   */
-  std::string filename = Base::getPropertyValue(FilenameStr);
-  ANSTO::Tar::File tarFile(filename);
-  if (!tarFile.good())
-    throw std::invalid_argument("invalid EMU tar file");
-
-  // dataset selection not supported in tar version - order is not guaranteed
-  m_datasetIndex = 0;
-
-  // lambda functions to find the first file of extension and to extract
-  // the file
-  const std::vector<std::string> &files = tarFile.files();
-  auto selectFile = [&](const std::string &ext) {
-    auto itf = std::find_if(files.cbegin(), files.cend(),
-                            [&ext](const std::string &file) {
-                              return file.rfind(ext) == file.length() - 4;
-                            });
-    if (itf == files.end())
-      throw std::runtime_error("missing tar file data");
-    else
-      tarFile.select(itf->c_str());
-  };
-  auto extractFile = [&](Poco::TemporaryFile &tfile) {
-    boost::shared_ptr<FILE> handle(fopen(tfile.path().c_str(), "wb"), fclose);
-    if (handle) {
-      // copy content
-      char buffer[4096];
-      size_t bytesRead;
-      while (0 != (bytesRead = tarFile.read(buffer, sizeof(buffer))))
-        fwrite(buffer, bytesRead, 1, handle.get());
-      handle.reset();
-    }
-  };
-
-  // extract hdf file into tmp file
-  selectFile(".hdf");
-  Poco::TemporaryFile hdfFile;
-  extractFile(hdfFile);
-
-  // extract the event file
-  selectFile(".bin");
-  Poco::TemporaryFile eventFile;
-  extractFile(eventFile);
-
-  // call the common loader
-  exec(hdfFile.path(), eventFile.path());
-}
-
-/**
- * Execute the algorithm. Establishes the filepath to the event file
- * from the HDF link and the path provided and invokes the common
- * exec() function that works with the two files.
- */
-template <> void LoadEMU<Kernel::NexusDescriptor>::exec() {
-
-  namespace fs = boost::filesystem;
-
-  // Open the hdf file and find the dirname and dataset number
-  std::string hdfFile = Base::getPropertyValue(FilenameStr);
-  std::string evtPath = Base::getPropertyValue(PathToBinaryStr);
-  if (evtPath.empty())
-    evtPath = "./";
-
-  // if relative ./ or ../ then append to the directory for the hdf file
-  if (evtPath.rfind("./") == 0 || evtPath.rfind("../") == 0) {
-    fs::path hp = hdfFile;
-    evtPath = fs::canonical(evtPath, hp.parent_path()).generic_string();
-  }
-
-  // dataset index to be loaded
-  m_datasetIndex = Base::getProperty(SelectDatasetStr);
-
-  // if path provided build the file path
-  if (fs::is_directory(evtPath)) {
-    NeXus::NXRoot root(hdfFile);
-    NeXus::NXEntry entry = root.openFirstEntry();
-    auto eventDir = GetNeXusValue<std::string>(
-        entry, "instrument/detector/daq_dirname", "./", 0);
-    auto dataset = GetNeXusValue<int32_t>(
-        entry, "instrument/detector/dataset_number", 0, m_datasetIndex);
-
-    // build the path to the event file as if a relative or absolute
-    // path is passed:
-    //   'relpath/[daq_dirname]/DATASET_[n]/EOS.bin' or the
-    char buffer[255] = {};
-    snprintf(buffer, sizeof(buffer), "%s/DATASET_%d/EOS.bin", eventDir.c_str(),
-             dataset);
-    fs::path path = evtPath;
-    path /= buffer;
-    path = fs::absolute(path);
-    evtPath = path.generic_string();
-  }
-
-  // finally check that the event file exists
-  if (!fs::is_regular_file(evtPath)) {
-    std::string msg = "Check path, cannot open binary event file: " + evtPath;
-    throw std::runtime_error(msg);
-  }
-
-  exec(hdfFile, evtPath);
-}
-
-/**
- * Execute the algorithm. The steps involved are:
- *   Create the workspace
- *   Get the instrument properties and load options
- *   Load the instrument from the IDF
- *   Reposition the relevant neutronic values for model based on the parameters
- *   Load the data values and convert to TOF
- *   Setting up the masks
- */
+/// Execute the algorithm using the \p hdfFile and \p eventFile.
+/// The steps involved are:
+///   Create the workspace
+///   Get the instrument properties and load options
+///   Load the instrument from the IDF
+///   Reposition the relevant neutronic values for model based on the parameters
+///   Load the data values and convert to TOF
+///   Setting up the masks
 template <typename FD>
 void LoadEMU<FD>::exec(const std::string &hdfFile,
                        const std::string &eventFile) {
@@ -1006,7 +824,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   Base::setProperty("OutputWorkspace", m_localWorkspace);
 }
 
-// set up the detector masks
+/// Set up the detector masks to the region of interest \p roi.
 template <typename FD>
 void LoadEMU<FD>::setupDetectorMasks(std::vector<bool> &roi) {
 
@@ -1033,7 +851,8 @@ void LoadEMU<FD>::setupDetectorMasks(std::vector<bool> &roi) {
   }
 }
 
-// prepare the event storage
+/// Allocate space for the event storage in \p eventVectors after the
+/// \p eventCounts have been determined.
 template <typename FD>
 void LoadEMU<FD>::prepareEventStorage(
     ANSTO::ProgressTracker &progTracker, std::vector<size_t> &eventCounts,
@@ -1056,7 +875,7 @@ void LoadEMU<FD>::prepareEventStorage(
   progTracker.complete();
 }
 
-// get and log the Doppler parameters
+/// Get the Doppler parameters and record to the log manager, \p logm.
 template <typename FD>
 void LoadEMU<FD>::loadDopplerParameters(API::LogManager &logm) {
 
@@ -1094,7 +913,8 @@ void LoadEMU<FD>::loadDopplerParameters(API::LogManager &logm) {
   logm.addProperty("CalibratePhase", calPhase);
 }
 
-// calibrate doppler phase based on teh analysed events
+/// Calibrate the doppler phase based on the analysed events using
+/// the \p eventCounts and \p eventVectors.
 template <typename FD>
 void LoadEMU<FD>::calibrateDopplerPhase(
     std::vector<size_t> &eventCounts,
@@ -1173,7 +993,8 @@ void LoadEMU<FD>::calibrateDopplerPhase(
   m_dopplerPhase = r.first;
 }
 
-// convert the doppler time to TOF for all the events in the workspace
+/// Convert the doppler time to TOF for all the events in \p eventVectors and
+/// time of flight range as \p minTOF and \p maxTOF.
 template <typename FD>
 void LoadEMU<FD>::dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors,
                                    double &minTOF, double &maxTOF) {
@@ -1213,7 +1034,7 @@ void LoadEMU<FD>::dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors,
   }
 }
 
-// Recovers the L2 neutronic distance for each detector.
+/// Recovers the L2 neutronic distance for each detector.
 template <typename FD> void LoadEMU<FD>::loadDetectorL2Values() {
 
   m_detectorL2 = std::vector<double>(HISTOGRAMS);
@@ -1226,7 +1047,8 @@ template <typename FD> void LoadEMU<FD>::loadDetectorL2Values() {
   }
 }
 
-// update the neutronic positins
+/// Update the neutronic position for the \p detID using the distance
+/// from the source and the sample to analyser distance, \p sampleAnalyser.
 template <typename FD>
 void LoadEMU<FD>::updateNeutronicPostions(detid_t detID,
                                           double sampleAnalyser) {
@@ -1251,8 +1073,8 @@ void LoadEMU<FD>::updateNeutronicPostions(detid_t detID,
   }
 }
 
-// region of interest is defined by the selected detectors and the mask
-//
+/// Region of interest is defined by the \p selected detectors and the
+/// \p maskfile.
 template <typename FD>
 std::vector<bool> LoadEMU<FD>::createRoiVector(const std::string &selected,
                                                const std::string &maskfile) {
@@ -1293,7 +1115,7 @@ std::vector<bool> LoadEMU<FD>::createRoiVector(const std::string &selected,
   return result;
 }
 
-// load parameters from input hdf file
+/// Load parameters from input \p hdfFile and save to the log manager, \p logm.
 template <typename FD>
 void LoadEMU<FD>::loadParameters(const std::string &hdfFile,
                                  API::LogManager &logm) {
@@ -1348,8 +1170,8 @@ void LoadEMU<FD>::loadParameters(const std::string &hdfFile,
                              "SourceSample", 1.0, 0);
 }
 
-// the environment variable needs to be loaded at the end
-// as the
+/// Load the environment variables from the \p hdfFile and save as
+/// time series to the log manager, \p logm.
 template <typename FD>
 void LoadEMU<FD>::loadEnvironParameters(const std::string &hdfFile,
                                         API::LogManager &logm) {
@@ -1358,7 +1180,7 @@ void LoadEMU<FD>::loadEnvironParameters(const std::string &hdfFile,
   NeXus::NXEntry entry = root.openFirstEntry();
   auto time_str = logm.getPropertyValueAsType<std::string>("end_time");
 
-  // load the environment variables for teh dataset loaded
+  // load the environment variables for the dataset loaded
   std::vector<std::string> tags = {"P01PS03", "P01PSP03", "T01S00",  "T01S05",
                                    "T01S06",  "T01SP00",  "T01SP06", "T02S00",
                                    "T02S04",  "T02S05",   "T02S06",  "T02SP00",
@@ -1370,7 +1192,7 @@ void LoadEMU<FD>::loadEnvironParameters(const std::string &hdfFile,
   }
 }
 
-// load the instrument definition and instrument parameters
+/// Load the instrument definition.
 template <typename FD> void LoadEMU<FD>::loadInstrument() {
 
   // loads the IDF and parameter file
@@ -1383,9 +1205,194 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
   loadInstrumentAlg->executeAsChildAlg();
 }
 
+//----------------- explicit instantiation and class specialization
+//--------------
+
 // finally instantiate the two loaders
 template class DLLExport LoadEMU<Kernel::FileDescriptor>;
 template class DLLExport LoadEMU<Kernel::NexusDescriptor>;
+
+/// Algorithms name for identification. @see Algorithm::name
+const std::string LoadEMUHdf::name() const { return "LoadEMUHdf"; }
+
+/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+const std::string LoadEMUHdf::summary() const {
+  return "Loads an EMU Hdf and linked event file into a workspace.";
+}
+
+/// Return the confidence as an integer value that this algorithm can
+/// load the file \p descriptor.
+int LoadEMUHdf::confidence(Kernel::NexusDescriptor &descriptor) const {
+  if (descriptor.extension() != ".hdf")
+    return 0;
+
+  if (descriptor.pathExists("/entry1/site_name") &&
+      descriptor.pathExists("/entry1/instrument/doppler/ctrl/velocity") &&
+      descriptor.pathExists("/entry1/instrument/doppler/ctrl/amplitude") &&
+      descriptor.pathExists("/entry1/instrument/detector/daq_dirname") &&
+      descriptor.pathExists("/entry1/instrument/detector/dataset_number") &&
+      descriptor.pathExists("/entry1/data/hmm_total_t_ds0") &&
+      descriptor.pathExists("/entry1/data/hmm_total_t_ds1") &&
+      descriptor.pathExists("/entry1/data/hmm_total_xt_ds0") &&
+      descriptor.pathExists("/entry1/data/hmm_total_xt_ds1")) {
+    return 80;
+  } else {
+    return 0;
+  }
+}
+
+/// Initialise the algorithm and declare the properties for the
+/// nexus descriptor.
+void LoadEMUHdf::init() { LoadEMU<Kernel::NexusDescriptor>::init(true); }
+
+/// Execute the algorithm. Establishes the filepath to the event file
+/// from the HDF link and the path provided and invokes the common
+// exec() function that works with the two files.
+void LoadEMUHdf::exec() {
+
+  namespace fs = boost::filesystem;
+
+  // Open the hdf file and find the dirname and dataset number
+  std::string hdfFile = Base::getPropertyValue(FilenameStr);
+  std::string evtPath = Base::getPropertyValue(PathToBinaryStr);
+  if (evtPath.empty())
+    evtPath = "./";
+
+  // if relative ./ or ../ then append to the directory for the hdf file
+  if (evtPath.rfind("./") == 0 || evtPath.rfind("../") == 0) {
+    fs::path hp = hdfFile;
+    evtPath = fs::canonical(evtPath, hp.parent_path()).generic_string();
+  }
+
+  // dataset index to be loaded
+  m_datasetIndex = Base::getProperty(SelectDatasetStr);
+
+  // if path provided build the file path
+  if (fs::is_directory(evtPath)) {
+    NeXus::NXRoot root(hdfFile);
+    NeXus::NXEntry entry = root.openFirstEntry();
+    auto eventDir = GetNeXusValue<std::string>(
+        entry, "instrument/detector/daq_dirname", "./", 0);
+    auto dataset = GetNeXusValue<int32_t>(
+        entry, "instrument/detector/dataset_number", 0, m_datasetIndex);
+
+    // build the path to the event file as if a relative or absolute
+    // path is passed:
+    //   'relpath/[daq_dirname]/DATASET_[n]/EOS.bin' or the
+    char buffer[255] = {};
+    snprintf(buffer, sizeof(buffer), "%s/DATASET_%d/EOS.bin", eventDir.c_str(),
+             dataset);
+    fs::path path = evtPath;
+    path /= buffer;
+    path = fs::absolute(path);
+    evtPath = path.generic_string();
+  }
+
+  // finally check that the event file exists
+  if (!fs::is_regular_file(evtPath)) {
+    std::string msg = "Check path, cannot open binary event file: " + evtPath;
+    throw std::runtime_error(msg);
+  }
+
+  LoadEMU<Kernel::NexusDescriptor>::exec(hdfFile, evtPath);
+}
+
+/// Algorithms name for identification. @see Algorithm::name
+const std::string LoadEMUTar::name() const { return "LoadEMUTar"; }
+
+/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+const std::string LoadEMUTar::summary() const {
+  return "Loads a merged EMU Hdf and event file into a workspace.";
+}
+
+/// Return the confidence as an integer value that this algorithm can
+/// load the file \p descriptor.
+int LoadEMUTar::confidence(Kernel::FileDescriptor &descriptor) const {
+  if (descriptor.extension() != ".tar")
+    return 0;
+
+  ANSTO::Tar::File file(descriptor.filename());
+  if (!file.good())
+    return 0;
+
+  size_t hdfFiles = 0;
+  size_t binFiles = 0;
+  const std::vector<std::string> &subFiles = file.files();
+  for (const auto &subFile : subFiles) {
+    auto len = subFile.length();
+    if ((len > 4) &&
+        (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
+      if ((subFile.rfind(".hdf") == len - 4) &&
+          (subFile.compare(0, 3, "EMU") == 0))
+        hdfFiles++;
+      else if (subFile.rfind(".bin") == len - 4)
+        binFiles++;
+    }
+  }
+
+  return (hdfFiles == 1) && (binFiles == 1) ? 50 : 0;
+}
+
+/// Initialise the algorithm and declare the standard properties for the
+/// general file descriptor.
+void LoadEMUTar::init() { LoadEMU<Kernel::FileDescriptor>::init(false); }
+
+/// Execute the algorithm. Extracts the hdf and event file from the tar
+/// and invokes the invokes the common exec() function that works with
+/// the two files.
+void LoadEMUTar::exec() {
+
+  // Opens the tar and extracts the hdf and event data to temporary files
+  std::string filename = Base::getPropertyValue(FilenameStr);
+  ANSTO::Tar::File tarFile(filename);
+  if (!tarFile.good())
+    throw std::invalid_argument("invalid EMU tar file");
+
+  // dataset selection not supported in tar version - order is not guaranteed
+  m_datasetIndex = 0;
+
+  // lambda functions to find the first file of extension and to extract
+  // the file
+  const std::vector<std::string> &files = tarFile.files();
+  auto selectFile = [&](const std::string &ext) {
+    auto itf = std::find_if(files.cbegin(), files.cend(),
+                            [&ext](const std::string &file) {
+                              return file.rfind(ext) == file.length() - 4;
+                            });
+    if (itf == files.end())
+      throw std::runtime_error("missing tar file data");
+    else
+      tarFile.select(itf->c_str());
+  };
+  auto extractFile = [&](Poco::TemporaryFile &tfile) {
+    boost::shared_ptr<FILE> handle(fopen(tfile.path().c_str(), "wb"), fclose);
+    if (handle) {
+      // copy content
+      char buffer[4096];
+      size_t bytesRead;
+      while (0 != (bytesRead = tarFile.read(buffer, sizeof(buffer))))
+        fwrite(buffer, bytesRead, 1, handle.get());
+      handle.reset();
+    }
+  };
+
+  // extract hdf file into tmp file
+  selectFile(".hdf");
+  Poco::TemporaryFile hdfFile;
+  extractFile(hdfFile);
+
+  // extract the event file
+  selectFile(".bin");
+  Poco::TemporaryFile eventFile;
+  extractFile(eventFile);
+
+  // call the common loader
+  LoadEMU<Kernel::FileDescriptor>::exec(hdfFile.path(), eventFile.path());
+}
+
+// register the algorithms into the AlgorithmFactory
+DECLARE_FILELOADER_ALGORITHM(LoadEMUTar)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEMUHdf)
 
 } // namespace DataHandling
 } // namespace Mantid
