@@ -138,5 +138,4 @@ class BrowseFileWidgetView(QtGui.QWidget):
         self._cached_text = tmp
 
     def warning_popup(self, message):
-        # TODO : limit the number of warnings to prevent spamming if a list of bad files is selected.
         message_box.warning(str(message))

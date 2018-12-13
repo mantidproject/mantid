@@ -1,15 +1,14 @@
 import unittest
 
-from PyQt4.QtGui import QApplication
+from Muon.GUI.Common import mock_widget
 
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-
-QT_APP = QApplication([])
 
 
 class LoadFileWidgetViewTest(unittest.TestCase):
 
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         self.view = BrowseFileWidgetView()
 
     # ------------------------------------------------------------------------------------------------------------------

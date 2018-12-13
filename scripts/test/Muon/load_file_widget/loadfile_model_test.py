@@ -88,6 +88,7 @@ class LoadFileWidgetModelTest(unittest.TestCase):
         self.mock_load_function(files, load_return_vals)
 
         self.model.execute()
+        self.assertEqual(len(self.model.loaded_filenames), 3)
         self.model.clear()
 
         self.assert_model_empty()

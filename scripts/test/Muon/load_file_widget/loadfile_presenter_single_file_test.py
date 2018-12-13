@@ -12,12 +12,11 @@ if sys.version_info.major == 3:
 else:
     import mock
 
-from PyQt4.QtGui import QApplication
-
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common import mock_widget
 
 
 class IteratorWithException:
@@ -48,10 +47,6 @@ class IteratorWithException:
     next = __next__
 
 
-# global QApplication (get errors if > 1 instance in the code)
-QT_APP = QApplication([])
-
-
 class LoadFileWidgetPresenterTest(unittest.TestCase):
     def run_test_with_and_without_threading(test_function):
 
@@ -66,9 +61,10 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QT_APP.processEvents()
+            self._qapp.processEvents()
 
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         self.view = BrowseFileWidgetView()
 
         self.view.on_browse_clicked = mock.Mock()

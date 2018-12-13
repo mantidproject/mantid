@@ -10,7 +10,7 @@ import copy
 
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
@@ -121,7 +121,7 @@ class BrowseFileWidgetPresenter(object):
         self.set_file_edit(file_list)
 
         if self._multiple_files and self._multiple_file_mode == "Co-Add":
-            self.combine_loaded_runs(self._model.loaded_runs)
+            load_utils.combine_loaded_runs(self._model.loaded_runs)
 
         self._view.notify_loading_finished()
         self.enable_loading()
@@ -161,39 +161,3 @@ class BrowseFileWidgetPresenter(object):
 
     def set_current_instrument(self, instrument):
         pass
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Co-adding
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def flatten_run_list(self, run_list):
-        """
-        run list might be [1,2,[3,4]] where the [3,4] are co-added
-        """
-        new_list = []
-        for item in run_list:
-            if isinstance(item, int):
-                new_list += [item]
-            elif isinstance(item, list):
-                for i in item:
-                    new_list += [i]
-        return new_list
-
-    def combine_loaded_runs(self, run_list):
-        running_total = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"][
-            "OutputWorkspace"].workspace
-        return_ws = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"]
-        for run in run_list[1:]:
-            ws = self._model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
-            running_total = algorithm_utils.run_Plus({
-                "LHSWorkspace": running_total,
-                "RHSWorkspace": ws,
-                "AllowDifferentNumberSpectra": False}
-            )
-            # remove the single loaded filename
-            self._model._loaded_data_store.remove_data(run=run)
-        self._model._loaded_data_store.remove_data(run=run_list[0])
-        # run_string = runUtils.run_list_to_string(run_list)
-        return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
-        self._model._loaded_data_store.add_data(run=self.flatten_run_list(run_list), workspace=return_ws,
-                                                filename="Co-added")

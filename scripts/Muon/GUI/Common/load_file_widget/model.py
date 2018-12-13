@@ -83,7 +83,6 @@ class BrowseFileWidgetModel(object):
     def clear(self):
         self._loaded_data_store.clear()
 
-    # TODO : remove the need for this function
     def remove_previous_data(self):
         self._loaded_data_store.remove_last_added_data()
 
