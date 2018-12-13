@@ -838,73 +838,81 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
-  // Bin Count column
-  file->writeData("column_7", binCount);
+  // Intensity over Sigma column
+  file->writeData("column_7", intensityOverSigma);
   file->openData("column_7");
+  file->putAttr("name", "Sigma Intensity");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Bin Count column
+  file->writeData("column_8", binCount);
+  file->openData("column_8");
   file->putAttr("name", "Bin Count");
   file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
   // Initial Energy column
-  file->writeData("column_8", initialEnergy);
-  file->openData("column_8");
+  file->writeData("column_9", initialEnergy);
+  file->openData("column_9");
   file->putAttr("name", "Initial Energy");
   file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
   // Final Energy column
-  file->writeData("column_9", finalEnergy);
-  file->openData("column_9");
+  file->writeData("column_10", finalEnergy);
+  file->openData("column_10");
   file->putAttr("name", "Final Energy");
   file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
   // Wave Length Column
-  file->writeData("column_10", waveLength);
-  file->openData("column_10");
+  file->writeData("column_11", waveLength);
+  file->openData("column_11");
   file->putAttr("name", "Wave Length");
   file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
   // Scattering Column
-  file->writeData("column_11", scattering);
-  file->openData("column_11");
+  file->writeData("column_12", scattering);
+  file->openData("column_12");
   file->putAttr("name", "Scattering");
   file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
   // D Spacing Column
-  file->writeData("column_12", dSpacing);
-  file->openData("column_12");
+  file->writeData("column_13", dSpacing);
+  file->openData("column_13");
   file->putAttr("name", "D Spacing");
   file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
   // TOF Column
-  file->writeData("column_13", TOF);
-  file->openData("column_13");
+  file->writeData("column_14", TOF);
+  file->openData("column_14");
   file->putAttr("name", "TOF");
   file->putAttr("interpret_as", specifyDouble);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
   // Run Number column
-  file->writeData("column_14", runNumber);
-  file->openData("column_14");
+  file->writeData("column_15", runNumber);
+  file->openData("column_15");
   file->putAttr("name", "Run Number");
   file->putAttr("interpret_as", specifyInteger);
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
   // Peak Number column
-  file->writeData("column_17", peakNumber);
-  file->openData("column_17");
+  file->writeData("column_18", peakNumber);
+  file->openData("column_18");
   file->putAttr("name", "Peak Number");
   file->putAttr("interpret_as", specifyInteger);
   file->putAttr("units", "Not known"); // Units may need changing when known
@@ -914,8 +922,8 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<int> array_dims;
   array_dims.push_back(static_cast<int>(peaks.size()));
   array_dims.push_back(9);
-  file->writeData("column_15", goniometerMatrix, array_dims);
-  file->openData("column_15");
+  file->writeData("column_16", goniometerMatrix, array_dims);
+  file->openData("column_16");
   file->putAttr("name", "Goniometer Matrix");
   file->putAttr("interpret_as", "A matrix of 3x3 doubles");
   file->putAttr("units", "Not known"); // Units may need changing when known
@@ -925,7 +933,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<int64_t> dims;
   dims.push_back(np);
   dims.push_back(static_cast<int>(maxShapeJSONLength));
-  const std::string name = "column_16";
+  const std::string name = "column_17";
   file->makeData(name, NeXus::CHAR, dims, false);
   file->openData(name);
 
