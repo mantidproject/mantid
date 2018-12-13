@@ -313,8 +313,6 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(API::Progress *pProgres
       std::make_unique<ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>>(mdEvents.cbegin(), mdEvents.cend());
   rootMdBox->distributeEvents(bc->getSplitThreshold(), bc->getMaxDepth() + 1);
 
-
-  std::cerr << bc->getSplitThreshold() << "    " << bc->getMaxDepth() << "\n";
   auto leafs = rootMdBox->leafs();
   size_t maxEvents = 0;
   size_t maxDepth = 0;
@@ -324,7 +322,6 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(API::Progress *pProgres
     if(leaf.box.eventCount() > maxEvents)
       maxEvents = leaf.box.eventCount();
   }
-  std::cerr << "Max depth and max events: " << maxDepth << "    " << maxEvents << "\n";
   return rootMdBox;
 }
 
@@ -392,7 +389,6 @@ DataObjects::MDBoxBase<MDEventType<ND>, ND>*
 ConvToMDEventsWSIndexing::makeMDBox(BoxStructureType<ND, MDEventType> sbox, const MD_BOX_TYPE& type,
                                     const MDSpaceBounds<ND>& space, const API::BoxController_sptr &bc,
                                     const unsigned& level) {
-  // TODO
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
   auto minCoord = MDEventType<ND>::indexToCoordinates(sbox.min(), space);
   auto maxCoord = MDEventType<ND>::indexToCoordinates(sbox.max(), space);
@@ -401,10 +397,7 @@ ConvToMDEventsWSIndexing::makeMDBox(BoxStructureType<ND, MDEventType> sbox, cons
   }
   switch(type) {
   case LEAF: {
-    auto res = new DataObjects::MDBox<MDEventType<ND>, ND>(bc.get(), level, extents);
-    auto &data = res->getEvents();
-    data.insert(data.end(), sbox.eventBegin(), sbox.eventEnd());
-    return res;
+    return new DataObjects::MDBox<MDEventType<ND>, ND>(bc.get(), level, extents, sbox.eventBegin(), sbox.eventEnd());
   }
   case GRID:
 //    return new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), level, extents);

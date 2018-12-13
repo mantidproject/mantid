@@ -339,6 +339,14 @@ public:
   }
 
 protected:
+  /**
+   * Calculates caches if the events are known
+   * @tparam EventIterator :: iterator which points to event in som e collection
+   * @param begin :: iterarator to start
+   * @param end :: iterator before ened (not included)
+   */
+  template <typename EventIterator>
+  void calcCaches(EventIterator begin, EventIterator end);
   /** Array of MDDimensionStats giving the extents and
    * other stats on the box dimensions.
    */
@@ -387,6 +395,34 @@ public:
 #ifndef __INTEL_COMPILER
 #pragma pack(pop) // Return to default packing size
 #endif
+
+template <typename MDE, size_t nd>
+template <typename EventIterator>
+void MDBoxBase<MDE, nd>::calcCaches(EventIterator begin, EventIterator end) {
+  m_signal = 0;
+  m_errorSquared = 0;
+  m_totalWeight = 0;
+  coord_t* centroid = m_centroid;
+  std::fill_n(centroid, nd, 0.0f);
+  for(auto it = begin; it != end; ++it) {
+    auto evSignal = it->getSignal();
+    m_signal += evSignal;
+    m_errorSquared += it->getErrorSquared();
+    /// Weight processing
+    ++m_totalWeight;
+    for (auto d = 0; d < nd; d++) {
+      // Total up the coordinate weighted by the signal.
+      centroid[d] += it->getCenter(d) * static_cast<coord_t>(evSignal);
+    }
+  }
+
+  // Normalize by the total signal
+  const coord_t reciprocal = 1.0f / static_cast<coord_t>(m_signal);
+  for (size_t d = 0; d < nd; ++d) {
+    centroid[d] *= reciprocal;
+  }
+}
+
 
 } // namespace DataObjects
 } // namespace Mantid

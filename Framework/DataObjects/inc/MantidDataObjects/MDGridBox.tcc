@@ -51,7 +51,7 @@ TMDE(MDGridBox)::MDGridBox(
 
 /** convenience Constructor, taking the shared pointer and extracting const
  * pointer from it
-  * @param bc :: shared poineter to the BoxController, owned by workspace
+  * @param bc :: shared pointer to the BoxController, owned by workspace
   * @param depth :: recursive split depth
   * @param extentsVector :: size of the box
 */
@@ -64,15 +64,24 @@ TMDE(MDGridBox)::MDGridBox(
   initGridBox();
 }
 
+/**
+ * contructor for explicit creation of MDGridBox with known
+ * events in it
+ * @param bc :: shared pointer to the BoxController, owned by workspace
+ * @param depth :: recursive split depth
+ * @param extentsVector :: size of the box
+ * @param begin :: iterator to start
+ * @param end :: iterator before end (not included)
+ */
 template <typename MDE, size_t nd>
-//template <typename EventIterator>
+//template <typename EventIterator> //can be done for every collection
 MDGridBox<MDE, nd>::MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,
                               const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
                               &extentsVector, EventIterator begin, EventIterator end) :
     MDBoxBase<MDE, nd>(bc, depth, 0, extentsVector), split(), splitCumul(),
     m_SubBoxSize(), numBoxes(0), m_Children(), diagonalSquared(0.f),
     nPoints(0) {
-  size_t totalSize = initGridBox();
+  initGridBox();
   double volume = 1;
   double diagSq = 0;
   for(auto x = 0; x < nd; ++x) {
@@ -82,34 +91,8 @@ MDGridBox<MDE, nd>::MDGridBox(Mantid::API::BoxController *const bc, const uint32
   }
   MDBoxBase<MDE, nd>::m_inverseVolume = 1.0/volume;
   diagonalSquared = diagSq;
-
-
   nPoints = std::distance(begin, end);
-  auto& signal = MDBoxBase<MDE, nd>::m_signal;
-  signal = 0;
-  auto& errorSq = MDBoxBase<MDE, nd>::m_errorSquared;
-  errorSq = 0;
-  auto& weight = MDBoxBase<MDE, nd>::m_totalWeight;
-  weight = 0;
-  coord_t* centroid = MDBoxBase<MDE, nd>::m_centroid;
-  std::fill_n(centroid, nd, 0.0f);
-  for(auto it = begin; it != end; ++it) {
-    auto evSignal = it->getSignal();
-    signal += evSignal;
-    errorSq += it->getErrorSquared();
-    /// Weight processing
-    ++weight;
-    for (auto d = 0; d < nd; d++) {
-      // Total up the coordinate weighted by the signal.
-      centroid[d] += it->getCenter(d) * static_cast<coord_t>(evSignal);
-    }
-  }
-
-  // Normalize by the total signal
-  const coord_t reciprocal = 1.0f / static_cast<coord_t>(signal);
-  for (size_t d = 0; d < nd; ++d) {
-    centroid[d] *= reciprocal;
-  }
+  MDBoxBase<MDE, nd>::calcCaches(begin, end);
 }
 
 

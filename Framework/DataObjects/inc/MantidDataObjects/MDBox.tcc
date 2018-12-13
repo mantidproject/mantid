@@ -99,6 +99,30 @@ TMDE(MDBox)::MDBox(
       m_Saveable(nullptr), m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
+
+
+/**
+ * contructor for explicit creation of MDGridBox with known
+ * events in it
+ * @param bc :: shared pointer to the BoxController, owned by workspace
+ * @param depth :: recursive split depth
+ * @param extentsVector :: size of the box
+ * @param begin :: iterator to start
+ * @param end :: iterator before ened (not included)
+ */
+template <typename MDE, size_t nd>
+//  template <typename EventIterator> //can be done for every collection
+MDBox<MDE, nd>::MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,
+      const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+      &extentsVector, EventIterator begin, EventIterator end) :
+      MDBoxBase<MDE, nd>(bc, depth, 0, extentsVector), m_Saveable(nullptr),
+      m_bIsMasked(false)  {
+  data = std::vector<MDE>(begin, end);
+  MDBoxBase<MDE, nd>::calcCaches(data.begin(), data.end());
+  if (this->m_BoxController->isFileBacked())
+    this->setFileBacked();
+}
+
 /**Common part of MD box constructor */
 TMDE(void MDBox)::initMDBox(const size_t nBoxEvents) {
   if (this->m_BoxController->getNDims() != nd)
