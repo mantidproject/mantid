@@ -224,13 +224,16 @@ void SaveReflectometryAscii::header() {
   writeInfo("Theta 2 + dir + ref numbers");
   writeInfo("Theta 3 + dir + ref numbers");
   const std::vector<std::string> logList = getProperty("LogList");
+  int existingLogs = 0;
   for (const auto &log : logList) {
     if (find(logs.cbegin(), logs.cend(), log) ==
         logs.end()) { // do not repeat a log
       writeInfo(log);
+      ++existingLogs;
     }
   }
-  for (auto i = logList.size(); i < 9; ++i)
+  // Write "Parameter : Not defined" 9 times minus the number of new user logs
+  for (auto i = logList.size() - existingLogs; i < 9; ++i)
     writeInfo("Parameter ");
   m_file << "Number of file format : "
          << "40\n";
