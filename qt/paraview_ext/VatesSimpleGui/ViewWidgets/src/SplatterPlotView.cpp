@@ -83,7 +83,7 @@ SplatterPlotView::SplatterPlotView(
                    SLOT(onResetCenterToPoint(double, double, double)));
 
   this->m_ui.thresholdButton->setToolTip(
-      "Set the threshold button to create a threshold filter on data");
+      "Create a threshold filter on the data");
   // Set the threshold button to create a threshold filter on data
   QObject::connect(this->m_ui.thresholdButton, SIGNAL(clicked()), this,
                    SLOT(onThresholdButtonClicked()));
