@@ -12,6 +12,7 @@ from mantid.kernel import ConfigService
 from mantid.api import WorkspaceGroup
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 def is_workspace_group(workspace):
@@ -69,7 +70,7 @@ class BrowseFileWidgetModel(object):
         failed_files = []
         for filename in self._filenames:
             try:
-                ws, run = self.load_workspace_from_filename(filename)
+                ws, run, filename = load_utils.load_workspace_from_filename(filename)
             except Exception:
                 failed_files += [filename]
                 continue
@@ -82,7 +83,6 @@ class BrowseFileWidgetModel(object):
     def clear(self):
         self._loaded_data_store.clear()
 
-    # TODO : remove the need for this function
     def remove_previous_data(self):
         self._loaded_data_store.remove_last_added_data()
 

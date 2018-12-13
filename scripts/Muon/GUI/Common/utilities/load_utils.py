@@ -14,8 +14,8 @@ from mantid.simpleapi import mtd
 from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class LoadUtils(object):
@@ -223,8 +223,6 @@ def load_workspace_from_filename(filename,
         run = int(workspace.getRunNumber())
         load_result["OutputWorkspace"].show(str(run))
 
-
-
     load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
     load_result["DeadTimeTable"] = None
 
@@ -263,7 +261,6 @@ def get_table_workspace_names_from_ADS():
 def combine_loaded_runs(model, run_list):
     return_ws = model._loaded_data_store.get_data(run=run_list[0])["workspace"]
     running_total = return_ws["OutputWorkspace"].workspace
-
     for run in run_list[1:]:
         ws = model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
         running_total = algorithm_utils.run_Plus({
