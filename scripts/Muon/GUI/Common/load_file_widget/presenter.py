@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import copy
 
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-import Muon.GUI.Common.utilities.load_utils as load_utils
+import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
@@ -173,19 +179,13 @@ class BrowseFileWidgetPresenter(object):
                     new_list += [i]
         return new_list
 
-
-
     def combine_loaded_runs(self, run_list):
-        print("LoadFilePresenter ", run_list)
-        print(self._model._loaded_data_store.params)
         running_total = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"][
             "OutputWorkspace"].workspace
         return_ws = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"]
         for run in run_list[1:]:
-            print(run)
             ws = self._model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
-            print(ws)
-            running_total = load_utils.run_Plus({
+            running_total = algorithm_utils.run_Plus({
                 "LHSWorkspace": running_total,
                 "RHSWorkspace": ws,
                 "AllowDifferentNumberSpectra": False}

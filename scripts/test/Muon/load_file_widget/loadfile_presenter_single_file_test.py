@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import sys
 import unittest
 
@@ -8,9 +14,9 @@ else:
 
 from PyQt4.QtGui import QApplication
 
-from Muon.GUI.Common.load_file_widget import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget import BrowseFileWidgetPresenter
-from Muon.GUI.Common.load_file_widget import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
@@ -57,19 +63,10 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
         return run_twice
 
-    class Runner:
-
-        def __init__(self, thread):
-            self.QT_APP = QT_APP
-            if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
-                if self._thread.isRunning():
-                    self.QT_APP.exec_()
-
-        def finished(self):
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
+    def wait_for_thread(self, thread_model):
+        if thread_model:
+            thread_model._thread.wait()
+            QT_APP.processEvents()
 
     def setUp(self):
         self.view = BrowseFileWidgetView()
@@ -105,7 +102,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.mock_browse_button_to_return_files(files)
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
     def load_failure(self):
         raise ValueError("Error text")
@@ -119,7 +116,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.mock_browse_button_to_return_files(["file.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.show_file_browser_and_return_selection.call_count, 1)
 
@@ -129,7 +126,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.mock_browse_button_to_return_files([])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.load_workspace_from_filename.call_count, 0)
 
@@ -138,7 +135,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.mock_browse_button_to_return_files(["file.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.disable_load_buttons.call_count, 1)
         self.assertEqual(self.view.enable_load_buttons.call_count, 1)
@@ -148,7 +145,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.model.execute = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.disable_load_buttons.call_count,
                          self.view.enable_load_buttons.call_count)
@@ -160,7 +157,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.model.execute = mock.Mock()
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.execute.call_count, 0)
         self.assertEqual(self.view.disable_load_buttons.call_count, 0)
@@ -173,7 +170,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.model.execute = mock.Mock()
 
         self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.execute.call_count, 0)
         self.assertEqual(self.view.disable_load_buttons.call_count, 0)
@@ -185,7 +182,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
@@ -195,7 +192,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235])
 
         self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
@@ -206,7 +203,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.set_file_edit = mock.Mock()
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/file1.nxs"])
         self.assertEqual(self.model.loaded_workspaces, [[1]])
@@ -221,7 +218,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.mock_user_input_text("C:/dir1/file1.nxs")
 
         self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/file1.nxs"])
         self.assertEqual(self.model.loaded_workspaces, [[1]])
@@ -238,13 +235,13 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.reset_edit_to_cached_value = mock.Mock()
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         set_file_edit_count = self.view.set_file_edit.call_count
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.set_file_edit.call_count, set_file_edit_count)
         self.assertEqual(self.view.reset_edit_to_cached_value.call_count, 0)
@@ -261,7 +258,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
             self.view.get_file_edit_text = mock.Mock(return_value=invalid_text)
 
             self.presenter.handle_file_changed_by_user()
-            self.Runner(self.presenter._load_thread)
+            self.wait_for_thread(self.presenter._load_thread)
 
             self.assertEqual(self.view.reset_edit_to_cached_value.call_count, call_count)
 
@@ -272,7 +269,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/EMU0001234.nxs"])
         self.assertEqual(self.model.loaded_workspaces, [[1]])
@@ -289,7 +286,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.set_file_edit("C:\dir2\EMU000123.nxs")
 
         self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/EMU0001234.nxs"])
         self.assertEqual(self.model.loaded_workspaces, [[1]])

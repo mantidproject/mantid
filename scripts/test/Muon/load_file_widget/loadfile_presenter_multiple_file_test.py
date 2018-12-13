@@ -9,9 +9,9 @@ else:
 
 from PyQt4.QtGui import QApplication
 
-from Muon.GUI.Common.load_file_widget import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget import BrowseFileWidgetPresenter
-from Muon.GUI.Common.load_file_widget import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
@@ -58,18 +58,10 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
 
         return run_twice
 
-    class Runner:
-
-        def __init__(self, thread):
-            if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
-                if self._thread.isRunning():
-                    QT_APP.exec_()
-
-        def finished(self):
+    def wait_for_thread(self, thread_model):
+        if thread_model:
+            thread_model._thread.wait()
             QT_APP.processEvents()
-            QT_APP.exit(0)
 
     def setUp(self):
         self.data = MuonLoadData()
@@ -98,7 +90,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
             return_value=["C:/dir1/file1.nxs", "C:/dir2/file1.nxs", "C:/dir2/file2.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         six.assertCountEqual(self, self.model.loaded_filenames, ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
         six.assertCountEqual(self, self.model.loaded_workspaces, [[1], [2]])
@@ -110,7 +102,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.view.set_file_edit("C:/dir1/file1.nxs;C:/dir2/file1.nxs;C:/dir2/file2.nxs")
 
         self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         six.assertCountEqual(self, self.model.loaded_filenames, ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
         six.assertCountEqual(self, self.model.loaded_workspaces, [[1], [2]])
@@ -123,7 +115,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
             return_value=["C:/dir1/file1.nxs", "C:/dir1/file2.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         # Load will take the last occurrence of the run from the list
         six.assertCountEqual(self, self.model.loaded_filenames, ["C:/dir1/file2.nxs"])
@@ -136,7 +128,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.view.set_file_edit("C:/dir1/file1.nxs;C:/dir1/file2.nxs")
 
         self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         # Load will take the last occurrence of the run from the user input
         six.assertCountEqual(self, self.model.loaded_filenames, ["C:/dir1/file2.nxs"])
@@ -150,7 +142,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
                                                      ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
         self.assertEqual(self.model.loaded_workspaces, [[1], [2]])
@@ -165,7 +157,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.view.set_file_edit("C:/dir1/file1.nxs;C:/dir2/file2.nxs")
 
         self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
         self.assertEqual(self.model.loaded_workspaces, [[1], [2]])
@@ -179,7 +171,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
                                                      ["C:/dir1/file2.nxs", "C:/dir1/file1.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.get_file_edit_text(), "C:/dir1/file1.nxs;C:/dir1/file2.nxs")
 
@@ -190,7 +182,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.view.set_file_edit("C:/dir1/file2.nxs;C:/dir1/file1.nxs")
 
         self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.get_file_edit_text(), "C:/dir1/file1.nxs;C:/dir1/file2.nxs")
 
@@ -205,7 +197,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
             side_effect=iter(IteratorWithException(load_return_values, [1])))
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/file1.nxs", "C:/dir2/file3.nxs"])
         self.assertEqual(self.model.loaded_runs, [1234, 1236])
@@ -217,12 +209,12 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
                                                      ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         self.mock_loading_multiple_files_from_browse([1236], [[3]], ["C:/dir1/file3.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         six.assertCountEqual(self, self.model.loaded_filenames,
                              ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs", "C:/dir1/file3.nxs"])
@@ -237,14 +229,14 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
                                                      ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         # only checks runs, so can have a different file/workspace (this is why overwriting is
         # the most useful behaviour in this situation).
         self.mock_loading_multiple_files_from_browse([1234], [[3]], ["C:/dir2/file1.nxs"])
 
         self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
+        self.wait_for_thread(self.presenter._load_thread)
 
         six.assertCountEqual(self, self.model.loaded_filenames, ["C:/dir2/file1.nxs", "C:/dir2/file2.nxs"])
         six.assertCountEqual(self, self.model.loaded_workspaces, [[3], [2]])

@@ -1,13 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
 
-import mantid.simpleapi as mantid
 from mantid.kernel import ConfigService
 from mantid.api import WorkspaceGroup
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 def is_workspace_group(workspace):
@@ -74,34 +78,6 @@ class BrowseFileWidgetModel(object):
         if failed_files:
             message = exception_message_for_failed_files(failed_files)
             raise ValueError(message)
-
-    def load_workspace_from_filename(self, filename):
-        # alg = mantid.AlgorithmManager.create("Load")
-        # alg.initialize()
-        # alg.setAlwaysStoreInADS(False)
-        # alg.setProperty("OutputWorkspace", "__notUsed")
-        #
-        # try:
-        #     alg.setProperty("Filename", filename)
-        #     alg.execute()
-        #     workspace = alg.getProperty("OutputWorkspace").value
-        # except Exception:
-        #     # let Load search for the file
-        #     alg.setProperty("Filename", filename.split(os.sep)[-1])
-        #     alg.execute()
-        #     workspace = alg.getProperty("OutputWorkspace").value
-        #
-        # # handle multi-period data
-        # if is_workspace_group(workspace):
-        #     workspaces = [ws for ws in workspace]
-        #     run = get_run_from_multi_period_data(workspaces)
-        # else:
-        #     workspaces = [workspace]
-        #     run = int(workspace.getRunNumber())
-
-        workspaces, run, filename = load_utils.load_workspace_from_filename(filename)
-
-        return workspaces, run
 
     def clear(self):
         self._loaded_data_store.clear()
