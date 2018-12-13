@@ -191,10 +191,8 @@ void PropertyManager::filterByProperty(
  */
 void PropertyManager::declareProperty(std::unique_ptr<Property> p,
                                       const std::string &doc) {
-  if (p->name().empty()) {
-    throw std::invalid_argument("An empty property name is not permitted");
-  }
   p->setDocumentation(doc);
+
   const std::string key = createKey(p->name());
   auto existing = m_properties.find(key);
   if (existing == m_properties.end()) {
