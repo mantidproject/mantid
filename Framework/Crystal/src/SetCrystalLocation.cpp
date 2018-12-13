@@ -45,10 +45,10 @@ DECLARE_ALGORITHM(SetCrystalLocation)
 
 void SetCrystalLocation::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "EventWorkspace", "", Direction::Input),
+                      "InputWorkspace", "", Direction::Input),
                   "Original event workspace");
   declareProperty(
-      make_unique<WorkspaceProperty<EventWorkspace>>("ModifiedEventWorkspace",
+      make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace",
                                                      "", Direction::Output),
       "Output event workspace with a modified sample position");
   declareProperty("NewX", 0.0, "New Absolute X position of crystal.");
@@ -59,8 +59,8 @@ void SetCrystalLocation::init() {
 // simple algorithm that changes the sample position of the input
 // event workspace.
 void SetCrystalLocation::exec() {
-  EventWorkspace_sptr events = getProperty("EventWorkspace");
-  EventWorkspace_sptr outEvents = getProperty("ModifiedEventWorkspace");
+  EventWorkspace_sptr events = getProperty("InputWorkspace");
+  EventWorkspace_sptr outEvents = getProperty("OutputWorkspace");
   double newX = getProperty("NewX");
   double newY = getProperty("NewY");
   double newZ = getProperty("NewZ");
@@ -73,7 +73,7 @@ void SetCrystalLocation::exec() {
   CalibrationHelpers::adjustUpSampleAndSourcePositions(
       componentInfo.l1(), newSamplePos, componentInfo);
  
-  setProperty("ModifiedEventWorkspace", outEvents);
+  setProperty("OutputWorkspace", outEvents);
 } // exec
 
 } // namespace Crystal
