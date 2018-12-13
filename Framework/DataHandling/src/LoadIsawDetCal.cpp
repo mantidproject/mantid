@@ -50,7 +50,8 @@ void LoadIsawDetCal::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
-  const auto exts = std::vector<std::string>({".DetCal", ".detcal", ".peaks", ".integrate"});
+  const auto exts =
+      std::vector<std::string>({".DetCal", ".detcal", ".peaks", ".integrate"});
   declareProperty(
       Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
       "The input filename of the ISAW DetCal file (Two files "
