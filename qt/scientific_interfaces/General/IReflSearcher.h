@@ -10,7 +10,6 @@
 #include <string>
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
-//#include "MantidQtCustomInterfaces/IReflPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
