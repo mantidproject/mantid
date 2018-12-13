@@ -60,4 +60,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Catalog ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS Catalog ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
