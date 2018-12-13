@@ -99,6 +99,7 @@ class AddRunsPagePresenter(object):
         run_selection = self._run_selector_presenter.run_selection()
         settings = self._summation_settings_presenter.settings()
         if self._output_directory_is_not_empty(settings):
+            self._view.disable_sum()
             self._sum_runs(run_selection,
                            settings,
                            self._sum_base_file_name(run_selection))
