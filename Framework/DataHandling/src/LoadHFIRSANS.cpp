@@ -115,8 +115,8 @@ void LoadHFIRSANS::init() {
                   "The name of the Output workspace");
 
   // Optionally, we can specify the wavelength and wavelength spread and
-  // overwrite
-  // the value in the data file (used when the data file is not populated)
+  // overwrite the value in the data file (used when the data file is not
+  // populated)
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
@@ -648,12 +648,12 @@ LoadHFIRSANS::getInstrumentDoubleParameter(const std::string &parameter) {
   std::vector<double> pars =
       m_workspace->getInstrument()->getNumberParameter(parameter);
   if (pars.empty()) {
-    g_log.warning() << "Parameter not found: " << parameter
-                    << " in the instrument parameter file.\n";
+    g_log.warning() << "Parameter not found in the instrument parameter file: "
+                    << parameter << "\n";
     return std::numeric_limits<double>::quiet_NaN();
   } else {
-    g_log.debug() << "Found the parameter: " << parameter << " = " << pars[0]
-                  << " in the instrument parameter file.\n";
+    g_log.debug() << "Found the parameter in the instrument parameter file: "
+                  << parameter << " = " << pars[0] << "\n";
     return pars[0];
   }
 }
