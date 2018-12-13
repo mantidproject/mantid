@@ -29,6 +29,32 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+}
+
+std::size_t numberOfColumns(Workspace_sptr workspace) {
+  return convertToMatrixWorkspace(workspace)->y(0).size();
+}
+
+bool isWorkspacePlottable(Workspace_sptr workspace) {
+  return numberOfColumns(workspace) > 1;
+}
+
+bool containsPlottableWorkspace(WorkspaceGroup_sptr workspaceGroup) {
+  for (auto const &workspace : *workspaceGroup)
+    if (isWorkspacePlottable(workspace))
+      return true;
+  return false;
+}
+
+bool isGroupPlottable(WorkspaceGroup_sptr workspaceGroup) {
+  if (workspaceGroup)
+    return containsPlottableWorkspace(workspaceGroup);
+  else
+    return false;
+}
+
 void updateParameters(
     IFunction_sptr function,
     std::unordered_map<std::string, ParameterValue> const &parameters) {
@@ -115,6 +141,11 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
 
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updatePlotGuess()));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceNameChanged(const QString &)),
+          this, SLOT(updatePlotGuess()));
+
   connect(m_plotPresenter.get(),
           SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
           SLOT(singleFit(std::size_t, std::size_t)));
@@ -124,8 +155,8 @@ void IndirectFitAnalysisTab::setup() {
 
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
-          SLOT(emitUpdateFitTypes()));
+  connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
+          SLOT(updateAvailableFitTypes()));
 
   connectDataAndSpectrumPresenters();
   connectDataAndPlotPresenters();
@@ -401,7 +432,7 @@ void IndirectFitAnalysisTab::updateBrowserFittingRange() {
 }
 
 void IndirectFitAnalysisTab::setBrowserWorkspace() {
-  if (m_fittingModel->numberOfWorkspaces() != 0) {
+  if (m_fittingModel->numberOfWorkspaces() > 0) {
     auto const name =
         m_fittingModel->getWorkspace(getSelectedDataIndex())->getName();
     m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
@@ -722,6 +753,7 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   setRunIsRunning(false);
+  setFitSingleSpectrumIsFitting(false);
   enablePlotResult(error);
   setSaveResultEnabled(!error);
   updateParameterValues();
@@ -838,12 +870,21 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
   m_fitPropertyBrowser->updateParameters();
 }
 
-/*
+/**
+ * Enables Plot Guess in the FitPropertyBrowser if a sample workspace is loaded
+ */
+void IndirectFitAnalysisTab::updatePlotGuess() {
+  auto const sampleWorkspace =
+      m_fittingModel->getWorkspace(getSelectedDataIndex());
+  m_fitPropertyBrowser->updatePlotGuess(sampleWorkspace);
+}
+
+/**
  * Saves the result workspace in the default save directory.
  */
 void IndirectFitAnalysisTab::saveResult() { m_fittingModel->saveResult(); }
 
-/*
+/**
  * Plots the result workspace with the specified name, using the specified
  * plot type. Plot type can either be 'None', 'All' or the name of a
  * parameter. In the case of 'None', nothing will be plotted. In the case of
@@ -864,41 +905,37 @@ void IndirectFitAnalysisTab::plotResult(const QString &plotType) {
 
 void IndirectFitAnalysisTab::plotAll(
     Mantid::API::WorkspaceGroup_sptr workspaces) {
-  for (auto index = 0u; index < workspaces->size(); ++index)
-    plotAll(boost::dynamic_pointer_cast<MatrixWorkspace>(
-                workspaces->getItem(index)),
-            index);
+  for (auto const &workspace : *workspaces)
+    plotAll(convertToMatrixWorkspace(workspace));
 }
 
 void IndirectFitAnalysisTab::plotParameter(
-    Mantid::API::WorkspaceGroup_sptr workspaces, const std::string &parameter) {
-  for (auto index = 0u; index < workspaces->size(); ++index)
-    plotParameter(boost::dynamic_pointer_cast<MatrixWorkspace>(
-                      workspaces->getItem(index)),
-                  parameter, index);
+    Mantid::API::WorkspaceGroup_sptr workspaces, std::string const &parameter) {
+  for (auto const &workspace : *workspaces)
+    plotParameter(convertToMatrixWorkspace(workspace), parameter);
 }
 
 void IndirectFitAnalysisTab::plotAll(
-    Mantid::API::MatrixWorkspace_sptr workspace, const std::size_t &index) {
-  const std::size_t numberOfSpectra =
-      m_fittingModel->getWorkspace(index)->getNumberHistograms();
-  if (numberOfSpectra > 1)
+    Mantid::API::MatrixWorkspace_sptr workspace) {
+  auto const numberOfDataPoints = workspace->blocksize();
+  if (numberOfDataPoints > 1)
     plotSpectrum(workspace);
   else
-    showMessageBox("Plotting the result of a workspace failed:\n\n "
-                   "Workspace result has only one data point");
+    showMessageBox(
+        "The plotting of data in one of the result workspaces failed:\n\n "
+        "Workspace has only one data point");
 }
 
 void IndirectFitAnalysisTab::plotParameter(
     Mantid::API::MatrixWorkspace_sptr workspace,
-    const std::string &parameterToPlot, const std::size_t &index) {
-  const std::size_t numberOfSpectra =
-      m_fittingModel->getWorkspace(index)->getNumberHistograms();
-  if (numberOfSpectra > 1)
+    const std::string &parameterToPlot) {
+  auto const numberOfDataPoints = workspace->blocksize();
+  if (numberOfDataPoints > 1)
     plotSpectrum(workspace, parameterToPlot);
   else
-    showMessageBox("Plotting the result of a workspace failed:\n\n "
-                   "Workspace result has only one data point");
+    showMessageBox(
+        "The plotting of data in one of the result workspaces failed:\n\n "
+        "Workspace has only one data point");
 }
 
 void IndirectFitAnalysisTab::plotSpectrum(
@@ -931,8 +968,10 @@ void IndirectFitAnalysisTab::singleFit() {
 
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
-  if (validate())
+  if (validate()) {
+    setFitSingleSpectrumIsFitting(true);
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
+  }
 }
 
 /**
@@ -952,6 +991,9 @@ bool IndirectFitAnalysisTab::validate() {
   const auto invalidFunction = m_fittingModel->isInvalidFunction();
   if (invalidFunction)
     validator.addErrorMessage(QString::fromStdString(*invalidFunction));
+  if (m_fittingModel->numberOfWorkspaces() == 0)
+    validator.addErrorMessage(
+        QString::fromStdString("No data has been selected for a fit."));
 
   const auto error = validator.generateErrorMessage();
   emit showMessageBox(error);
@@ -1029,7 +1071,11 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
 }
 
 void IndirectFitAnalysisTab::enablePlotResult(bool error) {
-  setPlotResultEnabled(!shouldEnablePlotResult() ? false : !error);
+  if (!error)
+    setPlotResultEnabled(
+        isGroupPlottable(m_fittingModel->getResultWorkspace()));
+  else
+    setPlotResultEnabled(!error);
 }
 
 /**
@@ -1080,8 +1126,6 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   setPlotResultEnabled(isFit);
   setSaveResultEnabled(isFit);
 }
-
-void IndirectFitAnalysisTab::emitUpdateFitTypes() { emit updateFitTypes(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

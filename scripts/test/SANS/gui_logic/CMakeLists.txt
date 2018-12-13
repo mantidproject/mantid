@@ -23,6 +23,7 @@ set ( TEST_PY_FILES
   diagnostics_page_model_test.py
   create_state_test.py
   batch_process_runner_test.py
+  save_other_presenter_test.py
   create_file_information_test.py
 )
 
