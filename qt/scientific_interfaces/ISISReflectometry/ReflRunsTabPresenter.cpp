@@ -177,6 +177,7 @@ bool ReflRunsTabPresenter::search() {
   // If we're not logged into a catalog, prompt the user to do so
   if (CatalogManager::Instance().getActiveSessions().empty()) {
     try {
+      // TODO: replace python runner
       // std::stringstream pythonSrc;
       // pythonSrc << "try:\n";
       // pythonSrc << "  algm = CatalogLoginDialog()\n";
@@ -239,19 +240,22 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
  * runs to table and processes them. Clears any existing table data first.
  */
 void ReflRunsTabPresenter::startNewAutoreduction() {
-  // if (requireNewAutoreduction()) {
-  //   // If starting a brand new autoreduction, delete all rows / groups in
-  //   // existing table first
-  //   // We'll prompt the user to check it's ok to delete existing rows
-  //   auto tablePresenter = getTablePresenter(group);
-  //   tablePresenter->setPromptUser(false);
-  //   try {
-  //     tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
-  //   } catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
-  //   {
-  //     return;
-  //   }
-  // }
+  if (requireNewAutoreduction()) {
+    // If starting a brand new autoreduction, delete all rows / groups in
+    // existing table first
+    // We'll prompt the user to check it's ok to delete existing rows
+
+    // TODO: enable autoprocessing
+    //   auto tablePresenter = getTablePresenter(group);
+    //   tablePresenter->setPromptUser(false);
+    //   try {
+    //     tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
+    //   } catch (const DataProcessorPresenter::DeleteAllRowsCancelledException
+    //   &)
+    //   {
+    //     return;
+    //   }
+  }
 
   if (setupNewAutoreduction(m_view->getSearchString()))
     checkForNewRuns();
@@ -293,7 +297,8 @@ void ReflRunsTabPresenter::autoreduceNewRuns() {
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0) {
-    // transfer(rowsToTransfer, autoreductionGroup(), TransferMatch::Strict);
+    transfer(rowsToTransfer, TransferMatch::Strict);
+    // TODO: enable autoprocessing
     //    auto tablePresenter = getTablePresenter(autoreductionGroup());
     //    tablePresenter->setPromptUser(false);
     //    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
@@ -303,6 +308,7 @@ void ReflRunsTabPresenter::autoreduceNewRuns() {
 }
 
 void ReflRunsTabPresenter::pauseAutoreduction() {
+  // TODO: enable autoprocessing
   //  if (isAutoreducing())
   //    getTablePresenter(autoreductionGroup())
   //        ->notify(DataProcessorPresenter::PauseFlag);
@@ -318,7 +324,7 @@ bool ReflRunsTabPresenter::isAutoreducing() const {
 }
 
 bool ReflRunsTabPresenter::isProcessing() const {
-  // TODO define this properly.
+  // TODO define this properly when we enable processing
   return false;
 }
 
@@ -432,9 +438,7 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
 }
 
 /** Tells the view to update the enabled/disabled state of all relevant
- *widgets
- * based on whether processing is in progress or not.
- *
+ * widgets based on whether processing is in progress or not.
  */
 void ReflRunsTabPresenter::updateWidgetEnabledState() const {
   auto const processing = isProcessing();
