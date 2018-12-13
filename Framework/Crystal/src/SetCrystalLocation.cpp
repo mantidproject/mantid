@@ -9,7 +9,7 @@
  * SetCrystalLocation.cpp
  *
  *  Created on: Dec 12, 2018
- *      Author: Brendan
+ *      Author: Brendan Sullivan
  */
 #include "MantidCrystal/SetCrystalLocation.h"
 
@@ -43,45 +43,6 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(SetCrystalLocation)
 
-class OrEnabledWhenProperties : public Kernel::IPropertySettings {
-public:
-  OrEnabledWhenProperties(const std::string &prop1Name,
-                          ePropertyCriterion prop1Crit,
-                          const std::string &prop1Value,
-                          const std::string &prop2Name,
-                          ePropertyCriterion prop2Crit,
-                          const std::string &prop2Value)
-      : IPropertySettings(), propName1(prop1Name), propName2(prop2Name),
-        Criteria1(prop1Crit), Criteria2(prop2Crit), value1(prop1Value),
-        value2(prop2Value)
-
-  {
-    Prop1 = new Kernel::EnabledWhenProperty(propName1, Criteria1, value1);
-    Prop2 = new Kernel::EnabledWhenProperty(propName2, Criteria2, value2);
-  }
-  ~OrEnabledWhenProperties() override // responsible for deleting all supplied
-                                      // EnabledWhenProperites
-  {
-    delete Prop1;
-    delete Prop2;
-  }
-
-  IPropertySettings *clone() const override {
-    return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,
-                                       Criteria2, value2);
-  }
-
-  bool isEnabled(const IPropertyManager *algo) const override {
-    return Prop1->isEnabled(algo) && Prop2->isEnabled(algo);
-  }
-
-private:
-  std::string propName1, propName2;
-  ePropertyCriterion Criteria1, Criteria2;
-  std::string value1, value2;
-  Kernel::EnabledWhenProperty *Prop1, *Prop2;
-};
-
 void SetCrystalLocation::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "EventWorkspace", "", Direction::Input),
@@ -95,14 +56,8 @@ void SetCrystalLocation::init() {
   declareProperty("NewZ", 0.0, "New Absolute Z position of crystal.");
 }
 
-/**
- * Execute algorithm. Steps:
- * a) Get property values
- * b) Set up data for call to PeakHKLErrors fitting function
- * c) execute and get results
- * d) Convert results to output information
- *
- */
+// simple algorithm that changes the sample position of the input
+// event workspace.
 void SetCrystalLocation::exec() {
   EventWorkspace_sptr events = getProperty("EventWorkspace");
   EventWorkspace_sptr outEvents = getProperty("ModifiedEventWorkspace");
@@ -118,7 +73,7 @@ void SetCrystalLocation::exec() {
   CalibrationHelpers::adjustUpSampleAndSourcePositions(
       componentInfo.l1(), newSamplePos, componentInfo);
  
-
+  setProperty("ModifiedEventWorkspace", outEvents);
 } // exec
 
 } // namespace Crystal
