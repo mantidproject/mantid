@@ -278,4 +278,8 @@ public:
 %End
     int sizeOfFunctionsGroup() const;
     void loadFunction(QString funStr);
+    double startX() const;
+    void setStartX(double start);
+    double endX() const;
+    void setEndX(double end);
 };

@@ -14,7 +14,7 @@ import numpy as np
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 import matplotlib.patheffects as path_effects
-from qtpy.QtCore import Signal, Qt
+from qtpy.QtCore import QObject, Signal, Qt
 from qtpy.QtGui import QGuiApplication, QCursor
 
 from mantidqt.utils.qt import import_qt
@@ -39,17 +39,32 @@ class FitPropertyBrowser(BaseBrowser):
 
     def show(self):
         self.tool = FitInteractiveTool(self.canvas)
+        self.tool.fit_start_x_moved.connect(self.move_start_x)
+        self.tool.fit_end_x_moved.connect(self.move_end_x)
+        self.setStartX(self.tool.fit_start_x.x)
+        self.setEndX(self.tool.fit_end_x.x)
         super(FitPropertyBrowser, self).show()
 
     def hide(self):
         if self.tool is not None:
+            self.tool.fit_start_x_moved.disconnect()
+            self.tool.fit_end_x_moved.disconnect()
             self.tool.disconnect()
         super(FitPropertyBrowser, self).hide()
 
+    def move_start_x(self, xd):
+        self.setStartX(xd)
 
-class VerticalMarker(object):
+    def move_end_x(self, xd):
+        self.setEndX(xd)
+
+
+class VerticalMarker(QObject):
+
+    moved = Signal(float)
 
     def __init__(self, canvas, x, color):
+        super(VerticalMarker, self).__init__()
         self.x = x
         self.ax = canvas.figure.get_axes()[0]
         y0, y1 = self.ax.get_ylim()
@@ -58,6 +73,7 @@ class VerticalMarker(object):
                                # path_effects=[path_effects.SimpleLineShadow(), path_effects.Normal()]
                                )
         self.ax.add_patch(self.patch)
+        self.is_moving = False
 
     def remove(self):
         self.patch.remove()
@@ -69,14 +85,30 @@ class VerticalMarker(object):
         vertices[1] = self.x, y1
         self.ax.draw_artist(self.patch)
 
-    def is_above(self, xd):
-        x, y = self.patch.get_transform().transform((self.x, 0))
-        return np.abs(x - xd) < 3
+    def is_above(self, x):
+        x_pixels, _ = self.patch.get_transform().transform((self.x, 0))
+        return np.abs(x_pixels - x) < 3
+
+    def on_click(self, x):
+        if self.is_above(x):
+            self.is_moving = True
+
+    def stop(self):
+        self.is_moving = False
+
+    def move(self, xd):
+        if self.is_moving:
+            self.x = xd
+            self.moved.emit(xd)
 
 
-class FitInteractiveTool(object):
+class FitInteractiveTool(QObject):
+
+    fit_start_x_moved = Signal(float)
+    fit_end_x_moved = Signal(float)
 
     def __init__(self, canvas):
+        super(FitInteractiveTool, self).__init__()
         self.canvas = canvas
         ax = canvas.figure.get_axes()[0]
         self.ax = ax
@@ -87,25 +119,40 @@ class FitInteractiveTool(object):
         self.fit_start_x = VerticalMarker(canvas, start_x, 'green')
         self.fit_end_x = VerticalMarker(canvas, end_x, 'green')
 
+        self.fit_start_x.moved.connect(self.fit_start_x_moved)
+        self.fit_end_x.moved.connect(self.fit_end_x_moved)
+
         self._cids = []
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_notify_callback))
-        # canvas.mpl_connect('figure_enter_event', self.enter_figure)
+        self._cids.append(canvas.mpl_connect('button_press_event', self.on_click))
+        self._cids.append(canvas.mpl_connect('button_release_event', self.on_release))
 
     def disconnect(self):
         for cid in self._cids:
             self.canvas.mpl_disconnect(cid)
-        print (self.fit_start_x, self.fit_end_x)
         self.fit_start_x.remove()
         self.fit_end_x.remove()
 
     def draw_callback(self, event):
         self.fit_start_x.redraw()
         self.fit_end_x.redraw()
-        # self.canvas.blit(self.ax.bbox)
 
     def motion_notify_callback(self, event):
-        if self.fit_start_x.is_above(event.x) or self.fit_end_x.is_above(event.x):
+        x = event.x
+        if x is not None and (self.fit_start_x.is_above(x) or self.fit_end_x.is_above(x)):
             QGuiApplication.setOverrideCursor(QCursor(Qt.SizeHorCursor))
         else:
             QGuiApplication.restoreOverrideCursor()
+        self.fit_start_x.move(event.xdata)
+        self.fit_end_x.move(event.xdata)
+        self.canvas.draw()
+
+    def on_click(self, event):
+        if event.button == 1:
+            self.fit_start_x.on_click(event.x)
+            self.fit_end_x.on_click(event.x)
+
+    def on_release(self, event):
+        self.fit_start_x.stop()
+        self.fit_end_x.stop()
