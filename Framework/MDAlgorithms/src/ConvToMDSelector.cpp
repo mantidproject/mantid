@@ -9,7 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidMDAlgorithms/ConvToMDEventsWS.h"
+#include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 #include "MantidMDAlgorithms/ConvToMDHistoWS.h"
 
 namespace Mantid {
@@ -57,6 +57,7 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
       existingWsConvType = Matrix2DWS;
   }
 
+  boost::shared_ptr<ConvToMDBase> res;
   // select a converter, which corresponds to the workspace type
   if ((existingWsConvType == Undefined) ||
       (existingWsConvType != inputWSType)) {
@@ -64,27 +65,29 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     case (EventWS):
       // check if user set a property to use indexing
       if(converterType == ConvToMDSelector::DEFAULT)
-        return boost::make_shared<ConvToMDEventsWS>();
+        res = boost::make_shared<ConvToMDEventsWS>();
       else
-        return boost::make_shared<ConvToMDEventsWSIndexing>();
+        res = boost::make_shared<ConvToMDEventsWSIndexing>();
+      break;
     case (Matrix2DWS):
-      return boost::make_shared<ConvToMDHistoWS>();
+       res = boost::make_shared<ConvToMDHistoWS>();
+       break;
     default:
       throw(std::logic_error("ConvToDataObjectsSelector: requested converter "
                              "for unknown ws type"));
     }
-
   } else {
     // existing converter is suitable for the workspace
     // in case of Event workspace check if user set a property to use indexing
     if (inputWSType == EventWS) {
       if (converterType == ConvToMDSelector::DEFAULT)
-        return boost::make_shared<ConvToMDEventsWS>();
+        res = boost::make_shared<ConvToMDEventsWS>();
       else
-        return boost::make_shared<ConvToMDEventsWSIndexing>();
+        res = boost::make_shared<ConvToMDEventsWSIndexing>();
     }
   }
 
+  return res;
 }
 } // namespace MDAlgorithms
 } // namespace Mantid

@@ -410,7 +410,7 @@ void MDBoxBase<MDE, nd>::calcCaches(EventIterator begin, EventIterator end) {
     m_errorSquared += it->getErrorSquared();
     /// Weight processing
     ++m_totalWeight;
-    for (auto d = 0; d < nd; d++) {
+    for (auto d = 0u; d < nd; d++) {
       // Total up the coordinate weighted by the signal.
       centroid[d] += it->getCenter(d) * static_cast<coord_t>(evSignal);
     }

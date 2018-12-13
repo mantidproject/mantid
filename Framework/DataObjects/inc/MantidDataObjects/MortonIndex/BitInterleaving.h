@@ -25,7 +25,7 @@
  * @param x Integer to pad
  * @return Padded integer
  */
-template <size_t N, typename IntT, typename MortonT> MortonT pad(IntT x) {
+template <size_t N, typename IntT, typename MortonT> MortonT pad(IntT) {
   throw std::runtime_error("No pad() specialisation.");
 }
 
@@ -39,7 +39,7 @@ template <size_t N, typename IntT, typename MortonT> MortonT pad(IntT x) {
  * @param x Padded integer
  * @return Original integer
  */
-template <size_t N, typename IntT, typename MortonT> IntT compact(MortonT x) {
+template <size_t N, typename IntT, typename MortonT> IntT compact(MortonT) {
   throw std::runtime_error("No compact() specialisation.");
 }
 

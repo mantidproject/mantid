@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
+	src/ConvToMDEventsWSIndexing.cpp
 	src/ConvToMDHistoWS.cpp
 	src/ConvToMDSelector.cpp
 	src/ConvertCWPDMDToSpectra.cpp
@@ -150,6 +151,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
+	inc/MantidMDAlgorithms/ConvToMDEventsWSIndexing.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
 	inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
 	inc/MantidMDAlgorithms/ConvertCWSDMDtoHKL.h
@@ -281,6 +283,7 @@ set ( TEST_FILES
 	CloneMDWorkspaceTest.h
 	CompactMDTest.h
 	CompareMDWorkspacesTest.h
+	ConvToMDEventsWSIndexingTest.h
 	ConvertCWPDMDToSpectraTest.h
 	ConvertCWSDExpToMomentumTest.h
 	ConvertCWSDMDtoHKLTest.h

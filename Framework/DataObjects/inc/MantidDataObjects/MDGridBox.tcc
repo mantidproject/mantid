@@ -84,13 +84,13 @@ MDGridBox<MDE, nd>::MDGridBox(Mantid::API::BoxController *const bc, const uint32
   initGridBox();
   double volume = 1;
   double diagSq = 0;
-  for(auto x = 0; x < nd; ++x) {
+  for(size_t x = 0; x < nd; ++x) {
     auto sz = extentsVector[x].getSize();
     volume *= sz;
     diagSq += sz*sz;
   }
-  MDBoxBase<MDE, nd>::m_inverseVolume = 1.0/volume;
-  diagonalSquared = diagSq;
+  MDBoxBase<MDE, nd>::m_inverseVolume = static_cast<coord_t >(1.0/volume);
+  diagonalSquared = static_cast<coord_t >(diagSq);
   nPoints = std::distance(begin, end);
   MDBoxBase<MDE, nd>::calcCaches(begin, end);
 }
