@@ -18,7 +18,7 @@ MatrixWorkspace_sptr createInstrumentWorkspace(int const &xLength,
 MatrixWorkspace_sptr
 createWorkspaceWithTextAxis(int const &numberOfSpectra,
                             std::vector<std::string> const &labels) {
-  if (numberOfSpectra == labels.size()) {
+  if (static_cast<std::size_t>(numberOfSpectra) == labels.size()) {
     auto workspace = createWorkspace(numberOfSpectra);
     workspace->replaceAxis(1, getTextAxis(numberOfSpectra, labels));
     return workspace;

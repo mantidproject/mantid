@@ -101,7 +101,7 @@ public:
 
     auto const yAxis = workspace->getAxis(1);
 
-    for (auto index = 0; index < workspace->getNumberHistograms(); ++index)
+    for (auto index = 0u; index < workspace->getNumberHistograms(); ++index)
       TS_ASSERT_EQUALS(yAxis->label(index), labels[index]);
   }
 
