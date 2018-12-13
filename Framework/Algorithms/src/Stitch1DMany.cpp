@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include <boost/make_shared.hpp>
 #include <boost/pointer_cast.hpp>
