@@ -1,4 +1,5 @@
 
+#include "MantidDataHandling/LoadEMU.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -6,7 +7,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadANSTOEventFile.h"
-#include "MantidDataHandling/LoadEMU.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
