@@ -8,7 +8,6 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTADDWORKSPACEDIALOG_H_
 
 #include "IAddWorkspaceDialog.h"
-#include "IndirectFitDataPresenter.h"
 #include "ui_IndirectAddWorkspaceDialog.h"
 
 namespace MantidQt {

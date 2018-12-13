@@ -8,7 +8,6 @@
 #define MANTIDQTCUSTOMINTERFACES_JUMPFITADDWORKSPACEDIALOG_H_
 
 #include "IAddWorkspaceDialog.h"
-#include "IndirectFitDataPresenter.h"
 #include "ui_JumpFitAddWorkspaceDialog.h"
 
 namespace MantidQt {
