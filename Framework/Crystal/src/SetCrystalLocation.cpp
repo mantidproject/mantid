@@ -13,20 +13,20 @@
  */
 #include "MantidCrystal/SetCrystalLocation.h"
 
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 #include <cstdarg>
 
@@ -47,10 +47,9 @@ void SetCrystalLocation::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Original event workspace");
-  declareProperty(
-      make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace",
-                                                     "", Direction::Output),
-      "Output event workspace with a modified sample position");
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "Output event workspace with a modified sample position");
   declareProperty("NewX", 0.0, "New Absolute X position of crystal.");
   declareProperty("NewY", 0.0, "New Absolute Y position of crystal.");
   declareProperty("NewZ", 0.0, "New Absolute Z position of crystal.");
@@ -72,7 +71,7 @@ void SetCrystalLocation::exec() {
   auto &componentInfo = outEvents->mutableComponentInfo();
   CalibrationHelpers::adjustUpSampleAndSourcePositions(
       componentInfo.l1(), newSamplePos, componentInfo);
- 
+
   setProperty("OutputWorkspace", outEvents);
 } // exec
 

@@ -33,9 +33,7 @@ orientation .
 */
 class DLLExport SetCrystalLocation : public API::Algorithm {
 public:
-  const std::string name() const override {
-    return "SetCrystalLocation";
-  };
+  const std::string name() const override { return "SetCrystalLocation"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm sets the sample location of the "
