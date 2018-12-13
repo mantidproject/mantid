@@ -21,6 +21,8 @@
 #include <vector>
 #include <tbb/parallel_sort.h>
 
+#include <chrono>
+
 namespace Mantid {
 // Forward declarations
 namespace API {
@@ -184,7 +186,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
   std::vector<MDEventType<ND>> mdEvents;
   mdEvents.reserve(numEvents);
 
-//#pragma omp parallel for
+#pragma omp parallel for
   for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra; ++workspaceIndex) {
     const auto& pws{m_OutWSWrapper->pWorkspace()};
     const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
@@ -242,7 +244,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
         mdEventsForSpectrum.pop_back();
     }
 
-//#pragma omp critical
+#pragma omp critical
     {
       /* Add to event list */
       mdEvents.insert(mdEvents.cend(), mdEventsForSpectrum.begin(),
