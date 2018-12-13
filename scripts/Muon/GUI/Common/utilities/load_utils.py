@@ -272,19 +272,19 @@ def flatten_run_list(self, run_list):
     return new_list
 
 
-def combine_loaded_runs(self, run_list):
-    return_ws = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"]
+def combine_loaded_runs(model, run_list):
+    return_ws = model._loaded_data_store.get_data(run=run_list[0])["workspace"]
     running_total = return_ws["OutputWorkspace"].workspace
     for run in run_list[1:]:
-        ws = self._model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
+        ws = model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
         running_total = algorithm_utils.run_Plus({
             "LHSWorkspace": running_total,
             "RHSWorkspace": ws,
             "AllowDifferentNumberSpectra": False}
         )
         # remove the single loaded filename
-        self._model._loaded_data_store.remove_data(run=run)
-    self._model._loaded_data_store.remove_data(run=run_list[0])
+        model._loaded_data_store.remove_data(run=run)
+    model._loaded_data_store.remove_data(run=run_list[0])
     return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
-    self._model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
+    model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
                                             filename="Co-added")

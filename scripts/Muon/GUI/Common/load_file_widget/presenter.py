@@ -121,7 +121,7 @@ class BrowseFileWidgetPresenter(object):
         self.set_file_edit(file_list)
 
         if self._multiple_files and self._multiple_file_mode == "Co-Add":
-            load_utils.combine_loaded_runs(self._model.loaded_runs)
+            load_utils.combine_loaded_runs(self._model, self._model.loaded_runs)
 
         self._view.notify_loading_finished()
         self.enable_loading()
