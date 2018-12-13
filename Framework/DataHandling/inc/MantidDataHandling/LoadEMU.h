@@ -50,25 +50,13 @@ template <typename FD> class LoadEMU : public API::IFileLoader<FD> {
 protected:
   using Base = API::IFileLoader<FD>;
 
-public:
-  int version() const override;
-  const std::vector<std::string> seeAlso() const override;
-  const std::string category() const override;
-  const std::string name() const override;
-  const std::string summary() const override;
-  int confidence(FD &descriptor) const override;
-
-protected:
+  // detailed init and exec code
   void init(bool hdfLoader);
   void exec(const std::string &hdfFile, const std::string &eventFile);
 
 private:
-  // initialisation
-  void init() override;
-
-  // execution
-  void exec() override;
-
+  using Base::init;
+  using Base::exec;
   // region of intreset
   std::vector<bool> createRoiVector(const std::string &seltubes,
                                     const std::string &maskfile);
@@ -147,6 +135,9 @@ Optional Properties:
 */
 class DLLExport LoadEMUTar : public LoadEMU<Kernel::FileDescriptor> {
 public:
+  int version() const override;
+  const std::vector<std::string> seeAlso() const override;
+  const std::string category() const override;
   const std::string name() const override;
   const std::string summary() const override;
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -181,6 +172,9 @@ Optional Properties:
 */
 class DLLExport LoadEMUHdf : public LoadEMU<Kernel::NexusDescriptor> {
 public:
+  int version() const override;
+  const std::vector<std::string> seeAlso() const override;
+  const std::string category() const override;
   const std::string name() const override;
   const std::string summary() const override;
   int confidence(Kernel::NexusDescriptor &descriptor) const override;

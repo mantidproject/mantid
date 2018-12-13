@@ -540,34 +540,6 @@ void loadEvents(API::Progress &prog, const char *progMsg,
 
 } // namespace EMU
 
-/// Algorithm's version for identification. @see Algorithm::version
-template <typename FD> int LoadEMU<FD>::version() const { return 1; }
-
-/// Similar algorithms. @see Algorithm::seeAlso
-template <typename FD>
-const std::vector<std::string> LoadEMU<FD>::seeAlso() const {
-  return {"Load", "LoadQKK"};
-}
-/// Algorithm's category for identification. @see Algorithm::category
-template <typename FD> const std::string LoadEMU<FD>::category() const {
-  return "DataHandling\\ANSTO";
-}
-
-template <typename FD> const std::string LoadEMU<FD>::name() const {
-  throw std::runtime_error("unexpected call to template instance");
-}
-template <typename FD> const std::string LoadEMU<FD>::summary() const {
-  throw std::runtime_error("unexpected call to template instance");
-}
-template <typename FD> int LoadEMU<FD>::confidence(FD &descriptor) const {
-  throw std::runtime_error("unexpected call to template instance");
-}
-template <typename FD> void LoadEMU<FD>::init() {
-  throw std::runtime_error("unexpected call to template instance");
-}
-template <typename FD> void LoadEMU<FD>::exec() {
-  throw std::runtime_error("unexpected call to template instance");
-}
 
 /// Declares the properties for the two loader variants. Adds the path option
 /// to the binary file and dataset set index if it is the \p hdfLoader.
@@ -1208,9 +1180,22 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
 //----------------- explicit instantiation and class specialization
 //--------------
 
-// finally instantiate the two loaders
+/// Instantiate base class for LoadEMUTar
 template class DLLExport LoadEMU<Kernel::FileDescriptor>;
+/// Instantiate base class for LoadEMUHdf
 template class DLLExport LoadEMU<Kernel::NexusDescriptor>;
+
+/// Algorithm's version for identification. @see Algorithm::version
+int LoadEMUHdf::version() const { return 1; }
+
+/// Similar algorithms. @see Algorithm::seeAlso
+const std::vector<std::string> LoadEMUHdf::seeAlso() const {
+  return {"Load", "LoadQKK"};
+}
+/// Algorithm's category for identification. @see Algorithm::category
+const std::string LoadEMUHdf::category() const {
+  return "DataHandling\\ANSTO";
+}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadEMUHdf::name() const { return "LoadEMUHdf"; }
@@ -1295,6 +1280,18 @@ void LoadEMUHdf::exec() {
   }
 
   LoadEMU<Kernel::NexusDescriptor>::exec(hdfFile, evtPath);
+}
+
+/// Algorithm's version for identification. @see Algorithm::version
+int LoadEMUTar::version() const { return 1; }
+
+/// Similar algorithms. @see Algorithm::seeAlso
+const std::vector<std::string> LoadEMUTar::seeAlso() const {
+  return {"Load", "LoadQKK"};
+}
+/// Algorithm's category for identification. @see Algorithm::category
+const std::string LoadEMUTar::category() const {
+  return "DataHandling\\ANSTO";
 }
 
 /// Algorithms name for identification. @see Algorithm::name
