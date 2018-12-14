@@ -7,86 +7,117 @@ Event Filtering
 .. contents::
    :local:
 
-In MantidPlot, there are a few algorithms working with event
-filtering.  These algorithms are :ref:`algm-FilterByTime`,
-:ref:`algm-FilterByLogValue`, :ref:`algm-FilterEvents`, and
-:ref:`algm-GenerateEventsFilter`.
+In mantid, there are a variety of ways to filter events that are in an
+:ref:`EventWorkspace`. They are :ref:`FilterByTime
+<algm-FilterByTime>` and :ref:`FilterByLogValue
+<algm-FilterByLogValue>` which will create a filter and apply it in a
+single step. The other way to filter events is to use
+:ref:`FilterEvents <algm-FilterEvents>` which allows for a variety of
+workspaces to specify how an :ref:`EventWorkspace` is split. This
+document focuses on how the create these workspaces and will largely
+ignore :ref:`FilterByTime <algm-FilterByTime>` and
+:ref:`FilterByLogValue <algm-FilterByLogValue>`.
 
 How to generate event filters
 =============================
 
-Generating filters explicitly
------------------------------
+Implicit filters
+----------------
 
-:ref:`algm-FilterEvents` reads and parses a
-:class:`mantid.api.ISplittersWorkspace` object to generate a list of
-:ref:`SplittingIntervals <SplittingInterval>`, which are used to split
-neutron events to specified output workspaces according to the times
-that they arrive detectors.
+:ref:`algm-FilterByTime` and :ref:`algm-FilterByLogValue` internally
+generate event filters during execution that are not exposed to the
+user. These algorithms can only split the neutron events by pulse
+time and do not provide the equivalent of a ``FastLog=True`` option.
 
-There can be two approaches to create a
-:class:`mantid.api.ISplittersWorkspace`.
+Explicit filters
+----------------
 
-* :ref:`algm-GenerateEventsFilter` generate event filters by either by
-  time or log value.  The output filters are stored in a
-  :ref:`SplittersWorkspace`, which is taken as an input property of
-  :ref:`algm-FilterEvents`.
+:ref:`algm-FilterEvents` takes either a :class:`SplittersWorkspace
+<mantid.api.ISplittersWorkspace>`, :ref:`TableWorkspace <Table
+Workspaces>`, or :ref:`MatrixWorkspace <MatrixWorkspace>` as the
+``SplittersWorkspace``. The events are split into output workspaces
+according to the times that they arrive detectors.
 
-* Users can create a :class:`mantid.api.ISplittersWorkspace` from scrach from Python
-  script, because :class:`mantid.api.ISplittersWorkspace` inherits from
-  :ref:`TableWorkspace <Table Workspaces>`.
+:ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` will create a
+:class:`SplittersWorkspace <mantid.api.ISplittersWorkspace>` based on
+its various options. This result can be supplied as the
+``SplittersWorkspace`` input property of ref:`algm-FilterEvents`. It
+will also generate an ``InformationWorkspace`` which can be passed
+along to :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`.
+Depending on the parameters in :ref:`GenerateEventsFilter
+<algm-GenerateEventsFilter>`, the events will be filtered based on
+their pulse times or their absolute times.  An neutron event's
+absolute time is the summation of its pulse time and TOF.
 
-Generating inexplicit filters
------------------------------
+Custom event filters
+====================
 
-:ref:`algm-FilterByTime` and :ref:`algm-FilterByLogValue` generate event filters during execution.
+Sometimes one wants to filter events based on arbitrary conditions. In
+this case, one needs to go beyond what existing algorithms can do. For
+this, one must generate their own splitters workspace. The workspace
+is generally 3 columns, with the first two being start and stop times
+and the third being the workspace index to put the events into. For
+filtering with time relative to the start of the run, the first two
+columns are ``float``. To specify the times as absolute, in the case
+of filtering files that will be summed together, the first two columns
+should be ``int64``. For both of the examples below, the filter
+workspaces are created using the following function:
 
-* :ref:`algm-FilterByTime` generates a set of :ref:`SplittingInterval`
-  according to user-specified setup for time splicing;
+.. code-block:: python
 
-* :ref:`algm-FilterByLogValue` generates a set of
-  :ref:`SplittingInterval` according to the value of a specific sample
-  log.
+   def create_table_workspace(table_ws_name, column_def_list):
+      CreateEmptyTableWorkspace(OutputWorkspace=table_ws_name)
+      table_ws = mtd[table_ws_name]
+      for col_tup in column_def_list:
+          data_type = col_tup[0]
+          col_name = col_tup[1]
+          table_ws.addColumn(data_type, col_name)
 
-:ref:`algm-GenerateEventsFilter` and :ref:`algm-FilterEvents` vs :ref:`algm-FilterByTime` and :ref:`algm-FilterByLogValue`
---------------------------------------------------------------------------------------------------------------------------
+      return table_ws
 
-* If :ref:`algm-GenerateEventsFilter` and :ref:`algm-FilterEvents` are
-  set up correctly, they can have the same functionality as
-  :ref:`algm-FilterByTime` and :ref:`algm-FilterByLogValue`.
+Relative time
+-------------
 
-* :ref:`algm-FilterEvents` is able to filter neutron events by either
-  their pulse times or their absolute times.  An neutron event's
-  absolute time is the summation of its pulse time and TOF.
+The easiest way to generate a custom event filter is to make one
+relative to the start time of the run or relative to a specified
+epoch. As the times in the table are seconds, a table can be created
+and used
 
-* :ref:`algm-FilterByLogValue` and :ref:`algm-FilterByTime` can only
-  split neutron events by their pulse time.
+.. code-block:: python
 
-Types of events filters
-=======================
+   filter_rel = create_table_workspace('custom_relative', [('float', 'start'), ('float', 'stop'), ('str', 'target')])
+   filter_rel.addRow((0,9500, '0'))
+   filter_rel.addRow((9500,19000, '1'))
+   FilterEvents(InputWorkspace='ws', SplitterWorkspace=filter_rel,
+                GroupWorkspaces=True, OutputWorkspaceBaseName='relative', RelativeTime=True)
 
-Filtering by :ref:`SplittingInterval`
--------------------------------------
+This will generate an event filter relative to the start of the
+run. Specifying the ``FilterStartTime`` in :ref:`FilterEvents
+<algm-FilterEvents>`, one can specify a different time that filtering
+will be relative to.
 
-:ref:`SplittingInterval` is an individual class to indicate an
-independent time splitter.  Any event can be filtered by a
-:ref:`SplittingInterval` object.
+Absolute time
+-------------
 
-:ref:`SplittersWorkspace` is a :ref:`TableWorkspace <Table
-Workspaces>` that stors a set of :ref:`SplittingInterval`.
+If instead a custom filter is to be created with absolute time, the
+time must be processed somewhat to go into the table workspace. Much of the
 
-Filtering by duplicate entries/booleans
----------------------------------------
+.. code-block:: python
 
-Duplicate entries in a :ref:`TimeSeriesProperty` and boolean type of
-:ref:`TimeSeriesProperty` are used in MantidPlot too to serve as time
-splitters.
+   abs_times = [datetime64('2014-12-12T09:11:22.538096666'), datetime64('2014-12-12T11:45:00'), datetime64('2014-12-12T14:14:00')]
+   # convert to time relative to GPS epoch
+   abs_times = [time - datetime64('1990-01-01T00:00') for time in abs_times]
+   # convert to number of seconds
+   abs_times = [float(time / timedelta64(1, 's')) for time in abs_times]
 
-These two are applied in the MantidPlot log viewing functionality and
-unfortunately intrudes into :ref:`TimeSeriesProperty`.
+   filter_abs = create_table_workspace('custom_absolute', [('float', 'start'), ('float', 'stop'), ('str', 'target')])
+   filter_abs.addRow((abs_times[0], abs_times[1], '0'))
+   filter_abs.addRow((abs_times[1], abs_times[2], '1'))
+   FilterEvents(InputWorkspace='PG3_21638', SplitterWorkspace=filter_abs,
+                GroupWorkspaces=True, OutputWorkspaceBaseName='absolute', RelativeTime=False)
 
-As time splitters are better to be isolated from logs, which are
-recorded in :ref:`TimeSeriesProperty`, it is not
-recommended to set up event filters by this approach.
+Be warned that specifying ``RelativeTime=True`` with a table full of
+absolute times will almost certainly generate output workspaces
+without any events in them.
 
 .. categories:: Concepts
