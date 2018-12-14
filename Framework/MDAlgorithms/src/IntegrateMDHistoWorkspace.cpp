@@ -279,21 +279,22 @@ void IntegrateMDHistoWorkspace::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "P1Bin", std::vector<double>()),
-                  "Projection 1 binning.");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "P2Bin", std::vector<double>()),
-                  "Projection 2 binning.");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "P3Bin", std::vector<double>()),
-                  "Projection 3 binning.");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "P4Bin", std::vector<double>()),
-                  "Projection 4 binning.");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "P5Bin", std::vector<double>()),
-                  "Projection 5 binning.");
+  const std::vector<double> defaultBinning;
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P1Bin", defaultBinning),
+      "Projection 1 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P2Bin", defaultBinning),
+      "Projection 2 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P3Bin", defaultBinning),
+      "Projection 3 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P4Bin", defaultBinning),
+      "Projection 4 binning.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("P5Bin", defaultBinning),
+      "Projection 5 binning.");
 
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

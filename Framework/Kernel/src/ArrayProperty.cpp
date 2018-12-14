@@ -18,10 +18,11 @@ namespace Kernel {
  *  @param direction :: The direction (Input/Output/InOut) of this property
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name, std::vector<T> &&vec,
+ArrayProperty<T>::ArrayProperty(std::string name, std::vector<T> vec,
                                 IValidator_sptr validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(name, vec, validator, direction) {}
+    : PropertyWithValue<std::vector<T>>(std::move(name), std::move(vec),
+                                        std::move(validator), direction) {}
 
 /** Constructor
  *  Will lead to the property having a default-constructed (i.e. empty) vector
@@ -32,11 +33,10 @@ ArrayProperty<T>::ArrayProperty(const std::string &name, std::vector<T> &&vec,
  */
 
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name,
-                                IValidator_sptr validator,
+ArrayProperty<T>::ArrayProperty(std::string name, IValidator_sptr validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), validator,
-                                        direction) {}
+    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
+                                        std::move(validator), direction) {}
 
 /** Constructor that's useful for output properties or inputs with an empty
  * default and no validator.
@@ -46,9 +46,8 @@ ArrayProperty<T>::ArrayProperty(const std::string &name,
  *  @param direction :: The direction (Input/Output/InOut) of this property
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name,
-                                const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(),
+ArrayProperty<T>::ArrayProperty(std::string name, const unsigned int direction)
+    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
                                         IValidator_sptr(new NullValidator),
                                         direction) {}
 
@@ -68,12 +67,12 @@ ArrayProperty<T>::ArrayProperty(const std::string &name,
  * the array type
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name,
-                                const std::string &values,
+ArrayProperty<T>::ArrayProperty(std::string name, const std::string &values,
                                 IValidator_sptr validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), values,
-                                        validator, direction) {}
+    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
+                                        values, std::move(validator),
+                                        direction) {}
 
 /// 'Virtual copy constructor'
 template <typename T> ArrayProperty<T> *ArrayProperty<T>::clone() const {

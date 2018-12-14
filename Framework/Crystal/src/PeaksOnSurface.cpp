@@ -66,7 +66,7 @@ void PeaksOnSurface::init() {
 
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>(
-          "Vertex4", std::vector<double>(), manditoryExtents->clone()),
+          "Vertex4", std::vector<double>(), std::move(manditoryExtents)),
       "A comma separated list of cartesian coordinates for the "
       "lower right vertex of the surface. Values to be specified "
       "in the CoordinateFrame choosen.");
