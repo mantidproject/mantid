@@ -283,10 +283,12 @@ public:
   //-----------------------------------------------------------------------------------
 
   void incGridBoxesCounter(size_t depth, size_t inc=1) {
+    std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
     m_numMDGridBoxes[depth] += inc;
   }
 
   void incBoxesCounter(size_t depth, size_t inc=1) {
+    std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
     m_numMDBoxes[depth] += inc;
   }
 
