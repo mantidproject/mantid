@@ -259,7 +259,7 @@ def get_table_workspace_names_from_ADS():
 # Co-adding
 # ------------------------------------------------------------------------------------------------------------------
 
-def flatten_run_list(self, run_list):
+def flatten_run_list(run_list):
     """
     run list might be [1,2,[3,4]] where the [3,4] are co-added
     """
