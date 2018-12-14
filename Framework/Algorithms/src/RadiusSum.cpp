@@ -58,7 +58,7 @@ void RadiusSum::init() {
       boost::make_shared<ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Centre", myInput, twoOrThreeElements),
+                      "Centre", std::move(myInput), twoOrThreeElements),
                   "Coordinate of the centre of the ring");
 
   auto nonNegative = boost::make_shared<BoundedValidator<double>>();

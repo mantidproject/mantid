@@ -68,14 +68,14 @@ void SetUB::init() {
                             "gamma", 90.0, reasonableAngle, Direction::Input),
                         "Lattice parameter gamma(degrees) ");
   this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("u", u0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("u", std::move(u0), mustBe3D),
       "Vector along k_i, when goniometer is at 0");
   this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("v", v0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("v", std::move(v0), mustBe3D),
       "In plane vector perpendicular to k_i, when goniometer is at 0");
-  this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("UB", zeroes, threeVthree),
-      "UB Matrix");
+  this->declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                            "UB", std::move(zeroes), threeVthree),
+                        "UB Matrix");
   this->declareProperty(make_unique<PropertyWithValue<int>>(
                             "MDSampleNumber", EMPTY_INT(), Direction::Input),
                         "For an MD workspace, the sample number to wich to "

@@ -56,7 +56,7 @@ void RingProfile::init() {
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      "Centre", myInput, twoOrThree),
+                      "Centre", std::move(myInput), twoOrThree),
                   "Coordinate of the centre of the ring");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<double>>();
   nonNegative->setLower(0);

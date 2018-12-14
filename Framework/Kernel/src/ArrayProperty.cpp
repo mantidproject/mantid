@@ -18,8 +18,7 @@ namespace Kernel {
  *  @param direction :: The direction (Input/Output/InOut) of this property
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name,
-                                const std::vector<T> &vec,
+ArrayProperty<T>::ArrayProperty(const std::string &name, std::vector<T> &&vec,
                                 IValidator_sptr validator,
                                 const unsigned int direction)
     : PropertyWithValue<std::vector<T>>(name, vec, validator, direction) {}

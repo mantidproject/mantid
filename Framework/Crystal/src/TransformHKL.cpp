@@ -53,8 +53,8 @@ void TransformHKL::init() {
   auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("HKLTransform",
-                                                 identity_matrix, threeBythree),
+      Kernel::make_unique<ArrayProperty<double>>(
+          "HKLTransform", std::move(identity_matrix), threeBythree),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
       "numbers");
 

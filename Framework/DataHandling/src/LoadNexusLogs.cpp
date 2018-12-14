@@ -473,8 +473,8 @@ void LoadNexusLogs::loadNPeriods(
     API::Run &run = workspace->mutableRun();
     const std::string protonChargeByPeriodLabel = "proton_charge_by_period";
     if (!run.hasProperty(protonChargeByPeriodLabel)) {
-      run.addProperty(new ArrayProperty<double>(protonChargeByPeriodLabel,
-                                                protonChargeByPeriod));
+      run.addProperty(new ArrayProperty<double>(
+          protonChargeByPeriodLabel, std::move(protonChargeByPeriod)));
     }
     file.closeGroup();
   } catch (::NeXus::Exception &) {

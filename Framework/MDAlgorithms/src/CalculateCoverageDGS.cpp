@@ -120,18 +120,18 @@ void CalculateCoverageDGS::init() {
   Q1[0] = 1.;
   Q2[1] = 1.;
   Q3[2] = 1.;
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q1Basis", Q1, mustBe3D),
-      "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q2Basis", Q2, mustBe3D),
-      "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q3Basis", Q3, mustBe3D),
-      "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Q1Basis", std::move(Q1), mustBe3D),
+                  "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Q2Basis", std::move(Q2), mustBe3D),
+                  "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Q3Basis", std::move(Q3), mustBe3D),
+                  "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
   declareProperty(
       make_unique<PropertyWithValue<double>>("IncidentEnergy", EMPTY_DBL(),
                                              mustBePositive,

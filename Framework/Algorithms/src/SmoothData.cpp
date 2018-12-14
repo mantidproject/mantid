@@ -34,7 +34,7 @@ void SmoothData::init() {
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("NPoints", npts0, min,
+      Kernel::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0), min,
                                               Direction::Input),
       "The number of points to average over (minimum 3). If an even number is\n"
       "given, it will be incremented by 1 to make it odd (default value 3)");

@@ -201,7 +201,8 @@ void SaveGSS::init() {
   std::vector<int> default_precision(3, 9);
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>(
-          "SLOGXYEPrecision", default_precision, precision_validator),
+          "SLOGXYEPrecision", std::move(default_precision),
+          precision_validator),
       "Enter 3 integers as the precisions of output X, Y and E for SLOG data "
       "only."
       "Default is (9, 9, 9) if it is left empty.  Otherwise it is not "

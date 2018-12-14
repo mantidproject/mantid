@@ -181,21 +181,23 @@ void LoadDNSSCD::init() {
                   "Angle in degrees between (HKL1) and the beam axis"
                   "if the goniometer is at zero.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("HKL1", u0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("HKL1", std::move(u0),
+                                                 mustBe3D),
       "Indices of the vector in reciprocal space in the horizontal plane at "
       "angle Omegaoffset, "
       "if the goniometer is at zero.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("HKL2", v0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("HKL2", std::move(v0),
+                                                 mustBe3D),
       "Indices of a second vector in reciprocal space in the horizontal plane "
       "not parallel to HKL1");
 
   std::vector<double> ttl(2, 0);
   ttl[1] = 180.0;
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("TwoThetaLimits", ttl,
-                                                 mustBe2D),
+      Kernel::make_unique<ArrayProperty<double>>("TwoThetaLimits",
+                                                 std::move(ttl), mustBe2D),
       "Range (min, max) of scattering angles (2theta, in degrees) to consider. "
       "Everything out of this range will be cut.");
 

@@ -29,7 +29,7 @@ namespace Kernel {
 template <typename T>
 class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
 public:
-  ArrayProperty(const std::string &name, const std::vector<T> &vec,
+  ArrayProperty(const std::string &name, std::vector<T> &&vec,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input);
   ArrayProperty(const std::string &name, IValidator_sptr validator,
