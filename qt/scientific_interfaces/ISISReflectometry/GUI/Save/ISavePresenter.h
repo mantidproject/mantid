@@ -23,17 +23,6 @@ public:
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
 
-  enum Flag {
-    populateWorkspaceListFlag,
-    filterWorkspaceListFlag,
-    workspaceParamsFlag,
-    saveWorkspacesFlag,
-    suggestSaveDirFlag,
-    autosaveEnabled,
-    autosaveDisabled,
-    savePathChanged
-  };
-
   virtual void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
@@ -43,7 +32,6 @@ public:
       std::string const &workspaceName) = 0;
 
   /// Tell the presenter something happened
-  virtual void notify(ISavePresenter::Flag flag) = 0;
   virtual void onAnyReductionPaused() = 0;
   virtual void onAnyReductionResumed() = 0;
 };

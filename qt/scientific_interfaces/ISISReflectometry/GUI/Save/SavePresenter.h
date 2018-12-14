@@ -25,12 +25,22 @@ namespace CustomInterfaces {
 SavePresenter is a presenter class for the tab 'Save ASCII' in the
 ISIS Reflectometry Interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter,
+                                                     public SaveViewSubscriber {
 public:
   SavePresenter(ISaveView *view, std::unique_ptr<IReflAsciiSaver> saver);
   /// Accept a main presenter
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
-  void notify(ISavePresenter::Flag flag) override;
+
+  void notifyPopulateWorkspaceList() override;
+  void notifyFilterWorkspaceList() override;
+  void notifyPopulateParametersList() override;
+  void notifySaveSelectedWorkspaces() override;
+  void notifySuggestSaveDir() override;
+  void notifyAutosaveDisabled() override;
+  void notifyAutosaveEnabled() override;
+  void notifySavePathChanged() override;
+
   void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;

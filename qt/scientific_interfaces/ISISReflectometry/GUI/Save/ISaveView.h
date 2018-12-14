@@ -8,12 +8,28 @@
 #define MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
 
 #include "DllConfig.h"
-#include "ISavePresenter.h"
 #include <string>
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+/**
+ISaveView is the base view class for the Reflectometry "Save ASCII"
+tab. It contains no QT specific functionality as that should be handled by a
+subclass.
+*/
+class MANTIDQT_ISISREFLECTOMETRY_DLL SaveViewSubscriber {
+public:
+  virtual void notifyPopulateWorkspaceList() = 0;
+  virtual void notifyFilterWorkspaceList() = 0;
+  virtual void notifyPopulateParametersList() = 0;
+  virtual void notifySaveSelectedWorkspaces() = 0;
+  virtual void notifySuggestSaveDir() = 0;
+  virtual void notifyAutosaveDisabled() = 0;
+  virtual void notifyAutosaveEnabled() = 0;
+  virtual void notifySavePathChanged() = 0;
+};
 
 /** @class ISaveView
 
@@ -25,7 +41,7 @@ be handled by a subclass.
 class MANTIDQT_ISISREFLECTOMETRY_DLL ISaveView {
 public:
   virtual ~ISaveView() = default;
-  virtual void subscribe(ISavePresenter *presenter) = 0;
+  virtual void subscribe(SaveViewSubscriber *notifyee) = 0;
 
   virtual std::string getSavePath() const = 0;
   virtual void setSavePath(const std::string &path) const = 0;

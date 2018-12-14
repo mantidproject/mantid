@@ -14,9 +14,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// Forward decs
-class ISavePresenter;
-
 /** SaveView : Provides an interface for the "Save ASCII" tab in the
 ISIS Reflectometry interface.
 */
@@ -29,7 +26,7 @@ public:
   /// Destructor
   ~SaveView() override;
 
-  void subscribe(ISavePresenter *presenter) override;
+  void subscribe(SaveViewSubscriber *notifyee) override;
 
   /// Returns the save path
   std::string getSavePath() const override;
@@ -102,10 +99,10 @@ public slots:
 private:
   /// Initialize the interface
   void initLayout();
-  /// The presenter
-  ISavePresenter *m_presenter;
+
   /// The widget
   Ui::SaveWidget m_ui;
+  SaveViewSubscriber *m_notifyee;
 };
 
 } // namespace CustomInterfaces

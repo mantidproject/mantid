@@ -43,6 +43,22 @@ void SavePresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
+void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }
+
+void SavePresenter::notifyFilterWorkspaceList() { filterWorkspaceNames(); }
+
+void SavePresenter::notifyPopulateParametersList() { populateParametersList(); }
+
+void SavePresenter::notifySaveSelectedWorkspaces() { saveSelectedWorkspaces(); }
+
+void SavePresenter::notifySuggestSaveDir() { suggestSaveDir(); }
+
+void SavePresenter::notifyAutosaveDisabled() { disableAutosave(); }
+
+void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
+
+void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
+
 void SavePresenter::onAnyReductionPaused() {
   populateWorkspaceList();
   m_view->enableAutosaveControls();
@@ -53,34 +69,6 @@ void SavePresenter::onAnyReductionResumed() {
   m_view->disableAutosaveControls();
   if (shouldAutosave())
     m_view->disableFileFormatAndLocationControls();
-}
-
-void SavePresenter::notify(ISavePresenter::Flag flag) {
-  switch (flag) {
-  case populateWorkspaceListFlag:
-    populateWorkspaceList();
-    break;
-  case filterWorkspaceListFlag:
-    filterWorkspaceNames();
-    break;
-  case workspaceParamsFlag:
-    populateParametersList();
-    break;
-  case saveWorkspacesFlag:
-    saveSelectedWorkspaces();
-    break;
-  case suggestSaveDirFlag:
-    suggestSaveDir();
-    break;
-  case autosaveDisabled:
-    disableAutosave();
-    break;
-  case autosaveEnabled:
-    enableAutosave();
-    break;
-  case savePathChanged:
-    onSavePathChanged();
-  }
 }
 
 void SavePresenter::enableAutosave() {

@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SaveView.h"
-#include "SavePresenter.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -17,13 +16,13 @@ namespace CustomInterfaces {
 /** Constructor
  * @param parent :: The parent of this view
  */
-SaveView::SaveView(QWidget *parent) : m_presenter(nullptr) {
+SaveView::SaveView(QWidget *parent) : m_notifyee(nullptr) {
   UNUSED_ARG(parent);
   initLayout();
 }
 
-void SaveView::subscribe(ISavePresenter *presenter) {
-  m_presenter = presenter;
+void SaveView::subscribe(SaveViewSubscriber *notifyee) {
+  m_notifyee = notifyee;
   populateListOfWorkspaces();
   suggestSaveDir();
 }
@@ -62,15 +61,13 @@ void SaveView::browseToSaveDirectory() {
   }
 }
 
-void SaveView::onSavePathChanged() {
-  m_presenter->notify(ISavePresenter::Flag::savePathChanged);
-}
+void SaveView::onSavePathChanged() { m_notifyee->notifySavePathChanged(); }
 
 void SaveView::onAutosaveChanged(int state) {
   if (state == Qt::CheckState::Checked)
-    m_presenter->notify(ISavePresenter::Flag::autosaveEnabled);
+    m_notifyee->notifyAutosaveEnabled();
   else
-    m_presenter->notify(ISavePresenter::Flag::autosaveDisabled);
+    m_notifyee->notifyAutosaveDisabled();
 }
 
 void SaveView::disableAutosaveControls() {
@@ -218,32 +215,30 @@ void SaveView::setParametersList(const std::vector<std::string> &logs) const {
 /** Populate the 'List of workspaces' widget
  */
 void SaveView::populateListOfWorkspaces() const {
-  m_presenter->notify(ISavePresenter::populateWorkspaceListFlag);
+  m_notifyee->notifyPopulateWorkspaceList();
 }
 
 /** Filter the 'List of workspaces' widget
  */
 void SaveView::filterWorkspaceList() const {
-  m_presenter->notify(ISavePresenter::filterWorkspaceListFlag);
+  m_notifyee->notifyFilterWorkspaceList();
 }
 
 /** Request for the parameters of a workspace
  */
 void SaveView::requestWorkspaceParams() const {
-  m_presenter->notify(ISavePresenter::workspaceParamsFlag);
+  m_notifyee->notifyPopulateParametersList();
 }
 
 /** Save selected workspaces
  */
 void SaveView::saveWorkspaces() const {
-  m_presenter->notify(ISavePresenter::saveWorkspacesFlag);
+  m_notifyee->notifySaveSelectedWorkspaces();
 }
 
 /** Suggest a save directory
  */
-void SaveView::suggestSaveDir() const {
-  m_presenter->notify(ISavePresenter::suggestSaveDirFlag);
-}
+void SaveView::suggestSaveDir() const { m_notifyee->notifySuggestSaveDir(); }
 
 void SaveView::error(const std::string &title, const std::string &prompt) {
   QMessageBox::critical(this, QString::fromStdString(title),
