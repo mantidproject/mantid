@@ -12,9 +12,9 @@ class myToolbar(NavigationToolbar):
         super(myToolbar, self).__init__(*args, **kwargs)
         self.layout().takeAt(5)  # or more than 1 if you have more buttons
         pm = QtGui.QPixmap()
-        ic = QtGui.QIcon(pm)
+        #ic = QtGui.QIcon(pm)
         # self.add = self.addAction(ic, "Add line")
-        #self.rm = self.addAction(ic, "Remove line")
+        # self.rm = self.addAction(ic, "Remove line")
 
     def setAddConnection(self, slot):
         self.add.triggered.connect(slot)

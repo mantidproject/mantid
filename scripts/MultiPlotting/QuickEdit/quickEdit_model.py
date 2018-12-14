@@ -10,8 +10,10 @@ from MultiPlotting.multiPlotting_context import *
 
 # use axis changer object later
 
-class QuickEditModel(object ):
-    def __init__(self,context):
+
+class QuickEditModel(object):
+
+    def __init__(self, context):
         self._context = context
 
     def getSubContext(self):
@@ -21,5 +23,5 @@ class QuickEditModel(object ):
         return subContext
 
     def updateContext(self, subContext):
-        self._context.set(xBounds, subContext["x bounds"]) 
-        self._context.set(yBounds, subContext["y bounds"]) 
+        self._context.set(xBounds, subContext["x bounds"])
+        self._context.set(yBounds, subContext["y bounds"])

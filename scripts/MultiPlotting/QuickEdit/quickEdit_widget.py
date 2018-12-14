@@ -6,52 +6,54 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
-from qtpy import QtWidgets
 
 from MultiPlotting.QuickEdit.quickEdit_view import QuickEditView
 from MultiPlotting.QuickEdit.quickEdit_model import QuickEditModel
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 
+
 class QuickEditWidget(object):
-    def __init__(self,context,parent=None):
+
+    def __init__(self, context, parent=None):
         view = QuickEditView(None, parent)
         model = QuickEditModel(context)
-        self._presenter = QuickEditPresenter(view,model)
+        self._presenter = QuickEditPresenter(view, model)
 
     @property
     def widget(self):
         return self._presenter.widget
     """ connect statements"""
-    def connect_autoscale_changed(self,slot):
+
+    def connect_autoscale_changed(self, slot):
         self._presenter.connect_autoscale_changed(slot)
 
-    def connect_errors_changed(self,slot):
+    def connect_errors_changed(self, slot):
         self._presenter.connect_errors_changed(slot)
 
-    def connect_x_range_changed(self,slot):
+    def connect_x_range_changed(self, slot):
         self._presenter.connect_x_range_changed(slot)
 
-    def connect_y_range_changed(self,slot):
+    def connect_y_range_changed(self, slot):
         self._presenter.connect_y_range_changed(slot)
 
-    def connect_plot_selection(self,slot):
+    def connect_plot_selection(self, slot):
         self._presenter.connect_plot_selection(slot)
     # add subplot
-    def add_subplot(self,name):
+
+    def add_subplot(self, name):
         self._presenter.add_subplot(name)
 
     def get_selection(self):
         name = self._presenter.widget.current_selection()
         if name == "All":
-           return self._presenter.all()
-        return [name] 
+            return self._presenter.all()
+        return [name]
 
-    def set_plot_x_range(self,range):
+    def set_plot_x_range(self, range):
         self._presenter.set_plot_x_range(range)
 
-    def set_plot_y_range(self,range):
+    def set_plot_y_range(self, range):
         self._presenter.set_plot_y_range(range)
 
-    def set_errors(self,state):
+    def set_errors(self, state):
         self._presenter.set_errors(state)
-

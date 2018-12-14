@@ -30,7 +30,7 @@ class AxisChangerView(QtWidgets.QWidget):
         layout.addWidget(self.upper_bound)
         self.setLayout(layout)
 
-    def set_enabled(self,state):
+    def set_enabled(self, state):
         self.lower_bound.setDisabled(state)
         self.upper_bound.setDisabled(state)
 
@@ -68,5 +68,3 @@ class AxisChangerView(QtWidgets.QWidget):
 
     def unreg_bound_changed(self, slot):
         self.sig_bound_changed.disconnect(slot)
-
- 

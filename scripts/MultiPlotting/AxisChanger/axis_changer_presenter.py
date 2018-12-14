@@ -5,12 +5,15 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+
 class AxisChangerPresenter(object):
+
     def __init__(self, view):
         self.view = view
 
-    def set_enabled(self,state):
+    def set_enabled(self, state):
         self.view.set_enabled(state)
+
     def hide(self):
         self.view.hide()
 
