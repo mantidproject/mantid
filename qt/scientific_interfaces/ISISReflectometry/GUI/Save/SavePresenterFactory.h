@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_SAVEPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_SAVEPRESENTERFACTORY_H
-#include "DllConfig.h"
+#include "../../DllConfig.h"
+#include "../../ReflAsciiSaver.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
-#include "ReflAsciiSaver.h"
 #include "SavePresenter.h"
 #include <memory>
 

@@ -29,6 +29,13 @@ public:
   virtual ~RunsTableViewSubscriber() = default;
 };
 
+/** @class ISaveView
+
+IRunsTableView is the base view class for the table component of the "Runs" tab
+in the
+Reflectometry Interface. It contains no QT specific functionality as that should
+be handled by a subclass.
+*/
 class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsTableView {
 public:
   virtual void invalidSelectionForCopy() = 0;

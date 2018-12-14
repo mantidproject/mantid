@@ -7,11 +7,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
 
-#include "DllConfig.h"
-#include "IReflAsciiSaver.h"
+#include "../../DllConfig.h"
+#include "../../IReflAsciiSaver.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
-#include <MantidKernel/ConfigPropertyObserver.h>
+#include "MantidKernel/ConfigPropertyObserver.h"
 #include <boost/optional.hpp>
 #include <memory>
 #include <string>

@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SavePresenter.h"
-#include "IReflMainWindowPresenter.h"
+#include "../../IReflMainWindowPresenter.h"
 #include "ISaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
