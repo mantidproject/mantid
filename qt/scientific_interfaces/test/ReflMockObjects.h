@@ -7,17 +7,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "../ISISReflectometry/IEventPresenter.h"
-#include "../ISISReflectometry/IEventView.h"
+#include "../ISISReflectometry/GUI/RunsTable/IRunsTableView.h"
 #include "../ISISReflectometry/IReflAsciiSaver.h"
+#include "../ISISReflectometry/IReflBatchPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowView.h"
 #include "../ISISReflectometry/IReflRunsTabPresenter.h"
 #include "../ISISReflectometry/IReflRunsTabView.h"
-#include "../ISISReflectometry/IReflSettingsTabPresenter.h"
-#include "../ISISReflectometry/IReflSettingsView.h"
-#include "../ISISReflectometry/ISavePresenter.h"
-#include "../ISISReflectometry/ISaveView.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -52,27 +48,7 @@ public:
 class MockRunsTabView : public IReflRunsTabView {
 public:
   MockRunsTabView() {
-    ON_CALL(*this, tableViews())
-        .WillByDefault(testing::ReturnRef(m_tableViews));
-  }
-
-  // Gmock requires parameters and return values of mocked methods to be
-  // copyable
-  // We can't mock setTableCommands(std::vector<Command_uptr>)
-  // because
-  // of the vector of unique pointers
-  // I will mock a proxy method, setTableCommandsProxy, I just want to test that
-  // this method is invoked by the presenter's constructor
-  virtual void setTableCommands(
-      std::vector<MantidQt::MantidWidgets::DataProcessor::Command_uptr>)
-      override {
-    setTableCommandsProxy();
-  }
-  // The same happens for setRowCommands
-  virtual void setRowCommands(
-      std::vector<MantidQt::MantidWidgets::DataProcessor::Command_uptr>)
-      override {
-    setRowCommandsProxy();
+    ON_CALL(*this, table()).WillByDefault(testing::Return(m_tableView));
   }
 
   // IO
@@ -97,7 +73,7 @@ public:
   MOCK_METHOD1(setTransferButtonEnabled, void(bool));
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
   MOCK_METHOD1(subscribe, void(IReflRunsTabPresenter *));
-  MOCK_CONST_METHOD0(tableViews, std::vector<IBatchView *> const &());
+  MOCK_CONST_METHOD0(table, IRunsTableView *());
   MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
   MOCK_METHOD1(setStartMonitorButtonEnabled, void(bool));
@@ -115,55 +91,7 @@ public:
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
 
 private:
-  std::vector<IBatchView *> m_tableViews;
-};
-
-class MockEventView : public IReflEventView {
-public:
-  // Global options
-  MOCK_METHOD1(enableSliceType, void(SliceType));
-  MOCK_METHOD1(disableSliceType, void(SliceType));
-  MOCK_METHOD0(enableSliceTypeSelection, void());
-  MOCK_METHOD0(disableSliceTypeSelection, void());
-  MOCK_CONST_METHOD0(getLogValueTimeSlicingValues, std::string());
-  MOCK_CONST_METHOD0(getCustomTimeSlicingValues, std::string());
-  MOCK_CONST_METHOD0(getUniformTimeSlicingValues, std::string());
-  MOCK_CONST_METHOD0(getUniformEvenTimeSlicingValues, std::string());
-  MOCK_CONST_METHOD0(getLogValueTimeSlicingType, std::string());
-
-  // Calls we don't care about
-  IReflEventPresenter *getPresenter() const override { return nullptr; }
-};
-
-class MockSaveTabView : public ISaveView {
-public:
-  MOCK_CONST_METHOD1(setSavePath, void(const std::string &path));
-  MOCK_CONST_METHOD0(getSavePath, std::string());
-  MOCK_CONST_METHOD0(getPrefix, std::string());
-  MOCK_CONST_METHOD0(getFilter, std::string());
-  MOCK_CONST_METHOD0(getRegexCheck, bool());
-  MOCK_CONST_METHOD0(getCurrentWorkspaceName, std::string());
-  MOCK_CONST_METHOD0(getSelectedWorkspaces, std::vector<std::string>());
-  MOCK_CONST_METHOD0(getSelectedParameters, std::vector<std::string>());
-  MOCK_CONST_METHOD0(getFileFormatIndex, int());
-  MOCK_CONST_METHOD0(getTitleCheck, bool());
-  MOCK_CONST_METHOD0(getQResolutionCheck, bool());
-  MOCK_CONST_METHOD0(getSeparator, std::string());
-  MOCK_CONST_METHOD0(clearWorkspaceList, void());
-  MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
-  MOCK_CONST_METHOD0(clearParametersList, void());
-  MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
-  MOCK_CONST_METHOD0(getAutosavePrefixInput, std::string());
-  MOCK_METHOD1(subscribe, void(ISavePresenter *));
-  MOCK_METHOD0(disallowAutosave, void());
-  MOCK_METHOD0(disableAutosaveControls, void());
-  MOCK_METHOD0(enableAutosaveControls, void());
-  MOCK_METHOD0(enableFileFormatAndLocationControls, void());
-  MOCK_METHOD0(disableFileFormatAndLocationControls, void());
-  MOCK_METHOD2(giveUserCritical,
-               void(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
-  virtual ~MockSaveTabView() = default;
+  IRunsTableView *m_tableView;
 };
 
 class MockMainWindowView : public IReflMainWindowView {
@@ -185,134 +113,20 @@ public:
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
   MOCK_CONST_METHOD0(isAutoreducing, bool());
-  MOCK_CONST_METHOD1(isAutoreducing, bool(int));
-  MOCK_METHOD1(settingsChanged, void(int));
+  MOCK_METHOD0(settingsChanged, void());
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
-  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
+  void acceptMainPresenter(IReflBatchPresenter *presenter) override {
     UNUSED_ARG(presenter);
   }
-  bool isProcessing(int) const override { return false; }
   bool isProcessing() const override { return false; }
   ~MockRunsTabPresenter() override{};
 };
 
-class MockEventPresenter : public IReflEventPresenter {
-public:
-  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
-  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
-  MOCK_METHOD1(acceptTabPresenter, void(IEventPresenter *));
-  MOCK_METHOD0(onReductionPaused, void());
-  MOCK_METHOD0(onReductionResumed, void());
-  MOCK_METHOD1(notifySliceTypeChanged, void(SliceType));
-  MOCK_METHOD0(notifySettingsChanged, void());
-  ~MockEventPresenter() override{};
-};
-
-class MockEventPresenter : public IEventPresenter {
-public:
-  std::string getTimeSlicingValues(int) const override { return std::string(); }
-  std::string getTimeSlicingType(int) const override { return std::string(); }
-  MOCK_METHOD1(acceptMainPresenter, void(IReflMainWindowPresenter *));
-  MOCK_METHOD1(settingsChanged, void(int));
-  MOCK_METHOD1(onReductionPaused, void(int));
-  MOCK_METHOD1(onReductionResumed, void(int));
-
-  ~MockEventPresenter() override{};
-};
-
-class MockSettingsPresenter : public IReflSettingsPresenter {
-public:
-  MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
-  MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
-  MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
-  MOCK_CONST_METHOD0(getReductionOptions, OptionsQMap());
-  MOCK_CONST_METHOD0(getStitchOptions, std::string());
-  MOCK_METHOD0(onReductionPaused, void());
-  MOCK_METHOD0(onReductionResumed, void());
-  MOCK_METHOD1(acceptTabPresenter, void(IReflSettingsTabPresenter *));
-  MOCK_METHOD1(setInstrumentName, void(const std::string &));
-  void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
-  IAlgorithm_sptr createReductionAlg() override {
-    return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-  }
-  ~MockSettingsPresenter() override{};
-};
-
-class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
-public:
-  MOCK_CONST_METHOD2(getOptionsForAngle, OptionsQMap(int, const double));
-  MOCK_CONST_METHOD1(hasPerAngleOptions, bool(int));
-  MOCK_CONST_METHOD0(getTransmissionOptions, OptionsQMap());
-  MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
-  MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
-  MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
-  MOCK_METHOD1(acceptMainPresenter, void(IReflMainWindowPresenter *));
-  MOCK_METHOD1(settingsChanged, void(int));
-  void setInstrumentName(const std::string &instName) override {
-    UNUSED_ARG(instName);
-  };
-  MOCK_METHOD1(onReductionPaused, void(int));
-  MOCK_METHOD1(onReductionResumed, void(int));
-  ~MockSettingsTabPresenter() override{};
-};
-
-class MockSaveTabPresenter : public ISavePresenter {
-public:
-  MOCK_METHOD2(completedRowReductionSuccessfully,
-               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
-                    std::string const &));
-  MOCK_METHOD2(completedGroupReductionSuccessfully,
-               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
-                    std::string const &));
-  void notify(ISavePresenter::Flag flag) override { UNUSED_ARG(flag); };
-  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
-    UNUSED_ARG(presenter);
-  };
-
-  MOCK_METHOD0(onAnyReductionPaused, void());
-  MOCK_METHOD0(onAnyReductionResumed, void());
-  ~MockSaveTabPresenter() override{};
-};
-
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD2(getOptionsForAngle, OptionsQMap(int, const double));
-  MOCK_CONST_METHOD1(hasPerAngleOptions, bool(int));
-  MOCK_CONST_METHOD1(getTransmissionOptions, OptionsQMap(int));
-  MOCK_CONST_METHOD1(getReductionOptions, OptionsQMap(int));
-  MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
-  MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
-  MOCK_CONST_METHOD0(getInstrumentName, std::string());
-  MOCK_METHOD2(completedRowReductionSuccessfully,
-               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
-                    std::string const &));
-  MOCK_METHOD2(completedGroupReductionSuccessfully,
-               void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
-                    std::string const &));
-  MOCK_METHOD1(notify, void(IReflMainWindowPresenter::Flag));
-  MOCK_METHOD1(notifyReductionPaused, void(int));
-  MOCK_METHOD1(notifyReductionResumed, void(int));
-  MOCK_METHOD3(askUserString,
-               std::string(const std::string &, const std::string &,
-                           const std::string &));
-  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserCritical,
-               void(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   MOCK_METHOD1(settingsChanged, void(int));
-  // Other calls we don't care about
-  std::string getTimeSlicingValues(int group) const override {
-    UNUSED_ARG(group);
-    return std::string();
-  }
-  std::string getTimeSlicingType(int group) const override {
-    UNUSED_ARG(group);
-    return std::string();
-  }
   bool isProcessing() const override { return false; }
-  bool isProcessing(int) const override { return false; }
 
   ~MockMainWindowPresenter() override{};
 };
