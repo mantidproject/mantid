@@ -12,6 +12,7 @@ import os.path
 
 from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace
 from mantid.dataobjects import MDHistoWorkspace
+from mantid import logger
 
 
 class WorkspaceSaver(object):
@@ -38,16 +39,22 @@ class WorkspaceSaver(object):
         for workspace_name in workspaces_to_save:
             # Get the workspace from the ADS
             workspace = ADS.retrieve(workspace_name)
-            place_to_save_workspace = os.path.join(self.directory + '/' + workspace_name)
+            place_to_save_workspace = os.path.join(self.directory, workspace_name)
 
             from mantid.simpleapi import SaveMD, SaveNexusProcessed
 
-            if isinstance(workspace, MDHistoWorkspace) or isinstance(workspace, IMDEventWorkspace):
-                # Save normally using SaveMD
-                SaveMD(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
-            else:
-                # Save normally using SaveNexusProcessed
-                SaveNexusProcessed(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
+            try:
+                if isinstance(workspace, MDHistoWorkspace) or isinstance(workspace, IMDEventWorkspace):
+                    # Save normally using SaveMD
+                    SaveMD(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
+                else:
+                    # Save normally using SaveNexusProcessed
+                    SaveNexusProcessed(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
+            except BaseException as exception:
+                if isinstance(exception, KeyboardInterrupt):
+                    raise KeyboardInterrupt
+                else:
+                    logger.warning("Couldn't save workspace in project: " + workspace)
 
             self.output_list.append(workspace_name)
 
