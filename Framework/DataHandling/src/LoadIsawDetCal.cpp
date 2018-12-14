@@ -57,11 +57,10 @@ void LoadIsawDetCal::init() {
       "The input filename of the ISAW DetCal file (Two files "
       "allowed for SNAP) ");
 
-  declareProperty(
-      Kernel::make_unique<API::FileProperty>(
-          "Filename2", "", API::FileProperty::OptionalLoad, exts),
-      "The input filename of the second ISAW DetCal file (West "
-      "banks for SNAP) ");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename2", "", API::FileProperty::OptionalLoad, exts),
+                  "The input filename of the second ISAW DetCal file (West "
+                  "banks for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }
