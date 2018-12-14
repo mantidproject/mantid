@@ -32,7 +32,7 @@ namespace API {
  * anyChangeHandle and anything done in that overriden method will happen
  * every time something changes in the AnalysisDataService.
  *
- * This works in both C++ and Python, some functionality is limited in 
+ * This works in both C++ and Python, some functionality is limited in
  * python, but the handlers will all be called.
  */
 
