@@ -17,10 +17,11 @@
 
 using namespace Mantid::API;
 
-class MockInheritingClass : public Mantid::API::AnalysisDataServiceObserver {
+class FakeAnalysisDataServiceObserver
+    : public Mantid::API::AnalysisDataServiceObserver {
 
 public:
-  MockInheritingClass()
+  FakeAnalysisDataServiceObserver()
       : m_anyChangeHandleCalled(false), m_addHandleCalled(false),
         m_replaceHandleCalled(false), m_deleteHandleCalled(false),
         m_clearHandleCalled(false), m_renameHandleCalled(false),
@@ -29,7 +30,7 @@ public:
     this->observeAll(false);
   }
 
-  ~MockInheritingClass() { this->observeAll(false); }
+  ~FakeAnalysisDataServiceObserver() { this->observeAll(false); }
 
   void anyChangeHandle() override { m_anyChangeHandleCalled = true; }
   void addHandle(const std::string &wsName, const Workspace_sptr &ws) override {
@@ -84,7 +85,7 @@ public:
 class AnalysisDataServiceObserverTest : public CxxTest::TestSuite {
 private:
   AnalysisDataServiceImpl &ads;
-  std::unique_ptr<MockInheritingClass> m_mockInheritingClass;
+  std::unique_ptr<FakeAnalysisDataServiceObserver> m_mockInheritingClass;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -98,16 +99,15 @@ public:
 
   AnalysisDataServiceObserverTest()
       : ads(AnalysisDataService::Instance()),
-        m_mockInheritingClass(std::make_unique<MockInheritingClass>()) {
+        m_mockInheritingClass(
+            std::make_unique<FakeAnalysisDataServiceObserver>()) {
     // Loads the framework manager
-    const auto &localFrameWorkManager =
-        Mantid::API::FrameworkManager::Instance();
-    UNUSED_ARG(localFrameWorkManager)
+    Mantid::API::FrameworkManager::Instance();
   }
 
   void setUp() override {
     ads.clear();
-    m_mockInheritingClass = std::make_unique<MockInheritingClass>();
+    m_mockInheritingClass = std::make_unique<FakeAnalysisDataServiceObserver>();
   }
 
   void addWorkspaceToADS(std::string name = "dummy") {

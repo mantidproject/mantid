@@ -28,6 +28,12 @@ AnalysisDataServiceObserver::~AnalysisDataServiceObserver() {
 // Observe Methods
 // ------------------------------------------------------------
 
+/**
+ * @brief Function will turn on/off all observers for the ADS
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeAll(bool turnOn) {
   this->observeAdd(turnOn);
   this->observeReplace(turnOn);
@@ -39,6 +45,13 @@ void AnalysisDataServiceObserver::observeAll(bool turnOn) {
   this->observeGroupUpdate(turnOn);
 }
 
+/**
+ * @brief Function will add/remove the observer to the ADS for if a workspace is
+ * added to it.
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeAdd(bool turnOn) {
   if (turnOn && !m_observingAdd) {
     AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -50,6 +63,13 @@ void AnalysisDataServiceObserver::observeAdd(bool turnOn) {
   m_observingAdd = turnOn;
 }
 
+/**
+ * @brief Function will add/remove the observer to the ADS for if a workspace is
+ * replaced
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeReplace(bool turnOn) {
   if (turnOn && !m_observingReplace) {
     AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -61,6 +81,13 @@ void AnalysisDataServiceObserver::observeReplace(bool turnOn) {
   m_observingReplace = turnOn;
 }
 
+/**
+ * @brief Function will add/remove the observer to the ADS for if a workspace is
+ * deleted.
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeDelete(bool turnOn) {
   if (turnOn && !m_observingDelete) {
     AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -72,6 +99,13 @@ void AnalysisDataServiceObserver::observeDelete(bool turnOn) {
   m_observingDelete = turnOn;
 }
 
+/**
+ * @brief Function will add/remove the observer to the ADS for if the ADS is
+ * cleared.
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeClear(bool turnOn) {
   if (turnOn && !m_observingClear) {
     AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -83,6 +117,13 @@ void AnalysisDataServiceObserver::observeClear(bool turnOn) {
   m_observingClear = turnOn;
 }
 
+/**
+ * @brief Function will add/remove the observer to the ADS for if a workspace is
+ * renamed
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeRename(bool turnOn) {
   if (turnOn && !m_observingRename) {
     AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -93,6 +134,14 @@ void AnalysisDataServiceObserver::observeRename(bool turnOn) {
   }
   m_observingRename = turnOn;
 }
+
+/**
+ * @brief Function will add/remove the observer to the ADS for if a group is
+ * added/created in the ADS
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeGroup(bool turnOn) {
   if (turnOn && !m_observingGroup) {
     AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -104,6 +153,13 @@ void AnalysisDataServiceObserver::observeGroup(bool turnOn) {
   m_observingGroup = turnOn;
 }
 
+/**
+ * @brief Function will add/remove the observer to the ADS for if a group is
+ * removed/delete from the ADS
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeUnGroup(bool turnOn) {
   if (turnOn && !m_observingUnGroup) {
     AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -115,6 +171,13 @@ void AnalysisDataServiceObserver::observeUnGroup(bool turnOn) {
   m_observingUnGroup = turnOn;
 }
 
+/**
+ * @brief Function will add/remove the observer to the ADS for if a workspace is
+ * added to a group or removed.
+ *
+ * @param turnOn bool; if this is True then if not already present the observer
+ * will be added else removed if it's false.
+ */
 void AnalysisDataServiceObserver::observeGroupUpdate(bool turnOn) {
   if (turnOn && !m_observingGroupUpdate) {
     AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -129,44 +192,104 @@ void AnalysisDataServiceObserver::observeGroupUpdate(bool turnOn) {
 // ------------------------------------------------------------
 // Virtual Methods
 // ------------------------------------------------------------
+/**
+ * @brief If anyChange to the ADS occurs then this function will trigger, works
+ * by overloading this class and overriding this function.
+ */
+void AnalysisDataServiceObserver::anyChangeHandle() {}
+
+/**
+ * @brief If a workspace is added to the ADS, then this function will trigger,
+ * works by overloading this class and overriding this function.
+ *
+ * @param wsName std::string; the name of the workspace added
+ * @param ws Workspace_sptr; the Workspace that is added
+ */
 void AnalysisDataServiceObserver::addHandle(
     const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
+/**
+ * @brief If a workspace is replaced in the ADS, then this function will
+ * trigger, works by overloading this class and overriding this function
+ *
+ * @param wsName std::string; the name of the workspace replacing
+ * @param ws Workspace_sptr; the Workspace that is replacing
+ */
 void AnalysisDataServiceObserver::replaceHandle(
     const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
+/**
+ * @brief If a workspace is deleted from the ADS, then this function will
+ * trigger, works by overloading this class and overriding this function
+ *
+ * @param wsName std::string; the name of the workspace
+ * @param ws Workspace_sptr; the Workspace that is deleted
+ */
 void AnalysisDataServiceObserver::deleteHandle(
     const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
+/**
+ * @brief If the ADS is cleared, then this function will trigger, works by
+ * overloading this class and overriding this function
+ */
 void AnalysisDataServiceObserver::clearHandle() {}
 
+/**
+ * @brief If a workspace is renamed in the ADS, then this function will trigger,
+ * works by overloading this class and overriding this function
+ *
+ * @param wsName std::string; the name of the workspace
+ * @param newName std::string; the new name of the workspace
+ */
 void AnalysisDataServiceObserver::renameHandle(const std::string &wsName,
                                                const std::string &newName) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(newName)
 }
 
+/**
+ * @brief If a group is created/added to the ADS, then this function will
+ * trigger, works by overloading this class and overriding this function
+ *
+ * @param wsName std::string; the name of the workspace
+ * @param ws Workspace_sptr; the WorkspaceGroup that was added/created
+ */
 void AnalysisDataServiceObserver::groupHandle(const std::string &wsName,
                                               const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
+/**
+ * @brief If a group is removed from the ADS, then this function will trigger,
+ * works by overloading this class and overriding this function
+ *
+ * @param wsName std::string; the name of the workspace
+ * @param ws Workspace_sptr; the WorkspaceGroup that was ungrouped
+ */
 void AnalysisDataServiceObserver::unGroupHandle(const std::string &wsName,
                                                 const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)
   UNUSED_ARG(ws)
 }
 
+/**
+ * @brief If a group has a workspace added/removed in the ADS, then this
+ * function will trigger, works by overloading this class and overriding this
+ * function.
+ *
+ * @param wsName std::string; the name of the workspace
+ * @param ws Workspace_sptr; the WorkspaceGroup that was updated
+ */
 void AnalysisDataServiceObserver::groupUpdateHandle(const std::string &wsName,
                                                     const Workspace_sptr &ws) {
   UNUSED_ARG(wsName)

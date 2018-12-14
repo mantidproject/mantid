@@ -52,12 +52,13 @@ from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
+from mantidqt.project.project import Project  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
 
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
-
+from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 
 # -----------------------------------------------------------------------------
 # Create the application instance early, set the application name for window
@@ -211,8 +212,6 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project object
-        from mantidqt.project.project import Project
-        from workbench.plotting.globalfiguremanager import GlobalFigureManager
         self.project = Project(GlobalFigureManager)
 
         # uses default configuration as necessary
@@ -416,6 +415,8 @@ class MainWindow(QMainWindow):
         if not self.project.saved:
             # Offer save
             if self.project.offer_save(self):
+                # Cancel has been clicked
+                event.ignore()
                 return
 
         # Close editors
