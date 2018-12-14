@@ -5,28 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-
-from mantid.api import WorkspaceGroup
-
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 import Muon.GUI.Common.utilities.load_utils as load_utils
-
-
-def is_workspace_group(workspace):
-    return isinstance(workspace, WorkspaceGroup)
-
-
-def get_run_from_multi_period_data(workspace_list):
-    """
-    Checks if multi-period data has a single consistent
-    run number and returns it, otherwise raises ValueError.
-    """
-    runs = [ws.getRunNumber() for ws in workspace_list]
-    unique_runs = list(set(runs))
-    if len(unique_runs) != 1:
-        raise ValueError("Multi-period data contains >1 unique run number.")
-    else:
-        return unique_runs[0]
 
 
 def exception_message_for_failed_files(failed_file_list):
