@@ -57,7 +57,7 @@ protected:
 private:
   using Base::exec;
   using Base::init;
-  // region of intreset
+  // region of intereset
   std::vector<bool> createRoiVector(const std::string &seltubes,
                                     const std::string &maskfile);
 
@@ -109,6 +109,7 @@ protected:
 
 // Implemented the two classes explicitly rather than through specialization as
 // the instantiation and linking did not behave consistently across platforms.
+
 extern template class LoadEMU<Kernel::FileDescriptor>;
 extern template class LoadEMU<Kernel::NexusDescriptor>;
 

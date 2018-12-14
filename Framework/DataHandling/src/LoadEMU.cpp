@@ -35,9 +35,6 @@
 namespace Mantid {
 namespace DataHandling {
 
-// using LoadEMUHdf = LoadEMU<Kernel::NexusDescriptor>;
-// using LoadEMUTar = LoadEMU<Kernel::FileDescriptor>;
-
 namespace {
 
 // number of physical detectors
@@ -1176,11 +1173,13 @@ template <typename FD> void LoadEMU<FD>::loadInstrument() {
   loadInstrumentAlg->executeAsChildAlg();
 }
 
-//--- explicit instantiation and class specialization -------
+//--------- explicit template instantiation -----------
 
 // Instantiate base class for LoadEMU's
 template class LoadEMU<Kernel::FileDescriptor>;
 template class LoadEMU<Kernel::NexusDescriptor>;
+
+// -------- EMU Hdf loader -----------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadEMUHdf::version() const { return 1; }
@@ -1277,6 +1276,8 @@ void LoadEMUHdf::exec() {
   LoadEMU<Kernel::NexusDescriptor>::exec(hdfFile, evtPath);
 }
 
+// -------- EMU Tar loader -----------------------
+
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadEMUTar::version() const { return 1; }
 
@@ -1292,7 +1293,7 @@ const std::string LoadEMUTar::name() const { return "LoadEMU"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadEMUTar::summary() const {
-  return "Loads an EMU tar file, that contains the Hdf and event file, into a "
+  return "Loads an EMU tar file, containing the Hdf and event file, into a "
          "workspace.";
 }
 

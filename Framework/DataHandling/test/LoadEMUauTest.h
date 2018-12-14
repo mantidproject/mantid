@@ -15,12 +15,16 @@
 #include <Poco/Path.h>
 #include <Poco/TemporaryFile.h>
 
+#ifdef _MSC_VER
+// Disable warning on 'no suitable definition ..' as the extern 
+// does not clear the warning. No issue linking. 
+#pragma warning(disable : 4661)
+#endif
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-
-extern template class Mantid::DataHandling::LoadEMU<FileDescriptor>;
 
 class LoadEMUauTest : public CxxTest::TestSuite {
 public:
