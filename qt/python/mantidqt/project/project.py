@@ -9,7 +9,6 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
-import re
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
@@ -31,12 +30,19 @@ class Project(AnalysisDataServiceObserver):
 
         self.project_file_ext = ".mtdproj"
 
+    def __get_saved(self):
+        return self.__saved
+
+    saved = property(__get_saved)
+
     def save(self):
+        """
+        The function that is called if the save button is clicked on the mainwindow
+        :return: None; if the user cancels
+        """
         if self.last_project_location is None:
-            self.save_as()
+            return self.save_as()
         else:
-            # Clear unused workspaces
-            self._clear_unused_workspaces(self.last_project_location)
             # Actually save
             workspaces_to_save = AnalysisDataService.getObjectNames()
             project_saver = ProjectSaver(self.project_file_ext)
@@ -45,6 +51,10 @@ class Project(AnalysisDataServiceObserver):
             self.__saved = True
 
     def save_as(self):
+        """
+        The function that is called if the save as... button is clicked on the mainwindow
+        :return: None; if the user cancels.
+        """
         directory = self._get_directory_finder(accept_mode=QFileDialog.AcceptSave)
 
         # If none then the user cancelled
@@ -74,6 +84,10 @@ class Project(AnalysisDataServiceObserver):
         return directory
 
     def load(self):
+        """
+        The event that is called when open project is clicked on the main window
+        :return: None; if the user cancelled.
+        """
         directory = self._get_directory_finder(accept_mode=QFileDialog.AcceptOpen)
 
         # If none then the user cancelled
@@ -87,7 +101,8 @@ class Project(AnalysisDataServiceObserver):
     def offer_save(self, parent):
         """
         :param parent: QWidget; Parent of the QMessageBox that is popped up
-        :return: Bool; Returns false if no save needed/save complete. Returns True if need to cancel closing.
+        :return: Bool; Returns false if no save needed/save complete. Returns True if need to cancel closing. However
+                        will return None if self.__saved is false
         """
         # If the current project is saved then return and don't do anything
         if self.__saved:
@@ -99,7 +114,7 @@ class Project(AnalysisDataServiceObserver):
             self.save()
         elif result == QMessageBox.Cancel:
             return True
-        # else
+        # if yes or no return false
         return False
 
     @staticmethod
@@ -112,27 +127,8 @@ class Project(AnalysisDataServiceObserver):
         self.__saved = False
 
     def anyChangeHandle(self):
+        """
+        The method that will be triggered if any of the changes in the ADS have occurred, that are checked for using the
+        AnalysisDataServiceObserver class' observeAll method
+        """
         self.modified_project()
-
-    def __get_saved(self):
-        return self.__saved
-
-    saved = property(__get_saved)
-
-    @staticmethod
-    def _clear_unused_workspaces(path):
-        files_to_remove = []
-        list_dir = os.listdir(path)
-        current_workspaces = AnalysisDataService.getObjectNames()
-        for item in list_dir:
-            # Don't count or check files that do not end in .nxs, and check that they are not in current workspaces
-            # without the .nxs
-            value = re.search('.nxs$', item)
-            if bool(value):
-                workspace_name = item.replace(".nxs", "")
-                if workspace_name not in current_workspaces:
-                    files_to_remove.append(item)
-
-        # Actually remove them
-        for filename in files_to_remove:
-            os.remove(path + "/" + filename)

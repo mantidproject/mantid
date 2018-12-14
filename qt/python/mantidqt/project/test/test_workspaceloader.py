@@ -34,7 +34,7 @@ class WorkspaceLoaderTest(unittest.TestCase):
 
     def test_workspace_loading(self):
         workspace_loader = workspaceloader.WorkspaceLoader()
-        workspace_loader.load_workspaces(self.working_directory, self.project_ext)
+        workspace_loader.load_workspaces(self.working_directory, workspaces_to_load=[self.ws1_name])
         self.assertEqual(ADS.getObjectNames(), [self.ws1_name])
 
 

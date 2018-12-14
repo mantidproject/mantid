@@ -148,22 +148,6 @@ class ProjectTest(unittest.TestCase):
 
         self.assertEqual(1, self.project.anyChangeHandle.call_count)
 
-    def test_removing_unused_workspaces_operates_as_expected_from_save(self):
-        working_directory = tempfile.mkdtemp()
-        self.project.last_project_location = working_directory
-        CreateSampleWorkspace(OutputWorkspace="ws1")
-
-        self.project.save()
-        ADS.clear()
-        CreateSampleWorkspace(OutputWorkspace="ws2")
-        self.project.save()
-
-        self.assertTrue(os.path.isdir(working_directory))
-        file_list = os.listdir(working_directory)
-        self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
-        self.assertTrue("ws2.nxs" in file_list)
-        self.assertTrue("ws1.nxs" not in file_list)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -32,11 +32,17 @@ class ProjectLoader(object):
         self.project_file_ext = project_file_ext
 
     def load_project(self, directory):
+        """
+        Will load the project in the given directory
+        :param directory: String or string castable object; the directory of the project
+        :return: Bool; True if all workspace loaded successfully, False if not loaded successfully.
+        """
         # Read project
         self.project_reader.read_project(directory)
 
         # Load in the workspaces
-        self.workspace_loader.load_workspaces(directory=directory, project_file_ext=self.project_file_ext)
+        self.workspace_loader.load_workspaces(directory=directory,
+                                              workspaces_to_load=self.project_reader.workspace_names)
         return _confirm_all_workspaces_loaded(workspaces_to_confirm=self.project_reader.workspace_names)
 
 
@@ -48,7 +54,17 @@ class ProjectReader(object):
         self.project_file_ext = project_file_ext
 
     def read_project(self, directory):
-        f = open(directory + "/" + (os.path.basename(directory) + self.project_file_ext))
-        json_data = json.load(f)
-        self.workspace_names = json_data["workspaces"]
-        self.interfaces_dicts = json_data["interfaces"]
+        """
+        Will read the project file in from the directory that is given.
+        :param directory: String or string castable object; the directory of the project
+        """
+        try:
+            with open(os.path.join(directory, (os.path.basename(directory) + self.project_file_ext))) as f:
+                json_data = json.load(f)
+                self.workspace_names = json_data["workspaces"]
+                self.interfaces_dicts = json_data["interfaces"]
+        except BaseException as e:
+            # Re-raise Keyboard interrupts
+            if isinstance(e, KeyboardInterrupt):
+                raise KeyboardInterrupt
+            logger.warning("JSON project file unable to be loaded/read")

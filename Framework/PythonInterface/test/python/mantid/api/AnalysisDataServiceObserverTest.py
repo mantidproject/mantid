@@ -20,7 +20,7 @@ else:
     import mock
 
 
-class FakeInheritingClass(AnalysisDataServiceObserver):
+class FakeADSObserver(AnalysisDataServiceObserver):
     # These methods are going to be mocked out but needs to be present to actually get the hook from the C++ side
     def anyChangeHandle(self):
         pass
@@ -52,7 +52,7 @@ class FakeInheritingClass(AnalysisDataServiceObserver):
 
 class AnalysisDataServiceObserverTest(unittest.TestCase):
     def setUp(self):
-        self.fake_class = FakeInheritingClass()
+        self.fake_class = FakeADSObserver()
         self.fake_class.anyChangeHandle = mock.MagicMock()
 
     def tearDown(self):

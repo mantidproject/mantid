@@ -8,8 +8,6 @@
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 
-#include <iostream>
-
 namespace Mantid {
 namespace PythonInterface {
 

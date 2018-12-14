@@ -21,11 +21,11 @@ class ProjectSaver(object):
 
     def save_project(self, directory, workspace_to_save=None, interfaces_to_save=None):
         """
-
-        :param directory: String;
+        The method that will actually save the project and call relevant savers for workspaces, plots, interfaces etc.
+        :param directory: String; The directory of the
         :param workspace_to_save: List; of Strings that will have workspace names in it, if None will save all
         :param interfaces_to_save: List; of Strings that will have interface tags in it, if None will save all
-        :return:
+        :return: None; If the method cannot be completed.
         """
         # Check if the directory doesn't exist
         if directory is None:
@@ -52,12 +52,6 @@ class ProjectSaver(object):
 
 class ProjectWriter(object):
     def __init__(self, dicts, save_location, workspace_names, project_file_ext):
-        """
-
-        :param dicts:
-        :param save_location:
-        :param workspace_names:
-        """
         self.dicts_to_save = dicts
         self.workspace_names = workspace_names
         self.directory = save_location
@@ -65,14 +59,20 @@ class ProjectWriter(object):
 
     def write_out(self):
         """
-
+        Write out the project file that contains workspace names, interfaces information, plot preferences etc.
         """
         # Get the JSON string versions
         workspace_interface_dict = {"workspaces": self.workspace_names, "interfaces": self.dicts_to_save}
 
         # Open file and save the string to it alongside the workspace_names
-        file_name = self.directory + '/' + (os.path.basename(self.directory) + self.project_file_ext)
         if not os.path.isdir(self.directory):
             os.makedirs(self.directory)
-        f = open(file_name, 'w+')
-        dump(obj=workspace_interface_dict, fp=f)
+        file_path = os.path.join(self.directory, (os.path.basename(self.directory) + self.project_file_ext))
+        try:
+            with open(file_path, "w+") as f:
+                dump(obj=workspace_interface_dict, fp=f)
+        except BaseException as e:
+            # Re-raise Keyboard interrupts
+            if isinstance(e, KeyboardInterrupt):
+                raise KeyboardInterrupt
+            logger.warning("JSON project file unable to be opened/written to")

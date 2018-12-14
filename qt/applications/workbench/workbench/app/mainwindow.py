@@ -52,6 +52,7 @@ from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
+from mantidqt.project.project import Project  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -211,7 +212,6 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project object
-        from mantidqt.project.project import Project
         self.project = Project()
 
         # uses default configuration as necessary
@@ -415,6 +415,8 @@ class MainWindow(QMainWindow):
         if not self.project.saved:
             # Offer save
             if self.project.offer_save(self):
+                # Cancel has been clicked
+                event.ignore()
                 return
 
         # Close editors

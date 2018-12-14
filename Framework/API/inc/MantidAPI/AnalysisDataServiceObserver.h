@@ -32,8 +32,8 @@ namespace API {
  * anyChangeHandle and anything done in that overriden method will happen
  * every time something changes in the AnalysisDataService.
  *
- * This works in both C++ and Python however not all of this class is exposed
- * to Python.
+ * This works in both C++ and Python, some functionality is limited in 
+ * python, but the handlers will all be called.
  */
 
 class MANTID_API_DLL AnalysisDataServiceObserver {
@@ -51,7 +51,7 @@ public:
   void observeUnGroup(bool turnOn = true);
   void observeGroupUpdate(bool turnOn = true);
 
-  virtual void anyChangeHandle() {}
+  virtual void anyChangeHandle();
   virtual void addHandle(const std::string &wsName, const Workspace_sptr &ws);
   virtual void replaceHandle(const std::string &wsName,
                              const Workspace_sptr &ws);
