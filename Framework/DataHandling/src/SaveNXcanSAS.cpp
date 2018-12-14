@@ -740,8 +740,7 @@ void SaveNXcanSAS::init() {
   inputWSValidator->add<API::CommonBinsValidator>();
   declareProperty(
       Mantid::Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
-          "InputWorkspace", "", Kernel::Direction::Input,
-          inputWSValidator),
+          "InputWorkspace", "", Kernel::Direction::Input, inputWSValidator),
       "The input workspace, which must be in units of Q");
   declareProperty(Mantid::Kernel::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".h5"),
