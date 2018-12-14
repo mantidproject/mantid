@@ -66,9 +66,11 @@ Effective peak parameters
 +++++++++++++++++++++++++
 
 - Peak height :math:`h`: 
+
 .. math:: h = I \cdot (\eta \cdot a_G + (1 - \eta) \cdot \frac{2}{\pi\cdot H}) = \frac{2 I}{\pi H} (1 + (\sqrt{\pi\ln{2}}-1)\eta)
 
 - :math:`\sigma`:
+
 .. math:: \sigma = \frac{H}{2\sqrt{2\ln(2)}}
 
 
@@ -76,13 +78,16 @@ Derivative
 ++++++++++
 
 - To mixing paramter :math:`\eta`
+
 .. math:: \frac{\partial pV(x)}{\partial \eta} = I \cdot [G'(x, H) - L'(x, H)]
 
 
 - To intensity :math:`I`
+
 .. math:: \frac{\partial pV(x)}{\partial I} = \eta G'(x, H) + (1-\eta) L'(x, H)
 
 - To peak centre :math:`x_0`
+
 .. math:: \frac{\partial pV(x)}{\partial x_0} = I \cdot [\eta \frac{\partial G'(x, H)}{\partial x_0} + (1 - \eta) \frac{\partial L'(x, H)}{\partial x_0}]
 
 .. math:: \frac{\partial G'(x, H)}{\partial x_0} = a_G\cdot e^{(-b_G(x-x_0)^2)} (-b_G) (-2) (x - x_0) = 2 b_G (x - x_0) G'(x, H)
@@ -90,6 +95,7 @@ Derivative
 .. math:: \frac{\partial L'(x, H)}{\partial x_0} = \frac{H}{2\pi} (-1) (-2) (x - x_0) \frac{1}{[(x - x_0)^2 + \frac{H^2}{4}]^2} = \frac{(x-x_0)H}{\pi[(x - x_0)^2 + \frac{H^2}{4}]^2} = \frac{4\pi(x-x_0)}{H}[L'(x, H)]^2
 
 - To peak width :math:`H`
+
 .. math:: \frac{\partial pV(x)}{\partial H} = I \cdot [\eta \frac{\partial G'(x, H)}{\partial H} + (1 - \eta) \frac{\partial L'(x, H)}{\partial H}]
 
 For Gaussian part:
