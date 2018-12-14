@@ -137,18 +137,21 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
+        self.load_utils_patcher.load_workspace_from_filename.assert_called_once_with("file.nxs")
         self.assertEqual(self.view.disable_load_buttons.call_count, 1)
         self.assertEqual(self.view.enable_load_buttons.call_count, 1)
 
     @run_test_with_and_without_threading
     def test_buttons_enabled_after_load_even_if_load_thread_throws(self):
-        self.model.execute = mock.Mock(side_effect=self.load_failure)
+        self.mock_browse_button_to_return_files(["file.nxs"])
+        self.load_utils_patcher.load_workspace_from_filename.side_effect = self.load_failure
 
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.view.disable_load_buttons.call_count,
-                         self.view.enable_load_buttons.call_count)
+        self.load_utils_patcher.load_workspace_from_filename.assert_called_once_with("file.nxs")
+        self.assertEqual(self.view.disable_load_buttons.call_count, 1)
+        self.assertEqual(self.view.enable_load_buttons.call_count, 1)
 
     @run_test_with_and_without_threading
     def test_files_not_loaded_into_model_if_multiple_files_selected_from_browse_in_single_file_mode(self):

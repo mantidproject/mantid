@@ -90,8 +90,8 @@ class BrowseFileWidgetPresenter(object):
         self._model.loadData(filenames)
         try:
             self._model.execute()
-        except ValueError as e:
-            self._view.warning_popup(e.args[0])
+        except ValueError as error:
+            self._view.warning_popup(error.args[0])
         self.on_loading_finished()
 
     def handle_load_thread_start(self, filenames):
