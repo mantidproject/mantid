@@ -126,7 +126,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def _x_range_changed(self, xRange):
         names = self.quickEdit.get_selection()
         if len(names) > 1:
-		    self._context.set_xBounds(xRange)
+            self._context.set_xBounds(xRange)
         self.plots.set_plot_x_range(names, xRange)
         self.quickEdit.set_plot_x_range(xRange)
 
