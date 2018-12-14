@@ -84,6 +84,9 @@ class LoadWidgetView(QtGui.QWidget):
     def on_multiple_loading_check_changed(self, slot):
         self.multiple_loading_check.stateChanged.connect(slot)
 
+    def on_multiple_load_type_changed(self, slot):
+        self.load_behaviour_combo.currentIndexChanged.connect(slot)
+
     def get_multiple_loading_state(self):
         return self.multiple_loading_check.isChecked()
 

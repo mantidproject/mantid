@@ -102,6 +102,8 @@ class LoadRunWidgetPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_run_changed_by_user(self):
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         run_string = self._view.get_run_edit_text()
         run_list = run_utils.run_string_to_list(run_string)
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)

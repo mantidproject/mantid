@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
 from mantid import ConfigService
+from mantid import AnalysisDataService
 
 
 class LoadWidgetPresenter(object):
@@ -32,6 +33,7 @@ class LoadWidgetPresenter(object):
         self.view.on_clear_button_clicked(self.clear_data_and_view)
 
         self._view.on_multiple_loading_check_changed(self.handle_multiple_files_option_changed)
+        self._view.on_multiple_load_type_changed(self.handle_multiple_files_option_changed)
 
         self.instrumentObserver = LoadWidgetPresenter.InstrumentObserver(self)
         self.loadNotifier = LoadWidgetPresenter.LoadNotifier(self)
@@ -47,7 +49,7 @@ class LoadWidgetPresenter(object):
         self.load_file_widget.enable_multiple_files(False)
         self.load_file_widget.update_view_from_model([])
 
-    def handle_multiple_files_option_changed(self):
+    def handle_multiple_files_option_changed(self, unused=None):
         if self._view.get_multiple_loading_state():
             self.enable_multiple_files(True)
         else:
@@ -125,6 +127,10 @@ class LoadWidgetPresenter(object):
             self.outer = outer  # handle to containing class
 
         def notify_subscribers(self, arg=None):
+            AnalysisDataService.clear()
+            for workspace, run in zip(self.outer._model.workspaces, self.outer._model.runs):
+                workspace['OutputWorkspace'].show(str(run))
+
             Observable.notify_subscribers(self, arg)
 
     class InstrumentObserver(Observer):
