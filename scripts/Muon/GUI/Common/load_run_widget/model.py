@@ -9,10 +9,6 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
-def exception_message_for_failed_files(failed_file_list):
-    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
-
-
 class LoadRunWidgetModel(object):
     """Stores info on all currently loaded workspaces"""
 
@@ -42,7 +38,7 @@ class LoadRunWidgetModel(object):
             self._loaded_data_store.remove_data(run=run)
             self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
         if failed_files:
-            message = exception_message_for_failed_files(failed_files)
+            message = load_utils.exception_message_for_failed_files(failed_files)
             raise ValueError(message)
 
     # This is needed to work with thread model
