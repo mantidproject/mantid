@@ -30,14 +30,17 @@ TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
     MatrixWorkspace_const_sptr ws, double ei)
     : m_constShift(0) {
 
+  // A constant among all spectra
+  constexpr double TWO_MEV_OVER_MASS =
+      2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
+
   // Get L1
-  V3D samplepos = ws->getInstrument()->getSample()->getPos();
-  V3D sourcepos = ws->getInstrument()->getSource()->getPos();
+  const auto &samplepos = ws->getInstrument()->getSample()->getPos();
+  const auto &sourcepos = ws->getInstrument()->getSource()->getPos();
   double l1 = samplepos.distance(sourcepos);
 
   // Calculate constant (to all spectra) shift
-  m_constShift = l1 / std::sqrt(ei * 2. * PhysicalConstants::meV /
-                                PhysicalConstants::NeutronMass);
+  m_constShift = l1 / std::sqrt(ei * TWO_MEV_OVER_MASS);
 }
 
 /**
