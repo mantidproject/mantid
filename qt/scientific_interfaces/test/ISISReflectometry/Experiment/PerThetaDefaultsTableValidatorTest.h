@@ -8,9 +8,14 @@
 #define MANTID_CUSTOMINTERFACES_PERTHETADEFAULTSTABLEVALIDATORTEST_H_
 #include "../../../ISISReflectometry/GUI/Experiment/PerThetaDefaultsTableValidator.h"
 #include "../../../ISISReflectometry/Reduction/TransmissionRunPair.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
+
+// The missing braces warning is a false positive -
+// https://llvm.org/bugs/show_bug.cgi?id=21629
+GNU_DIAG_OFF("missing-braces")
 
 class PerThetaDefaultsTableValidatorTest : public CxxTest::TestSuite {
 public:
@@ -187,4 +192,7 @@ private:
     TS_ASSERT_EQUALS(validationError.errors(), expectedErrors);
   }
 };
+
+GNU_DIAG_ON("missing-braces")
+
 #endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAULTSTABLEVALIDATORTEST_H_

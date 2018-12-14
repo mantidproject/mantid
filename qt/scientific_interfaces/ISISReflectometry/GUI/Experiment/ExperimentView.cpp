@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentView.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
 #include <QScrollBar>
@@ -491,6 +492,9 @@ ExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem) const {
   }
 }
 
+// The missing braces warning is a false positive -
+// https://llvm.org/bugs/show_bug.cgi?id=21629
+GNU_DIAG_OFF("missing-braces")
 std::vector<std::array<std::string, 8>>
 ExperimentView::getPerAngleOptions() const {
   auto const &table = *m_ui.optionsTable;
@@ -505,6 +509,7 @@ ExperimentView::getPerAngleOptions() const {
   }
   return rows;
 }
+GNU_DIAG_ON("missing-braces")
 
 void ExperimentView::showPerAngleOptionsAsInvalid(int row, int column) {
   m_ui.optionsTable->blockSignals(true);

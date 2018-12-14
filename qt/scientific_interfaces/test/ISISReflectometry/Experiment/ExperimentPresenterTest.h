@@ -20,6 +20,10 @@ using testing::NiceMock;
 using testing::Return;
 using testing::_;
 
+// The missing braces warning is a false positive -
+// https://llvm.org/bugs/show_bug.cgi?id=21629
+GNU_DIAG_OFF("missing-braces")
+
 class ExperimentPresenterTest : public CxxTest::TestSuite {
   using OptionsRow = std::array<std::string, 8>;
   using OptionsTable = std::vector<OptionsRow>;
@@ -550,5 +554,7 @@ private:
     verifyAndClear();
   }
 };
+
+GNU_DIAG_ON("missing-braces")
 
 #endif // MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
