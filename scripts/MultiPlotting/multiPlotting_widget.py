@@ -94,7 +94,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
         names = self.quickEdit.get_selection()
         xrange = self._context.get_xBounds()
         yrange = self._context.get_yBounds()
-        print("moo ",xrange,yrange)
         errors = True
         if len(names) == 1:
             xrange = self._context.subplots[names[0]].xbounds
@@ -127,7 +126,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def _x_range_changed(self, xRange):
         names = self.quickEdit.get_selection()
         if len(names) > 1:
-		    print("waaaa ",xRange,self._context.get_xBounds(),names)
 		    self._context.set_xBounds(xRange)
         self.plots.set_plot_x_range(names, xRange)
         self.quickEdit.set_plot_x_range(xRange)

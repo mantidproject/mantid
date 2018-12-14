@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from qtpy import QtGui
+#from qtpy import QtGui
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 
