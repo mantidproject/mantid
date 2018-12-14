@@ -289,3 +289,7 @@ def combine_loaded_runs(model, run_list):
     return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
                                       filename="Co-added")
+
+
+def exception_message_for_failed_files(failed_file_list):
+    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
