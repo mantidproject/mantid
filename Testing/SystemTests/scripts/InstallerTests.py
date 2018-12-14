@@ -54,7 +54,7 @@ if options.doInstall:
     log("Installing package '%s'" % installer.mantidInstaller)
     try:
         installer.install()
-        log("Application path " + installer.mantidPlotPath)
+        log("Application path: %r" % installer.mantidPlotPath)
         installer.no_uninstall = False
     except Exception as err:
         scriptfailure("Installing failed. "+str(err))

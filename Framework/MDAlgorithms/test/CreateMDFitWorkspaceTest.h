@@ -30,15 +30,12 @@ public:
     maker.execute();
     TS_ASSERT(maker.isExecuted());
 
-    IFitFunction *fun = FunctionFactory::Instance().createInitialized(
-        "name=UserFunctionMD,Formula=h*exp(-a*(x-c)^2),Workspace="
-        "CreateMDFitWorkspaceTest_ws");
+    std::unique_ptr<IFitFunction> fun = std::unique_ptr<IFitFunction>(
+        FunctionFactory::Instance().createInitialized(
+            "name=UserFunctionMD,Formula=h*exp(-a*(x-c)^2),Workspace="
+            "CreateMDFitWorkspaceTest_ws"));
     TS_ASSERT(fun);
     TS_ASSERT(fun->getWorkspace());
-
-    if (fun) {
-      delete fun;
-    }
   }
 };
 
