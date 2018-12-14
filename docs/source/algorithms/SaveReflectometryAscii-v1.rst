@@ -17,6 +17,7 @@ In case of histogrammed input data, the resulting file will contain the bin cent
 It is especially useful for saving reflectometry reduction data.
 A file can be loaded back into Mantid by :ref:`algm-LoadAscii`, which will not have an instrument defined and `Sample Logs` are missing.
 This algorithm writes data in scientific exponential notation (E-notation) of double-precision.
+Please note that `SampleLog` entries are not case sensitive, editing fields `Title` and `title` both edit the field `title`.
 
 Computation of resolution values
 --------------------------------
@@ -34,6 +35,7 @@ The file contains minimum 21 header lines each separating its name and value by 
 The header lines contain the following information: `Instrument`, `User-local contact`, `Title`, `Subtitle`, `Start date + time`, `End date + time`, `Theta 1 + dir + ref numbers`, `Theta 2 + dir + ref numbers`, `Theta 3 + dir + ref numbers`, (foreseen potentially added angle(s),) followed by 9 user defined parameter lines, followed by potentially added user defined parameter lines, `Number of file format`, `Number of data points`.
 The version of the file format is set randomly to the high value 40 in order to exceed all ILL Cosmos versions.
 For the ILL instruments D17 and FIGARO, obligatory header lines will be automatically filled by using the workspaces `Sample Logs` information which can be modified as shown in the `Usage`_.
+The algorithm seeks to add the values for the following SampleLog entries: `instrument.name`, `user.namelocalcontact`, `title`, `start_time` and `end_time` which correspond to the header lines of names `Instrument`, `User-local contact`, `Title`, `Start date + time`, `End date + time`, respectively.
 The options `WriteHeader`, `WriteResolution` and `Separator` do not have any effect and are not visible in the user interface.
 
 TXT File Format
@@ -80,14 +82,14 @@ Usage
     file = os.path.join(os.path.expanduser("~"), "ws")
 
     # Add Sample Log entries
-    # Add a Title entry which will be automatically used
-    AddSampleLog(Workspace=ws, LogName='Title', LogText='MyTest', LogType='String')
+    # Add a Title entry:
+    AddSampleLog(Workspace=ws, LogName='title', LogText='MyTest', LogType='String')
     # Add an entry called d as a Parameter (then, only eight not defined parameter lines remain):
     AddSampleLog(Workspace=ws, LogName='d', LogText='0.3', LogType='Number', LogUnit='mm', NumberType='Double')
 
-    # Save with mft extension and using the option LogList: Title will be added to a required header line and d will be additionally added
+    # Save with mft extension and using the option LogList: title will be added to a required header line and d will be additionally added
     # to the first parameter field.
-    SaveReflectometryAscii(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
+    SaveReflectometryAscii(InputWorkspace=ws, Filename=file, LogList=['title', 'd'])
 
     if os.path.exists(file + ".mft"):
       myFile = open((file + ".mft"), 'r')
@@ -106,7 +108,7 @@ Usage
    Theta 1 + dir + ref numbers : Not defined
    Theta 2 + dir + ref numbers : Not defined
    Theta 3 + dir + ref numbers : Not defined
-   d : 0.29999999999999999
+   d : 0.29999999999999999 mm
    Parameter  : Not defined
    Parameter  : Not defined
    Parameter  : Not defined
