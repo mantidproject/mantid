@@ -556,8 +556,8 @@ public:
     TS_ASSERT_EQUALS(axis->label(0), "Data");
     TS_ASSERT_EQUALS(axis->label(1), "Calc");
     TS_ASSERT_EQUALS(axis->label(2), "Diff");
-    TS_ASSERT_EQUALS(axis->label(3), "ExpDecay 1");
-    TS_ASSERT_EQUALS(axis->label(4), "ExpDecay 2");
+    TS_ASSERT_EQUALS(axis->label(3), "ExpDecay1");
+    TS_ASSERT_EQUALS(axis->label(4), "ExpDecay2");
 
     const double eValues[nExpectedHist] = {1.0, 0.01703318673, 0.0, 0.0092811,
                                            0.0142825267};
@@ -782,8 +782,8 @@ public:
     TS_ASSERT_EQUALS(axis->label(0), "Data");
     TS_ASSERT_EQUALS(axis->label(1), "Calc");
     TS_ASSERT_EQUALS(axis->label(2), "Diff");
-    TS_ASSERT_EQUALS(axis->label(3), "Convolution 1");
-    TS_ASSERT_EQUALS(axis->label(4), "Convolution 2");
+    TS_ASSERT_EQUALS(axis->label(3), "Convolution1");
+    TS_ASSERT_EQUALS(axis->label(4), "Convolution2");
 
     FunctionDomain1DView x(data->mutableX(0).rawData().data(),
                            data->mutableX(0).size());

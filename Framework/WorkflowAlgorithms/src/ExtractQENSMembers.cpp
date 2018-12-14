@@ -187,7 +187,7 @@ std::vector<std::string> ExtractQENSMembers::renameConvolvedMembers(
   auto index = 0u;
 
   for (const auto &member : members) {
-    if (member == "Convolution" && index < newNames.size())
+    if (member == "Convolution 1" && index < newNames.size())
       newMembers.emplace_back(newNames[index++]);
     else
       newMembers.emplace_back(member);
