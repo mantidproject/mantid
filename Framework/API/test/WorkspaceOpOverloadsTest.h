@@ -21,54 +21,6 @@ public:
   // that they call)
   //-------------------------------------------------------------------------------------------
 
-  void test_commonBoundaries() {
-    auto singlespectrum = boost::make_shared<WorkspaceTester>();
-    singlespectrum->initialize(1, 6, 5);
-    TSM_ASSERT("A single-spectrum workspace should always pass",
-               WorkspaceHelpers::commonBoundaries(*singlespectrum));
-
-    // A simple success case
-    auto ws = boost::make_shared<WorkspaceTester>();
-    ws->initialize(5, 6, 5);
-    TS_ASSERT(WorkspaceHelpers::commonBoundaries(*ws));
-    // Changing Y & E values makes no differenc
-    ws->dataY(3).assign(5, -5.0);
-    ws->dataE(1).assign(5, 1.0);
-    TS_ASSERT(WorkspaceHelpers::commonBoundaries(*ws));
-    // Simple failure case - change a single X value slightly
-    ws->dataX(2)[4] = 1.01;
-    TS_ASSERT(!WorkspaceHelpers::commonBoundaries(*ws));
-
-    // Check it fails if there are nan's or infinities, even if they match up
-    auto ws2 = boost::make_shared<WorkspaceTester>();
-    ws2->initialize(2, 6, 5);
-    ws2->dataX(0)[2] = std::numeric_limits<double>::infinity();
-    ws2->dataX(1)[2] = std::numeric_limits<double>::infinity();
-    TS_ASSERT(!WorkspaceHelpers::commonBoundaries(*ws2));
-    ws2->dataX(0)[2] = std::numeric_limits<double>::quiet_NaN();
-    ws2->dataX(1)[2] = std::numeric_limits<double>::quiet_NaN();
-    TS_ASSERT(!WorkspaceHelpers::commonBoundaries(*ws2));
-
-    // Check it fails if the sum is the same, but the boundaries are different
-    auto ws3 = boost::make_shared<WorkspaceTester>();
-    ws3->initialize(2, 3, 2);
-    ws3->dataX(0)[0] = -1;
-    ws3->dataX(0)[2] = 0;
-    TS_ASSERT(!WorkspaceHelpers::commonBoundaries(*ws3));
-  }
-
-  void test_commmonBoundaries_negative_sum() // Added in response to bug #7391
-  {
-    auto ws = boost::make_shared<WorkspaceTester>();
-    ws->initialize(2, 2, 1);
-    ws->getSpectrum(0).dataX()[0] = -2.0;
-    ws->getSpectrum(0).dataX()[1] = -1.0;
-    ws->getSpectrum(1).dataX()[0] = -2.5;
-    ws->getSpectrum(1).dataX()[1] = -1.5;
-
-    TS_ASSERT(!WorkspaceHelpers::commonBoundaries(*ws));
-  }
-
   void test_matchingBins() {
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);

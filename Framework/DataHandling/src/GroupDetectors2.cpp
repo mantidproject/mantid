@@ -175,14 +175,6 @@ void GroupDetectors2::exec() {
   }
 
   const size_t numInHists = inputWS->getNumberHistograms();
-  // Bin boundaries need to be the same, so do the full check on whether they
-  // actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    g_log.error()
-        << "Can only group if the histograms have common bin boundaries\n";
-    throw std::invalid_argument(
-        "Can only group if the histograms have common bin boundaries");
-  }
   progress(m_FracCompl = CHECKBINS);
   interruption_point();
 

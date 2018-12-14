@@ -236,7 +236,7 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
 
   // Rebin the data to common bins if requested, and if necessary
   bool alignBins = getProperty("AlignBins");
-  if (alignBins && !WorkspaceHelpers::commonBoundaries(*outputWS))
+  if (alignBins && !outputWS->isCommonBins())
     outputWS = this->alignBins(outputWS);
 
   // If appropriate, put back the bin width division into Y/E.
@@ -342,7 +342,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
   CommonBinsValidator sameBins;
   bool commonBoundaries = false;
   if (sameBins.isValid(inputWS).empty()) {
-    commonBoundaries = WorkspaceHelpers::commonBoundaries(*inputWS);
+    commonBoundaries = inputWS->isCommonBins();
     // Only do the full check if the quick one passes
     if (commonBoundaries) {
       // Calculate the new (common) X values
@@ -659,7 +659,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
   bool isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
-  if (WorkspaceHelpers::commonBoundaries(*WS) && !isInputEvents) {
+  if (WS->isCommonBins() && !isInputEvents) {
     auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(),
                                                         WS->x(0).crend());
     for (size_t j = 0; j < numberOfSpectra; ++j) {

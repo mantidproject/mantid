@@ -9,7 +9,6 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <numeric>
@@ -64,17 +63,9 @@ void GroupDetectors::exec() {
     return;
   }
 
-  // Bin boundaries need to be the same, so check if they actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(*WS)) {
-    g_log.error("Can only group if the histograms have common bin boundaries");
-    throw std::runtime_error(
-        "Can only group if the histograms have common bin boundaries");
-  }
-
   // If the spectraList property has been set, need to loop over the workspace
-  // looking for the
-  // appropriate spectra number and adding the indices they are linked to the
-  // list to be processed
+  // looking for the appropriate spectra number and adding the indices they
+  // are linked to the list to be processed
   if (!spectraList.empty()) {
     indexList = WS->getIndicesFromSpectra(spectraList);
   } // End dealing with spectraList

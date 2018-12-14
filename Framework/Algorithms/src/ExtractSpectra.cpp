@@ -105,7 +105,7 @@ void ExtractSpectra::init() {
 void ExtractSpectra::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
   m_histogram = m_inputWorkspace->isHistogramData();
-  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
+  m_commonBoundaries = m_inputWorkspace->isCommonBins();
   this->checkProperties();
 
   if (m_workspaceIndexList.empty()) {

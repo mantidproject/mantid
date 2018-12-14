@@ -55,8 +55,6 @@ void Regroup::init() {
 }
 
 /** Executes the regroup algorithm
- *
- *  @throw runtime_error Thrown if
  */
 void Regroup::exec() {
   // retrieve the properties
@@ -64,12 +62,6 @@ void Regroup::exec() {
 
   // Get the input workspace
   MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
-
-  // can work only if all histograms have the same boundaries
-  if (!API::WorkspaceHelpers::commonBoundaries(*inputW)) {
-    g_log.error("Histograms with different boundaries");
-    throw std::runtime_error("Histograms with different boundaries");
-  }
 
   bool dist = inputW->isDistribution();
 

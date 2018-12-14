@@ -180,8 +180,7 @@ void Mantid::Algorithms::WorkspaceJoiners::validateInputs(
   // Workspaces with point data are allowed to have different binning
   if (checkBinning) {
     // This is the full check for common binning
-    if (!WorkspaceHelpers::commonBoundaries(ws1) ||
-        !WorkspaceHelpers::commonBoundaries(ws2)) {
+    if (!ws1.isCommonBins() || !ws2.isCommonBins()) {
       g_log.error("Both input workspaces must have common binning for all "
                   "their spectra");
       throw std::invalid_argument("Both input workspaces must have common "

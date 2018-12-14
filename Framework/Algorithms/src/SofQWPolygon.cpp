@@ -42,11 +42,6 @@ void SofQWPolygon::init() { SofQW::createCommonInputProperties(*this); }
  */
 void SofQWPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    throw std::invalid_argument(
-        "The input workspace must have common binning across all spectra");
-  }
 
   // Progress reports & cancellation
   const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms() *
