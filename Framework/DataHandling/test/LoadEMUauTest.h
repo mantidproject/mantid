@@ -16,8 +16,8 @@
 #include <Poco/TemporaryFile.h>
 
 #ifdef _MSC_VER
-// Disable warning on 'no suitable definition ..' as the extern 
-// does not clear the warning. No issue linking. 
+// Disable warning on 'no suitable definition ..' as the extern
+// does not clear the warning. No issue linking.
 #pragma warning(disable : 4661)
 #endif
 
