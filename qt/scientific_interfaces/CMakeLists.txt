@@ -63,6 +63,7 @@ set ( TEST_FILES
   test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
   test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
   test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
+  test/ISISReflectometry/Save/SavePresenterTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest

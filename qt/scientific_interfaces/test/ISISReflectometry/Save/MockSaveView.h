@@ -15,10 +15,8 @@ namespace CustomInterfaces {
 
 class MockSaveView : public ISaveView {
 public:
-  MOCK_METHOD1(subscribe, void(SaveViewSubscriber *));
-
   MOCK_CONST_METHOD0(getSavePath, std::string());
-  MOCK_CONST_METHOD1(setSavePath, void(const std::string&));
+  MOCK_CONST_METHOD1(setSavePath, void(const std::string &));
   MOCK_CONST_METHOD0(getPrefix, std::string());
   MOCK_CONST_METHOD0(getFilter, std::string());
   MOCK_CONST_METHOD0(getRegexCheck, bool());
@@ -48,6 +46,9 @@ public:
   MOCK_METHOD0(noWorkspacesSelected, void());
   MOCK_METHOD0(cannotSaveWorkspaces, void());
   MOCK_METHOD1(cannotSaveWorkspaces, void(std::string const &));
+
+  // Calls we don't care about
+  void subscribe(SaveViewSubscriber *) override {}
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
