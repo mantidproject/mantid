@@ -9,18 +9,12 @@ from __future__ import absolute_import, print_function
 
 class QuickEditPresenter(object):
 
-    def __init__(self, view, model):
+    def __init__(self, view ):
         self._view = view
-        self._model = model
-        self._view.connect_x_range_changed(self.updateContext)
 
     @property
     def widget(self):
         return self._view
-
-    @property
-    def model(self):
-        return self._model
 
     def connect_autoscale_changed(self, slot):
         self._view.connect_autoscale_changed(slot)
@@ -36,10 +30,6 @@ class QuickEditPresenter(object):
 
     def connect_plot_selection(self, slot):
         self._view.connect_plot_selection(slot)
-
-    def updateContext(self, range):
-        subContext = self._view.getSubContext()
-        self.model.updateContext(subContext)
 
     def add_subplot(self, name):
         current = self._view.current_selection()

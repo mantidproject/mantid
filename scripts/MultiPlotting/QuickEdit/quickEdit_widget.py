@@ -8,7 +8,6 @@ from __future__ import absolute_import, print_function
 
 
 from MultiPlotting.QuickEdit.quickEdit_view import QuickEditView
-from MultiPlotting.QuickEdit.quickEdit_model import QuickEditModel
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 
 
@@ -16,8 +15,7 @@ class QuickEditWidget(object):
 
     def __init__(self, context, parent=None):
         view = QuickEditView(None, parent)
-        model = QuickEditModel(context)
-        self._presenter = QuickEditPresenter(view, model)
+        self._presenter = QuickEditPresenter(view)
 
     @property
     def widget(self):

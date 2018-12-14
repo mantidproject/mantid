@@ -61,9 +61,8 @@ class MultiPlotWidget(QtWidgets.QWidget):
                 yrange[0] = deepcopy(ybounds[0])
             if yrange[1] < ybounds[1]:
                 yrange[1] = deepcopy(ybounds[1])
-
-        self._context.set("xBounds", xrange)
-        self._context.set("yBounds", yrange)
+        self._context.set_xBounds(xrange)
+        self._context.set_yBounds(yrange)
         self._x_range_changed(xrange)
         self._y_range_changed(yrange)
         # get tick boxes correct
@@ -84,7 +83,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
             self.quickEdit.set_plot_x_range(xrange)
             self.quickEdit.set_plot_y_range(yrange)
         # if changed current selection
-        if names[0] == subplotName:
+        elif names[0] == subplotName:
             self.quickEdit.set_plot_x_range(xrange)
             self.quickEdit.set_plot_y_range(yrange)
         # if a different plot changed
@@ -95,6 +94,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         names = self.quickEdit.get_selection()
         xrange = self._context.get_xBounds()
         yrange = self._context.get_yBounds()
+        print("moo ",xrange,yrange)
         errors = True
         if len(names) == 1:
             xrange = self._context.subplots[names[0]].xbounds
@@ -124,19 +124,20 @@ class MultiPlotWidget(QtWidgets.QWidget):
         names = self.quickEdit.get_selection()
         self._change_errors(state, names)
 
-    def _x_range_changed(self, range):
+    def _x_range_changed(self, xRange):
         names = self.quickEdit.get_selection()
         if len(names) > 1:
-            self._context.set("xBounds", range)
-        self.plots.set_plot_x_range(names, range)
-        self.quickEdit.set_plot_x_range(range)
+		    print("waaaa ",xRange,self._context.get_xBounds(),names)
+		    self._context.set_xBounds(xRange)
+        self.plots.set_plot_x_range(names, xRange)
+        self.quickEdit.set_plot_x_range(xRange)
 
-    def _y_range_changed(self, range):
+    def _y_range_changed(self, yRange):
         names = self.quickEdit.get_selection()
         if len(names) > 1:
-            self._context.set("yBounds", range)
-        self.plots.set_plot_y_range(names, range)
-        self.quickEdit.set_plot_y_range(range)
+            self._context.set_yBounds(yRange)
+        self.plots.set_plot_y_range(names, yRange)
+        self.quickEdit.set_plot_y_range(yRange)
 
     def _check_all_errors(self, names):
         for name in names:

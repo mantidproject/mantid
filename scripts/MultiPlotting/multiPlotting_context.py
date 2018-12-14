@@ -33,14 +33,14 @@ class PlottingContext(object):
         except:
             print("cannot plot workspace")
 
-    def get(self, key):
-        return self.context[key]
-
-    def set(self, key, value):
-        self.context[key] = value
-
     def get_xBounds(self):
         return self.context[xBounds]
 
     def get_yBounds(self):
         return self.context[yBounds]
+
+    def set_xBounds(self, values):
+        self.context[xBounds] = values
+
+    def set_yBounds(self, values):
+        self.context[yBounds] = values
