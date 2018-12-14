@@ -12,9 +12,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-auto PerThetaDefaultsTableValidator::operator()(
-    std::vector<std::array<std::string, 8>> const &perThetaDefaultsContent,
-    double thetaTolerance) const -> ResultType {
+auto PerThetaDefaultsTableValidator::
+operator()(ContentType const &perThetaDefaultsContent,
+           double thetaTolerance) const -> ResultType {
 
   auto defaults = std::vector<PerThetaDefaults>();
   auto validationErrors = std::vector<InvalidDefaultsError>();
@@ -57,7 +57,7 @@ PerThetaDefaultsTableValidator::validateThetaValues(
 }
 
 void PerThetaDefaultsTableValidator::validateAllPerThetaDefaultRows(
-    std::vector<std::array<std::string, 8>> const &perThetaDefaultsContent,
+    ContentType const &perThetaDefaultsContent,
     std::vector<PerThetaDefaults> &perThetaDefaults,
     std::vector<InvalidDefaultsError> &validationErrors) const {
   auto row = 0;
