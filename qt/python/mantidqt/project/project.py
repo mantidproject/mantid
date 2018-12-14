@@ -31,6 +31,7 @@ class Project(AnalysisDataServiceObserver):
         self.project_file_ext = ".mtdproj"
 
         self.plot_gfm = globalfiguremanager_instance
+        self.plot_gfm.add_observer(self)
 
     def __get_saved(self):
         return self.__saved
@@ -135,5 +136,11 @@ class Project(AnalysisDataServiceObserver):
         """
         The method that will be triggered if any of the changes in the ADS have occurred, that are checked for using the
         AnalysisDataServiceObserver class' observeAll method
+        """
+        self.modified_project()
+
+    def notify(self, *args):
+        """
+        The method that will trigger when a plot is added, destroyed, or changed in the global figure manager.
         """
         self.modified_project()

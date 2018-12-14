@@ -11,7 +11,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from matplotlib import ticker, text, axis  # noqa
 import matplotlib.colors
 import matplotlib.axes
-import matplotlib.pyplot as plt
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
@@ -36,6 +35,7 @@ class PlotsLoader(object):
         :param plot_dict:
         :return:
         """
+        import matplotlib.pyplot as plt
         # Grab creation arguments
         creation_args = plot_dict["creationArguments"]
         workspace_name = creation_args[0][0].pop('workspaces')
