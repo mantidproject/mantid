@@ -8,9 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_IEXPERIMENTVIEW_H
 
 #include "DllConfig.h"
-#include "ExperimentOptionDefaults.h"
 #include "GetInstrumentParameter.h"
-#include "InstrumentOptionDefaults.h"
 #include "InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"

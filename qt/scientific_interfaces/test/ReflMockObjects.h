@@ -7,7 +7,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "../ISISReflectometry/ExperimentOptionDefaults.h"
 #include "../ISISReflectometry/IEventPresenter.h"
 #include "../ISISReflectometry/IEventView.h"
 #include "../ISISReflectometry/IReflAsciiSaver.h"
@@ -117,60 +116,6 @@ public:
 
 private:
   std::vector<IBatchView *> m_tableViews;
-};
-
-class MockSettingsView : public IReflSettingsView {
-public:
-  // Global options
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getStartOverlap, std::string());
-  MOCK_CONST_METHOD0(getEndOverlap, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
-  MOCK_CONST_METHOD0(getStitchOptions, std::string());
-  MOCK_CONST_METHOD0(getAnalysisMode, std::string());
-  MOCK_CONST_METHOD0(getDirectBeam, std::string());
-  MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
-  MOCK_CONST_METHOD0(getCRho, std::string());
-  MOCK_CONST_METHOD0(getCAlpha, std::string());
-  MOCK_CONST_METHOD0(getCAp, std::string());
-  MOCK_CONST_METHOD0(getCPp, std::string());
-  MOCK_CONST_METHOD0(getFloodCorrection, std::string());
-  MOCK_CONST_METHOD0(getFloodWorkspace, std::string());
-  MOCK_CONST_METHOD0(getIntMonCheck, std::string());
-  MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
-  MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());
-  MOCK_CONST_METHOD0(getMonitorBackgroundMin, std::string());
-  MOCK_CONST_METHOD0(getMonitorBackgroundMax, std::string());
-  MOCK_CONST_METHOD0(getLambdaMin, std::string());
-  MOCK_CONST_METHOD0(getLambdaMax, std::string());
-  MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
-  MOCK_CONST_METHOD0(getSummationType, std::string());
-  MOCK_CONST_METHOD0(getReductionType, std::string());
-  MOCK_CONST_METHOD0(getDebugOption, bool());
-  MOCK_CONST_METHOD0(getIncludePartialBins, bool());
-  MOCK_CONST_METHOD0(getPerAngleOptions, std::map<std::string, OptionsQMap>());
-  MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
-  MOCK_METHOD1(setReductionTypeEnabled, void(bool));
-  MOCK_METHOD1(setIncludePartialBinsEnabled, void(bool));
-  MOCK_METHOD1(setPolarisationOptionsEnabled, void(bool));
-  MOCK_METHOD1(setDetectorCorrectionEnabled, void(bool));
-  MOCK_METHOD1(setExpDefaults, void(ExperimentOptionDefaults));
-  MOCK_METHOD1(setInstDefaults, void(InstrumentOptionDefaults));
-  MOCK_METHOD0(disableAll, void());
-  MOCK_METHOD0(enableAll, void());
-  MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
-  MOCK_CONST_METHOD0(experimentSettingsEnabled, bool());
-  MOCK_CONST_METHOD0(instrumentSettingsEnabled, bool());
-  MOCK_METHOD2(showOptionLoadErrors,
-               void(std::vector<InstrumentParameterTypeMissmatch> const &,
-                    std::vector<MissingInstrumentParameterValue> const &));
-  MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
-  // Calls we don't care about
-  void createStitchHints(
-      const std::vector<MantidQt::MantidWidgets::Hint> &hints) override {
-    UNUSED_ARG(hints);
-  };
-  IReflSettingsPresenter *getPresenter() const override { return nullptr; }
 };
 
 class MockEventView : public IReflEventView {
