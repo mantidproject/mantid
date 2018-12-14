@@ -308,7 +308,7 @@ public:
     // grouped
     // inside the members group workspace.
     std::unordered_set<std::string> members = {
-        "Data", "Calc", "Diff", "LinearBackground 1", "Lorentzian 1"};
+        "Data", "Calc", "Diff", "LinearBackground 1", "Convolution 1"};
     for (auto i = 0u; i < membersGroupWs->size(); ++i) {
       MatrixWorkspace_const_sptr ws = getMatrixWorkspace(membersGroupWs, i);
       TS_ASSERT(ws->getNumberHistograms() == specMax - specMin + 1);
