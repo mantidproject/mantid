@@ -59,7 +59,7 @@ void LoadIsawDetCal::init() {
 
   declareProperty(
       Kernel::make_unique<API::FileProperty>(
-          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
+          "Filename2", "", API::FileProperty::OptionalLoad, exts),
       "The input filename of the second ISAW DetCal file (West "
       "banks for SNAP) ");
 
