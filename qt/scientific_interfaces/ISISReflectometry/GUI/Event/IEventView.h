@@ -8,11 +8,12 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H
 
 #include "../../DllConfig.h"
-#include "IEventPresenter.h"
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
 
 /**
 IEventView is the base view class for the Reflectometry "Event Handling"
@@ -31,6 +32,12 @@ public:
   virtual void notifyLogBlockNameChanged(std::string blockName) = 0;
 };
 
+/** @class IEventView
+
+IEventView is the base view class for the tab "Event" in the
+Reflectometry Interface. It contains no QT specific functionality as that should
+be handled by a subclass.
+*/
 class MANTIDQT_ISISREFLECTOMETRY_DLL IEventView {
 public:
   virtual void subscribe(EventViewSubscriber *notifyee) = 0;
