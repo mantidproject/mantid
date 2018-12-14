@@ -26,7 +26,8 @@ else:
 
 
 class FakeGlobalFigureManager(object):
-    pass
+    def add_observer(self, *unused):
+        pass
 
 
 class ProjectTest(unittest.TestCase):

@@ -16,6 +16,10 @@ from mantid import logger
 
 class PlotsSaver(object):
     def save_plots(self, plot_dict):
+        # if arguement is none return empty dictionary
+        if plot_dict is None:
+            return {}
+
         plot_list = []
         for index in plot_dict:
             try:
