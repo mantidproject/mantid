@@ -66,6 +66,7 @@ class ProjectReader(object):
         Will read the project file in from the directory that is given.
         try:
         """
+        try:
             with open(os.path.join(directory, (os.path.basename(directory) + self.project_file_ext))) as f:
                 json_data = json.load(f)
                 self.workspace_names = json_data["workspaces"]

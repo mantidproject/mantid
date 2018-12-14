@@ -58,8 +58,8 @@ class ProjectSaver(object):
 
 
 class ProjectWriter(object):
-    def __init__(self, dicts, save_location, workspace_names, project_file_ext):
-        self.dicts_to_save = dicts
+    def __init__(self, interfaces_to_save, save_location, workspace_names, project_file_ext, plots_to_save):
+        self.interfaces_to_save = interfaces_to_save
         self.workspace_names = workspace_names
         self.directory = save_location
         self.project_file_ext = project_file_ext

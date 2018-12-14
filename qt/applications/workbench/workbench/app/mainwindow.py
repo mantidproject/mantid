@@ -60,6 +60,7 @@ plugins.setup_library_paths()
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 
+
 # -----------------------------------------------------------------------------
 # Create the application instance early, set the application name for window
 # titles and hold on to a reference to it. Required to be performed early so

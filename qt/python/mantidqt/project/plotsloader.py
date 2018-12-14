@@ -8,7 +8,7 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from matplotlib import ticker, text, axis
+from matplotlib import ticker, text, axis  # noqa
 import matplotlib.colors
 import matplotlib.axes
 import matplotlib.pyplot as plt
@@ -21,9 +21,9 @@ from mantid import plots  # noqa
 
 class PlotsLoader(object):
     def load_plots(self, plots_list):
-        for plot in plots_list:
+        for plot_ in plots_list:
             try:
-                self.make_fig(plot)
+                self.make_fig(plot_)
             except BaseException as e:
                 # Catch all errors in here so it can fail silently-ish
                 if isinstance(e, KeyboardInterrupt):
@@ -105,15 +105,15 @@ class PlotsLoader(object):
 
         # Update/set text
         text_list = dic["texts"]
-        for index, text in enumerate(text_list):
+        for index, text_ in enumerate(text_list):
             try:
-                ax.texts[index] = self.create_text_from_dict(text)
+                ax.texts[index] = self.create_text_from_dict(text_)
             except IndexError:
-                ax.text(self.create_text_from_dict(text))
+                ax.text(self.create_text_from_dict(text_))
 
         # Update artists that are text
         for artist in dic["textFromArtists"]:
-           ax.text(self.create_text_from_dict(artist))
+            ax.text(self.create_text_from_dict(artist))
 
         # Update Legend
         legend = ax.get_legend()
