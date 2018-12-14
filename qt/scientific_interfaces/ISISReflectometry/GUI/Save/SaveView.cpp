@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "QtReflSaveTabView.h"
-#include "ReflSaveTabPresenter.h"
+#include "SaveView.h"
+#include "SavePresenter.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -17,12 +17,12 @@ namespace CustomInterfaces {
 /** Constructor
  * @param parent :: The parent of this view
  */
-QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter(nullptr) {
+SaveView::SaveView(QWidget *parent) : m_presenter(nullptr) {
   UNUSED_ARG(parent);
   initLayout();
 }
 
-void QtReflSaveTabView::subscribe(IReflSaveTabPresenter *presenter) {
+void SaveView::subscribe(ISavePresenter *presenter) {
   m_presenter = presenter;
   populateListOfWorkspaces();
   suggestSaveDir();
@@ -30,12 +30,12 @@ void QtReflSaveTabView::subscribe(IReflSaveTabPresenter *presenter) {
 
 /** Destructor
  */
-QtReflSaveTabView::~QtReflSaveTabView() {}
+SaveView::~SaveView() {}
 
 /**
 Initialize the Interface
 */
-void QtReflSaveTabView::initLayout() {
+void SaveView::initLayout() {
   m_ui.setupUi(this);
 
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
@@ -53,7 +53,7 @@ void QtReflSaveTabView::initLayout() {
           SLOT(browseToSaveDirectory()));
 }
 
-void QtReflSaveTabView::browseToSaveDirectory() {
+void SaveView::browseToSaveDirectory() {
   auto savePath = QFileDialog::getExistingDirectory(
       this, "Select the directory to save to.");
   if (!savePath.isEmpty()) {
@@ -62,31 +62,31 @@ void QtReflSaveTabView::browseToSaveDirectory() {
   }
 }
 
-void QtReflSaveTabView::onSavePathChanged() {
-  m_presenter->notify(IReflSaveTabPresenter::Flag::savePathChanged);
+void SaveView::onSavePathChanged() {
+  m_presenter->notify(ISavePresenter::Flag::savePathChanged);
 }
 
-void QtReflSaveTabView::onAutosaveChanged(int state) {
+void SaveView::onAutosaveChanged(int state) {
   if (state == Qt::CheckState::Checked)
-    m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveEnabled);
+    m_presenter->notify(ISavePresenter::Flag::autosaveEnabled);
   else
-    m_presenter->notify(IReflSaveTabPresenter::Flag::autosaveDisabled);
+    m_presenter->notify(ISavePresenter::Flag::autosaveDisabled);
 }
 
-void QtReflSaveTabView::disableAutosaveControls() {
+void SaveView::disableAutosaveControls() {
   m_ui.autosaveGroup->setEnabled(false);
 }
 
-void QtReflSaveTabView::enableAutosaveControls() {
+void SaveView::enableAutosaveControls() {
   m_ui.autosaveGroup->setEnabled(true);
 }
 
-void QtReflSaveTabView::enableFileFormatAndLocationControls() {
+void SaveView::enableFileFormatAndLocationControls() {
   m_ui.fileFormatGroup->setEnabled(true);
   m_ui.fileLocationGroup->setEnabled(true);
 }
 
-void QtReflSaveTabView::disableFileFormatAndLocationControls() {
+void SaveView::disableFileFormatAndLocationControls() {
   m_ui.fileFormatGroup->setEnabled(false);
   m_ui.fileLocationGroup->setEnabled(false);
 }
@@ -94,49 +94,47 @@ void QtReflSaveTabView::disableFileFormatAndLocationControls() {
 /** Returns the save path
  * @return :: The save path
  */
-std::string QtReflSaveTabView::getSavePath() const {
+std::string SaveView::getSavePath() const {
   return m_ui.savePathEdit->text().toStdString();
 }
 
 /** Sets the save path
  */
-void QtReflSaveTabView::setSavePath(const std::string &path) const {
+void SaveView::setSavePath(const std::string &path) const {
   m_ui.savePathEdit->setText(QString::fromStdString(path));
 }
 
 /** Returns the file name prefix
  * @return :: The prefix
  */
-std::string QtReflSaveTabView::getPrefix() const {
+std::string SaveView::getPrefix() const {
   return m_ui.prefixEdit->text().toStdString();
 }
 
 /** Returns the workspace list filter
  * @return :: The filter
  */
-std::string QtReflSaveTabView::getFilter() const {
+std::string SaveView::getFilter() const {
   return m_ui.filterEdit->text().toStdString();
 }
 
 /** Returns the regular expression check value
  * @return :: The regex check
  */
-bool QtReflSaveTabView::getRegexCheck() const {
-  return m_ui.regexCheckBox->isChecked();
-}
+bool SaveView::getRegexCheck() const { return m_ui.regexCheckBox->isChecked(); }
 
 /** Returns the name of the currently selected workspace from the 'List of
  * workspaces' widget
  * @return :: item name
  */
-std::string QtReflSaveTabView::getCurrentWorkspaceName() const {
+std::string SaveView::getCurrentWorkspaceName() const {
   return m_ui.listOfWorkspaces->currentItem()->text().toStdString();
 }
 
 /** Returns a list of names of currently selected workspaces
  * @return :: workspace names
  */
-std::vector<std::string> QtReflSaveTabView::getSelectedWorkspaces() const {
+std::vector<std::string> SaveView::getSelectedWorkspaces() const {
   std::vector<std::string> itemNames;
   auto items = m_ui.listOfWorkspaces->selectedItems();
   for (auto it = items.begin(); it != items.end(); it++) {
@@ -148,7 +146,7 @@ std::vector<std::string> QtReflSaveTabView::getSelectedWorkspaces() const {
 /** Returns a list of names of currently selected parameters
  * @return :: parameter names
  */
-std::vector<std::string> QtReflSaveTabView::getSelectedParameters() const {
+std::vector<std::string> SaveView::getSelectedParameters() const {
   std::vector<std::string> paramNames;
   auto items = m_ui.listOfLoggedParameters->selectedItems();
   for (auto it = items.begin(); it != items.end(); it++) {
@@ -160,32 +158,30 @@ std::vector<std::string> QtReflSaveTabView::getSelectedParameters() const {
 /** Returns the index of the selected file format
  * @return :: File format index
  */
-int QtReflSaveTabView::getFileFormatIndex() const {
+int SaveView::getFileFormatIndex() const {
   return m_ui.fileFormatComboBox->currentIndex();
 }
 
 /** Returns the title check value
  * @return :: The title check
  */
-bool QtReflSaveTabView::getTitleCheck() const {
-  return m_ui.titleCheckBox->isChecked();
-}
+bool SaveView::getTitleCheck() const { return m_ui.titleCheckBox->isChecked(); }
 
 /** Returns the Q resolution check value
  * @return :: The Q resolution check
  */
-bool QtReflSaveTabView::getQResolutionCheck() const {
+bool SaveView::getQResolutionCheck() const {
   return m_ui.qResolutionCheckBox->isChecked();
 }
 
-void QtReflSaveTabView::disallowAutosave() {
+void SaveView::disallowAutosave() {
   m_ui.saveReductionResultsCheckBox->setCheckState(Qt::CheckState::Unchecked);
 }
 
 /** Returns the separator type
  * @return :: The separator
  */
-std::string QtReflSaveTabView::getSeparator() const {
+std::string SaveView::getSeparator() const {
   auto sep = m_ui.separatorButtonGroup->checkedButton()->text().toStdString();
   boost::to_lower(sep); // lowercase
   return sep;
@@ -193,21 +189,18 @@ std::string QtReflSaveTabView::getSeparator() const {
 
 /** Clear the 'List of workspaces' widget
  */
-void QtReflSaveTabView::clearWorkspaceList() const {
-  m_ui.listOfWorkspaces->clear();
-}
+void SaveView::clearWorkspaceList() const { m_ui.listOfWorkspaces->clear(); }
 
 /** Clear the 'List of Logged Parameters' widget
  */
-void QtReflSaveTabView::clearParametersList() const {
+void SaveView::clearParametersList() const {
   m_ui.listOfLoggedParameters->clear();
 }
 
 /** Set the 'List of workspaces' widget with workspace names
  * @param names :: The list of workspace names
  */
-void QtReflSaveTabView::setWorkspaceList(
-    const std::vector<std::string> &names) const {
+void SaveView::setWorkspaceList(const std::vector<std::string> &names) const {
   for (auto it = names.begin(); it != names.end(); it++) {
     m_ui.listOfWorkspaces->addItem(QString::fromStdString(*it));
   }
@@ -216,8 +209,7 @@ void QtReflSaveTabView::setWorkspaceList(
 /** Set the 'List of logged parameters' widget with workspace run logs
  * @param logs :: The list of workspace run logs
  */
-void QtReflSaveTabView::setParametersList(
-    const std::vector<std::string> &logs) const {
+void SaveView::setParametersList(const std::vector<std::string> &logs) const {
   for (auto it = logs.begin(); it != logs.end(); it++) {
     m_ui.listOfLoggedParameters->addItem(QString::fromStdString(*it));
   }
@@ -225,71 +217,69 @@ void QtReflSaveTabView::setParametersList(
 
 /** Populate the 'List of workspaces' widget
  */
-void QtReflSaveTabView::populateListOfWorkspaces() const {
-  m_presenter->notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
+void SaveView::populateListOfWorkspaces() const {
+  m_presenter->notify(ISavePresenter::populateWorkspaceListFlag);
 }
 
 /** Filter the 'List of workspaces' widget
  */
-void QtReflSaveTabView::filterWorkspaceList() const {
-  m_presenter->notify(IReflSaveTabPresenter::filterWorkspaceListFlag);
+void SaveView::filterWorkspaceList() const {
+  m_presenter->notify(ISavePresenter::filterWorkspaceListFlag);
 }
 
 /** Request for the parameters of a workspace
  */
-void QtReflSaveTabView::requestWorkspaceParams() const {
-  m_presenter->notify(IReflSaveTabPresenter::workspaceParamsFlag);
+void SaveView::requestWorkspaceParams() const {
+  m_presenter->notify(ISavePresenter::workspaceParamsFlag);
 }
 
 /** Save selected workspaces
  */
-void QtReflSaveTabView::saveWorkspaces() const {
-  m_presenter->notify(IReflSaveTabPresenter::saveWorkspacesFlag);
+void SaveView::saveWorkspaces() const {
+  m_presenter->notify(ISavePresenter::saveWorkspacesFlag);
 }
 
 /** Suggest a save directory
  */
-void QtReflSaveTabView::suggestSaveDir() const {
-  m_presenter->notify(IReflSaveTabPresenter::suggestSaveDirFlag);
+void SaveView::suggestSaveDir() const {
+  m_presenter->notify(ISavePresenter::suggestSaveDirFlag);
 }
 
-void QtReflSaveTabView::error(const std::string &title,
-                              const std::string &prompt) {
+void SaveView::error(const std::string &title, const std::string &prompt) {
   QMessageBox::critical(this, QString::fromStdString(title),
                         QString::fromStdString(prompt));
 }
 
-void QtReflSaveTabView::warning(const std::string &title,
-                                const std::string &prompt) {
+void SaveView::warning(const std::string &title, const std::string &prompt) {
   QMessageBox::critical(this, QString::fromStdString(title),
                         QString::fromStdString(prompt));
 }
 
-void QtReflSaveTabView::invalidRegex() {
+void SaveView::invalidRegex() {
   error("Invalid Regex", "Error, invalid regular expression.");
 }
 
-void QtReflSaveTabView::errorInvalidSaveDirectory() {
+void SaveView::errorInvalidSaveDirectory() {
   error("Invalid directory", "The save path specified doesn't exist or is "
                              "not writable.");
 }
 
-void QtReflSaveTabView::warnInvalidSaveDirectory() {
+void SaveView::warnInvalidSaveDirectory() {
   warning("Invalid directory",
           "You just changed the save path to a directory which "
           "doesn't exist or is not writable.");
 }
 
-void QtReflSaveTabView::noWorkspacesSelected() {
+void SaveView::noWorkspacesSelected() {
   error("No workspaces selected.",
         "You must select the workspaces in order to save.");
 }
 
-void QtReflSaveTabView::cannotSaveWorkspaces() {
+void SaveView::cannotSaveWorkspaces() {
   error("Error", "Unknown error while saving workspaces");
 }
 
-void QtReflSaveTabView::cannotSaveWorkspaces(std::string const &fullError) {
+void SaveView::cannotSaveWorkspaces(std::string const &fullError) {
   error("Error", fullError);
 }
 } // namespace CustomInterfaces

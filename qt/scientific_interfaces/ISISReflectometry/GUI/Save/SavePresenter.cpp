@@ -4,9 +4,9 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ReflSaveTabPresenter.h"
+#include "SavePresenter.h"
 #include "IReflMainWindowPresenter.h"
-#include "IReflSaveTabView.h"
+#include "ISaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -28,8 +28,8 @@ using namespace Mantid::API;
  * @param saver :: The model to use to save the files
  * @param view :: The view we are handling
  */
-ReflSaveTabPresenter::ReflSaveTabPresenter(
-    IReflSaveTabView *view, std::unique_ptr<IReflAsciiSaver> saver)
+SavePresenter::SavePresenter(ISaveView *view,
+                             std::unique_ptr<IReflAsciiSaver> saver)
     : m_view(view), m_saver(std::move(saver)), m_mainPresenter(),
       m_shouldAutosave(false) {
 
@@ -39,24 +39,23 @@ ReflSaveTabPresenter::ReflSaveTabPresenter(
 /** Accept a main presenter
  * @param mainPresenter :: [input] The main presenter
  */
-void ReflSaveTabPresenter::acceptMainPresenter(
-    IReflBatchPresenter *mainPresenter) {
+void SavePresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
-void ReflSaveTabPresenter::onAnyReductionPaused() {
+void SavePresenter::onAnyReductionPaused() {
   populateWorkspaceList();
   m_view->enableAutosaveControls();
   m_view->enableFileFormatAndLocationControls();
 }
 
-void ReflSaveTabPresenter::onAnyReductionResumed() {
+void SavePresenter::onAnyReductionResumed() {
   m_view->disableAutosaveControls();
   if (shouldAutosave())
     m_view->disableFileFormatAndLocationControls();
 }
 
-void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
+void SavePresenter::notify(ISavePresenter::Flag flag) {
   switch (flag) {
   case populateWorkspaceListFlag:
     populateWorkspaceList();
@@ -84,7 +83,7 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   }
 }
 
-void ReflSaveTabPresenter::enableAutosave() {
+void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
     m_shouldAutosave = true;
   } else {
@@ -94,14 +93,14 @@ void ReflSaveTabPresenter::enableAutosave() {
   }
 }
 
-void ReflSaveTabPresenter::disableAutosave() { m_shouldAutosave = false; }
+void SavePresenter::disableAutosave() { m_shouldAutosave = false; }
 
-void ReflSaveTabPresenter::onSavePathChanged() {
+void SavePresenter::onSavePathChanged() {
   if (shouldAutosave() && !isValidSaveDirectory(m_view->getSavePath()))
     warnInvalidSaveDirectory();
 }
 
-void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
+void SavePresenter::completedGroupReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
   UNUSED_ARG(group);
@@ -114,9 +113,9 @@ void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
   }
 }
 
-bool ReflSaveTabPresenter::shouldAutosave() const { return m_shouldAutosave; }
+bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
 
-void ReflSaveTabPresenter::completedRowReductionSuccessfully(
+void SavePresenter::completedRowReductionSuccessfully(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
   if (!MantidWidgets::DataProcessor::canPostprocess(group) &&
@@ -132,14 +131,14 @@ void ReflSaveTabPresenter::completedRowReductionSuccessfully(
 /** Fills the 'List of Workspaces' widget with the names of all available
  * workspaces
  */
-void ReflSaveTabPresenter::populateWorkspaceList() {
+void SavePresenter::populateWorkspaceList() {
   m_view->clearWorkspaceList();
   m_view->setWorkspaceList(getAvailableWorkspaceNames());
 }
 
 /** Filters the names in the 'List of Workspaces' widget
  */
-void ReflSaveTabPresenter::filterWorkspaceNames() {
+void SavePresenter::filterWorkspaceNames() {
   m_view->clearWorkspaceList();
 
   std::string filter = m_view->getFilter();
@@ -173,7 +172,7 @@ void ReflSaveTabPresenter::filterWorkspaceNames() {
 /** Fills the 'List of Logged Parameters' widget with the parameters of the
  * currently selected workspace
  */
-void ReflSaveTabPresenter::populateParametersList() {
+void SavePresenter::populateParametersList() {
   m_view->clearParametersList();
 
   std::string wsName = m_view->getCurrentWorkspaceName();
@@ -188,19 +187,19 @@ void ReflSaveTabPresenter::populateParametersList() {
   m_view->setParametersList(logs);
 }
 
-bool ReflSaveTabPresenter::isValidSaveDirectory(std::string const &directory) {
+bool SavePresenter::isValidSaveDirectory(std::string const &directory) {
   return m_saver->isValidSaveDirectory(directory);
 }
 
-void ReflSaveTabPresenter::warnInvalidSaveDirectory() {
+void SavePresenter::warnInvalidSaveDirectory() {
   m_view->warnInvalidSaveDirectory();
 }
 
-void ReflSaveTabPresenter::errorInvalidSaveDirectory() {
+void SavePresenter::errorInvalidSaveDirectory() {
   m_view->errorInvalidSaveDirectory();
 }
 
-NamedFormat ReflSaveTabPresenter::formatFromIndex(int formatIndex) const {
+NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
   switch (formatIndex) {
   case 0:
     return NamedFormat::Custom;
@@ -215,7 +214,7 @@ NamedFormat ReflSaveTabPresenter::formatFromIndex(int formatIndex) const {
   }
 }
 
-FileFormatOptions ReflSaveTabPresenter::getSaveParametersFromView() const {
+FileFormatOptions SavePresenter::getSaveParametersFromView() const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
       /*prefix=*/m_view->getPrefix(),
@@ -224,7 +223,7 @@ FileFormatOptions ReflSaveTabPresenter::getSaveParametersFromView() const {
       /*includeQResolution=*/m_view->getQResolutionCheck());
 }
 
-void ReflSaveTabPresenter::saveWorkspaces(
+void SavePresenter::saveWorkspaces(
     std::vector<std::string> const &workspaceNames,
     std::vector<std::string> const &logParameters) {
   auto savePath = m_view->getSavePath();
@@ -236,14 +235,14 @@ void ReflSaveTabPresenter::saveWorkspaces(
 }
 
 /** Saves workspaces with the names specified. */
-void ReflSaveTabPresenter::saveWorkspaces(
+void SavePresenter::saveWorkspaces(
     std::vector<std::string> const &workspaceNames) {
   auto selectedLogParameters = m_view->getSelectedParameters();
   saveWorkspaces(workspaceNames, selectedLogParameters);
 }
 
 /** Saves selected workspaces */
-void ReflSaveTabPresenter::saveSelectedWorkspaces() {
+void SavePresenter::saveSelectedWorkspaces() {
   // Check that at least one workspace has been selected for saving
   auto workspaceNames = m_view->getSelectedWorkspaces();
   if (workspaceNames.empty()) {
@@ -261,7 +260,7 @@ void ReflSaveTabPresenter::saveSelectedWorkspaces() {
 
 /** Suggests a save directory and sets it in the 'Save path' text field
  */
-void ReflSaveTabPresenter::suggestSaveDir() {
+void SavePresenter::suggestSaveDir() {
   std::string path = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");
   m_view->setSavePath(path);
@@ -270,7 +269,7 @@ void ReflSaveTabPresenter::suggestSaveDir() {
 /** Obtains all available workspace names to save
  * @return :: list of workspace names
  */
-std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
+std::vector<std::string> SavePresenter::getAvailableWorkspaceNames() {
   auto allNames = AnalysisDataService::Instance().getObjectNames();
   // Exclude workspace groups and table workspaces as they cannot be saved to
   // ascii

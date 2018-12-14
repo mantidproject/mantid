@@ -4,22 +4,22 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_ISAVEPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_ISAVEPRESENTER_H
 #include "IReflBatchPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflSaveTabPresenter
+/** @class ISavePresenter
 
-IReflSaveTabPresenter is an interface which defines the functions that need
+ISavePresenter is an interface which defines the functions that need
 to be implemented by a concrete 'Save ASCII' tab presenter
 */
-class IReflSaveTabPresenter {
+class ISavePresenter {
 public:
-  virtual ~IReflSaveTabPresenter(){};
+  virtual ~ISavePresenter(){};
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
 
@@ -43,10 +43,10 @@ public:
       std::string const &workspaceName) = 0;
 
   /// Tell the presenter something happened
-  virtual void notify(IReflSaveTabPresenter::Flag flag) = 0;
+  virtual void notify(ISavePresenter::Flag flag) = 0;
   virtual void onAnyReductionPaused() = 0;
   virtual void onAnyReductionResumed() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_ISAVEPRESENTER_H */

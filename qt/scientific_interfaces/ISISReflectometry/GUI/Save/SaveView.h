@@ -4,33 +4,32 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_QTREFLSAVETABVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QTREFLSAVETABVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_SAVEVIEW_H_
+#define MANTID_CUSTOMINTERFACES_SAVEVIEW_H_
 
-#include "IReflSaveTabView.h"
-#include "ui_ReflSaveTabWidget.h"
+#include "ISaveView.h"
+#include "ui_SaveWidget.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflSaveTabPresenter;
+class ISavePresenter;
 
-/** QtReflSaveTabView : Provides an interface for the "Save ASCII" tab in the
+/** SaveView : Provides an interface for the "Save ASCII" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflSaveTabView
-    : public QWidget,
-      public IReflSaveTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL SaveView : public QWidget,
+                                                public ISaveView {
   Q_OBJECT
 public:
   /// Constructor
-  QtReflSaveTabView(QWidget *parent = nullptr);
+  SaveView(QWidget *parent = nullptr);
   /// Destructor
-  ~QtReflSaveTabView() override;
+  ~SaveView() override;
 
-  void subscribe(IReflSaveTabPresenter *presenter) override;
+  void subscribe(ISavePresenter *presenter) override;
 
   /// Returns the save path
   std::string getSavePath() const override;
@@ -104,12 +103,12 @@ private:
   /// Initialize the interface
   void initLayout();
   /// The presenter
-  IReflSaveTabPresenter *m_presenter;
+  ISavePresenter *m_presenter;
   /// The widget
-  Ui::ReflSaveTabWidget m_ui;
+  Ui::SaveWidget m_ui;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_CUSTOMINTERFACES_QTREFLSAVETABVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_SAVEVIEW_H_ */

@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
 
 #include "DllConfig.h"
 #include "IReflAsciiSaver.h"
-#include "IReflSaveTabPresenter.h"
-#include "IReflSaveTabView.h"
+#include "ISavePresenter.h"
+#include "ISaveView.h"
 #include <MantidKernel/ConfigPropertyObserver.h>
 #include <boost/optional.hpp>
 #include <memory>
@@ -20,19 +20,17 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class ReflSaveTabPresenter
+/** @class SavePresenter
 
-ReflSaveTabPresenter is a presenter class for the tab 'Save ASCII' in the
+SavePresenter is a presenter class for the tab 'Save ASCII' in the
 ISIS Reflectometry Interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSaveTabPresenter
-    : public IReflSaveTabPresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter {
 public:
-  ReflSaveTabPresenter(IReflSaveTabView *view,
-                       std::unique_ptr<IReflAsciiSaver> saver);
+  SavePresenter(ISaveView *view, std::unique_ptr<IReflAsciiSaver> saver);
   /// Accept a main presenter
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
-  void notify(IReflSaveTabPresenter::Flag flag) override;
+  void notify(ISavePresenter::Flag flag) override;
   void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
@@ -72,7 +70,7 @@ private:
   bool shouldAutosave() const;
 
   /// The view
-  IReflSaveTabView *m_view;
+  ISaveView *m_view;
   std::unique_ptr<IReflAsciiSaver> m_saver;
   /// The main presenter
   IReflBatchPresenter *m_mainPresenter;
@@ -80,4 +78,4 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H */
+#endif /* MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H */

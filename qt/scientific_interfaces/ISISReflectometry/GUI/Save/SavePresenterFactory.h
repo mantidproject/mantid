@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_REFLSAVEPRESENTERFACTORY_H
-#define MANTID_ISISREFLECTOMETRY_REFLSAVEPRESENTERFACTORY_H
+#ifndef MANTID_ISISREFLECTOMETRY_SAVEPRESENTERFACTORY_H
+#define MANTID_ISISREFLECTOMETRY_SAVEPRESENTERFACTORY_H
 #include "DllConfig.h"
-#include "IReflSaveTabPresenter.h"
-#include "IReflSaveTabView.h"
+#include "ISavePresenter.h"
+#include "ISaveView.h"
 #include "ReflAsciiSaver.h"
-#include "ReflSaveTabPresenter.h"
+#include "SavePresenter.h"
 #include <memory>
 
 namespace MantidQt {
@@ -18,11 +18,11 @@ namespace CustomInterfaces {
 
 class SavePresenterFactory {
 public:
-  std::unique_ptr<IReflSaveTabPresenter> make(IReflSaveTabView *view) {
-    return Mantid::Kernel::make_unique<ReflSaveTabPresenter>(
+  std::unique_ptr<ISavePresenter> make(ISaveView *view) {
+    return Mantid::Kernel::make_unique<SavePresenter>(
         view, Mantid::Kernel::make_unique<ReflAsciiSaver>());
   }
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTERFACTORY_H
+#endif // MANTID_ISISREFLECTOMETRY_SAVEPRESENTERFACTORY_H

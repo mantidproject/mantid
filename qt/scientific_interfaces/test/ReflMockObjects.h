@@ -14,10 +14,10 @@
 #include "../ISISReflectometry/IReflMainWindowView.h"
 #include "../ISISReflectometry/IReflRunsTabPresenter.h"
 #include "../ISISReflectometry/IReflRunsTabView.h"
-#include "../ISISReflectometry/IReflSaveTabPresenter.h"
-#include "../ISISReflectometry/IReflSaveTabView.h"
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
+#include "../ISISReflectometry/ISavePresenter.h"
+#include "../ISISReflectometry/ISaveView.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -135,7 +135,7 @@ public:
   IReflEventPresenter *getPresenter() const override { return nullptr; }
 };
 
-class MockSaveTabView : public IReflSaveTabView {
+class MockSaveTabView : public ISaveView {
 public:
   MOCK_CONST_METHOD1(setSavePath, void(const std::string &path));
   MOCK_CONST_METHOD0(getSavePath, std::string());
@@ -154,7 +154,7 @@ public:
   MOCK_CONST_METHOD0(clearParametersList, void());
   MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD0(getAutosavePrefixInput, std::string());
-  MOCK_METHOD1(subscribe, void(IReflSaveTabPresenter *));
+  MOCK_METHOD1(subscribe, void(ISavePresenter *));
   MOCK_METHOD0(disallowAutosave, void());
   MOCK_METHOD0(disableAutosaveControls, void());
   MOCK_METHOD0(enableAutosaveControls, void());
@@ -256,7 +256,7 @@ public:
   ~MockSettingsTabPresenter() override{};
 };
 
-class MockSaveTabPresenter : public IReflSaveTabPresenter {
+class MockSaveTabPresenter : public ISavePresenter {
 public:
   MOCK_METHOD2(completedRowReductionSuccessfully,
                void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
@@ -264,7 +264,7 @@ public:
   MOCK_METHOD2(completedGroupReductionSuccessfully,
                void(MantidQt::MantidWidgets::DataProcessor::GroupData const &,
                     std::string const &));
-  void notify(IReflSaveTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
+  void notify(ISavePresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };

@@ -4,28 +4,28 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
+#define MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
 
 #include "DllConfig.h"
-#include "IReflSaveTabPresenter.h"
+#include "ISavePresenter.h"
 #include <string>
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflSaveTabView
+/** @class ISaveView
 
-IReflSaveTabView is the base view class for the tab "Save ASCII" in the
+ISaveView is the base view class for the tab "Save ASCII" in the
 Reflectometry Interface. It contains no QT specific functionality as that should
 be handled by a subclass.
 */
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IReflSaveTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ISaveView {
 public:
-  virtual ~IReflSaveTabView() = default;
-  virtual void subscribe(IReflSaveTabPresenter *presenter) = 0;
+  virtual ~ISaveView() = default;
+  virtual void subscribe(ISavePresenter *presenter) = 0;
 
   virtual std::string getSavePath() const = 0;
   virtual void setSavePath(const std::string &path) const = 0;
@@ -61,4 +61,4 @@ public:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H */

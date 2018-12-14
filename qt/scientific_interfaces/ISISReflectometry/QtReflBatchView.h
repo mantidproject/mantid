@@ -10,11 +10,11 @@
 #include "GUI/Event/EventView.h"
 #include "GUI/Experiment/ExperimentView.h"
 #include "GUI/Instrument/InstrumentView.h"
+#include "GUI/Save/SaveView.h"
 #include "IReflBatchPresenter.h"
 #include "IReflBatchView.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "QtReflRunsTabView.h"
-#include "QtReflSaveTabView.h"
 #include "ui_ReflBatchWidget.h"
 #include <memory>
 
@@ -31,7 +31,7 @@ public:
 
   IReflRunsTabView *runs() const override;
   IEventView *eventHandling() const override;
-  IReflSaveTabView *save() const override;
+  ISaveView *save() const override;
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
 
@@ -41,13 +41,13 @@ private:
 
   std::unique_ptr<QtReflRunsTabView> createRunsTab();
   std::unique_ptr<EventView> createEventTab();
-  std::unique_ptr<QtReflSaveTabView> createSaveTab();
+  std::unique_ptr<SaveView> createSaveTab();
 
   Ui::ReflBatchWidget m_ui;
   IReflBatchPresenter *m_notifyee;
   std::unique_ptr<QtReflRunsTabView> m_runs;
   std::unique_ptr<EventView> m_eventHandling;
-  std::unique_ptr<QtReflSaveTabView> m_save;
+  std::unique_ptr<SaveView> m_save;
   std::unique_ptr<ExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;
 };

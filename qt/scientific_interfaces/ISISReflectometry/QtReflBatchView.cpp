@@ -6,14 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtReflBatchView.h"
 #include "GUI/Event/EventView.h"
+#include "GUI/Save/SaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/make_unique.h"
 #include "QtReflRunsTabView.h"
-#include "QtReflSaveTabView.h"
 #include "ReflAsciiSaver.h"
 #include "ReflBatchPresenter.h"
 #include "ReflRunsTabPresenter.h"
-#include "ReflSaveTabPresenter.h"
 
 #include <QMessageBox>
 
@@ -59,7 +58,7 @@ IEventView *QtReflBatchView::eventHandling() const {
   return m_eventHandling.get();
 }
 
-IReflSaveTabView *QtReflBatchView::save() const { return m_save.get(); }
+ISaveView *QtReflBatchView::save() const { return m_save.get(); }
 
 std::unique_ptr<QtReflRunsTabView> QtReflBatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
@@ -77,8 +76,8 @@ Mantid::API::IAlgorithm_sptr QtReflBatchView::createReductionAlg() {
       "ReflectometryReductionOneAuto");
 }
 
-std::unique_ptr<QtReflSaveTabView> QtReflBatchView::createSaveTab() {
-  return Mantid::Kernel::make_unique<QtReflSaveTabView>(this);
+std::unique_ptr<SaveView> QtReflBatchView::createSaveTab() {
+  return Mantid::Kernel::make_unique<SaveView>(this);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

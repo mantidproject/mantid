@@ -19,7 +19,7 @@ namespace CustomInterfaces {
 class IReflBatchView;
 class IReflRunsTabPresenter;
 class IEventPresenter;
-class IReflSaveTabPresenter;
+class ISavePresenter;
 
 /** @class ReflBatchPresenter
 
@@ -35,7 +35,7 @@ public:
                      std::unique_ptr<IEventPresenter> eventPresenter,
                      std::unique_ptr<IExperimentPresenter> experimentPresenter,
                      std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-                     std::unique_ptr<IReflSaveTabPresenter> savePresenter);
+                     std::unique_ptr<ISavePresenter> savePresenter);
 
   /// Returns values passed for 'Transmission run(s)'
   MantidWidgets::DataProcessor::OptionsQMap
@@ -74,7 +74,7 @@ private:
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   /// The presenter of tab 'Save ASCII'
-  std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
+  std::unique_ptr<ISavePresenter> m_savePresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
