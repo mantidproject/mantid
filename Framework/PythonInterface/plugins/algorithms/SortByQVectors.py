@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import *
 from mantid.api import *
+from mantid.kernel import *
 import mantid.simpleapi as ms
 import numpy as np
 

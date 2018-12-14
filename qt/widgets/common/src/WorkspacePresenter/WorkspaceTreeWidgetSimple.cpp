@@ -6,14 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
 #include "MantidQtWidgets/Common/MantidTreeModel.h"
-#include <MantidQtWidgets/Common/MantidTreeWidget.h>
-#include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
 
-#include <MantidAPI/AlgorithmManager.h>
-#include <MantidAPI/FileProperty.h>
-#include <MantidAPI/ITableWorkspace.h>
-#include <MantidAPI/MatrixWorkspace.h>
-#include <MantidAPI/WorkspaceGroup.h>
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QMenu>
 #include <QSignalMapper>
@@ -24,8 +25,9 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
-    : WorkspaceTreeWidget(new MantidTreeModel(), parent),
+WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
+                                                     QWidget *parent)
+    : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent),
       m_plotSpectrum(new QAction("spectrum...", this)),
       m_overplotSpectrum(new QAction("overplot spectrum...", this)),
       m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)),
@@ -33,8 +35,14 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
           new QAction("overplot spectrum with errors...", this)),
       m_plotColorfill(new QAction("colorfill", this)),
       m_sampleLogs(new QAction("Sample Logs", this)),
-      m_showInstrument(new QAction("Show Instrument", this)) {
-  // connections
+      m_showInstrument(new QAction("Show Instrument", this)),
+      m_showData(new QAction("Show Data", this)) {
+
+  // Replace the double click action on the MantidTreeWidget
+  m_tree->m_doubleClickAction = [&](QString wsName) {
+    emit workspaceDoubleClicked(wsName);
+  };
+
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
   connect(m_overplotSpectrum, SIGNAL(triggered()), this,
@@ -48,6 +56,9 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
   connect(m_sampleLogs, SIGNAL(triggered()), this, SLOT(onSampleLogsClicked()));
   connect(m_showInstrument, SIGNAL(triggered()), this,
           SLOT(onShowInstrumentClicked()));
+  connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
+  connect(m_tree, SIGNAL(itemSelectionChanged()), this,
+          SIGNAL(treeSelectionChanged()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -78,7 +89,8 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     } catch (Exception::NotFoundError &) {
       return;
     }
-    if (boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+    if (auto matrixWS =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       QMenu *plotSubMenu(new QMenu("Plot", menu));
       plotSubMenu->addAction(m_plotSpectrum);
       plotSubMenu->addAction(m_overplotSpectrum);
@@ -88,7 +100,11 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       plotSubMenu->addAction(m_plotColorfill);
       menu->addMenu(plotSubMenu);
       menu->addSeparator();
+      menu->addAction(m_showData);
       menu->addAction(m_showInstrument);
+      m_showInstrument->setEnabled(
+          matrixWS->getInstrument() &&
+          !matrixWS->getInstrument()->getName().empty());
       menu->addSeparator();
     }
     menu->addAction(m_rename);
@@ -129,6 +145,9 @@ void WorkspaceTreeWidgetSimple::onSampleLogsClicked() {
 
 void WorkspaceTreeWidgetSimple::onShowInstrumentClicked() {
   emit showInstrumentClicked(getSelectedWorkspaceNamesAsQList());
+}
+void WorkspaceTreeWidgetSimple::onShowDataClicked() {
+  emit showDataClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

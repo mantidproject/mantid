@@ -15,6 +15,7 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QMenu>
 #include <QPlainTextEdit>
 #include <QPoint>
@@ -29,6 +30,11 @@
 namespace {
 // Track number of attachments to generate a unique channel name
 int ATTACH_COUNT = 0;
+
+int DEFAULT_LINE_COUNT_MAX = 8192;
+const char *PRIORITY_KEY_NAME = "MessageDisplayPriority";
+const char *LINE_COUNT_MAX_KEY_NAME = "MessageDisplayLineCountMax";
+
 } // namespace
 
 using Mantid::Kernel::ConfigService;
@@ -47,10 +53,12 @@ namespace MantidWidgets {
  * at the group containing the values
  */
 void MessageDisplay::readSettings(const QSettings &storage) {
-  const int logLevel = storage.value("MessageDisplayPriority", 0).toInt();
+  const int logLevel = storage.value(PRIORITY_KEY_NAME, 0).toInt();
   if (logLevel > 0) {
     ConfigService::Instance().setLogLevel(logLevel, true);
   }
+  setMaximumLineCount(
+      storage.value(LINE_COUNT_MAX_KEY_NAME, DEFAULT_LINE_COUNT_MAX).toInt());
 }
 
 /**
@@ -60,7 +68,8 @@ void MessageDisplay::readSettings(const QSettings &storage) {
  * at the group where the values should be stored.
  */
 void MessageDisplay::writeSettings(QSettings &storage) const {
-  storage.setValue("MessageDisplayPriority", Poco::Logger::root().getLevel());
+  storage.setValue(PRIORITY_KEY_NAME, Poco::Logger::root().getLevel());
+  storage.setValue(LINE_COUNT_MAX_KEY_NAME, maximumLineCount());
 }
 
 /**
@@ -242,20 +251,20 @@ void MessageDisplay::scrollToBottom() {
       m_textDisplay->verticalScrollBar()->maximum());
 }
 
-//------------------------------------------------------------------------------
-// Protected members
-//------------------------------------------------------------------------------
-
 //-----------------------------------------------------------------------------
 // Private slot member functions
 //-----------------------------------------------------------------------------
 
 void MessageDisplay::showContextMenu(const QPoint &mousePos) {
   QMenu *menu = m_textDisplay->createStandardContextMenu();
-  if (!m_textDisplay->document()->isEmpty())
-    menu->addAction("Clear", m_textDisplay, SLOT(clear()));
-
   menu->addSeparator();
+  if (!m_textDisplay->document()->isEmpty()) {
+    menu->addAction("Clear", m_textDisplay, SLOT(clear()));
+    menu->addSeparator();
+  }
+  menu->addAction("&Scrollback limit", this, SLOT(setScrollbackLimit()));
+  menu->addSeparator();
+
   QMenu *logLevelMenu = menu->addMenu("&Log Level");
   logLevelMenu->addAction(m_error);
   logLevelMenu->addAction(m_warning);
@@ -286,6 +295,38 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
  */
 void MessageDisplay::setLogLevel(int priority) {
   ConfigService::Instance().setLogLevel(priority);
+}
+
+/**
+ * Set the maximum number of blocks kept by the text edit
+ */
+void MessageDisplay::setScrollbackLimit() {
+  constexpr int minLineCountAllowed(-1);
+  setMaximumLineCount(
+      QInputDialog::getInt(this, "", "No. of lines\n(-1 keeps all content)",
+                           maximumLineCount(), minLineCountAllowed));
+}
+
+// The text edit works in blocks but it is not entirely clear what a block
+// is defined as. Experiments showed setting a max block count=1 suppressed
+// all output and a min(block count)==2 was required to see a single line.
+// We have asked the user for lines so add 1 to get the behaviour they
+// would expect. Equally we subtract 1 for the value we show them to
+// keep it consistent
+
+/**
+ * @return The maximum number of lines displayed in the text edit
+ */
+int MessageDisplay::maximumLineCount() const {
+  return m_textDisplay->maximumBlockCount() - 1;
+}
+
+/**
+ * The maximum number of lines that are to be displayed in the text edit
+ * @param count The new maximum number of lines to retain.
+ */
+void MessageDisplay::setMaximumLineCount(int count) {
+  m_textDisplay->setMaximumBlockCount(count + 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -346,6 +387,7 @@ void MessageDisplay::initFormats() {
 void MessageDisplay::setupTextArea() {
   m_textDisplay->setReadOnly(true);
   m_textDisplay->ensureCursorVisible();
+  setMaximumLineCount(DEFAULT_LINE_COUNT_MAX);
   m_textDisplay->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
   m_textDisplay->setMouseTracking(true);
   m_textDisplay->setUndoRedoEnabled(false);

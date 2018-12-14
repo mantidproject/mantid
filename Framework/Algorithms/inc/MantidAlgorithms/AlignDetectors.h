@@ -43,7 +43,6 @@ class ConversionFactors;
 class DLLExport AlignDetectors : public API::Algorithm {
 public:
   AlignDetectors();
-  ~AlignDetectors() override;
 
   /// Algorithms name for identification. @see Algorithm::name
   const std::string name() const override;
@@ -83,9 +82,6 @@ private:
 
   /// number of spectra in input workspace
   int64_t m_numberOfSpectra;
-
-  /// Map of conversion factors for TOF to d-Spacing conversion
-  std::map<detid_t, double> *tofToDmap;
 };
 
 } // namespace Algorithms

@@ -47,6 +47,9 @@ public:
   QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
   getSelectedMatrixWorkspaces() const;
 
+  /// Action that is executed when a workspace in the tree is double clicked.
+  std::function<void(QString)> m_doubleClickAction = nullptr;
+
 protected:
   void dragMoveEvent(QDragMoveEvent *de) override;
   void dragEnterEvent(QDragEnterEvent *de) override;

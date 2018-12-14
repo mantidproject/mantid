@@ -57,17 +57,15 @@ class PeaksIntegrationReportDialog(QDialog):
         :return:
         """
         default_dir = os.getcwd()
-        output_file = str(QFileDialog.getSaveFileName(self, 'Export table to csv file', default_dir,
-                                                            'Data Files (*.dat);;All  Files (*.*)'))
-
-        # return if cancelled
-        if len(output_file) == 0:
+        output_file = QFileDialog.getSaveFileName(self, 'Export table to csv file', default_dir,
+                                                  'Data Files (*.dat);;All  Files (*.*)')
+        if not output_file:
             return
+        if isinstance(output_file, tuple):
+            output_file = output_file[0]
 
         # write
         self.ui.tableWidget_spreadsheet.export_table_csv(output_file)
-
-        return
 
     def do_quit(self):
         """

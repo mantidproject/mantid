@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import json
 from mantid.simpleapi import *
 from mantid.geometry import PointGroupFactory
@@ -85,7 +85,7 @@ class HKLStatisticsTestMixin(object):
         return overall_statistics
 
 
-class SortHKLTest(HKLStatisticsTestMixin, stresstesting.MantidStressTest):
+class SortHKLTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
     ''' System test for SortHKL
 
     This system test compares some of the output of SortHKL to statistics produced

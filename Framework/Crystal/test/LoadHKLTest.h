@@ -46,8 +46,7 @@ public:
     ws->setInstrument(inst);
     double smu = 0.357;
     double amu = 0.011;
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
     auto sampleShape = boost::make_shared<CSGObject>();
     sampleShape->setMaterial(Material("SetInAnvredCorrection", neutron, 1.0));
     ws->mutableSample().setShape(sampleShape);

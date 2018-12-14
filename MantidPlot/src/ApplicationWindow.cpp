@@ -1578,8 +1578,16 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
     itemMenuAction->setText(item->title());
   }
 
-  auto catalogMenuAction = myMenuBar()->addMenu(icat);
-  catalogMenuAction->setText(tr("&Catalog"));
+  const auto &config = Mantid::Kernel::ConfigService::Instance();
+  const auto showCatalogMenu = !config.getFacility(config.getFacility().name())
+                                    .catalogInfo()
+                                    .soapEndPoint()
+                                    .empty();
+
+  if (showCatalogMenu) {
+    auto catalogMenuAction = myMenuBar()->addMenu(icat);
+    catalogMenuAction->setText(tr("&Catalog"));
+  }
 
   // -- INTERFACE MENU --
   auto interfaceMenuAction = myMenuBar()->addMenu(interfaceMenu);
@@ -16826,10 +16834,7 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
 void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
 
-  m_projectRecovery.removeOlderCheckpoints();
-
-  // Mantid crashed during writing to this checkpoint so remove it
-  m_projectRecovery.removeLockedCheckpoints();
+  m_projectRecovery.repairCheckpointDirectory();
 
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();

@@ -17,6 +17,7 @@ New Algorithms
 ##############
 
 - Added a new algorithm to ILL's reduction workflow: :ref:`DirectILLTubeBackground <algm-DirectILLTubeBackground>` which can be used to calculate the time-independent backgrounds for instruments with PSD detectors such as IN5.
+- The new algorithm :ref:`SofTwoThetaTOF <algm-SofTwoThetaTOF>` can be used to convert a workspace from (spectrum number, TOF) units to (:math:`2\theta`, TOF) averaging the intensities over constant scattering angles.
 
 Improvements
 ############
@@ -29,11 +30,14 @@ Improvements
   - The temperature sample log can now be a time series.
 
 - :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
+- The upper limit of the empty container scaling factor in :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` has been removed.
 
 Bugfixes
 ########
 
 - Fixed a bug in :ref:`DirectILLCollectData <algm-DirectILLCollectData>` which prevented the *OutputIncidentEnergyWorkspace* being generated if *IncidentEnergyCalibration* was turned off.
+- Fixed the detector :math:`2\theta` width calculation in :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`. The algorithm was computing the angle between the detector center and top point, not the actual :math:`2\theta` width.
+- Fixed a bug in :ref:`Rebin2D <algm-Rebin2D>` which requires that an input workspace had to have fractional area weights for the `UseFractionalArea` option to work. The behaviour is now that if the input workspace does not have fractional areas, and `UseFractionalArea` is true, then fractional area tracking will be used with input fractions set to unity.
 
 Interfaces
 ----------
@@ -62,6 +66,14 @@ Improved
 ########
 
 - The ``directtools`` plotting and utility module has been updated with improved automatic E ranges, cut labels and other visuals. All functions now should also be applicable to non-ILL data as well.
+
+Instrument definitions
+----------------------
+
+Improved
+########
+
+- IN5: pixel radius and height are now more realistic and the detector ID of the monitor is now 100000 instead of 0.
 
 :ref:`Release 3.14.0 <v3.14.0>`
 

@@ -6,11 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QFrame)  # noqa
+from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_diagnose_detectors_script import DiagnoseDetectorsScript
 import reduction_gui.widgets.util as util
-import ui.inelastic.ui_dgs_diagnose_detectors
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("DiagnoseDetectorsWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class DiagnoseDetectorsWidget(BaseWidget):
@@ -23,10 +29,10 @@ class DiagnoseDetectorsWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(DiagnoseDetectorsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class DiagDetsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_diagnose_detectors.Ui_DiagDetsFrame):
+        class DiagDetsFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/inelastic/dgs_diagnose_detectors.ui', baseinstance=self)
 
         self._content = DiagDetsFrame(self)
         self._layout.addWidget(self._content)
@@ -52,19 +58,18 @@ class DiagnoseDetectorsWidget(BaseWidget):
                 self._content.sambkg_errorbar_crit_edit
         ]:
 
-            dvp = QtGui.QDoubleValidator(widget)
+            dvp = QDoubleValidator(widget)
             dvp.setBottom(0.0)
             widget.setValidator(dvp)
 
         for widget in [self._content.tof_start_edit,
                        self._content.tof_end_edit]:
-            ivp = QtGui.QIntValidator(widget)
+            ivp = QIntValidator(widget)
             ivp.setBottom(0)
             widget.setValidator(ivp)
 
         # Connections
-        self.connect(self._content.det_van2_browse, QtCore.SIGNAL("clicked()"),
-                     self._det_van2_browse)
+        self._content.det_van2_browse.clicked.connect(self._det_van2_browse)
 
     def _det_van2_browse(self):
         fname = self.data_browse_dialog()

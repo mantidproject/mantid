@@ -35,7 +35,10 @@ CatalogConfigService *makeCatalogConfigServiceAdapter(
     Adapter(const T &adaptee, const std::string key)
         : m_adaptee(adaptee), m_key(key) {}
     OptionalPath preferredMountPoint() const override {
-      return m_adaptee.getString(m_key);
+      auto const mountPoint = m_adaptee.getString(m_key);
+      if (!mountPoint.empty())
+        return OptionalPath(mountPoint);
+      return OptionalPath(boost::none);
     }
   };
   return new Adapter(adaptee, key);

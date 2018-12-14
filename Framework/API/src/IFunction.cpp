@@ -66,13 +66,7 @@ struct TieNode {
 /**
  * Destructor
  */
-IFunction::~IFunction() {
-  m_attrs.clear();
-  if (m_handler) {
-    delete m_handler;
-    m_handler = nullptr;
-  }
-}
+IFunction::~IFunction() { m_attrs.clear(); }
 
 /**
  * Virtual copy constructor
@@ -558,8 +552,8 @@ std::vector<std::string> IFunction::getParameterNames() const {
 /** Set a function handler
  * @param handler :: A new handler
  */
-void IFunction::setHandler(FunctionHandler *handler) {
-  m_handler = handler;
+void IFunction::setHandler(std::unique_ptr<FunctionHandler> handler) {
+  m_handler = std::move(handler);
   if (handler && handler->function().get() != this) {
     throw std::runtime_error("Function handler points to a different function");
   }

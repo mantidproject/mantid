@@ -95,6 +95,7 @@ set ( SRC_FILES
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
 	src/CylinderAbsorption.cpp
+	src/DeadTimeCorrection.cpp
 	src/DeleteLog.cpp
 	src/DeleteWorkspace.cpp
 	src/DeleteWorkspaces.cpp
@@ -182,6 +183,7 @@ set ( SRC_FILES
 	src/MaskBinsIf.cpp
 	src/MaskDetectorsIf.cpp
 	src/MaskInstrument.cpp
+	src/MaskNonOverlappingBins.cpp
 	src/MatrixWorkspaceAccess.cpp
 	src/Max.cpp
 	src/MaxEnt.cpp
@@ -214,6 +216,7 @@ set ( SRC_FILES
 	src/PDDetermineCharacterizations.cpp
 	src/PDFFourierTransform.cpp
 	src/PaddingAndApodization.cpp
+	src/ParallaxCorrection.cpp
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
 	src/Plus.cpp
@@ -429,6 +432,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
 	inc/MantidAlgorithms/CylinderAbsorption.h
+	inc/MantidAlgorithms/DeadTimeCorrection.h
 	inc/MantidAlgorithms/DeleteLog.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DeleteWorkspaces.h
@@ -517,6 +521,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaskBinsIf.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/MaskInstrument.h
+	inc/MantidAlgorithms/MaskNonOverlappingBins.h
 	inc/MantidAlgorithms/MatrixWorkspaceAccess.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
@@ -552,6 +557,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/PaddingAndApodization.h
+	inc/MantidAlgorithms/ParallaxCorrection.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
 	inc/MantidAlgorithms/Plus.h
@@ -695,6 +701,7 @@ set ( TEST_FILES
 	AppendSpectraTest.h
 	ApplyCalibrationTest.h
 	ApplyDetailedBalanceTest.h
+	ApplyFloodWorkspaceTest.h
 	ApplyTransmissionCorrectionTest.h
 	AverageLogDataTest.h
 	Bin2DPowderDiffractionTest.h
@@ -777,6 +784,7 @@ set ( TEST_FILES
 	CrossCorrelateTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
+	DeadTimeCorrectionTest.h
 	DeleteLogTest.h
 	DeleteWorkspaceTest.h
 	DeleteWorkspacesTest.h
@@ -862,6 +870,7 @@ set ( TEST_FILES
 	MaskBinsTest.h
 	MaskDetectorsIfTest.h
 	MaskInstrumentTest.h
+	MaskNonOverlappingBinsTest.h
 	MaxEnt/MaxentCalculatorTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
 	MaxEnt/MaxentEntropyPositiveValuesTest.h
@@ -893,6 +902,7 @@ set ( TEST_FILES
 	PDDetermineCharacterizationsTest.h
 	PDFFourierTransformTest.h
 	PaddingAndApodizationTest.h
+	ParallaxCorrectionTest.h
 	PauseTest.h
 	PerformIndexOperationsTest.h
 	PlusTest.h
@@ -938,6 +948,7 @@ set ( TEST_FILES
 	ResizeRectangularDetectorTest.h
 	RingProfileTest.h
 	RunCombinationHelperTest.h
+	SampleLogsBehaviourTest.h
 	SANSCollimationLengthEstimatorTest.h
 	SassenaFFTTest.h
 	ScaleTest.h

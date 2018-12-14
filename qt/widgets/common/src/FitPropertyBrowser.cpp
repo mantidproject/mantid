@@ -62,7 +62,22 @@ namespace MantidWidgets {
 
 namespace {
 Mantid::Kernel::Logger g_log("FitPropertyBrowser");
+
+using namespace Mantid::API;
+
+Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieve(workspaceName);
 }
+
+MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+}
+
+int getNumberOfSpectra(MatrixWorkspace_sptr workspace) {
+  return static_cast<int>(workspace->getNumberHistograms());
+}
+
+} // namespace
 
 /**
  * Constructor
@@ -772,10 +787,11 @@ void FitPropertyBrowser::createCompositeFunction(
   }
   setWorkspace(m_compositeFunction);
 
-  PropertyHandler *h = new PropertyHandler(
+  auto h = std::make_unique<PropertyHandler>(
       m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
-  m_compositeFunction->setHandler(h);
-  setCurrentFunction(h);
+  m_compositeFunction->setHandler(std::move(h));
+  setCurrentFunction(
+      static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
 
   if (m_auto_back) {
     addAutoBackground();
@@ -1331,27 +1347,36 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                workspaceName()));
-    if (!ws) {
+    auto const workspace =
+        convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
+
+    if (workspace) {
+      int const numberOfSpectra = getNumberOfSpectra(workspace);
+      int const currentIndex = workspaceIndex();
+
+      if (currentIndex < 0) {
+        setWorkspaceIndex(0);
+        emit workspaceIndexChanged(0);
+      } else if (currentIndex >= numberOfSpectra) {
+        setWorkspaceIndex(numberOfSpectra - 1);
+        emit workspaceIndexChanged(numberOfSpectra - 1);
+      }
+    } else
       setWorkspaceIndex(0);
-      return;
-    }
-    int n = static_cast<int>(ws->getNumberHistograms());
-    int wi = workspaceIndex();
-    if (wi < 0) {
-      setWorkspaceIndex(0);
-    } else if (wi >= n) {
-      setWorkspaceIndex(n - 1);
-    }
-    emit workspaceIndexChanged(wi);
   } else if (prop->propertyName() == "Workspace Index") {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
     h->setFunctionWorkspace();
+  } else if (prop->propertyName() == "WorkspaceIndex") {
+    PropertyHandler *h = getHandler()->findHandler(prop);
+    auto const index = prop->valueText().toInt();
+    if (h && index != workspaceIndex()) {
+      h->setAttribute(prop);
+      setWorkspaceIndex(index);
+      emit workspaceIndexChanged(index);
+      emit updatePlotSpectrum(index);
+    }
   } else if (prop == m_maxIterations || prop == m_peakRadius) {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
@@ -1634,9 +1659,17 @@ Mantid::API::IFunction_sptr FitPropertyBrowser::getFittingFunction() const {
   if (m_compositeFunction->nFunctions() > 1) {
     function = m_compositeFunction;
   } else {
-    function = m_compositeFunction->getFunction(0);
+    function = getFunctionAtIndex(0);
   }
   return function;
+}
+
+/**
+ * Return the function within a composite function at the position specified
+ */
+Mantid::API::IFunction_sptr
+FitPropertyBrowser::getFunctionAtIndex(std::size_t const &index) const {
+  return m_compositeFunction->getFunction(index);
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
@@ -1910,6 +1943,13 @@ void FitPropertyBrowser::updateParameters() {
 }
 
 /**
+ * Update the function attributes which have changed
+ */
+void FitPropertyBrowser::updateAttributes() {
+  getHandler()->updateAttributes();
+}
+
+/**
  * Slot. Removes all functions.
  */
 void FitPropertyBrowser::clear() {
@@ -1987,10 +2027,10 @@ bool FitPropertyBrowser::isUndoEnabled() const {
          compositeFunction()->nParams() == m_initialParameters.size();
 }
 
-/// Enable/disable the Fit button;
-void FitPropertyBrowser::setFitEnabled(bool yes) {
-  m_fitActionFit->setEnabled(yes);
-  m_fitActionSeqFit->setEnabled(yes);
+/// Enable/disable the Fit buttons;
+void FitPropertyBrowser::setFitEnabled(bool enable) {
+  m_fitActionFit->setEnabled(enable);
+  m_fitActionSeqFit->setEnabled(enable);
 }
 
 /// Returns true if the function is ready for a fit
@@ -2781,7 +2821,7 @@ void FitPropertyBrowser::setupMultifit() {
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 workspaceName()));
     if (mws) {
-      auto fun = m_compositeFunction->getFunction(0);
+      auto fun = getFunctionAtIndex(0);
       QString fun1Ini = QString::fromStdString(fun->asString());
       QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace=" + wsName +
                        ",WSParam=(WorkspaceIndex=0);";
@@ -2818,7 +2858,7 @@ void FitPropertyBrowser::processMultiBGResults() {
 
   // check if member functions are the same
   QStringList parNames;
-  auto fun0 = compositeFunction()->getFunction(0);
+  auto fun0 = getFunctionAtIndex(0);
   if (!fun0) {
     throw std::runtime_error(
         "IFunction expected but func function of another type");
@@ -2828,7 +2868,7 @@ void FitPropertyBrowser::processMultiBGResults() {
   }
 
   for (size_t i = 1; i < compositeFunction()->nFunctions(); ++i) {
-    auto fun = compositeFunction()->getFunction(i);
+    auto fun = getFunctionAtIndex(i);
     if (!fun) {
       throw std::runtime_error(
           "IFunction expected but func function of another type");
