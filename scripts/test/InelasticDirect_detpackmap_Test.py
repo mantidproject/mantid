@@ -5,16 +5,17 @@ import unittest
 class TestCase(unittest.TestCase):
 
     def test_sequoia(self):
-        assert sequoia('B1') == 38
-        assert sequoia('B37') == 74
-        assert sequoia('C1') == 75
-        assert sequoia('C25T') == 99
-        assert sequoia('C26T') == 100
-        assert sequoia('C25B') == 101
-        assert sequoia('C26B') == 102
-        assert sequoia('C37') == 113
-        assert sequoia('D1') == 114
-        assert sequoia('D37') == 150
+        asserteq = self.assertEqual
+        asserteq(sequoia('B1'),  38)
+        asserteq(sequoia('B37'),  74)
+        asserteq(sequoia('C1'),  75)
+        asserteq(sequoia('C25T'),  99)
+        asserteq(sequoia('C26T'),  100)
+        asserteq(sequoia('C25B'),  101)
+        asserteq(sequoia('C26B'),  102)
+        asserteq(sequoia('C37'),  113)
+        asserteq(sequoia('D1'),  114)
+        asserteq(sequoia('D37'),  150)
         return
 
 
