@@ -110,7 +110,7 @@ void ConvertAxisByFormula::exec() {
   bool isRefAxis = false;
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
   if (refAxisPtr != nullptr) {
-    isRaggedBins = outputWs->isCommonBins();
+    isRaggedBins = !outputWs->isCommonBins();
     isRefAxis = true;
   }
 
