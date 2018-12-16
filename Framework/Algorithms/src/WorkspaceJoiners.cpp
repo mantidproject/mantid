@@ -165,33 +165,16 @@ WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
 }
 
 /** Checks that the two input workspace have common size and the same
- * instrument & unit. There is an option to check whether their binning is
- * compatible
- *  Also calls the checkForOverlap method.
+ * instrument & unit.
  *  @param ws1 :: The first input workspace
  *  @param ws2 :: The second input workspace
- *  @param checkBinning :: A flag for whether to check that the workspaces have
- * compatible binning (default true)
  *  @throw std::invalid_argument If the workspaces are not compatible
  */
-void Mantid::Algorithms::WorkspaceJoiners::validateInputs(
-    const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
-    const bool checkBinning) {
-  // Workspaces with point data are allowed to have different binning
-  if (checkBinning) {
-    // This is the full check for common binning
-    if (!ws1.isCommonBins() || !ws2.isCommonBins()) {
-      g_log.error("Both input workspaces must have common binning for all "
-                  "their spectra");
-      throw std::invalid_argument("Both input workspaces must have common "
-                                  "binning for all their spectra");
-    }
-  }
-
+void WorkspaceJoiners::checkCompatibility(
+    const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2) {
   if (ws1.getInstrument()->getName() != ws2.getInstrument()->getName()) {
     const std::string message("The input workspaces are not compatible because "
                               "they come from different instruments");
-    g_log.error(message);
     throw std::invalid_argument(message);
   }
 
@@ -203,14 +186,12 @@ void Mantid::Algorithms::WorkspaceJoiners::validateInputs(
   if (ws1_unitID != ws2_unitID) {
     const std::string message("The input workspaces are not compatible because "
                               "they have different units on the X axis");
-    g_log.error(message);
     throw std::invalid_argument(message);
   }
 
   if (ws1.isDistribution() != ws2.isDistribution()) {
     const std::string message(
         "The input workspaces have inconsistent distribution flags");
-    g_log.error(message);
     throw std::invalid_argument(message);
   }
 }

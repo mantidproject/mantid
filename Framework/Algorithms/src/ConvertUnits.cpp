@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -338,31 +337,25 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
                                                // create the output workspace
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
   // See if the workspace has common bins - if so the X vector can be common
-  // First a quick check using the validator
-  CommonBinsValidator sameBins;
-  bool commonBoundaries = false;
-  if (sameBins.isValid(inputWS).empty()) {
-    commonBoundaries = inputWS->isCommonBins();
-    // Only do the full check if the quick one passes
-    if (commonBoundaries) {
-      // Calculate the new (common) X values
-      for (auto &x : outputWS->mutableX(0)) {
-        x = factor * std::pow(x, power);
-      }
-
-      auto xVals = outputWS->sharedX(0);
-
-      PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
-      for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
-        PARALLEL_START_INTERUPT_REGION
-        outputWS->setX(j, xVals);
-        prog.report("Convert to " + m_outputUnit->unitID());
-        PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-      if (!m_inputEvents) // if in event mode the work is done
-        return outputWS;
+  const bool commonBoundaries = inputWS->isCommonBins();
+  if (commonBoundaries) {
+    // Calculate the new (common) X values
+    for (auto &x : outputWS->mutableX(0)) {
+      x = factor * std::pow(x, power);
     }
+
+    auto xVals = outputWS->sharedX(0);
+
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
+    for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
+      PARALLEL_START_INTERUPT_REGION
+      outputWS->setX(j, xVals);
+      prog.report("Convert to " + m_outputUnit->unitID());
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+    if (!m_inputEvents) // if in event mode the work is done
+      return outputWS;
   }
 
   EventWorkspace_sptr eventWS =
