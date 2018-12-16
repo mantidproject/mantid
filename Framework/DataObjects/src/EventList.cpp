@@ -2724,23 +2724,6 @@ std::size_t EventList::maskConditionHelper(std::vector<T> &events,
     events.erase(first, events.end());
 
   return n;
-
-  /*
-  size_t count = 0;
-  auto it_e = events.begin();
-  auto it_m = mask.begin();
-  while (it_e != events.end() && it_m != mask.end()) {
-          if (*it_m) {
-                  ++it_e;
-          }
-          else {
-                  it_e = events.erase(it_e);
-                  count++;
-          }
-          ++it_m;
-  }
-  return count;
-  */
 }
 
 // --------------------------------------------------------------------------
