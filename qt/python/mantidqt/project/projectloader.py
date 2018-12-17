@@ -38,6 +38,10 @@ class ProjectLoader(object):
         :param directory: String or string castable object; the directory of the project
         :return: Bool; True if all workspace loaded successfully, False if not loaded successfully.
         """
+        # It can be expected that if at this point it is NoneType that it's an error
+        if directory is None:
+            return
+
         # Read project
         self.project_reader.read_project(directory)
 
@@ -56,7 +60,6 @@ class ProjectLoader(object):
 class ProjectReader(object):
     def __init__(self, project_file_ext):
         self.workspace_names = None
-        self.interfaces_dicts = None
         self.plot_lists = None
         self.project_file_ext = project_file_ext
 
@@ -70,10 +73,6 @@ class ProjectReader(object):
             with open(os.path.join(directory, (os.path.basename(directory) + self.project_file_ext))) as f:
                 json_data = json.load(f)
                 self.workspace_names = json_data["workspaces"]
-                self.interfaces_dicts = json_data["interfaces"]
                 self.plot_lists = json_data["plots"]
-        except BaseException as e:
-            # Re-raise Keyboard interrupts
-            if isinstance(e, KeyboardInterrupt):
-                raise KeyboardInterrupt
+        except Exception:
             logger.warning("JSON project file unable to be loaded/read")

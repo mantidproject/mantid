@@ -47,11 +47,7 @@ class Project(AnalysisDataServiceObserver):
             return self.save_as()
         else:
             # Actually save
-            workspaces_to_save = AnalysisDataService.getObjectNames()
-            plots_to_save = self.plot_gfm.figs
-            project_saver = ProjectSaver(self.project_file_ext)
-            project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                       interfaces_to_save=None, plots_to_save=plots_to_save)
+            self._save()
             self.__saved = True
 
     def save_as(self):
@@ -59,7 +55,7 @@ class Project(AnalysisDataServiceObserver):
         The function that is called if the save as... button is clicked on the mainwindow
         :return: None; if the user cancels.
         """
-        directory = self._get_directory_finder(accept_mode=QFileDialog.AcceptSave)
+        directory = self._file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.DirectoryOnly)
 
         # If none then the user cancelled
         if directory is None:
@@ -67,42 +63,48 @@ class Project(AnalysisDataServiceObserver):
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = directory
+        self._save()
+
+    def _save(self):
         workspaces_to_save = AnalysisDataService.getObjectNames()
         plots_to_save = self.plot_gfm.figs
         project_saver = ProjectSaver(self.project_file_ext)
-        project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save, interfaces_to_save=None,
+        project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save,
                                    plots_to_save=plots_to_save)
         self.__saved = True
 
-    @staticmethod
-    def _get_directory_finder(accept_mode):
-        directory = None
+    def _file_dialog(self, accept_mode, file_mode, file_filter=None):
+        path = None
         # Check if it exists
         first_pass = True
-        while first_pass or (not os.path.exists(directory) and os.path.exists(directory + (os.path.basename(directory)
-                                                                                           + ".mtdproj"))):
+        while first_pass or (not os.path.exists(path) and os.path.exists(path + (os.path.basename(path)
+                                                                                 + self.project_file_ext))):
             first_pass = False
-            directory = open_a_file_dialog(accept_mode=accept_mode, file_mode=QFileDialog.DirectoryOnly)
-            if directory is None:
+            path = open_a_file_dialog(accept_mode=accept_mode, file_mode=file_mode, file_filter=file_filter)
+            if path is None:
                 # Cancel close dialogs
                 return
 
-        return directory
+        return path
 
     def load(self):
         """
         The event that is called when open project is clicked on the main window
         :return: None; if the user cancelled.
         """
-        directory = self._get_directory_finder(accept_mode=QFileDialog.AcceptOpen)
+        file_name = self._file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
+                                      file_filter="Project files ( *" + self.project_file_ext + ")")
 
         # If none then the user cancelled
-        if directory is None:
+        if file_name is None:
             return
+
+        directory = os.path.dirname(file_name)
 
         project_loader = ProjectLoader(self.project_file_ext)
         project_loader.load_project(directory)
         self.last_project_location = directory
+        self.__saved = True
 
     def offer_save(self, parent):
         """
