@@ -11,33 +11,19 @@ import sys
 
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
-
 from mantid.kernel import ConfigServiceImpl
-import mantid.simpleapi as simpleapi
-
 from Muon.GUI.Common.muon_data_context import MuonDataContext
-
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
 from save_python import getWidgetIfOpen
+from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
+import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+
 
 Name = "Muon_Analysis_2"
 
-from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
-
-from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
-from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
-
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
-
-import Muon.GUI.Common.message_box as message_box
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 muonGUI = None
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
@@ -79,37 +65,19 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         self.context = MuonDataContext(load_data=self.loaded_data)
 
         # construct all the widgets.
-        self.setup_load_widget()
+        self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(self.load_widget_view)
+        splitter.addWidget(self.load_widget.load_widget_view)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
 
-    def setup_load_widget(self):
-        # set up the views
-        self.load_file_view = BrowseFileWidgetView(self)
-        self.load_run_view = LoadRunWidgetView(self)
-        self.load_widget_view = LoadWidgetView(parent=self,
-                                               load_file_view=self.load_file_view,
-                                               load_run_view=self.load_run_view)
-        self.load_widget = LoadWidgetPresenter(self.load_widget_view,
-                                               LoadWidgetModel(self.loaded_data))
-
-        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(self.loaded_data))
-        self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(self.loaded_data))
-
-        self.load_widget.set_load_file_widget(self.file_widget)
-        self.load_widget.set_load_run_widget(self.run_widget)
-
-        self.load_widget.set_current_instrument(self.context.instrument)
-
     def closeEvent(self, event):
         print("Muon Analysis Close Event")
-        self.load_widget_view = None
-        self.load_run_view = None
-        self.load_file_view = None
+        self.load_widget.load_widget_view = None
+        self.load_widget.load_run_view = None
+        self.load_widget.load_file_view = None
 
 
 class MuonAnalysis2Gui(QtGui.QMainWindow):
