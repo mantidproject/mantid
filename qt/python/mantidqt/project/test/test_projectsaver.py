@@ -169,7 +169,7 @@ class ProjectWriterTest(unittest.TestCase):
     def test_write_out_on_just_workspaces(self):
         plots_to_save = []
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
-        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list, 
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
                                                     project_file_ext=project_file_ext, plots_to_save=plots_to_save)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
 
@@ -185,7 +185,7 @@ class ProjectWriterTest(unittest.TestCase):
     def test_write_out_on_just_plots(self):
         plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
         workspace_list = []
-        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list, 
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
                                                     project_file_ext=project_file_ext, plots_to_save=plots_to_save)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
 
@@ -202,7 +202,7 @@ class ProjectWriterTest(unittest.TestCase):
     def test_write_out_on_both_workspaces_and_plots(self):
         plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
-        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list, 
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
                                                     project_file_ext=project_file_ext, plots_to_save=plots_to_save)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
 
