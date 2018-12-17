@@ -217,7 +217,7 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
 
 std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiIqtFit_" + m_fitType + "_Result";
+    return "MultiIqtFit_" + m_fitType + "_Results";
   auto const fitString = getFitString(getWorkspace(0));
   return createOutputName("%1%" + fitString + "_" + m_fitType + "_s%2%", "_to_",
                           0);
@@ -225,7 +225,7 @@ std::string IqtFitModel::sequentialFitOutputName() const {
 
 std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
-    return "MultiSimultaneousIqtFit_" + m_fitType + "_Result";
+    return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
   auto const fitString = getFitString(getWorkspace(0));
   return createOutputName("%1%" + fitString + "_mult" + m_fitType + "_s%2%",
                           "_to_", 0);

@@ -66,7 +66,7 @@ void ConvFit::setupFitTab() {
   m_fitStrings["ElasticDiffSphere"] = "EDS";
   m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
   m_fitStrings["StretchedExpFT"] = "SFT";
-  m_fitStrings["Teixeira Water"] = "Teixeria1L";
+  m_fitStrings["Teixeira Water"] = "TxWater";
 
   auto &functionFactory = FunctionFactory::Instance();
   auto lorentzian = functionFactory.createFunction("Lorentzian");

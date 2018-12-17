@@ -302,6 +302,7 @@ runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
   }
   return createGroup(results);
 }
+
 } // namespace
 
 namespace Mantid {
@@ -514,15 +515,15 @@ void QENSFitSequential::exec() {
   const auto groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outputBaseName + "_Workspaces");
-  auto hhh = getPropertyValue("OutputWorkspace");
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
-  //if (containsMultipleData(workspaces))
-  //  renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
-  //                   inputWorkspaces);
-  //else
-  //  renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+  if (containsMultipleData(workspaces))
+    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
+                     inputWorkspaces);
+  else
+    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
@@ -691,9 +692,9 @@ void QENSFitSequential::renameGroupWorkspace(
     std::string const &currentName, std::vector<std::string> const &spectra,
     std::string const &outputBaseName, std::string const &endOfSuffix) {
   if (AnalysisDataService::Instance().doesExist(currentName)) {
-    auto const pdfGroup =
+    auto const group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(currentName);
-    renameWorkspaces(pdfGroup, spectra, outputBaseName, endOfSuffix);
+    renameWorkspaces(group, spectra, outputBaseName, endOfSuffix);
   }
 }
 

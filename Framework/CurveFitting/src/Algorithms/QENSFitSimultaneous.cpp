@@ -612,7 +612,7 @@ std::vector<MatrixWorkspace_sptr> QENSFitSimultaneous::convertInputToElasticQ(
 
 std::string QENSFitSimultaneous::getOutputBaseName() const {
   const auto base = getPropertyValue("OutputWorkspace");
-  auto position = base.rfind("_Result");
+  auto position = base.rfind("_Results");
   if (position != std::string::npos)
     return base.substr(0, position);
   return base;
