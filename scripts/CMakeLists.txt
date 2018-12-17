@@ -131,6 +131,7 @@ set ( TEST_PYQT4_FILES
 # Additional tests
 add_subdirectory(test/directtools)
 add_subdirectory(test/isis_powder)
+add_subdirectory(test/MultiPlotting)
 add_subdirectory(test/Muon)
 add_subdirectory(test/SANS)
 add_subdirectory(test/TOFTOF)
