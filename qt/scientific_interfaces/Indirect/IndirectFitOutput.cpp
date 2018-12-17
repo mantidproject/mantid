@@ -158,7 +158,7 @@ std::string constructResultName(const std::string &name,
                                 IndirectFitData const *fitData) {
   if (containsMultipleData(name)) {
     const auto nameEnd = cutFirstOf(cutLastOf(name, "s_"), "Multi");
-    return fitData->getInputBasename() + "_" + nameEnd;
+    return fitData->getBasename() + "_" + nameEnd;
   } else
     return cutLastOf(name, "s_1");
 }
