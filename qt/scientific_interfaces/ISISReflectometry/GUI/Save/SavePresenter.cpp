@@ -30,17 +30,9 @@ using namespace Mantid::API;
  */
 SavePresenter::SavePresenter(ISaveView *view,
                              std::unique_ptr<IReflAsciiSaver> saver)
-    : m_view(view), m_saver(std::move(saver)), m_mainPresenter(),
-      m_shouldAutosave(false) {
+    : m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
 
   m_view->subscribe(this);
-}
-
-/** Accept a main presenter
- * @param mainPresenter :: [input] The main presenter
- */
-void SavePresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
 }
 
 void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }

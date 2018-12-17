@@ -20,8 +20,6 @@ to be implemented by a concrete 'Save ASCII' tab presenter
 class ISavePresenter {
 public:
   virtual ~ISavePresenter(){};
-  /// Accept a main presenter
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
 
   virtual void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,

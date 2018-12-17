@@ -22,10 +22,6 @@ EventPresenter::EventPresenter(IEventView *view)
   m_view->subscribe(this);
 }
 
-void EventPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
-
 Slicing const &EventPresenter::slicing() const { return m_slicing; }
 
 void EventPresenter::notifyUniformSliceCountChanged(int) {

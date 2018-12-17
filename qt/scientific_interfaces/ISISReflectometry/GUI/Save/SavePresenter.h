@@ -29,8 +29,6 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter,
                                                      public SaveViewSubscriber {
 public:
   SavePresenter(ISaveView *view, std::unique_ptr<IReflAsciiSaver> saver);
-  /// Accept a main presenter
-  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
 
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;

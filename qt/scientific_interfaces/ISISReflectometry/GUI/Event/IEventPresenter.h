@@ -22,7 +22,6 @@ to be implemented by a concrete 'Event' presenter
 class IEventPresenter {
 public:
   virtual ~IEventPresenter() = default;
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
 };

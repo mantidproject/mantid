@@ -39,8 +39,6 @@ public:
   notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) override;
   void notifyLogBlockNameChanged(std::string blockName) override;
 
-  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
-
   Slicing const &slicing() const;
 
 private:
@@ -52,7 +50,6 @@ private:
   void setSlicingFromView();
   /// The view we are managing
   IEventView *m_view;
-  IReflBatchPresenter *m_mainPresenter;
   SliceType m_sliceType;
 };
 } // namespace CustomInterfaces
