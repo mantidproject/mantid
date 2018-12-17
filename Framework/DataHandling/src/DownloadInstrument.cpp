@@ -91,6 +91,12 @@ void DownloadInstrument::init() {
 void DownloadInstrument::exec() {
   StringToStringMap fileMap;
   setProperty("FileDownloadCount", 0);
+
+  // to aid in general debugging, always ask github for what the rate limit
+  // status is. This doesn't count against rate limit.
+  GitHubApiHelper inetHelper;
+  g_log.information(inetHelper.getRateLimitDescription());
+
   try {
     fileMap = processRepository();
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
