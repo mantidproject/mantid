@@ -68,7 +68,8 @@ public:
   virtual void enableFileFormatAndLocationControls() = 0;
   virtual void disableFileFormatAndLocationControls() = 0;
 
-  virtual void invalidRegex() = 0;
+  virtual void showFilterEditValid() = 0;
+  virtual void showFilterEditInvalid() = 0;
   virtual void errorInvalidSaveDirectory() = 0;
   virtual void warnInvalidSaveDirectory() = 0;
   virtual void noWorkspacesSelected() = 0;

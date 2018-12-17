@@ -250,8 +250,16 @@ void SaveView::warning(const std::string &title, const std::string &prompt) {
                         QString::fromStdString(prompt));
 }
 
-void SaveView::invalidRegex() {
-  error("Invalid Regex", "Error, invalid regular expression.");
+void SaveView::showFilterEditValid() {
+  auto palette = m_ui.filterEdit->palette();
+  palette.setColor(QPalette::Base, Qt::transparent);
+  m_ui.filterEdit->setPalette(palette);
+}
+
+void SaveView::showFilterEditInvalid() {
+  auto palette = m_ui.filterEdit->palette();
+  palette.setColor(QPalette::Base, QColor("#ffb8ad"));
+  m_ui.filterEdit->setPalette(palette);
 }
 
 void SaveView::errorInvalidSaveDirectory() {

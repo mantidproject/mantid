@@ -73,7 +73,8 @@ public:
   void error(const std::string &title, const std::string &prompt);
   void warning(const std::string &title, const std::string &prompt);
 
-  void invalidRegex() override;
+  void showFilterEditValid() override;
+  void showFilterEditInvalid() override;
   void errorInvalidSaveDirectory() override;
   void warnInvalidSaveDirectory() override;
   void noWorkspacesSelected() override;

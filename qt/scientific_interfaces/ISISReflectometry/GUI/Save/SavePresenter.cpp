@@ -142,8 +142,9 @@ void SavePresenter::filterWorkspaceNames() {
       it = std::copy_if(
           wsNames.begin(), wsNames.end(), validNames.begin(),
           [rgx](std::string s) { return boost::regex_search(s, rgx); });
+      m_view->showFilterEditValid();
     } catch (boost::regex_error &) {
-      m_view->invalidRegex();
+      m_view->showFilterEditInvalid();
     }
   } else {
     // Otherwise simply add names where the filter string is found in

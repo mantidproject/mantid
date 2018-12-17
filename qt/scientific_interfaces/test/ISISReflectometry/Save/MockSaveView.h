@@ -40,7 +40,8 @@ public:
   MOCK_METHOD0(enableFileFormatAndLocationControls, void());
   MOCK_METHOD0(disableFileFormatAndLocationControls, void());
 
-  MOCK_METHOD0(invalidRegex, void());
+  MOCK_METHOD0(showFilterEditValid, void());
+  MOCK_METHOD0(showFilterEditInvalid, void());
   MOCK_METHOD0(errorInvalidSaveDirectory, void());
   MOCK_METHOD0(warnInvalidSaveDirectory, void());
   MOCK_METHOD0(noWorkspacesSelected, void());
