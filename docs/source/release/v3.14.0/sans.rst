@@ -31,6 +31,8 @@ Improved
 * Added a "process all" and "process selected" button to the batch table in place of "process" button.
 * Added a load button to load selected workspaces without processing.
 * Added save_can option to output unsubtracted can and sample workspaces.
+* Can set PhiMin, PhiMax, and UseMirror mask options from the options column in the table
+* Workspaces are centred upon loading
 
 Bug fixes
 #########

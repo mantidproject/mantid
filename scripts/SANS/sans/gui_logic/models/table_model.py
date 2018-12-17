@@ -429,8 +429,8 @@ def options_column_bool(string):
     """
     Evaluate input string as a bool. Used for UseMirror in Options column,
     as evaluating bool("False") returns True (any string is Truthy).
-    :param string:
-    :return:
+    :param string: User input string to be evaluated as False or True
+    :return: True or False
     """
     truthy_strings = ("true", "1", "yes", "t", "y")  # t short for true, y short for yes
     falsy_strings = ("false", "0", "no", "f", "n")
