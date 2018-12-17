@@ -38,7 +38,6 @@ class LoadWidgetPresenter(object):
         self.instrumentObserver = LoadWidgetPresenter.InstrumentObserver(self)
         self.loadNotifier = LoadWidgetPresenter.LoadNotifier(self)
 
-
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
         self.load_run_widget.enable_multiple_files(False)

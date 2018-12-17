@@ -10,6 +10,7 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 
+
 class LoadWidget(object):
     def __init__(self, loaded_data, instrument, parent):
         # set up the views
