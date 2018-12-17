@@ -12,6 +12,12 @@ or by importing them into MantidPlot.
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 """
 from __future__ import (absolute_import, division, print_function)
+# == for testing conda build of mantid-framework ==========
+import os
+if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
+    # conda build of mantid-framework sometimes require importing matplotlib before mantid
+    import matplotlib
+# =========================================================
 from six import PY3
 import datetime
 import difflib
@@ -22,7 +28,6 @@ from mantid.api import FrameworkManager
 from mantid.kernel import config, MemoryStats
 from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
 import numpy
-import os
 import platform
 import re
 import shutil

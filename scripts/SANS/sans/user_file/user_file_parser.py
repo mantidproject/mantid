@@ -262,20 +262,20 @@ class InstrParser(object):
     Type = "INSTR"
     _INSTRUMENTS = ["LOQ", "LARMOR", "SANS2D", "ZOOM", "NOINSTRUMENT"]
 
+    INSTRUMENTS_DICT = {"LOQ": SANSInstrument.LOQ,
+                        "LARMOR": SANSInstrument.LARMOR,
+                        "SANS2D": SANSInstrument.SANS2D,
+                        "ZOOM": SANSInstrument.ZOOM}
+
     @staticmethod
     def parse_line(line):
-        if line == "LOQ":
-            ret_val = SANSInstrument.LOQ
-        elif line == "LARMOR":
-            ret_val = SANSInstrument.LARMOR
-        elif line == "SANS2D":
-            ret_val = SANSInstrument.SANS2D
-        elif line == "ZOOM":
-            ret_val = SANSInstrument.ZOOM
-        else:
+        try:
+            ret_val = InstrParser.INSTRUMENTS_DICT[line]
+        except KeyError:
             raise RuntimeError("InstrParser: Unknown command for INSTR: {0}".format(line))
-
-        return {DetectorId.instrument: ret_val}
+        else:
+            # If no exception raised
+            return {DetectorId.instrument: ret_val}
 
     @staticmethod
     def get_type():

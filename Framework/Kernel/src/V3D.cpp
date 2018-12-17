@@ -205,7 +205,7 @@ double V3D::zenith(const V3D &v) const {
  *  @return The angle between the vectors in radians (0 < theta < pi)
  */
 double V3D::angle(const V3D &v) const {
-  double ratio = this->scalar_prod(v) / (this->norm() * v.norm());
+  const double ratio = this->scalar_prod(v) / (this->norm() * v.norm());
 
   if (ratio >= 1.0)       // NOTE: Due to rounding errors, if v is
     return 0.0;           //       is nearly the same as "this" or

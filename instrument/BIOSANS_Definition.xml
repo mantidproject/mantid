@@ -1,679 +1,580 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- For help on the notation used to specify an Instrument Definition File 
-     see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="BioSANS" valid-from   ="1900-01-31 23:59:59"
-                           valid-to     ="2012-01-31 23:59:59"
-		          last-modified="2012-03-23 15:02:05">
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+			name="BIOSANS"
+			valid-from="2016-04-22 00:00:00"
+			valid-to="2100-01-31 23:59:59"
+			last-modified="2018-12-06 17:45:00.000">
+	
+	<defaults>
+		<length unit="meter"/>
+		<angle unit="degree"/>
+		<reference-frame>
+			<along-beam axis="z"/>
+			<pointing-up axis="y"/>
+			<handedness val="right"/>
+		</reference-frame>
+	</defaults>
+	
+	<!--SOURCE AND SAMPLE POSITION-->
+	<component type="moderator">
+		<location z="-13.601"/>
+	</component>
+	<type name="moderator" is="Source"/>
+	
+	<component type="sample-position">
+		<location y="0.0" x="0.0" z="0.0"/>
+	</component>
+	<type name="sample-position" is="SamplePos"/>
+	
+	<!-- ***************************************************************** -->
+	<!--MONITOR 1 -->
+	<component type="monitors" idlist="monitor1">
+		<location/>
+	</component>
+	<type name="monitors">
+	    <component type="monitor">
+    		<location z="-10.5" name="monitor1"/>
+    	</component>
+	</type>
+	<idlist idname="monitor1">
+		<id val="1" />
+	</idlist>
 
-  <!-- TEST DEFINITION: NOT READY FOR SHOW TIME -->
-  
-  <defaults>
-    <length unit="meter"/>
-    <angle unit="degree"/>
-    <reference-frame>
-      <!-- The z-axis is set parallel to and in the direction of the beam. the 
-           y-axis points up and the coordinate system is right handed. -->
-      <along-beam axis="z"/>
-      <pointing-up axis="y"/>
-      <handedness val="right"/>
-    </reference-frame>
-    <default-view axis-view="z+"/>
-  </defaults>
-  
-  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
-  
-  <!-- source and sample-position components 
-  		Place the beam along the z-axis, the sample holder at (0,0,0) -->
+	<!--MONITOR 2 -->
+	<component type="timers" idlist="timer1">
+		<location/>
+	</component>
+	<type name="timers">
+	    <component type="monitor">
+    		<location z="-10.5" name="timer1"/>
+    	</component>
+	</type>
+	<idlist idname="timer1">
+		<id val="2" />
+	</idlist>
 
-  <component type="source">
-    <location x="0.0" y="0.0" z="-1.0"/>
-  </component>
-  <type name="source" is="Source" />
-  
-  <component type="some-sample-holder">
-    <location x="0.0" y="0.0" z="0.0"/>
-  </component>
-  <type name="some-sample-holder" is="SamplePos" />
-  
-  
-  <!-- detector components (including monitors) -->
-  
-  <component type="monitor1" idlist="monitor1">
-    <location z="-0.5"/>
-  </component>
-  <type name="monitor1" is="monitor" />
- 
-  <component type="timer1" idlist="timer1">
-    <location z="-0.5" />
-  </component>
-  <type name="timer1" is="monitor" />
- 
-  <component type="sample_aperture">
-    <location z="0.0"/>
-    <parameter name="Size"> <value val="14.0" /> </parameter>
-  </component>
-  <type name="sample_aperture" />
- 
-
-  <component type="detector1" name="detector1" idlist="det1">
-   <location x="0.0" y="0.0" z="0.0" />
-  </component>   
-
- 
-  <type name="detector1">
-    <component type="tube" >
-		<location x="-0.487050" name="tube0" />
-		<location x="-0.481950" name="tube1" />
-		<location x="-0.476850" name="tube2" />
-		<location x="-0.471750" name="tube3" />
-		<location x="-0.466650" name="tube4" />
-		<location x="-0.461550" name="tube5" />
-		<location x="-0.456450" name="tube6" />
-		<location x="-0.451350" name="tube7" />
-		<location x="-0.446250" name="tube8" />
-		<location x="-0.441150" name="tube9" />
-		<location x="-0.436050" name="tube10" />
-		<location x="-0.430950" name="tube11" />
-		<location x="-0.425850" name="tube12" />
-		<location x="-0.420750" name="tube13" />
-		<location x="-0.415650" name="tube14" />
-		<location x="-0.410550" name="tube15" />
-		<location x="-0.405450" name="tube16" />
-		<location x="-0.400350" name="tube17" />
-		<location x="-0.395250" name="tube18" />
-		<location x="-0.390150" name="tube19" />
-		<location x="-0.385050" name="tube20" />
-		<location x="-0.379950" name="tube21" />
-		<location x="-0.374850" name="tube22" />
-		<location x="-0.369750" name="tube23" />
-		<location x="-0.364650" name="tube24" />
-		<location x="-0.359550" name="tube25" />
-		<location x="-0.354450" name="tube26" />
-		<location x="-0.349350" name="tube27" />
-		<location x="-0.344250" name="tube28" />
-		<location x="-0.339150" name="tube29" />
-		<location x="-0.334050" name="tube30" />
-		<location x="-0.328950" name="tube31" />
-		<location x="-0.323850" name="tube32" />
-		<location x="-0.318750" name="tube33" />
-		<location x="-0.313650" name="tube34" />
-		<location x="-0.308550" name="tube35" />
-		<location x="-0.303450" name="tube36" />
-		<location x="-0.298350" name="tube37" />
-		<location x="-0.293250" name="tube38" />
-		<location x="-0.288150" name="tube39" />
-		<location x="-0.283050" name="tube40" />
-		<location x="-0.277950" name="tube41" />
-		<location x="-0.272850" name="tube42" />
-		<location x="-0.267750" name="tube43" />
-		<location x="-0.262650" name="tube44" />
-		<location x="-0.257550" name="tube45" />
-		<location x="-0.252450" name="tube46" />
-		<location x="-0.247350" name="tube47" />
-		<location x="-0.242250" name="tube48" />
-		<location x="-0.237150" name="tube49" />
-		<location x="-0.232050" name="tube50" />
-		<location x="-0.226950" name="tube51" />
-		<location x="-0.221850" name="tube52" />
-		<location x="-0.216750" name="tube53" />
-		<location x="-0.211650" name="tube54" />
-		<location x="-0.206550" name="tube55" />
-		<location x="-0.201450" name="tube56" />
-		<location x="-0.196350" name="tube57" />
-		<location x="-0.191250" name="tube58" />
-		<location x="-0.186150" name="tube59" />
-		<location x="-0.181050" name="tube60" />
-		<location x="-0.175950" name="tube61" />
-		<location x="-0.170850" name="tube62" />
-		<location x="-0.165750" name="tube63" />
-		<location x="-0.160650" name="tube64" />
-		<location x="-0.155550" name="tube65" />
-		<location x="-0.150450" name="tube66" />
-		<location x="-0.145350" name="tube67" />
-		<location x="-0.140250" name="tube68" />
-		<location x="-0.135150" name="tube69" />
-		<location x="-0.130050" name="tube70" />
-		<location x="-0.124950" name="tube71" />
-		<location x="-0.119850" name="tube72" />
-		<location x="-0.114750" name="tube73" />
-		<location x="-0.109650" name="tube74" />
-		<location x="-0.104550" name="tube75" />
-		<location x="-0.099450" name="tube76" />
-		<location x="-0.094350" name="tube77" />
-		<location x="-0.089250" name="tube78" />
-		<location x="-0.084150" name="tube79" />
-		<location x="-0.079050" name="tube80" />
-		<location x="-0.073950" name="tube81" />
-		<location x="-0.068850" name="tube82" />
-		<location x="-0.063750" name="tube83" />
-		<location x="-0.058650" name="tube84" />
-		<location x="-0.053550" name="tube85" />
-		<location x="-0.048450" name="tube86" />
-		<location x="-0.043350" name="tube87" />
-		<location x="-0.038250" name="tube88" />
-		<location x="-0.033150" name="tube89" />
-		<location x="-0.028050" name="tube90" />
-		<location x="-0.022950" name="tube91" />
-		<location x="-0.017850" name="tube92" />
-		<location x="-0.012750" name="tube93" />
-		<location x="-0.007650" name="tube94" />
-		<location x="-0.002550" name="tube95" />
-		<location x="0.002550" name="tube96" />
-		<location x="0.007650" name="tube97" />
-		<location x="0.012750" name="tube98" />
-		<location x="0.017850" name="tube99" />
-		<location x="0.022950" name="tube100" />
-		<location x="0.028050" name="tube101" />
-		<location x="0.033150" name="tube102" />
-		<location x="0.038250" name="tube103" />
-		<location x="0.043350" name="tube104" />
-		<location x="0.048450" name="tube105" />
-		<location x="0.053550" name="tube106" />
-		<location x="0.058650" name="tube107" />
-		<location x="0.063750" name="tube108" />
-		<location x="0.068850" name="tube109" />
-		<location x="0.073950" name="tube110" />
-		<location x="0.079050" name="tube111" />
-		<location x="0.084150" name="tube112" />
-		<location x="0.089250" name="tube113" />
-		<location x="0.094350" name="tube114" />
-		<location x="0.099450" name="tube115" />
-		<location x="0.104550" name="tube116" />
-		<location x="0.109650" name="tube117" />
-		<location x="0.114750" name="tube118" />
-		<location x="0.119850" name="tube119" />
-		<location x="0.124950" name="tube120" />
-		<location x="0.130050" name="tube121" />
-		<location x="0.135150" name="tube122" />
-		<location x="0.140250" name="tube123" />
-		<location x="0.145350" name="tube124" />
-		<location x="0.150450" name="tube125" />
-		<location x="0.155550" name="tube126" />
-		<location x="0.160650" name="tube127" />
-		<location x="0.165750" name="tube128" />
-		<location x="0.170850" name="tube129" />
-		<location x="0.175950" name="tube130" />
-		<location x="0.181050" name="tube131" />
-		<location x="0.186150" name="tube132" />
-		<location x="0.191250" name="tube133" />
-		<location x="0.196350" name="tube134" />
-		<location x="0.201450" name="tube135" />
-		<location x="0.206550" name="tube136" />
-		<location x="0.211650" name="tube137" />
-		<location x="0.216750" name="tube138" />
-		<location x="0.221850" name="tube139" />
-		<location x="0.226950" name="tube140" />
-		<location x="0.232050" name="tube141" />
-		<location x="0.237150" name="tube142" />
-		<location x="0.242250" name="tube143" />
-		<location x="0.247350" name="tube144" />
-		<location x="0.252450" name="tube145" />
-		<location x="0.257550" name="tube146" />
-		<location x="0.262650" name="tube147" />
-		<location x="0.267750" name="tube148" />
-		<location x="0.272850" name="tube149" />
-		<location x="0.277950" name="tube150" />
-		<location x="0.283050" name="tube151" />
-		<location x="0.288150" name="tube152" />
-		<location x="0.293250" name="tube153" />
-		<location x="0.298350" name="tube154" />
-		<location x="0.303450" name="tube155" />
-		<location x="0.308550" name="tube156" />
-		<location x="0.313650" name="tube157" />
-		<location x="0.318750" name="tube158" />
-		<location x="0.323850" name="tube159" />
-		<location x="0.328950" name="tube160" />
-		<location x="0.334050" name="tube161" />
-		<location x="0.339150" name="tube162" />
-		<location x="0.344250" name="tube163" />
-		<location x="0.349350" name="tube164" />
-		<location x="0.354450" name="tube165" />
-		<location x="0.359550" name="tube166" />
-		<location x="0.364650" name="tube167" />
-		<location x="0.369750" name="tube168" />
-		<location x="0.374850" name="tube169" />
-		<location x="0.379950" name="tube170" />
-		<location x="0.385050" name="tube171" />
-		<location x="0.390150" name="tube172" />
-		<location x="0.395250" name="tube173" />
-		<location x="0.400350" name="tube174" />
-		<location x="0.405450" name="tube175" />
-		<location x="0.410550" name="tube176" />
-		<location x="0.415650" name="tube177" />
-		<location x="0.420750" name="tube178" />
-		<location x="0.425850" name="tube179" />
-		<location x="0.430950" name="tube180" />
-		<location x="0.436050" name="tube181" />
-		<location x="0.441150" name="tube182" />
-		<location x="0.446250" name="tube183" />
-		<location x="0.451350" name="tube184" />
-		<location x="0.456450" name="tube185" />
-		<location x="0.461550" name="tube186" />
-		<location x="0.466650" name="tube187" />
-		<location x="0.471750" name="tube188" />
-		<location x="0.476850" name="tube189" />
-		<location x="0.481950" name="tube190" />
-		<location x="0.487050" name="tube191" />
-
-    </component>
-  </type>
-  
-  <type name="pixel" is="detector">
-    <cuboid id="shape">
-      <left-front-bottom-point x="-0.002550" y="-0.002550" z="0.0"  />
-      <left-front-top-point  x="-0.002550" y="0.002550" z="0.0"  />
-      <left-back-bottom-point  x="-0.002550" y="-0.002550" z="-0.000005"  />
-      <right-front-bottom-point  x="0.002550" y="-0.002550" z="0.0"  />
-    </cuboid>
-    <algebra val="shape" /> 
-  </type>    
-  
-  <type name="tube" outline="yes">
-    <properties/>
-    <component type="pixel">
-		<location y="-0.487050" name="pixel0" />
-		<location y="-0.481950" name="pixel1" />
-		<location y="-0.476850" name="pixel2" />
-		<location y="-0.471750" name="pixel3" />
-		<location y="-0.466650" name="pixel4" />
-		<location y="-0.461550" name="pixel5" />
-		<location y="-0.456450" name="pixel6" />
-		<location y="-0.451350" name="pixel7" />
-		<location y="-0.446250" name="pixel8" />
-		<location y="-0.441150" name="pixel9" />
-		<location y="-0.436050" name="pixel10" />
-		<location y="-0.430950" name="pixel11" />
-		<location y="-0.425850" name="pixel12" />
-		<location y="-0.420750" name="pixel13" />
-		<location y="-0.415650" name="pixel14" />
-		<location y="-0.410550" name="pixel15" />
-		<location y="-0.405450" name="pixel16" />
-		<location y="-0.400350" name="pixel17" />
-		<location y="-0.395250" name="pixel18" />
-		<location y="-0.390150" name="pixel19" />
-		<location y="-0.385050" name="pixel20" />
-		<location y="-0.379950" name="pixel21" />
-		<location y="-0.374850" name="pixel22" />
-		<location y="-0.369750" name="pixel23" />
-		<location y="-0.364650" name="pixel24" />
-		<location y="-0.359550" name="pixel25" />
-		<location y="-0.354450" name="pixel26" />
-		<location y="-0.349350" name="pixel27" />
-		<location y="-0.344250" name="pixel28" />
-		<location y="-0.339150" name="pixel29" />
-		<location y="-0.334050" name="pixel30" />
-		<location y="-0.328950" name="pixel31" />
-		<location y="-0.323850" name="pixel32" />
-		<location y="-0.318750" name="pixel33" />
-		<location y="-0.313650" name="pixel34" />
-		<location y="-0.308550" name="pixel35" />
-		<location y="-0.303450" name="pixel36" />
-		<location y="-0.298350" name="pixel37" />
-		<location y="-0.293250" name="pixel38" />
-		<location y="-0.288150" name="pixel39" />
-		<location y="-0.283050" name="pixel40" />
-		<location y="-0.277950" name="pixel41" />
-		<location y="-0.272850" name="pixel42" />
-		<location y="-0.267750" name="pixel43" />
-		<location y="-0.262650" name="pixel44" />
-		<location y="-0.257550" name="pixel45" />
-		<location y="-0.252450" name="pixel46" />
-		<location y="-0.247350" name="pixel47" />
-		<location y="-0.242250" name="pixel48" />
-		<location y="-0.237150" name="pixel49" />
-		<location y="-0.232050" name="pixel50" />
-		<location y="-0.226950" name="pixel51" />
-		<location y="-0.221850" name="pixel52" />
-		<location y="-0.216750" name="pixel53" />
-		<location y="-0.211650" name="pixel54" />
-		<location y="-0.206550" name="pixel55" />
-		<location y="-0.201450" name="pixel56" />
-		<location y="-0.196350" name="pixel57" />
-		<location y="-0.191250" name="pixel58" />
-		<location y="-0.186150" name="pixel59" />
-		<location y="-0.181050" name="pixel60" />
-		<location y="-0.175950" name="pixel61" />
-		<location y="-0.170850" name="pixel62" />
-		<location y="-0.165750" name="pixel63" />
-		<location y="-0.160650" name="pixel64" />
-		<location y="-0.155550" name="pixel65" />
-		<location y="-0.150450" name="pixel66" />
-		<location y="-0.145350" name="pixel67" />
-		<location y="-0.140250" name="pixel68" />
-		<location y="-0.135150" name="pixel69" />
-		<location y="-0.130050" name="pixel70" />
-		<location y="-0.124950" name="pixel71" />
-		<location y="-0.119850" name="pixel72" />
-		<location y="-0.114750" name="pixel73" />
-		<location y="-0.109650" name="pixel74" />
-		<location y="-0.104550" name="pixel75" />
-		<location y="-0.099450" name="pixel76" />
-		<location y="-0.094350" name="pixel77" />
-		<location y="-0.089250" name="pixel78" />
-		<location y="-0.084150" name="pixel79" />
-		<location y="-0.079050" name="pixel80" />
-		<location y="-0.073950" name="pixel81" />
-		<location y="-0.068850" name="pixel82" />
-		<location y="-0.063750" name="pixel83" />
-		<location y="-0.058650" name="pixel84" />
-		<location y="-0.053550" name="pixel85" />
-		<location y="-0.048450" name="pixel86" />
-		<location y="-0.043350" name="pixel87" />
-		<location y="-0.038250" name="pixel88" />
-		<location y="-0.033150" name="pixel89" />
-		<location y="-0.028050" name="pixel90" />
-		<location y="-0.022950" name="pixel91" />
-		<location y="-0.017850" name="pixel92" />
-		<location y="-0.012750" name="pixel93" />
-		<location y="-0.007650" name="pixel94" />
-		<location y="-0.002550" name="pixel95" />
-		<location y="0.002550" name="pixel96" />
-		<location y="0.007650" name="pixel97" />
-		<location y="0.012750" name="pixel98" />
-		<location y="0.017850" name="pixel99" />
-		<location y="0.022950" name="pixel100" />
-		<location y="0.028050" name="pixel101" />
-		<location y="0.033150" name="pixel102" />
-		<location y="0.038250" name="pixel103" />
-		<location y="0.043350" name="pixel104" />
-		<location y="0.048450" name="pixel105" />
-		<location y="0.053550" name="pixel106" />
-		<location y="0.058650" name="pixel107" />
-		<location y="0.063750" name="pixel108" />
-		<location y="0.068850" name="pixel109" />
-		<location y="0.073950" name="pixel110" />
-		<location y="0.079050" name="pixel111" />
-		<location y="0.084150" name="pixel112" />
-		<location y="0.089250" name="pixel113" />
-		<location y="0.094350" name="pixel114" />
-		<location y="0.099450" name="pixel115" />
-		<location y="0.104550" name="pixel116" />
-		<location y="0.109650" name="pixel117" />
-		<location y="0.114750" name="pixel118" />
-		<location y="0.119850" name="pixel119" />
-		<location y="0.124950" name="pixel120" />
-		<location y="0.130050" name="pixel121" />
-		<location y="0.135150" name="pixel122" />
-		<location y="0.140250" name="pixel123" />
-		<location y="0.145350" name="pixel124" />
-		<location y="0.150450" name="pixel125" />
-		<location y="0.155550" name="pixel126" />
-		<location y="0.160650" name="pixel127" />
-		<location y="0.165750" name="pixel128" />
-		<location y="0.170850" name="pixel129" />
-		<location y="0.175950" name="pixel130" />
-		<location y="0.181050" name="pixel131" />
-		<location y="0.186150" name="pixel132" />
-		<location y="0.191250" name="pixel133" />
-		<location y="0.196350" name="pixel134" />
-		<location y="0.201450" name="pixel135" />
-		<location y="0.206550" name="pixel136" />
-		<location y="0.211650" name="pixel137" />
-		<location y="0.216750" name="pixel138" />
-		<location y="0.221850" name="pixel139" />
-		<location y="0.226950" name="pixel140" />
-		<location y="0.232050" name="pixel141" />
-		<location y="0.237150" name="pixel142" />
-		<location y="0.242250" name="pixel143" />
-		<location y="0.247350" name="pixel144" />
-		<location y="0.252450" name="pixel145" />
-		<location y="0.257550" name="pixel146" />
-		<location y="0.262650" name="pixel147" />
-		<location y="0.267750" name="pixel148" />
-		<location y="0.272850" name="pixel149" />
-		<location y="0.277950" name="pixel150" />
-		<location y="0.283050" name="pixel151" />
-		<location y="0.288150" name="pixel152" />
-		<location y="0.293250" name="pixel153" />
-		<location y="0.298350" name="pixel154" />
-		<location y="0.303450" name="pixel155" />
-		<location y="0.308550" name="pixel156" />
-		<location y="0.313650" name="pixel157" />
-		<location y="0.318750" name="pixel158" />
-		<location y="0.323850" name="pixel159" />
-		<location y="0.328950" name="pixel160" />
-		<location y="0.334050" name="pixel161" />
-		<location y="0.339150" name="pixel162" />
-		<location y="0.344250" name="pixel163" />
-		<location y="0.349350" name="pixel164" />
-		<location y="0.354450" name="pixel165" />
-		<location y="0.359550" name="pixel166" />
-		<location y="0.364650" name="pixel167" />
-		<location y="0.369750" name="pixel168" />
-		<location y="0.374850" name="pixel169" />
-		<location y="0.379950" name="pixel170" />
-		<location y="0.385050" name="pixel171" />
-		<location y="0.390150" name="pixel172" />
-		<location y="0.395250" name="pixel173" />
-		<location y="0.400350" name="pixel174" />
-		<location y="0.405450" name="pixel175" />
-		<location y="0.410550" name="pixel176" />
-		<location y="0.415650" name="pixel177" />
-		<location y="0.420750" name="pixel178" />
-		<location y="0.425850" name="pixel179" />
-		<location y="0.430950" name="pixel180" />
-		<location y="0.436050" name="pixel181" />
-		<location y="0.441150" name="pixel182" />
-		<location y="0.446250" name="pixel183" />
-		<location y="0.451350" name="pixel184" />
-		<location y="0.456450" name="pixel185" />
-		<location y="0.461550" name="pixel186" />
-		<location y="0.466650" name="pixel187" />
-		<location y="0.471750" name="pixel188" />
-		<location y="0.476850" name="pixel189" />
-		<location y="0.481950" name="pixel190" />
-		<location y="0.487050" name="pixel191" />
-    </component>
-  </type>
-  
-  <!-- DETECTOR and MONITOR ID LISTS -->
-
-  <idlist idname="det1">
-        <id start="1000000" step="1000" end="1191000" />
-    <id start="1000001" step="1000" end="1191001" />
-    <id start="1000002" step="1000" end="1191002" />
-    <id start="1000003" step="1000" end="1191003" />
-    <id start="1000004" step="1000" end="1191004" />
-    <id start="1000005" step="1000" end="1191005" />
-    <id start="1000006" step="1000" end="1191006" />
-    <id start="1000007" step="1000" end="1191007" />
-    <id start="1000008" step="1000" end="1191008" />
-    <id start="1000009" step="1000" end="1191009" />
-    <id start="1000010" step="1000" end="1191010" />
-    <id start="1000011" step="1000" end="1191011" />
-    <id start="1000012" step="1000" end="1191012" />
-    <id start="1000013" step="1000" end="1191013" />
-    <id start="1000014" step="1000" end="1191014" />
-    <id start="1000015" step="1000" end="1191015" />
-    <id start="1000016" step="1000" end="1191016" />
-    <id start="1000017" step="1000" end="1191017" />
-    <id start="1000018" step="1000" end="1191018" />
-    <id start="1000019" step="1000" end="1191019" />
-    <id start="1000020" step="1000" end="1191020" />
-    <id start="1000021" step="1000" end="1191021" />
-    <id start="1000022" step="1000" end="1191022" />
-    <id start="1000023" step="1000" end="1191023" />
-    <id start="1000024" step="1000" end="1191024" />
-    <id start="1000025" step="1000" end="1191025" />
-    <id start="1000026" step="1000" end="1191026" />
-    <id start="1000027" step="1000" end="1191027" />
-    <id start="1000028" step="1000" end="1191028" />
-    <id start="1000029" step="1000" end="1191029" />
-    <id start="1000030" step="1000" end="1191030" />
-    <id start="1000031" step="1000" end="1191031" />
-    <id start="1000032" step="1000" end="1191032" />
-    <id start="1000033" step="1000" end="1191033" />
-    <id start="1000034" step="1000" end="1191034" />
-    <id start="1000035" step="1000" end="1191035" />
-    <id start="1000036" step="1000" end="1191036" />
-    <id start="1000037" step="1000" end="1191037" />
-    <id start="1000038" step="1000" end="1191038" />
-    <id start="1000039" step="1000" end="1191039" />
-    <id start="1000040" step="1000" end="1191040" />
-    <id start="1000041" step="1000" end="1191041" />
-    <id start="1000042" step="1000" end="1191042" />
-    <id start="1000043" step="1000" end="1191043" />
-    <id start="1000044" step="1000" end="1191044" />
-    <id start="1000045" step="1000" end="1191045" />
-    <id start="1000046" step="1000" end="1191046" />
-    <id start="1000047" step="1000" end="1191047" />
-    <id start="1000048" step="1000" end="1191048" />
-    <id start="1000049" step="1000" end="1191049" />
-    <id start="1000050" step="1000" end="1191050" />
-    <id start="1000051" step="1000" end="1191051" />
-    <id start="1000052" step="1000" end="1191052" />
-    <id start="1000053" step="1000" end="1191053" />
-    <id start="1000054" step="1000" end="1191054" />
-    <id start="1000055" step="1000" end="1191055" />
-    <id start="1000056" step="1000" end="1191056" />
-    <id start="1000057" step="1000" end="1191057" />
-    <id start="1000058" step="1000" end="1191058" />
-    <id start="1000059" step="1000" end="1191059" />
-    <id start="1000060" step="1000" end="1191060" />
-    <id start="1000061" step="1000" end="1191061" />
-    <id start="1000062" step="1000" end="1191062" />
-    <id start="1000063" step="1000" end="1191063" />
-    <id start="1000064" step="1000" end="1191064" />
-    <id start="1000065" step="1000" end="1191065" />
-    <id start="1000066" step="1000" end="1191066" />
-    <id start="1000067" step="1000" end="1191067" />
-    <id start="1000068" step="1000" end="1191068" />
-    <id start="1000069" step="1000" end="1191069" />
-    <id start="1000070" step="1000" end="1191070" />
-    <id start="1000071" step="1000" end="1191071" />
-    <id start="1000072" step="1000" end="1191072" />
-    <id start="1000073" step="1000" end="1191073" />
-    <id start="1000074" step="1000" end="1191074" />
-    <id start="1000075" step="1000" end="1191075" />
-    <id start="1000076" step="1000" end="1191076" />
-    <id start="1000077" step="1000" end="1191077" />
-    <id start="1000078" step="1000" end="1191078" />
-    <id start="1000079" step="1000" end="1191079" />
-    <id start="1000080" step="1000" end="1191080" />
-    <id start="1000081" step="1000" end="1191081" />
-    <id start="1000082" step="1000" end="1191082" />
-    <id start="1000083" step="1000" end="1191083" />
-    <id start="1000084" step="1000" end="1191084" />
-    <id start="1000085" step="1000" end="1191085" />
-    <id start="1000086" step="1000" end="1191086" />
-    <id start="1000087" step="1000" end="1191087" />
-    <id start="1000088" step="1000" end="1191088" />
-    <id start="1000089" step="1000" end="1191089" />
-    <id start="1000090" step="1000" end="1191090" />
-    <id start="1000091" step="1000" end="1191091" />
-    <id start="1000092" step="1000" end="1191092" />
-    <id start="1000093" step="1000" end="1191093" />
-    <id start="1000094" step="1000" end="1191094" />
-    <id start="1000095" step="1000" end="1191095" />
-    <id start="1000096" step="1000" end="1191096" />
-    <id start="1000097" step="1000" end="1191097" />
-    <id start="1000098" step="1000" end="1191098" />
-    <id start="1000099" step="1000" end="1191099" />
-    <id start="1000100" step="1000" end="1191100" />
-    <id start="1000101" step="1000" end="1191101" />
-    <id start="1000102" step="1000" end="1191102" />
-    <id start="1000103" step="1000" end="1191103" />
-    <id start="1000104" step="1000" end="1191104" />
-    <id start="1000105" step="1000" end="1191105" />
-    <id start="1000106" step="1000" end="1191106" />
-    <id start="1000107" step="1000" end="1191107" />
-    <id start="1000108" step="1000" end="1191108" />
-    <id start="1000109" step="1000" end="1191109" />
-    <id start="1000110" step="1000" end="1191110" />
-    <id start="1000111" step="1000" end="1191111" />
-    <id start="1000112" step="1000" end="1191112" />
-    <id start="1000113" step="1000" end="1191113" />
-    <id start="1000114" step="1000" end="1191114" />
-    <id start="1000115" step="1000" end="1191115" />
-    <id start="1000116" step="1000" end="1191116" />
-    <id start="1000117" step="1000" end="1191117" />
-    <id start="1000118" step="1000" end="1191118" />
-    <id start="1000119" step="1000" end="1191119" />
-    <id start="1000120" step="1000" end="1191120" />
-    <id start="1000121" step="1000" end="1191121" />
-    <id start="1000122" step="1000" end="1191122" />
-    <id start="1000123" step="1000" end="1191123" />
-    <id start="1000124" step="1000" end="1191124" />
-    <id start="1000125" step="1000" end="1191125" />
-    <id start="1000126" step="1000" end="1191126" />
-    <id start="1000127" step="1000" end="1191127" />
-    <id start="1000128" step="1000" end="1191128" />
-    <id start="1000129" step="1000" end="1191129" />
-    <id start="1000130" step="1000" end="1191130" />
-    <id start="1000131" step="1000" end="1191131" />
-    <id start="1000132" step="1000" end="1191132" />
-    <id start="1000133" step="1000" end="1191133" />
-    <id start="1000134" step="1000" end="1191134" />
-    <id start="1000135" step="1000" end="1191135" />
-    <id start="1000136" step="1000" end="1191136" />
-    <id start="1000137" step="1000" end="1191137" />
-    <id start="1000138" step="1000" end="1191138" />
-    <id start="1000139" step="1000" end="1191139" />
-    <id start="1000140" step="1000" end="1191140" />
-    <id start="1000141" step="1000" end="1191141" />
-    <id start="1000142" step="1000" end="1191142" />
-    <id start="1000143" step="1000" end="1191143" />
-    <id start="1000144" step="1000" end="1191144" />
-    <id start="1000145" step="1000" end="1191145" />
-    <id start="1000146" step="1000" end="1191146" />
-    <id start="1000147" step="1000" end="1191147" />
-    <id start="1000148" step="1000" end="1191148" />
-    <id start="1000149" step="1000" end="1191149" />
-    <id start="1000150" step="1000" end="1191150" />
-    <id start="1000151" step="1000" end="1191151" />
-    <id start="1000152" step="1000" end="1191152" />
-    <id start="1000153" step="1000" end="1191153" />
-    <id start="1000154" step="1000" end="1191154" />
-    <id start="1000155" step="1000" end="1191155" />
-    <id start="1000156" step="1000" end="1191156" />
-    <id start="1000157" step="1000" end="1191157" />
-    <id start="1000158" step="1000" end="1191158" />
-    <id start="1000159" step="1000" end="1191159" />
-    <id start="1000160" step="1000" end="1191160" />
-    <id start="1000161" step="1000" end="1191161" />
-    <id start="1000162" step="1000" end="1191162" />
-    <id start="1000163" step="1000" end="1191163" />
-    <id start="1000164" step="1000" end="1191164" />
-    <id start="1000165" step="1000" end="1191165" />
-    <id start="1000166" step="1000" end="1191166" />
-    <id start="1000167" step="1000" end="1191167" />
-    <id start="1000168" step="1000" end="1191168" />
-    <id start="1000169" step="1000" end="1191169" />
-    <id start="1000170" step="1000" end="1191170" />
-    <id start="1000171" step="1000" end="1191171" />
-    <id start="1000172" step="1000" end="1191172" />
-    <id start="1000173" step="1000" end="1191173" />
-    <id start="1000174" step="1000" end="1191174" />
-    <id start="1000175" step="1000" end="1191175" />
-    <id start="1000176" step="1000" end="1191176" />
-    <id start="1000177" step="1000" end="1191177" />
-    <id start="1000178" step="1000" end="1191178" />
-    <id start="1000179" step="1000" end="1191179" />
-    <id start="1000180" step="1000" end="1191180" />
-    <id start="1000181" step="1000" end="1191181" />
-    <id start="1000182" step="1000" end="1191182" />
-    <id start="1000183" step="1000" end="1191183" />
-    <id start="1000184" step="1000" end="1191184" />
-    <id start="1000185" step="1000" end="1191185" />
-    <id start="1000186" step="1000" end="1191186" />
-    <id start="1000187" step="1000" end="1191187" />
-    <id start="1000188" step="1000" end="1191188" />
-    <id start="1000189" step="1000" end="1191189" />
-    <id start="1000190" step="1000" end="1191190" />
-    <id start="1000191" step="1000" end="1191191" />
-
-  </idlist> 
-  
-  <!-- DETECTOR and MONITOR ID LISTS -->
-
-  <idlist idname="monitor1">
-    <id val="1" />  
-  </idlist>
-  <idlist idname="timer1">
-    <id val="2" />  
-  </idlist>
-  
+	<!--MONITOR SHAPE-->
+	<!--FIXME: Do something real here.-->
+	<type is="monitor" name="monitor">
+		<cylinder id="cyl-approx">
+		<centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
+		<axis y="0.0" x="0.0" z="1.0"/>
+		<radius val="0.01"/>
+		<height val="0.03"/>
+		</cylinder>
+		<algebra val="cyl-approx"/>
+	</type>
+		
+	<!-- ***************************************************************** -->
+	<!-- Main Detector -->
+	<component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
+		<location name="detector1">
+			<parameter name="z">
+				<logfile eq="0.001*value" id="sdd"/>
+			</parameter>
+			<parameter name="x">
+				<logfile eq="0.001*value" id="detector-translation"/>
+			</parameter>
+			<parameter name="y">
+        <value val="0.0"/>
+      </parameter>
+		</location>
+	</component>
+	
+	<!-- Detector: -->
+	<type name="detector1" is="rectangular_detector" type="pixel_rectangular" xpixels="192"
+		xstart="0.52525" xstep="-0.0055" ypixels="256" ystart="-0.54825" ystep="0.0043">
+		<properties />
+	</type>
+	
+	<!-- Pixel for Detectors: 5.5x4 mm -->
+	<type is="detector" name="pixel_rectangular">
+		<cuboid id="pixel-shape">
+			<left-front-bottom-point y="-0.002" x="-0.00275" z="0.0" />
+			<left-front-top-point y="0.002" x="-0.00275" z="0.0" />
+			<left-back-bottom-point y="-0.002" x="-0.00275" z="-0.0001" />
+			<right-front-bottom-point y="-0.002" x="0.00275" z="0.0" />
+		</cuboid>
+		<algebra val="pixel-shape" />
+	</type>
+	
+	<!-- ***************************************************************** -->
+	<!-- Wing Detector -->
+	
+	<!-- Detector list def -->
+	<idlist idname="wing_detector_ids">
+		<id start="49155" end="90114" />
+	</idlist>
+	
+	<component type="wing_detector_arm" idlist="wing_detector_ids">
+		<location />
+	</component>
+	
+	<!-- Detector Banks -->
+	<type name="wing_detector_arm">
+		<component type="wing_detector">
+			<location>
+				<parameter name="r-position">
+					<value val="0"/>
+				</parameter>
+				<parameter name="t-position">
+					<logfile id="rotangle"  eq="0.0+value"/>
+				</parameter>
+				<parameter name="p-position">
+					<value val="0"/>
+				</parameter>
+				<parameter name="rotx">
+					<value val="0"/>
+				</parameter>
+				<parameter name="roty">
+					<logfile id="rotangle"  eq="0.0+value"/>
+				</parameter>
+				<parameter name="rotz">
+					<value val="0"/>
+				</parameter>
+			</location>
+		</component>
+	</type>
+	
+	<type name="wing_detector">
+		<component type="wing_tube">
+			
+			<location r="1.13" t="-0.0" name="wing_tube_0" />
+			<location r="1.13" t="-0.278873538391" name="wing_tube_1" />
+			<location r="1.13" t="-0.557747076782" name="wing_tube_2" />
+			<location r="1.13" t="-0.836620615172" name="wing_tube_3" />
+			<location r="1.13" t="-1.11549415356" name="wing_tube_4" />
+			<location r="1.13" t="-1.39436769195" name="wing_tube_5" />
+			<location r="1.13" t="-1.67324123034" name="wing_tube_6" />
+			<location r="1.13" t="-1.95211476874" name="wing_tube_7" />
+			<location r="1.13" t="-2.23098830713" name="wing_tube_8" />
+			<location r="1.13" t="-2.50986184552" name="wing_tube_9" />
+			<location r="1.13" t="-2.78873538391" name="wing_tube_10" />
+			<location r="1.13" t="-3.0676089223" name="wing_tube_11" />
+			<location r="1.13" t="-3.34648246069" name="wing_tube_12" />
+			<location r="1.13" t="-3.62535599908" name="wing_tube_13" />
+			<location r="1.13" t="-3.90422953747" name="wing_tube_14" />
+			<location r="1.13" t="-4.18310307586" name="wing_tube_15" />
+			<location r="1.13" t="-4.46197661425" name="wing_tube_16" />
+			<location r="1.13" t="-4.74085015264" name="wing_tube_17" />
+			<location r="1.13" t="-5.01972369103" name="wing_tube_18" />
+			<location r="1.13" t="-5.29859722943" name="wing_tube_19" />
+			<location r="1.13" t="-5.57747076782" name="wing_tube_20" />
+			<location r="1.13" t="-5.85634430621" name="wing_tube_21" />
+			<location r="1.13" t="-6.1352178446" name="wing_tube_22" />
+			<location r="1.13" t="-6.41409138299" name="wing_tube_23" />
+			<location r="1.13" t="-6.69296492138" name="wing_tube_24" />
+			<location r="1.13" t="-6.97183845977" name="wing_tube_25" />
+			<location r="1.13" t="-7.25071199816" name="wing_tube_26" />
+			<location r="1.13" t="-7.52958553655" name="wing_tube_27" />
+			<location r="1.13" t="-7.80845907494" name="wing_tube_28" />
+			<location r="1.13" t="-8.08733261333" name="wing_tube_29" />
+			<location r="1.13" t="-8.36620615172" name="wing_tube_30" />
+			<location r="1.13" t="-8.64507969012" name="wing_tube_31" />
+			<location r="1.13" t="-8.92395322851" name="wing_tube_32" />
+			<location r="1.13" t="-9.2028267669" name="wing_tube_33" />
+			<location r="1.13" t="-9.48170030529" name="wing_tube_34" />
+			<location r="1.13" t="-9.76057384368" name="wing_tube_35" />
+			<location r="1.13" t="-10.0394473821" name="wing_tube_36" />
+			<location r="1.13" t="-10.3183209205" name="wing_tube_37" />
+			<location r="1.13" t="-10.5971944589" name="wing_tube_38" />
+			<location r="1.13" t="-10.8760679972" name="wing_tube_39" />
+			<location r="1.13" t="-11.1549415356" name="wing_tube_40" />
+			<location r="1.13" t="-11.433815074" name="wing_tube_41" />
+			<location r="1.13" t="-11.7126886124" name="wing_tube_42" />
+			<location r="1.13" t="-11.9915621508" name="wing_tube_43" />
+			<location r="1.13" t="-12.2704356892" name="wing_tube_44" />
+			<location r="1.13" t="-12.5493092276" name="wing_tube_45" />
+			<location r="1.13" t="-12.828182766" name="wing_tube_46" />
+			<location r="1.13" t="-13.1070563044" name="wing_tube_47" />
+			<location r="1.13" t="-13.3859298428" name="wing_tube_48" />
+			<location r="1.13" t="-13.6648033812" name="wing_tube_49" />
+			<location r="1.13" t="-13.9436769195" name="wing_tube_50" />
+			<location r="1.13" t="-14.2225504579" name="wing_tube_51" />
+			<location r="1.13" t="-14.5014239963" name="wing_tube_52" />
+			<location r="1.13" t="-14.7802975347" name="wing_tube_53" />
+			<location r="1.13" t="-15.0591710731" name="wing_tube_54" />
+			<location r="1.13" t="-15.3380446115" name="wing_tube_55" />
+			<location r="1.13" t="-15.6169181499" name="wing_tube_56" />
+			<location r="1.13" t="-15.8957916883" name="wing_tube_57" />
+			<location r="1.13" t="-16.1746652267" name="wing_tube_58" />
+			<location r="1.13" t="-16.4535387651" name="wing_tube_59" />
+			<location r="1.13" t="-16.7324123034" name="wing_tube_60" />
+			<location r="1.13" t="-17.0112858418" name="wing_tube_61" />
+			<location r="1.13" t="-17.2901593802" name="wing_tube_62" />
+			<location r="1.13" t="-17.5690329186" name="wing_tube_63" />
+			<location r="1.13" t="-17.847906457" name="wing_tube_64" />
+			<location r="1.13" t="-18.1267799954" name="wing_tube_65" />
+			<location r="1.13" t="-18.4056535338" name="wing_tube_66" />
+			<location r="1.13" t="-18.6845270722" name="wing_tube_67" />
+			<location r="1.13" t="-18.9634006106" name="wing_tube_68" />
+			<location r="1.13" t="-19.242274149" name="wing_tube_69" />
+			<location r="1.13" t="-19.5211476874" name="wing_tube_70" />
+			<location r="1.13" t="-19.8000212257" name="wing_tube_71" />
+			<location r="1.13" t="-20.0788947641" name="wing_tube_72" />
+			<location r="1.13" t="-20.3577683025" name="wing_tube_73" />
+			<location r="1.13" t="-20.6366418409" name="wing_tube_74" />
+			<location r="1.13" t="-20.9155153793" name="wing_tube_75" />
+			<location r="1.13" t="-21.1943889177" name="wing_tube_76" />
+			<location r="1.13" t="-21.4732624561" name="wing_tube_77" />
+			<location r="1.13" t="-21.7521359945" name="wing_tube_78" />
+			<location r="1.13" t="-22.0310095329" name="wing_tube_79" />
+			<location r="1.13" t="-22.3098830713" name="wing_tube_80" />
+			<location r="1.13" t="-22.5887566097" name="wing_tube_81" />
+			<location r="1.13" t="-22.867630148" name="wing_tube_82" />
+			<location r="1.13" t="-23.1465036864" name="wing_tube_83" />
+			<location r="1.13" t="-23.4253772248" name="wing_tube_84" />
+			<location r="1.13" t="-23.7042507632" name="wing_tube_85" />
+			<location r="1.13" t="-23.9831243016" name="wing_tube_86" />
+			<location r="1.13" t="-24.26199784" name="wing_tube_87" />
+			<location r="1.13" t="-24.5408713784" name="wing_tube_88" />
+			<location r="1.13" t="-24.8197449168" name="wing_tube_89" />
+			<location r="1.13" t="-25.0986184552" name="wing_tube_90" />
+			<location r="1.13" t="-25.3774919936" name="wing_tube_91" />
+			<location r="1.13" t="-25.656365532" name="wing_tube_92" />
+			<location r="1.13" t="-25.9352390703" name="wing_tube_93" />
+			<location r="1.13" t="-26.2141126087" name="wing_tube_94" />
+			<location r="1.13" t="-26.4929861471" name="wing_tube_95" />
+			<location r="1.13" t="-26.7718596855" name="wing_tube_96" />
+			<location r="1.13" t="-27.0507332239" name="wing_tube_97" />
+			<location r="1.13" t="-27.3296067623" name="wing_tube_98" />
+			<location r="1.13" t="-27.6084803007" name="wing_tube_99" />
+			<location r="1.13" t="-27.8873538391" name="wing_tube_100" />
+			<location r="1.13" t="-28.1662273775" name="wing_tube_101" />
+			<location r="1.13" t="-28.4451009159" name="wing_tube_102" />
+			<location r="1.13" t="-28.7239744543" name="wing_tube_103" />
+			<location r="1.13" t="-29.0028479926" name="wing_tube_104" />
+			<location r="1.13" t="-29.281721531" name="wing_tube_105" />
+			<location r="1.13" t="-29.5605950694" name="wing_tube_106" />
+			<location r="1.13" t="-29.8394686078" name="wing_tube_107" />
+			<location r="1.13" t="-30.1183421462" name="wing_tube_108" />
+			<location r="1.13" t="-30.3972156846" name="wing_tube_109" />
+			<location r="1.13" t="-30.676089223" name="wing_tube_110" />
+			<location r="1.13" t="-30.9549627614" name="wing_tube_111" />
+			<location r="1.13" t="-31.2338362998" name="wing_tube_112" />
+			<location r="1.13" t="-31.5127098382" name="wing_tube_113" />
+			<location r="1.13" t="-31.7915833766" name="wing_tube_114" />
+			<location r="1.13" t="-32.0704569149" name="wing_tube_115" />
+			<location r="1.13" t="-32.3493304533" name="wing_tube_116" />
+			<location r="1.13" t="-32.6282039917" name="wing_tube_117" />
+			<location r="1.13" t="-32.9070775301" name="wing_tube_118" />
+			<location r="1.13" t="-33.1859510685" name="wing_tube_119" />
+			<location r="1.13" t="-33.4648246069" name="wing_tube_120" />
+			<location r="1.13" t="-33.7436981453" name="wing_tube_121" />
+			<location r="1.13" t="-34.0225716837" name="wing_tube_122" />
+			<location r="1.13" t="-34.3014452221" name="wing_tube_123" />
+			<location r="1.13" t="-34.5803187605" name="wing_tube_124" />
+			<location r="1.13" t="-34.8591922989" name="wing_tube_125" />
+			<location r="1.13" t="-35.1380658372" name="wing_tube_126" />
+			<location r="1.13" t="-35.4169393756" name="wing_tube_127" />
+			<location r="1.13" t="-35.695812914" name="wing_tube_128" />
+			<location r="1.13" t="-35.9746864524" name="wing_tube_129" />
+			<location r="1.13" t="-36.2535599908" name="wing_tube_130" />
+			<location r="1.13" t="-36.5324335292" name="wing_tube_131" />
+			<location r="1.13" t="-36.8113070676" name="wing_tube_132" />
+			<location r="1.13" t="-37.090180606" name="wing_tube_133" />
+			<location r="1.13" t="-37.3690541444" name="wing_tube_134" />
+			<location r="1.13" t="-37.6479276828" name="wing_tube_135" />
+			<location r="1.13" t="-37.9268012212" name="wing_tube_136" />
+			<location r="1.13" t="-38.2056747595" name="wing_tube_137" />
+			<location r="1.13" t="-38.4845482979" name="wing_tube_138" />
+			<location r="1.13" t="-38.7634218363" name="wing_tube_139" />
+			<location r="1.13" t="-39.0422953747" name="wing_tube_140" />
+			<location r="1.13" t="-39.3211689131" name="wing_tube_141" />
+			<location r="1.13" t="-39.6000424515" name="wing_tube_142" />
+			<location r="1.13" t="-39.8789159899" name="wing_tube_143" />
+			<location r="1.13" t="-40.1577895283" name="wing_tube_144" />
+			<location r="1.13" t="-40.4366630667" name="wing_tube_145" />
+			<location r="1.13" t="-40.7155366051" name="wing_tube_146" />
+			<location r="1.13" t="-40.9944101435" name="wing_tube_147" />
+			<location r="1.13" t="-41.2732836818" name="wing_tube_148" />
+			<location r="1.13" t="-41.5521572202" name="wing_tube_149" />
+			<location r="1.13" t="-41.8310307586" name="wing_tube_150" />
+			<location r="1.13" t="-42.109904297" name="wing_tube_151" />
+			<location r="1.13" t="-42.3887778354" name="wing_tube_152" />
+			<location r="1.13" t="-42.6676513738" name="wing_tube_153" />
+			<location r="1.13" t="-42.9465249122" name="wing_tube_154" />
+			<location r="1.13" t="-43.2253984506" name="wing_tube_155" />
+			<location r="1.13" t="-43.504271989" name="wing_tube_156" />
+			<location r="1.13" t="-43.7831455274" name="wing_tube_157" />
+			<location r="1.13" t="-44.0620190658" name="wing_tube_158" />
+			<location r="1.13" t="-44.3408926041" name="wing_tube_159" />
+		</component>
+	</type>
+	
+	<type name="wing_tube" outline="yes">
+		<component type="wing_pixel">
+			
+			<location y="-0.54825" name="wing_pixel_0" />
+			<location y="-0.54395" name="wing_pixel_1" />
+			<location y="-0.53965" name="wing_pixel_2" />
+			<location y="-0.53535" name="wing_pixel_3" />
+			<location y="-0.53105" name="wing_pixel_4" />
+			<location y="-0.52675" name="wing_pixel_5" />
+			<location y="-0.52245" name="wing_pixel_6" />
+			<location y="-0.51815" name="wing_pixel_7" />
+			<location y="-0.51385" name="wing_pixel_8" />
+			<location y="-0.50955" name="wing_pixel_9" />
+			<location y="-0.50525" name="wing_pixel_10" />
+			<location y="-0.50095" name="wing_pixel_11" />
+			<location y="-0.49665" name="wing_pixel_12" />
+			<location y="-0.49235" name="wing_pixel_13" />
+			<location y="-0.48805" name="wing_pixel_14" />
+			<location y="-0.48375" name="wing_pixel_15" />
+			<location y="-0.47945" name="wing_pixel_16" />
+			<location y="-0.47515" name="wing_pixel_17" />
+			<location y="-0.47085" name="wing_pixel_18" />
+			<location y="-0.46655" name="wing_pixel_19" />
+			<location y="-0.46225" name="wing_pixel_20" />
+			<location y="-0.45795" name="wing_pixel_21" />
+			<location y="-0.45365" name="wing_pixel_22" />
+			<location y="-0.44935" name="wing_pixel_23" />
+			<location y="-0.44505" name="wing_pixel_24" />
+			<location y="-0.44075" name="wing_pixel_25" />
+			<location y="-0.43645" name="wing_pixel_26" />
+			<location y="-0.43215" name="wing_pixel_27" />
+			<location y="-0.42785" name="wing_pixel_28" />
+			<location y="-0.42355" name="wing_pixel_29" />
+			<location y="-0.41925" name="wing_pixel_30" />
+			<location y="-0.41495" name="wing_pixel_31" />
+			<location y="-0.41065" name="wing_pixel_32" />
+			<location y="-0.40635" name="wing_pixel_33" />
+			<location y="-0.40205" name="wing_pixel_34" />
+			<location y="-0.39775" name="wing_pixel_35" />
+			<location y="-0.39345" name="wing_pixel_36" />
+			<location y="-0.38915" name="wing_pixel_37" />
+			<location y="-0.38485" name="wing_pixel_38" />
+			<location y="-0.38055" name="wing_pixel_39" />
+			<location y="-0.37625" name="wing_pixel_40" />
+			<location y="-0.37195" name="wing_pixel_41" />
+			<location y="-0.36765" name="wing_pixel_42" />
+			<location y="-0.36335" name="wing_pixel_43" />
+			<location y="-0.35905" name="wing_pixel_44" />
+			<location y="-0.35475" name="wing_pixel_45" />
+			<location y="-0.35045" name="wing_pixel_46" />
+			<location y="-0.34615" name="wing_pixel_47" />
+			<location y="-0.34185" name="wing_pixel_48" />
+			<location y="-0.33755" name="wing_pixel_49" />
+			<location y="-0.33325" name="wing_pixel_50" />
+			<location y="-0.32895" name="wing_pixel_51" />
+			<location y="-0.32465" name="wing_pixel_52" />
+			<location y="-0.32035" name="wing_pixel_53" />
+			<location y="-0.31605" name="wing_pixel_54" />
+			<location y="-0.31175" name="wing_pixel_55" />
+			<location y="-0.30745" name="wing_pixel_56" />
+			<location y="-0.30315" name="wing_pixel_57" />
+			<location y="-0.29885" name="wing_pixel_58" />
+			<location y="-0.29455" name="wing_pixel_59" />
+			<location y="-0.29025" name="wing_pixel_60" />
+			<location y="-0.28595" name="wing_pixel_61" />
+			<location y="-0.28165" name="wing_pixel_62" />
+			<location y="-0.27735" name="wing_pixel_63" />
+			<location y="-0.27305" name="wing_pixel_64" />
+			<location y="-0.26875" name="wing_pixel_65" />
+			<location y="-0.26445" name="wing_pixel_66" />
+			<location y="-0.26015" name="wing_pixel_67" />
+			<location y="-0.25585" name="wing_pixel_68" />
+			<location y="-0.25155" name="wing_pixel_69" />
+			<location y="-0.24725" name="wing_pixel_70" />
+			<location y="-0.24295" name="wing_pixel_71" />
+			<location y="-0.23865" name="wing_pixel_72" />
+			<location y="-0.23435" name="wing_pixel_73" />
+			<location y="-0.23005" name="wing_pixel_74" />
+			<location y="-0.22575" name="wing_pixel_75" />
+			<location y="-0.22145" name="wing_pixel_76" />
+			<location y="-0.21715" name="wing_pixel_77" />
+			<location y="-0.21285" name="wing_pixel_78" />
+			<location y="-0.20855" name="wing_pixel_79" />
+			<location y="-0.20425" name="wing_pixel_80" />
+			<location y="-0.19995" name="wing_pixel_81" />
+			<location y="-0.19565" name="wing_pixel_82" />
+			<location y="-0.19135" name="wing_pixel_83" />
+			<location y="-0.18705" name="wing_pixel_84" />
+			<location y="-0.18275" name="wing_pixel_85" />
+			<location y="-0.17845" name="wing_pixel_86" />
+			<location y="-0.17415" name="wing_pixel_87" />
+			<location y="-0.16985" name="wing_pixel_88" />
+			<location y="-0.16555" name="wing_pixel_89" />
+			<location y="-0.16125" name="wing_pixel_90" />
+			<location y="-0.15695" name="wing_pixel_91" />
+			<location y="-0.15265" name="wing_pixel_92" />
+			<location y="-0.14835" name="wing_pixel_93" />
+			<location y="-0.14405" name="wing_pixel_94" />
+			<location y="-0.13975" name="wing_pixel_95" />
+			<location y="-0.13545" name="wing_pixel_96" />
+			<location y="-0.13115" name="wing_pixel_97" />
+			<location y="-0.12685" name="wing_pixel_98" />
+			<location y="-0.12255" name="wing_pixel_99" />
+			<location y="-0.11825" name="wing_pixel_100" />
+			<location y="-0.11395" name="wing_pixel_101" />
+			<location y="-0.10965" name="wing_pixel_102" />
+			<location y="-0.10535" name="wing_pixel_103" />
+			<location y="-0.10105" name="wing_pixel_104" />
+			<location y="-0.09675" name="wing_pixel_105" />
+			<location y="-0.09245" name="wing_pixel_106" />
+			<location y="-0.08815" name="wing_pixel_107" />
+			<location y="-0.08385" name="wing_pixel_108" />
+			<location y="-0.07955" name="wing_pixel_109" />
+			<location y="-0.07525" name="wing_pixel_110" />
+			<location y="-0.07095" name="wing_pixel_111" />
+			<location y="-0.06665" name="wing_pixel_112" />
+			<location y="-0.06235" name="wing_pixel_113" />
+			<location y="-0.05805" name="wing_pixel_114" />
+			<location y="-0.05375" name="wing_pixel_115" />
+			<location y="-0.04945" name="wing_pixel_116" />
+			<location y="-0.04515" name="wing_pixel_117" />
+			<location y="-0.04085" name="wing_pixel_118" />
+			<location y="-0.03655" name="wing_pixel_119" />
+			<location y="-0.03225" name="wing_pixel_120" />
+			<location y="-0.02795" name="wing_pixel_121" />
+			<location y="-0.02365" name="wing_pixel_122" />
+			<location y="-0.01935" name="wing_pixel_123" />
+			<location y="-0.01505" name="wing_pixel_124" />
+			<location y="-0.01075" name="wing_pixel_125" />
+			<location y="-0.00645" name="wing_pixel_126" />
+			<location y="-0.00215" name="wing_pixel_127" />
+			<location y="0.00215" name="wing_pixel_128" />
+			<location y="0.00645" name="wing_pixel_129" />
+			<location y="0.01075" name="wing_pixel_130" />
+			<location y="0.01505" name="wing_pixel_131" />
+			<location y="0.01935" name="wing_pixel_132" />
+			<location y="0.02365" name="wing_pixel_133" />
+			<location y="0.02795" name="wing_pixel_134" />
+			<location y="0.03225" name="wing_pixel_135" />
+			<location y="0.03655" name="wing_pixel_136" />
+			<location y="0.04085" name="wing_pixel_137" />
+			<location y="0.04515" name="wing_pixel_138" />
+			<location y="0.04945" name="wing_pixel_139" />
+			<location y="0.05375" name="wing_pixel_140" />
+			<location y="0.05805" name="wing_pixel_141" />
+			<location y="0.06235" name="wing_pixel_142" />
+			<location y="0.06665" name="wing_pixel_143" />
+			<location y="0.07095" name="wing_pixel_144" />
+			<location y="0.07525" name="wing_pixel_145" />
+			<location y="0.07955" name="wing_pixel_146" />
+			<location y="0.08385" name="wing_pixel_147" />
+			<location y="0.08815" name="wing_pixel_148" />
+			<location y="0.09245" name="wing_pixel_149" />
+			<location y="0.09675" name="wing_pixel_150" />
+			<location y="0.10105" name="wing_pixel_151" />
+			<location y="0.10535" name="wing_pixel_152" />
+			<location y="0.10965" name="wing_pixel_153" />
+			<location y="0.11395" name="wing_pixel_154" />
+			<location y="0.11825" name="wing_pixel_155" />
+			<location y="0.12255" name="wing_pixel_156" />
+			<location y="0.12685" name="wing_pixel_157" />
+			<location y="0.13115" name="wing_pixel_158" />
+			<location y="0.13545" name="wing_pixel_159" />
+			<location y="0.13975" name="wing_pixel_160" />
+			<location y="0.14405" name="wing_pixel_161" />
+			<location y="0.14835" name="wing_pixel_162" />
+			<location y="0.15265" name="wing_pixel_163" />
+			<location y="0.15695" name="wing_pixel_164" />
+			<location y="0.16125" name="wing_pixel_165" />
+			<location y="0.16555" name="wing_pixel_166" />
+			<location y="0.16985" name="wing_pixel_167" />
+			<location y="0.17415" name="wing_pixel_168" />
+			<location y="0.17845" name="wing_pixel_169" />
+			<location y="0.18275" name="wing_pixel_170" />
+			<location y="0.18705" name="wing_pixel_171" />
+			<location y="0.19135" name="wing_pixel_172" />
+			<location y="0.19565" name="wing_pixel_173" />
+			<location y="0.19995" name="wing_pixel_174" />
+			<location y="0.20425" name="wing_pixel_175" />
+			<location y="0.20855" name="wing_pixel_176" />
+			<location y="0.21285" name="wing_pixel_177" />
+			<location y="0.21715" name="wing_pixel_178" />
+			<location y="0.22145" name="wing_pixel_179" />
+			<location y="0.22575" name="wing_pixel_180" />
+			<location y="0.23005" name="wing_pixel_181" />
+			<location y="0.23435" name="wing_pixel_182" />
+			<location y="0.23865" name="wing_pixel_183" />
+			<location y="0.24295" name="wing_pixel_184" />
+			<location y="0.24725" name="wing_pixel_185" />
+			<location y="0.25155" name="wing_pixel_186" />
+			<location y="0.25585" name="wing_pixel_187" />
+			<location y="0.26015" name="wing_pixel_188" />
+			<location y="0.26445" name="wing_pixel_189" />
+			<location y="0.26875" name="wing_pixel_190" />
+			<location y="0.27305" name="wing_pixel_191" />
+			<location y="0.27735" name="wing_pixel_192" />
+			<location y="0.28165" name="wing_pixel_193" />
+			<location y="0.28595" name="wing_pixel_194" />
+			<location y="0.29025" name="wing_pixel_195" />
+			<location y="0.29455" name="wing_pixel_196" />
+			<location y="0.29885" name="wing_pixel_197" />
+			<location y="0.30315" name="wing_pixel_198" />
+			<location y="0.30745" name="wing_pixel_199" />
+			<location y="0.31175" name="wing_pixel_200" />
+			<location y="0.31605" name="wing_pixel_201" />
+			<location y="0.32035" name="wing_pixel_202" />
+			<location y="0.32465" name="wing_pixel_203" />
+			<location y="0.32895" name="wing_pixel_204" />
+			<location y="0.33325" name="wing_pixel_205" />
+			<location y="0.33755" name="wing_pixel_206" />
+			<location y="0.34185" name="wing_pixel_207" />
+			<location y="0.34615" name="wing_pixel_208" />
+			<location y="0.35045" name="wing_pixel_209" />
+			<location y="0.35475" name="wing_pixel_210" />
+			<location y="0.35905" name="wing_pixel_211" />
+			<location y="0.36335" name="wing_pixel_212" />
+			<location y="0.36765" name="wing_pixel_213" />
+			<location y="0.37195" name="wing_pixel_214" />
+			<location y="0.37625" name="wing_pixel_215" />
+			<location y="0.38055" name="wing_pixel_216" />
+			<location y="0.38485" name="wing_pixel_217" />
+			<location y="0.38915" name="wing_pixel_218" />
+			<location y="0.39345" name="wing_pixel_219" />
+			<location y="0.39775" name="wing_pixel_220" />
+			<location y="0.40205" name="wing_pixel_221" />
+			<location y="0.40635" name="wing_pixel_222" />
+			<location y="0.41065" name="wing_pixel_223" />
+			<location y="0.41495" name="wing_pixel_224" />
+			<location y="0.41925" name="wing_pixel_225" />
+			<location y="0.42355" name="wing_pixel_226" />
+			<location y="0.42785" name="wing_pixel_227" />
+			<location y="0.43215" name="wing_pixel_228" />
+			<location y="0.43645" name="wing_pixel_229" />
+			<location y="0.44075" name="wing_pixel_230" />
+			<location y="0.44505" name="wing_pixel_231" />
+			<location y="0.44935" name="wing_pixel_232" />
+			<location y="0.45365" name="wing_pixel_233" />
+			<location y="0.45795" name="wing_pixel_234" />
+			<location y="0.46225" name="wing_pixel_235" />
+			<location y="0.46655" name="wing_pixel_236" />
+			<location y="0.47085" name="wing_pixel_237" />
+			<location y="0.47515" name="wing_pixel_238" />
+			<location y="0.47945" name="wing_pixel_239" />
+			<location y="0.48375" name="wing_pixel_240" />
+			<location y="0.48805" name="wing_pixel_241" />
+			<location y="0.49235" name="wing_pixel_242" />
+			<location y="0.49665" name="wing_pixel_243" />
+			<location y="0.50095" name="wing_pixel_244" />
+			<location y="0.50525" name="wing_pixel_245" />
+			<location y="0.50955" name="wing_pixel_246" />
+			<location y="0.51385" name="wing_pixel_247" />
+			<location y="0.51815" name="wing_pixel_248" />
+			<location y="0.52245" name="wing_pixel_249" />
+			<location y="0.52675" name="wing_pixel_250" />
+			<location y="0.53105" name="wing_pixel_251" />
+			<location y="0.53535" name="wing_pixel_252" />
+			<location y="0.53965" name="wing_pixel_253" />
+			<location y="0.54395" name="wing_pixel_254" />
+			<location y="0.54825" name="wing_pixel_255" />
+		</component>
+	</type>
+	
+	<type name="wing_pixel" is="detector">
+		<cylinder id="cyl-approx">
+			<centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+			<axis y="1.0" x="0.0" z="0.0"/>
+			<radius val="0.00275"/>
+			<height val="0.0043"/>
+		</cylinder>
+		<algebra val="cyl-approx"/>
+	</type>
+	
 </instrument>
+

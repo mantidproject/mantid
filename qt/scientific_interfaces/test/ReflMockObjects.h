@@ -130,6 +130,8 @@ public:
   MOCK_CONST_METHOD0(getCAlpha, std::string());
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
+  MOCK_CONST_METHOD0(getFloodCorrection, std::string());
+  MOCK_CONST_METHOD0(getFloodWorkspace, std::string());
   MOCK_CONST_METHOD0(getIntMonCheck, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());

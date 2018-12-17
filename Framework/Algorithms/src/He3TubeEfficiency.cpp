@@ -47,13 +47,6 @@ He3TubeEfficiency::He3TubeEfficiency()
   m_shapeCache.clear();
 }
 
-/// Destructor
-He3TubeEfficiency::~He3TubeEfficiency() {
-  if (m_progress) {
-    delete m_progress;
-  }
-}
-
 /**
  * Declare algorithm properties
  */
@@ -125,7 +118,7 @@ void He3TubeEfficiency::exec() {
   }
 
   std::size_t numHists = m_inputWS->getNumberHistograms();
-  m_progress = new API::Progress(this, 0.0, 1.0, numHists);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHists);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
@@ -425,7 +418,7 @@ void He3TubeEfficiency::execEvent() {
 
   std::size_t numHistograms = m_outputWS->getNumberHistograms();
   auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
-  m_progress = new API::Progress(this, 0.0, 1.0, numHistograms);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHistograms);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
