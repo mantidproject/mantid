@@ -139,7 +139,7 @@ class PlotsLoader(object):
                           u'color': style_dic["color"],
                           u'rotation': style_dic["rotation"],
                           u'fontsize': style_dic["textSize"],
-                          u'zOrder': style_dic["zOrder"],
+                          u'zorder': style_dic["zOrder"],
                           u'usetex': dic["useTeX"],
                           u'horizontalalignment': style_dic["hAlign"],
                           u'verticalalignment': style_dic["vAlign"]})

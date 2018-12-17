@@ -120,7 +120,7 @@ class PlotsLoaderTest(unittest.TestCase):
                                                                       "hAlign": 1, "vAlign": 1, "rotation": 1,
                                                                       "zOrder": 1}})
         self.assertEqual(ax.text.call_count, 1)
-        ax.text.assert_called_once_with(fontdict={u'zOrder': 1, u'fontsize': 1, u'color': 1, u'alpha': 1,
+        ax.text.assert_called_once_with(fontdict={u'zorder': 1, u'fontsize': 1, u'color': 1, u'alpha': 1,
                                                   u'rotation': 1, u'verticalalignment': 1, u'usetex': 1,
                                                   u'horizontalalignment': 1}, s=u'text', x=1, y=1)
 
