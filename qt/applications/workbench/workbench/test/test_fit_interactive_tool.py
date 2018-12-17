@@ -7,7 +7,7 @@ from mantidqt.utils.qt.test.gui_window_test import *
 
 from workbench.plotting.functions import plot
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
-from workbench.test.runner import run_gui_test
+from workbench.test.workbenchtests import runTests
 
 
 class TestFitPropertyBrowser(WorkbenchGuiTest):
@@ -38,4 +38,4 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(fit_browser.endX(), end_x - 30.0 / (end_x_pxl - start_x_pxl) * (end_x - start_x), 2)
 
 
-run_gui_test(TestFitPropertyBrowser)
+runTests(TestFitPropertyBrowser)

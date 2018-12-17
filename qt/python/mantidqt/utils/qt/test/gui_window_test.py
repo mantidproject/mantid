@@ -68,10 +68,6 @@ class GuiTestBase(object):
         open_in_window(self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause,
                        close_on_finish=close_on_finish)
 
-    def run_all_tests(self):
-        for test in inspect.getmembers(self, is_test_method):
-            self.run_test(method=test[0], close_on_finish=True)
-
     def get_child(self, child_class, name):
         children = self.widget.findChildren(child_class, name)
         if len(children) == 0:
@@ -141,9 +137,6 @@ class GuiWindowTest(TestCase, GuiTestBase):
             wrapped_name = '_' + name
             setattr(cls, wrapped_name, test[1])
             setattr(cls, name, make_test_wrapper(wrapped_name))
-
-    def runTest(self):
-        pass
 
 
 class WorkbenchGuiTest(GuiWindowTest):
