@@ -419,6 +419,7 @@ void LoadDiffCal::exec() {
 #else
     e.printError(stderr);
 #endif
+    file.close();
     throw FileError("Did not find group \"/calibration\"", m_filename);
   }
 
