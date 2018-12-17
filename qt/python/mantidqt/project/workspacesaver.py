@@ -50,11 +50,8 @@ class WorkspaceSaver(object):
                 else:
                     # Save normally using SaveNexusProcessed
                     SaveNexusProcessed(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
-            except BaseException as exception:
-                if isinstance(exception, KeyboardInterrupt):
-                    raise KeyboardInterrupt
-                else:
-                    logger.warning("Couldn't save workspace in project: " + workspace)
+            except Exception:
+                logger.warning("Couldn't save workspace in project: " + workspace)
 
             self.output_list.append(workspace_name)
 

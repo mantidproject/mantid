@@ -19,12 +19,11 @@ class ProjectSaver(object):
     def __init__(self, project_file_ext):
         self.project_file_ext = project_file_ext
 
-    def save_project(self, directory, workspace_to_save=None, interfaces_to_save=None):
+    def save_project(self, directory, workspace_to_save=None):
         """
         The method that will actually save the project and call relevant savers for workspaces, plots, interfaces etc.
         :param directory: String; The directory of the
         :param workspace_to_save: List; of Strings that will have workspace names in it, if None will save all
-        :param interfaces_to_save: List; of Strings that will have interface tags in it, if None will save all
         :return: None; If the method cannot be completed.
         """
         # Check if the directory doesn't exist
@@ -33,7 +32,7 @@ class ProjectSaver(object):
             return
 
         # Check this isn't saving a blank project file
-        if workspace_to_save is None and interfaces_to_save is None:
+        if workspace_to_save is None:
             logger.warning("Can not save an empty project")
             return
 
@@ -41,18 +40,14 @@ class ProjectSaver(object):
         workspace_saver = workspacesaver.WorkspaceSaver(directory=directory)
         workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
 
-        # Get interface details in dicts
-        dictionaries_to_save = {}
-
         # Pass dicts to Project Writer
-        writer = ProjectWriter(dictionaries_to_save, directory, workspace_saver.get_output_list(),
+        writer = ProjectWriter(directory, workspace_saver.get_output_list(),
                                self.project_file_ext)
         writer.write_out()
 
 
 class ProjectWriter(object):
-    def __init__(self, dicts, save_location, workspace_names, project_file_ext):
-        self.dicts_to_save = dicts
+    def __init__(self, save_location, workspace_names, project_file_ext):
         self.workspace_names = workspace_names
         self.directory = save_location
         self.project_file_ext = project_file_ext
@@ -62,7 +57,7 @@ class ProjectWriter(object):
         Write out the project file that contains workspace names, interfaces information, plot preferences etc.
         """
         # Get the JSON string versions
-        workspace_interface_dict = {"workspaces": self.workspace_names, "interfaces": self.dicts_to_save}
+        to_save_dict = {"workspaces": self.workspace_names}
 
         # Open file and save the string to it alongside the workspace_names
         if not os.path.isdir(self.directory):
@@ -70,9 +65,6 @@ class ProjectWriter(object):
         file_path = os.path.join(self.directory, (os.path.basename(self.directory) + self.project_file_ext))
         try:
             with open(file_path, "w+") as f:
-                dump(obj=workspace_interface_dict, fp=f)
-        except BaseException as e:
-            # Re-raise Keyboard interrupts
-            if isinstance(e, KeyboardInterrupt):
-                raise KeyboardInterrupt
+                dump(obj=to_save_dict, fp=f)
+        except Exception:
             logger.warning("JSON project file unable to be opened/written to")

@@ -25,8 +25,5 @@ class WorkspaceLoader(object):
         for workspace in workspaces_to_load:
             try:
                 Load(path.join(directory, (workspace + ".nxs")), OutputWorkspace=workspace)
-            except BaseException as exception:
-                if isinstance(exception, KeyboardInterrupt):
-                    raise KeyboardInterrupt
-                else:
-                    logger.warning("Couldn't load file in project: " + workspace + ".nxs")
+            except Exception:
+                logger.warning("Couldn't load file in project: " + workspace + ".nxs")

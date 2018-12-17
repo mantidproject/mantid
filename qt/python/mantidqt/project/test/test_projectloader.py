@@ -34,6 +34,12 @@ class ProjectLoaderTest(unittest.TestCase):
         if isdir(working_directory):
             rmtree(working_directory)
 
+    def test_project_loading_when_directory_is_none(self):
+        # Tests that error handling of a value being none receives a None back.
+        project_loader = projectloader.ProjectLoader(project_file_ext)
+
+        self.assertEqual(project_loader.load_project(None), None)
+
     def test_project_loading(self):
         project_loader = projectloader.ProjectLoader(project_file_ext)
 
@@ -63,7 +69,6 @@ class ProjectReaderTest(unittest.TestCase):
         project_reader = projectloader.ProjectReader(project_file_ext)
         project_reader.read_project(working_directory)
         self.assertEqual(["ws1"], project_reader.workspace_names)
-        self.assertEqual({}, project_reader.interfaces_dicts)
 
 
 if __name__ == "__main__":
