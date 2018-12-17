@@ -121,7 +121,7 @@ class ProjectSaverTest(unittest.TestCase):
         self.assertTrue(ws1_name + ".nxs" in list_of_files)
 
     def test_saving_plots_when_plots_are_passed(self):
-        fig = matplotlib.figure.Figure()
+        fig = matplotlib.figure.Figure(dpi=100, figsize=(6.4, 4.8))
         fig_manager = matplotlib.backend_bases.FigureManagerBase(matplotlib.backend_bases.FigureCanvasBase(fig), 1)
         matplotlib.axes.Axes(fig=fig, rect=[0, 0, 0, 0])
 
@@ -131,9 +131,9 @@ class ProjectSaverTest(unittest.TestCase):
         project_saver.save_project(directory=working_directory,
                                    plots_to_save={1: fig_manager})
 
-        plots_dict = {"creationArguments": [], "axes": [], "label": "", "properties": {"figWidth": 6.4,
-                                                                                       "figHeight": 4.8,
-                                                                                       "dpi": 100.0}}
+        plots_dict = {u"creationArguments": [], u"axes": [], u"label": u"", u"properties": {u"figWidth": 6.4,
+                                                                                            u"figHeight": 4.8,
+                                                                                            u"dpi": 100.0}}
 
         f = open(file_name, "r")
         file_dict = json.load(f)
