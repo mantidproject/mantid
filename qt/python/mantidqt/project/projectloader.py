@@ -17,6 +17,9 @@ from mantid import AnalysisDataService as ADS, logger
 
 
 def _confirm_all_workspaces_loaded(workspaces_to_confirm):
+    if workspaces_to_confirm is None:
+        return True
+
     current_workspaces = ADS.getObjectNames()
     for ws in workspaces_to_confirm:
         if ws not in current_workspaces:

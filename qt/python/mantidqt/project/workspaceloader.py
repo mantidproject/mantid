@@ -21,6 +21,10 @@ class WorkspaceLoader(object):
         :param directory: String or string castable object; The project directory
         :param workspaces_to_load: List of Strings; of the workspaces to load
         """
+
+        if workspaces_to_load is None:
+            return
+
         from mantid.simpleapi import Load  # noqa
         for workspace in workspaces_to_load:
             try:

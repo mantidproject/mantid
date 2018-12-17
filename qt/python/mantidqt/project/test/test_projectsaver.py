@@ -81,7 +81,7 @@ class ProjectSaverTest(unittest.TestCase):
         f = open(file_name, "r")
         file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
-        self.assertTrue(interfaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
 
         # Check workspace is saved
         list_of_files = os.listdir(working_directory)
@@ -151,7 +151,9 @@ class ProjectWriterTest(unittest.TestCase):
 
     def test_write_out_empty_workspaces(self):
         workspace_list = []
-        project_writer = projectsaver.ProjectWriter(working_directory, workspace_list, project_file_ext)
+        plots_to_save = []
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
 
         workspaces_string = "\"workspaces\": []"

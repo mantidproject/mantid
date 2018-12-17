@@ -69,7 +69,7 @@ class Project(AnalysisDataServiceObserver):
         workspaces_to_save = AnalysisDataService.getObjectNames()
         plots_to_save = self.plot_gfm.figs
         project_saver = ProjectSaver(self.project_file_ext)
-        project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save,
+        project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
                                    plots_to_save=plots_to_save)
         self.__saved = True
 

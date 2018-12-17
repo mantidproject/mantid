@@ -20,6 +20,9 @@ from mantid import plots  # noqa
 
 class PlotsLoader(object):
     def load_plots(self, plots_list):
+        if plots_list is None:
+            return
+
         for plot_ in plots_list:
             try:
                 self.make_fig(plot_)

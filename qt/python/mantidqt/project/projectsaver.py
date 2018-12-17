@@ -65,7 +65,7 @@ class ProjectWriter(object):
         Write out the project file that contains workspace names, interfaces information, plot preferences etc.
         """
         # Get the JSON string versions
-        workspace_interface_dict = {"workspaces": self.workspace_names, "plots": self.plots_to_save}
+        to_save_dict = {"workspaces": self.workspace_names, "plots": self.plots_to_save}
 
         # Open file and save the string to it alongside the workspace_names
         if not os.path.isdir(self.directory):
