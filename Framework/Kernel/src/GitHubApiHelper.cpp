@@ -110,7 +110,10 @@ int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session,
   if (retStatus == HTTP_OK ||
       (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
-    processResponseHeaders(*m_response);
+    if (m_response)
+      processResponseHeaders(*m_response);
+    else
+      g_log.warning("Response is null pointer");
     return retStatus;
   } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) ||
              (retStatus == HTTP_UNAUTHORIZED) ||
