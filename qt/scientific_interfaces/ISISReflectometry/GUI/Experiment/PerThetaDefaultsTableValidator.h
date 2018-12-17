@@ -9,6 +9,7 @@
 #include "../../Reduction/PerThetaDefaults.h"
 #include "../../ValidationResult.h"
 #include "PerThetaDefaultsTableValidationError.h"
+#include <array>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,16 +20,15 @@ public:
   using ResultType = ValidationResult<std::vector<PerThetaDefaults>,
                                       PerThetaDefaultsTableValidationError>;
 
-  ResultType operator()(
-      std::vector<std::array<std::string, 8>> const &perThetaDefaultsContent,
-      double thetaTolerance) const;
+  ResultType operator()(ContentType const &perThetaDefaultsContent,
+                        double thetaTolerance) const;
 
   ValidationResult<boost::blank, ThetaValuesValidationError>
   validateThetaValues(std::vector<PerThetaDefaults> perThetaDefaults,
                       double tolerance) const;
 
   void validateAllPerThetaDefaultRows(
-      std::vector<std::array<std::string, 8>> const &perThetaDefaultsContent,
+      ContentType const &perThetaDefaultsContent,
       std::vector<PerThetaDefaults> &perThetaDefaults,
       std::vector<InvalidDefaultsError> &validationErrors) const;
 
