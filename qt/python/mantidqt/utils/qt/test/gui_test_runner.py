@@ -80,7 +80,7 @@ class ScriptRunner(object):
             try:
                 if self.script_iter is None:
                     if self.close_on_finish:
-                        QMetaObject.invokeMethod(self.widget, 'close', Qt.QueuedConnection)
+                        app.exit()
                     return
                 # Run test script until the next 'yield'
                 ret = self.script_iter.next()
@@ -99,10 +99,11 @@ class ScriptRunner(object):
                     self.script_iter = None
                     self.script_timer.stop()
                     if self.close_on_finish:
-                        QMetaObject.invokeMethod(self.widget, 'close', Qt.QueuedConnection)
+                        app.exit()
             except Exception as e:
-                self.widget.close()
                 traceback.print_exc()
+                if self.close_on_finish:
+                    app.exit(1)
                 self.error = e
 
 
@@ -158,7 +159,7 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
     script_runner = None
     if script is not None:
         try:
-            timer = QTimer()
+            timer = QTimer(app)
             script_runner = ScriptRunner(script, widget, close_on_finish=close_on_finish, script_timer=timer, is_cli=is_cli)
             if pause != 0:
                 timer.setInterval(pause * 1000)

@@ -85,9 +85,12 @@ class VerticalMarker(QObject):
         vertices[1] = self.x, y1
         self.ax.draw_artist(self.patch)
 
-    def is_above(self, x):
+    def get_x_in_pixels(self):
         x_pixels, _ = self.patch.get_transform().transform((self.x, 0))
-        return np.abs(x_pixels - x) < 3
+        return x_pixels
+
+    def is_above(self, x):
+        return np.abs(self.get_x_in_pixels() - x) < 3
 
     def on_click(self, x):
         if self.is_above(x):
@@ -116,7 +119,7 @@ class FitInteractiveTool(QObject):
         ax = canvas.figure.get_axes()[0]
         self.ax = ax
         xlim = ax.get_xlim()
-        dx = (xlim[1] - xlim[0]) / 5.
+        dx = (xlim[1] - xlim[0]) / 20.
         start_x = xlim[0] + dx
         end_x = xlim[1] - dx
         self.fit_start_x = VerticalMarker(canvas, start_x, 'green')

@@ -14,6 +14,28 @@ from unittest import TestCase
 from mantidqt.utils.qt.test.gui_test_runner import open_in_window
 from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
 from qtpy.QtCore import Qt, QMetaObject
+from qtpy.QtTest import QTest
+
+
+def trigger_action(action):
+    QMetaObject.invokeMethod(action, 'trigger', Qt.QueuedConnection)
+
+
+def find_action_with_text(widget, text):
+    for action in widget.findChildren(QAction):
+        if action.text() == text:
+            return action
+    raise RuntimeError("Couldn't find action with text \"{}\"".format(text))
+
+
+def drag_mouse(widget, from_pos, to_pos):
+    QTest.mousePress(widget, Qt.LeftButton, Qt.NoModifier, from_pos)
+    yield
+    QTest.mouseMove(widget, from_pos)
+    yield 0.1
+    QTest.mouseMove(widget, to_pos)
+    yield
+    QTest.mouseRelease(widget, Qt.LeftButton, Qt.NoModifier, to_pos)
 
 
 class GuiTestBase(object):
@@ -45,6 +67,10 @@ class GuiTestBase(object):
         self.call_method = method
         open_in_window(self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause,
                        close_on_finish=close_on_finish)
+
+    def run_all_tests(self):
+        for test in inspect.getmembers(self, is_test_method):
+            self.run_test(method=test[0], close_on_finish=True)
 
     def get_child(self, child_class, name):
         children = self.widget.findChildren(child_class, name)
@@ -115,3 +141,13 @@ class GuiWindowTest(TestCase, GuiTestBase):
             wrapped_name = '_' + name
             setattr(cls, wrapped_name, test[1])
             setattr(cls, name, make_test_wrapper(wrapped_name))
+
+    def runTest(self):
+        pass
+
+
+class WorkbenchGuiTest(GuiWindowTest):
+
+    def create_widget(self):
+        qapp = QApplication.instance()
+        return qapp.activeWindow()

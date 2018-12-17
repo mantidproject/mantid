@@ -24,7 +24,13 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   if ( WIN32 )
     set ( _test_runner ${_test_runner}.bat )
   endif ()
-  set ( _test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py )
+
+  if ( NOT PYUNITTEST_RUNNER )
+    set ( _test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py )
+  else ()
+    set ( _test_runner_module ${PYUNITTEST_RUNNER} )
+  endif()
+
 
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
