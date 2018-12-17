@@ -311,7 +311,7 @@ if ( ENABLE_CPACK )
                                        "sip >= 4.18,"
                                        "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
                                        "python-requests,"
-                                       "scipy,python2-scikit-image",
+                                       "scipy,python2-scikit-image,"
                                        "hdf,hdf5,jsoncpp >= 0.7.0" )
       if (ENABLE_MANTIDPLOT)
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,PyQt4,qwtplot3d-qt4" )
