@@ -357,8 +357,8 @@ class OptionsColumnModel(object):
                                   "PhiMin": 'The min angle',
                                   "PhiMax": 'The max angle',  # TODO: complete the phi hints
                                   "UseMirror": 'True or false. Whether or not phi angle applies to both halves',
-                                  "MergeScale": 'The scale applied to the HAB when mergeing',
-                                  "MergeShift": 'The shift applied to the HAB when mergeing',
+                                  "MergeScale": 'The scale applied to the HAB when merging',
+                                  "MergeShift": 'The shift applied to the HAB when merging',
                                   "EventSlices": 'The event slices to reduce.'
                                   ' The format is the same as for the event slices'
                                   ' box in settings, however if a comma separated list is given '

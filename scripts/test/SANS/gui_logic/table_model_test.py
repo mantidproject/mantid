@@ -139,14 +139,18 @@ class TableModelTest(unittest.TestCase):
         permissable_properties = OptionsColumnModel._get_permissible_properties()
 
         self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str,
-                                                  "MergeScale": float, "MergeShift": float})
+                                                  "MergeScale": float, "MergeShift": float, "PhiMin": float,
+                                                  "PhiMax": float, "UseMirror": bool})
 
     def test_that_OptionsColumnModel_get_hint_strategy(self):
         hint_strategy = OptionsColumnModel.get_hint_strategy()
         expected_hint_strategy = BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
-                                  "MergeScale": 'The scale applied to the HAB when mergeing',
-                                  "MergeShift": 'The shift applied to the HAB when mergeing',
+                                  "PhiMin": 'The min angle',
+                                  "PhiMax": 'The max angle',
+                                  "UseMirror": 'True or false. Whether or not phi angle applies to both halves',
+                                  "MergeScale": 'The scale applied to the HAB when merging',
+                                  "MergeShift": 'The shift applied to the HAB when merging',
                                   "EventSlices": 'The event slices to reduce.'
                                   ' The format is the same as for the event slices'
                                   ' box in settings, however if a comma separated list is given '
