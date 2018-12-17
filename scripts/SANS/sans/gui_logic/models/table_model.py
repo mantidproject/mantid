@@ -347,13 +347,16 @@ class OptionsColumnModel(object):
 
     @staticmethod
     def _get_permissible_properties():
-        return {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
-                "MergeShift": float}
+        return {"WavelengthMin": float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
+                "MergeShift": float, "PhiMin": float, "PhiMax": float, "UseMirror": bool}
 
     @staticmethod
     def get_hint_strategy():
         return BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                  "PhiMin": 'The min angle',
+                                  "PhiMax": 'The max angle',  # TODO: complete the phi hints
+                                  "UseMirror": 'True or false. Whether or not phi angle applies to both halves',
                                   "MergeScale": 'The scale applied to the HAB when mergeing',
                                   "MergeShift": 'The shift applied to the HAB when mergeing',
                                   "EventSlices": 'The event slices to reduce.'

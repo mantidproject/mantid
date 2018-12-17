@@ -107,10 +107,12 @@ class GuiStateDirector(object):
         :param state_gui_model: the state gui model
         """
         options = options_column_model.get_options()
+        print("Got options")
 
         # Here we apply the correction to the state depending on the settings in the options. This is not very nice,
         # but currently it is not clear how to solve this differently.
         if "WavelengthMin" in options.keys():
+            print("Wave min in keys")
             state_gui_model.wavelength_min = options["WavelengthMin"]
 
         if "WavelengthMax" in options.keys():
@@ -124,3 +126,15 @@ class GuiStateDirector(object):
 
         if "MergeShift" in options.keys():
             state_gui_model.merge_shift = options["MergeShift"]
+
+        if "PhiMin" in options.keys():
+            print("Phi min in keys")
+            state_gui_model.phi_limit_min = options["PhiMin"]
+
+        if "PhiMax" in options.keys():
+            print("Phi max in keys")
+            state_gui_model.phi_limit_max = options["PhiMax"]
+
+        if "UseMirror" in options.keys():
+            print("Use mirror in keys")
+            state_gui_model.phi_limit_use_mirror = options["UseMirror"]
