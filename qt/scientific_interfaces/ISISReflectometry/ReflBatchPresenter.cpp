@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflBatchPresenter.h"
 #include "GUI/Event/IEventPresenter.h"
+#include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IReflBatchView.h"

@@ -8,18 +8,18 @@
 #define MANTID_ISISREFLECTOMETRY_REFLBATCHPRESENTER_H
 
 #include "DllConfig.h"
+#include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
+#include "GUI/Save/ISavePresenter.h"
 #include "IReflBatchPresenter.h"
+#include "IReflRunsTabPresenter.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class IReflBatchView;
-class IReflRunsTabPresenter;
-class IEventPresenter;
-class ISavePresenter;
 
 /** @class ReflBatchPresenter
 
