@@ -82,6 +82,8 @@ SplatterPlotView::SplatterPlotView(
                    SIGNAL(setRotationToPoint(double, double, double)), this,
                    SLOT(onResetCenterToPoint(double, double, double)));
 
+  this->m_ui.thresholdButton->setToolTip(
+      "Create a threshold filter on the data");
   // Set the threshold button to create a threshold filter on data
   QObject::connect(this->m_ui.thresholdButton, SIGNAL(clicked()), this,
                    SLOT(onThresholdButtonClicked()));
@@ -177,7 +179,6 @@ void SplatterPlotView::render() {
     this->m_splatSource = builder->createFilter(
         "filters", MantidQt::API::MdConstants::MantidParaViewSplatterPlot,
         this->origSrc);
-    src = this->m_splatSource;
   } else {
     // We don't want to load the same peak workspace twice into the splatterplot
     // mode
@@ -292,6 +293,11 @@ void SplatterPlotView::checkPeaksCoordinates() {
 }
 
 void SplatterPlotView::onThresholdButtonClicked() {
+  if (!this->m_threshSource) {
+    // prevent trying to create a filter for empty data (nullptr)
+    // which causes VSI to crash
+    return;
+  }
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->m_threshSource = builder->createFilter(
       "filters", MantidQt::API::MdConstants::Threshold, this->m_splatSource);
@@ -321,12 +327,16 @@ void SplatterPlotView::checkView(ModeControlWidget::Views initialView) {
  */
 void SplatterPlotView::onPickModeToggled(bool state) {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+
   if (state) {
     pqPipelineSource *src = nullptr;
     if (this->m_threshSource) {
       src = this->m_threshSource;
-    } else {
+    } else if (this->m_splatSource) {
       src = this->m_splatSource;
+    } else {
+      // no sources are present in the view -> don't do anything
+      return;
     }
     this->m_probeSource = builder->createFilter(
         "filters", MantidQt::API::MdConstants::ProbePoint, src);
