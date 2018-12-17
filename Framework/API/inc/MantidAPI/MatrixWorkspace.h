@@ -15,6 +15,7 @@
 #include "MantidKernel/EmptyValues.h"
 
 #include <atomic>
+#include <boost/optional.hpp>
 #include <mutex>
 
 namespace Mantid {
@@ -553,7 +554,7 @@ protected:
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
-  void invalidateCommonBinsFlag() { m_isCommonBinsFlagSet = false; }
+  void invalidateCommonBinsFlag() { m_isCommonBinsFlag = boost::none; }
 
   void updateCachedDetectorGrouping(const size_t index) const override;
 
@@ -587,11 +588,8 @@ private:
   /// A text label for use when plotting spectra
   std::string m_YUnitLabel;
 
-  /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
-  /// default
-  mutable bool m_isCommonBinsFlagSet{false};
-  /// Flag indicating whether the data has common bins. False by default
-  mutable bool m_isCommonBinsFlag{false};
+  /// Flag indicating whether the data has common bins. Empty by default
+  mutable boost::optional<bool> m_isCommonBinsFlag{boost::none};
 
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;

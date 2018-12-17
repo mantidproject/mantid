@@ -56,8 +56,7 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace(const Parallel::StorageMode storageMode)
     : IMDWorkspace(storageMode), ExperimentInfo(), m_axes(),
-      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
-      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
+      m_isInitialized(false), m_YUnit(), m_YUnitLabel(), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other) {
@@ -70,7 +69,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isInitialized = other.m_isInitialized;
   m_YUnit = other.m_YUnit;
   m_YUnitLabel = other.m_YUnitLabel;
-  m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
   // TODO: Do we need to init m_monitorWorkspace?
@@ -963,15 +961,14 @@ bool MatrixWorkspace::isHistogramData() const {
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
-  if (m_isCommonBinsFlagSet) {
-    return m_isCommonBinsFlag;
+  if (m_isCommonBinsFlag) {
+    return *m_isCommonBinsFlag;
   }
-  m_isCommonBinsFlagSet = true;
   m_isCommonBinsFlag = true;
   const size_t numHist = this->getNumberHistograms();
   // there being only one or zero histograms is accepted as not being an error
   if (numHist <= 1) {
-    return m_isCommonBinsFlag;
+    return *m_isCommonBinsFlag;
   }
 
   // First check if the x-axis shares a common ptr.
@@ -984,8 +981,8 @@ bool MatrixWorkspace::isCommonBins() const {
   }
 
   // If true, we may return here.
-  if (m_isCommonBinsFlag) {
-    return m_isCommonBinsFlag;
+  if (*m_isCommonBinsFlag) {
+    return *m_isCommonBinsFlag;
   }
 
   m_isCommonBinsFlag = true;
@@ -999,7 +996,7 @@ bool MatrixWorkspace::isCommonBins() const {
   }
 
   // Check that the values of each histogram are identical.
-  if (m_isCommonBinsFlag) {
+  if (*m_isCommonBinsFlag) {
     const size_t numBins = x(0).size();
     const size_t lastSpec = numHist - 1;
     for (size_t i = 0; i < lastSpec; ++i) {
@@ -1023,7 +1020,7 @@ bool MatrixWorkspace::isCommonBins() const {
       }
     }
   }
-  return m_isCommonBinsFlag;
+  return *m_isCommonBinsFlag;
 }
 
 /** Called by the algorithm MaskBins to mask a single bin for the first time,
