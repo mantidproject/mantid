@@ -64,6 +64,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         patcher = mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
         self.addCleanup(patcher.stop)
         self.load_utils_patcher = patcher.start()
+        self.load_utils_patcher.exception_message_for_failed_files.return_value = ''
 
     def tearDown(self):
         self.obj = None

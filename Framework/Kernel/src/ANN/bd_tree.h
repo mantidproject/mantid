@@ -78,12 +78,11 @@ public:
 
   ~ANNbd_shrink() override // destructor
   {
-    if (child[ANN_IN] != nullptr && child[ANN_IN] != KD_TRIVIAL)
+    if (child[ANN_IN] != KD_TRIVIAL)
       delete child[ANN_IN];
-    if (child[ANN_OUT] != nullptr && child[ANN_OUT] != KD_TRIVIAL)
+    if (child[ANN_OUT] != KD_TRIVIAL)
       delete child[ANN_OUT];
-    if (bnds != nullptr)
-      delete[] bnds; // delete bounds
+    delete[] bnds; // delete bounds
   }
 
   void getStats(                                // get tree statistics
