@@ -144,6 +144,11 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                                                         parent_alg=self)
         progress.report("Loaded the data.")
 
+        # Centre the workspaces
+        progress.report("Centring the workspace.")
+        self._centre(workspaces, state)
+        progress.report("Finished centring the workspace.")
+
         # Check if a move has been requested and perform it. This can be useful if scientists want to load the data and
         # have it moved in order to inspect it with other tools
         move_workspaces = self.getProperty("MoveWorkspace").value
@@ -332,6 +337,19 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         # The property name for the number of workspaces
         number_of_workspaces_name = "NumberOf" + name + "s"
         self.setProperty(number_of_workspaces_name, counter)
+
+    def _centre(self, workspaces, state):
+        move_name = "SANSMove"
+        state_dict = state.property_manager
+        move_options = {"SANSState": state_dict,
+                        "MoveType": "SetToZero",
+                        "Component": ""}
+
+        for key, workspace_list in list(workspaces.items()):
+            for workspace in workspace_list:
+                move_options.update({"Workspace": workspace})
+                move_alg = create_child_algorithm(self, move_name, **move_options)
+                move_alg.execute()
 
     def _perform_initial_move(self, workspaces, state):
         move_name = "SANSMove"
