@@ -49,7 +49,7 @@ TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
         beamDir.scalar_prod(m_spectrumInfo.sourcePosition() -
                             m_spectrumInfo.position(workspace_index));
     const double scale = std::abs(L1s / L1m);
-    return Correction(scale, 0.);
+    return Correction(0., scale);
   }
 
   // Get E_fix
@@ -79,7 +79,7 @@ TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
   const double shift = -1. * l2 / sqrt(efix * TWO_MEV_OVER_MASS);
 
   // 1.0 * tof + shift
-  return Correction(1.0, shift);
+  return Correction(shift, 1.0);
 }
 
 } // namespace Algorithms

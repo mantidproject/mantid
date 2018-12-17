@@ -52,8 +52,7 @@ Correction Mantid::Algorithms::TimeAtSampleStrategyDirect::calculate(
 
   // Correction is L1 and Ei dependent only. Detector positions are not
   // required.
-  return Correction(0, m_constShift);
+  return Correction(m_constShift, 0);
 }
-
 } // namespace Algorithms
 } // namespace Mantid

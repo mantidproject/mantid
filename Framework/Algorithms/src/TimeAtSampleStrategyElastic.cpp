@@ -46,7 +46,7 @@ TimeAtSampleStrategyElastic::calculate(const size_t &workspace_index) const {
     scale = L1s / (L1s + m_spectrumInfo.l2(workspace_index));
   }
 
-  return Correction(scale, 0.);
+  return Correction(0., scale);
 }
 
 } // namespace Algorithms
