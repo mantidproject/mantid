@@ -22,7 +22,14 @@ from mantidqt.utils.qt import import_qt
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
 
-class FitPropertyBrowser(BaseBrowser):
+class FitPropertyBrowserBase(BaseBrowser):
+
+    def __init__(self, parent=None):
+        super(FitPropertyBrowserBase, self).__init__(parent)
+        self.init()
+
+
+class FitPropertyBrowser(FitPropertyBrowserBase):
 
     closing = Signal()
 

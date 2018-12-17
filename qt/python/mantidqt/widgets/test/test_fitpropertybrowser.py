@@ -9,7 +9,7 @@ from qtpy.QtCore import Qt, QMetaObject
 
 from mantid import FrameworkManager
 from mantidqt.utils.qt.test.gui_window_test import GuiWindowTest
-from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowserBase
 
 
 def on_ubuntu_or_darwin():
@@ -22,7 +22,7 @@ def on_ubuntu_or_darwin():
 class TestFitPropertyBrowser(GuiWindowTest):
 
     def create_widget(self):
-        return FitPropertyBrowser()
+        return FitPropertyBrowserBase()
 
     def start_setup_menu(self):
         self.click_button('button_Setup')
