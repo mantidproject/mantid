@@ -457,6 +457,60 @@ public:
     TS_ASSERT_EQUALS(xMax, 1.0);
   }
 
+  void test_invalid_overlap_bins_start_step_end() {
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", this->b);
+    alg.setProperty("RHSWorkspace", this->a);
+    alg.setProperty("StartOverlap", -0.41);
+    alg.setProperty("EndOverlap", -0.42);
+    alg.setProperty("Params", "-0.8, 0.2, 1.0");
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT(!alg.isExecuted())
+  }
+
+  void test_invalid_overlap_bins_step() {
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", this->b);
+    alg.setProperty("RHSWorkspace", this->a);
+    alg.setProperty("StartOverlap", -0.41);
+    alg.setProperty("EndOverlap", -0.42);
+    alg.setProperty("Params", "0.2");
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT(!alg.isExecuted())
+  }
+
+  void test_invalid_overlap_points() {
+    const auto &x1 = Points(4, LinearGenerator(1., 1.));
+    const auto &y1 = Counts(4, LinearGenerator(1., 1.));
+    Workspace2D_sptr ws1 = boost::make_shared<Workspace2D>();
+    Mantid::HistogramData::Histogram histogram1(x1, y1);
+    ws1->initialize(1, histogram1);
+    const auto &x2 = Points(4, LinearGenerator(1.5, 1.));
+    const auto &y2 = Counts(4, LinearGenerator(5., 1.));
+    Mantid::HistogramData::Histogram histogram2(x2, y2);
+    Workspace2D_sptr ws2 = boost::make_shared<Workspace2D>();
+    ws2->initialize(1, histogram2);
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", ws1);
+    alg.setProperty("RHSWorkspace", ws2);
+    alg.setProperty("StartOverlap", 1.75);
+    alg.setProperty("EndOverlap", 1.8);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
   void test_stitching_determines_params() {
     HistogramX x1(10, LinearGenerator(-1., 0.2));
     HistogramX x2(7, LinearGenerator(0.4, 0.2));
@@ -541,7 +595,7 @@ public:
                        scaleE * 4., 1.e-9)
     }
     // X values
-    auto &stitched_x = ret.get<0>()->mutableX(0);
+    const auto &stitched_x = ret.get<0>()->x(0);
     TSM_ASSERT_DELTA("X values unchanged", stitched_x.rawData(), this->x, 1.e-9)
   }
 
@@ -571,7 +625,7 @@ public:
                        scaleExpected * 4., 1.e-9)
     }
     // X values
-    auto &stitched_x = ret.get<0>()->mutableX(0);
+    const auto &stitched_x = ret.get<0>()->x(0);
     TSM_ASSERT_DELTA("X values unchanged", stitched_x.rawData(), this->x, 1.e-9)
   }
 
@@ -602,7 +656,7 @@ public:
       TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i], 4., 1.e-9)
     }
     // X values
-    auto &stitched_x = ret.get<0>()->mutableX(0);
+    const auto &stitched_x = ret.get<0>()->x(0);
     TSM_ASSERT_DELTA("X values unchanged", stitched_x.rawData(), this->x, 1.e-9)
   }
 

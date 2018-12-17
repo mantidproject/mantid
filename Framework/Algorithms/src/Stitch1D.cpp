@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
@@ -19,6 +20,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
 
 #include <algorithm>
 #include <boost/math/special_functions.hpp>
@@ -158,6 +160,7 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   std::map<std::string, std::string> issues;
   MatrixWorkspace_sptr lhs = getProperty("LHSWorkspace");
   MatrixWorkspace_sptr rhs = getProperty("RHSWorkspace");
+  const std::string theUnit = lhs->getAxis(0)->unit()->label();
   if (!lhs)
     issues["LHSWorkspace"] = "Cannot retrieve workspace";
   if (!rhs)
@@ -173,39 +176,98 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
                                " is not compatible: " + compatible + "\n";
   }
   if (!isDefault("StartOverlap") && !isDefault("EndOverlap")) {
-    double startOverlap = this->getProperty("StartOverlap");
-    double endOverlap = this->getProperty("EndOverlap");
+    const double startOverlap = this->getProperty("StartOverlap");
+    const double endOverlap = this->getProperty("EndOverlap");
     if (endOverlap < startOverlap)
       issues["StartOverlap"] = "Must be smaller than EndOverlap";
-    // With regard to x values
-    const auto &lhsX = lhs->x(0);
-    const auto &rhsX = rhs->x(0);
-    const auto lhsMin = lhsX.front();
-    const auto rhsMin = rhsX.front();
-    const auto lhsMax = lhsX.back();
-    const auto rhsMax = rhsX.back();
-    // A global view on x values
-    const double minVal = std::min(lhsMin, rhsMin);
-    if ((minVal - 1.e-9) > startOverlap)
-      issues["StartOverlap"] =
-          "Must be greater or equal than the minimum x value (" +
-          std::to_string(minVal) + ")";
-    const double maxVal = std::max(lhsMax, rhsMax);
-    if ((maxVal + 1.e-9) < endOverlap)
-      issues["EndOverlap"] =
-          "Must be smaller or equal than the maximum x value (" +
-          std::to_string(maxVal) + ")";
-    if (rhs->isHistogramData()) {
-      // For the current implementation of binned data, lhs and rhs cannot be
-      // exchanged:
-      if (lhsMin > startOverlap)
-        issues["StartOverlap"] = "Must be greater or equal than the minimum x "
-                                 "value of the LHS workspace";
-      if (rhsMax < endOverlap)
-        issues["EndOverlap"] = "Must be smaller or equal than the maximum x "
-                               "value of the RHS workspace";
-      if (rhsMin > lhsMax)
-        issues["LHSWorkspace"] = "LHS and RHS workspaces must overlap";
+    else {
+      // With regard to x values
+      const auto &lhsX = lhs->x(0);
+      const auto &rhsX = rhs->x(0);
+      const auto lhsMin = lhsX.front();
+      const auto rhsMin = rhsX.front();
+      const auto lhsMax = lhsX.back();
+      const auto rhsMax = rhsX.back();
+      // A global view on x values
+      const double minVal = std::min(lhsMin, rhsMin);
+      if ((minVal - 1.e-9) > startOverlap)
+        issues["StartOverlap"] =
+            "Must be greater or equal than the minimum x value (" +
+            std::to_string(minVal) + " " + theUnit + ")";
+      const double maxVal = std::max(lhsMax, rhsMax);
+      if ((maxVal + 1.e-9) < endOverlap)
+        issues["EndOverlap"] =
+            "Must be smaller or equal than the maximum x value (" +
+            std::to_string(maxVal) + " " + theUnit + ")";
+      if (rhs->isHistogramData()) {
+        // For the current implementation of binned data, lhs and rhs cannot be
+        // exchanged:
+        if (lhsMin > startOverlap)
+          issues["StartOverlap"] =
+              "Must be greater or equal than the minimum x "
+              "value of the LHS workspace";
+        if (rhsMax < endOverlap)
+          issues["EndOverlap"] = "Must be smaller or equal than the maximum x "
+                                 "value of the RHS workspace";
+        if (rhsMin > lhsMax)
+          issues["LHSWorkspace"] = "LHS and RHS workspaces must overlap";
+      }
+      // Case automatic scaling:
+      // Avoid too small user defined overlap region which will result in a zero
+      // scale factor
+      if (!this->getProperty("UseManualScaleFactor")) {
+        const double userRange = endOverlap - startOverlap;
+        const std::string errMsg =
+            "Defined overlap is too small for automatic scaling, consider "
+            "using manual scale factors or modify the overlap range.";
+        if (!lhs->isHistogramData()) {
+          // Point data: search for points larger than start overlap and smaller
+          // than end overlap in lhs and rhs Minimum 2 points must be found
+          auto startLHS =
+              std::lower_bound(lhsX.cbegin(), lhsX.cend(), startOverlap);
+          auto endLHS =
+              std::upper_bound(lhsX.cbegin(), lhsX.cend(), endOverlap);
+          auto startRHS =
+              std::lower_bound(rhsX.cbegin(), rhsX.cend(), startOverlap);
+          auto endRHS =
+              std::upper_bound(rhsX.cbegin(), rhsX.cend(), endOverlap);
+          auto startPoint = std::max(startLHS, startRHS);
+          auto endPoint = std::min(endLHS, endRHS);
+          const double minRange = endPoint[0] - startPoint[0];
+          if (minRange > userRange)
+            issues["StartOverlap"] =
+                errMsg + " (" + std::to_string(minRange) + " " + theUnit +
+                " > " + std::to_string(userRange) + " " + theUnit + ")";
+        } else { // Binned data
+          std::vector<double> params = this->getProperty("Params");
+          double binWidth(0.);
+          if (params.size() == 1)
+            binWidth = params.front();
+          if (params.size() == 3)
+            binWidth = params[1];
+          if (binWidth != 0.) {
+            // Params step given:
+            // Verify that start and end overlap are not in the same bin
+            if (binWidth > userRange)
+              issues["StartOverlap"] =
+                  errMsg + " (" + std::to_string(binWidth) + " " + theUnit +
+                  " > " + std::to_string(userRange) + " " + theUnit + ")";
+          } else {
+            // Bin values given:
+            // Search for bin boundaries larger than start overlpa and smaller
+            // than end overlap in lhs and rhs Should not be in the same bin
+            auto startBin =
+                std::lower_bound(params.cbegin(), params.cend(), startOverlap);
+            auto endBin =
+                std::lower_bound(params.cbegin(), params.cend(), endOverlap);
+            if ((endBin - startBin) > userRange)
+              issues["StartOverlap"] =
+                  errMsg + " (" + std::to_string(endBin - startBin) + " " +
+                  theUnit + " > " + std::to_string(userRange) + " " + theUnit +
+                  ")";
+          }
+        }
+      }
     }
   }
   return issues;
@@ -411,10 +473,6 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
 void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
                               MatrixWorkspace_sptr &scaleFactorWS,
                               MatrixWorkspace_const_sptr &dxWS) {
-  if (!ws->isHistogramData()) {
-    scaleFactorWS->mutableY(0).front() = 1.;
-    scaleFactorWS->mutableE(0).front() = 1.;
-  }
   ws *= scaleFactorWS;
   // We lost Dx values (Multiply) and need to get them back for point data
   if (ws->size() == dxWS->size()) {
