@@ -29,7 +29,7 @@ public:
   virtual ~RunsTableViewSubscriber() = default;
 };
 
-/** @class ISaveView
+/** @class IRunsTableView
 
 IRunsTableView is the base view class for the table component of the "Runs" tab
 in the
