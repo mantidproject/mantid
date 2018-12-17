@@ -19,7 +19,7 @@ to be implemented by a concrete 'Save ASCII' tab presenter
 */
 class ISavePresenter {
 public:
-  virtual ~ISavePresenter(){};
+  virtual ~ISavePresenter() = default;
 
   virtual void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
