@@ -514,14 +514,15 @@ void QENSFitSequential::exec() {
   const auto groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outputBaseName + "_Workspaces");
+  auto hhh = getPropertyValue("OutputWorkspace");
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
-  if (containsMultipleData(workspaces))
-    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
-                     inputWorkspaces);
-  else
-    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+  //if (containsMultipleData(workspaces))
+  //  renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
+  //                   inputWorkspaces);
+  //else
+  //  renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
