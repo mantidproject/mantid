@@ -18,12 +18,12 @@ class PlotsSaver(object):
     def save_plots(self, plot_dict):
         # if arguement is none return empty dictionary
         if plot_dict is None:
-            return {}
+            return []
 
         plot_list = []
         for index in plot_dict:
             try:
-                (index, plot_list.append(self.get_dict_from_fig(plot_dict[index].canvas.figure)))
+                plot_list.append(self.get_dict_from_fig(plot_dict[index].canvas.figure))
             except BaseException as e:
                 # Catch all errors in here so it can fail silently-ish
                 if isinstance(e, KeyboardInterrupt):

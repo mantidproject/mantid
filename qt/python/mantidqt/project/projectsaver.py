@@ -26,6 +26,7 @@ class ProjectSaver(object):
         :param directory: String; The directory of the
         :param workspace_to_save: List; of Strings that will have workspace names in it, if None will save all
         :param interfaces_to_save: List; of Strings that will have interface tags in it, if None will save all
+        :param plots_to_save: List; of matplotlib.figure objects to save to the project file.
         :return: None; If the method cannot be completed.
         """
         # Check if the directory doesn't exist
