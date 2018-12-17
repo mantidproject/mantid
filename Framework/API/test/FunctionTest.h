@@ -54,6 +54,7 @@ public:
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
   ISpectrum &getSpectrum(const size_t index) override {
+    invalidateCommonBinsFlag();
     return m_spectra[index];
   }
 

@@ -152,6 +152,7 @@ public:
   //----------------------------------------------------------------------
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
+  /// Overriding classes must call invalidateCommonBinsFlag().
   virtual ISpectrum &getSpectrum(const size_t index) = 0;
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
@@ -254,7 +255,6 @@ public:
     return getSpectrum(index).dx();
   }
   HistogramData::HistogramX &mutableX(const size_t index) & {
-    invalidateCommonBinsFlag();
     return getSpectrum(index).mutableX();
   }
   HistogramData::HistogramDx &mutableDx(const size_t index) & {
@@ -324,7 +324,6 @@ public:
 
   /// Deprecated, use mutableX() instead. Returns the x data
   virtual MantidVec &dataX(const std::size_t index) {
-    invalidateCommonBinsFlag();
     return getSpectrum(index).dataX();
   }
   /// Deprecated, use mutableY() instead. Returns the y data
@@ -372,7 +371,6 @@ public:
   virtual void setX(const std::size_t index,
                     const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setX(X);
-    invalidateCommonBinsFlag();
   }
 
   /// Deprecated, use setSharedX() instead. Set the specified X array to point
@@ -380,7 +378,6 @@ public:
   virtual void setX(const std::size_t index,
                     const boost::shared_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setX(X);
-    invalidateCommonBinsFlag();
   }
 
   /**
@@ -554,7 +551,10 @@ protected:
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
-  void invalidateCommonBinsFlag() { m_isCommonBinsFlag = boost::none; }
+  void invalidateCommonBinsFlag() {
+    if (m_isCommonBinsFlag)
+      m_isCommonBinsFlag = boost::none;
+  }
 
   void updateCachedDetectorGrouping(const size_t index) const override;
 

@@ -154,6 +154,7 @@ public:
     return m_vec.empty() ? 0 : m_vec[0].dataY().size();
   }
   ISpectrum &getSpectrum(const size_t index) override {
+    invalidateCommonBinsFlag();
     m_vec[index].setMatrixWorkspace(this, index);
     return m_vec[index];
   }
