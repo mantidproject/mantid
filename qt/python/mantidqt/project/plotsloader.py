@@ -32,11 +32,12 @@ class PlotsLoader(object):
                     raise KeyboardInterrupt(str(e))
                 logger.warning("A plot was unable to be loaded from the save file")
 
-    def make_fig(self, plot_dict):
+    def make_fig(self, plot_dict, create_plot=True):
         """
         This method currently only considers single matplotlib.axes.Axes based figures as that is the most common case
-        :param plot_dict:
-        :return:
+        :param plot_dict: dictionary; A dictionary of various items intended to recreate a figure
+        :param create_plot: Bool; whether or not to make the plot, or to return the figure.
+        :return: matplotlib.figure; Only returns if create_plot=False
         """
         import matplotlib.pyplot as plt
         # Grab creation arguments
@@ -55,7 +56,12 @@ class PlotsLoader(object):
         fig._label = plot_dict["label"]
         fig.canvas.set_window_title(plot_dict["label"])
         self.restore_figure_data(fig=fig, dic=plot_dict)
-        fig.show()
+
+        # If the function should create plot then create else return
+        if create_plot:
+            fig.show()
+        else:
+            return fig
 
     @staticmethod
     def plot_func( workspace, axes, creation_arg):
@@ -108,15 +114,12 @@ class PlotsLoader(object):
 
         # Update/set text
         text_list = dic["texts"]
-        for index, text_ in enumerate(text_list):
-            try:
-                ax.texts[index] = self.create_text_from_dict(text_)
-            except IndexError:
-                ax.text(self.create_text_from_dict(text_))
+        for text_ in text_list:
+            self.create_text_from_dict(ax, text_)
 
         # Update artists that are text
         for artist in dic["textFromArtists"]:
-            ax.text(self.create_text_from_dict(artist))
+            self.create_text_from_dict(ax, artist)
 
         # Update Legend
         legend = ax.get_legend()
@@ -127,24 +130,19 @@ class PlotsLoader(object):
             self.update_legend(ax, dic["legend"])
 
     @staticmethod
-    def create_text_from_dict(dic):
-        if dic["text"]:
-            # If the text has a $\\ then it is assumed that it is meant to only be one back slash so one needs to be
-            # removed
-            style_dic = dic["style"]
-            return matplotlib.text.Text(text='d-Spacing ()',
-                                        # transform=dic["transform"],
-                                        position=dic["position"],
-                                        usetex=dic["useTeX"],
-                                        alpha=style_dic["alpha"],
-                                        fontsize=style_dic["textSize"],
-                                        color=style_dic["color"],
-                                        horizontalalignment=style_dic["hAlign"],
-                                        verticalalignment=style_dic["vAlign"],
-                                        multialignment=style_dic["mAlign"],
-                                        rotation=style_dic["rotation"],
-                                        zorder=style_dic["zOrder"])
-        return None
+    def create_text_from_dict(ax, dic):
+        style_dic = dic["style"]
+        ax.text(x=dic["position"][0],
+                y=dic["position"][1],
+                s=dic["text"],
+                fontdict={u'alpha': style_dic["alpha"],
+                          u'color': style_dic["color"],
+                          u'rotation': style_dic["rotation"],
+                          u'fontsize': style_dic["textSize"],
+                          u'zOrder': style_dic["zOrder"],
+                          u'usetex': dic["useTeX"],
+                          u'horizontalalignment': style_dic["hAlign"],
+                          u'verticalalignment': style_dic["vAlign"]})
 
     @staticmethod
     def update_lines(ax, line):

@@ -149,7 +149,7 @@ class PlotsSaver(object):
         grid_style = {}
         gridlines = ax.get_gridlines()
         if ax._gridOnMajor and len(gridlines) > 0:
-            grid_style["color"] = matplotlib.colors.to_hex(gridlines[0].get_color())
+            grid_style["color"] = matplotlib.colors.rgb2hex(gridlines[0].get_color())
             grid_style["alpha"] = gridlines[0].get_alpha()
             grid_style["gridOn"] = True
         else:
@@ -160,7 +160,7 @@ class PlotsSaver(object):
         line_dict = {"lineIndex": index,
                      "label": line.get_label(),
                      "alpha": line.get_alpha(),
-                     "color": matplotlib.colors.to_hex(line.get_color()),
+                     "color": matplotlib.colors.rgb2hex(line.get_color()),
                      "lineWidth": line.get_linewidth(),
                      "lineStyle": line.get_linestyle(),
                      "markerStyle": self.get_dict_from_marker_style(line)}
@@ -170,8 +170,8 @@ class PlotsSaver(object):
 
     @staticmethod
     def get_dict_from_marker_style(line):
-        style_dict = {"faceColor": matplotlib.colors.to_hex(line.get_markerfacecolor()),
-                      "edgeColor": matplotlib.colors.to_hex(line.get_markeredgecolor()),
+        style_dict = {"faceColor": matplotlib.colors.rgb2hex(line.get_markerfacecolor()),
+                      "edgeColor": matplotlib.colors.rgb2hex(line.get_markeredgecolor()),
                       "edgeWidth": line.get_markeredgewidth(),
                       "markerType": line.get_marker(),
                       "markerSize": line.get_markersize(),
@@ -191,10 +191,9 @@ class PlotsSaver(object):
     def get_dict_from_text_style(text):
         style_dict = {"alpha": text.get_alpha(),
                       "textSize": text.get_size(),
-                      "color": matplotlib.colors.to_hex(text.get_color()),
+                      "color": matplotlib.colors.rgb2hex(text.get_color()),
                       "hAlign": text.get_horizontalalignment(),
                       "vAlign": text.get_verticalalignment(),
-                      "mAlign": text._multialignment,
                       "rotation": text.get_rotation(),
                       "zOrder": text.get_zorder()}
         if style_dict["alpha"] is None:

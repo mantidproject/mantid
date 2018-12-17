@@ -111,14 +111,18 @@ class PlotsLoaderTest(unittest.TestCase):
         self.assertEqual(self.plots_loader.update_legend.call_count, 1)
 
     def test_create_text_from_dict(self):
-        matplotlib.text.Text = mock.MagicMock()
+        fig = matplotlib.figure.Figure()
+        ax = matplotlib.axes.Axes(fig=fig, rect=[0, 0, 0, 0])
+        ax.text = mock.MagicMock()
 
-        self.plots_loader.create_text_from_dict({"text": "text", "position": 1, "useTeX": 1,
-                                                 "style": {"alpha": 1, "textSize": 1, "color": 1, "hAlign": 1,
-                                                           "vAlign": 1, "mAlign": 1, "rotation": 1, "zOrder": 1}})
-
-        self.assertEqual(self.plots_loader.create_text_from_dict(dic={"text": False}), None)
-        self.assertEqual(matplotlib.text.Text.call_count, 1)
+        self.plots_loader.create_text_from_dict(ax=ax, dic={"text": "text", "position": (1, 1), "useTeX": 1,
+                                                            "style": {"alpha": 1, "textSize": 1, "color": 1,
+                                                                      "hAlign": 1, "vAlign": 1, "rotation": 1,
+                                                                      "zOrder": 1}})
+        self.assertEqual(ax.text.call_count, 1)
+        ax.text.assert_called_once_with(fontdict={u'zOrder': 1, u'fontsize': 1, u'color': 1, u'alpha': 1,
+                                                  u'rotation': 1, u'verticalalignment': 1, u'usetex': 1,
+                                                  u'horizontalalignment': 1}, s=u'text', x=1, y=1)
 
     @mock.patch("matplotlib.figure.Figure.show")
     def test_load_plot_from_dict(self, pass_func):
