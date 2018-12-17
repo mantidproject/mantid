@@ -775,7 +775,7 @@ std::string NexusGeometryParser::getMangledName(const std::string &fileName,
   std::string mangledName = instName;
   if (!fileName.empty()) {
     std::string checksum =
-        Mantid::Kernel::ChecksumHelper::sha1FromFile(fileName, false);
+        Mantid::Kernel::ChecksumHelper::sha1FromString(fileName);
     mangledName += checksum;
   }
   return mangledName;
