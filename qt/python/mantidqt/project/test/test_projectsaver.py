@@ -146,22 +146,6 @@ class ProjectSaverTest(unittest.TestCase):
         self.assertDictEqual(plots_dict, file_dict["plots"][0])
 
 
-
-    #def test_only_one_interface_saving(self):
-
-    #def test_only_multiple_interfaces_saving(self):
-
-    #def test_one_workspace_and_one_interface_saving(self):
-
-    #def test_multiple_workspaces_and_multiple_interfaces(self):
-
-    #def test_get_encoders_retrieves_correct_encoder(self):
-
-    #def test_encode_interfaces_on_one_interface(self):
-
-    #def test_encode_interfaces_on_multiple_interfaces(self):
-
-
 class ProjectWriterTest(unittest.TestCase):
     def tearDown(self):
         ADS.clear()
