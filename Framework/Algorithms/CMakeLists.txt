@@ -95,6 +95,7 @@ set ( SRC_FILES
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
 	src/CylinderAbsorption.cpp
+	src/DeadTimeCorrection.cpp
 	src/DeleteLog.cpp
 	src/DeleteWorkspace.cpp
 	src/DeleteWorkspaces.cpp
@@ -160,6 +161,7 @@ set ( SRC_FILES
 	src/GetQsInQENSData.cpp
 	src/GetTimeSeriesLogInformation.cpp
 	src/GravitySANSHelper.cpp
+	src/GroupToXResolution.cpp
 	src/GroupWorkspaces.cpp
 	src/HRPDSlabCanAbsorption.cpp
 	src/He3TubeEfficiency.cpp
@@ -178,8 +180,10 @@ set ( SRC_FILES
 	src/MagFormFactorCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
+	src/MaskBinsIf.cpp
 	src/MaskDetectorsIf.cpp
 	src/MaskInstrument.cpp
+	src/MaskNonOverlappingBins.cpp
 	src/MatrixWorkspaceAccess.cpp
 	src/Max.cpp
 	src/MaxEnt.cpp
@@ -427,6 +431,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
 	inc/MantidAlgorithms/CylinderAbsorption.h
+	inc/MantidAlgorithms/DeadTimeCorrection.h
 	inc/MantidAlgorithms/DeleteLog.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DeleteWorkspaces.h
@@ -493,6 +498,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetQsInQENSData.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
+	inc/MantidAlgorithms/GroupToXResolution.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
 	inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
 	inc/MantidAlgorithms/He3TubeEfficiency.h
@@ -511,8 +517,10 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MagFormFactorCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
+	inc/MantidAlgorithms/MaskBinsIf.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/MaskInstrument.h
+	inc/MantidAlgorithms/MaskNonOverlappingBins.h
 	inc/MantidAlgorithms/MatrixWorkspaceAccess.h
 	inc/MantidAlgorithms/Max.h
 	inc/MantidAlgorithms/MaxEnt.h
@@ -699,7 +707,7 @@ set ( TEST_FILES
 	CalculateCarpenterSampleCorrectionTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
- 	CalculateDynamicRangeTest.h
+	CalculateDynamicRangeTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateIqtTest.h
@@ -773,6 +781,7 @@ set ( TEST_FILES
 	CrossCorrelateTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
+	DeadTimeCorrectionTest.h
 	DeleteLogTest.h
 	DeleteWorkspaceTest.h
 	DeleteWorkspacesTest.h
@@ -833,6 +842,7 @@ set ( TEST_FILES
 	GetEiV1Test.h
 	GetQsInQENSDataTest.h
 	GetTimeSeriesLogInformationTest.h
+	GroupToXResolutionTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
 	He3TubeEfficiencyTest.h
@@ -853,9 +863,11 @@ set ( TEST_FILES
 	MCInteractionVolumeTest.h
 	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
+	MaskBinsIfTest.h
 	MaskBinsTest.h
 	MaskDetectorsIfTest.h
 	MaskInstrumentTest.h
+	MaskNonOverlappingBinsTest.h
 	MaxEnt/MaxentCalculatorTest.h
 	MaxEnt/MaxentEntropyNegativeValuesTest.h
 	MaxEnt/MaxentEntropyPositiveValuesTest.h

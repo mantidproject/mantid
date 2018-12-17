@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from collections import namedtuple
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 
 from mantid.simpleapi import (ConvertUnits, LoadRaw, FilterPeaks, PredictPeaks, SetUB, SaveIsawPeaks)
 from mantid import config
@@ -13,7 +13,7 @@ import numpy as np
 import os
 
 
-class WISHSingleCrystalPeakPredictionTest(MantidStressTest):
+class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
     """
     At the time of writing WISH users rely quite heavily on the PredictPeaks
     algorithm. As WISH has tubes rather than rectangular detectors sometimes

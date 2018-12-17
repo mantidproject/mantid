@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
@@ -14,7 +14,7 @@ from mantid import config
 from ISISCommandInterface import *
 
 
-class SANS2DMultiPeriodAddFiles(stresstesting.MantidStressTest):
+class SANS2DMultiPeriodAddFiles(systemtesting.MantidSystemTest):
 
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""
@@ -51,7 +51,7 @@ class SANS2DMultiPeriodAddFiles(stresstesting.MantidStressTest):
         return '5512p7rear_1D_2.0_4.0Phi-45.0_45.0','SANS2DMultiPeriodAddFiles.nxs'
 
 
-class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
+class LARMORMultiPeriodAddEventFiles(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""
         return 2500

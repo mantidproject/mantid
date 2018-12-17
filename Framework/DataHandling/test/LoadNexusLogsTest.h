@@ -261,6 +261,39 @@ public:
     TS_ASSERT(pclog->getStatistics().duration < 3e9);
   }
 
+  void test_no_crash_on_2D_array_of_values_on_load() {
+    auto testWS = createTestWorkspace();
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "larmor_array_time_series_mock.nxs");
+    TS_ASSERT_THROWS_NOTHING(loader.execute())
+  }
+
+  void test_last_time_series_log_entry_equals_end_time() {
+    LoadNexusLogs ld;
+    std::string outws_name = "REF_L_instrument";
+    ld.initialize();
+    ld.setPropertyValue("Filename", "REF_L_32035.nxs");
+    MatrixWorkspace_sptr ws = createTestWorkspace();
+    // Put it in the object.
+    ld.setProperty("Workspace", ws);
+    ld.execute();
+    TS_ASSERT(ld.isExecuted());
+
+    auto run = ws->run();
+    auto pclog = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("PhaseRequest1"));
+
+    TS_ASSERT(pclog);
+
+    const auto lastTime = pclog->lastTime();
+    const auto endTime = run.endTime();
+
+    TS_ASSERT_EQUALS(endTime.totalNanoseconds(), lastTime.totalNanoseconds());
+  }
+
 private:
   API::MatrixWorkspace_sptr createTestWorkspace() {
     return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);

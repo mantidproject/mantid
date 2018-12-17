@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
 
-import ui_run_selector_widget
+from . import ui_run_selector_widget
 from PyQt4.QtCore import pyqtSignal
 from mantidqtpython import MantidQt
 

@@ -1,49 +1,23 @@
-# pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
-import unittest
-import os
-import stresstesting
-
-import mantid
-from mantid.api import AlgorithmManager
-
-from mantid.simpleapi import BiblySANSDATAProcessor
-
-# -----------------------------------------------
-# Tests for the BilbySANSDataProcessorTest algorithm
-# -----------------------------------------------
-class BilbySANSDataProcessorTest(unittest.TestCase):
-    def test_this_is_an_example_test(self):
-        # Given : This sets up the inputs to the algorithm call
-
-        # When : Here we make the algorithm call
-        output_workspace, transmission_fit = BilbySANSDataProcessor(**args, **kwargs)
-
-        # Then : Here we test the outputs are correct
-        self.assertTrue(False)
+import systemtesting
+from BilbyReductionScript import run_bilby_reduction
 
 
-
-class BilbySANSDataProcessorTest(stresstesting.MantidStressTest):
+class BilbySANSDataProcessorTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
-        self._success = False
+        systemtesting.MantidSystemTest.__init__(self)
+        self.tolerance = 1e-6
 
     def runTest(self):
-        suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(BilbySANSDataProcessorTest, 'test'))
-        runner = unittest.TextTestRunner()
-        res = runner.run(suite)
-        if res.wasSuccessful():
-            self._success = True
-
-    def requiredMemoryMB(self):
-        return 2000
+        run_bilby_reduction('mantid_reduction_settings_example.csv', '0', '0', 'shift_assembled.csv', False)
 
     def validate(self):
-        return self._success
-
-
-if __name__ == '__main__':
-    unittest.main()
+        self.disableChecking.append('Instrument')
+        return 'BBY0019749_1D_2.0_18.0_AgBeh', 'BilbyReductionExampleOutput.nxs'

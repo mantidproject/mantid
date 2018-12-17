@@ -47,7 +47,7 @@ class ContextExampleWidget(object):
     def updateContext(self):
         self._presenter.updateContext()
 
-    def loadFromContext(self, context):
+    def loadFromContext(self):
         # extract relevant info from context via model
         model = self._presenter.model
         sub_context = model.getSubContext()

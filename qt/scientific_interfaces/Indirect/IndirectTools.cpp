@@ -51,7 +51,6 @@ void IndirectTools::initLayout() {
 
   // Connect statements for the buttons shared between all tabs on the Indirect
   // Bayes interface
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));

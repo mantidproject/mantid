@@ -252,17 +252,17 @@ public:
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.78656, 0.001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], -0.61545, 0.001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.3180, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.610, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], -0.298, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.2446, 0.001);
 
       TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0213, 0.01);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0385, 0.01);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0682, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.04, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.07, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.12, 0.01);
     }
   }
 
@@ -293,13 +293,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0119, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0063, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0099, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0152, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0000, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0378, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0310, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0548, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0958, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0562, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0992, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1734, 0.0001);
     }
   }
 
@@ -330,13 +330,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.7964, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], -0.6206, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.3099, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.6233, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], -0.2982, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.2765, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0149, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0275, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0498, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0276, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0509, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0921, 0.0001);
     }
   }
 
@@ -373,13 +373,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.7977, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], -0.6213, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.3088, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.6251, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], -0.2982, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.2810, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0120, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0223, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0405, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0222, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0413, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0750, 0.0001);
     }
   }
 
@@ -416,13 +416,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0043, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0022, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0035, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0057, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0000, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0142, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0249, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0467, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.0854, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0462, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0867, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1585, 0.0001);
     }
   }
 
