@@ -8,6 +8,7 @@
 #define MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXING_H_
 
 #include  "MantidMDAlgorithms/ConvToMDEventsWS.h"
+#include "queue"
 
 namespace Mantid {
 // Forward declarations
@@ -87,11 +88,21 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   }
 
   template<size_t ND, template <size_t> class MDEventType>
+  struct StructureToNativeBox {
+    unsigned level;
+    std::reference_wrapper<const ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>> sBox;
+    std::reference_wrapper<DataObjects::MDGridBox<MDEventType<ND>, ND>> nBox;
+
+    friend bool operator<(const StructureToNativeBox& a, const StructureToNativeBox& b) {return a.level < b.level; }
+  };
+
+  template<size_t ND, template <size_t> class MDEventType>
   void convertToNativeBoxStructureRecursive(const ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>& sBoxCur,
                                             DataObjects::MDGridBox<MDEventType<ND>, ND>& nBoxCur,
                                             const MDSpaceBounds<ND>& space,
                                             const API::BoxController_sptr &bc,
-                                            unsigned level);
+                                            unsigned level, unsigned partialLevel,
+                                            std::vector<StructureToNativeBox<ND, MDEventType>>& boxMapBuffer);
 
   template<size_t ND, template <size_t> class MDEventType>
   DataObjects::MDBoxBase<MDEventType<ND>, ND>*
@@ -213,7 +224,9 @@ void ConvToMDEventsWSIndexing::convertToNativeBoxStructureRecursive(
     DataObjects::MDGridBox<MDEventType<ND>, ND>& nBoxCur,
     const MDSpaceBounds<ND>& space,
     const API::BoxController_sptr &bc,
-    unsigned level) {
+    unsigned level, unsigned partialLevel,
+    std::vector<StructureToNativeBox<ND, MDEventType>>& boxMapBuffer) {
+  std::vector<StructureToNativeBox<ND, MDEventType>> boxMapBufferLocal;
   const auto& sChildren = sBoxCur.children();
   std::vector<API::IMDNode *> children;
   for(unsigned i = 0; i < sChildren.size(); ++i) {
@@ -224,16 +237,23 @@ void ConvToMDEventsWSIndexing::convertToNativeBoxStructureRecursive(
       children.emplace_back(makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::LEAF, space, bc, level));
     } else {
       bc->incGridBoxesCounter(level);
-      children.emplace_back(makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::GRID, space, bc, level));
+      auto gridBoxPtr =
+          static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND>*>
+          (makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::GRID, space, bc, level));
+      children.emplace_back(gridBoxPtr);
+      boxMapBufferLocal.emplace_back(StructureToNativeBox<ND, MDEventType>{level, std::cref(sChildren[i]), std::ref(*gridBoxPtr)});
     }
   }
   nBoxCur.setChildren(children, 0, children.size());
 
   ++level;
-  for(unsigned i = 0; i < children.size(); ++i) {
-    if (!sChildren[i].isLeaf())
-      ConvToMDEventsWSIndexing::convertToNativeBoxStructureRecursive<ND, MDEventType>(sChildren[i],
-                                                                                      *(static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND> *>(children[i])), space, bc, level);
+  if(level < partialLevel) {
+    for (auto &bm: boxMapBufferLocal) {
+      ConvToMDEventsWSIndexing::
+      convertToNativeBoxStructureRecursive<ND, MDEventType>(bm.sBox, bm.nBox, space, bc, level, partialLevel, boxMapBuffer);
+    }
+  } else {
+    boxMapBuffer.insert(boxMapBuffer.end(), boxMapBufferLocal.begin(), boxMapBufferLocal.end());
   }
 }
 
@@ -250,7 +270,8 @@ convertToNativeBoxStructure(const ConvToMDEventsWSIndexing::BoxStructureType<ND,
         static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND> *>
         (makeMDBox<ND, MDEventType>(mdBox, ConvToMDEventsWSIndexing::GRID, space, bc, 0))
     );
-    convertToNativeBoxStructureRecursive<ND, MDEventType>(mdBox, *res, space, bc, 1);
+    std::vector<ConvToMDEventsWSIndexing::StructureToNativeBox<ND, MDEventType>> mapBoxBuf;
+    convertToNativeBoxStructureRecursive<ND, MDEventType>(mdBox, *res, space, bc, 1, 100, mapBoxBuf);
     return res;
   }
 }
