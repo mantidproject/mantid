@@ -35,7 +35,7 @@ createPopulatedworkspace(std::vector<double> const &xValues,
   createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
   createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
                                         verticalAxisNames);
-  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "workspace");
+  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "OutputResults");
   createWorkspaceAlgorithm->execute();
   return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
 }
