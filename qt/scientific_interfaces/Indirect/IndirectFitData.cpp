@@ -276,7 +276,7 @@ IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
 std::string
 IndirectFitData::displayName(const std::string &formatString,
                              const std::string &rangeDelimiter) const {
-  const auto workspaceName = getInputBasename();
+  const auto workspaceName = getBasename();
   const auto spectraString =
       boost::apply_visitor(SpectraToString(rangeDelimiter), m_spectra);
 
@@ -291,7 +291,7 @@ IndirectFitData::displayName(const std::string &formatString,
 
 std::string IndirectFitData::displayName(const std::string &formatString,
                                          std::size_t spectrum) const {
-  const auto workspaceName = getInputBasename();
+  const auto workspaceName = getBasename();
 
   auto formatted = boost::format(formatString);
   formatted = tryPassFormatArgument(formatted, workspaceName);
@@ -299,7 +299,7 @@ std::string IndirectFitData::displayName(const std::string &formatString,
   return formatted.str();
 }
 
-std::string IndirectFitData::getInputBasename() const {
+std::string IndirectFitData::getBasename() const {
   return cutLastOf(workspace()->getName(), "_red");
 }
 
