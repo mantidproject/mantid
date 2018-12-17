@@ -20,6 +20,8 @@ class PlotsSaverTest(unittest.TestCase):
     def setUp(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
         plots_loader = PlotsLoader()
+
+        # Make a figure with a given input with all these values already set
         self.loader_plot_dict = {u'axes': [{u'legend': {u'exists': False}, u'lines': [{u'alpha': 1,
                                                                                        u'color': u'#1f77b4',
                                                                                        u'label': u'ws1: spec 2',

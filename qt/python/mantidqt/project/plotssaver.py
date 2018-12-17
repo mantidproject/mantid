@@ -13,6 +13,14 @@ import matplotlib.colors
 
 from mantid import logger
 
+try:
+    from matplotlib.colors import to_hex
+except ImportError:
+    from matplotlib.colors import colorConverter, rgb2hex
+
+    def to_hex(color):
+        return rgb2hex(colorConverter.to_rgb(color))
+
 
 class PlotsSaver(object):
     def save_plots(self, plot_dict):
@@ -149,7 +157,7 @@ class PlotsSaver(object):
         grid_style = {}
         gridlines = ax.get_gridlines()
         if ax._gridOnMajor and len(gridlines) > 0:
-            grid_style["color"] = matplotlib.colors.rgb2hex(gridlines[0].get_color())
+            grid_style["color"] = to_hex(gridlines[0].get_color())
             grid_style["alpha"] = gridlines[0].get_alpha()
             grid_style["gridOn"] = True
         else:
@@ -160,7 +168,7 @@ class PlotsSaver(object):
         line_dict = {"lineIndex": index,
                      "label": line.get_label(),
                      "alpha": line.get_alpha(),
-                     "color": matplotlib.colors.rgb2hex(line.get_color()),
+                     "color": to_hex(line.get_color()),
                      "lineWidth": line.get_linewidth(),
                      "lineStyle": line.get_linestyle(),
                      "markerStyle": self.get_dict_from_marker_style(line)}
@@ -170,8 +178,8 @@ class PlotsSaver(object):
 
     @staticmethod
     def get_dict_from_marker_style(line):
-        style_dict = {"faceColor": matplotlib.colors.rgb2hex(line.get_markerfacecolor()),
-                      "edgeColor": matplotlib.colors.rgb2hex(line.get_markeredgecolor()),
+        style_dict = {"faceColor": to_hex(line.get_markerfacecolor()),
+                      "edgeColor": to_hex(line.get_markeredgecolor()),
                       "edgeWidth": line.get_markeredgewidth(),
                       "markerType": line.get_marker(),
                       "markerSize": line.get_markersize(),
@@ -191,7 +199,7 @@ class PlotsSaver(object):
     def get_dict_from_text_style(text):
         style_dict = {"alpha": text.get_alpha(),
                       "textSize": text.get_size(),
-                      "color": matplotlib.colors.rgb2hex(text.get_color()),
+                      "color": to_hex(text.get_color()),
                       "hAlign": text.get_horizontalalignment(),
                       "vAlign": text.get_verticalalignment(),
                       "rotation": text.get_rotation(),
