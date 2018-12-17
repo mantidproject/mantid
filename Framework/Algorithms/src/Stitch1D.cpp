@@ -178,7 +178,7 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   if (!isDefault("StartOverlap") && !isDefault("EndOverlap")) {
     const double startOverlap = this->getProperty("StartOverlap");
     const double endOverlap = this->getProperty("EndOverlap");
-    if (endOverlap < startOverlap)
+    if (endOverlap <= startOverlap)
       issues["StartOverlap"] = "Must be smaller than EndOverlap";
     else {
       // With regard to x values
@@ -211,62 +211,6 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
                                  "value of the RHS workspace";
         if (rhsMin > lhsMax)
           issues["LHSWorkspace"] = "LHS and RHS workspaces must overlap";
-      }
-      // Case automatic scaling:
-      // Avoid too small user defined overlap region which will result in a zero
-      // scale factor
-      if (!this->getProperty("UseManualScaleFactor")) {
-        const double userRange = endOverlap - startOverlap;
-        const std::string errMsg =
-            "Defined overlap is too small for automatic scaling, consider "
-            "using manual scale factors or modify the overlap range.";
-        if (!lhs->isHistogramData()) {
-          // Point data: search for points larger than start overlap and smaller
-          // than end overlap in lhs and rhs Minimum 2 points must be found
-          auto startLHS =
-              std::lower_bound(lhsX.cbegin(), lhsX.cend(), startOverlap);
-          auto endLHS =
-              std::upper_bound(lhsX.cbegin(), lhsX.cend(), endOverlap);
-          auto startRHS =
-              std::lower_bound(rhsX.cbegin(), rhsX.cend(), startOverlap);
-          auto endRHS =
-              std::upper_bound(rhsX.cbegin(), rhsX.cend(), endOverlap);
-          auto startPoint = std::max(startLHS, startRHS);
-          auto endPoint = std::min(endLHS, endRHS);
-          const double minRange = endPoint[0] - startPoint[0];
-          if (minRange > userRange)
-            issues["StartOverlap"] =
-                errMsg + " (" + std::to_string(minRange) + " " + theUnit +
-                " > " + std::to_string(userRange) + " " + theUnit + ")";
-        } else { // Binned data
-          std::vector<double> params = this->getProperty("Params");
-          double binWidth(0.);
-          if (params.size() == 1)
-            binWidth = params.front();
-          if (params.size() == 3)
-            binWidth = params[1];
-          if (binWidth != 0.) {
-            // Params step given:
-            // Verify that start and end overlap are not in the same bin
-            if (binWidth > userRange)
-              issues["StartOverlap"] =
-                  errMsg + " (" + std::to_string(binWidth) + " " + theUnit +
-                  " > " + std::to_string(userRange) + " " + theUnit + ")";
-          } else {
-            // Bin values given:
-            // Search for bin boundaries larger than start overlpa and smaller
-            // than end overlap in lhs and rhs Should not be in the same bin
-            auto startBin =
-                std::lower_bound(params.cbegin(), params.cend(), startOverlap);
-            auto endBin =
-                std::lower_bound(params.cbegin(), params.cend(), endOverlap);
-            if ((endBin - startBin) > userRange)
-              issues["StartOverlap"] =
-                  errMsg + " (" + std::to_string(endBin - startBin) + " " +
-                  theUnit + " > " + std::to_string(userRange) + " " + theUnit +
-                  ")";
-          }
-        }
       }
     }
   }
@@ -484,14 +428,6 @@ void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
   }
   m_scaleFactor = scaleFactorWS->y(0).front();
   m_errorScaleFactor = scaleFactorWS->e(0).front();
-  if (m_scaleFactor < 1.e-2 || m_scaleFactor > 1.e2 ||
-      std::isnan(m_scaleFactor)) {
-    std::stringstream messageBuffer;
-    messageBuffer << "Calculated scale factor is: " << m_scaleFactor
-                  << ". Check that in both input workspaces the integrated "
-                     "overlap region is non-zero.";
-    g_log.warning(messageBuffer.str());
-  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -544,6 +480,13 @@ void Stitch1D::exec() {
   } else {
     auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
     auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
+    if ((rhsOverlapIntegrated->y(0).front() == 0.) ||
+        (lhsOverlapIntegrated->y(0).front()) == 0.) {
+      std::stringstream messageBuffer;
+      messageBuffer << "Check that in both input workspaces the integrated "
+                       "overlap region is non-zero.";
+      throw std::runtime_error(messageBuffer.str());
+    }
     if (scaleRHS) {
       auto scaleFactor = lhsOverlapIntegrated / rhsOverlapIntegrated;
       scaleWorkspace(rhs, scaleFactor, rhsWS);
