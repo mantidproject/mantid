@@ -270,9 +270,22 @@ convertToNativeBoxStructure(const ConvToMDEventsWSIndexing::BoxStructureType<ND,
         static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND> *>
         (makeMDBox<ND, MDEventType>(mdBox, ConvToMDEventsWSIndexing::GRID, space, bc, 0))
     );
-    std::vector<ConvToMDEventsWSIndexing::StructureToNativeBox<ND, MDEventType>> mapBoxBuf;
-    convertToNativeBoxStructureRecursive<ND, MDEventType>(mdBox, *res, space, bc, 1, 100, mapBoxBuf);
-    return res;
+    std::vector<ConvToMDEventsWSIndexing::StructureToNativeBox<ND, MDEventType>> mapBoxBuf, dummy;
+    if(m_NumThreads == 1) {
+      convertToNativeBoxStructureRecursive<ND, MDEventType>(mdBox, *res, space, bc, 1, bc->getMaxDepth() + 1, mapBoxBuf);
+      return res;
+    } else {
+      //this has the same behavior as in ConvertToMdEventsWS class
+      unsigned nThreads = m_NumThreads > 0 ? m_NumThreads : Kernel::ThreadPool::getNumPhysicalCores();
+      // How many preliminary steps we need to have enough jobs for parallelizind ~10*nThreads
+      unsigned toLevel = log(10*nThreads)/(ND*log(bc->getSplitInto(0))) + 1;
+      convertToNativeBoxStructureRecursive<ND, MDEventType>(mdBox, *res, space, bc, 1, toLevel, mapBoxBuf);
+      std::cerr << "toLevel = " << toLevel << "  Jobs count: " << mapBoxBuf.size() << "\n"; //TODO tmp
+#pragma omp parallel for num_threads(nThreads)
+      for(unsigned i = 0; i < mapBoxBuf.size(); ++i)
+        convertToNativeBoxStructureRecursive<ND, MDEventType>(mapBoxBuf[i].sBox, mapBoxBuf[i].nBox, space, bc, toLevel, bc->getMaxDepth() + 1, dummy);
+      return res;
+    }
   }
 }
 
@@ -301,6 +314,11 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
 template<typename EventType, size_t ND, template <size_t> class MDEventType>
 void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
   pProgress->resetNumSteps(4, 0, 1);
+
+  std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+  start = std::chrono::high_resolution_clock::now();
+
+
   std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
   MDSpaceBounds<ND> space;
   const auto& pws{m_OutWSWrapper->pWorkspace()};
@@ -309,11 +327,22 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
     space(ax, 1) = pws->getDimension(ax)->getMaximum();
   }
 
+  end = std::chrono::high_resolution_clock::now();
+  std::cerr << "Convert events: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  start = std::chrono::high_resolution_clock::now();
+
+
 #pragma omp parallel for
   for(size_t i = 0; i < mdEvents.size(); ++i)
     mdEvents[i].retrieveIndex(space);
 
   pProgress->report(0);
+
+  end = std::chrono::high_resolution_clock::now();
+  std::cerr << "Retrieve morton: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  start = std::chrono::high_resolution_clock::now();
+
+
 
   tbb::parallel_sort(mdEvents.begin(), mdEvents.end(), [] (const MDEventType<ND>& a, const MDEventType<ND>& b) {
     return a.getIndex() < b.getIndex();
@@ -321,18 +350,39 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
 
   pProgress->report(1);
 
+
+  end = std::chrono::high_resolution_clock::now();
+  std::cerr << "Sort: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  start = std::chrono::high_resolution_clock::now();
+
+
   auto rootMdBox = buildStructureFromSortedEvents<ND, MDEventType>(bc, mdEvents);
 
   pProgress->report(2);
+
+  end = std::chrono::high_resolution_clock::now();
+  std::cerr << "Build boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  start = std::chrono::high_resolution_clock::now();
+
 
 #pragma omp parallel for
   for(size_t i = 0; i < mdEvents.size(); ++i)
     mdEvents[i].retrieveCoordinates(space);
 
+
+  end = std::chrono::high_resolution_clock::now();
+  std::cerr << "Retrieve cordinates: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  start = std::chrono::high_resolution_clock::now();
+
+
   m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure<ND, MDEventType>(*(rootMdBox.get()), space, bc));
 
   pProgress->report(3);
+
+  end = std::chrono::high_resolution_clock::now();
+  std::cerr << "Convert boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
 }
+
 
 
 template <size_t ND>
