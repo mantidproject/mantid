@@ -45,6 +45,7 @@ Improvements
   maximum of 18 plots.
 - The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed.
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
+- Fit and Fit Sequential in the Fit combobox above the FitPropertyBrowser are now disabled while fitting is taking place.
 
 Bugfixes
 ########
@@ -116,6 +117,16 @@ Bugfixes
 ########
 
 - An unwanted 'Fit' plot is no longer plotted in ResNorm when you click `Plot` in the output options.
+
+
+Simulations Interface
+---------------------
+
+Improvements
+############
+
+- The Run button is now above the output options.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
 
 
 Diffraction Interface

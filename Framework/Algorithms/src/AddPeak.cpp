@@ -117,8 +117,8 @@ void AddPeak::exec() {
   Qy *= knorm;
   Qz *= knorm;
 
-  Mantid::Geometry::IPeak *peak =
-      peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2);
+  auto peak = std::unique_ptr<Mantid::Geometry::IPeak>(
+      peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2));
   peak->setDetectorID(detID);
   peak->setGoniometerMatrix(runWS->run().getGoniometer().getR());
   peak->setBinCount(count);
@@ -128,7 +128,6 @@ void AddPeak::exec() {
     peak->setSigmaIntensity(std::sqrt(height));
 
   peaksWS->addPeak(*peak);
-  delete peak;
   // peaksWS->modified();
 }
 
