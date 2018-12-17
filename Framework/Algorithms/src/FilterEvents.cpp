@@ -65,7 +65,7 @@ FilterEvents::FilterEvents()
       m_filterByPulseTime(false), m_informationWS(), m_hasInfoWS(),
       m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
-      m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
+      m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(NoneCorrect),
       m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
       m_filterStartTime(0), m_runStartTime(0) {}
 
@@ -1463,6 +1463,7 @@ TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
  */
 void FilterEvents::setupCustomizedTOFCorrection() {
   // Check input workspace
+  m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
   vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
   bool hasshift = false;
   if (colnames.size() < 2)
