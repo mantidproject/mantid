@@ -411,6 +411,10 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
 void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
                               MatrixWorkspace_sptr &scaleFactorWS,
                               MatrixWorkspace_const_sptr &dxWS) {
+  if (!ws->isHistogramData()) {
+    scaleFactorWS->mutableY(0).front() = 1.;
+    scaleFactorWS->mutableE(0).front() = 1.;
+  }
   ws *= scaleFactorWS;
   // We lost Dx values (Multiply) and need to get them back for point data
   if (ws->size() == dxWS->size()) {
