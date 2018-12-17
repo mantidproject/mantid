@@ -2,7 +2,7 @@ from Direct.detpackmap import sequoia
 import unittest
 
 
-class TestCase(unittest.TestCase):
+class InelasticDirectDetpackmapTest(unittest.TestCase):
 
     def test_sequoia(self):
         self.assertEqual(sequoia('B1'),  38)
@@ -15,7 +15,8 @@ class TestCase(unittest.TestCase):
         self.assertEqual(sequoia('C37'),  113)
         self.assertEqual(sequoia('D1'),  114)
         self.assertEqual(sequoia('D37'),  150)
-
+        with self.assertRaises(ValueError):
+            sequoia('M38')
 
 if __name__ == '__main__':
     unittest.main()
