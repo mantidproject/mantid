@@ -13,6 +13,7 @@
 #include "PerThetaDefaults.h"
 #include "TransmissionRunPair.h"
 #include "ValidationResult.h"
+#include <array>
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
