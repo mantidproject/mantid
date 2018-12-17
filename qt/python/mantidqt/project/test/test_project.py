@@ -73,7 +73,7 @@ class ProjectTest(unittest.TestCase):
         self.project._file_dialog = mock.MagicMock(return_value=working_directory)
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project.save_as()
-        
+
         self.assertEqual(self.project._file_dialog.call_count, 1)
         ADS.clear()
 
