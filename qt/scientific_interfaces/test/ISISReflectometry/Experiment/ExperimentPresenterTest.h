@@ -89,7 +89,7 @@ public:
     verifyAndClear();
   }
 
-  void testSumInQWidgetsEnbledWhenChangeToSumInQ() {
+  void testSumInQWidgetsEnabledWhenChangeToSumInQ() {
     auto presenter = makePresenter();
 
     expectViewReturnsSumInQDefaults();
@@ -97,6 +97,28 @@ public:
     EXPECT_CALL(m_view, enableIncludePartialBins()).Times(1);
     presenter.notifySummationTypeChanged();
 
+    verifyAndClear();
+  }
+
+  void testChangingIncludePartialBinsUpdatesModel() {
+    auto presenter = makePresenter();
+
+    expectViewReturnsSumInQDefaults();
+    EXPECT_CALL(m_view, getIncludePartialBins()).WillOnce(Return(true));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT(presenter.experiment().includePartialBins());
+    verifyAndClear();
+  }
+
+  void testChangingDebugOptionUpdatesModel() {
+    auto presenter = makePresenter();
+
+    expectViewReturnsSumInQDefaults();
+    EXPECT_CALL(m_view, getDebugOption()).WillOnce(Return(true));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT(presenter.experiment().debug());
     verifyAndClear();
   }
 
@@ -130,6 +152,28 @@ public:
 
   void testSettingPolarizationCorrectionsToPNREnablesInputs() {
     runWithPolarizationCorrectionInputsEnabled("PNR");
+  }
+
+  void testSetFloodCorrectionsUpdatesModel() {
+    auto presenter = makePresenter();
+    FloodCorrections floodCorr(FloodCorrectionType::Workspace,
+                               std::string{"testWS"});
+
+    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return("Workspace"));
+    EXPECT_CALL(m_view, getFloodWorkspace())
+        .WillOnce(Return(floodCorr.workspace().get()));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
+    verifyAndClear();
+  }
+
+  void testSetFloodCorrectionsToWorkspaceEnablesInputs() {
+    runWithFloodCorrectionInputsEnabled("Workspace");
+  }
+
+  void testSetFloodCorrectionsToParameterFileDisablesInputs() {
+    runWithFloodCorrectionInputsDisabled("ParameterFile");
   }
 
   void testSetValidTransmissionRunRange() {
@@ -345,14 +389,15 @@ private:
 
   Experiment makeModel() {
     auto polarizationCorrections =
-        PolarizationCorrections(PolarizationCorrectionType::None, boost::none,
-                                boost::none, boost::none, boost::none);
+        PolarizationCorrections(PolarizationCorrectionType::None);
+    auto floodCorrections = FloodCorrections(FloodCorrectionType::Workspace);
     auto transmissionRunRange = boost::none;
     auto stitchParameters = std::map<std::string, std::string>();
     auto perThetaDefaults = std::vector<PerThetaDefaults>();
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                      SummationType::SumInLambda,
+                      SummationType::SumInLambda, false, false,
                       std::move(polarizationCorrections),
+                      std::move(floodCorrections),
                       std::move(transmissionRunRange),
                       std::move(stitchParameters), std::move(perThetaDefaults));
   }
@@ -400,6 +445,28 @@ private:
     EXPECT_CALL(m_view, getCAlpha()).Times(1);
     EXPECT_CALL(m_view, getCAp()).Times(1);
     EXPECT_CALL(m_view, getCPp()).Times(1);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
+  void runWithFloodCorrectionInputsDisabled(std::string const &type) {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return(type));
+    EXPECT_CALL(m_view, disableFloodCorrectionInputs()).Times(1);
+    EXPECT_CALL(m_view, getFloodWorkspace()).Times(0);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
+  void runWithFloodCorrectionInputsEnabled(std::string const &type) {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return(type));
+    EXPECT_CALL(m_view, enableFloodCorrectionInputs()).Times(1);
+    EXPECT_CALL(m_view, getFloodWorkspace()).Times(1);
     presenter.notifySettingsChanged();
 
     verifyAndClear();

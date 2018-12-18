@@ -110,8 +110,6 @@ void ExperimentView::initLayout() {
           SLOT(summationTypeChanged(int)));
   connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this,
           SLOT(onNewPerThetaDefaultsRowRequested()));
-  connect(m_ui.floodCorComboBox, SIGNAL(currentIndexChanged(const QString &)),
-          this, SLOT(floodCorComboBoxChanged(const QString &)));
 }
 
 void ExperimentView::initializeTableItems(QTableWidget &table) {
@@ -368,6 +366,16 @@ void ExperimentView::disablePolarizationCorrectionInputs() {
   m_ui.CPpEdit->setEnabled(false);
 }
 
+void ExperimentView::enableFloodCorrectionInputs() {
+  m_ui.floodWorkspaceWsSelector->setVisible(true);
+  m_ui.floodWorkspaceWsSelectorLabel->setVisible(true);
+}
+
+void ExperimentView::disableFloodCorrectionInputs() {
+  m_ui.floodWorkspaceWsSelector->setVisible(false);
+  m_ui.floodWorkspaceWsSelectorLabel->setVisible(false);
+}
+
 void ExperimentView::onPerAngleDefaultsChanged(int row, int column) {
   m_notifyee->notifyPerAngleDefaultsChanged(row, column);
 }
@@ -387,12 +395,6 @@ void ExperimentView::addPerThetaDefaultsRow() {
 
 void ExperimentView::removePerThetaDefaultsRow(int rowIndex) {
   m_ui.optionsTable->removeRow(rowIndex);
-}
-
-void ExperimentView::floodCorComboBoxChanged(const QString &text) {
-  auto const showWorkspaceSelector = text == "Workspace";
-  m_ui.floodWorkspaceWsSelector->setVisible(showWorkspaceSelector);
-  m_ui.floodWorkspaceWsSelectorLabel->setVisible(showWorkspaceSelector);
 }
 
 std::string ExperimentView::getText(QLineEdit const &lineEdit) const {

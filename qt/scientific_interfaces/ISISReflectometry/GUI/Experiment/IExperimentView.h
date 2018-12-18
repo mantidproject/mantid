@@ -73,6 +73,9 @@ public:
   virtual void enablePolarizationCorrectionInputs() = 0;
   virtual void disablePolarizationCorrectionInputs() = 0;
 
+  virtual void enableFloodCorrectionInputs() = 0;
+  virtual void disableFloodCorrectionInputs() = 0;
+
   virtual double getTransmissionStartOverlap() const = 0;
   virtual void setTransmissionStartOverlap(double start) = 0;
   virtual double getTransmissionEndOverlap() const = 0;

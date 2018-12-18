@@ -9,6 +9,7 @@
 
 #include "../DllConfig.h"
 #include "AnalysisMode.h"
+#include "FloodCorrections.h"
 #include "PerThetaDefaults.h"
 #include "PolarizationCorrections.h"
 #include "RangeInLambda.h"
@@ -24,8 +25,9 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Experiment {
 public:
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,
-             SummationType summationType,
+             SummationType summationType, bool includePartialBins, bool debug,
              PolarizationCorrections polarizationCorrections,
+             FloodCorrections floodCorrections,
              boost::optional<RangeInLambda> transmissionRunRange,
              std::map<std::string, std::string> stitchParameters,
              std::vector<PerThetaDefaults> perThetaDefaults);
@@ -33,7 +35,10 @@ public:
   AnalysisMode analysisMode() const;
   ReductionType reductionType() const;
   SummationType summationType() const;
+  bool includePartialBins() const;
+  bool debug() const;
   PolarizationCorrections const &polarizationCorrections() const;
+  FloodCorrections const &floodCorrections() const;
   boost::optional<RangeInLambda> transmissionRunRange() const;
   std::map<std::string, std::string> stitchParameters() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
@@ -45,8 +50,11 @@ private:
   AnalysisMode m_analysisMode;
   ReductionType m_reductionType;
   SummationType m_summationType;
+  bool m_includePartialBins;
+  bool m_debug;
 
   PolarizationCorrections m_polarizationCorrections;
+  FloodCorrections m_floodCorrections;
   boost::optional<RangeInLambda> m_transmissionRunRange;
 
   std::map<std::string, std::string> m_stitchParameters;

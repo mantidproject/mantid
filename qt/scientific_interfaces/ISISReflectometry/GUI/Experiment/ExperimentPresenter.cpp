@@ -78,6 +78,19 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   return PolarizationCorrections(correctionType);
 }
 
+FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
+  auto const correctionType =
+      floodCorrectionTypeFromString(m_view->getFloodCorrectionType());
+
+  if (floodCorrectionRequiresInputs(correctionType)) {
+    m_view->enableFloodCorrectionInputs();
+    return FloodCorrections(correctionType, m_view->getFloodWorkspace());
+  }
+
+  m_view->disableFloodCorrectionInputs();
+  return FloodCorrections(correctionType);
+}
+
 boost::optional<RangeInLambda>
 ExperimentPresenter::transmissionRunRangeFromView() {
   auto const range = RangeInLambda(m_view->getTransmissionStartOverlap(),
@@ -117,13 +130,17 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
         reductionTypeFromString(m_view->getReductionType());
     auto const summationType =
         summationTypeFromString(m_view->getSummationType());
+    auto const includePartialBins = m_view->getIncludePartialBins();
+    auto const debugOption = m_view->getDebugOption();
     auto transmissionRunRange = transmissionRunRangeFromView();
     auto polarizationCorrections = polarizationCorrectionsFromView();
+    auto floodCorrections = floodCorrectionsFromView();
     auto stitchParameters = stitchParametersFromView();
     return ExperimentValidationResult(
         Experiment(analysisMode, reductionType, summationType,
-                   polarizationCorrections, transmissionRunRange,
-                   stitchParameters, perThetaValidationResult.assertValid()));
+                   includePartialBins, debugOption, polarizationCorrections,
+                   floodCorrections, transmissionRunRange, stitchParameters,
+                   perThetaValidationResult.assertValid()));
   } else {
     return ExperimentValidationResult(
         ExperimentValidationErrors(perThetaValidationResult.assertError()));

@@ -23,6 +23,11 @@ public:
     ON_CALL(*this, getReductionType()).WillByDefault(testing::Return("Normal"));
     ON_CALL(*this, getPolarizationCorrectionType())
         .WillByDefault(testing::Return("None"));
+    ON_CALL(*this, getFloodCorrectionType())
+        .WillByDefault(testing::Return("Workspace"));
+    ON_CALL(*this, getDebugOption()).WillByDefault(testing::Return(false));
+    ON_CALL(*this, getIncludePartialBins())
+        .WillByDefault(testing::Return(false));
   }
   MOCK_METHOD1(subscribe, void(ExperimentViewSubscriber *));
   MOCK_METHOD1(createStitchHints,
@@ -52,6 +57,8 @@ public:
   MOCK_METHOD0(disablePolarizationCorrections, void());
   MOCK_METHOD0(enablePolarizationCorrectionInputs, void());
   MOCK_METHOD0(disablePolarizationCorrectionInputs, void());
+  MOCK_METHOD0(enableFloodCorrectionInputs, void());
+  MOCK_METHOD0(disableFloodCorrectionInputs, void());
   MOCK_CONST_METHOD0(getTransmissionStartOverlap, double());
   MOCK_METHOD1(setTransmissionStartOverlap, void(double));
   MOCK_CONST_METHOD0(getTransmissionEndOverlap, double());

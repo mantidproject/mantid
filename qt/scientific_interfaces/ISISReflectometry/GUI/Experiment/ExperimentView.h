@@ -99,6 +99,9 @@ public:
   void enablePolarizationCorrectionInputs() override;
   void disablePolarizationCorrectionInputs() override;
 
+  void enableFloodCorrectionInputs() override;
+  void disableFloodCorrectionInputs() override;
+
   void addPerThetaDefaultsRow() override;
   void removePerThetaDefaultsRow(int rowIndex) override;
 
@@ -109,9 +112,6 @@ public slots:
   void onRemovePerThetaDefaultsRequested();
   void onSettingsChanged();
   void onPerAngleDefaultsChanged(int row, int column);
-
-private slots:
-  void floodCorComboBoxChanged(const QString &text);
 
 private:
   void initializeTableItems(QTableWidget &table);
