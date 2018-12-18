@@ -93,6 +93,9 @@ class RunTabPresenter(object):
         def on_load_clicked(self):
             self._presenter.on_load_clicked()
 
+        def on_export_table_clicked(self):
+            self._presenter.on_export_table_clicked()
+
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
 
@@ -543,6 +546,13 @@ class RunTabPresenter(object):
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box("Warning", "Process halted", str(e))
+
+    def on_export_table_clicked(self):
+        try:
+            self.sans_logger.information("Starting export of table.")
+        except Exception as e:
+            self.sans_logger.error("Export halted due to : {}".format(str(e)))
+            self.display_warning_box("Warning", "Export halted", str(e))
 
     def on_multiperiod_changed(self, show_periods):
         if show_periods:

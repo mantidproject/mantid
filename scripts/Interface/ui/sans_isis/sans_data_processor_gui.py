@@ -307,6 +307,8 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.load_button.clicked.connect(self._load_clicked)
 
+        self.export_table_button.clicked.connect(self._export_table_clicked)
+
         self.help_button.clicked.connect(self._on_help_button_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -459,6 +461,9 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _load_clicked(self):
         self._call_settings_listeners(lambda listener: listener.on_load_clicked())
+
+    def _export_table_clicked(self):
+        self._call_settings_listeners(lambda listener: listener.on_export_table_clicked())
 
     def _processing_finished(self):
         """
