@@ -487,8 +487,7 @@ void LoadHFIRSANS::storeMetaDataIntoWS() {
   addRunProperty<double>(
       "timer", boost::lexical_cast<double>(m_metadata["Counters/time"]), "sec");
 
-  // sample thickness
-  // XML 1.03: source distance is now in meters
+  // XML 1.03: sample thickness is now in meters
   double sample_thickness =
       boost::lexical_cast<double>(m_metadata["Header/Sample_Thickness"]);
   if (m_sansSpiceXmlFormatVersion >= 1.03) {
@@ -506,15 +505,6 @@ void LoadHFIRSANS::storeMetaDataIntoWS() {
       "sample-aperture-diameter",
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]),
       "mm");
-  // XML 1.03: source distance is now in meters
-  double source_distance =
-      boost::lexical_cast<double>(m_metadata["Header/source_distance"]);
-  if (m_sansSpiceXmlFormatVersion >= 1.03) {
-    g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: source_distance "
-                     "in meters. Converting to mm...";
-    source_distance *= 1000.0;
-  }
-  addRunProperty<double>("source-sample-distance", source_distance, "mm");
   addRunProperty<double>(
       "number-of-guides",
       boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
@@ -669,7 +659,10 @@ double LoadHFIRSANS::getSourceToSampleDistance() {
   // First let's try to get source_distance first:
   double sourceToSampleDistance =
       boost::lexical_cast<double>(m_metadata["Header/source_distance"]);
-  sourceToSampleDistance *= 1000; // convert to mm
+  // XML 1.03: source distance is now in meters
+  if (m_sansSpiceXmlFormatVersion >= 1.03) {
+    sourceToSampleDistance *= 1000; // convert to mm
+  }
   if (sourceToSampleDistance <= 0) {
     g_log.warning()
         << "Source To Sample Distance: Header/source_distance = "
@@ -707,7 +700,6 @@ void LoadHFIRSANS::setBeamDiameter() {
   double sourceToSampleDistance = getSourceToSampleDistance();
   addRunProperty<double>("source-sample-distance", sourceToSampleDistance,
                          "mm");
-
   const double sampleAperture =
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
   const double sourceAperture =
