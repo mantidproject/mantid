@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import re
 
-from Muon.GUI.Common import run_string_utils as run_utils
+from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 
 
@@ -109,6 +109,11 @@ class GroupingTablePresenter(object):
 
     def update_model_from_view(self):
         table = self._view.get_table_contents()
+        for row in table:
+            valid_name  = self.validate_group_name(row[0])
+            valid_decectors = self.validate_detector_ids(row[1])
+            if not valid_name or not valid_decectors:
+                return
         self._model.clear_groups()
         for entry in table:
             detector_list = run_utils.run_string_to_list(str(entry[1]))
@@ -119,7 +124,7 @@ class GroupingTablePresenter(object):
         self._view.disable_updates()
 
         self._view.clear()
-        for group in self._model.groups:
+        for name, group in self._model.groups.items():
             self.add_group_to_view(group)
 
         self._view.enable_updates()

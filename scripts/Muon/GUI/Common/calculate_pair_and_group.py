@@ -4,15 +4,14 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import Muon.GUI.Common.load_utils as load_utils
-
+import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 def calculate_group_data(context, group_name):
     processed_data = _run_pre_processing(context)
 
     params = _get_MuonGroupingCounts_parameters(context, group_name)
     params["InputWorkspace"] = processed_data
-    group_data = load_utils.run_MuonGroupingCounts(context, params)
+    group_data = algorithm_utils.run_MuonGroupingCounts(params)
 
     return group_data
 
@@ -22,7 +21,7 @@ def calculate_pair_data(context, pair_name):
 
     params = _get_MuonPairingAsymmetry_parameters(context, pair_name)
     params["InputWorkspace"] = processed_data
-    pair_data = load_utils.run_MuonPairingAsymmetry(context, params)
+    pair_data = algorithm_utils.run_MuonPairingAsymmetry(params)
 
     return pair_data
 
@@ -30,7 +29,7 @@ def calculate_pair_data(context, pair_name):
 def _run_pre_processing(context):
     params = context._get_pre_processing_params()
     params["InputWorkspace"] = context.loaded_workspace
-    processed_data = load_utils.run_MuonPreProcess(context, params)
+    processed_data = algorithm_utils.run_MuonPreProcess(params)
     return processed_data
 
 

@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import pyqtSignal as Signal
 
-from Muon.GUI.Common import table_utils
+from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common import message_box
 
 
@@ -123,14 +123,12 @@ class GroupingTableView(QtGui.QWidget):
                 group_name_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 0, group_name_widget)
                 self.grouping_table.item(row_position, 0).setToolTip(entry)
-                continue
             if i == 1:
                 # column 1 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem(self._validate_detector_ID_entry)
                 detector_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 1, detector_widget)
                 self.grouping_table.item(row_position, 1).setToolTip(entry)
-                continue
             if i == 2:
                 # column 2 : number of detectors
                 item.setFlags(QtCore.Qt.ItemIsEnabled)

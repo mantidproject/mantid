@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_data_context import MuonDataContext, construct_empty_group
 
 
 class GroupingTableModel(object):
@@ -12,7 +12,7 @@ class GroupingTableModel(object):
     a callback to this class.
     """
 
-    def __init__(self, data=MuonContext()):
+    def __init__(self, data=MuonDataContext()):
         self._data = data
 
     @property
@@ -23,6 +23,10 @@ class GroupingTableModel(object):
     def group_names(self):
         return self._data.group_names
 
+    @property
+    def group_and_pair_names(self):
+        return self._data.group_names + self._data.pair_names
+
     def add_group(self, group):
         self._data.add_group(group)
 
@@ -31,7 +35,7 @@ class GroupingTableModel(object):
             del self._data.groups[name]
 
     def construct_empty_group(self, group_index):
-        return self._data.construct_empty_group(group_index)
+        return construct_empty_group(self.group_names, group_index)
 
-    def clear(self):
+    def clear_groups(self):
         self._data.clear_groups()
