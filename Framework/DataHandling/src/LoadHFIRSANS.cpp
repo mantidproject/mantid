@@ -21,6 +21,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
@@ -49,6 +50,7 @@
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
 namespace Mantid {
@@ -657,41 +659,49 @@ LoadHFIRSANS::getInstrumentDoubleParameter(const std::string &parameter) {
     return pars[0];
   }
 }
-
+/**
+ *  Source to Detector Distance is already calculated in the
+    metadata tag source_distance (if source_distance >= 0).
+    In the metadata we have:
+        source_distance
+        sample_aperture_to_flange
+        nguides
+    The nguides is the index to the Mantid table of number of guides <-> source
+    distances.
+    source_distance = MantidTable[nguides] - sample_aperture_to_flange.
+ **/
 double LoadHFIRSANS::getSourceToSampleDistance() {
-  const int nguides = static_cast<int>(
-      boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
-  // m_workspace->run().getPropertyValueAsType<int>("number-of-guides");
-
-  // aperture-distances: array from the instrument parameters
-  std::string pars = getInstrumentStringParameter("aperture-distances");
-
-  double SSD = 0;
-  Mantid::Kernel::StringTokenizer tok(
-      pars, ",", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  if (tok.count() > 0 && tok.count() < 10 && nguides >= 0 && nguides < 9) {
-    const std::string distance_as_string = tok[8 - nguides];
-    try {
-      auto distance_as_string_copy =
-          boost::algorithm::trim_copy(distance_as_string);
-      SSD = boost::lexical_cast<double>(distance_as_string_copy);
-    } catch (boost::bad_lexical_cast const &e) {
-      g_log.error(e.what());
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "Bad value for source-to-sample distance");
-    }
-  } else
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to get source-to-sample distance");
-
-  // Check for an offset
-  double sourceSampleDistanceOffset =
-      getInstrumentDoubleParameter("source-distance-offset");
-  if (!std::isnan(sourceSampleDistanceOffset)) {
-    SSD += sourceSampleDistanceOffset;
+  // First let's try to get source_distance first:
+  double sourceToSampleDistance =
+      boost::lexical_cast<double>(m_metadata["Header/source_distance"]);
+  sourceToSampleDistance *= 1000; // convert to mm
+  if (sourceToSampleDistance <= 0) {
+    g_log.warning()
+        << "Source To Sample Distance: Header/source_distance = "
+        << sourceToSampleDistance
+        << ". Trying to calculate it from the number of guides used and offset."
+        << '\n';
+    const int nGuides = static_cast<int>(
+        boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
+    // aperture-distances: array from the instrument parameters
+    std::string guidesDistances =
+        getInstrumentStringParameter("aperture-distances");
+    std::vector<std::string> guidesDistancesSplit;
+    boost::split(guidesDistancesSplit, guidesDistances,
+                 boost::is_any_of("\t ,"), boost::token_compress_on);
+    sourceToSampleDistance =
+        boost::lexical_cast<double>(guidesDistancesSplit[nGuides]);
+    g_log.debug() << "Number of guides used = " << nGuides
+                  << " --> Raw SSD = " << sourceToSampleDistance << "mm.\n";
+    double sourceToSampleDistanceOffset = boost::lexical_cast<double>(
+        m_metadata["Header/sample_aperture_to_flange"]);
+    g_log.debug() << "SSD offset  = " << sourceToSampleDistanceOffset
+                  << "mm.\n";
+    sourceToSampleDistance -= sourceToSampleDistanceOffset;
   }
-  g_log.debug() << "Source Sample Distance = " << SSD << ".\n";
-  return SSD;
+  g_log.information() << "Source To Sample Distance = "
+                      << sourceToSampleDistance << "mm.\n";
+  return sourceToSampleDistance;
 }
 
 /**
@@ -699,25 +709,9 @@ double LoadHFIRSANS::getSourceToSampleDistance() {
  * */
 void LoadHFIRSANS::setBeamDiameter() {
 
-  double SourceToSampleDistance = 0.0;
-
-  try {
-    SourceToSampleDistance = getSourceToSampleDistance();
-    m_workspace->mutableRun().addProperty("source-sample-distance",
-                                          SourceToSampleDistance, "mm", true);
-    g_log.information()
-        << "Computed SSD from number of guides in the parameters file: "
-        << SourceToSampleDistance << " mm \n";
-  } catch (...) {
-    Mantid::Kernel::Property *prop =
-        m_workspace->run().getProperty("source-sample-distance");
-    Mantid::Kernel::PropertyWithValue<double> *dp =
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-    SourceToSampleDistance = *dp;
-    g_log.warning() << "Could not compute SSD from number of guides in the "
-                       "parameters file, taking: "
-                    << SourceToSampleDistance << " mm \n";
-  }
+  double sourceToSampleDistance = getSourceToSampleDistance();
+  addRunProperty<double>("source-sample-distance", sourceToSampleDistance,
+                         "mm");
 
   const double sampleAperture =
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
@@ -725,16 +719,15 @@ void LoadHFIRSANS::setBeamDiameter() {
       boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]);
   g_log.debug() << "Computing beam diameter. m_sampleDetectorDistance="
                 << m_sampleDetectorDistance
-                << " SourceToSampleDistance=" << SourceToSampleDistance
+                << " SourceToSampleDistance=" << sourceToSampleDistance
                 << " sourceAperture= " << sourceAperture
                 << " sampleAperture=" << sampleAperture << "\n";
 
   const double beamDiameter = m_sampleDetectorDistance /
-                                  SourceToSampleDistance *
+                                  sourceToSampleDistance *
                                   (sourceAperture + sampleAperture) +
                               sampleAperture;
-  m_workspace->mutableRun().addProperty("beam-diameter", beamDiameter, "mm",
-                                        true);
+  addRunProperty<double>("beam-diameter", beamDiameter, "mm");
 }
 
 } // namespace DataHandling
