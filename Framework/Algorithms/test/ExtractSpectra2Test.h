@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAlgorithms/ExtractSpectra2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -125,6 +126,51 @@ public:
   }
 
   void test_parallel() { ParallelTestHelpers::runParallel(run_parallel); }
+
+  void test_BinEdgeAxis() {
+    auto input = createWorkspace();
+    BinEdgeAxis *axis = new BinEdgeAxis(input->getNumberHistograms() + 1);
+    for (size_t i = 0; i < axis->length(); ++i) {
+      axis->setValue(i, -2. + static_cast<double>(i));
+    }
+    input->replaceAxis(1, axis);
+    ExtractSpectra2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", std::move(input));
+    alg.setProperty("InputWorkspaceIndexSet", "1-3");
+    alg.setProperty("OutputWorkspace", "out");
+    alg.execute();
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    auto outAxis = out->getAxis(1);
+    TS_ASSERT_DIFFERS(dynamic_cast<BinEdgeAxis *>(outAxis), nullptr)
+    TS_ASSERT_EQUALS(outAxis->length(), 4)
+    TS_ASSERT_EQUALS((*outAxis)(0), -1.)
+    TS_ASSERT_EQUALS((*outAxis)(1), 0.)
+    TS_ASSERT_EQUALS((*outAxis)(2), 1.)
+    TS_ASSERT_EQUALS((*outAxis)(3), 2.)
+  }
+
+  void test_BinEdgeAxis_fails_with_non_contiguous_indices() {
+    auto input = createWorkspace();
+    BinEdgeAxis *axis = new BinEdgeAxis(input->getNumberHistograms() + 1);
+    for (size_t i = 0; i < axis->length(); ++i) {
+      axis->setValue(i, -2. + static_cast<double>(i));
+    }
+    input->replaceAxis(1, axis);
+    ExtractSpectra2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", std::move(input));
+    alg.setProperty("InputWorkspaceIndexSet", "1,3");
+    alg.setProperty("OutputWorkspace", "out");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), const std::invalid_argument &e, e.what(),
+        std::string("Cannot extract non-contiguous set of spectra when the "
+                    "vertical axis has bin edges."))
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_EXTRACTSPECTRA2TEST_H_ */
