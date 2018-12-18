@@ -91,6 +91,8 @@ public:
     return m_indices[index];
   }
 
+  bool isContiguous() const noexcept;
+
 protected:
   ~IndexSet() = default;
 
@@ -137,6 +139,21 @@ IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
     throw std::runtime_error("IndexSet: duplicate indices are not allowed");
   m_indices = indices;
   m_size = m_indices.size();
+}
+
+/**
+ * Check if the index range is contiguous and in ascending order.
+ */
+template <class T>
+bool IndexSet<T>::isContiguous() const noexcept {
+  if (!m_isRange || m_indices.size() > 1) {
+    for (size_t i = 0; i < m_indices.size() - 1; ++i) {
+      if (m_indices[i] + 1 != m_indices[i + 1]) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 } // namespace detail
