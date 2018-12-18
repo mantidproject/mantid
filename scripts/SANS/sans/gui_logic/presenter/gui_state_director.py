@@ -71,8 +71,8 @@ class GuiStateDirector(object):
             state_gui_model.sample_height = float(table_index_model.sample_height)
         if table_index_model.sample_width:
             state_gui_model.sample_width = float(table_index_model.sample_width)
-        if table_index_model.sample_shape:
-            state_gui_model.sample_shape = table_index_model.sample_shape
+
+        self._apply_sample_shape_model_to_state(table_index_model.sample_shape, state_gui_model)
 
         # 4. Create the rest of the state based on the builder.
         user_file_state_director = StateDirectorISIS(data, file_information)
@@ -96,6 +96,11 @@ class GuiStateDirector(object):
                     func(entry_as_integer)
             except ValueError:  # noqa
                 pass
+
+    @staticmethod
+    def _apply_sample_shape_model_to_state(sample_shape_model, state_gui_model):
+        if sample_shape_model.get_sample_shape():
+            state_gui_model.sample_shape = sample_shape_model.get_sample_shape()
 
     @staticmethod
     def _apply_column_options_to_state(options_column_model, state_gui_model):

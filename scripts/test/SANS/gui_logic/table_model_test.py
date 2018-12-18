@@ -8,10 +8,10 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel)
+from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, SampleShapeColumnModel)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from PyQt4.QtCore import QCoreApplication
-from sans.common.enums import RowState
+from sans.common.enums import (RowState, SampleShape)
 try:
     from unittest import mock
 except:
@@ -59,6 +59,40 @@ class TableModelTest(unittest.TestCase):
         args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
         kwargs = {'options_column_string': "WavelengthMin=1, WavelengthMax=3, NotRegister2"}
         self.assertRaises(ValueError,  TableIndexModel, *args, **kwargs)
+
+    def test_that_sample_shape_can_be_parsed(self):
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
+                                            sample_shape="  flat Plate  ")
+        sample_shape_column_model = table_index_model.sample_shape
+        sample_shape_enum = sample_shape_column_model.get_sample_shape()
+        sample_shape_text = sample_shape_column_model.get_sample_shape_string()
+
+        self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
+        self.assertEqual(sample_shape_text, "FlatPlate")
+
+    def test_that_sample_shape_can_be_set_as_enum(self):
+        # If a batch file contains a sample shape, it is a enum: SampleShape.Disc, Cylinder, FlatPlate
+        # So SampleShapeColumnModel must be able to parse this.
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
+                                            sample_shape=SampleShape.FlatPlate)
+        sample_shape_column_model = table_index_model.sample_shape
+        sample_shape_enum = sample_shape_column_model.get_sample_shape()
+        sample_shape_text = sample_shape_column_model.get_sample_shape_string()
+
+        self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
+        self.assertEqual(sample_shape_text, "FlatPlate")
+
+    def test_that_incorrect_sample_shape_raises_RuntimeError(self):
+        try:
+            table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                                "", "", "", "", "", "", "", "",
+                                                sample_shape="Not a sample shape")
+        except RuntimeError as e:
+            self.assertEqual(str(e), "Not a sample shape is not a recognised sample shape.")
+        else:
+            self.assertFalse(True, "Expected a RuntimeError to be raised.")
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
         table_model = TableModel()

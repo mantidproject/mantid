@@ -275,6 +275,10 @@ class RunTabPresenter(object):
             self._view.set_out_default_user_file()
 
             self._view.set_hinting_line_edit_for_column(
+                self._table_model.column_name_converter.index('sample_shape'),
+                self._table_model.get_sample_shape_hint_strategy())
+
+            self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
 
