@@ -364,7 +364,6 @@ set ( SRC_FILES
   src/InstrumentSelector.cpp
   src/LineEditWithClear.cpp
   src/LogValueSelector.cpp
-  src/MWDiag.cpp
   src/MantidHelpWindow.cpp
   src/MantidTreeModel.cpp
   src/MantidTreeWidget.cpp
@@ -396,7 +395,6 @@ set ( SRC_FILES
   src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
   src/WorkspaceSelector.cpp
   src/pqHelpWindow.cxx
-  src/pythonCalc.cpp
 
   src/QtPropertyBrowser/qtpropertybrowser.cpp
   src/QtPropertyBrowser/qtpropertymanager.cpp
@@ -483,11 +481,9 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
-  inc/MantidQtWidgets/Common/MWDiag.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
-  inc/MantidQtWidgets/Common/pythonCalc.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/SaveWorkspaces.h
   inc/MantidQtWidgets/Common/ScriptEditor.h
@@ -683,7 +679,6 @@ set ( UI_FILES
   inc/MantidQtWidgets/Common/CatalogSelector.ui
   inc/MantidQtWidgets/Common/IndirectInstrumentConfig.ui
   inc/MantidQtWidgets/Common/LogValueSelector.ui
-  inc/MantidQtWidgets/Common/MWDiag.ui
   inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
   inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui

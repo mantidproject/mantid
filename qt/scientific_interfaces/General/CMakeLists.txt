@@ -5,13 +5,11 @@ set ( SRC_FILES
 	SampleTransmission.cpp
 	StepScan.cpp
 	UserInputValidator.cpp
-	background.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
-	Background.h
 	DataComparison.h
 	DllConfig.h
 	MantidEV.h
@@ -23,7 +21,6 @@ set ( INC_FILES
 )
 
 set ( MOC_FILES
-    Background.h
     DataComparison.h
     MantidEV.h
     SampleTransmission.h

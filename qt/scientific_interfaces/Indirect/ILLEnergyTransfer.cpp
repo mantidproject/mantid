@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ILLEnergyTransfer.h"
 
-#include "../General/Background.h"
 #include "../General/UserInputValidator.h"
 
 #include <QFileInfo>

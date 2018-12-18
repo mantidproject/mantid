@@ -38,6 +38,7 @@ set ( SRC_FILES
 	IndirectFitPlotPresenter.cpp
 	IndirectFitPlotView.cpp
 	IndirectFittingModel.cpp
+	IndirectInstrumentConfig.cpp
 	IndirectLoadILL.cpp
 	IndirectMolDyn.cpp
 	IndirectMoments.cpp
@@ -127,7 +128,6 @@ set ( INC_FILES
 	IndirectSqw.h
 	IndirectSymmetrise.h
 	IndirectTab.h
-	IndirectTools.h
 	IndirectToolsTab.h
 	IndirectTransmission.h
 	IndirectTransmissionCalc.h
@@ -242,9 +242,9 @@ set ( UI_FILES
    IndirectSpectrumSelector.ui
    IndirectSqw.ui
    IndirectSymmetrise.ui
-   IndirectTools.ui
    IndirectTransmission.ui
    IndirectTransmissionCalc.ui
+   IndirectTools.ui
    Iqt.ui
    IqtFit.ui
    JumpFit.ui
