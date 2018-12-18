@@ -144,8 +144,7 @@ IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
 /**
  * Check if the index range is contiguous and in ascending order.
  */
-template <class T>
-bool IndexSet<T>::isContiguous() const noexcept {
+template <class T> bool IndexSet<T>::isContiguous() const noexcept {
   if (!m_isRange || m_indices.size() > 1) {
     for (size_t i = 0; i < m_indices.size() - 1; ++i) {
       if (m_indices[i] + 1 != m_indices[i + 1]) {

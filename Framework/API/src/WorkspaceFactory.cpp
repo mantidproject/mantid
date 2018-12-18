@@ -130,7 +130,8 @@ void WorkspaceFactoryImpl::initializeFromParent(
   for (size_t i = 0; i < parent.m_axes.size(); ++i) {
     const bool isBinEdge =
         dynamic_cast<const BinEdgeAxis *const>(parent.m_axes[i]) != nullptr;
-    const size_t newAxisLength = child.m_axes[i]->length() + (isBinEdge ? 1 : 0);
+    const size_t newAxisLength =
+        child.m_axes[i]->length() + (isBinEdge ? 1 : 0);
     const size_t oldAxisLength = parent.m_axes[i]->length();
 
     if (!differentSize && newAxisLength == oldAxisLength) {
