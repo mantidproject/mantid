@@ -14,7 +14,7 @@ import numpy as np
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 from qtpy.QtCore import QObject, Signal, Qt
-from qtpy.QtGui import QGuiApplication, QCursor
+from qtpy.QtWidgets import QApplication, QCursor
 
 from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
@@ -181,10 +181,10 @@ class FitInteractiveTool(QObject):
         x = event.x
         if x is not None and (self.fit_start_x.should_override_cursor(x) or self.fit_end_x.should_override_cursor(x)):
             if not self.is_cursor_overridden:
-                QGuiApplication.setOverrideCursor(QCursor(Qt.SizeHorCursor))
+                QApplication.setOverrideCursor(QCursor(Qt.SizeHorCursor))
             self.is_cursor_overridden = True
         else:
-            QGuiApplication.restoreOverrideCursor()
+            QApplication.restoreOverrideCursor()
             self.is_cursor_overridden = False
         self.fit_start_x.mouse_move(event.xdata)
         self.fit_end_x.mouse_move(event.xdata)
