@@ -41,12 +41,9 @@
 			<value val="837.9"/>
 		</parameter>
 		
-		
+		<!-- Aperture distances for 8 guides to 0 guides -->
 		<parameter name="aperture-distances" type="string">
-			<!-- Aperture distances for 8 guides to 0 guides -->
-			<!-- <value val="2018.0, 3426.9, 5449.1, 7473.8, 9497.2, 11527.1, 13546.6, 15568.2, 17594.6"/> -->
-			<!-- distance to aperture based on the number of guides used -->
-			<value val="17594.6 15568.2 13546.6 11527.1 9497.2 7473.8 5449.1 3426.9 2018"/>
+			<value val="2018.0, 3426.9, 5449.1, 7473.8, 9497.2, 11527.1, 13546.6, 15568.2, 17594.6"/>
 		</parameter>
 		
 		<parameter name="source-distance-offset">
