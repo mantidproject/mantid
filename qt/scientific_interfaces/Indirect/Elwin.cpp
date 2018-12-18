@@ -8,6 +8,7 @@
 #include "../General/UserInputValidator.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QFileInfo>
@@ -43,6 +44,10 @@ bool canPlotWorkspace(std::string const &workspaceName) {
 
 std::vector<std::string> getOutputWorkspaceSuffices() {
   return {"_eq", "_eq2", "_elf", "_elt"};
+}
+
+int getNumberOfSpectra(std::string const &name) {
+  return static_cast<int>(getADSMatrixWorkspace(name)->getNumberHistograms());
 }
 
 } // namespace
@@ -139,6 +144,9 @@ void Elwin::setup() {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+
+  connect(m_uiForm.cbPlotWorkspace, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setPlotSpectrumMinMax()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -284,6 +292,8 @@ void Elwin::unGroupInput(bool error) {
     updateAvailablePlotWorkspaces();
     if (m_uiForm.cbPlotWorkspace->size().isEmpty())
       setPlotResultEnabled(false);
+    else
+      setPlotSpectrumMinMax();
 
   } else {
     setPlotResultEnabled(false);
@@ -292,12 +302,30 @@ void Elwin::unGroupInput(bool error) {
 }
 
 void Elwin::updateAvailablePlotWorkspaces() {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.cbPlotWorkspace);
   m_uiForm.cbPlotWorkspace->clear();
   for (auto const &suffix : getOutputWorkspaceSuffices()) {
     auto const workspaceName = getOutputBasename().toStdString() + suffix;
     if (canPlotWorkspace(workspaceName))
       m_uiForm.cbPlotWorkspace->addItem(QString::fromStdString(workspaceName));
   }
+}
+
+void Elwin::setPlotSpectrumValue(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spPlotSpectrum);
+  m_uiForm.spPlotSpectrum->setValue(value);
+}
+
+void Elwin::setPlotSpectrumMinMax() {
+  auto const name = m_uiForm.cbPlotWorkspace->currentText().toStdString();
+  auto const maximumValue = getNumberOfSpectra(name) - 1;
+  setPlotSpectrumMinMax(0, maximumValue);
+  setPlotSpectrumValue(0);
+}
+
+void Elwin::setPlotSpectrumMinMax(int minimum, int maximum) {
+  m_uiForm.spPlotSpectrum->setMinimum(minimum);
+  m_uiForm.spPlotSpectrum->setMaximum(maximum);
 }
 
 bool Elwin::validate() {
