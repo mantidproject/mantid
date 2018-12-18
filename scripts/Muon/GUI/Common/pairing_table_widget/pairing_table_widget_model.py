@@ -1,11 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_data_context import MuonDataContext, construct_empty_pair
 
 
 class PairingTableModel(object):
 
-    def __init__(self, data=MuonContext()):
+    def __init__(self, data=MuonDataContext()):
         self._data = data
 
     @property
@@ -16,6 +16,14 @@ class PairingTableModel(object):
     def pair_names(self):
         return self._data.pair_names
 
+    @property
+    def group_names(self):
+        return self._data.group_names
+
+    @property
+    def group_and_pair_names(self):
+        return self._data.group_names + self._data.pair_names
+
     def add_pair(self, pair):
         self._data.add_pair(pair)
 
@@ -24,7 +32,7 @@ class PairingTableModel(object):
             del self._data.pairs[name]
 
     def construct_empty_pair(self, pair_index):
-        return self._data.construct_empty_pair(pair_index)
+        return construct_empty_pair(self.group_names, self.pair_names, pair_index)
 
-    def clear(self):
+    def clear_pairs(self):
         self._data.clear_pairs()

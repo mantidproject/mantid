@@ -8,31 +8,28 @@ else:
     import mock
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import QApplication
 
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_model import PairingTableModel
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_context import MuonContext
-
-# global QApplication (get errors if > 1 instance in the code)
-QT_APP = QApplication([])
+from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common import mock_widget
 
 
 class PairingTablePresenterTest(unittest.TestCase):
 
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonContext()
+        self.data = MuonDataContext()
         self.add_three_groups_to_model()
 
-        self.model = GroupingTabModel(data=self.data)
+        self.model = PairingTableModel(data=self.data)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
@@ -49,16 +46,16 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 0)
 
     def add_three_groups_to_model(self):
-        group1 = MuonGroup(group_name="my_group_0", detector_IDs=[1])
-        group2 = MuonGroup(group_name="my_group_1", detector_IDs=[2])
-        group3 = MuonGroup(group_name="my_group_2", detector_IDs=[3])
+        group1 = MuonGroup(group_name="my_group_0", detector_ids=[1])
+        group2 = MuonGroup(group_name="my_group_1", detector_ids=[2])
+        group3 = MuonGroup(group_name="my_group_2", detector_ids=[3])
         self.data.add_group(group1)
         self.data.add_group(group2)
         self.data.add_group(group3)
 
     def add_two_pairs_to_table(self):
-        pair1 = MuonPair(pair_name="my_pair_0", group1_name="my_group_0", group2_name="my_group_1", alpha=1.0)
-        pair2 = MuonPair(pair_name="my_pair_1", group1_name="my_group_1", group2_name="my_group_2", alpha=1.0)
+        pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
+        pair2 = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2", alpha=1.0)
         self.presenter.add_pair(pair1)
         self.presenter.add_pair(pair2)
 
@@ -140,7 +137,7 @@ class PairingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(len(self.model.pairs), 1)
         self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(self.view.get_table_item_text(0, 0), "pair_0")
+        self.assertEqual(self.view.get_table_item_text(0, 0), "pair_1")
 
     def test_context_menu_add_pairing_with_rows_selected_does_not_add_pair(self):
         self.add_two_pairs_to_table()
@@ -152,7 +149,7 @@ class PairingTablePresenterTest(unittest.TestCase):
 
     def test_context_menu_remove_pairing_with_no_rows_selected_removes_last_row(self):
         for i in range(3):
-            # names : pair_0, pair_1, pair_2
+            # names : pair_1, pair_2, pair_3
             self.presenter.handle_add_pair_button_clicked()
 
         self.view.contextMenuEvent(0)
@@ -160,8 +157,8 @@ class PairingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(len(self.model.pairs), 2)
         self.assertEqual(self.view.num_rows(), 2)
-        self.assertEqual(self.view.get_table_item_text(0, 0), "pair_0")
-        self.assertEqual(self.view.get_table_item_text(1, 0), "pair_1")
+        self.assertEqual(self.view.get_table_item_text(0, 0), "pair_1")
+        self.assertEqual(self.view.get_table_item_text(1, 0), "pair_2")
 
     def test_context_menu_remove_pairing_removes_selected_rows(self):
         for i in range(3):
@@ -174,7 +171,7 @@ class PairingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(len(self.model.pairs), 1)
         self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(self.view.get_table_item_text(0, 0), "pair_1")
+        self.assertEqual(self.view.get_table_item_text(0, 0), "pair_2")
 
     def test_context_menu_remove_pairing_disabled_if_no_pairs_in_table(self):
         self.view.contextMenuEvent(0)
@@ -187,9 +184,11 @@ class PairingTablePresenterTest(unittest.TestCase):
 
     def test_that_can_change_pair_name_to_valid_name_and_update_view_and_model(self):
         self.add_two_pairs_to_table()
-
+        print(self.view.get_table_contents())
         self.view.pairing_table.setCurrentCell(0, 0)
         self.view.pairing_table.item(0, 0).setText("new_name")
+        print(self.view.get_table_contents())
+
 
         self.assertEqual(self.view.get_table_item_text(0, 0), "new_name")
         self.assertIn("new_name", self.model.pair_names)
@@ -212,8 +211,10 @@ class PairingTablePresenterTest(unittest.TestCase):
         invalid_names = ["", "@", "name!", "+-"]
 
         for invalid_name in invalid_names:
+            print(self.view.get_table_contents())
             self.view.pairing_table.setCurrentCell(0, 0)
             self.view.pairing_table.item(0, 0).setText(invalid_name)
+            print(self.view.get_table_contents())
 
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_pair_0")
             self.assertIn("my_pair_0", self.model.pair_names)
@@ -250,29 +251,30 @@ class PairingTablePresenterTest(unittest.TestCase):
     def test_that_default_pair_name_is_pair_0(self):
         self.presenter.handle_add_pair_button_clicked()
 
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "pair_0")
-        self.assertIn("pair_0", self.model.pair_names)
+        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "pair_1")
+        self.assertIn("pair_1", self.model.pair_names)
 
     def test_that_adding_new_pair_creates_incremented_default_name(self):
         self.presenter.handle_add_pair_button_clicked()
         self.presenter.handle_add_pair_button_clicked()
         self.presenter.handle_add_pair_button_clicked()
 
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "pair_0")
-        self.assertEqual(str(self.view.get_table_item_text(1, 0)), "pair_1")
-        self.assertEqual(str(self.view.get_table_item_text(2, 0)), "pair_2")
-        six.assertCountEqual(self, self.model.pair_names, ["pair_0", "pair_1", "pair_2"])
+        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "pair_1")
+        self.assertEqual(str(self.view.get_table_item_text(1, 0)), "pair_2")
+        self.assertEqual(str(self.view.get_table_item_text(2, 0)), "pair_3")
+        six.assertCountEqual(self, self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
 
 
 class GroupSelectorTest(unittest.TestCase):
 
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonContext()
+        self.data = MuonDataContext()
 
-        self.model = GroupingTabModel(data=self.data)
+        self.model = PairingTableModel(data=self.data)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
@@ -289,16 +291,16 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 0)
 
     def add_three_groups_to_model(self):
-        group1 = MuonGroup(group_name="my_group_0", detector_IDs=[1])
-        group2 = MuonGroup(group_name="my_group_1", detector_IDs=[2])
-        group3 = MuonGroup(group_name="my_group_2", detector_IDs=[3])
+        group1 = MuonGroup(group_name="my_group_0", detector_ids=[1])
+        group2 = MuonGroup(group_name="my_group_1", detector_ids=[2])
+        group3 = MuonGroup(group_name="my_group_2", detector_ids=[3])
         self.data.add_group(group1)
         self.data.add_group(group2)
         self.data.add_group(group3)
 
     def add_two_pairs_to_table(self):
-        pair1 = MuonPair(pair_name="my_pair_0", group1_name="my_group_0", group2_name="my_group_1", alpha=1.0)
-        pair2 = MuonPair(pair_name="my_pair_1", group1_name="my_group_1", group2_name="my_group_2", alpha=1.0)
+        pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
+        pair2 = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2", alpha=1.0)
         self.presenter.add_pair(pair1)
         self.presenter.add_pair(pair2)
 
@@ -323,7 +325,7 @@ class GroupSelectorTest(unittest.TestCase):
 
     def test_that_adding_pair_then_adding_group_puts_group_in_combos(self):
         self.presenter.handle_add_pair_button_clicked()
-        self.data.add_group(MuonGroup(group_name="my_group_0", detector_IDs=[1]))
+        self.data.add_group(MuonGroup(group_name="my_group_0", detector_ids=[1]))
         self.presenter.update_view_from_model()
 
         self.assertEqual(self.get_group_1_selector(0).count(), 1)
@@ -331,15 +333,15 @@ class GroupSelectorTest(unittest.TestCase):
 
     def test_that_adding_pair_then_adding_group_sets_combo_to_added_group(self):
         self.presenter.handle_add_pair_button_clicked()
-        self.data.add_group(MuonGroup(group_name="my_group_0", detector_IDs=[1]))
+        self.data.add_group(MuonGroup(group_name="my_group_0", detector_ids=[1]))
         self.presenter.update_view_from_model()
 
         self.assertEqual(self.get_group_1_selector(0).currentText(), "my_group_0")
         self.assertEqual(self.get_group_2_selector(0).currentText(), "my_group_0")
 
     def test_that_adding_two_groups_and_then_pair_sets_combo_to_added_groups(self):
-        self.data.add_group(MuonGroup(group_name="my_group_0", detector_IDs=[1]))
-        self.data.add_group(MuonGroup(group_name="my_group_1", detector_IDs=[2]))
+        self.data.add_group(MuonGroup(group_name="my_group_0", detector_ids=[1]))
+        self.data.add_group(MuonGroup(group_name="my_group_1", detector_ids=[2]))
         self.presenter.handle_add_pair_button_clicked()
 
         self.assertEqual(self.get_group_1_selector(0).currentText(), "my_group_0")
@@ -392,12 +394,13 @@ class GroupSelectorTest(unittest.TestCase):
 class AlphaTest(unittest.TestCase):
 
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonContext()
+        self.data = MuonDataContext()
 
-        self.model = GroupingTabModel(data=self.data)
+        self.model = PairingTableModel(data=self.data)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
@@ -414,16 +417,16 @@ class AlphaTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 0)
 
     def add_three_groups_to_model(self):
-        group1 = MuonGroup(group_name="my_group_0", detector_IDs=[1])
-        group2 = MuonGroup(group_name="my_group_1", detector_IDs=[2])
-        group3 = MuonGroup(group_name="my_group_2", detector_IDs=[3])
+        group1 = MuonGroup(group_name="my_group_0", detector_ids=[1])
+        group2 = MuonGroup(group_name="my_group_1", detector_ids=[2])
+        group3 = MuonGroup(group_name="my_group_2", detector_ids=[3])
         self.data.add_group(group1)
         self.data.add_group(group2)
         self.data.add_group(group3)
 
     def add_two_pairs_to_table(self):
-        pair1 = MuonPair(pair_name="my_pair_0", group1_name="my_group_0", group2_name="my_group_1", alpha=1.0)
-        pair2 = MuonPair(pair_name="my_pair_1", group1_name="my_group_1", group2_name="my_group_2", alpha=1.0)
+        pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
+        pair2 = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2", alpha=1.0)
         self.presenter.add_pair(pair1)
         self.presenter.add_pair(pair2)
 
@@ -510,7 +513,7 @@ class AlphaTest(unittest.TestCase):
 
         self.assertEqual(self.presenter.guessAlphaNotifier.notify_subscribers.call_count, 1)
         self.assertEqual(self.presenter.guessAlphaNotifier.notify_subscribers.call_args_list[0][0][0],
-                         ["pair_1", "", ""])
+                         ["pair_2", "", ""])
 
 
 if __name__ == '__main__':

@@ -3,8 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import pyqtSignal as Signal
 
-from Muon.GUI.Common import message_box, table_utils
-
+from Muon.GUI.Common import message_box
+from Muon.GUI.Common.utilities import table_utils
 
 class PairingTableView(QtGui.QWidget):
     dataChanged = Signal()
@@ -138,7 +138,6 @@ class PairingTableView(QtGui.QWidget):
                 pair_name_widget = table_utils.ValidatedTableItem(self._validate_pair_name_entry)
                 pair_name_widget.setText(entry)
                 self.pairing_table.setItem(row_position, 0, pair_name_widget)
-                continue
             if i == 1:
                 group1_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
@@ -146,7 +145,6 @@ class PairingTableView(QtGui.QWidget):
                 index = self.get_index_of_text(group1_selector_widget, entry)
                 group1_selector_widget.setCurrentIndex(index)
                 self.pairing_table.setCellWidget(row_position, 1, group1_selector_widget)
-                continue
             if i == 2:
                 group2_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
@@ -154,12 +152,10 @@ class PairingTableView(QtGui.QWidget):
                 index = self.get_index_of_text(group2_selector_widget, entry)
                 group2_selector_widget.setCurrentIndex(index)
                 self.pairing_table.setCellWidget(row_position, 2, group2_selector_widget)
-                continue
             if i == 3:
                 alpha_widget = table_utils.ValidatedTableItem(self._validate_alpha)
                 alpha_widget.setText(entry)
                 self.pairing_table.setItem(row_position, 3, alpha_widget)
-                continue
             self.pairing_table.setItem(row_position, i, item)
         # guess alpha button
         guess_alpha_widget = self._guess_alpha_button()
@@ -231,7 +227,7 @@ class PairingTableView(QtGui.QWidget):
 
     def on_cell_changed(self, _row, _col):
         if not self._updating:
-            self._on_table_data_changed()
+            self._on_table_data_changed(_row, _col)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Context Menu

@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import re
 
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.run_string_utils import valid_name_regex, valid_alpha_regex
+from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex, valid_alpha_regex
 from Muon.GUI.Common.observer_pattern import Observable
 
 
@@ -50,8 +50,20 @@ class PairingTablePresenter(object):
         group2 = table_row[2]
         self.guessAlphaNotifier.notify_subscribers([pair_name, group1, group2])
 
-    def handle_data_change(self):
-        self.update_model_from_view()
+    def handle_data_change(self, row, col):
+        changed_item = self._view.get_table_item_text(row, col)
+        update_model = True
+        if col == 0 and not self.validate_pair_name(changed_item):
+            update_model = False
+        if col == 3:
+            if not self.validate_alpha(changed_item):
+                update_model = False
+            else:
+                self._view.pairing_table.item(row, col).setText(str(round(float(changed_item), 3)))
+
+        if update_model:
+            self.update_model_from_view()
+
         self.update_view_from_model()
         self.notify_data_changed()
 
@@ -60,8 +72,8 @@ class PairingTablePresenter(object):
         self._model.clear_pairs()
         for entry in table:
             pair = MuonPair(pair_name=str(entry[0]),
-                            group1_name=str(entry[1]),
-                            group2_name=str(entry[2]),
+                            backward_group_name=str(entry[1]),
+                            forward_group_name=str(entry[2]),
                             alpha=float(entry[3]))
             self._model.add_pair(pair)
 
@@ -69,7 +81,7 @@ class PairingTablePresenter(object):
         self._view.disable_updates()
 
         self._view.clear()
-        for pair in self._model.pairs:
+        for name, pair in self._model.pairs.items():
             self.add_pair_to_view(pair)
 
         self._view.enable_updates()
@@ -97,7 +109,7 @@ class PairingTablePresenter(object):
         self._view.disable_updates()
         self.update_group_selections()
         assert isinstance(pair, MuonPair)
-        entry = [str(pair.name), str(pair.group1), str(pair.group2), str(pair.alpha)]
+        entry = [str(pair.name), str(pair.forward_group), str(pair.backward_group), str(pair.alpha)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
