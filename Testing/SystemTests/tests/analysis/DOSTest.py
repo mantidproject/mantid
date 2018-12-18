@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -8,7 +14,7 @@ from mantid.simpleapi import *
 #------------------------------------------------------------------------------------
 
 
-class DOSPhononTest(stresstesting.MantidStressTest):
+class DOSPhononTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         file_name = 'squaricn.phonon'
@@ -27,7 +33,7 @@ class DOSPhononTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------
 
 
-class DOSPhononCrossSectionScaleTest(stresstesting.MantidStressTest):
+class DOSPhononCrossSectionScaleTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         file_name = 'squaricn.phonon'
@@ -47,7 +53,7 @@ class DOSPhononCrossSectionScaleTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------
 
 
-class DOSCastepTest(stresstesting.MantidStressTest):
+class DOSCastepTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         file_name = 'squaricn.castep'
@@ -66,7 +72,7 @@ class DOSCastepTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------
 
 
-class DOSRamanActiveTest(stresstesting.MantidStressTest):
+class DOSRamanActiveTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         file_name = 'squaricn.phonon'
@@ -88,7 +94,7 @@ class DOSRamanActiveTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------
 
 
-class DOSIRActiveTest(stresstesting.MantidStressTest):
+class DOSIRActiveTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         file_name = 'squaricn.phonon'
@@ -109,7 +115,7 @@ class DOSIRActiveTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------
 
 
-class DOSPartialTest(stresstesting.MantidStressTest):
+class DOSPartialTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         file_name = 'squaricn.phonon'
@@ -131,7 +137,7 @@ class DOSPartialTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------
 
 
-class DOSPartialSummedContributionsTest(stresstesting.MantidStressTest):
+class DOSPartialSummedContributionsTest(systemtesting.MantidSystemTest):
     """
       This test checks the reference result of the total DOS against
       the summed partial contributions of all elements. The two should be roughly
@@ -161,7 +167,7 @@ class DOSPartialSummedContributionsTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------
 
 
-class DOSPartialCrossSectionScaleTest(stresstesting.MantidStressTest):
+class DOSPartialCrossSectionScaleTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         file_name = 'squaricn.phonon'
@@ -184,7 +190,7 @@ class DOSPartialCrossSectionScaleTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------
 
 
-class DOSPartialSummedContributionsCrossSectionScaleTest(stresstesting.MantidStressTest):
+class DOSPartialSummedContributionsCrossSectionScaleTest(systemtesting.MantidSystemTest):
     """
       This test checks the reference result of the total DOS against
       the summed partial contributions of all elements. The two should be roughly

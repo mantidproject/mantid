@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
@@ -353,11 +359,9 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 }
 
 Workspace2D *Workspace2D::doClone() const { return new Workspace2D(*this); }
-
 Workspace2D *Workspace2D::doCloneEmpty() const {
   return new Workspace2D(storageMode());
 }
-
 } // namespace DataObjects
 } // namespace Mantid
 

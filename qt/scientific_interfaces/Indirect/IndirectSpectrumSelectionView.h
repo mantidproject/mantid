@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEW_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEW_H_
 
 #include "ui_IndirectSpectrumSelector.h"
 
 #include "../General/UserInputValidator.h"
-
+#include "DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -16,47 +22,26 @@ namespace IDA {
 
 enum class SpectrumSelectionMode { RANGE, STRING };
 
-/** IndirectSpectrumSelectionView
-
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-    National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport IndirectSpectrumSelectionView : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionView
+    : public API::MantidWidget {
   Q_OBJECT
+
 public:
   IndirectSpectrumSelectionView(QWidget *parent = nullptr);
-  ~IndirectSpectrumSelectionView() override;
+  virtual ~IndirectSpectrumSelectionView() override;
 
   SpectrumSelectionMode selectionMode() const;
 
-  std::size_t minimumSpectrum() const;
-  std::size_t maximumSpectrum() const;
+  virtual std::size_t minimumSpectrum() const;
+  virtual std::size_t maximumSpectrum() const;
 
-  std::string spectraString() const;
-  std::string maskString() const;
+  virtual std::string spectraString() const;
+  virtual std::string maskString() const;
 
-  void displaySpectra(const std::string &spectraString);
-  void displaySpectra(int minimum, int maximum);
+  virtual void displaySpectra(const std::string &spectraString);
+  virtual void displaySpectra(int minimum, int maximum);
 
-  void setSpectraRange(int minimum, int maximum);
+  virtual void setSpectraRange(int minimum, int maximum);
 
   void setSpectraRegex(const std::string &regex);
   void setMaskBinsRegex(const std::string &regex);
@@ -64,21 +49,21 @@ public:
   UserInputValidator &validateSpectraString(UserInputValidator &uiv) const;
   UserInputValidator &validateMaskBinsString(UserInputValidator &uiv) const;
 
-  void showSpectraErrorLabel();
+  virtual void showSpectraErrorLabel();
   void showMaskBinErrorLabel();
-  void hideSpectraErrorLabel();
+  virtual void hideSpectraErrorLabel();
   void hideMaskBinErrorLabel();
 
-  void setMaskSelectionEnabled(bool enabled);
-  void clear();
+  virtual void setMaskSelectionEnabled(bool enabled);
+  virtual void clear();
 
 public slots:
-  void setMinimumSpectrum(std::size_t spectrum);
-  void setMaximumSpectrum(std::size_t spectrum);
+  virtual void setMinimumSpectrum(std::size_t spectrum);
+  virtual void setMaximumSpectrum(std::size_t spectrum);
   void setMaskSpectrum(std::size_t spectrum);
 
-  void setSpectraString(const std::string &spectraString);
-  void setMaskString(const std::string &maskString);
+  virtual void setSpectraString(const std::string &spectraString);
+  virtual void setMaskString(const std::string &maskString);
   void setMaskSpectraList(const std::vector<std::size_t> &maskSpectra);
 
   void hideSpectrumSelector();
@@ -107,6 +92,7 @@ private slots:
 private:
   void setSpectraRangeMinimum(int minimum);
   void setSpectraRangeMaximum(int maximum);
+  void displaySpectraList();
   QValidator *createValidator(const QString &regex);
 
   std::unique_ptr<Ui::IndirectSpectrumSelector> m_selector;

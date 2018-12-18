@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeaksOnSurface.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -37,31 +43,33 @@ void PeaksOnSurface::init() {
   auto manditoryExtents = boost::make_shared<
       Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
-  std::vector<double> vertexDefault;
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(
+          "Vertex1", std::vector<double>(), manditoryExtents->clone()),
+      "A comma separated list of cartesian coordinates for the "
+      "lower left vertex of the surface. Values to be specified in "
+      "the CoordinateFrame choosen.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Vertex1", vertexDefault, manditoryExtents->clone()),
-                  "A comma separated list of cartesian coordinates for the "
-                  "lower left vertex of the surface. Values to be specified in "
-                  "the CoordinateFrame choosen.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(
+          "Vertex2", std::vector<double>(), manditoryExtents->clone()),
+      "A comma separated list of cartesian coordinates for the "
+      "upper left vertex of the surface. Values to be specified in "
+      "the CoordinateFrame choosen.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Vertex2", vertexDefault, manditoryExtents->clone()),
-                  "A comma separated list of cartesian coordinates for the "
-                  "upper left vertex of the surface. Values to be specified in "
-                  "the CoordinateFrame choosen.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(
+          "Vertex3", std::vector<double>(), manditoryExtents->clone()),
+      "A comma separated list of cartesian coordinates for the "
+      "upper right vertex of the surface. Values to be specified "
+      "in the CoordinateFrame choosen.");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Vertex3", vertexDefault, manditoryExtents->clone()),
-                  "A comma separated list of cartesian coordinates for the "
-                  "upper right vertex of the surface. Values to be specified "
-                  "in the CoordinateFrame choosen.");
-
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Vertex4", vertexDefault, manditoryExtents->clone()),
-                  "A comma separated list of cartesian coordinates for the "
-                  "lower right vertex of the surface. Values to be specified "
-                  "in the CoordinateFrame choosen.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(
+          "Vertex4", std::vector<double>(), std::move(manditoryExtents)),
+      "A comma separated list of cartesian coordinates for the "
+      "lower right vertex of the surface. Values to be specified "
+      "in the CoordinateFrame choosen.");
 }
 
 void PeaksOnSurface::validateExtentsInput() const {

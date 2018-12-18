@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MSDFitModel.h"
 
 using namespace Mantid::API;
@@ -26,7 +32,11 @@ std::string MSDFitModel::singleFitOutputName(std::size_t index,
                                    spectrum);
 }
 
-std::string MSDFitModel::getResultXAxisUnit() const { return ""; }
+std::vector<std::string> MSDFitModel::getSpectrumDependentAttributes() const {
+  return {};
+}
+
+std::string MSDFitModel::getResultXAxisUnit() const { return "Temperature"; }
 
 } // namespace IDA
 } // namespace CustomInterfaces

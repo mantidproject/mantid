@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_FITPEAKS_H_
 #define MANTID_ALGORITHMS_FITPEAKS_H_
 
@@ -36,6 +42,7 @@ public:
   size_t getNumberParameters() const;
   size_t getNumberPeaks() const;
   double getParameterValue(size_t ipeak, size_t iparam) const;
+  double getParameterError(size_t ipeak, size_t iparam) const;
   void setRecord(size_t ipeak, const double cost, const double peak_position,
                  const FitFunction fit_functions);
   void setBadRecord(size_t ipeak, const double peak_position);
@@ -50,6 +57,8 @@ private:
   std::vector<double> m_fitted_peak_positions;
   // fitted peak and background parameters
   std::vector<std::vector<double>> m_function_parameters_vector;
+  /// fitted peak and background parameters' fitting error
+  std::vector<std::vector<double>> m_function_errors_vector;
 };
 } // namespace FitPeaksAlgorithm
 
@@ -91,7 +100,7 @@ private:
   void processInputFitRanges();
 
   /// Generate output workspaces
-  void generateFittedParametersValueWorkspace();
+  void generateFittedParametersValueWorkspaces();
   /// main method to create output workspaces
   void generateOutputPeakPositionWS();
   /// Generate workspace for calculated values
@@ -153,6 +162,10 @@ private:
                                    API::IPeakFunction_sptr peakfunction,
                                    API::IBackgroundFunction_sptr bkgdfunc);
 
+  void setupParameterTableWorkspace(API::ITableWorkspace_sptr table_ws,
+                                    const std::vector<std::string> &param_names,
+                                    bool with_chi2);
+
   /// get vector X, Y and E in a given range
   void getRangeData(size_t iws, const std::pair<double, double> &fit_window,
                     std::vector<double> &vec_x, std::vector<double> &vec_y,
@@ -192,7 +205,7 @@ private:
   int observePeakCenter(const HistogramData::Histogram &histogram,
                         API::FunctionValues &bkgd_values, size_t start_index,
                         size_t stop_index, double &peak_center,
-                        size_t &peak_center_index, double &peak_intensity);
+                        size_t &peak_center_index, double &peak_height);
 
   /// Observe peak width
   double observePeakWidth(const HistogramData::Histogram &histogram,
@@ -238,9 +251,11 @@ private:
   /// output workspace for peak positions
   API::MatrixWorkspace_sptr
       m_outputPeakPositionWorkspace; // output workspace for peak positions
-  /// optional output analysis workspaces
+  /// output analysis workspaces
   /// table workspace for fitted parameters
   API::ITableWorkspace_sptr m_fittedParamTable;
+  /// table workspace for fitted parameters' fitting error. This is optional
+  API::ITableWorkspace_sptr m_fitErrorTable;
   /// flag to show that the pamarameters in table are raw parameters or
   /// effective parameters
   bool m_rawPeaksTable;
@@ -263,6 +278,8 @@ private:
   std::string m_costFunction;
   /// Fit from right or left
   bool m_fitPeaksFromRight;
+  /// Fit iterations
+  int m_fitIterations;
 
   //-------- Input param init values --------------------------------
   /// input starting parameters' indexes in peak function

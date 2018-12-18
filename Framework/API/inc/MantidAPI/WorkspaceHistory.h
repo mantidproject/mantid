@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_WORKSPACEHISTORY_H_
 #define MANTID_API_WORKSPACEHISTORY_H_
 
@@ -26,27 +32,6 @@ class HistoryView;
 
   @author Dickon Champion, ISIS, RAL
   @date 21/01/2008
-
-  Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>.
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL WorkspaceHistory {
 public:
@@ -76,6 +61,8 @@ public:
   AlgorithmHistory_const_sptr getAlgorithmHistory(const size_t index) const;
   /// Add operator[] access
   AlgorithmHistory_const_sptr operator[](const size_t index) const;
+  /// Add an operator== that compares algorithm historys
+  bool operator==(const WorkspaceHistory &otherHistory) const;
   /// Create an algorithm from a history record at a given index
   boost::shared_ptr<IAlgorithm> getAlgorithm(const size_t index) const;
   /// Convenience function for retrieving the last algorithm
