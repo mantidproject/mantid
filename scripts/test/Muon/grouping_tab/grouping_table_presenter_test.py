@@ -1,12 +1,6 @@
 import unittest
 import sys
 import six
-
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
-
 from PyQt4 import QtGui
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_model import GroupingTableModel
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
@@ -14,6 +8,11 @@ from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter impor
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
+
+if sys.version_info.major > 2:
+    from unittest import mock
+else:
+    import mock
 
 
 class GroupingTablePresenterTest(unittest.TestCase):
@@ -176,7 +175,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
             self.view.contextMenuEvent(0)
 
             self.assertFalse(self.view.add_pair_action.isEnabled())
-
 
     # ------------------------------------------------------------------------------------------------------------------
     # Group name validation
