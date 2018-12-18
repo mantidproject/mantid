@@ -12,33 +12,36 @@ for presenting and generating the reduction settings.
 
 from __future__ import (absolute_import, division, print_function)
 
-import os
 import copy
+import csv
+import os
+import sys
 import time
-from mantid.kernel import Logger, ConfigService
-from mantid.api import (FileFinder)
 
-from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
-from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
-from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
-from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
-from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument)
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
-from sans.user_file.user_file_reader import UserFileReader
+from mantid.api import (FileFinder)
+from mantid.kernel import Logger, ConfigService
+
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
+from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument)
+from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
-from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
-from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
-from ui.sans_isis.work_handler import WorkHandler
-from ui.sans_isis import SANSSaveOtherWindow
+from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
+from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
+from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
+from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
+from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
+from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
+from sans.sans_batch import SANSCentreFinder
+from sans.user_file.user_file_reader import UserFileReader
+from ui.sans_isis import SANSSaveOtherWindow
+from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
+from ui.sans_isis.work_handler import WorkHandler
 
 try:
     import mantidplot
@@ -548,8 +551,26 @@ class RunTabPresenter(object):
             self.display_warning_box("Warning", "Process halted", str(e))
 
     def on_export_table_clicked(self):
+        non_empty_rows = self.get_row_indices()
+        if len(non_empty_rows) == 0:
+            self.sans_logger.information("Cannot export table as it is empty.")
+            return
+
+        filename = "temp"
+        if filename[-4:] != '.csv':
+            filename += '.csv'
+
+        # Python 2 and 3 take input in different modes for writing lists to csv files
+        if sys.version_info[0] == 2:
+            open_type = 'wb'
+        else:
+            open_type = 'w'
+
         try:
             self.sans_logger.information("Starting export of table.")
+            with open(filename, open_type) as outfile:
+                # Pass filewriting object rather than filename to make testing easier
+                self._export_table(outfile, non_empty_rows)
         except Exception as e:
             self.sans_logger.error("Export halted due to : {}".format(str(e)))
             self.display_warning_box("Warning", "Export halted", str(e))
@@ -1132,6 +1153,21 @@ class RunTabPresenter(object):
 
     def get_cell_value(self, row, column):
         return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
+
+    def _export_table(self, filewriter, rows):
+        """
+        Take the current table model, and create a comma delimited csv file
+        :param filewriter: File object to be written to
+        :param rows: list of indices for non-empty rows
+        :return: Nothing
+        """
+        for row in rows:
+            try:
+                table_row = self._table_model.get_table_entry(row).to_list()
+            except Exception as e:
+                raise e
+            else:
+                filewriter.writerow(table_row)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Settings

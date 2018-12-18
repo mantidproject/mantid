@@ -12,16 +12,16 @@ information regarding the custom output name and the information in the options 
 
 from __future__ import (absolute_import, division, print_function)
 
+import functools
 import os
 import re
 
 from sans.common.constants import ALL_PERIODS
-from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from sans.common.enums import RowState, SampleShape
-import functools
+from sans.common.file_information import SANSFileInformationFactory
+from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from sans.gui_logic.presenter.create_file_information import create_file_information
 from ui.sans_isis.work_handler import WorkHandler
-from sans.common.file_information import SANSFileInformationFactory
 
 
 class TableModel(object):
