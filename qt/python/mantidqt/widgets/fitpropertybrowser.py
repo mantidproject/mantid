@@ -107,7 +107,7 @@ class VerticalMarker(QObject):
         self.is_moving = False
 
     def mouse_move(self, xd):
-        if self.is_moving:
+        if self.is_moving and xd is not None:
             self.x = xd
             self.moved.emit(xd)
 
@@ -180,9 +180,11 @@ class FitInteractiveTool(QObject):
         self.fit_end_x.stop()
 
     def move_start_x(self, xd):
-        self.fit_start_x.x = xd
-        self.canvas.draw()
+        if xd is not None:
+            self.fit_start_x.x = xd
+            self.canvas.draw()
 
     def move_end_x(self, xd):
-        self.fit_end_x.x = xd
-        self.canvas.draw()
+        if xd is not None:
+            self.fit_end_x.x = xd
+            self.canvas.draw()
