@@ -401,7 +401,7 @@ class SampleShapeColumnModel(object):
 
         try:
             sample_shape = SampleShapeColumnModel.SAMPLE_SHAPES[parsed]
-        except KeyError as e:
+        except KeyError:
             raise RuntimeError("{} is not a recognised sample shape.".format(sample_shape_string))
         else:
             return sample_shape
