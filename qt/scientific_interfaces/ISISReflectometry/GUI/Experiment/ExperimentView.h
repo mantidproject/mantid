@@ -113,6 +113,9 @@ public slots:
   void onSettingsChanged();
   void onPerAngleDefaultsChanged(int row, int column);
 
+private slots:
+  void floodCorComboBoxChanged(const QString &text);
+
 private:
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);
