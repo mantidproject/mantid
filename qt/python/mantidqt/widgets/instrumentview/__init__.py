@@ -25,6 +25,14 @@ from __future__ import (absolute_import, unicode_literals)
 # 3rdparty imports
 from qtpy import PYQT4
 
+from mantidqt.project.decoderfactory import DecoderFactory
+from mantidqt.project.encoderfactory import EncoderFactory
+from mantidqt.widgets.instrumentview.interpreters import Decoder, Encoder
 
 if PYQT4:
     raise ImportError("Instrument view requires Qt >= v5")
+
+
+# Add encoder and decoders to the relevant factory
+DecoderFactory.register_decoder(Decoder)
+EncoderFactory.register_encoder(Encoder)

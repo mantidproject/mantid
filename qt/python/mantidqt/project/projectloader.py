@@ -13,6 +13,7 @@ import os
 
 from mantidqt.project.workspaceloader import WorkspaceLoader
 from mantidqt.project.plotsloader import PlotsLoader
+from mantidqt.project.decoderfactory import DecoderFactory
 from mantid import AnalysisDataService as ADS, logger
 
 
@@ -33,6 +34,7 @@ class ProjectLoader(object):
         self.project_reader = ProjectReader(project_file_ext)
         self.workspace_loader = WorkspaceLoader()
         self.plot_loader = PlotsLoader()
+        self.decoder_factory = DecoderFactory()
         self.project_file_ext = project_file_ext
 
     def load_project(self, directory):
@@ -57,6 +59,14 @@ class ProjectLoader(object):
             # Load plots
             self.plot_loader.load_plots(self.project_reader.plot_lists)
 
+            # Load interfaces
+            for interface in self.project_reader.interface_list:
+                # Find decoder
+                decoder = self.decoder_factory.find_decoder(interface["tag"])
+
+                # Actually load the interface
+                decoder.decode()
+
         return workspace_success
 
 
@@ -64,6 +74,7 @@ class ProjectReader(object):
     def __init__(self, project_file_ext):
         self.workspace_names = None
         self.plot_lists = None
+        self.interface_list = None
         self.project_file_ext = project_file_ext
 
     def read_project(self, directory):
