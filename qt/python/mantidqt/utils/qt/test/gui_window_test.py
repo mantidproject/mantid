@@ -12,7 +12,7 @@ import inspect
 from unittest import TestCase
 
 from mantidqt.utils.qt.test.gui_test_runner import open_in_window
-from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication, QMainWindow
+from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
 from qtpy.QtCore import Qt, QMetaObject
 from qtpy.QtTest import QTest
 

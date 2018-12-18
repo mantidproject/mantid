@@ -23,7 +23,7 @@ from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from workbench.plotting.qappthreadcall import QAppThreadCall
-from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser, FitInteractiveTool
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
