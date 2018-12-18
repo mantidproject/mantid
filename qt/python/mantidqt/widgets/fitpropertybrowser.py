@@ -14,7 +14,8 @@ import numpy as np
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 from qtpy.QtCore import QObject, Signal, Qt
-from qtpy.QtWidgets import QApplication, QCursor
+from qtpy.QtGui import QCursor
+from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
@@ -75,15 +76,17 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             lin.remove()
         self.fit_result_lines = []
 
+    def get_lines(self):
+        return self.canvas.figure.get_axes()[0].get_lines()
+
     def fitting_done(self, name):
         from workbench.plotting.functions import plot
         name += '_Workspace'
         ws = mtd[name]
         self.clear_fit_result_lines()
         plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
-        ax = self.canvas.figure.get_axes()[0]
         name += ':'
-        for lin in ax.get_lines():
+        for lin in self.get_lines():
             if lin.get_label().startswith(name):
                 self.fit_result_lines.append(lin)
 
