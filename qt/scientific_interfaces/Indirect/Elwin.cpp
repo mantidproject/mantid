@@ -146,7 +146,7 @@ void Elwin::setup() {
           SLOT(plotCurrentPreview()));
 
   connect(m_uiForm.cbPlotWorkspace, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setPlotSpectrumMinMax()));
+          SLOT(updateAvailablePlotSpectra()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -289,16 +289,20 @@ void Elwin::unGroupInput(bool error) {
       ungroupAlg->execute();
     }
 
-    updateAvailablePlotWorkspaces();
-    if (m_uiForm.cbPlotWorkspace->size().isEmpty())
-      setPlotResultEnabled(false);
-    else
-      setPlotSpectrumMinMax();
+    updatePlotSpectrumOptions();
 
   } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
   }
+}
+
+void Elwin::updatePlotSpectrumOptions() {
+  updateAvailablePlotWorkspaces();
+  if (m_uiForm.cbPlotWorkspace->size().isEmpty())
+    setPlotResultEnabled(false);
+  else
+    updateAvailablePlotSpectra();
 }
 
 void Elwin::updateAvailablePlotWorkspaces() {
@@ -316,7 +320,7 @@ void Elwin::setPlotSpectrumValue(int value) {
   m_uiForm.spPlotSpectrum->setValue(value);
 }
 
-void Elwin::setPlotSpectrumMinMax() {
+void Elwin::updateAvailablePlotSpectra() {
   auto const name = m_uiForm.cbPlotWorkspace->currentText().toStdString();
   auto const maximumValue = getNumberOfSpectra(name) - 1;
   setPlotSpectrumMinMax(0, maximumValue);

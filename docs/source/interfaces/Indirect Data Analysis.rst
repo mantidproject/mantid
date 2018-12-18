@@ -1,4 +1,4 @@
-Indirect Data Analysis
+﻿Indirect Data Analysis
 ======================
 
 .. contents:: Table of Contents
@@ -93,8 +93,10 @@ SE log value
   specified value in the instrument parameters file, and in the absence of such
   specification, defaults to "last value")
 
-Plot Result
-  If enabled will plot the result as a spectra plot.
+Plot Spectrum
+  If enabled it will plot the spectrum represented by the workspace index in the 
+  neighbouring spin box. This workspace index is the index of the spectrum within the 
+  workspace selected in the combobox.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
@@ -178,11 +180,16 @@ Save Result
   directory.
   
 Tiled Plot
-  Produces a tiled plot of the output workspaces generated.
+  Produces a tiled plot of spectra included within the range for the output workspaces 
+  generated. There is a maximum of 18 spectra allowed for a tiled plot. 
 
 Monte Carlo Error Calculation - Number Of Iterations
-  The number of iterations to perform in the Monte Carlo routine for error
-  calculation in I(Q,t)
+  The number of iterations to perform in the Monte Carlo routine for error calculation 
+  in I(Q,t). 
+
+Monte Carlo Error Calculation - Calculate Errors
+  The calculation of errors using a Monte Carlo implementation can be skipped by ticking 
+  the Calculate Errors checkbox.
 
 A note on Binning
 ~~~~~~~~~~~~~~~~~
@@ -424,10 +431,11 @@ The 'Plot Guess' check-box can be used to enable/disable the guess curve in the 
 Output
 ~~~~~~
 
-The results of the fit may be plot and saved under the 'Output' section of the fitting interfaces.
+The results of the fit may be plotted and saved under the 'Output' section of the fitting interfaces.
 
 Next to the 'Plot Output' label, you can select a parameter to plot and then click 'Plot' to plot it across the
-fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set).
+fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set). 
+The 'Plot Output' options will be disabled after a fit if there is only one data point for the parameters.
 
 Clicking the 'Save Result' button will save the result of the fit to your default save location.
 
@@ -481,9 +489,9 @@ input workspace, using the fitted values from the previous spectrum as input
 values for fitting the next. This is done by means of the
 :ref:`IqtFitSequential <algm-IqtFitSequential>` algorithm.
 
-A sequential fit is run by clicking the Run button at the bottom of the tab, a
-single fit can be done using the Fit Single Spectrum button underneath the
-preview plot.
+A sequential fit is run by clicking the Run button seen just above the output 
+options, a single fit can be done using the Fit Single Spectrum button underneath 
+the preview plot.
 
 Spectrum Selection
 ~~~~~~~~~~~~~~~~~~

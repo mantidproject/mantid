@@ -29,7 +29,7 @@ private slots:
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
   void unGroupInput(bool error);
-  void setPlotSpectrumMinMax();
+  void updateAvailablePlotSpectra();
   void runClicked();
   void saveClicked();
   void plotClicked();
@@ -46,6 +46,7 @@ private:
 
   QString getOutputBasename();
 
+  void updatePlotSpectrumOptions();
   void updateAvailablePlotWorkspaces();
   void setPlotSpectrumValue(int value);
   void setPlotSpectrumMinMax(int minimum, int maximum);
