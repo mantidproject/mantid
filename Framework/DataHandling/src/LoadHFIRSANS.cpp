@@ -48,11 +48,6 @@
 #include <utility>
 #include <vector>
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::DOMParser;
-using Poco::XML::Element;
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -83,8 +78,8 @@ int LoadHFIRSANS::confidence(Kernel::FileDescriptor &descriptor) const {
   { // start of inner scope
     Poco::XML::InputSource src(is);
     // Set up the DOM parser and parse xml file
-    DOMParser pParser;
-    Poco::AutoPtr<Document> pDoc;
+    Poco::XML::DOMParser pParser;
+    Poco::AutoPtr<Poco::XML::Document> pDoc;
     try {
       pDoc = pParser.parse(&src);
     } catch (Poco::Exception &e) {
@@ -96,7 +91,7 @@ int LoadHFIRSANS::confidence(Kernel::FileDescriptor &descriptor) const {
                                          descriptor.filename());
     }
     // Get pointer to root element
-    Element *pRootElem = pDoc->documentElement();
+    Poco::XML::Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
       if (pRootElem->tagName() == "SPICErack") {
         confidence = 80;
