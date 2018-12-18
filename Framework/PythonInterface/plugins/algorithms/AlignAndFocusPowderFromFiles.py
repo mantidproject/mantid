@@ -128,7 +128,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         args = {}
         for name in PROPS_FOR_ALIGN:
             prop = self.getProperty(name)
-            if name == 'PreserveEvents' or not prop.isDefault:
+            name_list = ['PreserveEvents', 'CompressTolerance', 'CompressWallClockTolerance']
+            if name in name_list or not prop.isDefault:
                 if 'Workspace' in name:
                     args[name] = prop.valueAsStr
                 else:
@@ -269,8 +270,10 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                          startProgress=prog_start, endProgress=prog_start + prog_per_chunk_step)
                     DeleteWorkspace(Workspace=unfocusname_chunk)
 
-                if self.kwargs['PreserveEvents']:
-                    CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname)
+                if self.kwargs['PreserveEvents'] and self.getProperty['CompressTolerance'] > 0.:
+                    CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname,
+                                   WallClockTolerance=self.getProperty['CompressWallClockTolerance'],
+                                   Tolerance= self.getProperty['CompressTolerance'])
         # end of inner loop
 
     def PyExec(self):
@@ -353,8 +356,10 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                          ClearRHSWorkspace=self.kwargs['PreserveEvents'])
                     DeleteWorkspace(Workspace=unfocusname_file)
 
-                if self.kwargs['PreserveEvents']:
-                    CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
+                if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
+                    CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname,
+                                   WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
+                                   Tolerance= self.kwargs['CompressTolerance'])
                     # not compressing unfocussed workspace because it is in d-spacing
                     # and is likely to be from a different part of the instrument
 
