@@ -54,7 +54,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.enable_multiple_files(True)
         self.presenter.set_current_instrument("EMU")
 
-        patcher = mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+        patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
         self.addCleanup(patcher.stop)
         self.load_utils_patcher = patcher.start()
         self.load_utils_patcher.exception_message_for_failed_files.return_value = ''

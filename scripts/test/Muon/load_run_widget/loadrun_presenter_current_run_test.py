@@ -61,7 +61,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
         fileUtils.get_current_run_filename = mock.Mock(return_value="EMU0001234.nxs")
 
-        patcher = mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+        patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
         self.addCleanup(patcher.stop)
         self.load_utils_patcher = patcher.start()
         self.load_utils_patcher.exception_message_for_failed_files.return_value = ''
