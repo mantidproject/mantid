@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REBIN2DTEST_H_
 #define MANTID_ALGORITHMS_REBIN2DTEST_H_
 
@@ -58,7 +64,8 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
 
 MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
                                   const std::string &axis1Params,
-                                  const std::string &axis2Params) {
+                                  const std::string &axis2Params,
+                                  const bool UseFractionalArea = false) {
   // Name of the output workspace.
   std::string outWSName("Rebin2DTest_OutputWS");
 
@@ -69,6 +76,8 @@ MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
   TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
   TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis1Binning", axis1Params));
   TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis2Binning", axis2Params));
+  TS_ASSERT_THROWS_NOTHING(
+      alg.setProperty("UseFractionalArea", UseFractionalArea));
   TS_ASSERT_THROWS_NOTHING(alg.execute(););
   TS_ASSERT(alg.isExecuted());
 
@@ -145,6 +154,32 @@ public:
           TS_ASSERT_DELTA(y[j], 5, epsilon);
         }
         TS_ASSERT_DELTA(e[j], errors[j], epsilon);
+      }
+    }
+  }
+
+  void test_BothAxes_FractionalArea() {
+    MatrixWorkspace_sptr inputWS =
+        makeInputWS(false, false, false); // 10 histograms, 10 bins
+    MatrixWorkspace_sptr outputWS =
+        runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5", true);
+    TS_ASSERT_EQUALS(outputWS->id(), "RebinnedOutput");
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
+
+    const double epsilon(1e-08);
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      const auto &y = outputWS->y(i);
+      const auto &e = outputWS->e(i);
+      const size_t numBins = y.size();
+      for (size_t j = 0; j < numBins; ++j) {
+        TS_ASSERT_DELTA(y[j], 2, epsilon);
+        if (j < 5) {
+          TS_ASSERT_DELTA(e[j], 2. / 3., epsilon);
+        } else {
+          // Last bin
+          TS_ASSERT_DELTA(e[j], sqrt(0.8), epsilon);
+        }
       }
     }
   }

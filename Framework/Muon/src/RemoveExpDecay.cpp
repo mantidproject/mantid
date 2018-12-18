@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -43,7 +49,8 @@ void MuonRemoveExpDecay::init() {
                   "The name of the output 2D workspace.");
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra",
+                                                      std::move(empty)),
       "The workspace indices to remove the exponential decay from.");
 }
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
 #define MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
 
@@ -41,38 +47,38 @@ public:
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(3), 1.25);
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(6), 2.0);
 
-    const double delta(1e-08);
-    TS_ASSERT_DELTA(result->y(0)[1160], 22.8567683273, delta);
-    TS_ASSERT_DELTA(result->e(0)[1160], 0.2568965638, delta);
+    constexpr double delta(1e-08);
+    TS_ASSERT_DELTA(result->y(0)[1160], 21.7520993124, delta);
+    TS_ASSERT_DELTA(result->e(0)[1160], 0.3661963331, delta);
 
-    TS_ASSERT_DELTA(result->y(1)[1145], 7.5942160104, delta);
-    TS_ASSERT_DELTA(result->e(1)[1145], 0.2413193155, delta);
+    TS_ASSERT_DELTA(result->y(1)[1145], 8.4138755126, delta);
+    TS_ASSERT_DELTA(result->e(1)[1145], 0.1878620548, delta);
 
-    TS_ASSERT_DELTA(result->y(2)[1200], 2.0249626546, delta);
-    TS_ASSERT_DELTA(result->e(2)[1200], 0.0925193880, delta);
+    TS_ASSERT_DELTA(result->y(2)[1200], 2.1953146211, delta);
+    TS_ASSERT_DELTA(result->e(2)[1200], 0.0908974232, delta);
 
-    TS_ASSERT_DELTA(result->y(3)[99], 0.0419939169, delta);
-    TS_ASSERT_DELTA(result->e(3)[99], 0.0226037551, delta);
+    TS_ASSERT_DELTA(result->y(3)[99], 0.0419979335, delta);
+    TS_ASSERT_DELTA(result->e(3)[99], 0.0235662509, delta);
 
-    TS_ASSERT_DELTA(result->y(4)[1654], 0.0167189448, delta);
-    TS_ASSERT_DELTA(result->e(4)[1654], 0.0056801131, delta);
+    TS_ASSERT_DELTA(result->y(4)[1654], 0.0172577389, delta);
+    TS_ASSERT_DELTA(result->e(4)[1654], 0.0056296512, delta);
 
-    TS_ASSERT_DELTA(result->y(5)[1025], 0.0808168496, delta);
-    TS_ASSERT_DELTA(result->e(5)[1025], 0.0161117732, delta);
+    TS_ASSERT_DELTA(result->y(5)[1025], 0.0819037897, delta);
+    TS_ASSERT_DELTA(result->e(5)[1025], 0.0240486539, delta);
 
     // Spectra-detector mapping
-    const size_t nspectra(6);
+    constexpr size_t nspectra(6);
     using IDSet = std::set<int>;
     std::vector<IDSet> expectedIDs(nspectra);
-    IDSet s1 = {3};
+    IDSet s1 = {13};
     expectedIDs[0] = s1;
-    IDSet s2 = {13};
+    IDSet s2 = {23};
     expectedIDs[1] = s2;
-    IDSet s3 = {13, 23};
+    IDSet s3 = {23};
     expectedIDs[2] = s3;
-    IDSet s4 = {23, 33};
+    IDSet s4 = {33};
     expectedIDs[3] = s4;
-    IDSet s5 = {33, 43};
+    IDSet s5 = {43};
     expectedIDs[4] = s5;
     IDSet s6 = {43};
     expectedIDs[5] = s6;

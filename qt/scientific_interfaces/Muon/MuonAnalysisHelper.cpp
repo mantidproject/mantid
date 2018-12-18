@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -362,6 +368,17 @@ void WidgetAutoSaver::beginGroup(const QString &name) {
  * Ends the scope of the previous begin group.
  */
 void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
+/**
+ * Checks if a QString is a numeric value
+ * @param qstring:: QString to test
+ * @returns :: bool if it is a number
+ */
+bool isNumber(const QString &qstring) {
+  bool isNumber = false;
+  auto value = qstring.toDouble(&isNumber);
+  UNUSED_ARG(value);
+  return isNumber;
+}
 
 /**
  * Get a run label for the workspace.
@@ -653,7 +670,6 @@ void groupWorkspaces(const std::string &groupName,
     groupingAlg->execute();
   }
 }
-
 /**
  * Replaces the named log value in the given workspace with the given value
  * @param wsName :: [input] Name of workspace

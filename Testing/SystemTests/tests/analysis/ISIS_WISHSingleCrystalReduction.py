@@ -1,11 +1,19 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from collections import namedtuple
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 
-from mantid.simpleapi import (ConvertUnits, LoadRaw, FilterPeaks, PredictPeaks, SetUB)
+from mantid.simpleapi import (ConvertUnits, LoadRaw, FilterPeaks, PredictPeaks, SetUB, SaveIsawPeaks)
+from mantid import config
 import numpy as np
+import os
 
 
-class WISHSingleCrystalPeakPredictionTest(MantidStressTest):
+class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
     """
     At the time of writing WISH users rely quite heavily on the PredictPeaks
     algorithm. As WISH has tubes rather than rectangular detectors sometimes
@@ -24,7 +32,10 @@ class WISHSingleCrystalPeakPredictionTest(MantidStressTest):
         return 16000
 
     def cleanup(self):
-        pass
+        try:
+            os.path.remove(self._peaks_file)
+        except:
+            pass
 
     def runTest(self):
         ws = LoadRaw(Filename='WISH00038237.raw', OutputWorkspace='38237')
@@ -40,6 +51,8 @@ class WISHSingleCrystalPeakPredictionTest(MantidStressTest):
         # We specifically want to check peak -5 -1 -7 exists, so filter for it
         self._filtered = FilterPeaks(self._peaks, "h^2+k^2+l^2", 75, '=',
                                      OutputWorkspace='filtered')
+
+        SaveIsawPeaks(self._peaks, Filename='WISHSXReductionPeaksTest.peaks')
 
     def validate(self):
         self.assertEqual(self._peaks.rowCount(), 510)
@@ -58,5 +71,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidStressTest):
                 break
         #endfor
         self.assertTrue(expected_peak_found, msg="Peak at {} expected but it was not found".format(expected))
+        self._peaks_file = os.path.join(config['defaultsave.directory'], 'WISHSXReductionPeaksTest.peaks')
+        self.assertTrue(os.path.isfile(self._peaks_file))
 
         return self._peaks.name(), "WISHPredictedSingleCrystalPeaks.nxs"

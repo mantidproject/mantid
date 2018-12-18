@@ -36,24 +36,21 @@ set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications
 # default shell (bash-like)
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   "#!/bin/sh\n"
-  "MANTIDPATH=${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
   "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\n"
-  "PATH=$PATH:$MANTIDPATH\n"
+  "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
 
-  "export MANTIDPATH PV_PLUGIN_PATH PATH\n"
+  "export PV_PLUGIN_PATH PATH\n"
 )
 
 # c-shell
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
   "#!/bin/csh\n"
-  "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
   "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\"\n"
-  "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
+  "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
 )
 
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-  ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
   DESTINATION ${ETC_DIR}
 )
 
@@ -66,8 +63,13 @@ print(sc.get_python_lib(plat_specific=True))"
   OUTPUT_VARIABLE PYTHON_SITE
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
   "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+)
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
+  DESTINATION ${ETC_DIR}
+  RENAME mantid.pth
 )
 
 ############################################################################
@@ -180,9 +182,6 @@ if [ -z \"\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}\" ]; then
 else
     TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}
 fi" )
-
-# chunk of code for fixing MANTIDPATH
-set ( MTD_PATH_DEFINITION "MANTIDPATH=\${INSTALLDIR}/bin" )
 
 # chunk of code for launching gdb
 set ( GDB_DEFINITIONS

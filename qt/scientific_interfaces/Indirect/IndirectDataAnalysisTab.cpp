@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisTab.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -43,6 +49,11 @@ IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
 void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
   loadSettings(settings);
 }
+
+/**
+ * Sets the active browser workspace when the tab is changed
+ */
+void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }
 
 /**
  * Slot that can be called when a user edits an input.

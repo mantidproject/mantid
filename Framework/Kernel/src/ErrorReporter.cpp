@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ErrorReporter.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
@@ -10,7 +16,6 @@
 #include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
-
 #include <json/json.h>
 
 namespace Mantid {
@@ -25,19 +30,30 @@ Logger g_log("ErrorReporter");
 // Constructor for ErrorReporter
 /** Constructor
  */
-ErrorReporter::ErrorReporter(std::string application,
-                             Types::Core::time_duration upTime,
-                             std::string exitCode, bool share)
-    : ErrorReporter(application, upTime, exitCode, share, "", "", "") {}
+ErrorReporter::ErrorReporter(const std::string application,
+                             const Types::Core::time_duration upTime,
+                             const std::string exitCode, const bool share)
+    : ErrorReporter(application, upTime, exitCode, share, "", "", "", "") {}
 
 /** Constructor
  */
-ErrorReporter::ErrorReporter(std::string application,
-                             Types::Core::time_duration upTime,
-                             std::string exitCode, bool share, std::string name,
-                             std::string email, std::string textBox)
+ErrorReporter::ErrorReporter(const std::string application,
+                             const Types::Core::time_duration upTime,
+                             const std::string exitCode, const bool share,
+                             const std::string name, const std::string email,
+                             const std::string textBox)
+    : ErrorReporter(application, upTime, exitCode, share, name, email, textBox,
+                    "") {}
+
+ErrorReporter::ErrorReporter(const std::string application,
+                             const Types::Core::time_duration upTime,
+                             const std::string exitCode, const bool share,
+                             const std::string name, const std::string email,
+                             const std::string textBox,
+                             const std::string recoveryFile)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
-      m_share(share), m_name(name), m_email(email), m_textbox(textBox) {
+      m_share(share), m_name(name), m_email(email), m_textbox(textBox),
+      m_recoveryFile(recoveryFile) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
       "errorreports.rooturl");
   if (!url.is_initialized()) {
@@ -107,9 +123,11 @@ std::string ErrorReporter::generateErrorMessage() {
     message["textBox"] = m_textbox;
     message["email"] = m_email;
     message["name"] = m_name;
+    message["fileHash"] = m_recoveryFile;
   } else {
     message["email"] = "";
     message["name"] = "";
+    message["fileHash"] = "";
     message["textBox"] = "";
   }
 

@@ -254,6 +254,60 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="gbRun">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>45</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Run</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>7</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>439</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbRun">
+        <property name="text">
+         <string>Run</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>439</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="gbOutput">
      <property name="title">
       <string>Output Options</string>
@@ -268,39 +322,34 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Plot Output:</string>
+         <string>Spectrum:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="cbPlotOutput">
+       <widget class="QSpinBox" name="spSpectrum">
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <item>
-         <property name="text">
-          <string>Contour</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Spectra</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Both</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pbPlot">
+       <widget class="QPushButton" name="pbPlotSpectrum">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Plot</string>
+         <string>Plot Spectrum</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPlotContour">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Plot Contour</string>
         </property>
        </widget>
       </item>

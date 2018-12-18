@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_
 
@@ -39,7 +45,6 @@ enum class MultiFitState { Enabled, Disabled };
 } // namespace Muon
 
 namespace MuonAnalysisHelper {
-
 /// Sets double validator for specified field
 MANTIDQT_MUONINTERFACE_DLL void setDoubleValidator(QLineEdit *field,
                                                    bool allowEmpty = false);
@@ -68,6 +73,7 @@ getRunLabel(const Mantid::API::Workspace_sptr &ws);
 MANTIDQT_MUONINTERFACE_DLL std::string
 getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
 
+MANTIDQT_MUONINTERFACE_DLL bool isNumber(const QString &string);
 /// Get a run label given instrument and run numbers
 MANTIDQT_MUONINTERFACE_DLL std::string
 getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);

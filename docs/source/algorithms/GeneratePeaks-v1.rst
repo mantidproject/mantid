@@ -11,7 +11,7 @@ Description
 
 Generate a workspace by summing over the peak functions and optionally background functions.
 The peaks' and background'
-parameters are either (1) given in a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_
+parameters are either (1) given in a :ref:`TableWorkspace <Table Workspaces>`
 or (2) given by an array of doubles.
 
 Function Parameters
@@ -23,10 +23,10 @@ TableWorkspace
 ==============
 
 Peak and background parameters must have the following columns, which are case
-sensitive in input `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_
+sensitive in input :ref:`TableWorkspace <Table Workspaces>`
 
 The definition of this table workspace is consistent with the output
-peak and background parameter `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_
+peak and background parameter :ref:`TableWorkspace <Table Workspaces>`
 of algorithm FindPeaks.
 
 The following table contains the effective peak and background parameters.

@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import pyqtSignal
 
-import ui_summation_settings_widget
+from . import ui_summation_settings_widget
 from sans.gui_logic.models.binning_type import BinningType
 
 
