@@ -283,7 +283,9 @@ public:
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
+    void fit();
 signals:
     void startXChanged(double);
     void endXChanged(double);
+    void fittingDone(const QString &);
 };

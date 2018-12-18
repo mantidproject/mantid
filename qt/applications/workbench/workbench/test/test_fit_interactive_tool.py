@@ -13,7 +13,10 @@ from workbench.test.workbenchtests import runTests
 class TestFitPropertyBrowser(WorkbenchGuiTest):
 
     def start(self):
-        ws = Load(r'irs26176_graphite002_conv_1LFixF_s0_to_9_Result.nxs', OutputWorkspace='ws')
+        if 'ws' not in mtd:
+            ws = Load(r'irs26176_graphite002_conv_1LFixF_s0_to_9_Result.nxs', OutputWorkspace='ws')
+        else:
+            ws = mtd['ws']
         plot([ws], [1])
         manager = GlobalFigureManager.get_active()
         self.w = manager.window
@@ -134,6 +137,18 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.start()
         self.fit_browser.setEndX(0.3)
         self.assertAlmostEqual(self.fit_browser.tool.fit_end_x.x, self.fit_browser.startX())
+
+    def test_fit(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground')
+        self.fit_browser.fit()
+        yield self.wait_for_true(lambda: 'ws_Workspace' in mtd)
+        self.assertEqual(self.fit_browser.getFittingFunction(), "name=LinearBackground,A0=4.74354,A1=-0.442138")
+        self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
+        del mtd['ws_Workspace']
+        self.fit_browser.fit()
+        yield self.wait_for_true(lambda: 'ws_Workspace' in mtd)
+        self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
 
 
 runTests(TestFitPropertyBrowser)

@@ -16,6 +16,7 @@ from matplotlib.patches import PathPatch
 from qtpy.QtCore import QObject, Signal, Qt
 from qtpy.QtGui import QGuiApplication, QCursor
 
+from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
 
 
@@ -38,8 +39,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.init()
         self.canvas = canvas
         self.tool = None
+        self.fit_result_lines = []
         self.startXChanged.connect(self.move_start_x)
         self.endXChanged.connect(self.move_end_x)
+        self.fittingDone.connect(self.fitting_done)
 
     def closeEvent(self, event):
         self.closing.emit()
@@ -66,6 +69,23 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     def move_end_x(self, xd):
         if self.tool is not None:
             self.tool.move_end_x(xd)
+
+    def clear_fit_result_lines(self):
+        for lin in self.fit_result_lines:
+            lin.remove()
+        self.fit_result_lines = []
+
+    def fitting_done(self, name):
+        from workbench.plotting.functions import plot
+        name += '_Workspace'
+        ws = mtd[name]
+        self.clear_fit_result_lines()
+        plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
+        ax = self.canvas.figure.get_axes()[0]
+        name += ':'
+        for lin in ax.get_lines():
+            if lin.get_label().startswith(name):
+                self.fit_result_lines.append(lin)
 
 
 class VerticalMarker(QObject):
