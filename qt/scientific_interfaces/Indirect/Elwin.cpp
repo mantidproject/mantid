@@ -510,48 +510,22 @@ void Elwin::runClicked() { runTab(); }
 void Elwin::plotClicked() {
   setPlotResultIsPlotting(true);
 
-  auto const workspaceBaseName = getOutputBasename();
-
-  plotResult(workspaceBaseName + "_eq");
-  plotResult(workspaceBaseName + "_eq2");
-  plotResult(workspaceBaseName + "_elf");
-  plotResult(workspaceBaseName + "_elt");
+  auto const workspaceName = m_uiForm.cbPlotWorkspace->currentText();
+  auto const workspaceIndex = m_uiForm.spPlotSpectrum->text().toInt();
+  plotSpectrum(workspaceName, workspaceIndex);
 
   setPlotResultIsPlotting(false);
-}
-
-void Elwin::plotResult(QString const &workspaceName) {
-  auto const name = workspaceName.toStdString();
-  if (checkADSForPlotSaveWorkspace(name, true)) {
-    if (canPlotWorkspace(name))
-      plotSpectrum(workspaceName);
-    else
-      showMessageBox("Plotting a spectrum of the workspace " + workspaceName +
-                     " failed : Workspace only has one data point");
-  }
 }
 
 /**
  * Handles saving of workspaces
  */
 void Elwin::saveClicked() {
-  auto workspaceBaseName = getOutputBasename();
+  auto const workspaceBaseName = getOutputBasename().toStdString();
 
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
-                                   false))
-    addSaveWorkspaceToQueue(workspaceBaseName + "_eq");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
-                                   false))
-    addSaveWorkspaceToQueue(workspaceBaseName + "_eq2");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
-                                   false))
-    addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   false, false))
-    addSaveWorkspaceToQueue(workspaceBaseName + "_elt");
+  for (auto const &suffix : getOutputWorkspaceSuffices())
+    if (checkADSForPlotSaveWorkspace(workspaceBaseName + suffix, false))
+      addSaveWorkspaceToQueue(workspaceBaseName + suffix);
 
   m_batchAlgoRunner->executeBatchAsync();
 }

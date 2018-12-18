@@ -81,6 +81,8 @@ protected:
                 const int specMin = -1, const int specMax = -1);
 
   /// Add a SaveNexusProcessed step to the batch queue
+  void addSaveWorkspaceToQueue(const std::string &wsName,
+                               const std::string &filename = "");
   void addSaveWorkspaceToQueue(const QString &wsName,
                                const QString &filename = "");
 

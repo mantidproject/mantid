@@ -46,7 +46,6 @@ private:
   QString getOutputBasename();
 
   void updateAvailablePlotWorkspaces();
-  void plotResult(QString const &workspaceName);
 
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
