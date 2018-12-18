@@ -18,7 +18,7 @@ Usage
 
 .. testcode:: ExSetCrystalLocation
 
-  events = Load('TOPAZ_3007_bank_37_20_sec.nxs')
+  events = Load('BSS_11841_event.nxs')
   sample = mtd['events'].getInstrument().getSample()
   print('Sample position before SetCrystalLocation: {}'.format(sample.getPos()))
   SetCrystalLocation(InputWorkspace=events, OutputWorkspace=events, NewX=0.1, NewY=0.1, NewZ=0.1)
