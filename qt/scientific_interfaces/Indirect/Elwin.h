@@ -43,14 +43,17 @@ private:
                             const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
 
+  QString getOutputBasename();
+
+  void updateAvailablePlotWorkspaces();
   void plotResult(QString const &workspaceName);
 
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
 
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;

@@ -25,8 +25,24 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
   return workspace->y(0).size() > 1;
+}
+
+bool isWorkspacePlottable(std::string const &workspaceName) {
+  return isWorkspacePlottable(getADSMatrixWorkspace(workspaceName));
+}
+
+bool canPlotWorkspace(std::string const &workspaceName) {
+  return doesExistInADS(workspaceName) && isWorkspacePlottable(workspaceName);
+}
+
+std::vector<std::string> getOutputWorkspaceSuffices() {
+  return {"_eq", "_eq2", "_elf", "_elt"};
 }
 
 } // namespace
@@ -194,8 +210,7 @@ void Elwin::run() {
   }
 
   // Group input workspaces
-  IAlgorithm_sptr groupWsAlg =
-      AlgorithmManager::Instance().create("GroupWorkspaces");
+  auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
   runTimeProps["InputWorkspaces"] = inputWorkspacesString;
@@ -204,7 +219,7 @@ void Elwin::run() {
   m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
 
   // Configure ElasticWindowMultiple algorithm
-  IAlgorithm_sptr elwinMultAlg =
+  auto elwinMultAlg =
       AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
 
@@ -260,15 +275,28 @@ void Elwin::unGroupInput(bool error) {
 
   if (!error) {
     if (!m_uiForm.ckGroupInput->isChecked()) {
-      IAlgorithm_sptr ungroupAlg =
-          AlgorithmManager::Instance().create("UnGroupWorkspace");
+      auto ungroupAlg = AlgorithmManager::Instance().create("UnGroupWorkspace");
       ungroupAlg->initialize();
       ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
       ungroupAlg->execute();
     }
+
+    updateAvailablePlotWorkspaces();
+    if (m_uiForm.cbPlotWorkspace->size().isEmpty())
+      setPlotResultEnabled(false);
+
   } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
+  }
+}
+
+void Elwin::updateAvailablePlotWorkspaces() {
+  m_uiForm.cbPlotWorkspace->clear();
+  for (auto const &suffix : getOutputWorkspaceSuffices()) {
+    auto const workspaceName = getOutputBasename().toStdString() + suffix;
+    if (canPlotWorkspace(workspaceName))
+      m_uiForm.cbPlotWorkspace->addItem(QString::fromStdString(workspaceName));
   }
 }
 
@@ -474,14 +502,15 @@ void Elwin::updateRS(QtProperty *prop, double val) {
     backgroundRangeSelector->setMaximum(val);
 }
 
+void Elwin::runClicked() { runTab(); }
+
 /**
  * Handles mantid plotting
  */
 void Elwin::plotClicked() {
   setPlotResultIsPlotting(true);
 
-  auto const workspaceBaseName =
-      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+  auto const workspaceBaseName = getOutputBasename();
 
   plotResult(workspaceBaseName + "_eq");
   plotResult(workspaceBaseName + "_eq2");
@@ -494,7 +523,7 @@ void Elwin::plotClicked() {
 void Elwin::plotResult(QString const &workspaceName) {
   auto const name = workspaceName.toStdString();
   if (checkADSForPlotSaveWorkspace(name, true)) {
-    if (isWorkspacePlottable(getADSMatrixWorkspace(name)))
+    if (canPlotWorkspace(name))
       plotSpectrum(workspaceName);
     else
       showMessageBox("Plotting a spectrum of the workspace " + workspaceName +
@@ -506,8 +535,7 @@ void Elwin::plotResult(QString const &workspaceName) {
  * Handles saving of workspaces
  */
 void Elwin::saveClicked() {
-  auto workspaceBaseName =
-      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+  auto workspaceBaseName = getOutputBasename();
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
                                    false))
@@ -528,20 +556,8 @@ void Elwin::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void Elwin::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
-void Elwin::setPlotResultEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-}
-
-void Elwin::setSaveResultEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
-
-void Elwin::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
+QString Elwin::getOutputBasename() {
+  return getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 }
 
 void Elwin::setRunIsRunning(bool running) {
@@ -550,11 +566,27 @@ void Elwin::setRunIsRunning(bool running) {
 }
 
 void Elwin::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Spectrum");
   setButtonsEnabled(!plotting);
 }
 
-void Elwin::runClicked() { runTab(); }
+void Elwin::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
+void Elwin::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+
+void Elwin::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotWorkspace->setEnabled(enabled);
+  m_uiForm.spPlotSpectrum->setEnabled(enabled);
+}
+
+void Elwin::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces
