@@ -6,6 +6,7 @@ from PyQt4.QtCore import pyqtSignal as Signal
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.utilities import table_utils
 
+
 class PairingTableView(QtGui.QWidget):
     dataChanged = Signal()
 
