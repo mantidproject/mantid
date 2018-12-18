@@ -7,7 +7,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import csv
 import unittest
 import sys
 
@@ -27,10 +26,8 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 if sys.version_info.major == 3:
     from unittest import mock
-    from io import StringIO as IOObject
 else:
     import mock
-    from io import BytesIO as IOObject
 
 BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SampleScatter: 1, BatchReductionEntry.SampleTransmission: 2,
                               BatchReductionEntry.SampleDirect: 3, BatchReductionEntry.Output: 'test_file',
@@ -887,32 +884,22 @@ class RunTabPresenterTest(unittest.TestCase):
                          "_export table should not have been called."
                          " It was called {} times.".format(presenter._export_table.call_count))
 
-    def test_table_exported_correctly(self):
+    def test_row_created_for_batch_file_correctly(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
         presenter.set_view(view)
 
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        test_row_1 = ['', '', '', '', '', '', '', '', '', '', '', '',
-                      '', '', '', '', '', '', '']
-        test_row_2 = ['SANS2D00022025', '', 'SANS2D00022052', '', 'SANS2D00022022', '', '', '', '', '', '', '',
-                      'another_file', 'a_user_file.txt', '1.2', '', '', 'Disc', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_1)
-        presenter.on_row_inserted(2, test_row_2)
-        presenter.on_row_inserted(3, test_row_2)
+        test_row = ["SANS2D00022025", "another_file", "SANS2D00022052", "SANS2D00022022",
+                    "", "", "", "a_user_file.txt"]
 
-        expected_string = ("SANS2D00022024,,SANS2D00022048,,SANS2D00022048,,,,,,,,test_file,,1.0,,,,\r\n"
-                           "SANS2D00022025,,SANS2D00022052,,SANS2D00022022,,,,,,,,another_file,a_user_file.txt,"
-                           "1.2,,,Disc,\r\n")
+        expected_list = ["sample_sans", "SANS2D00022025", "output_as", "another_file",
+                         "sample_trans", "SANS2D00022052", "sample_direct_beam", "SANS2D00022022",
+                         "can_sans", "", "can_trans", "", "can_direct_beam", "",
+                         "user_file", "a_user_file.txt"]
 
-        outfile = IOObject()
-        writer = csv.writer(outfile)
-        presenter._export_table(writer, [0, 2])
-        actual_string = outfile.getvalue()
+        actual_list = presenter._create_batch_entry_from_row(test_row)
 
-        self.assertEqual(actual_string, expected_string)
+        self.assertEqual(actual_list, expected_list)
 
     @staticmethod
     def _clear_property_manager_data_service():

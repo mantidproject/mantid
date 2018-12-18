@@ -556,7 +556,8 @@ class RunTabPresenter(object):
             self.sans_logger.information("Cannot export table as it is empty.")
             return
 
-        filename = "temp"
+        filename = self._table_model.batch_file  # Set default to current batch file
+
         if filename[-4:] != '.csv':
             filename += '.csv'
 
@@ -570,7 +571,8 @@ class RunTabPresenter(object):
             self.sans_logger.information("Starting export of table.")
             with open(filename, open_type) as outfile:
                 # Pass filewriting object rather than filename to make testing easier
-                self._export_table(outfile, non_empty_rows)
+                writer = csv.writer(outfile)
+                self._export_table(writer, non_empty_rows)
         except Exception as e:
             self.sans_logger.error("Export halted due to : {}".format(str(e)))
             self.display_warning_box("Warning", "Export halted", str(e))
@@ -1163,11 +1165,34 @@ class RunTabPresenter(object):
         """
         for row in rows:
             try:
-                table_row = self._table_model.get_table_entry(row).to_list()
+                table_row = self._table_model.get_table_entry(row).to_batch_list()
+                batch_file_row = self._create_batch_entry_from_row(table_row)
             except Exception as e:
                 raise e
             else:
-                filewriter.writerow(table_row)
+                filewriter.writerow(batch_file_row)
+
+    @staticmethod
+    def _create_batch_entry_from_row(row):
+        batch_file_keywords = ["sample_sans",
+                               "output_as",
+                               "sample_trans",
+                               "sample_direct_beam",
+                               "can_sans",
+                               "can_trans",
+                               "can_direct_beam",
+                               "user_file"]
+
+        loop_range = min(len(row), len(batch_file_keywords))
+        new_row = [''] * (2 * loop_range)
+
+        for i in range(loop_range):
+            key = batch_file_keywords[i]
+            value = row[i]
+            new_row[2*i] = key
+            new_row[2*i + 1] = value
+
+        return new_row
 
     # ------------------------------------------------------------------------------------------------------------------
     # Settings
