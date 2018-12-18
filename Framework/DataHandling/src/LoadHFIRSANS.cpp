@@ -21,7 +21,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
@@ -47,6 +46,10 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+using Poco::XML::DOMParser;
+using Poco::XML::Document;
+using Poco::XML::Element;
 
 namespace Mantid {
 namespace DataHandling {
@@ -78,8 +81,8 @@ int LoadHFIRSANS::confidence(Kernel::FileDescriptor &descriptor) const {
   { // start of inner scope
     Poco::XML::InputSource src(is);
     // Set up the DOM parser and parse xml file
-    Poco::XML::DOMParser pParser;
-    Poco::AutoPtr<Poco::XML::Document> pDoc;
+    DOMParser pParser;
+    Poco::AutoPtr<Document> pDoc;
     try {
       pDoc = pParser.parse(&src);
     } catch (Poco::Exception &e) {
@@ -91,7 +94,7 @@ int LoadHFIRSANS::confidence(Kernel::FileDescriptor &descriptor) const {
                                          descriptor.filename());
     }
     // Get pointer to root element
-    Poco::XML::Element *pRootElem = pDoc->documentElement();
+    Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
       if (pRootElem->tagName() == "SPICErack") {
         confidence = 80;
@@ -112,8 +115,8 @@ void LoadHFIRSANS::init() {
                   "The name of the Output workspace");
 
   // Optionally, we can specify the wavelength and wavelength spread and
-  // overwrite the value in the data file (used when the data file is not
-  // populated)
+  // overwrite
+  // the value in the data file (used when the data file is not populated)
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
@@ -140,16 +143,16 @@ void LoadHFIRSANS::exec() {
   setWavelength();
   createWorkspace();
   storeMetaDataIntoWS();
+  runLoadInstrument();
   // ugly hack for Biosans wing detector:
   // it tests if there is metadata tagged with the wing detector
   // if so, puts the detector in the right angle
   if (m_metadata.find("Motor_Positions/det_west_wing_rot") !=
       m_metadata.end()) {
     rotateDetector();
+    runLoadInstrument();
   }
   moveDetector();
-  runLoadInstrument();
-  // This needs parameters from IDF! Run load instrument before!
   setBeamDiameter();
   setProperty("OutputWorkspace", m_workspace);
 }
@@ -380,20 +383,7 @@ void LoadHFIRSANS::createWorkspace() {
 template <class T>
 void LoadHFIRSANS::addRunProperty(const std::string &name, const T &value,
                                   const std::string &units) {
-  g_log.debug() << "Adding Property to the Run: " << name << " -> " << value
-                << "\n";
   m_workspace->mutableRun().addProperty(name, value, units, true);
-}
-
-template <class T>
-void LoadHFIRSANS::addRunTimeSeriesProperty(const std::string &name,
-                                            const T &value) {
-  g_log.debug() << "Adding Time Series Property to the Run: " << name << " -> "
-                << value << "\n";
-  API::Run &runDetails = m_workspace->mutableRun();
-  auto *p = new Mantid::Kernel::TimeSeriesProperty<T>(name);
-  p->addValue(DateAndTime::getCurrentTime(), value);
-  runDetails.addLogData(p);
 }
 
 /**
@@ -554,8 +544,15 @@ void LoadHFIRSANS::rotateDetector() {
   // The angle is negative!
   double angle = -boost::lexical_cast<double>(
       m_metadata["Motor_Positions/det_west_wing_rot"]);
+
   g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
-  addRunTimeSeriesProperty<double>("rotangle", angle);
+
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+  //	auto p = boost::make_shared <Mantid::Kernel::TimeSeriesProperty<double>
+  //>("rotangle");
+  p->addValue(DateAndTime::getCurrentTime(), angle);
+  runDetails.addLogData(p);
 }
 
 /**
@@ -602,7 +599,7 @@ void LoadHFIRSANS::setDetectorDistance() {
                 << " mm." << '\n';
   addRunProperty<double>("sample-detector-distance", m_sampleDetectorDistance,
                          "mm");
-  addRunTimeSeriesProperty<double>("sdd", m_sampleDetectorDistance);
+  // return m_sampleDetectorDistance;
 }
 
 /**
@@ -611,12 +608,36 @@ void LoadHFIRSANS::setDetectorDistance() {
 void LoadHFIRSANS::moveDetector() {
 
   setDetectorDistance();
-  double translationDistance =
+  double translation_distance =
       boost::lexical_cast<double>(m_metadata["Motor_Positions/detector_trans"]);
-  translationDistance /= 1000.0;
-  g_log.debug() << "Detector Translation = " << translationDistance
+  translation_distance /= 1000.0;
+  g_log.debug() << "Detector Translation = " << translation_distance
                 << " meters." << '\n';
-  addRunTimeSeriesProperty<double>("detector-translation", translationDistance);
+
+  // Move the detector to the right position
+  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
+
+  // Finding the name of the detector object.
+  std::string detID =
+      m_workspace->getInstrument()->getStringParameter("detector-name")[0];
+
+  g_log.information() << "Moving: " << detID
+                      << " Z=" << m_sampleDetectorDistance / 1000.0
+                      << " X=" << translation_distance << '\n';
+  try {
+    mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
+    mover->setProperty("ComponentName", detID);
+    mover->setProperty("Z", m_sampleDetectorDistance / 1000.0);
+    mover->setProperty("X", -translation_distance);
+    mover->execute();
+  } catch (std::invalid_argument &e) {
+    g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
+    g_log.error(e.what());
+  } catch (std::runtime_error &e) {
+    g_log.error(
+        "Unable to successfully run MoveInstrumentComponent Child Algorithm");
+    g_log.error(e.what());
+  }
 }
 
 /**
@@ -645,58 +666,50 @@ LoadHFIRSANS::getInstrumentDoubleParameter(const std::string &parameter) {
   std::vector<double> pars =
       m_workspace->getInstrument()->getNumberParameter(parameter);
   if (pars.empty()) {
-    g_log.warning() << "Parameter not found in the instrument parameter file: "
-                    << parameter << "\n";
+    g_log.warning() << "Parameter not found: " << parameter
+                    << " in the instrument parameter file.\n";
     return std::numeric_limits<double>::quiet_NaN();
   } else {
-    g_log.debug() << "Found the parameter in the instrument parameter file: "
-                  << parameter << " = " << pars[0] << "\n";
+    g_log.debug() << "Found the parameter: " << parameter << " = " << pars[0]
+                  << " in the instrument parameter file.\n";
     return pars[0];
   }
 }
-/**
- *  Source to Detector Distance is already calculated in the
-    metadata tag source_distance (if source_distance >= 0).
-    In the metadata we have:
-        source_distance
-        sample_aperture_to_flange
-        nguides
-    The nguides is the index to the Mantid table of number of guides <-> source
-    distances.
-    source_distance = MantidTable[nguides] - sample_aperture_to_flange.
- **/
+
 double LoadHFIRSANS::getSourceToSampleDistance() {
-  // First let's try to get source_distance first:
-  double sourceToSampleDistance =
-      boost::lexical_cast<double>(m_metadata["Header/source_distance"]);
-  sourceToSampleDistance *= 1000; // convert to mm
-  if (sourceToSampleDistance <= 0) {
-    g_log.warning()
-        << "Source To Sample Distance: Header/source_distance = "
-        << sourceToSampleDistance
-        << ". Trying to calculate it from the number of guides used and offset."
-        << '\n';
-    const int nGuides = static_cast<int>(
-        boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
-    // aperture-distances: array from the instrument parameters
-    std::string guidesDistances =
-        getInstrumentStringParameter("aperture-distances");
-    std::vector<std::string> guidesDistancesSplit;
-    boost::split(guidesDistancesSplit, guidesDistances,
-                 boost::is_any_of("\t ,"), boost::token_compress_on);
-    sourceToSampleDistance =
-        boost::lexical_cast<double>(guidesDistancesSplit[nGuides]);
-    g_log.debug() << "Number of guides used = " << nGuides
-                  << " --> Raw SSD = " << sourceToSampleDistance << "mm.\n";
-    double sourceToSampleDistanceOffset = boost::lexical_cast<double>(
-        m_metadata["Header/sample_aperture_to_flange"]);
-    g_log.debug() << "SSD offset  = " << sourceToSampleDistanceOffset
-                  << "mm.\n";
-    sourceToSampleDistance -= sourceToSampleDistanceOffset;
+  const int nguides = static_cast<int>(
+      boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
+  // m_workspace->run().getPropertyValueAsType<int>("number-of-guides");
+
+  // aperture-distances: array from the instrument parameters
+  std::string pars = getInstrumentStringParameter("aperture-distances");
+
+  double SSD = 0;
+  Mantid::Kernel::StringTokenizer tok(
+      pars, ",", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  if (tok.count() > 0 && tok.count() < 10 && nguides >= 0 && nguides < 9) {
+    const std::string distance_as_string = tok[8 - nguides];
+    try {
+      auto distance_as_string_copy =
+          boost::algorithm::trim_copy(distance_as_string);
+      SSD = boost::lexical_cast<double>(distance_as_string_copy);
+    } catch (boost::bad_lexical_cast const &e) {
+      g_log.error(e.what());
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "Bad value for source-to-sample distance");
+    }
+  } else
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Unable to get source-to-sample distance");
+
+  // Check for an offset
+  double sourceSampleDistanceOffset =
+      getInstrumentDoubleParameter("source-distance-offset");
+  if (!std::isnan(sourceSampleDistanceOffset)) {
+    SSD += sourceSampleDistanceOffset;
   }
-  g_log.information() << "Source To Sample Distance = "
-                      << sourceToSampleDistance << "mm.\n";
-  return sourceToSampleDistance;
+  g_log.debug() << "Source Sample Distance = " << SSD << ".\n";
+  return SSD;
 }
 
 /**
@@ -704,9 +717,23 @@ double LoadHFIRSANS::getSourceToSampleDistance() {
  * */
 void LoadHFIRSANS::setBeamDiameter() {
 
-  double sourceToSampleDistance = getSourceToSampleDistance();
-  addRunProperty<double>("source-sample-distance", sourceToSampleDistance,
-                         "mm");
+  double SourceToSampleDistance = 0.0;
+
+  try {
+    SourceToSampleDistance = getSourceToSampleDistance();
+    m_workspace->mutableRun().addProperty("source-sample-distance",
+                                          SourceToSampleDistance, "mm", true);
+    g_log.information() << "Computed SSD from number of guides: "
+                        << SourceToSampleDistance << " mm \n";
+  } catch (...) {
+    Mantid::Kernel::Property *prop =
+        m_workspace->run().getProperty("source-sample-distance");
+    Mantid::Kernel::PropertyWithValue<double> *dp =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    SourceToSampleDistance = *dp;
+    g_log.warning() << "Could not compute SSD from number of guides, taking: "
+                    << SourceToSampleDistance << " mm \n";
+  }
 
   const double sampleAperture =
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
@@ -714,15 +741,16 @@ void LoadHFIRSANS::setBeamDiameter() {
       boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]);
   g_log.debug() << "Computing beam diameter. m_sampleDetectorDistance="
                 << m_sampleDetectorDistance
-                << " SourceToSampleDistance=" << sourceToSampleDistance
+                << " SourceToSampleDistance=" << SourceToSampleDistance
                 << " sourceAperture= " << sourceAperture
                 << " sampleAperture=" << sampleAperture << "\n";
 
   const double beamDiameter = m_sampleDetectorDistance /
-                                  sourceToSampleDistance *
+                                  SourceToSampleDistance *
                                   (sourceAperture + sampleAperture) +
                               sampleAperture;
-  addRunProperty<double>("beam-diameter", beamDiameter, "mm");
+  m_workspace->mutableRun().addProperty("beam-diameter", beamDiameter, "mm",
+                                        true);
 }
 
 } // namespace DataHandling
