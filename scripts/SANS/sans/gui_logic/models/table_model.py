@@ -439,4 +439,4 @@ def options_column_bool(string):
     elif string.lower() in falsy_strings:
         return False
     else:
-        raise RuntimeError("Could not evaluate {} as a boolean value. It should be True or False.".format(string))
+        raise ValueError("Could not evaluate {} as a boolean value. It should be True or False.".format(string))

@@ -259,7 +259,7 @@ class TableModelTest(unittest.TestCase):
     def test_that_non_bool_option_raises_error_if_option_is_bool(self):
         try:
             options_column_model = OptionsColumnModel('UseMirror=SomeString')
-        except RuntimeError as e:
+        except ValueError as e:
             self.assertEqual(str(e), 'Could not evaluate SomeString as a boolean value. It should be True or False.')
         else:
             self.assertTrue(False, 'A RuntimeError should be raised.')
