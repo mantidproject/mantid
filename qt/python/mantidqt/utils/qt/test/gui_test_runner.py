@@ -68,8 +68,7 @@ class ScriptRunner(object):
         ret = run_script(script, widget)
         if isinstance(ret, Exception):
             raise ret
-        self.script_iter = iter(ret) if inspect.isgenerator(ret) else None
-        self.parent_iter = None
+        self.script_iter = [iter(ret) if inspect.isgenerator(ret) else None]
         self.pause_timer = QTimer()
         self.pause_timer.setSingleShot(True)
         self.script_timer = script_timer
@@ -78,28 +77,31 @@ class ScriptRunner(object):
         global app
         if not self.pause_timer.isActive():
             try:
-                if self.script_iter is None:
+                script_iter = self.script_iter[-1]
+                if script_iter is None:
                     if self.close_on_finish:
                         app.exit()
                     return
                 # Run test script until the next 'yield'
-                ret = self.script_iter.next()
-                if ret is not None:
+                ret = script_iter.next()
+                while ret is not None:
                     if inspect.isgenerator(ret):
-                        self.parent_iter = self.script_iter
-                        self.script_iter = ret
-                    else:
+                        self.script_iter.append(ret)
+                        ret = None
+                    elif isinstance(ret, six.integer_types) or isinstance(ret, float):
                         # Start non-blocking pause in seconds
                         self.pause_timer.start(int(ret * 1000))
+                        ret = None
+                    else:
+                        ret = ret()
             except StopIteration:
-                if self.parent_iter is not None:
-                    self.script_iter = self.parent_iter
-                    self.parent_iter = None
+                if len(self.script_iter) > 1:
+                    self.script_iter.pop()
                 else:
-                    self.script_iter = None
+                    self.script_iter = [None]
                     self.script_timer.stop()
                     if self.close_on_finish:
-                        app.exit()
+                        app.closeAllWindows()
             except Exception as e:
                 traceback.print_exc()
                 if self.close_on_finish:
@@ -144,17 +146,21 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
     if app is None:
         setup_library_paths()
         app = QApplication([""])
-    widget_name = 'Widget to test'
-    if isinstance(widget_or_name, six.string_types):
-        widget = create_widget(widget_or_name)
-        widget_name = widget_or_name
-    elif isinstance(widget_or_name, QWidget):
-        widget = widget_or_name
+    if widget_or_name is not None:
+        widget_name = 'Widget to test'
+        if isinstance(widget_or_name, six.string_types):
+            widget = create_widget(widget_or_name)
+            widget_name = widget_or_name
+        elif isinstance(widget_or_name, QWidget):
+            widget = widget_or_name
+        else:
+            widget = widget_or_name()
+        if hasattr(widget, 'setWindowTitle'):
+            widget.setWindowTitle(widget_name)
+        if widget is not None:
+            widget.show()
     else:
-        widget = widget_or_name()
-    if hasattr(widget, 'setWindowTitle'):
-        widget.setWindowTitle(widget_name)
-    widget.show()
+        widget = None
 
     script_runner = None
     if script is not None:

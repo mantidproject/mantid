@@ -12,7 +12,7 @@ import inspect
 from unittest import TestCase
 
 from mantidqt.utils.qt.test.gui_test_runner import open_in_window
-from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
+from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication, QMainWindow
 from qtpy.QtCore import Qt, QMetaObject
 from qtpy.QtTest import QTest
 
@@ -122,25 +122,53 @@ def is_test_method(value):
     return value.__name__.startswith('test_')
 
 
-def make_test_wrapper(name):
-    def wrapper(self):
-        self.run_test(method=name)
-    return wrapper
+class MultiTestRunner(object):
+
+    def __init__(self, methods):
+        self.methods = methods
+
+    def __call__(self, w):
+        for method in self.methods:
+            yield method
 
 
 class GuiWindowTest(TestCase, GuiTestBase):
 
     @classmethod
+    def make_test_wrapper(cls, wrapped_name):
+        def wrapper(self):
+            self.run_test(method=wrapped_name)
+        return wrapper
+
+    @classmethod
     def setUpClass(cls):
+        cls.test_methods = []
+        cls.widget = None
         for test in inspect.getmembers(cls, is_test_method):
             name = test[0]
             wrapped_name = '_' + name
             setattr(cls, wrapped_name, test[1])
-            setattr(cls, name, make_test_wrapper(wrapped_name))
+            setattr(cls, name, cls.make_test_wrapper(wrapped_name))
 
 
 class WorkbenchGuiTest(GuiWindowTest):
 
+    @classmethod
+    def make_test_wrapper(cls, wrapped_name):
+        def wrapper(self):
+            if len(self.test_methods) == 0:
+                self.widget = self.create_widget()
+            self.test_methods.append(getattr(self, wrapped_name))
+        return wrapper
+
+    @classmethod
+    def tearDownClass(cls):
+        runner = MultiTestRunner(cls.test_methods)
+        open_in_window(cls.widget, runner, close_on_finish=True, attach_debugger=False)
+
     def create_widget(self):
         qapp = QApplication.instance()
+        for w in qapp.allWidgets():
+            if w.objectName() == "Mantid Workbench":
+                return w
         return qapp.activeWindow()
