@@ -52,6 +52,14 @@ public:
   virtual void enableReductionType() = 0;
   virtual void disableReductionType() = 0;
 
+  virtual bool getIncludePartialBins() const = 0;
+  virtual void setIncludePartialBins(bool enable) = 0;
+  virtual void enableIncludePartialBins() = 0;
+  virtual void disableIncludePartialBins() = 0;
+
+  virtual bool getDebugOption() const = 0;
+  virtual void setDebugOption(bool enable) = 0;
+
   virtual std::vector<std::array<std::string, 8>>
   getPerAngleOptions() const = 0;
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
@@ -82,6 +90,11 @@ public:
   virtual void setCAp(double cAp) = 0;
   virtual double getCPp() const = 0;
   virtual void setCPp(double cPp) = 0;
+
+  virtual std::string getFloodCorrectionType() const = 0;
+  virtual void setFloodCorrectionType(std::string const &correction) = 0;
+  virtual std::string getFloodWorkspace() const = 0;
+  virtual void setFloodWorkspace(std::string const &workspace) = 0;
 
   virtual std::string getStitchOptions() const = 0;
   virtual void setStitchOptions(std::string const &stitchOptions) = 0;

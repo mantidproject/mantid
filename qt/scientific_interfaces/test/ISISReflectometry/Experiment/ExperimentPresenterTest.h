@@ -79,20 +79,22 @@ public:
     verifyAndClear();
   }
 
-  void testReductionTypeDisabledWhenChangeToSumInLambda() {
+  void testSumInQWidgetsDisabledWhenChangeToSumInLambda() {
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, disableReductionType()).Times(1);
+    EXPECT_CALL(m_view, disableIncludePartialBins()).Times(1);
     presenter.notifySummationTypeChanged();
 
     verifyAndClear();
   }
 
-  void testReductionTypeEnbledWhenChangeToSumInQ() {
+  void testSumInQWidgetsEnbledWhenChangeToSumInQ() {
     auto presenter = makePresenter();
 
     expectViewReturnsSumInQDefaults();
     EXPECT_CALL(m_view, enableReductionType()).Times(1);
+    EXPECT_CALL(m_view, enableIncludePartialBins()).Times(1);
     presenter.notifySummationTypeChanged();
 
     verifyAndClear();

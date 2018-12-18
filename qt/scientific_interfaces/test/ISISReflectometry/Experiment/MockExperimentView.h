@@ -35,6 +35,12 @@ public:
   MOCK_METHOD1(setReductionType, void(std::string const &));
   MOCK_METHOD0(enableReductionType, void());
   MOCK_METHOD0(disableReductionType, void());
+  MOCK_CONST_METHOD0(getIncludePartialBins, bool());
+  MOCK_METHOD1(setIncludePartialBins, void(bool));
+  MOCK_METHOD0(enableIncludePartialBins, void());
+  MOCK_METHOD0(disableIncludePartialBins, void());
+  MOCK_CONST_METHOD0(getDebugOption, bool());
+  MOCK_METHOD1(setDebugOption, void(bool));
   MOCK_CONST_METHOD0(getPerAngleOptions,
                      std::vector<std::array<std::string, 8>>());
   MOCK_METHOD2(showPerAngleOptionsAsInvalid, void(int row, int column));
@@ -62,6 +68,10 @@ public:
   MOCK_METHOD1(setCAp, void(double));
   MOCK_CONST_METHOD0(getCPp, double());
   MOCK_METHOD1(setCPp, void(double));
+  MOCK_CONST_METHOD0(getFloodCorrectionType, std::string());
+  MOCK_METHOD1(setFloodCorrectionType, void(std::string const &));
+  MOCK_CONST_METHOD0(getFloodWorkspace, std::string());
+  MOCK_METHOD1(setFloodWorkspace, void(std::string const &));
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_METHOD1(setStitchOptions, void(std::string const &));
   MOCK_METHOD2(showOptionLoadErrors,

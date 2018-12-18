@@ -30,10 +30,13 @@ void ExperimentPresenter::notifySettingsChanged() {
 
 void ExperimentPresenter::notifySummationTypeChanged() {
   notifySettingsChanged();
-  if (m_model.summationType() == SummationType::SumInQ)
+  if (m_model.summationType() == SummationType::SumInQ) {
     m_view->enableReductionType();
-  else
+    m_view->enableIncludePartialBins();
+  } else {
     m_view->disableReductionType();
+    m_view->disableIncludePartialBins();
+  }
 }
 
 void ExperimentPresenter::notifyNewPerAngleDefaultsRequested() {
