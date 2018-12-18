@@ -270,10 +270,10 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                          startProgress=prog_start, endProgress=prog_start + prog_per_chunk_step)
                     DeleteWorkspace(Workspace=unfocusname_chunk)
 
-                if self.kwargs['PreserveEvents'] and self.getProperty['CompressTolerance'] > 0.:
+                if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
                     CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname,
-                                   WallClockTolerance=self.getProperty['CompressWallClockTolerance'],
-                                   Tolerance= self.getProperty['CompressTolerance'])
+                                   WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
+                                   Tolerance= self.kwargs['CompressTolerance'])
         # end of inner loop
 
     def PyExec(self):
