@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ View for the masking table.
 
 The view for the masking table displays all available masks for a SANS reduction. It also allows to display the moved
@@ -10,7 +16,7 @@ from abc import ABCMeta, abstractmethod
 
 from PyQt4 import QtGui
 from six import with_metaclass
-import ui_masking_table
+from . import ui_masking_table
 
 
 class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):

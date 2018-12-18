@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_SPECTRUMINFOITEM_H_
 #define MANTID_API_SPECTRUMINFOITEM_H_
 
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTypes/SpectrumDefinition.h"
+#include <type_traits>
 
-using Mantid::API::SpectrumInfo;
 using Mantid::Kernel::V3D;
 using Mantid::SpectrumDefinition;
 
@@ -28,36 +34,19 @@ methods include:
 
 @author Bhuvan Bezawada, STFC
 @date 2018
-
-Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-class MANTID_API_DLL SpectrumInfoItem {
+template <typename T> class SpectrumInfoItem {
 
 public:
   // Methods that can be called via the iterator
   bool isMonitor() const { return m_spectrumInfo->isMonitor(m_index); }
 
   bool isMasked() const { return m_spectrumInfo->isMasked(m_index); }
+
+  void setMasked(bool masked) {
+    static_assert(!std::is_const<T>::value, "Operation disabled on const T");
+    return m_spectrumInfo->setMasked(m_index, masked);
+  }
 
   double twoTheta() const { return m_spectrumInfo->twoTheta(m_index); }
 
@@ -79,23 +68,12 @@ public:
     return m_spectrumInfo->position(m_index);
   }
 
-private:
-  // Allow SpectrumInfoIterator access
-  friend class SpectrumInfoIterator;
-
-  // Private constructor, can only be created by SpectrumInfoIterator
-  SpectrumInfoItem(const SpectrumInfo &spectrumInfo, const size_t index)
+  SpectrumInfoItem(T &spectrumInfo, const size_t index)
       : m_spectrumInfo(&spectrumInfo), m_index(index) {}
-
-  // Provide copy and move constructors
-  SpectrumInfoItem(const SpectrumInfoItem &other) = default;
-  SpectrumInfoItem &operator=(const SpectrumInfoItem &rhs) = default;
-  SpectrumInfoItem(SpectrumInfoItem &&other) = default;
-  SpectrumInfoItem &operator=(SpectrumInfoItem &&rhs) = default;
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.
-  const SpectrumInfo *m_spectrumInfo;
+  T *m_spectrumInfo;
   size_t m_index;
 };
 

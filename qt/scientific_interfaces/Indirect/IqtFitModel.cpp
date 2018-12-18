@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -193,6 +199,10 @@ IAlgorithm_sptr IqtFitModel::getFittingAlgorithm() const {
   return IndirectFittingModel::getFittingAlgorithm();
 }
 
+std::vector<std::string> IqtFitModel::getSpectrumDependentAttributes() const {
+  return {};
+}
+
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
   algorithm->setProperty("IgnoreInvalidData", true);
@@ -208,7 +218,7 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
 std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiIqtFit_" + m_fitType + "_Result";
-  auto fitString = getFitString(getWorkspace(0));
+  auto const fitString = getFitString(getWorkspace(0));
   return createOutputName("%1%" + fitString + "_" + m_fitType + "_s%2%", "_to_",
                           0);
 }
@@ -216,14 +226,14 @@ std::string IqtFitModel::sequentialFitOutputName() const {
 std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiSimultaneousIqtFit_" + m_fitType + "_Result";
-  auto fitString = getFitString(getWorkspace(0));
+  auto const fitString = getFitString(getWorkspace(0));
   return createOutputName("%1%" + fitString + "_mult" + m_fitType + "_s%2%",
                           "_to_", 0);
 }
 
 std::string IqtFitModel::singleFitOutputName(std::size_t index,
                                              std::size_t spectrum) const {
-  auto fitString = getFitString(getWorkspace(0));
+  auto const fitString = getFitString(getWorkspace(0));
   return createSingleFitOutputName(
       "%1%" + fitString + "_" + m_fitType + "_s%2%", index, spectrum);
 }

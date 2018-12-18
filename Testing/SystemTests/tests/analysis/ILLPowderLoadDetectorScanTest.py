@@ -1,4 +1,10 @@
-import stresstesting
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+import systemtesting
 
 from mantid.simpleapi import LoadILLDiffraction
 from mantid import config
@@ -6,7 +12,7 @@ from mantid import config
 
 # TODO: Once the nexus saver for a scanned workspace is implemented,
 # replace the assertions with compare workspaces with the reference
-class ILLPowderLoadDetectorScanTest(stresstesting.MantidStressTest):
+class ILLPowderLoadDetectorScanTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
         super(ILLPowderLoadDetectorScanTest, self).__init__()

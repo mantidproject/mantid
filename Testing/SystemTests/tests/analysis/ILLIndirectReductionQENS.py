@@ -1,9 +1,15 @@
-import stresstesting
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+import systemtesting
 from mantid.simpleapi import IndirectILLReductionQENS, Plus, CompareWorkspaces, GroupWorkspaces, Scale
 from mantid import config, mtd
 
 
-class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
+class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
     # cache default instrument and datadirs
     facility = config['default.facility']

@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
 import platform
 import shutil
-import stresstesting
+import systemtesting
 
 import mantid.simpleapi as mantid
 from mantid import config
@@ -41,7 +47,7 @@ calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 
 
-class CreateVanadiumTest(stresstesting.MantidStressTest):
+class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
     existing_config = config['datasearch.directories']
@@ -66,7 +72,7 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
             config['datasearch.directories'] = self.existing_config
 
 
-class FocusTest(stresstesting.MantidStressTest):
+class FocusTest(systemtesting.MantidSystemTest):
 
     focus_results = None
     existing_config = config["datasearch.directories"]

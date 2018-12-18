@@ -6,7 +6,7 @@
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
             name="SNAP" valid-from   ="2018-05-01 00:00:01"
                         valid-to     ="2100-01-31 23:59:59"
-		        last-modified="2018-05-14 14:00:00">
+		        last-modified="2018-11-07 14:00:00">
   <!--Data taken from /SNS/SNAP/2010_2_3_CAL/calibrations/SNAP_geom_2010_03_22.xml-->
   <!--Created by Vickie Lynch, modified by Janik Zikovsky -->
   <!-- Modified by Vickie Lynch, Feb 17,2011 Bank names changed from local_name to name -->
@@ -20,46 +20,46 @@
       <handedness val="right"/>
     </reference-frame>
   </defaults>
+
   <!--SOURCE-->
   <component type="moderator">
     <location z="-15.0"/>
   </component>
   <type name="moderator" is="Source"/>
+
   <!--SAMPLE-->
   <component type="sample-position">
     <location y="0.0" x="0.0" z="0.0"/>
   </component>
   <type name="sample-position" is="SamplePos"/>
+
   <!--MONITORS-->
-  <component type="monitors" idlist="monitors">
-    <location/>
-  </component>
-  <type is="monitor" name="monitors">
-    <component type="monitor">
-      <location z="-3.0" name="monitor1"/>
-    </component>
-  </type>
-
-<!--  ressonance monitor pixel with events -->
-
+  <idlist idname="Downstream_monitor">
+    <id val="-2"/>
+  </idlist>
   <component type="Downstream_monitor" idlist="Downstream_monitor">
     <properties />
     <location  />
   </component>
-
   <type is="monitor" name="Downstream_monitor">
    <component type="monitor">
     <location x="0.0" y="0.0" z="0.3" name="monitor2" />
    </component>
   </type>
 
-  <idlist idname="Downstream_monitor">
-    <id start="1179648" end="1179648" />
-    <!--id start="1342177280" end="1342177280" / -->
+  <idlist idname="monitors">
+    <id val="-1"/>
   </idlist>
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type is="monitor" name="monitors">
+    <component type="monitor">
+      <location x="0.0" y="0.0" z="-3.0" name="monitor1"/>
+    </component>
+  </type>
 
-<!--  detector components -->
-
+  <!--DETECTORS-->
   <component type="East">
     <location >
       <parameter name="roty">
@@ -245,8 +245,4 @@
     <algebra val="some-shape"/>
   </type>
 
-  <!--MONITOR IDs-->
-  <idlist idname="monitors">
-    <id val="-1"/>
-  </idlist>
 </instrument>

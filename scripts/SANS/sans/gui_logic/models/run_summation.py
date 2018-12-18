@@ -1,20 +1,33 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import SANSadd2
 from ui.sans_isis.work_handler import WorkHandler
 
 
 class RunSummation(object):
-    def __init__(self, work_handler):
+    def __init__(self, work_handler, view=None):
         self._work_handler = work_handler
+        self._view = view
 
     class Listener(WorkHandler.WorkListener):
+        def __init__(self, presenter):
+            self._presenter = presenter
+
         def on_processing_finished(self, result):
-            pass
+            self._presenter.on_processing_finished(result)
 
         def on_processing_error(self, error):
-            pass
+            # currently no different functionality required between
+            # processing finished and processing error,
+            # so call the same method
+            self._presenter.on_processing_finished(error)
 
     def __call__(self, run_selection, settings, base_file_name):
-        self._work_handler.process(RunSummation.Listener(), self.run, run_selection, settings, base_file_name)
+        self._work_handler.process(RunSummation.Listener(self), self.run, 0, run_selection, settings, base_file_name)
 
     def run(self, run_selection, settings, base_file_name):
         run_selection = self._run_selection_as_path_list(run_selection)
@@ -55,3 +68,7 @@ class RunSummation(object):
 
     def _should_save_as_event_workspaces(self, settings):
         return settings.should_save_as_event_workspaces()
+
+    def on_processing_finished(self, result):
+        if self._view:
+            self._view.enable_sum()
