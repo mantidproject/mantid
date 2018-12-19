@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
 #include "../ISISReflectometry/IReflAsciiSaver.h"
+#include "../ISISReflectometry/IReflAutoreduction.h"
 #include "../ISISReflectometry/IReflBatchPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowView.h"
@@ -114,6 +115,19 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
+};
+
+/**** Autoreduction ****/
+class MockReflAutoreduction : public IReflAutoreduction {
+public:
+  MOCK_CONST_METHOD0(running, bool());
+  MOCK_CONST_METHOD1(searchStringChanged, bool(const std::string &));
+  MOCK_CONST_METHOD0(searchResultsExist, bool());
+  MOCK_METHOD0(setSearchResultsExist, void());
+
+  MOCK_METHOD1(setupNewAutoreduction, bool(const std::string &));
+  MOCK_METHOD0(pause, bool());
+  MOCK_METHOD0(stop, void());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

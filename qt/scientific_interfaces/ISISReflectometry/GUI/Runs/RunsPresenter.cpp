@@ -21,6 +21,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "ReflAutoreduction.h"
 #include "ReflCatalogSearcher.h"
 #include "ReflFromStdStringMap.h"
 #include "ReflNexusMeasurementItemSource.h"
@@ -61,17 +62,18 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param defaultInstrumentIndex The index of the instrument to have selected by
  * default.
  * @param messageHandler :: A handler to pass messages to the user
+ * @param autoreduction :: [input] The autoreduction implementation
  * @param searcher :: [input] The search implementation
  */
-RunsPresenter::RunsPresenter(IRunsView *mainView,
-                             ProgressableView *progressableView,
-                             RunsTablePresenterFactory makeRunsTablePresenter,
-                             double thetaTolerance,
-                             std::vector<std::string> const &instruments,
-                             int defaultInstrumentIndex,
-                             IReflMessageHandler *messageHandler,
-                             boost::shared_ptr<IReflSearcher> searcher)
-    : m_view(mainView), m_progressView(progressableView),
+RunsPresenter::RunsPresenter(
+    IRunsView *mainView, ProgressableView *progressableView,
+    RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
+    std::vector<std::string> const &instruments, int defaultInstrumentIndex,
+    IReflMessageHandler *messageHandler,
+    boost::shared_ptr<IReflAutoreduction> autoreduction,
+    boost::shared_ptr<IReflSearcher> searcher)
+    : m_autoreduction(autoreduction), m_view(mainView),
+      m_progressView(progressableView),
       m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
       m_searcher(searcher), m_instrumentChanged(false),
@@ -268,13 +270,13 @@ void RunsPresenter::startNewAutoreduction() {
  */
 bool RunsPresenter::requireNewAutoreduction() const {
   bool searchNumChanged =
-      m_autoreduction.searchStringChanged(m_view->getSearchString());
+      m_autoreduction->searchStringChanged(m_view->getSearchString());
 
   return searchNumChanged || m_instrumentChanged;
 }
 
 bool RunsPresenter::setupNewAutoreduction(const std::string &searchString) {
-  return m_autoreduction.setupNewAutoreduction(searchString);
+  return m_autoreduction->setupNewAutoreduction(searchString);
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
@@ -293,7 +295,7 @@ void RunsPresenter::checkForNewRuns() {
  */
 void RunsPresenter::autoreduceNewRuns() {
 
-  m_autoreduction.setSearchResultsExist();
+  m_autoreduction->setSearchResultsExist();
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0) {
@@ -316,10 +318,12 @@ void RunsPresenter::pauseAutoreduction() {
 
 void RunsPresenter::stopAutoreduction() {
   m_view->stopTimer();
-  m_autoreduction.stop();
+  m_autoreduction->stop();
 }
 
-bool RunsPresenter::isAutoreducing() const { return m_autoreduction.running(); }
+bool RunsPresenter::isAutoreducing() const {
+  return m_autoreduction->running();
+}
 
 bool RunsPresenter::isProcessing() const {
   // TODO define this properly when we enable processing
@@ -345,7 +349,7 @@ bool RunsPresenter::shouldUpdateExistingSearchResults() const {
   // Existing search results should be updated rather than replaced if
   // autoreduction is running and has valid results
   return m_searchModel && isAutoreducing() &&
-         m_autoreduction.searchResultsExist();
+         m_autoreduction->searchResultsExist();
 }
 
 /** Check that the given rows are valid for a transfer and warn the user if not

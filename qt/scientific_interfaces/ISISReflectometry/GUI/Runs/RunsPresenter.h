@@ -14,7 +14,6 @@
 #include "IReflBatchPresenter.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "ReflAutoreduction.h"
 #include "SearchResult.h"
 #include <boost/shared_ptr.hpp>
 
@@ -30,6 +29,7 @@ class ProgressableView;
 namespace CustomInterfaces {
 
 // Forward decs
+class IReflAutoreduction;
 class IRunsView;
 class IReflMessageHandler;
 class IReflSearcher;
@@ -57,6 +57,8 @@ public:
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
                 int defaultInstrumentIndex, IReflMessageHandler *messageHandler,
+                boost::shared_ptr<IReflAutoreduction> autoreduction =
+                    boost::shared_ptr<IReflAutoreduction>(),
                 boost::shared_ptr<IReflSearcher> searcher =
                     boost::shared_ptr<IReflSearcher>());
   RunsPresenter(RunsPresenter const &) = delete;
@@ -75,7 +77,7 @@ public:
 
 protected:
   /// Information about the autoreduction process
-  ReflAutoreduction m_autoreduction;
+  boost::shared_ptr<IReflAutoreduction> m_autoreduction;
   void startNewAutoreduction();
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;

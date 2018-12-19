@@ -56,12 +56,13 @@ void QtReflMainWindowView::initLayout() {
   auto defaultInstrumentIndex = 0;
   // TODO: Look this up properly by comparing the default instrument to the
   // values in the list;
+  auto autoreduction = boost::shared_ptr<IReflAutoreduction>();
   auto searcher = boost::shared_ptr<IReflSearcher>();
   auto messageHandler = this;
 
   auto makeRunsPresenter = RunsPresenterFactory(
       std::move(makeRunsTablePresenter), thetaTolerance, instruments,
-      defaultInstrumentIndex, messageHandler, searcher);
+      defaultInstrumentIndex, messageHandler, autoreduction, searcher);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();

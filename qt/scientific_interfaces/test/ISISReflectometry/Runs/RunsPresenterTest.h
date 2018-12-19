@@ -8,7 +8,6 @@
 #define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
-#include "../../../ISISReflectometry/ReflAutoreduction.h"
 #include "../../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenterFactory.h"
 #include "../RunsTable/MockRunsTableView.h"
@@ -35,14 +34,48 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
-      : m_thetaTolerance(0.01),
-        m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
-        m_runsTableView(), m_progressView(), m_messageHandler(), m_searcher() {
+      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
+                                              "POLREF", "OFFSPEC"},
+        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
+        m_autoreduction(new MockReflAutoreduction),
+        m_searcher(new MockReflSearcher) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
 
-  void testInit() { auto presenter = makePresenter(); }
+  void testMakePresenter() { auto presenter = makePresenter(); }
+
+  void testSettingsChanged() {
+    // TODO
+  }
+
+  void testSearchWithEmptyString() {
+    auto presenter = makePresenter();
+    auto searchString = std::string("");
+    EXPECT_CALL(m_view, getSearchString())
+        .Times(1)
+        .WillOnce(Return(searchString));
+    expectSearchFailed();
+    presenter.notify(IRunsPresenter::SearchFlag);
+    verifyAndClear();
+  }
+
+  void testSearchCatalogLoginFails() {
+    auto presenter = makePresenter();
+    auto searchString = std::string("test string");
+    EXPECT_CALL(m_view, getSearchString())
+        .Times(1)
+        .WillOnce(Return(searchString));
+    // TODO: add expected call to python runner when implemented
+    EXPECT_CALL(m_view, noActiveICatSessions()).Times(1);
+    expectSearchFailed();
+    presenter.notify(IRunsPresenter::SearchFlag);
+    verifyAndClear();
+  }
+
+  void testSearchSucceeds() {
+    // TODO: add this test when python runner implemented
+  }
 
 private:
   RunsPresenter makePresenter() {
@@ -60,7 +93,7 @@ private:
         &m_view, &m_progressView,
         MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance),
         m_thetaTolerance, m_instruments, defaultInstrumentIndex,
-        &m_messageHandler, m_searcher);
+        &m_messageHandler, m_autoreduction, m_searcher);
 
     verifyAndClear();
     return presenter;
@@ -68,22 +101,37 @@ private:
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runsTableView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_progressView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_autoreduction));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searcher));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
   void expectUpdateViewWhenMonitorStarting() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(false));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(false));
   }
+
   void expectUpdateViewWhenMonitorStarted() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(false));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(true));
   }
+
   void expectUpdateViewWhenMonitorStopped() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(true));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(false));
+  }
+
+  void expectStopAutoreduction() {
+    EXPECT_CALL(m_view, stopTimer()).Times(1);
+    EXPECT_CALL(*m_autoreduction, stop()).Times(1);
+  }
+
+  void expectSearchFailed() {
+    EXPECT_CALL(m_view, getAlgorithmRunner()).Times(0);
+    expectStopAutoreduction();
   }
 
   double m_thetaTolerance;
@@ -92,6 +140,7 @@ private:
   MockRunsTableView m_runsTableView;
   MockProgressableView m_progressView;
   MockMessageHandler m_messageHandler;
+  boost::shared_ptr<MockReflAutoreduction> m_autoreduction;
   boost::shared_ptr<MockReflSearcher> m_searcher;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
 };

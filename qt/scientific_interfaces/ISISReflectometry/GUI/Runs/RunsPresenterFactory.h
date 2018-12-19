@@ -26,17 +26,21 @@ public:
                        std::vector<std::string> instruments,
                        int defaultInstrumentIndex,
                        IReflMessageHandler *messageHandler,
+                       boost::shared_ptr<IReflAutoreduction> autoreduction,
                        boost::shared_ptr<IReflSearcher> searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
         m_defaultInstrumentIndex(std::move(defaultInstrumentIndex)),
-        m_messageHandler(messageHandler), m_searcher(std::move(searcher)) {}
+        m_messageHandler(messageHandler),
+        m_autoreduction(std::move(autoreduction)),
+        m_searcher(std::move(searcher)) {}
 
   std::unique_ptr<IRunsPresenter> make(IRunsView *view) {
     return std::make_unique<RunsPresenter>(
         view, view, m_runsTablePresenterFactory, m_thetaTolerance,
-        m_instruments, m_defaultInstrumentIndex, m_messageHandler, m_searcher);
+        m_instruments, m_defaultInstrumentIndex, m_messageHandler,
+        m_autoreduction, m_searcher);
   }
 
 private:
@@ -45,6 +49,7 @@ private:
   std::vector<std::string> m_instruments;
   int m_defaultInstrumentIndex;
   IReflMessageHandler *m_messageHandler;
+  boost::shared_ptr<IReflAutoreduction> m_autoreduction;
   boost::shared_ptr<IReflSearcher> m_searcher;
 };
 } // namespace CustomInterfaces

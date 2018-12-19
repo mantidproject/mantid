@@ -42,6 +42,7 @@ set ( INC_FILES
     ${REDUCTION_INC_FILES}
     DllConfig.h
     InstrumentParameters.h
+    IReflAutoreduction.h
     IReflMainWindowPresenter.h
     IReflBatchPresenter.h
     IReflMainWindowView.h
