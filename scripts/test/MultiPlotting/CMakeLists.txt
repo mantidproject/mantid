@@ -5,6 +5,11 @@
 set ( TEST_PY_FILES
    AxisChangerTwoPresenter_test.py
    AxisChangerTwoView_test.py
+   QuickEditPresenter_test.py
+   QuickEditWidget_test.py
+   MultiPlottingContext_test.py
+   MultiPlotWidget_test.py
+   SubPlotContext_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

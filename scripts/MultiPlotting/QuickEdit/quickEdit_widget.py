@@ -13,7 +13,7 @@ from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 
 class QuickEditWidget(object):
 
-    def __init__(self, context, parent=None):
+    def __init__(self, parent=None):
         view = QuickEditView(None, parent)
         self._presenter = QuickEditPresenter(view)
 
@@ -55,3 +55,6 @@ class QuickEditWidget(object):
 
     def set_errors(self, state):
         self._presenter.set_errors(state)
+
+    def set_mock(self,mock_presenter):
+        self._presenter = mock_presenter
