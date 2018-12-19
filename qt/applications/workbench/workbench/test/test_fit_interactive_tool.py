@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from qtpy.QtCore import QPoint
+from qtpy.QtGui import QCursor
 
 from mantid.simpleapi import *
 from mantidqt.utils.qt.test.gui_window_test import *
@@ -24,71 +25,69 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield 0.1
         self.fit_browser = manager.fit_browser
 
+    def move_marker(self, canvas, marker, pos, dx):
+        tr = self.fit_browser.tool.ax.get_xaxis_transform()
+        x0 = tr.transform((0, 0))[0]
+        dx_pxl = tr.transform((dx, 0))[0] - x0
+        pos0 = QCursor.pos()
+        pos.setX(marker.get_x_in_pixels())
+        new_pos = pos + QPoint(dx_pxl, 0)
+        yield drag_mouse(canvas, pos, new_pos)
+        pos1 = QCursor.pos()
+        if pos0 == pos1:
+            new_x = marker.x + dx
+            marker.on_click(pos.x())
+            marker.mouse_move(new_x)
+            marker.stop()
+
+    def move_start_x(self, canvas, pos, dx):
+        return self.move_marker(canvas, self.fit_browser.tool.fit_start_x, pos, dx)
+
+    def move_end_x(self, canvas, pos, dx):
+        return self.move_marker(canvas, self.fit_browser.tool.fit_end_x, pos, dx)
+
     def test_fit_range(self):
         yield self.start()
         start_x = self.fit_browser.startX()
-        start_x_pxl = self.fit_browser.tool.fit_start_x.get_x_in_pixels()
         end_x = self.fit_browser.endX()
-        end_x_pxl = self.fit_browser.tool.fit_end_x.get_x_in_pixels()
         self.assertGreater(end_x, start_x)
         self.assertGreater(start_x, 0.3)
         self.assertGreater(2.0, end_x)
         pos = self.w._canvas.geometry().center()
         canvas = self.w.childAt(pos)
-        pos.setX(self.fit_browser.tool.fit_start_x.get_x_in_pixels())
-        new_pos = pos + QPoint(100, 0)
-        yield drag_mouse(canvas, pos, new_pos)
-        self.assertAlmostEqual(self.fit_browser.startX(), start_x + 100.0 / (end_x_pxl - start_x_pxl) * (end_x - start_x), 2)
-        pos.setX(self.fit_browser.tool.fit_end_x.get_x_in_pixels())
-        new_pos = pos - QPoint(30, 0)
-        yield drag_mouse(canvas, pos, new_pos)
-        self.assertAlmostEqual(self.fit_browser.endX(), end_x - 30.0 / (end_x_pxl - start_x_pxl) * (end_x - start_x), 2)
+        yield self.move_start_x(canvas, pos, 0.5)
+        self.assertAlmostEqual(self.fit_browser.startX(), start_x + 0.5, 2)
+        yield self.move_end_x(canvas, pos, -0.25)
+        self.assertAlmostEqual(self.fit_browser.endX(), end_x - 0.25, 2)
 
     def test_fit_range_start_moved_too_far(self):
         yield self.start()
         start_x = self.fit_browser.startX()
         end_x = self.fit_browser.endX()
-        start_x_pxl = self.fit_browser.tool.fit_start_x.get_x_in_pixels()
-        end_x_pxl = self.fit_browser.tool.fit_end_x.get_x_in_pixels()
         self.assertGreater(end_x, start_x)
         self.assertGreater(start_x, 0.3)
         self.assertGreater(2.0, end_x)
-
         pos = self.w._canvas.geometry().center()
         canvas = self.w.childAt(pos)
-        pos.setX(self.fit_browser.tool.fit_end_x.get_x_in_pixels())
-        new_pos = pos - QPoint(100, 0)
-        yield drag_mouse(canvas, pos, new_pos)
+        yield self.move_end_x(canvas, pos, -0.5)
         new_end_x = self.fit_browser.endX()
-        self.assertAlmostEqual(new_end_x, end_x - 100.0 / (end_x_pxl - start_x_pxl) * (end_x - start_x), 2)
-
-        pos.setX(self.fit_browser.tool.fit_start_x.get_x_in_pixels())
-        new_pos = pos + QPoint()
-        new_pos.setX(end_x_pxl)
-        yield drag_mouse(canvas, pos, new_pos)
+        self.assertAlmostEqual(new_end_x, end_x - 0.5, 2)
+        yield self.move_start_x(canvas, pos, 1.0)
         self.assertAlmostEqual(self.fit_browser.startX(), new_end_x)
 
     def test_fit_range_end_moved_too_far(self):
         yield self.start()
         start_x = self.fit_browser.startX()
-        start_x_pxl = self.fit_browser.tool.fit_start_x.get_x_in_pixels()
         end_x = self.fit_browser.endX()
-        end_x_pxl = self.fit_browser.tool.fit_end_x.get_x_in_pixels()
         self.assertGreater(end_x, start_x)
         self.assertGreater(start_x, 0.3)
         self.assertGreater(2.0, end_x)
         pos = self.w._canvas.geometry().center()
         canvas = self.w.childAt(pos)
-        pos.setX(self.fit_browser.tool.fit_start_x.get_x_in_pixels())
-        new_pos = pos + QPoint(100, 0)
-        yield drag_mouse(canvas, pos, new_pos)
+        yield self.move_start_x(canvas, pos, 0.5)
         new_start_x = self.fit_browser.startX()
-        self.assertAlmostEqual(new_start_x, start_x + 100.0 / (end_x_pxl - start_x_pxl) * (end_x - start_x), 2)
-
-        pos.setX(self.fit_browser.tool.fit_end_x.get_x_in_pixels())
-        new_pos = pos + QPoint()
-        new_pos.setX(start_x_pxl)
-        yield drag_mouse(canvas, pos, new_pos)
+        self.assertAlmostEqual(new_start_x, start_x + 0.5, 2)
+        yield self.move_end_x(canvas, pos, -1.0)
         self.assertAlmostEqual(self.fit_browser.endX(), new_start_x)
 
     def test_fit_range_moved_start_outside(self):
@@ -96,9 +95,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         start_x_pxl = self.fit_browser.tool.fit_start_x.get_x_in_pixels()
         pos = self.w._canvas.geometry().center()
         canvas = self.w.childAt(pos)
-        pos.setX(self.fit_browser.tool.fit_start_x.get_x_in_pixels())
-        new_pos = pos - QPoint(pos.x(), 0)
-        yield drag_mouse(canvas, pos, new_pos)
+        yield self.move_start_x(canvas, pos, -2.0)
         self.assertAlmostEqual(start_x_pxl, self.fit_browser.tool.fit_start_x.get_x_in_pixels())
 
     def test_fit_range_moved_end_outside(self):
@@ -106,9 +103,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         end_x_pxl = self.fit_browser.tool.fit_end_x.get_x_in_pixels()
         pos = self.w._canvas.geometry().center()
         canvas = self.w.childAt(pos)
-        pos.setX(self.fit_browser.tool.fit_end_x.get_x_in_pixels())
-        new_pos = pos + QPoint(0, canvas.width())
-        yield drag_mouse(canvas, pos, new_pos)
+        yield self.move_end_x(canvas, pos, 2.0)
         self.assertAlmostEqual(end_x_pxl, self.fit_browser.tool.fit_end_x.get_x_in_pixels())
 
     def test_fit_range_set_start(self):
