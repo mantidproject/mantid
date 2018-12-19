@@ -17,6 +17,23 @@
 #include <QMimeData>
 #include <QUrl>
 
+namespace {
+
+std::string extractLastOf(const std::string &str,
+                          const std::string &delimiter) {
+  const auto cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(cutIndex, str.size() - cutIndex);
+  return str;
+}
+
+std::string loadAlgName(const std::string &filePath) {
+  const auto suffix = extractLastOf(filePath, ".");
+  return suffix == ".dave" ? "LoadDaveGrp" : "Load";
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -125,8 +142,8 @@ bool DataSelector::isValid() {
         // don't use algorithm runner because we need to know instantly.
         const QString filepath =
             m_uiForm.rfFileInput->getUserInput().toString();
-        const Algorithm_sptr loadAlg =
-            AlgorithmManager::Instance().createUnmanaged("Load");
+        const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(
+            loadAlgName(filepath.toStdString()));
         loadAlg->initialize();
         loadAlg->setProperty("Filename", filepath.toStdString());
         loadAlg->setProperty("OutputWorkspace", wsName.toStdString());
@@ -179,14 +196,14 @@ QString DataSelector::getProblem() const {
  */
 void DataSelector::autoLoadFile(const QString &filepath) {
   using namespace Mantid::API;
-  QString baseName = getWsNameFromFiles();
+  const auto baseName = getWsNameFromFiles().toStdString();
 
   // create instance of load algorithm
-  const Algorithm_sptr loadAlg =
-      AlgorithmManager::Instance().createUnmanaged("Load");
+  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(
+      loadAlgName(filepath.toStdString()));
   loadAlg->initialize();
   loadAlg->setProperty("Filename", filepath.toStdString());
-  loadAlg->setProperty("OutputWorkspace", baseName.toStdString());
+  loadAlg->setProperty("OutputWorkspace", baseName);
 
   m_algRunner.startAlgorithm(loadAlg);
 }
