@@ -42,7 +42,7 @@ public:
                           boost::optional<double> CAp = boost::none,
                           boost::optional<double> CPp = boost::none);
 
-  PolarizationCorrectionType correctionType();
+  PolarizationCorrectionType correctionType() const;
   boost::optional<double> cRho() const;
   boost::optional<double> cAlpha() const;
   boost::optional<double> cAp() const;

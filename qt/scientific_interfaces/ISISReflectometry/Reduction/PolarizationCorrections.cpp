@@ -15,7 +15,7 @@ PolarizationCorrections::PolarizationCorrections(
     : m_correctionType(correctionType), m_cRho(CRho), m_cAlpha(CAlpha),
       m_cAp(CAp), m_cPp(CPp) {}
 
-PolarizationCorrectionType PolarizationCorrections::correctionType() {
+PolarizationCorrectionType PolarizationCorrections::correctionType() const {
   return m_correctionType;
 }
 
@@ -36,7 +36,8 @@ bool operator!=(PolarizationCorrections const &lhs,
 
 bool operator==(PolarizationCorrections const &lhs,
                 PolarizationCorrections const &rhs) {
-  return lhs.cRho() == rhs.cRho() && lhs.cAlpha() == rhs.cAlpha() &&
+  return lhs.correctionType() == rhs.correctionType() &&
+         lhs.cRho() == rhs.cRho() && lhs.cAlpha() == rhs.cAlpha() &&
          lhs.cAp() == rhs.cAp() && lhs.cPp() == rhs.cPp();
 }
 } // namespace CustomInterfaces
