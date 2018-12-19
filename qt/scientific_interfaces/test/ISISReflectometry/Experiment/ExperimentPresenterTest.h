@@ -59,8 +59,6 @@ public:
   void testModelUpdatedWhenAnalysisModeChanged() {
     auto presenter = makePresenter();
 
-    expectViewReturnsSumInLambdaDefaults();
-    expectViewReturnsDefaultPolarizationCorrectionType();
     EXPECT_CALL(m_view, getAnalysisMode())
         .WillOnce(Return(std::string("MultiDetectorAnalysis")));
     presenter.notifySettingsChanged();
@@ -73,9 +71,7 @@ public:
   void testModelUpdatedWhenSummationTypeChanged() {
     auto presenter = makePresenter();
 
-    expectViewReturnsDefaultAnalysisMode();
     expectViewReturnsSumInQDefaults();
-    expectViewReturnsDefaultPolarizationCorrectionType();
     presenter.notifySummationTypeChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().summationType(),
@@ -86,9 +82,6 @@ public:
   void testReductionTypeDisabledWhenChangeToSumInLambda() {
     auto presenter = makePresenter();
 
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
-    expectViewReturnsDefaultPolarizationCorrectionType();
     EXPECT_CALL(m_view, disableReductionType()).Times(1);
     presenter.notifySummationTypeChanged();
 
@@ -98,9 +91,7 @@ public:
   void testReductionTypeEnbledWhenChangeToSumInQ() {
     auto presenter = makePresenter();
 
-    expectViewReturnsDefaultAnalysisMode();
     expectViewReturnsSumInQDefaults();
-    expectViewReturnsDefaultPolarizationCorrectionType();
     EXPECT_CALL(m_view, enableReductionType()).Times(1);
     presenter.notifySummationTypeChanged();
 
@@ -112,8 +103,6 @@ public:
     PolarizationCorrections polCorr(PolarizationCorrectionType::PA, 1.2, 1.3,
                                     2.4, 2.5);
 
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
     EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return("PA"));
     EXPECT_CALL(m_view, getCRho()).WillOnce(Return(polCorr.cRho().get()));
     EXPECT_CALL(m_view, getCAlpha()).WillOnce(Return(polCorr.cAlpha().get()));
@@ -176,7 +165,6 @@ public:
     auto const optionsString = "Params=0.02";
     std::map<std::string, std::string> optionsMap = {{"Params", "0.02"}};
 
-    expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getStitchOptions()).WillOnce(Return(optionsString));
     EXPECT_CALL(m_view, showStitchParametersValid());
     presenter.notifySettingsChanged();
@@ -190,7 +178,6 @@ public:
     auto const optionsString = "0.02";
     std::map<std::string, std::string> emptyOptionsMap;
 
-    expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getStitchOptions()).WillOnce(Return(optionsString));
     EXPECT_CALL(m_view, showStitchParametersInvalid());
     presenter.notifySettingsChanged();
@@ -206,7 +193,6 @@ public:
     // row should be added to view
     EXPECT_CALL(m_view, addPerThetaDefaultsRow());
     // new value should be requested from view to update model
-    expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getPerAngleOptions()).Times(1);
     presenter.notifyNewPerAngleDefaultsRequested();
 
@@ -220,7 +206,6 @@ public:
     // row should be removed from view
     EXPECT_CALL(m_view, removePerThetaDefaultsRow(indexToRemove)).Times(1);
     // new value should be requested from view to update model
-    expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getPerAngleOptions()).Times(1);
     presenter.notifyRemovePerAngleDefaultsRequested(indexToRemove);
 
@@ -234,7 +219,6 @@ public:
     auto const column = 0;
     OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
                                        optionsRowWithSecondAngle()};
-    expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     presenter.notifyPerAngleDefaultsChanged(row, column);
 
@@ -374,7 +358,6 @@ private:
   ExperimentPresenter makePresenter() {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    expectViewReturnsDefaultValues();
     auto presenter =
         ExperimentPresenter(&m_view, makeModel(), m_thetaTolerance);
     verifyAndClear();
@@ -385,18 +368,6 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
   }
 
-  void expectViewReturnsDefaultAnalysisMode() {
-    EXPECT_CALL(m_view, getAnalysisMode())
-        .WillOnce(Return(std::string("PointDetectorAnalysis")));
-  }
-
-  void expectViewReturnsSumInLambdaDefaults() {
-    EXPECT_CALL(m_view, getSummationType())
-        .WillOnce(Return(std::string("SumInLambda")));
-    EXPECT_CALL(m_view, getReductionType())
-        .WillOnce(Return(std::string("Normal")));
-  }
-
   void expectViewReturnsSumInQDefaults() {
     EXPECT_CALL(m_view, getSummationType())
         .WillOnce(Return(std::string("SumInQ")));
@@ -404,22 +375,9 @@ private:
         .WillOnce(Return(std::string("DivergentBeam")));
   }
 
-  void expectViewReturnsDefaultPolarizationCorrectionType() {
-    EXPECT_CALL(m_view, getPolarizationCorrectionType())
-        .WillOnce(Return(std::string("None")));
-  }
-
-  void expectViewReturnsDefaultValues() {
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
-    expectViewReturnsDefaultPolarizationCorrectionType();
-  }
-
   void runWithPolarizationCorrectionInputsDisabled(std::string const &type) {
     auto presenter = makePresenter();
 
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
     EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return(type));
     EXPECT_CALL(m_view, disablePolarizationCorrectionInputs()).Times(1);
     EXPECT_CALL(m_view, getCRho()).Times(0);
@@ -434,8 +392,6 @@ private:
   void runWithPolarizationCorrectionInputsEnabled(std::string const &type) {
     auto presenter = makePresenter();
 
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
     EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return(type));
     EXPECT_CALL(m_view, enablePolarizationCorrectionInputs()).Times(1);
     EXPECT_CALL(m_view, getCRho()).Times(1);
@@ -451,7 +407,6 @@ private:
       RangeInLambda const &range,
       boost::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
-    expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getTransmissionStartOverlap())
         .WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getTransmissionEndOverlap())
@@ -464,7 +419,6 @@ private:
 
   void runTestForInvalidTransmissionRunRange(RangeInLambda const &range) {
     auto presenter = makePresenter();
-    expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getTransmissionStartOverlap())
         .WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getTransmissionEndOverlap())
@@ -520,7 +474,6 @@ private:
 
   void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {
     auto presenter = makePresenter();
-    expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     EXPECT_CALL(m_view, showAllPerAngleOptionsAsValid()).Times(1);
     presenter.notifyPerAngleDefaultsChanged(1, 1);

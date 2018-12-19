@@ -15,6 +15,15 @@ namespace CustomInterfaces {
 
 class MockExperimentView : public IExperimentView {
 public:
+  MockExperimentView() {
+    ON_CALL(*this, getAnalysisMode())
+        .WillByDefault(testing::Return("PointDetectorAnalysis"));
+    ON_CALL(*this, getSummationType())
+        .WillByDefault(testing::Return("SumInLambda"));
+    ON_CALL(*this, getReductionType()).WillByDefault(testing::Return("Normal"));
+    ON_CALL(*this, getPolarizationCorrectionType())
+        .WillByDefault(testing::Return("None"));
+  }
   MOCK_METHOD1(subscribe, void(ExperimentViewSubscriber *));
   MOCK_METHOD1(createStitchHints,
                void(const std::vector<MantidWidgets::Hint> &));
