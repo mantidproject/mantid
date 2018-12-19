@@ -20,6 +20,15 @@ from save_python import getWidgetIfOpen
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
+
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
+
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
 
 
 Name = "Muon_Analysis_2"
@@ -66,12 +75,32 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
+        self.setup_grouping_tab()
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget.load_widget_view)
+        splitter.addWidget(self.group_tab_view)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.group_tab_presenter.loadObserver)
+
+    def setup_grouping_tab(self):
+        # Share a single model between the sub-widgets
+        self.group_tab_model = GroupingTabModel(self.context)
+
+        self.grouping_table_view = GroupingTableView()
+        self.grouping_table_widget = GroupingTablePresenter(self.grouping_table_view, self.group_tab_model)
+
+        self.pairing_table_view = PairingTableView()
+        self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.group_tab_model)
+
+        self.group_tab_view = GroupingTabView(self.grouping_table_view, self.pairing_table_view)
+        self.group_tab_presenter = GroupingTabPresenter(self.group_tab_view,
+                                                        self.group_tab_model,
+                                                        self.grouping_table_widget,
+                                                        self.pairing_table_widget)
 
     def closeEvent(self, event):
         print("Muon Analysis Close Event")
