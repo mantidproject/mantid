@@ -20,9 +20,10 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenterFactory {
 public:
   RunsTablePresenterFactory(std::vector<std::string> const &instruments,
                             double thetaTolerance);
-  std::unique_ptr<RunsTablePresenter> operator()(IRunsTableView *view) const;
+  virtual std::unique_ptr<RunsTablePresenter>
+  operator()(IRunsTableView *view) const;
 
-private:
+protected:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
 };

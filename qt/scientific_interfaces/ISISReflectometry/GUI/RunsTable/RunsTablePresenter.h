@@ -27,8 +27,14 @@ public:
 
   void notifyProcessRequested() override;
   void notifyPauseRequested() override;
+  void notifyInsertRowRequested() override;
+  void notifyInsertGroupRequested() override;
+  void notifyDeleteRowRequested() override;
+  void notifyDeleteGroupRequested() override;
+  void notifyFilterChanged(std::string const &filterValue) override;
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
+
   void notifyCellTextChanged(
       MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
       std::string const &oldValue, std::string const &newValue) override;
@@ -40,13 +46,8 @@ public:
   void notifyCopyRowsRequested() override;
   void notifyPasteRowsRequested() override;
   void notifyCutRowsRequested() override;
-  void notifyFilterReset() override;
-  void notifyFilterChanged(std::string const &filterValue) override;
 
-  void notifyInsertRowRequested() override;
-  void notifyInsertGroupRequested() override;
-  void notifyDeleteRowRequested() override;
-  void notifyDeleteGroupRequested() override;
+  void notifyFilterReset() override;
 
   void mergeAdditionalJobs(ReductionJobs const &jobs);
   ReductionJobs const &reductionJobs() const;

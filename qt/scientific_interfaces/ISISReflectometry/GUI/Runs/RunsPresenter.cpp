@@ -72,7 +72,7 @@ RunsPresenter::RunsPresenter(IRunsView *mainView,
                              IReflMessageHandler *messageHandler,
                              boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_makeRunsTablePresenter(makeRunsTablePresenter),
+      m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
       m_searcher(searcher), m_instrumentChanged(false),
       m_thetaTolerance(thetaTolerance) {

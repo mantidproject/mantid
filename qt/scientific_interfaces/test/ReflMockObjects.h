@@ -11,6 +11,8 @@
 #include "../ISISReflectometry/IReflBatchPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowView.h"
+#include "../ISISReflectometry/IReflMessageHandler.h"
+#include "../ISISReflectometry/IReflSearcher.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -99,6 +101,19 @@ public:
                           std::vector<std::string> const &,
                           FileFormatOptions const &));
   virtual ~MockReflAsciiSaver() = default;
+};
+
+class MockReflSearcher : public IReflSearcher {
+public:
+  MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
+};
+
+/**** Catalog ****/
+class MockMessageHandler : public IReflMessageHandler {
+public:
+  MOCK_METHOD2(giveUserCritical,
+               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
