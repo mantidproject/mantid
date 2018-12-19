@@ -567,7 +567,7 @@ class RunTabPresenter(object):
 
             default_filename = self._table_model.batch_file
             filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
-            
+
             if filename:
                 self.sans_logger.notice("Starting export of table.")
                 if filename[-4:] != '.csv':
@@ -1176,12 +1176,9 @@ class RunTabPresenter(object):
         :return: Nothing
         """
         for row in rows:
-            try:
                 table_row = self._table_model.get_table_entry(row).to_batch_list()
                 batch_file_row = self._create_batch_entry_from_row(table_row)
-            except Exception as e:
-                raise e
-            else:
+                
                 filewriter.writerow(batch_file_row)
 
     @staticmethod
