@@ -34,7 +34,7 @@ def drag_mouse(widget, from_pos, to_pos):
     QTest.mouseMove(widget, from_pos)
     yield 0.1
     QTest.mouseMove(widget, to_pos)
-    yield
+    yield 0.1
     QTest.mouseRelease(widget, Qt.LeftButton, Qt.NoModifier, to_pos)
 
 
