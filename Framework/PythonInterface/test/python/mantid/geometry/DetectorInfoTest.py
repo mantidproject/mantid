@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -81,11 +87,15 @@ class DetectorInfoTest(unittest.TestCase):
     	workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
     	info = workspace.detectorInfo()
     	self.assertEquals(info.size(), 0)
+    
+    def test_detectorIds(self):
+        info = self._ws.detectorInfo()
+        ids = info.detectorIDs()
+        # Should be read-only
+        self.assertFalse(ids.flags.writeable)
+        for a, b in zip(ids, [1,2]):
+            self.assertEquals(a,b)
 
-    """
-    The following test cases test for returned objects to do with position
-    and rotation.
-    """
 
     def test_position(self):
         """ Test that the detector's position is returned. """
@@ -106,30 +116,44 @@ class DetectorInfoTest(unittest.TestCase):
     ---------------
     """
 
-    def test_iteration_for_isMonitor(self):
+    def test_basic_iteration(self):
         info = self._ws.detectorInfo()
-        for detInfo in info:
-            self.assertEquals(type(detInfo.isMonitor), bool)
+        expected_iterations = len(info) 
+        actual_iterations = len(list(iter(info)))
+        self.assertEquals(expected_iterations, actual_iterations)
 
-    def test_iteration_for_isMasked(self):
+    def test_iterator_for_monitors(self):
         info = self._ws.detectorInfo()
-        for detInfo in info:
-            self.assertEquals(type(detInfo.isMasked), bool)
-
-    def test_iteration_for_twoTheta(self):
+        # check no monitors in instrument
+        for item in info:
+            self.assertFalse(item.isMonitor)
+            
+    def test_iterator_for_masked(self):
         info = self._ws.detectorInfo()
-        for detInfo in info:
-            self.assertEquals(type(detInfo.twoTheta), float)
+        # nothing should be masked 
+        for item in info:
+            self.assertFalse(item.isMasked)
+    
+    def test_iterator_for_masked(self):
+        info = self._ws.detectorInfo()
+        it = iter(info)
+        item = next(it)
+        item.setMasked(True)
+        self.assertTrue(item.isMasked)
+        item.setMasked(False)
+        self.assertFalse(item.isMasked)
 
     def test_iteration_for_position(self):
         info = self._ws.detectorInfo()
-        for detInfo in info:
-            self.assertEquals(type(detInfo.position), V3D)
-
-    def test_iteration_for_rotation(self):
-        info = self._ws.detectorInfo()
-        for detInfo in info:
-            self.assertEquals(type(detInfo.rotation), Quat)
+        lastY = None
+        for i,item in enumerate(info):
+            pos = item.position
+            # See test helper for position construction
+            self.assertAlmostEquals(pos.X(), 0)
+            self.assertAlmostEquals(pos.Z(), 5)
+            if(lastY):
+                self.assertTrue(pos.Y() > lastY)
+            lastY = pos.Y()
 
 
     """

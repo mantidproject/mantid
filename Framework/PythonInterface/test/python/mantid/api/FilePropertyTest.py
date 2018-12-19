@@ -1,10 +1,21 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import FileProperty, FileAction, AlgorithmManager
+from mantid.api import AlgorithmManager, FileProperty, FileAction, FrameworkManagerImpl
 from mantid.kernel import Direction
 
+
 class FilePropertyTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
 
     def test_constructor_with_name_and_default_and_action(self):
         prop = FileProperty("LoadProperty", "", FileAction.Load)

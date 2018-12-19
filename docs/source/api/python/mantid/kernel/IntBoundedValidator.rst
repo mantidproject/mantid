@@ -2,7 +2,7 @@
  IntBoundedValidator
 =====================
 
-This a python binding to the C++ class Mantid::Kernel::IntBoundedValidator.
+This is a Python binding to the C++ class Mantid::Kernel::IntBoundedValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 

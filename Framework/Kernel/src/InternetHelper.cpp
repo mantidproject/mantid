@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
 
 // Poco
 #include <Poco/Net/AcceptCertificateHandler.h>
@@ -101,14 +108,7 @@ InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-InternetHelper::~InternetHelper() {
-  if (m_request != nullptr) {
-    delete m_request;
-  }
-  if (m_response != nullptr) {
-    delete m_response;
-  }
-}
+InternetHelper::~InternetHelper() = default;
 
 void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
                                          const std::string &proxyUrl) {
@@ -120,22 +120,16 @@ void InternetHelper::setupProxyOnSession(HTTPClientSession &session,
 }
 
 void InternetHelper::createRequest(Poco::URI &uri) {
-  if (m_request != nullptr) {
-    delete m_request;
-  }
-  if (m_response != nullptr) {
-    delete m_response;
-  }
-
-  m_request =
-      new HTTPRequest(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
-
-  m_response = new HTTPResponse();
+  m_request = std::make_unique<HTTPRequest>(m_method, uri.getPathAndQuery(),
+                                            HTTPMessage::HTTP_1_1);
+  m_response = std::make_unique<HTTPResponse>();
   if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);
   }
 
-  m_request->set("User-Agent", "MANTID");
+  m_request->set("User-Agent",
+                 // Use standard User-Agent format as per MDN documentation.
+                 std::string("Mantid/") + MantidVersion::version());
   if (m_method == "POST") {
     // HTTP states that the 'Content-Length' header should not be included
     // if the 'Transfer-Encoding' header is set. UNKNOWN_CONTENT_LENGTH

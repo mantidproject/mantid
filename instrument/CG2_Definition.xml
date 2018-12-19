@@ -5,8 +5,7 @@
             name="CG2"
             valid-from="2016-04-22 00:00:00"
             valid-to="2100-01-31 23:59:59"
-		    last-modified="2016-05-20 08:24:35.208311">
-
+		        last-modified="2018-12-07 13:07:00.000">
 
   <defaults>
     <length unit="metre"/>
@@ -29,40 +28,67 @@
   </component>
   <type is="SamplePos" name="sample-position"/>
 
+  <!-- ***************************************************************** -->
+	<!--MONITOR 1 -->
+	<component type="monitors" idlist="monitor1">
+		<location/>
+	</component>
+	<type name="monitors">
+	    <component type="monitor">
+    		<location z="-0.5" name="monitor1"/>
+    	</component>
+	</type>
+	<idlist idname="monitor1">
+		<id val="1" />
+	</idlist>
 
-  <!-- detector components (including monitors) -->
+	<!--MONITOR 2: Timer -->
+	<component type="timers" idlist="timer1">
+		<location/>
+	</component>
+	<type name="timers">
+	    <component type="monitor">
+    		<location z="-0.5" name="timer1"/>
+    	</component>
+	</type>
+	<idlist idname="timer1">
+		<id val="2" />
+	</idlist>
+
+	<!--MONITOR SHAPE-->
+	<!--FIXME: Do something real here.-->
+	<type is="monitor" name="monitor">
+		<cylinder id="cyl-approx">
+		<centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
+		<axis y="0.0" x="0.0" z="1.0"/>
+		<radius val="0.01"/>
+		<height val="0.03"/>
+		</cylinder>
+		<algebra val="cyl-approx"/>
+	</type>
 
   <!-- ***************************************************************** -->
-  <!--MONITOR 1 -->
-  <component type="monitor1" idlist="monitor1">
-    <location z="-10.5" />
-  </component>
-  <type name="monitor1" is="monitor" />
-  <idlist idname="monitor1">
-    <id val="1" />
-  </idlist>
-
- <!--MONITOR 2 -->
-  <component type="timer1" idlist="timer1">
-    <location z="-10.5" />
-  </component>
-  <type name="timer1" is="monitor" />
-   <idlist idname="timer1">
-    <id val="2" />
-  </idlist>
-
   <component type="sample_aperture">
     <location z="0.0"/>
     <parameter name="Size"> <value val="14.0" /> </parameter>
   </component>
   <type name="sample_aperture" />
 
-
 <!-- ***************************************************************** -->
 <!-- Main Detector -->
-<component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
-    <location z='0' />
-</component>
+	<component type="detector1" idstart="3" idfillbyfirst="x" idstep="256" idstepbyrow="1">
+		<location name="detector1">
+			<parameter name="z">
+				<logfile eq="0.001*value" id="sdd"/>
+			</parameter>
+			<parameter name="x">
+				<logfile eq="0.001*value" id="detector-translation"/>
+			</parameter>
+      <parameter name="y">
+        <value val="0.0"/>
+      </parameter>
+		</location>
+	</component>
 
 <!-- Detector: -->
 <type name="detector1" is="rectangular_detector" type="pixel"
@@ -71,16 +97,16 @@
     <properties />
 </type>
 
-<!-- Pixel for Detector-->
-<type is="detector" name="pixel">
-    <cylinder id="cyl-approx">
-      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
-      <axis y="1.0" x="0.0" z="0.0"/>
-      <radius val="0.00275"/>
-      <height val="0.0043"/>
-    </cylinder>
-    <algebra val="cyl-approx"/>
-</type>
+	<!-- Pixel for Detectors: 5.5x4.3 mm -->
+	<type is="detector" name="pixel">
+		<cuboid id="pixel-shape">
+			<left-front-bottom-point y="-0.00215" x="-0.00275" z="0.0" />
+			<left-front-top-point y="0.00215" x="-0.00275" z="0.0" />
+			<left-back-bottom-point y="-0.00215" x="-0.00275" z="-0.0001" />
+			<right-front-bottom-point y="-0.00215" x="0.00275" z="0.0" />
+		</cuboid>
+		<algebra val="pixel-shape" />
+	</type>
 
 </instrument>
 

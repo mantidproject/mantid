@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
 #define MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
 
@@ -5,6 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
+#include "MantidDataHandling/LoadGeometry.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
@@ -33,6 +40,8 @@
 namespace Mantid {
 namespace DataHandling {
 
+bool exists(::NeXus::File &file, const std::string &name);
+
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
   Load Event Nexus files.
@@ -44,26 +53,6 @@ namespace DataHandling {
   </UL>
 
   @date Sep 27, 2010
-
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
   */
 class DLLExport LoadEventNexus
     : public API::IFileLoader<Kernel::NexusDescriptor> {
@@ -219,9 +208,6 @@ private:
 
   /// Do we load the sample logs?
   bool loadlogs;
-  /// have the logs been loaded?
-  bool m_logs_loaded_correctly;
-
   /// True if the event_id is spectrum no not pixel ID
   bool event_id_is_spec;
 };
@@ -467,48 +453,54 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
                                        const std::string &top_entry_name,
                                        Algorithm *alg) {
   std::string instrument;
+  std::string instFilename;
 
-  // Get the instrument name
-  ::NeXus::File nxfile(nexusfilename);
-  // Start with the base entry
-  nxfile.openGroup(top_entry_name, "NXentry");
-  // Open the instrument
-  nxfile.openGroup("instrument", "NXinstrument");
-  try {
-    nxfile.openData("name");
-    instrument = nxfile.getStrData();
-    alg->getLogger().debug()
-        << "Instrument name read from NeXus file is " << instrument << '\n';
-  } catch (::NeXus::Exception &) {
-    // Try to fall back to isis compatibility options
-    nxfile.closeGroup();
-    instrument = readInstrumentFromISIS_VMSCompat(nxfile);
-    if (instrument.empty()) {
-      // Get the instrument name from the file instead
-      size_t n = nexusfilename.rfind('/');
-      if (n != std::string::npos) {
-        std::string temp =
-            nexusfilename.substr(n + 1, nexusfilename.size() - n - 1);
-        n = temp.find('_');
-        if (n != std::string::npos && n > 0) {
-          instrument = temp.substr(0, n);
+  // Check if the geometry can be loaded directly from the Nexus file
+  if (LoadGeometry::isNexus(nexusfilename)) {
+    instFilename = nexusfilename;
+  } else {
+    // Get the instrument name
+    ::NeXus::File nxfile(nexusfilename);
+    // Start with the base entry
+    nxfile.openGroup(top_entry_name, "NXentry");
+    // Open the instrument
+    nxfile.openGroup("instrument", "NXinstrument");
+    try {
+      nxfile.openData("name");
+      instrument = nxfile.getStrData();
+      alg->getLogger().debug()
+          << "Instrument name read from NeXus file is " << instrument << '\n';
+    } catch (::NeXus::Exception &) {
+      // Try to fall back to isis compatibility options
+      nxfile.closeGroup();
+      instrument = readInstrumentFromISIS_VMSCompat(nxfile);
+      if (instrument.empty()) {
+        // Get the instrument name from the file instead
+        size_t n = nexusfilename.rfind('/');
+        if (n != std::string::npos) {
+          std::string temp =
+              nexusfilename.substr(n + 1, nexusfilename.size() - n - 1);
+          n = temp.find('_');
+          if (n != std::string::npos && n > 0) {
+            instrument = temp.substr(0, n);
+          }
         }
       }
     }
+    if (instrument == "POWGEN3") // hack for powgen b/c of bad long name
+      instrument = "POWGEN";
+    if (instrument == "NOM") // hack for nomad
+      instrument = "NOMAD";
+
+    if (instrument.empty())
+      throw std::runtime_error("Could not find the instrument name in the NXS "
+                               "file or using the filename. Cannot load "
+                               "instrument!");
+
+    // Now let's close the file as we don't need it anymore to load the
+    // instrument.
+    nxfile.close();
   }
-  if (instrument == "POWGEN3") // hack for powgen b/c of bad long name
-    instrument = "POWGEN";
-  if (instrument == "NOM") // hack for nomad
-    instrument = "NOMAD";
-
-  if (instrument.empty())
-    throw std::runtime_error("Could not find the instrument name in the NXS "
-                             "file or using the filename. Cannot load "
-                             "instrument!");
-
-  // Now let's close the file as we don't need it anymore to load the
-  // instrument.
-  nxfile.close();
 
   // do the actual work
   Mantid::API::IAlgorithm_sptr loadInst =
@@ -517,6 +509,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try {
+    loadInst->setPropertyValue("Filename", instFilename);
     loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
                                                              localWorkspace);
@@ -588,7 +581,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   file.openGroup(entry_name, "NXentry");
 
   // get the title
-  try {
+  if (exists(file, "title")) {
     file.openData("title");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string title = file.getStrData();
@@ -596,12 +589,10 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
         WS->setTitle(title);
     }
     file.closeData();
-  } catch (std::exception &) {
-    // don't set the title if the field is not loaded
   }
 
   // get the notes
-  try {
+  if (exists(file, "notes")) {
     file.openData("notes");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string notes = file.getStrData();
@@ -609,29 +600,29 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
         WS->mutableRun().addProperty("file_notes", notes);
     }
     file.closeData();
-  } catch (::NeXus::Exception &) {
-    // let it drop on floor
   }
 
   // Get the run number
-  file.openData("run_number");
-  std::string run;
-  if (file.getInfo().type == ::NeXus::CHAR) {
-    run = file.getStrData();
-  } else if (file.isDataInt()) {
-    // inside ISIS the run_number type is int32
-    std::vector<int> value;
-    file.getData(value);
-    if (!value.empty())
-      run = std::to_string(value[0]);
+  if (exists(file, "run_number")) {
+    file.openData("run_number");
+    std::string run;
+    if (file.getInfo().type == ::NeXus::CHAR) {
+      run = file.getStrData();
+    } else if (file.isDataInt()) {
+      // inside ISIS the run_number type is int32
+      std::vector<int> value;
+      file.getData(value);
+      if (!value.empty())
+        run = std::to_string(value[0]);
+    }
+    if (!run.empty()) {
+      WS->mutableRun().addProperty("run_number", run);
+    }
+    file.closeData();
   }
-  if (!run.empty()) {
-    WS->mutableRun().addProperty("run_number", run);
-  }
-  file.closeData();
 
   // get the experiment identifier
-  try {
+  if (exists(file, "experiment_identifier")) {
     file.openData("experiment_identifier");
     std::string expId;
     if (file.getInfo().type == ::NeXus::CHAR) {
@@ -641,15 +632,13 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
       WS->mutableRun().addProperty("experiment_identifier", expId);
     }
     file.closeData();
-  } catch (::NeXus::Exception &) {
-    // let it drop on floor
   }
 
   // get the sample name - nested try/catch to leave the handle in an
   // appropriate state
   try {
     file.openGroup("sample", "NXsample");
-    try {
+    if (exists(file, "name")) {
       file.openData("name");
       const auto info = file.getInfo();
       std::string name;
@@ -671,8 +660,6 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
       if (!name.empty()) {
         WS->mutableSample().setName(name);
       }
-    } catch (::NeXus::Exception &) {
-      // let it drop on floor
     }
     file.closeGroup();
   } catch (::NeXus::Exception &) {
@@ -680,12 +667,13 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // get the duration
-  file.openData("duration");
-  std::vector<double> duration;
-  file.getDataCoerce(duration);
-  if (duration.size() == 1) {
-    // get the units
-    // clang-format off
+  if (exists(file, "duration")) {
+    file.openData("duration");
+    std::vector<double> duration;
+    file.getDataCoerce(duration);
+    if (duration.size() == 1) {
+      // get the units
+      // clang-format off
     std::vector< ::NeXus::AttrInfo> infos = file.getAttrInfos();
     std::string units;
     for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
@@ -695,12 +683,13 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
         break;
       }
     }
-    // clang-format on
+      // clang-format on
 
-    // set the property
-    WS->mutableRun().addProperty("duration", duration[0], units);
+      // set the property
+      WS->mutableRun().addProperty("duration", duration[0], units);
+    }
+    file.closeData();
   }
-  file.closeData();
 
   // close the file
   file.close();
@@ -711,8 +700,8 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
  *  specified by the info in the Nexus file
  *
  *  @param nexusfilename :: The Nexus file name
- *  @param localWorkspace :: templated workspace in which to put the instrument
- *geometry
+ *  @param localWorkspace :: templated workspace in which to put the
+ *instrument geometry
  *  @param top_entry_name :: entry name at the top of the Nexus file
  *  @param alg :: Handle of the algorithm
  *  @return true if successful
@@ -734,8 +723,8 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
 /** Load the instrument from the nexus file
  *
  *  @param nexusfilename :: The name of the nexus file being loaded
- *  @param localWorkspace :: templated workspace in which to put the instrument
- *geometry
+ *  @param localWorkspace :: templated workspace in which to put the
+ *instrument geometry
  *  @param top_entry_name :: entry name at the top of the Nexus file
  *  @param alg :: Handle of the algorithm
  *  @return true if successful
@@ -750,7 +739,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
     ::NeXus::File nxsfile(nexusfilename);
     nxsfile.openPath(top_entry_name + "/instrument/instrument_xml");
   } catch (::NeXus::Exception &) {
-    alg->getLogger().information("No instrument definition found in " +
+    alg->getLogger().information("No instrument XML definition found in " +
                                  nexusfilename + " at " + top_entry_name +
                                  "/instrument");
     return false;
@@ -770,9 +759,9 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
     alg->getLogger().error(
         "Invalid argument to LoadIDFFromNexus Child Algorithm ");
   } catch (std::runtime_error &) {
-    alg->getLogger().debug("No instrument definition found in " +
-                           nexusfilename + " at " + top_entry_name +
-                           "/instrument");
+    alg->getLogger().debug(
+        "No instrument definition found by LoadIDFFromNexus in " +
+        nexusfilename + " at " + top_entry_name + "/instrument");
   }
 
   if (!loadInst->isExecuted())

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
 //-------------------------------------------
@@ -898,4 +904,8 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
     return Script::Asynchronous;
   else
     return Script::Serialised;
+}
+
+const Script &ScriptingWindow::getCurrentScriptRunner() {
+  return m_manager->currentInterpreter()->getRunner();
 }

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/TransformHKL.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/SelectCellWithForm.h"
@@ -35,8 +41,8 @@ void TransformHKL::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double>>(
+          "Tolerance", 0.15, std::move(mustBePositive), Direction::Input),
       "Indexing Tolerance (0.15)");
 
   std::vector<double> identity_matrix(9, 0.0);
@@ -47,8 +53,8 @@ void TransformHKL::init() {
   auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("HKLTransform",
-                                                 identity_matrix, threeBythree),
+      Kernel::make_unique<ArrayProperty<double>>(
+          "HKLTransform", std::move(identity_matrix), std::move(threeBythree)),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
       "numbers");
 

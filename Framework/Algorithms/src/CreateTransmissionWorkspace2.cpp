@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateTransmissionWorkspace2.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -5,8 +11,9 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,7 +70,7 @@ void CreateTransmissionWorkspace2::init() {
                       "ProcessingInstructions", "",
                       boost::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
-                  "Grouping pattern on workspace indexes to yield only "
+                  "Grouping pattern on spectrum numbers to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
@@ -117,12 +124,16 @@ void CreateTransmissionWorkspace2::exec() {
   MatrixWorkspace_sptr outWS;
 
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
+  convertProcessingInstructions(firstTransWS);
+
   firstTransWS = normalizeDetectorsByMonitors(firstTransWS);
   firstTransWS = cropWavelength(firstTransWS);
 
   MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
   if (secondTransWS) {
     storeTransitionRun(1, firstTransWS);
+
+    convertProcessingInstructions(secondTransWS);
 
     secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
     secondTransWS = cropWavelength(secondTransWS);
@@ -170,16 +181,12 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
   }
 
   // Normalization by integrated monitors
-  // Only if both MonitorIntegrationWavelengthMin and
-  // MonitorIntegrationWavelengthMax are have been given
+  // Only if defined by property
+  const bool normalizeByIntegratedMonitors =
+      getProperty("NormalizeByIntegratedMonitors");
 
-  Property *intMinProperty = getProperty("MonitorIntegrationWavelengthMin");
-  Property *intMaxProperty = getProperty("MonitorIntegrationWavelengthMax");
-  const bool integratedMonitors =
-      !(intMinProperty->isDefault() || intMaxProperty->isDefault());
-
-  auto monitorWS = makeMonitorWS(IvsTOF, integratedMonitors);
-  if (!integratedMonitors)
+  auto monitorWS = makeMonitorWS(IvsTOF, normalizeByIntegratedMonitors);
+  if (!normalizeByIntegratedMonitors)
     detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
 
   return divide(detectorWS, monitorWS);

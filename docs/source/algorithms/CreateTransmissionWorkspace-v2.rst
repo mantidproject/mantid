@@ -63,7 +63,7 @@ Usage
     trans = Load(Filename='INTER00013463.nxs')
     transWS = CreateTransmissionWorkspace(FirstTransmissionRun = trans,
                                           I0MonitorIndex = 2,
-                                          ProcessingInstructions = '3,4',
+                                          ProcessingInstructions = '4,5',
                                           WavelengthMin = 1,
                                           WavelengthMax = 17,
                                           MonitorBackgroundWavelengthMin = 15,
@@ -97,7 +97,7 @@ Output:
                                           StartOverlap = 10.0,
                                           EndOverlap = 12.0,
                                           I0MonitorIndex = 2,
-                                          ProcessingInstructions = '3,4',
+                                          ProcessingInstructions = '4,5',
                                           WavelengthMin = 1,
                                           WavelengthMax = 17,
                                           MonitorBackgroundWavelengthMin = 15,
