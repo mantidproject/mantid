@@ -82,7 +82,8 @@ Bugfixes
 - Fixed a crash in :ref:`MaskDetectors <algm-MaskDetectors>` when a non-existent component was given in ``ComponentList``.
 - History for algorithms that took groups sometimes would get incorrect history causing history to be incomplete, so now full group history is saved for all items belonging to the group.
 - Fixed a bug in `SetGoniometer <algm-SetGoniometer>` where it would use the mean log value rather than the time series average value for goniometer angles.
-
+- Fixed a bug in `AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for using the passed on CompressTolerance and CompressWallClockTolerance in the child `CompressEvents <algm-CompressEvents>` algorithm instead of just in the child `AlignAndFocusPowder <algm-AlignAndFocusPowder>` algorithm.
+ 
 
 Python
 ------

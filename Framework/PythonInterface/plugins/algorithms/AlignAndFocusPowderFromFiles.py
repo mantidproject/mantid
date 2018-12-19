@@ -128,7 +128,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         args = {}
         for name in PROPS_FOR_ALIGN:
             prop = self.getProperty(name)
-            name_list = ['PreserveEvents', 'CompressTolerance', 'CompressWallClockTolerance']
+            name_list = ['PreserveEvents', 'CompressTolerance',
+                         'CompressWallClockTolerance', 'CompressStartTime']
             if name in name_list or not prop.isDefault:
                 if 'Workspace' in name:
                     args[name] = prop.valueAsStr
