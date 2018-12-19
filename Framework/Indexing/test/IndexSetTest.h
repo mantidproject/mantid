@@ -139,7 +139,7 @@ public:
   }
 
   void test_isContiguous() {
-    const IndexSetTester empty;
+    const IndexSetTester empty{};
     TS_ASSERT(empty.isContiguous())
     const IndexSetTester range(3);
     TS_ASSERT(range.isContiguous())
