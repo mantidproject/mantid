@@ -15,11 +15,14 @@ class EncoderFactory(object):
     @classmethod
     def find_encoder(cls, tag):
         for encoder in cls.encoder_list:
-            if encoder.has_tag(tag):
+            if encoder().has_tag(tag):
                 return encoder
-
-        return False
+        return None
 
     @classmethod
     def register_encoder(cls, encoder):
+        for encoder_ in cls.encoder_list:
+            if encoder is encoder_:
+                # It's a duplicate
+                return
         cls.encoder_list.append(encoder)
