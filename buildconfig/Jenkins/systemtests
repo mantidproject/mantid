@@ -50,6 +50,11 @@ fi
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
 cd $WORKSPACE/build
 
+# Remove (possibly) stale files
+#   build/ExternalData/**: data files will change over time and removing
+#                          the links helps keep it fresh
+rm -rf $WORKSPACE/build/ExternalData
+
 ###############################################################################
 # CMake configuration if it has not already been configured.
 # We use the special flag that only creates the targets for the data
@@ -76,6 +81,8 @@ rm -f $userprops
 echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
 echo "usagereports.enabled = 0" >> $userprops
 echo "CheckMantidVersion.OnStartup = 0" >> $userprops
+# Remove user instrument directory
+rm -fr ~/.mantid/instrument
 
 # Remove mismatch files which have not been cleaned up yet
 default_save_directory=${WORKSPACE}/build/Testing/SystemTests/scripts/
