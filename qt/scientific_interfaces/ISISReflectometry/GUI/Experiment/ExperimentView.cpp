@@ -367,13 +367,13 @@ void ExperimentView::disablePolarizationCorrectionInputs() {
 }
 
 void ExperimentView::enableFloodCorrectionInputs() {
-  m_ui.floodWorkspaceWsSelector->setVisible(true);
-  m_ui.floodWorkspaceWsSelectorLabel->setVisible(true);
+  m_ui.floodWorkspaceWsSelector->setEnabled(true);
+  m_ui.floodWorkspaceWsSelectorLabel->setEnabled(true);
 }
 
 void ExperimentView::disableFloodCorrectionInputs() {
-  m_ui.floodWorkspaceWsSelector->setVisible(false);
-  m_ui.floodWorkspaceWsSelectorLabel->setVisible(false);
+  m_ui.floodWorkspaceWsSelector->setEnabled(false);
+  m_ui.floodWorkspaceWsSelectorLabel->setEnabled(false);
 }
 
 void ExperimentView::onPerAngleDefaultsChanged(int row, int column) {
