@@ -315,6 +315,10 @@ void Elwin::updateAvailablePlotWorkspaces() {
   }
 }
 
+QString Elwin::getPlotWorkspaceName() const {
+  return m_uiForm.cbPlotWorkspace->currentText();
+}
+
 void Elwin::setPlotSpectrumValue(int value) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spPlotSpectrum);
   m_uiForm.spPlotSpectrum->setValue(value);
@@ -330,6 +334,10 @@ void Elwin::updateAvailablePlotSpectra() {
 void Elwin::setPlotSpectrumMinMax(int minimum, int maximum) {
   m_uiForm.spPlotSpectrum->setMinimum(minimum);
   m_uiForm.spPlotSpectrum->setMaximum(maximum);
+}
+
+int Elwin::getPlotSpectrumIndex() const {
+  return m_uiForm.spPlotSpectrum->text().toInt();
 }
 
 bool Elwin::validate() {
@@ -541,11 +549,7 @@ void Elwin::runClicked() { runTab(); }
  */
 void Elwin::plotClicked() {
   setPlotResultIsPlotting(true);
-
-  auto const workspaceName = m_uiForm.cbPlotWorkspace->currentText();
-  auto const workspaceIndex = m_uiForm.spPlotSpectrum->text().toInt();
-  plotSpectrum(workspaceName, workspaceIndex);
-
+  plotSpectrum(getPlotWorkspaceName(), getPlotSpectrumIndex());
   setPlotResultIsPlotting(false);
 }
 
@@ -566,31 +570,33 @@ QString Elwin::getOutputBasename() {
   return getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 }
 
-void Elwin::setRunIsRunning(bool running) {
+void Elwin::setRunIsRunning(const bool &running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
 }
 
-void Elwin::setPlotResultIsPlotting(bool plotting) {
+void Elwin::setPlotResultIsPlotting(const bool &plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Spectrum");
   setButtonsEnabled(!plotting);
 }
 
-void Elwin::setButtonsEnabled(bool enabled) {
+void Elwin::setButtonsEnabled(const bool &enabled) {
   setRunEnabled(enabled);
   setPlotResultEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
-void Elwin::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void Elwin::setRunEnabled(const bool &enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
 
-void Elwin::setPlotResultEnabled(bool enabled) {
+void Elwin::setPlotResultEnabled(const bool &enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
   m_uiForm.cbPlotWorkspace->setEnabled(enabled);
   m_uiForm.spPlotSpectrum->setEnabled(enabled);
 }
 
-void Elwin::setSaveResultEnabled(bool enabled) {
+void Elwin::setSaveResultEnabled(const bool &enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 

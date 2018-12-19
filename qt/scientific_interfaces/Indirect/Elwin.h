@@ -48,15 +48,17 @@ private:
 
   void updatePlotSpectrumOptions();
   void updateAvailablePlotWorkspaces();
+  QString getPlotWorkspaceName() const;
   void setPlotSpectrumValue(int value);
   void setPlotSpectrumMinMax(int minimum, int maximum);
+  int getPlotSpectrumIndex() const;
 
-  void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setPlotResultEnabled(bool enabled);
-  void setSaveResultEnabled(bool enabled);
+  void setRunIsRunning(const bool &running);
+  void setPlotResultIsPlotting(const bool &plotting);
+  void setButtonsEnabled(const bool &enabled);
+  void setRunEnabled(const bool &enabled);
+  void setPlotResultEnabled(const bool &enabled);
+  void setSaveResultEnabled(const bool &enabled);
 
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
