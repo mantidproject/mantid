@@ -1,12 +1,6 @@
 import unittest
 import sys
 import six
-
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
-
 from PyQt4 import QtGui
 
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
@@ -21,6 +15,11 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import Groupin
 
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
+
+if sys.version_info.major > 2:
+    from unittest import mock
+else:
+    import mock
 
 
 class GroupingTabPresenterTest(unittest.TestCase):
@@ -82,8 +81,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
         pair_name = "pair_0"
 
-        self.assertEqual(self.context.pairs[pair_name].group1, "fwd")
-        self.assertEqual(self.context.pairs[pair_name].group2, "bwd")
+        self.assertEqual(self.context.pairs[pair_name].forward_group, "fwd")
+        self.assertEqual(self.context.pairs[pair_name].backward_group, "bwd")
 
     def test_that_clear_button_clears_model_and_view(self):
         self.view.clear_grouping_button.clicked.emit(True)
@@ -130,11 +129,12 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.assertEqual(mock_save.call_count, 1)
             self.assertEqual(mock_save.call_args[0][-1], "grouping.xml")
 
-    # def test_that_default_groupings_setup(self):
+    def test_update_all_calculates_groups_and_pairs(self):
+        self.presenter.thread_manager = mock.MagicMock()
+        self.view.update_button.clicked.emit(True)
 
-    # test default grouping
-
-    # test update all
+        self.presenter.thread_manager.process.assert_called_once_with(self.presenter.listener,
+                                                                      self.presenter.calculate_all_data, 0, [1])
 
 
 if __name__ == '__main__':

@@ -1,11 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.utilities.threading_manager import WorkerManager
 from Muon.GUI.Common.observer_pattern import Observer, Observable
 
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
+from ui.sans_isis.work_handler import WorkHandler
+from sans.gui_logic.presenter.work_handler_listener_wrapper import GenericWorkHandlerListener
 
 
 class GroupingTabPresenter(object):
@@ -36,7 +37,7 @@ class GroupingTabPresenter(object):
         self._view.on_default_grouping_button_clicked(self.handle_default_grouping_button_clicked)
 
         # multi-threading
-        self.thread_manager = None
+        self.thread_manager = WorkHandler()
 
         # monitors for loaded data changing
         self.loadObserver = GroupingTabPresenter.LoadObserver(self)
@@ -117,7 +118,7 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.disable_editing()
         self.pairing_table_widget.disable_editing()
 
-    def enable_editing(self):
+    def enable_editing(self, result=None):
         self._view.set_buttons_enabled(True)
         self.grouping_table_widget.enable_editing()
         self.pairing_table_widget.enable_editing()
@@ -127,13 +128,8 @@ class GroupingTabPresenter(object):
 
     def handle_update_all_clicked(self):
         self.disable_editing()
-        if self.thread_manager:
-            self.thread_manager.clear()
-            self.thread_manager.deleteLater()
-            self.thread_manager = None
-        self.thread_manager = WorkerManager(fn=self.calculate_all_data, num_threads=1,
-                                            callback_on_threads_complete=self.enable_editing, arg=[1])
-        self.thread_manager.start()
+        self.listener = GenericWorkHandlerListener(self.enable_editing, self.enable_editing)
+        self.thread_manager.process(self.listener, self.calculate_all_data, 0, [1])
 
     def handle_default_grouping_button_clicked(self):
         self._model.reset_groups_and_pairs_to_default()
