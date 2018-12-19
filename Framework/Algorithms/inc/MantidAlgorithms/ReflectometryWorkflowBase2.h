@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE2_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE2_H_
 
@@ -5,32 +11,14 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 namespace Mantid {
 namespace Algorithms {
 
 /** ReflectometryWorkflowBase2 : base class containing common implementation
  functionality usable by concrete reflectometry workflow algorithms. Version 2.
-
- Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport ReflectometryWorkflowBase2
     : public API::DataProcessorAlgorithm {
@@ -84,10 +72,9 @@ protected:
   populateMonitorProperties(Mantid::API::IAlgorithm_sptr alg,
                             Mantid::Geometry::Instrument_const_sptr instrument);
   /// Populate processing instructions
-  std::string populateProcessingInstructions(
-      Mantid::API::IAlgorithm_sptr alg,
-      Mantid::Geometry::Instrument_const_sptr instrument,
-      Mantid::API::MatrixWorkspace_sptr inputWS) const;
+  std::string
+  findProcessingInstructions(Mantid::Geometry::Instrument_const_sptr instrument,
+                             Mantid::API::MatrixWorkspace_sptr inputWS) const;
   /// Populate transmission properties
   bool populateTransmissionProperties(Mantid::API::IAlgorithm_sptr alg) const;
   /// Find theta from a named log value
@@ -95,6 +82,28 @@ protected:
                           const std::string &logName);
   // Retrieve the run number from the logs of the input workspace.
   std::string getRunNumber(Mantid::API::MatrixWorkspace const &ws) const;
+
+  void convertProcessingInstructions(Instrument_const_sptr instrument,
+                                     MatrixWorkspace_sptr inputWS);
+  void convertProcessingInstructions(MatrixWorkspace_sptr inputWS);
+  std::string m_processingInstructionsWorkspaceIndex;
+  std::string m_processingInstructions;
+
+protected:
+  std::string
+  convertToSpectrumNumber(const std::string &workspaceIndex,
+                          Mantid::API::MatrixWorkspace_const_sptr ws) const;
+
+  std::string convertProcessingInstructionsToWorkspaceIndices(
+      const std::string &instructions,
+      Mantid::API::MatrixWorkspace_const_sptr ws) const;
+
+  std::string convertToWorkspaceIndex(const std::string &spectrumNumber,
+                                      MatrixWorkspace_const_sptr ws) const;
+
+  std::string convertProcessingInstructionsToSpectrumNumbers(
+      const std::string &instructions,
+      Mantid::API::MatrixWorkspace_const_sptr ws) const;
 };
 } // namespace Algorithms
 } // namespace Mantid

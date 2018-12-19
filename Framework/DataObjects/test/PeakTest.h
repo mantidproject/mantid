@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKTEST_H_
 #define MANTID_DATAOBJECTS_PEAKTEST_H_
 
@@ -228,6 +234,14 @@ public:
     TS_ASSERT_EQUALS(p.getK(), 2.0);
     TS_ASSERT_EQUALS(p.getL(), 3.0);
     TS_ASSERT_EQUALS(p.getHKL(), V3D(1.0, 2.0, 3.0));
+  }
+
+  void test_samplePos() {
+    Peak p(inst, 10000, 2.0);
+    p.setSamplePos(1.0, 1.0, 1.0);
+    TS_ASSERT_EQUALS(p.getSamplePos(), V3D(1.0, 1.0, 1.0));
+    p.setSamplePos(V3D(2.0, 2.0, 2.0));
+    TS_ASSERT_EQUALS(p.getSamplePos(), V3D(2.0, 2.0, 2.0));
   }
 
   void test_getBank_and_row() {

@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is for use by inelastic instruments and takes as its
-input a workspace where the data's been reduced to be in `units <http://www.mantidproject.org/Units>`_
+input a workspace where the data's been reduced to be in :ref:`units <Unit Factory>`
 of **energy transfer** against spectrum number (which can be seen as equivalent to
 angle, with the angle being taken from the detector(s) to which the
 spectrum pertains).

@@ -1,0 +1,75 @@
+digraph Sample {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+    AbsoluteScaleBy
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    BeamInputWorkspace
+    TransmissionInputWorkspace
+    AbsorberInputWorkspace
+    ContainerInputWorkspace
+    SensitivityInputWorkspace
+    ReferenceInputWorkspace
+    MaskedInputWorkspace
+    SampleThickness
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+    Minus
+    MoveInstrumentComponent
+    ApplyTransmissionCorrection
+    SolidAngle
+    Minus2 [label="Minus"]
+    MaskDetectors
+    NormaliseByThickness
+    Divide2 [label="Divide"]
+    Divide3 [label="Divide"]
+    Divide4 [label="Divide"]
+  }
+
+  subgraph process {
+    $process_style
+    ScaleByFluxFactor
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> NormaliseBy
+  NormaliseBy -> Divide
+  Divide -> Minus
+  AbsorberInputWorkspace -> Minus
+  Minus -> MoveInstrumentComponent
+  BeamInputWorkspace -> MoveInstrumentComponent
+  MoveInstrumentComponent -> SolidAngle [label="Divide"]
+  SolidAngle -> ApplyTransmissionCorrection
+  TransmissionInputWorkspace -> ApplyTransmissionCorrection
+  ApplyTransmissionCorrection -> Minus2
+  ContainerInputWorkspace -> Minus2
+  Minus2 -> MaskDetectors
+  MaskedInputWorkspace -> MaskDetectors
+  MaskDetectors -> NormaliseByThickness
+  SampleThickness -> NormaliseByThickness
+  NormaliseByThickness -> AbsoluteScaleBy
+  AbsoluteScaleBy -> Divide2 [label="Beam Flux"]
+  BeamInputWorkspace -> Divide2
+  Divide2 -> Divide3
+  SensitivityInputWorkspace -> Divide3
+  Divide3 -> ScaleByFluxFactor
+  AbsoluteScaleBy -> Divide4 [label="Standard Sample"]
+  ReferenceInputWorkspace -> Divide4
+  Divide4 -> ScaleByFluxFactor
+  ScaleByFluxFactor -> OutputWorkspace
+}

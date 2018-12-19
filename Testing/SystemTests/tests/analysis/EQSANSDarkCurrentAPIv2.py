@@ -1,5 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 from reduction_workflow.instruments.sans.hfir_command_interface import DarkCurrent,SetTransmission
@@ -8,7 +14,7 @@ from mantid.api import *
 import os
 
 
-class EQSANSDarkCurrent(stresstesting.MantidStressTest):
+class EQSANSDarkCurrent(systemtesting.MantidSystemTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct

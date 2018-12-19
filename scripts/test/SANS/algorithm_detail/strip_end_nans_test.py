@@ -1,11 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
-from mantid.api import AlgorithmManager
+
+from mantid.api import AlgorithmManager, FrameworkManager
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 
 
 class StripEndNansTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
+
     def _do_test(self, data_x, data_y):
         # Arrange
         alg_ws = AlgorithmManager.createUnmanaged("CreateWorkspace")
