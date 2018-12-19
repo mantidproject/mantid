@@ -19,12 +19,18 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include <boost/lexical_cast.hpp>
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormalization)
@@ -118,9 +124,9 @@ void MDNormalization::init() {
   }
 
   // symmetry operations
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>("SymmetryOps", "", Direction::Input),
+  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>("SymmetryOperations", "", Direction::Input),
                   "If specified the symmetry will be applied, "
-                  "can be space group name or number, or list individual symmetries.");
+                  "can be space group name, point group name, or list individual symmetries.");
 
   // temporary workspaces
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
@@ -272,6 +278,20 @@ MDNormalization::validateInputs() {
         errorMessage.emplace(propName, "All of QDimension1, QDimension2, QDimension3 must be present");
     }
   }
+  // symmetry operations
+  std::string symOps = this->getProperty("SymmetryOperations");
+  if(!symOps.empty()) {
+    bool isSpaceGroup =Geometry::SpaceGroupFactory::Instance().isSubscribed(symOps);
+    bool isPointGroup = Geometry::PointGroupFactory::Instance().isSubscribed(symOps);
+    if(!isSpaceGroup &&!isPointGroup) {
+        try {
+          Geometry::SymmetryOperationFactory::Instance().createSymOps(symOps);
+        }
+        catch (const Mantid::Kernel::Exception::ParseError&) {
+          errorMessage.emplace("SymmetryOperations", "The input is not a space group, a point group, or a list of symmetry operations");
+        }
+    }
+  }
   return errorMessage;
 }
 
@@ -280,12 +300,34 @@ MDNormalization::validateInputs() {
 /** Execute the algorithm.
  */
 void MDNormalization::exec() {
+  // symmetry operations
+  std::string symOps = this->getProperty("SymmetryOperations");
+
+  std::vector<Geometry::SymmetryOperation> symmetryOps;
+  if (symOps.empty()){
+    symOps="x,y,z";
+  }
+  if(Geometry::SpaceGroupFactory::Instance().isSubscribed(symOps)){
+    auto spaceGroup = Geometry::SpaceGroupFactory::Instance().createSpaceGroup(symOps);
+    auto pointGroup = spaceGroup->getPointGroup();
+    symmetryOps = pointGroup->getSymmetryOperations();
+  } else if (Geometry::PointGroupFactory::Instance().isSubscribed(symOps)) {
+    auto pointGroup = Geometry::PointGroupFactory::Instance().createPointGroup(symOps);
+    symmetryOps = pointGroup->getSymmetryOperations();
+  } else {
+    symmetryOps = Geometry::SymmetryOperationFactory::Instance().createSymOps(symOps);
+  }
+  g_log.debug()<<"Symmetry operations\n";
+  for(auto so:symmetryOps){
+    g_log.debug()<<so.identifier()<<"\n";
+  }
+
   // calculate dimensions for binning
   Mantid::API::IMDEventWorkspace_sptr inputWS =
         this->getProperty("InputWorkspace");
   std::vector<double> Q1Basis{1., 0., 0.}, Q2Basis{0., 1., 0.},Q3Basis{0., 0., 1.};
   DblMatrix UB;
-  bool isRLU = (getProperty("RLU");
+  bool isRLU = getProperty("RLU");
   if (isRLU) {
     Q1Basis = getProperty("QDimension1");
     Q2Basis = getProperty("QDimension2");
@@ -303,7 +345,6 @@ void MDNormalization::exec() {
   for (size_t i=3; i<inputWS->getNumDims(); i++) {
     originalDimensionNames.push_back(inputWS->getDimension(i)->getName());
   }
-
 
 }
 
