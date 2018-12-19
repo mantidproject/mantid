@@ -27,6 +27,8 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     :return: String; The filename that was selected, it is possible to return a directory so look out for that.
     """
     global _LAST_SAVE_DIRECTORY
+    original_last_save = _LAST_SAVE_DIRECTORY
+
     dialog = QFileDialog(parent)
 
     # It is the intention to only save the user's last used directory until workbench is restarted similar to other
@@ -58,6 +60,10 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     dialog.exec_()
 
     filename = _LAST_SAVE_DIRECTORY
+    # If nothing new has been set then return None
+    if filename == original_last_save:
+        return None
+
     # Make sure that the _LAST_SAVE_DIRECTORY is set
     if _LAST_SAVE_DIRECTORY is not None and not os.path.isdir(_LAST_SAVE_DIRECTORY):
         # Remove the file for last directory

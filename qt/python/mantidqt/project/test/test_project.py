@@ -56,12 +56,12 @@ class ProjectTest(unittest.TestCase):
 
     def test_save_as_saves_project_successfully(self):
         working_directory = tempfile.mkdtemp()
-        self.project._file_dialog = mock.MagicMock(return_value=working_directory)
+        self.project._save_file_dialog = mock.MagicMock(return_value=working_directory)
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
         self.project.save_as()
 
-        self.assertEqual(self.project._file_dialog.call_count, 1)
+        self.assertEqual(self.project._save_file_dialog.call_count, 1)
         self.assertTrue(os.path.isdir(working_directory))
         file_list = os.listdir(working_directory)
         self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
@@ -70,16 +70,16 @@ class ProjectTest(unittest.TestCase):
     def test_load_calls_loads_successfully(self):
         working_directory = tempfile.mkdtemp()
         return_value_for_load = os.path.join(working_directory, os.path.basename(working_directory) + ".mtdproj")
-        self.project._file_dialog = mock.MagicMock(return_value=working_directory)
+        self.project._save_file_dialog = mock.MagicMock(return_value=working_directory)
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project.save_as()
 
-        self.assertEqual(self.project._file_dialog.call_count, 1)
+        self.assertEqual(self.project._save_file_dialog.call_count, 1)
         ADS.clear()
 
-        self.project._file_dialog = mock.MagicMock(return_value=return_value_for_load)
+        self.project._load_file_dialog = mock.MagicMock(return_value=return_value_for_load)
         self.project.load()
-        self.assertEqual(self.project._file_dialog.call_count, 1)
+        self.assertEqual(self.project._load_file_dialog.call_count, 1)
         self.assertEqual(["ws1"], ADS.getObjectNames())
 
     def test_offer_save_does_nothing_if_saved_is_true(self):

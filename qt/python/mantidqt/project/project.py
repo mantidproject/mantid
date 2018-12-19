@@ -52,33 +52,33 @@ class Project(AnalysisDataServiceObserver):
         The function that is called if the save as... button is clicked on the mainwindow
         :return: None; if the user cancels.
         """
-        path = None
-        first_pass = True
-        while first_pass or (os.path.exists(path) and not os.path.exists(path + (os.path.basename(path)
-                                                                                 + self.project_file_ext))):
-            first_pass = False
-            path = open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.DirectoryOnly)
-            if path is None:
-                # Cancel close dialogs
+        path = self._save_file_dialog()
+        if path is None:
+            # Cancel close dialogs
+            return
+
+        overwriting = False
+        # If the selected path is a project directory ask if overwrite is required?
+        if os.path.exists(os.path.join(path, (os.path.basename(path) + self.project_file_ext))):
+            answer = QMessageBox.question(None, "Overwrite project?",
+                                          "Would you like to overwrite the selected project?",
+                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if answer == QMessageBox.No:
                 return
+            elif answer == QMessageBox.Yes:
+                overwriting = True
 
-            # If the selected path is a project directory ask if overwrite is required?
-            if os.path.exists(os.path.join(path, (os.path.basename(path) + self.project_file_ext))):
-                answer = QMessageBox.question(None, "Overwrite project?",
-                                              "Would you like to overwrite the selected project?",
-                                              QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                if answer == QMessageBox.Yes:
-                    break
-                else:
-                    continue
-
-            if os.path.exists(path) and os.listdir(path) != []:
-                QMessageBox.warning(None, "Empty directory or project required!",
-                                    "Please choose either an new directory or an already saved project", QMessageBox.Ok)
+        if not overwriting and os.path.exists(path) and os.listdir(path) != []:
+            QMessageBox.warning(None, "Empty directory or project required!",
+                                "Please choose either an new directory or an already saved project", QMessageBox.Ok)
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = path
         self._save()
+
+    @staticmethod
+    def _save_file_dialog():
+        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.DirectoryOnly)
 
     def _save(self):
         workspaces_to_save = AnalysisDataService.getObjectNames()
@@ -91,24 +91,16 @@ class Project(AnalysisDataServiceObserver):
         The event that is called when open project is clicked on the main window
         :return: None; if the user cancelled.
         """
-        file_ext = ""
-        file_name = ""
+        file_name = self._load_file_dialog()
+        if file_name is None:
+            # Cancel close dialogs
+            return
 
-        # Do While loop, do once then as many times as required to get a valid file or cancel is clicked.
-        first_pass = True
-        while first_pass or file_ext != self.project_file_ext:
-            first_pass = False
-            file_name = open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
-                                           file_filter="Project files ( *" + self.project_file_ext + ")")
-            if file_name is None:
-                # Cancel close dialogs
-                return
+        # Sanity check
+        _, file_ext = os.path.splitext(file_name)
 
-            # Sanity check
-            _, file_ext = os.path.splitext(file_name)
-
-            if file_ext != ".mtdproj":
-                QMessageBox.warning(None, "Wrong file type!", "Please select a valid project file", QMessageBox.Ok)
+        if file_ext != ".mtdproj":
+            QMessageBox.warning(None, "Wrong file type!", "Please select a valid project file", QMessageBox.Ok)
 
         directory = os.path.dirname(file_name)
 
@@ -116,6 +108,10 @@ class Project(AnalysisDataServiceObserver):
         project_loader.load_project(directory)
         self.last_project_location = directory
         self.__saved = True
+
+    def _load_file_dialog(self):
+        return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
+                                  file_filter="Project files ( *" + self.project_file_ext + ")")
 
     def offer_save(self, parent):
         """
