@@ -130,6 +130,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.assertEqual(mock_save.call_count, 1)
             self.assertEqual(mock_save.call_args[0][-1], "grouping.xml")
 
+    # def test_that_default_groupings_setup(self):
+
     # test default grouping
 
     # test update all

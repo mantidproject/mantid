@@ -230,7 +230,7 @@ class GroupingTableView(QtGui.QWidget):
 
     def on_cell_changed(self, _row, _col):
         if not self._updating:
-            self._on_table_data_changed()
+            self._on_table_data_changed(_row, _col)
 
     # ------------------------------------------------------------------------------------------------------------------
     #
