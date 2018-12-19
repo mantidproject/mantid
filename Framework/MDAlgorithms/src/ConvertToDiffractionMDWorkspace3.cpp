@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace3.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -37,7 +43,7 @@ void ConvertToDiffractionMDWorkspace3::init() {
 
   std::vector<double> extents;
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Extents", extents),
+      Kernel::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default "
       "will use ConvertToMDMinMaxLocal to calculate extents for each "

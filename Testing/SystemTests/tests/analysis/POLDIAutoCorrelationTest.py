@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import numpy as np
 
 
-class POLDIAutoCorrelationTest(stresstesting.MantidStressTest):
+class POLDIAutoCorrelationTest(systemtesting.MantidSystemTest):
     '''This test checks that the results of PoldiAutoCorrelation match the expected outcome.'''
 
     def runTest(self):

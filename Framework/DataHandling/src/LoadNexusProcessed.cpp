@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -1467,6 +1473,9 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   } else if (mtd_entry.containsGroup("offsets_workspace")) {
     workspaceType = "OffsetsWorkspace";
     group_name = "offsets_workspace";
+  } else if (mtd_entry.containsGroup("mask_workspace")) {
+    workspaceType = "MaskWorkspace";
+    group_name = "mask_workspace";
   }
 
   // Get workspace characteristics

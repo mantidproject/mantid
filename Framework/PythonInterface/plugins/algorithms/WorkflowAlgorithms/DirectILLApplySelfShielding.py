@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -43,7 +49,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ "DirectILLReduction" ]
+        return [ 'DirectILLReduction', 'DirectILLApplySelfShielding' ]
 
     def name(self):
         """Return the algorithm's name."""
@@ -88,7 +94,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
-        scalingFactor = FloatBoundedValidator(lower=0, upper=1)
+        mustBePositive = FloatBoundedValidator(lower=0)
 
         # Properties.
         self.declareProperty(MatrixWorkspaceProperty(
@@ -125,7 +131,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             doc='An empty container workspace for subtraction from the input workspace.')
         self.declareProperty(name=common.PROP_EC_SCALING,
                              defaultValue=1.0,
-                             validator=scalingFactor,
+                             validator=mustBePositive,
                              direction=Direction.Input,
                              doc='A multiplier (transmission, if no self ' +
                                  'shielding is applied) for the empty container.')
