@@ -124,7 +124,7 @@ class GroupingTablePresenter(object):
         self._view.disable_updates()
 
         self._view.clear()
-        for name, group in self._model.groups.items():
+        for group in self._model.groups:
             self.add_group_to_view(group)
 
         self._view.enable_updates()

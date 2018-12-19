@@ -1,10 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.threading_manager import WorkerManager
+from Muon.GUI.Common.utilities.threading_manager import WorkerManager
 from Muon.GUI.Common.observer_pattern import Observer, Observable
 
-import Muon.GUI.Common.muon_file_utils as file_utils
-import Muon.GUI.Common.load_utils as load_utils
+import Muon.GUI.Common.utilities.muon_file_utils as file_utils
+import Muon.GUI.Common.utilities.xml_utils as xml_utils
+import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 
 class GroupingTabPresenter(object):
@@ -82,11 +83,11 @@ class GroupingTabPresenter(object):
         ws1 = self._model.get_group_workspace(group1_name)
         ws2 = self._model.get_group_workspace(group2_name)
 
-        ws = load_utils.run_AppendSpectra(ws1, ws2)
+        ws = algorithm_utils.run_AppendSpectra(ws1, ws2)
 
-        new_alpha = load_utils.run_AlphaCalc({"InputWorkspace": ws,
-                                              "ForwardSpectra": [0],
-                                              "BackwardSpectra": [1]})
+        new_alpha = algorithm_utils.run_AlphaCalc({"InputWorkspace": ws,
+                                                   "ForwardSpectra": [0],
+                                                   "BackwardSpectra": [1]})
         self._model.update_pair_alpha(pair_name, new_alpha)
         self.pairing_table_widget.update_view_from_model()
 
@@ -97,7 +98,7 @@ class GroupingTabPresenter(object):
         file_filter = file_utils.filter_for_extensions(["xml"])
         filename = self._view.show_file_browser_and_return_selection(file_filter, [""])
 
-        groups, pairs = load_utils.load_grouping_from_XML(filename)
+        groups, pairs = xml_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
         for group in groups:
@@ -161,7 +162,7 @@ class GroupingTabPresenter(object):
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            load_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename)
+            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_data_context import MuonDataContext, construct_empty_group, construct_empty_pair
 
 
 class GroupingTabModel(object):
@@ -15,7 +15,7 @@ class GroupingTabModel(object):
     pairs and groups should be of type MuonGroup and MuonPair respectively.
     """
 
-    def __init__(self, data=MuonContext()):
+    def __init__(self, data=MuonDataContext()):
         self._data = data
 
     def get_group_workspace(self, group_name):
@@ -81,17 +81,17 @@ class GroupingTabModel(object):
             del self._data.pairs[name]
 
     def construct_empty_group(self, _group_index):
-        return self._data.construct_empty_group(_group_index)
+        return construct_empty_group(self.group_names, _group_index)
 
     def construct_empty_pair(self, _pair_index):
-        return self._data.construct_empty_pair(_pair_index)
+        return construct_empty_pair(self.group_names, self.pair_names, _pair_index)
 
     def construct_empty_pair_with_group_names(self, name1, name2):
         """
         Create a default pair with specific group names.
         The pair name is auto-generated and alpha=1.0
         """
-        pair = self._data.construct_empty_pair(0)
+        pair = construct_empty_pair(self.group_names, self.pair_names, 0)
         pair.group1 = name1
         pair.group2 = name2
         return pair

@@ -2,15 +2,13 @@ import unittest
 import sys
 import six
 
-if sys.version_info.major == 3:
+if sys.version_info.major > 2:
     from unittest import mock
 else:
     import mock
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import QApplication
 
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_model import GroupingTableModel
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, MuonGroup
 
@@ -21,19 +19,18 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
 
-from Muon.GUI.Common.muon_context import MuonContext
-
-# global QApplication (get errors if > 1 instance in the code)
-QT_APP = QApplication([])
+from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common import mock_widget
 
 
 class GroupingTabPresenterTest(unittest.TestCase):
 
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.context = MuonContext()
+        self.context = MuonDataContext()
         self.model = GroupingTabModel(data=self.context)
 
         self.grouping_table_view = GroupingTableView()
@@ -51,16 +48,16 @@ class GroupingTabPresenterTest(unittest.TestCase):
                                               self.pairing_table_widget)
 
     def add_three_groups(self):
-        testgroup1 = MuonGroup(group_name="fwd", detector_IDs=[1, 2, 3, 4, 5])
-        testgroup2 = MuonGroup(group_name="bwd", detector_IDs=[6, 7, 8, 9, 10])
-        testgroup3 = MuonGroup(group_name="top", detector_IDs=[11, 12, 13, 14, 15])
+        testgroup1 = MuonGroup(group_name="fwd", detector_ids=[1, 2, 3, 4, 5])
+        testgroup2 = MuonGroup(group_name="bwd", detector_ids=[6, 7, 8, 9, 10])
+        testgroup3 = MuonGroup(group_name="top", detector_ids=[11, 12, 13, 14, 15])
         self.grouping_table_widget.add_group(testgroup1)
         self.grouping_table_widget.add_group(testgroup2)
         self.grouping_table_widget.add_group(testgroup3)
 
     def add_two_pairs(self):
-        testpair1 = MuonPair(pair_name="long1", group1_name="fwd", group2_name="bwd")
-        testpair2 = MuonPair(pair_name="long2", group1_name="fwd", group2_name="top")
+        testpair1 = MuonPair(pair_name="long1", forward_group_name="fwd", backward_group_name="bwd")
+        testpair2 = MuonPair(pair_name="long2", forward_group_name="fwd", backward_group_name="top")
         self.pairing_table_widget.add_pair(testpair1)
         self.pairing_table_widget.add_pair(testpair2)
 
@@ -99,7 +96,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
     def test_that_load_grouping_triggers_the_correct_function(self):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
 
-        with mock.patch("Muon.GUI.Common.load_utils.load_grouping_from_XML") as mock_load:
+        with mock.patch("Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             self.view.load_grouping_button.clicked.emit(True)
 
             self.assertEqual(mock_load.call_count, 1)
@@ -107,11 +104,11 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
     def test_that_load_grouping_inserts_loaded_groups_and_pairs_correctly(self):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
-        groups = [MuonGroup(group_name="grp1", detector_IDs=[1, 2, 3, 4, 5]),
-                  MuonGroup(group_name="grp2", detector_IDs=[6, 7, 8, 9, 10])]
-        pairs = [MuonPair(pair_name="pair1", group1_name="grp1", group2_name="grp2")]
+        groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
+                  MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
+        pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
 
-        with mock.patch("Muon.GUI.Common.load_utils.load_grouping_from_XML") as mock_load:
+        with mock.patch("Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs
             mock_load.return_value = (groups, pairs)
             self.view.load_grouping_button.clicked.emit(True)
@@ -127,7 +124,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         # Save functionality is tested elsewhere
         self.view.show_file_save_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
 
-        with mock.patch("Muon.GUI.Common.load_utils.save_grouping_to_XML") as mock_save:
+        with mock.patch("Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.save_grouping_to_XML") as mock_save:
             self.view.save_grouping_button.clicked.emit(True)
 
             self.assertEqual(mock_save.call_count, 1)
