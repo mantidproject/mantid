@@ -28,7 +28,7 @@ def calculate_pair_data(context, pair_name):
 
 
 def _run_pre_processing(context):
-    params = context._get_pre_processing_params()
+    params = _get_pre_processing_params(context)
     params["InputWorkspace"] = context.loaded_workspace
     processed_data = algorithm_utils.run_MuonPreProcess(params)
     return processed_data

@@ -152,7 +152,12 @@ class GroupingTabPresenter(object):
         self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
+        self._model._data.update_current_data()
+
         if self._model.is_data_loaded():
+            self._model._data.show_raw_data()
+            self._model._data.show_all_groups()
+            self._model._data.show_all_pairs()
             self.grouping_table_widget.update_view_from_model()
             self.pairing_table_widget.update_view_from_model()
             self.update_description_text()

@@ -92,8 +92,8 @@ class GroupingTabModel(object):
         The pair name is auto-generated and alpha=1.0
         """
         pair = construct_empty_pair(self.group_names, self.pair_names, 0)
-        pair.group1 = name1
-        pair.group2 = name2
+        pair.forward_group = name1
+        pair.backward_group = name2
         return pair
 
     def reset_groups_and_pairs_to_default(self):
