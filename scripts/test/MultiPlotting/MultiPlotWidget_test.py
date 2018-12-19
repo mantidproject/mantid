@@ -70,7 +70,7 @@ class MultiPlotWidgetTest(unittest.TestCase):
     def test_setAllValues(self):
         self.widget._context.subplots = data()
         # mocks as we only want to test logic
-        self.widget.quickEdit.get_selection = mock.MagicMock(return_value = data().keys())
+        self.widget.quickEdit.get_selection = mock.MagicMock(return_value = list(data().keys()))
         self.widget._x_range_changed = mock.MagicMock()
         self.widget._y_range_changed = mock.MagicMock()
         self.widget._check_all_errors = mock.MagicMock(return_value = False)
