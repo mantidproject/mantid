@@ -4,18 +4,16 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
 
 #include "DllConfig.h"
+#include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IReflBatchPresenter.h"
-#include "IReflRunsTabPresenter.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "ReflAutoreduction.h"
 #include "SearchResult.h"
 #include <boost/shared_ptr.hpp>
@@ -32,12 +30,11 @@ class ProgressableView;
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflRunsTabView;
+class IRunsView;
 class IReflMessageHandler;
 class IReflSearcher;
 class ReflSearchModel;
 
-using MantidWidgets::DataProcessor::DataProcessorPresenter;
 using MantidWidgets::ProgressableView;
 
 enum class TransferMatch {
@@ -46,33 +43,31 @@ enum class TransferMatch {
   Strict      // only those that exactly match all parts of the regex
 };
 
-/** @class ReflRunsTabPresenter
+/** @class RunsPresenter
 
-ReflRunsTabPresenter is a presenter class for the Reflectometry Interface. It
+RunsPresenter is a presenter class for the Reflectometry Interface. It
 handles any interface functionality and model manipulation.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
-    : public IReflRunsTabPresenter,
+class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
+    : public IRunsPresenter,
       public Mantid::API::AlgorithmObserver {
 public:
-  ReflRunsTabPresenter(IReflRunsTabView *mainView,
-                       ProgressableView *progressView,
-                       RunsTablePresenterFactory makeRunsTablePresenter,
-                       double thetaTolerance,
-                       std::vector<std::string> const &instruments,
-                       int defaultInstrumentIndex,
-                       IReflMessageHandler *messageHandler,
-                       boost::shared_ptr<IReflSearcher> searcher =
-                           boost::shared_ptr<IReflSearcher>());
-  ReflRunsTabPresenter(ReflRunsTabPresenter const &) = delete;
-  ~ReflRunsTabPresenter() override;
-  ReflRunsTabPresenter const &operator=(ReflRunsTabPresenter const &) = delete;
+  RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
+                RunsTablePresenterFactory makeRunsTablePresenter,
+                double thetaTolerance,
+                std::vector<std::string> const &instruments,
+                int defaultInstrumentIndex, IReflMessageHandler *messageHandler,
+                boost::shared_ptr<IReflSearcher> searcher =
+                    boost::shared_ptr<IReflSearcher>());
+  RunsPresenter(RunsPresenter const &) = delete;
+  ~RunsPresenter() override;
+  RunsPresenter const &operator=(RunsPresenter const &) = delete;
 
-  ReflRunsTabPresenter(ReflRunsTabPresenter &&) = default;
-  ReflRunsTabPresenter &operator=(ReflRunsTabPresenter &&) = default;
+  RunsPresenter(RunsPresenter &&) = default;
+  RunsPresenter &operator=(RunsPresenter &&) = default;
 
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
-  void notify(IReflRunsTabPresenter::Flag flag) override;
+  void notify(IRunsPresenter::Flag flag) override;
   void settingsChanged() override;
 
   bool isAutoreducing() const override;
@@ -89,7 +84,7 @@ protected:
 
 private:
   /// The main view we're managing
-  IReflRunsTabView *m_view;
+  IRunsView *m_view;
   /// The progress view
   ProgressableView *m_progressView;
   RunsTablePresenterFactory m_makeRunsTablePresenter;
@@ -154,4 +149,4 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H */

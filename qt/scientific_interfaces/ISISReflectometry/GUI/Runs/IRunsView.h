@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H
+#define MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H
 
 #include "DllConfig.h"
 #include "GUI/RunsTable/IRunsTableView.h"
@@ -29,21 +29,21 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 namespace DataProcessor = MantidWidgets::DataProcessor;
-class IReflRunsTabPresenter;
+class IRunsPresenter;
 class ReflSearchModel;
 
-/** @class IReflRunsTabView
+/** @class IRunsView
 
-IReflRunsTabView is the base view class for the Reflectometry Interface. It
+IRunsView is the base view class for the Reflectometry Interface. It
 contains no QT specific functionality as that should be handled by a subclass.
 */
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IReflRunsTabView
+class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsView
     : public MantidQt::MantidWidgets::ProgressableView {
 public:
-  virtual ~IReflRunsTabView() = default;
+  virtual ~IRunsView() = default;
 
-  virtual void subscribe(IReflRunsTabPresenter *presenter) = 0;
+  virtual void subscribe(IRunsPresenter *presenter) = 0;
   virtual IRunsTableView *table() const = 0;
 
   // Connect the model
@@ -68,7 +68,7 @@ public:
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
 
-  virtual IReflRunsTabPresenter *getPresenter() const = 0;
+  virtual IRunsPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -91,4 +91,4 @@ public:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H */

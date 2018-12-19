@@ -4,17 +4,17 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
-#define MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
+#ifndef MANTID_ISISREFLECTOMETRY_RUNSTABVIEW_H_
+#define MANTID_ISISREFLECTOMETRY_RUNSTABVIEW_H_
 
 #include "DllConfig.h"
 #include "GUI/RunsTable/RunsTableView.h"
-#include "IReflRunsTabView.h"
+#include "IRunsView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
-#include "ui_ReflRunsTabWidget.h"
+#include "ui_RunsWidget.h"
 
 #include <QBasicTimer>
 
@@ -34,23 +34,23 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflRunsTabPresenter;
+class IRunsPresenter;
 class ReflSearchModel;
 
 using MantidWidgets::SlitCalculator;
 namespace DataProcessor = MantidWidgets::DataProcessor;
 
-/** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
+/** RunsView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
+class MANTIDQT_ISISREFLECTOMETRY_DLL RunsView
     : public MantidQt::API::MantidWidget,
-      public IReflRunsTabView {
+      public IRunsView {
   Q_OBJECT
 public:
-  QtReflRunsTabView(QWidget *parent, RunsTableViewFactory makeView);
+  RunsView(QWidget *parent, RunsTableViewFactory makeView);
 
-  void subscribe(IReflRunsTabPresenter *presenter) override;
+  void subscribe(IRunsPresenter *presenter) override;
   IRunsTableView *table() const override;
 
   // Connect the model
@@ -81,7 +81,7 @@ public:
   std::string getSearchInstrument() const override;
   std::string getSearchString() const override;
 
-  IReflRunsTabPresenter *getPresenter() const override;
+  IRunsPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -110,14 +110,14 @@ private:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
   // the presenter
-  IReflRunsTabPresenter *m_presenter;
+  IRunsPresenter *m_presenter;
 
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   // Command adapters
   std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
   // the interface (uses actions owned by m_commands)
-  Ui::ReflRunsTabWidget ui;
+  Ui::RunsWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
   // Timer for triggering periodic autoreduction
@@ -142,4 +142,4 @@ private slots:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_ */
+#endif /* MANTID_ISISREFLECTOMETRY_RUNSVIEW_H_ */

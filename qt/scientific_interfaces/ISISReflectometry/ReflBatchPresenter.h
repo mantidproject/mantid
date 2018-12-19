@@ -11,9 +11,9 @@
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
+#include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IReflBatchPresenter.h"
-#include "IReflRunsTabPresenter.h"
 #include <memory>
 
 namespace MantidQt {
@@ -31,7 +31,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflBatchPresenter
 public:
   /// Constructor
   ReflBatchPresenter(IReflBatchView *view,
-                     std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
+                     std::unique_ptr<IRunsPresenter> runsPresenter,
                      std::unique_ptr<IEventPresenter> eventPresenter,
                      std::unique_ptr<IExperimentPresenter> experimentPresenter,
                      std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
@@ -67,7 +67,7 @@ private:
   /// The view we are handling
   IReflBatchView *m_view;
   /// The presenter of tab 'Runs'
-  std::unique_ptr<IReflRunsTabPresenter> m_runsPresenter;
+  std::unique_ptr<IRunsPresenter> m_runsPresenter;
   /// The presenter of tab 'Event Handling'
   std::unique_ptr<IEventPresenter> m_eventPresenter;
   /// The presenter of tab 'Settings'

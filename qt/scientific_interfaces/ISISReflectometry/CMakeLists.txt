@@ -20,7 +20,6 @@ set ( SRC_FILES
     ExperimentOptionDefaults.cpp
     QtReflMainWindowView.cpp
     QtReflBatchView.cpp
-    QtReflRunsTabView.cpp
     ReflCatalogSearcher.cpp
     ReflAsciiSaver.cpp
     IReflAsciiSaver.cpp
@@ -29,7 +28,6 @@ set ( SRC_FILES
     ReflMainWindowPresenter.cpp
     ReflBatchPresenter.cpp
     ReflNexusMeasurementItemSource.cpp
-    ReflRunsTabPresenter.cpp
     ReflSearchModel.cpp
     ReflTableSchema.cpp
     Parse.cpp
@@ -49,14 +47,11 @@ set ( INC_FILES
     IReflMainWindowView.h
     IReflBatchView.h
     IReflMessageHandler.h
-    IReflRunsTabPresenter.h
-    IReflRunsTabView.h
     IReflSearcher.h
     MeasurementItem.h
     PrecompiledHeader.h
     QtReflMainWindowView.h
     QtReflBatchView.h
-    QtReflRunsTabView.h
     QWidgetGroup.h
     ReflAutoreduction.h
     ReflCatalogSearcher.h
@@ -67,7 +62,6 @@ set ( INC_FILES
     ReflBatchPresenter.h
     ReflMeasurementItemSource.h
     ReflNexusMeasurementItemSource.h
-    ReflRunsTabPresenter.h
     ReflSearchModel.h
     ReflTableSchema.h
     TransferResults.h
@@ -80,7 +74,6 @@ set ( INC_FILES
 set ( MOC_FILES
     ${GUI_MOC_FILES}
     ReflSearchModel.h
-    QtReflRunsTabView.h
     QtReflMainWindowView.h
     QtReflBatchView.h
 )
@@ -89,7 +82,6 @@ set ( UI_FILES
    ${GUI_UI_FILES}
    ReflMainWindowWidget.ui
    ReflBatchWidget.ui
-   ReflRunsTabWidget.ui
    ReflWindow.ui
 )
 

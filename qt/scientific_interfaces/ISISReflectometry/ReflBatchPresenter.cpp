@@ -8,9 +8,9 @@
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
+#include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IReflBatchView.h"
-#include "IReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -30,7 +30,7 @@ namespace CustomInterfaces {
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
 ReflBatchPresenter::ReflBatchPresenter(
-    IReflBatchView *view, std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
+    IReflBatchView *view, std::unique_ptr<IRunsPresenter> runsPresenter,
     std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
@@ -45,7 +45,7 @@ ReflBatchPresenter::ReflBatchPresenter(
   m_runsPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
-  m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+  m_runsPresenter->notify(IRunsPresenter::InstrumentChangedFlag);
 }
 
 bool ReflBatchPresenter::requestClose() const { return true; }

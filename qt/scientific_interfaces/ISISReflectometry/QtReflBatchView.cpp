@@ -6,13 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtReflBatchView.h"
 #include "GUI/Event/EventView.h"
+#include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/make_unique.h"
-#include "QtReflRunsTabView.h"
 #include "ReflAsciiSaver.h"
 #include "ReflBatchPresenter.h"
-#include "ReflRunsTabPresenter.h"
 
 #include <QMessageBox>
 
@@ -52,7 +51,7 @@ IInstrumentView *QtReflBatchView::instrument() const {
   return m_instrument.get();
 }
 
-IReflRunsTabView *QtReflBatchView::runs() const { return m_runs.get(); }
+IRunsView *QtReflBatchView::runs() const { return m_runs.get(); }
 
 IEventView *QtReflBatchView::eventHandling() const {
   return m_eventHandling.get();
@@ -60,10 +59,10 @@ IEventView *QtReflBatchView::eventHandling() const {
 
 ISaveView *QtReflBatchView::save() const { return m_save.get(); }
 
-std::unique_ptr<QtReflRunsTabView> QtReflBatchView::createRunsTab() {
+std::unique_ptr<RunsView> QtReflBatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
-  return Mantid::Kernel::make_unique<QtReflRunsTabView>(
+  return Mantid::Kernel::make_unique<RunsView>(
       this, RunsTableViewFactory(instruments));
 }
 

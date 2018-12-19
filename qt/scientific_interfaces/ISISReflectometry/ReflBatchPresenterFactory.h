@@ -10,11 +10,11 @@
 #include "GUI/Event/EventPresenterFactory.h"
 #include "GUI/Experiment/ExperimentPresenterFactory.h"
 #include "GUI/Instrument/InstrumentPresenterFactory.h"
+#include "GUI/Runs/RunsPresenterFactory.h"
 #include "GUI/Save/SavePresenterFactory.h"
 #include "IReflBatchPresenter.h"
 #include "IReflBatchView.h"
 #include "ReflBatchPresenter.h"
-#include "ReflRunsPresenterFactory.h"
 #include <memory>
 
 namespace MantidQt {

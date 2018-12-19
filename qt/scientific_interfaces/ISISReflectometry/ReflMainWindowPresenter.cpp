@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflMainWindowPresenter.h"
+#include "GUI/Runs/IRunsPresenter.h"
 #include "IReflMainWindowView.h"
-#include "IReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;

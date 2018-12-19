@@ -7,13 +7,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "../ISISReflectometry/GUI/RunsTable/IRunsTableView.h"
 #include "../ISISReflectometry/IReflAsciiSaver.h"
 #include "../ISISReflectometry/IReflBatchPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowView.h"
-#include "../ISISReflectometry/IReflRunsTabPresenter.h"
-#include "../ISISReflectometry/IReflRunsTabView.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -45,55 +42,6 @@ public:
 
 /**** Views ****/
 
-class MockRunsTabView : public IReflRunsTabView {
-public:
-  MockRunsTabView() {
-    ON_CALL(*this, table()).WillByDefault(testing::Return(m_tableView));
-  }
-
-  // IO
-  MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
-  MOCK_CONST_METHOD0(getAllSearchRows, std::set<int>());
-  MOCK_CONST_METHOD0(getSearchString, std::string());
-  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
-  MOCK_CONST_METHOD0(getTransferMethod, std::string());
-  MOCK_CONST_METHOD0(getAlgorithmRunner,
-                     boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
-  MOCK_CONST_METHOD0(getMonitorAlgorithmRunner,
-                     boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
-  MOCK_CONST_METHOD0(getSelectedGroup, int());
-  MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
-  MOCK_METHOD0(setTableCommandsProxy, void());
-  MOCK_METHOD0(setRowCommandsProxy, void());
-  MOCK_METHOD0(clearCommands, void());
-  MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
-  MOCK_METHOD1(updateMenuEnabledState, void(bool));
-  MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
-  MOCK_METHOD1(setAutoreducePauseButtonEnabled, void(bool));
-  MOCK_METHOD1(setTransferButtonEnabled, void(bool));
-  MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
-  MOCK_METHOD1(subscribe, void(IReflRunsTabPresenter *));
-  MOCK_CONST_METHOD0(table, IRunsTableView *());
-  MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
-  MOCK_METHOD1(setSearchButtonEnabled, void(bool));
-  MOCK_METHOD1(setStartMonitorButtonEnabled, void(bool));
-  MOCK_METHOD1(setStopMonitorButtonEnabled, void(bool));
-  MOCK_METHOD1(startTimer, void(const int));
-  MOCK_METHOD0(stopTimer, void());
-  MOCK_METHOD0(startIcatSearch, void());
-  MOCK_METHOD0(startMonitor, void());
-  MOCK_METHOD0(stopMonitor, void());
-  MOCK_METHOD0(updateMonitorRunning, void());
-  MOCK_METHOD0(updateMonitorStopped, void());
-
-  // Calls we don't care about
-  void showSearch(ReflSearchModel_sptr) override{};
-  IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
-
-private:
-  IRunsTableView *m_tableView;
-};
-
 class MockMainWindowView : public IReflMainWindowView {
 public:
   MOCK_METHOD3(askUserString,
@@ -109,18 +57,6 @@ public:
 };
 
 /**** Presenters ****/
-
-class MockRunsTabPresenter : public IReflRunsTabPresenter {
-public:
-  MOCK_CONST_METHOD0(isAutoreducing, bool());
-  MOCK_METHOD0(settingsChanged, void());
-  void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
-  void acceptMainPresenter(IReflBatchPresenter *presenter) override {
-    UNUSED_ARG(presenter);
-  }
-  bool isProcessing() const override { return false; }
-  ~MockRunsTabPresenter() override{};
-};
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:

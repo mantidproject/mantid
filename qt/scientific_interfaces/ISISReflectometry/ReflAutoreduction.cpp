@@ -5,9 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflAutoreduction.h"
+#include "GUI/Runs/IRunsView.h"
+#include "GUI/Runs/RunsPresenter.h"
 #include "IReflMainWindowPresenter.h"
-#include "IReflRunsTabView.h"
-#include "ReflRunsTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
