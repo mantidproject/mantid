@@ -33,7 +33,7 @@ parser.add_argument('--archivesearch', dest='archivesearch', action='store_true'
 parser.add_argument('--exclude-in-pull-requests', dest="exclude_in_pr_builds",action="store_true",
                     help="Skip tests that are not run in pull request builds")
 log_levels = ['error', 'warning', 'notice', 'information', 'debug']
-parser.add_argument('-l', dest='log_level', metavar='level', default='notice',
+parser.add_argument('-l', dest='log_level', metavar='level', default='information',
                     choices=log_levels, help='Log level '+str(log_levels))
 options = parser.parse_args()
 
