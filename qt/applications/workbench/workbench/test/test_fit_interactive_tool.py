@@ -32,8 +32,9 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         pos.setX(marker.get_x_in_pixels())
         new_pos = pos + QPoint(dx_pxl, 0)
         yield drag_mouse(canvas, pos, new_pos)
-        pos1 = QCursor.pos()
-        if canvas.mapFromGlobal(pos1) != new_pos:
+        pos1 = canvas.mapFromGlobal(QCursor.pos())
+        print(pos1, new_pos)
+        if pos1 != new_pos:
             new_x = marker.x + dx
             marker.on_click(pos.x())
             marker.mouse_move(new_x)
@@ -140,12 +141,12 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.start()
         self.fit_browser.loadFunction('name=LinearBackground')
         self.fit_browser.fit()
-        yield self.wait_for_true(lambda: 'ws_Workspace' in mtd)
+        yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
         # self.assertEqual(self.fit_browser.getFittingFunction(), "name=LinearBackground,A0=4.74354,A1=-0.442138")
         self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
         del mtd['ws_Workspace']
         self.fit_browser.fit()
-        yield self.wait_for_true(lambda: 'ws_Workspace' in mtd)
+        yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
         self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
 
 

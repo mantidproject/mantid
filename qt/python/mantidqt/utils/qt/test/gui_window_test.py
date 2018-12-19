@@ -13,7 +13,7 @@ from unittest import TestCase
 
 from mantidqt.utils.qt.test.gui_test_runner import open_in_window
 from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
-from qtpy.QtCore import Qt, QMetaObject
+from qtpy.QtCore import Qt, QMetaObject, QTime
 from qtpy.QtTest import QTest
 
 
@@ -53,8 +53,13 @@ class GuiTestBase(object):
             yield
             var = getattr(self, var_name)
 
-    def wait_for_true(self, fun):
+    def wait_for_true(self, fun, timeout_sec=1.0):
+        t = QTime()
+        t.start()
+        timeout_millisec = int(timeout_sec * 1000)
         while not fun():
+            if t.elapsed() > timeout_millisec:
+                raise StopIteration()
             yield
 
     def wait_for_modal(self):
