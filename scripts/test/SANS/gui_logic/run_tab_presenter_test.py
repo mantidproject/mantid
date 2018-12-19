@@ -901,6 +901,25 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(actual_list, expected_list)
 
+    def test_buttons_enabled_after_export_table_fails(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 2])
+        presenter._view.enable_buttons = mock.MagicMock()
+        # Mock error throw on disable buttons so export fails
+        presenter._view.disable_buttons = mock.MagicMock(side_effect=RuntimeError("A test exception"))
+        try:
+            presenter.on_export_table_clicked()
+        except Exception as e:
+            self.assertTrue(False, "Exceptions should have been caught in the method. "
+                                   "Exception thrown is {}".format(str(e)))
+        else:
+            self.assertEqual(presenter._view.enable_buttons.call_count, 1,
+                             "Expected enable buttons to be called once, "
+                             "was called {} times.".format(presenter._view.enable_buttons.call_count))
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():

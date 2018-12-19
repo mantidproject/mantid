@@ -84,7 +84,7 @@ class TableModelTest(unittest.TestCase):
 
     def test_that_parse_string_returns_correctly(self):
         string_to_parse = 'EventSlices=1-6,5-9,4:5:89 , WavelengthMax=78 , WavelengthMin=9'
-        expected_dict = {'EventSlices':'1-6,5-9,4:5:89', 'WavelengthMax':'78', 'WavelengthMin':'9'}
+        expected_dict = {'EventSlices': '1-6,5-9,4:5:89', 'WavelengthMax': '78', 'WavelengthMin': '9'}
 
         parsed_dict = OptionsColumnModel._parse_string(string_to_parse)
 
@@ -138,7 +138,7 @@ class TableModelTest(unittest.TestCase):
     def test_that_OptionsColumnModel_get_permissable_properties_returns_correct_properties(self):
         permissable_properties = OptionsColumnModel._get_permissible_properties()
 
-        self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str,
+        self.assertEqual(permissable_properties, {"WavelengthMin": float, "WavelengthMax": float, "EventSlices": str,
                                                   "MergeScale": float, "MergeShift": float})
 
     def test_that_OptionsColumnModel_get_hint_strategy(self):
@@ -209,6 +209,17 @@ class TableModelTest(unittest.TestCase):
 
         self.assertEqual(options_string, 'EventSlices=1-6,5-9,4:5:89, MergeScale=1.5,'
                                          ' WavelengthMax=78.0, WavelengthMin=9.0')
+
+    def test_that_to_batch_list_is_correct_format(self):
+        test_row = ['SANS2D00022024  ', '', 'SANS2D00022025 ', '', '   SANS2D00022026 ', '', '', '', '', '', '', '',
+                    '    out_file', 'a_user_file ', 1.0, '', '', 'Disc', 'WavelengthMax=5.0']
+        table_index_model = TableIndexModel(*test_row)
+
+        actual_list = table_index_model.to_batch_list()
+        expected_list = ["SANS2D00022024", "out_file", "SANS2D00022025", "SANS2D00022026",
+                         "", "", "", "a_user_file"]
+
+        self.assertEqual(actual_list, expected_list)
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string

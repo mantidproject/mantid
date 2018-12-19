@@ -553,13 +553,8 @@ class RunTabPresenter(object):
     def on_export_table_clicked(self):
         non_empty_rows = self.get_row_indices()
         if len(non_empty_rows) == 0:
-            self.sans_logger.information("Cannot export table as it is empty.")
+            self.sans_logger.notice("Cannot export table as it is empty.")
             return
-
-        filename = self._table_model.batch_file  # Set default to current batch file
-
-        if filename[-4:] != '.csv':
-            filename += '.csv'
 
         # Python 2 and 3 take input in different modes for writing lists to csv files
         if sys.version_info[0] == 2:
@@ -568,12 +563,25 @@ class RunTabPresenter(object):
             open_type = 'w'
 
         try:
-            self.sans_logger.information("Starting export of table.")
-            with open(filename, open_type) as outfile:
-                # Pass filewriting object rather than filename to make testing easier
-                writer = csv.writer(outfile)
-                self._export_table(writer, non_empty_rows)
+            self._view.disable_buttons()
+
+            default_filename = self._table_model.batch_file
+            filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
+            
+            if filename:
+                self.sans_logger.notice("Starting export of table.")
+                if filename[-4:] != '.csv':
+                    filename += '.csv'
+
+                with open(filename, open_type) as outfile:
+                    # Pass filewriting object rather than filename to make testing easier
+                    writer = csv.writer(outfile)
+                    self._export_table(writer, non_empty_rows)
+                    self.sans_logger.notice("Table exporting finished.")
+
+            self._view.enable_buttons()
         except Exception as e:
+            self._view.enable_buttons()
             self.sans_logger.error("Export halted due to : {}".format(str(e)))
             self.display_warning_box("Warning", "Export halted", str(e))
 
@@ -585,6 +593,10 @@ class RunTabPresenter(object):
 
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
+
+    def display_save_file_box(self, title, default_path, file_filter):
+        filename = self._view.display_save_file_box(title, default_path, file_filter)
+        return filename
 
     def notify_progress(self, row, out_shift_factors, out_scale_factors):
         self.increment_progress()
