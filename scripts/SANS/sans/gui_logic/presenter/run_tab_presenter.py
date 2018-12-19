@@ -1178,7 +1178,6 @@ class RunTabPresenter(object):
         for row in rows:
                 table_row = self._table_model.get_table_entry(row).to_batch_list()
                 batch_file_row = self._create_batch_entry_from_row(table_row)
-                
                 filewriter.writerow(batch_file_row)
 
     @staticmethod
