@@ -204,6 +204,10 @@ protected:
 private:
   std::vector<SpectrumTester> m_vec;
   size_t m_spec;
+  ISpectrum &getSpectrumWithoutInvalidation(const size_t index) override {
+    m_vec[index].setMatrixWorkspace(this, index);
+    return m_vec[index];
+  }
 };
 
 class WorkspaceTester : public AxeslessWorkspaceTester {
