@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-import os
+import os, sys
 os.environ["QT_API"] = "pyqt"  # noqa E402
 
 from matplotlib.figure import Figure
@@ -37,7 +37,7 @@ def get_subPlot(name):
     subplot.addLine(label1, line1, ws1, 2)
     return subplot, ws1
 
-
+@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
 class PlottingViewHelperFunctionTests(unittest.TestCase):
 
     def setUp(self):
@@ -294,6 +294,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
             list(self.view.plots.keys()))
 
 
+@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
 class PlottingViewPlotFunctionsTests(unittest.TestCase):
 
     def setUp(self):
