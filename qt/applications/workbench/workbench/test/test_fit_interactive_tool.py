@@ -25,7 +25,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield 0.1
         self.fit_browser = manager.fit_browser
 
-    def move_marker(self, canvas, marker, pos, dx):
+    def move_marker(self, canvas, marker, pos, dx, try_other_way_if_failed):
         tr = self.fit_browser.tool.ax.get_xaxis_transform()
         x0 = tr.transform((0, 0))[0]
         dx_pxl = tr.transform((dx, 0))[0] - x0
@@ -34,18 +34,20 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield drag_mouse(canvas, pos, new_pos)
         pos1 = canvas.mapFromGlobal(QCursor.pos())
         print(pos1, new_pos)
-        if pos1 != new_pos:
+        if try_other_way_if_failed and pos1 != new_pos:
             new_x = marker.x + dx
             marker.on_click(pos.x())
             marker.mouse_move(new_x)
             yield 0.1
             marker.stop()
 
-    def move_start_x(self, canvas, pos, dx):
-        return self.move_marker(canvas, self.fit_browser.tool.fit_start_x, pos, dx)
+    def move_start_x(self, canvas, pos, dx, try_other_way_if_failed=True):
+        return self.move_marker(canvas, self.fit_browser.tool.fit_start_x, pos, dx,
+                                try_other_way_if_failed=try_other_way_if_failed)
 
-    def move_end_x(self, canvas, pos, dx):
-        return self.move_marker(canvas, self.fit_browser.tool.fit_end_x, pos, dx)
+    def move_end_x(self, canvas, pos, dx, try_other_way_if_failed=True):
+        return self.move_marker(canvas, self.fit_browser.tool.fit_end_x, pos, dx,
+                                try_other_way_if_failed=try_other_way_if_failed)
 
     def test_fit_range(self):
         yield self.start()
@@ -96,7 +98,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         start_x_pxl = self.fit_browser.tool.fit_start_x.get_x_in_pixels()
         pos = self.w._canvas.geometry().center()
         canvas = self.w.childAt(pos)
-        yield self.move_start_x(canvas, pos, -2.0)
+        yield self.move_start_x(canvas, pos, -2.0, try_other_way_if_failed=False)
         self.assertAlmostEqual(start_x_pxl, self.fit_browser.tool.fit_start_x.get_x_in_pixels(), 0)
 
     def test_fit_range_moved_end_outside(self):
@@ -104,7 +106,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         end_x_pxl = self.fit_browser.tool.fit_end_x.get_x_in_pixels()
         pos = self.w._canvas.geometry().center()
         canvas = self.w.childAt(pos)
-        yield self.move_end_x(canvas, pos, 2.0)
+        yield self.move_end_x(canvas, pos, 2.0, try_other_way_if_failed=False)
         self.assertAlmostEqual(end_x_pxl, self.fit_browser.tool.fit_end_x.get_x_in_pixels(), 0)
 
     def test_fit_range_set_start(self):
