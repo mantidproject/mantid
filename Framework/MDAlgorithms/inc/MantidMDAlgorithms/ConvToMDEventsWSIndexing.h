@@ -135,6 +135,19 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
                                                                 const MDSpaceBounds<ND>& space,
                                                                 const API::BoxController_sptr &bc,
                                                                 const unsigned& level);
+
+  template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
+  void distributeEvents(DataObjects::MDBoxBase<MDEventType<ND>, ND>* root,
+                                                  const EventIterator begin,
+                                                  const EventIterator end,
+                                                  const typename MDEventType<ND>::MortonT lower,
+                                                  const typename MDEventType<ND>::MortonT upper,
+                                                  const MDSpaceBounds<ND>& space,
+                                                  const size_t childBoxCount,
+                                                  const size_t splitThreshold,
+                                                  size_t maxDepth,
+                                                  unsigned level,
+                                                  const API::BoxController_sptr &bc);
 };
 
 
@@ -261,10 +274,13 @@ template<size_t ND, template <size_t> class MDEventType>
 DataObjects::MDBoxBase<MDEventType<ND>, ND>* ConvToMDEventsWSIndexing::
 convertToNativeBoxStructure(const ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType> & mdBox,
                             const MDSpaceBounds<ND>& space, const API::BoxController_sptr &bc) {
+
   if(mdBox.isLeaf()) {
+    bc->incBoxesCounter(0);
     return makeMDBox<ND, MDEventType>(mdBox, ConvToMDEventsWSIndexing::LEAF, space, bc, 0);
   }
   else {
+    bc->incGridBoxesCounter(0);
     DataObjects::MDGridBox<MDEventType<ND>, ND>*
         res(
         static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND> *>
@@ -313,6 +329,8 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
 
 template<typename EventType, size_t ND, template <size_t> class MDEventType>
 void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+  bc->clearBoxesCounter(1);
+  bc->clearGridBoxesCounter(0);
   pProgress->resetNumSteps(4, 0, 1);
 
   std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
@@ -321,14 +339,17 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
 
   std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
   MDSpaceBounds<ND> space;
+  std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents;
   const auto& pws{m_OutWSWrapper->pWorkspace()};
   for(size_t ax = 0; ax < ND; ++ ax) {
     space(ax, 0) = pws->getDimension(ax)->getMinimum();
     space(ax, 1) = pws->getDimension(ax)->getMaximum();
+    extents.emplace_back();
+    extents.rbegin()->setExtents(pws->getDimension(ax)->getMinimum(), pws->getDimension(ax)->getMaximum());
   }
 
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << "Convert events: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr << bc->getNumMDBoxes()[1] << " " << "Convert events: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
   start = std::chrono::high_resolution_clock::now();
 
 
@@ -339,7 +360,7 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
   pProgress->report(0);
 
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << "Retrieve morton: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr << bc->getNumMDBoxes()[1] << " " << "Retrieve morton: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
   start = std::chrono::high_resolution_clock::now();
 
 
@@ -352,7 +373,7 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
 
 
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << "Sort: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr << bc->getNumMDBoxes()[1] << " " << "Sort: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
   start = std::chrono::high_resolution_clock::now();
 
 
@@ -361,26 +382,33 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
   pProgress->report(2);
 
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << "Build boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr << bc->getNumMDBoxes()[1] << " " <<  "Build boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
   start = std::chrono::high_resolution_clock::now();
 
 
-#pragma omp parallel for
-  for(size_t i = 0; i < mdEvents.size(); ++i)
-    mdEvents[i].retrieveCoordinates(space);
+//#pragma omp parallel for
+//  for(size_t i = 0; i < mdEvents.size(); ++i)
+//    mdEvents[i].retrieveCoordinates(space);
+//
+//
+//  end = std::chrono::high_resolution_clock::now();
+//  std::cerr << bc->getNumMDBoxes()[1] << " " <<  "Retrieve cordinates: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+//  start = std::chrono::high_resolution_clock::now();
+//
+//
+//  m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure<ND, MDEventType>(*(rootMdBox.get()), space, bc));
 
-
-  end = std::chrono::high_resolution_clock::now();
-  std::cerr << "Retrieve cordinates: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
-  start = std::chrono::high_resolution_clock::now();
-
-
-  m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure<ND, MDEventType>(*(rootMdBox.get()), space, bc));
-
+  bc->incGridBoxesCounter(0);
+  auto root = new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), 0, extents, mdEvents.begin(), mdEvents.end());
+  auto mortonMin = md_structure_ws::calculateDefaultBound<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT>(std::numeric_limits<typename MDEventType<ND>::IntT>::min());
+  auto mortonMax = md_structure_ws::calculateDefaultBound<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT>(std::numeric_limits<typename MDEventType<ND>::IntT>::max());
+  distributeEvents(root, mdEvents.begin(), mdEvents.end(), mortonMin, mortonMax,
+      space, bc->getNumSplit() , bc->getSplitThreshold(), bc->getMaxDepth()+1, 1 , bc);
+  m_OutWSWrapper->pWorkspace()->setBox(root);
   pProgress->report(3);
 
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << "Convert boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr << bc->getNumMDBoxes()[1] << " " <<  "Build native boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
 }
 
 
@@ -434,7 +462,110 @@ ConvToMDEventsWSIndexing::makeMDBox(BoxStructureType<ND, MDEventType> sbox, cons
   default:
     throw std::logic_error("Wrong MD box type detected.");
   }
+}
 
+
+template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
+void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventType<ND>, ND>* root,
+                                                const EventIterator begin,
+                                                const EventIterator end,
+                                                const typename MDEventType<ND>::MortonT lowerBound,
+                                                const typename MDEventType<ND>::MortonT upperBound,
+                                                const MDSpaceBounds<ND>& space,
+                                                const size_t childBoxCount,
+                                                const size_t splitThreshold,
+                                                size_t maxDepth,
+                                                unsigned level,
+                                                const API::BoxController_sptr &bc) {
+  using MDEvent = MDEventType<ND>;
+  using MortonT = typename MDEvent::MortonT;
+  using BoxBase = DataObjects::MDBoxBase<MDEvent, ND>;
+  using Box = DataObjects::MDBox<MDEvent, ND>;
+  using GridBox = DataObjects::MDGridBox<MDEvent, ND>;
+
+  if (maxDepth-- == 1 || std::distance(begin, end) <= splitThreshold) {
+    return;
+  }
+
+  std::vector<API::IMDNode *> children;
+  children.reserve(childBoxCount);
+
+/* Determine the "width" of this box in Morton number */
+  const MortonT thisBoxWidth = upperBound - lowerBound;
+
+  /* Determine the "width" of the child boxes in Morton number */
+  const MortonT childBoxWidth = thisBoxWidth / childBoxCount;
+
+  auto eventIt = begin;
+
+  std::vector<std::pair<EventIterator, EventIterator>> eventRanges;
+  std::vector<std::pair<MortonT, MortonT>> mortonBounds;
+
+  /* For each new child box */
+  for (size_t i = 0; i < childBoxCount; ++i) {
+    /* Lower child box bound is parent box lower bound plus for each previous
+     * child box; box width plus offset by one (such that lower bound of box
+     * i+1 is one grater than upper bound of box i) */
+    const auto boxLower = lowerBound + ((childBoxWidth + 1) * i);
+
+    /* Upper child box bound is lower plus child box width */
+    const auto boxUpper = childBoxWidth + boxLower;
+
+    const auto boxEventStart = eventIt;
+
+    /* Iterate over event list to find the first event that should not be in
+     * the current child box */
+    while (md_structure_ws::morton_contains<MortonT>(boxLower, boxUpper,
+                                                     eventIt->getIndex()) &&
+        eventIt != end) {
+      /* Event was in the box, increment the event iterator */
+      ++eventIt;
+    }
+
+    /* Add new child box. */
+    /* As we are adding as we iterate over Morton numbers and parent events
+     * child boxes are inserted in the correct sorted order. */
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
+    auto minCoord = MDEvent::indexToCoordinates(boxLower, space);
+    auto maxCoord = MDEvent::indexToCoordinates(boxUpper, space);
+    for(unsigned ax = 0; ax < ND; ++ax) {
+      extents[ax].setExtents(minCoord[ax], maxCoord[ax]);
+    }
+
+    BoxBase* newBox;
+    if(std::distance(boxEventStart, eventIt) <= splitThreshold || maxDepth == 1) {
+      for(auto it = boxEventStart; it < eventIt; ++it)
+        it->retrieveCoordinates(space);
+      bc->incBoxesCounter(level);
+      newBox = new Box(bc.get(), level, extents, boxEventStart, eventIt);
+    } else {
+      bc->incGridBoxesCounter(level);
+      newBox = new GridBox(bc.get(), level, extents, boxEventStart, eventIt);
+    }
+
+    children.emplace_back(newBox);
+    eventRanges.emplace_back(std::make_pair(boxEventStart, eventIt));
+    mortonBounds.emplace_back(std::make_pair(boxLower, boxUpper));
+  }
+
+  root->setChildren(children, 0, children.size());
+
+  /* Distribute events within child boxes */
+  /* See https://en.wikibooks.org/wiki/OpenMP/Tasks */
+  /* The parallel pragma enables execution of the following block by all worker
+   * threads. */
+  ++level;
+#pragma omp parallel for
+  for (size_t i = 0; i < eventRanges.size(); i++) {
+    BoxBase* childPtr = static_cast<BoxBase*>(children[i]);
+    auto chBegin = eventRanges[i].first;
+    auto chEnd = eventRanges[i].second;
+    auto lower = mortonBounds[i].first;
+    auto upper = mortonBounds[i].second;
+    distributeEvents(childPtr, chBegin, chEnd, lower, upper,
+                     space, childBoxCount, splitThreshold,
+                     maxDepth, level, bc);
+  }
 }
 
 } // namespace MDAlgorithms

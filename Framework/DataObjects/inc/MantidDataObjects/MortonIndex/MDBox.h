@@ -78,6 +78,13 @@ bool morton_contains(const MortonT lower, const MortonT upper,
   return lower <= value && value <= upper;
 }
 
+template<size_t ND, typename IntT, typename MortonT>
+MortonT calculateDefaultBound(IntT intBound) {
+  IntArray<ND, IntT> minCoord;
+  minCoord.fill(intBound);
+  return Interleaver<ND, IntT, MortonT>::interleave(minCoord);
+}
+
 /**
  * @class MDBox
  *
@@ -122,11 +129,8 @@ public:
 
 private:
   MortonT CalculateDefaultBound(IntT intBound) {
-    IntArray<ND, IntT> minCoord;
-    minCoord.fill(intBound);
-    return Interleaver<ND, IntT, MortonT>::interleave(minCoord);
+    return calculateDefaultBound<ND, IntT, MortonT>(intBound);
   }
-
   void leafs(std::vector<Leaf>& lf, unsigned& level) {
     if(isLeaf()) {
       Leaf l(level, *this);
@@ -216,7 +220,7 @@ public:
      * in the box to split again. */
     /* We check for maxDepth == 1 as maximum depth includes the root node, which
      * did not decrement the max depth counter. */
-    if (maxDepth-- == 1 || eventCount() < splitThreshold) {
+    if (maxDepth-- == 1 || eventCount() <= splitThreshold) {
       return;
     }
 
@@ -262,21 +266,9 @@ public:
 /* See https://en.wikibooks.org/wiki/OpenMP/Tasks */
 /* The parallel pragma enables execution of the following block by all worker
  * threads. */
-#pragma omp parallel
-/* The single nowait pragma disables execution on a single worker thread and
- * disables its barrier. */
-#pragma omp single nowait
-    {
-      for (size_t i = 0; i < m_childBoxes.size(); i++) {
-
-/* Run each child box splitting as a separate task */
-#pragma omp task
-        m_childBoxes[i].distributeEvents(splitThreshold, maxDepth);
-      }
-
-/* Wait for all tasks to be completed */
-#pragma omp taskwait
-    }
+#pragma omp parallel for
+    for (size_t i = 0; i < m_childBoxes.size(); i++)
+      m_childBoxes[i].distributeEvents(splitThreshold, maxDepth);
   }
 
   /**
