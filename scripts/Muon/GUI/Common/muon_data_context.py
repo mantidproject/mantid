@@ -9,11 +9,15 @@ from __future__ import (absolute_import, division, print_function)
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 
+import Muon.GUI.Common.utilities.xml_utils as xml_utils
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.muon_file_utils import format_run_for_file
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_raw_data_directory, get_group_data_directory,
@@ -36,7 +40,7 @@ def get_default_grouping(instrument, main_field_direction):
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = instrument_directory + grouping_file
-    new_groups, new_pairs = load_utils.load_grouping_from_XML(filename)
+    new_groups, new_pairs = xml_utils.load_grouping_from_XML(filename)
     return new_groups, new_pairs
 
 
@@ -111,7 +115,7 @@ class MuonDataContext(object):
 
     @property
     def instrument(self):
-        inst = ConfigService.getInstrument()
+        inst = ConfigService.getInstrument().name()
         return inst
 
     @property
@@ -263,7 +267,7 @@ class MuonDataContext(object):
         directory = get_base_data_directory(self) + get_group_data_directory(self)
         workspace = calculate_group_data(self, group_name)
 
-        self._groups[group_name].workspace = load_utils.MuonWorkspace(workspace)
+        self._groups[group_name].workspace = MuonWorkspaceWrapper(workspace)
         if show:
             self._groups[group_name].workspace.show(directory + name)
 
@@ -276,13 +280,13 @@ class MuonDataContext(object):
         directory = get_base_data_directory(self) + get_pair_data_directory(self)
         workspace = calculate_pair_data(self, pair_name)
 
-        self._pairs[pair_name].workspace = load_utils.MuonWorkspace(workspace)
+        self._pairs[pair_name].workspace = MuonWorkspaceWrapper(workspace)
         if show:
             self._pairs[pair_name].workspace.show(directory + name)
 
     def calculate_all_groups(self):
         for group_name in self._groups.keys():
-            calculate_group_data(group_name)
+            calculate_group_data(self, group_name)
 
     def set_groups_and_pairs_to_default(self):
         groups, pairs = get_default_grouping(self.instrument, self.main_field_direction)

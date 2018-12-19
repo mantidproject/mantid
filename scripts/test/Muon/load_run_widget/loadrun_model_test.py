@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
 
-from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.muon_test_helpers import IteratorWithException
 import unittest
@@ -32,7 +32,7 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(model.loaded_filenames, [])
         self.assertEqual(model.loaded_runs, [])
 
-    @mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+    @mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
     def test_execute_successfully_loads_valid_files(self, load_utils_mock):
         # Mock the load algorithm
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
@@ -51,7 +51,7 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(model.loaded_runs[1], 19490)
         self.assertEqual(model.loaded_runs[2], 19491)
 
-    @mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+    @mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
     def test_model_is_cleared_correctly(self, load_utils_mock):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
         load_return_vals = [([1, 2, 3], filename, 19489 + i) for i, filename in enumerate(files)]
@@ -68,7 +68,7 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(model.loaded_filenames, [])
         self.assertEqual(model.loaded_runs, [])
 
-    @mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+    @mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
     def test_execute_throws_if_one_file_does_not_load_correctly_but_still_loads_other_files(self, load_utils_mock):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
         load_return_vals = [([1, 2, 3], 19489 + i, filename) for i, filename in enumerate(files)]

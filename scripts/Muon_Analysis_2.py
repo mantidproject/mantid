@@ -11,21 +11,82 @@ import sys
 
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
-
+from mantid.kernel import ConfigServiceImpl
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
 from save_python import getWidgetIfOpen
+from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
+import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+
 
 Name = "Muon_Analysis_2"
 
+
 muonGUI = None
+SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
+
+
+def check_facility():
+    """
+    Get the currently set facility and check if it is in the list
+    of supported facilities, raising an AttributeError if not.
+    """
+    current_facility = ConfigServiceImpl.Instance().getFacility().name()
+    if current_facility not in SUPPORTED_FACILITIES:
+        raise AttributeError("Your facility {} is not supported by MuonAnalysis 2.0, so you"
+                             "will not be able to load any files. \n \n"
+                             "Supported facilities are :"
+                             + "\n - ".join(SUPPORTED_FACILITIES))
+
+
+class MuonAnalysis4Gui(QtGui.QMainWindow):
+    """
+    The Muon Analaysis 2.0 interface.
+    """
+
+    @staticmethod
+    def warning_popup(message):
+        message_box.warning(str(message))
+
+    def __init__(self, parent=None):
+        super(MuonAnalysis4Gui, self).__init__(parent)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        try:
+            check_facility()
+        except AttributeError as error:
+            self.warning_popup(error.args[0])
+
+        # initialise the data storing classes of the interface
+        self.loaded_data = MuonLoadData()
+        self.context = MuonDataContext(load_data=self.loaded_data)
+
+        # construct all the widgets.
+        self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
+
+        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitter.addWidget(self.load_widget.load_widget_view)
+
+        self.setCentralWidget(splitter)
+        self.setWindowTitle("Muon Analysis version 2")
+
+    def closeEvent(self, event):
+        print("Muon Analysis Close Event")
+        self.load_widget.load_widget_view = None
+        self.load_widget.load_run_view = None
+        self.load_widget.load_file_view = None
 
 
 class MuonAnalysis2Gui(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
         super(MuonAnalysis2Gui, self).__init__(parent)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        self.add_table_workspace()
 
         self._context = MuonContext(Name)
 
@@ -85,11 +146,10 @@ def main():
         return widget
     app = qapp()
     try:
-        muon = MuonAnalysis2Gui()
+        global muon
+        muon = MuonAnalysis4Gui()
         muon.resize(700, 700)
-        muon.setProperty("launcher", Name)
         muon.show()
-        muon.setAccessibleName(Name)
         app.exec_()
         return muon
     except RuntimeError as error:
@@ -110,8 +170,10 @@ def saveToProject():
 def loadFromProject(project):
     global muonGUI
     muonGUI = main()
-    muonGUI.loadFromContext(project)
+    muonGUI.dock_widget.loadFromProject(project)
+    # muonGUI.loadFromContext(project)
     return muonGUI
+
 
 if __name__ == '__main__':
     muon = main()
