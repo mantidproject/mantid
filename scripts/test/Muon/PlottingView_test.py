@@ -11,7 +11,7 @@ os.environ["QT_API"] = "pyqt"  # noqa E402
 
 from matplotlib.figure import Figure
 
-from mantid.simpleapi import *
+from mantid import WorkspaceFactory
 from mantid import plots
 from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
@@ -26,7 +26,12 @@ except ImportError:
 
 
 def get_subPlot(name):
-    ws1 = CreateWorkspace(DataX=[1, 2, 3, 4], DataY=[4, 5, 6, 7], NSpec=2)
+    data_x, data_y = [1, 2, 3, 4], [4, 5, 6, 7]
+    nspec = 2
+    ws1 = WorkspaceFactory.create("Workspace2D", nspec, len(data_x), len(data_y))
+    for i in range(ws1.getNumberHistograms()):
+        ws1.setX(i, data_x)
+        ws1.setY(i, data_y)
     label1 = "test"
     # create real lines
     fig = Figure()
