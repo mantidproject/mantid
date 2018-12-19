@@ -6,6 +6,8 @@ from PyQt4.QtCore import pyqtSignal as Signal
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common import message_box
 
+group_table_columns = {0: 'group_name', 1: 'detector_ids', 2: 'number_of_detectors'}
+
 
 class GroupingTableView(QtGui.QWidget):
     # For use by parent widget
@@ -24,7 +26,6 @@ class GroupingTableView(QtGui.QWidget):
 
         self.setup_interface_layout()
 
-        self.grouping_table.itemChanged.connect(self.on_item_changed)
         self.grouping_table.cellChanged.connect(self.on_cell_changed)
 
         self._validate_group_name_entry = lambda text: True
@@ -117,19 +118,19 @@ class GroupingTableView(QtGui.QWidget):
         self.grouping_table.insertRow(row_position)
         for i, entry in enumerate(row_entries):
             item = QtGui.QTableWidgetItem(entry)
-            if i == 0:
+            if group_table_columns[i] == 'group_name':
                 # column 0 : group name
                 group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
                 group_name_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 0, group_name_widget)
                 self.grouping_table.item(row_position, 0).setToolTip(entry)
-            if i == 1:
+            if group_table_columns[i] == 'detector_ids':
                 # column 1 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem(self._validate_detector_ID_entry)
                 detector_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 1, detector_widget)
                 self.grouping_table.item(row_position, 1).setToolTip(entry)
-            if i == 2:
+            if group_table_columns[i] == 'number_of_detectors':
                 # column 2 : number of detectors
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
                 item.setFlags(QtCore.Qt.ItemIsSelectable)
@@ -223,11 +224,6 @@ class GroupingTableView(QtGui.QWidget):
         selected_names = self.get_selected_group_names()
         self.addPairRequested.emit(selected_names[0], selected_names[1])
 
-    def on_item_changed(self):
-        """Not yet implemented."""
-        if not self._updating:
-            pass
-
     def on_cell_changed(self, _row, _col):
         if not self._updating:
             self._on_table_data_changed()
@@ -242,11 +238,12 @@ class GroupingTableView(QtGui.QWidget):
     def get_table_contents(self):
         if self._updating:
             return []
-        ret = [[None for _ in range(self.num_cols())]
-               for _ in range(self.num_rows())]
+        ret = []
         for row in range(self.num_rows()):
+            row_list = []
             for col in range(self.num_cols()):
-                ret[row][col] = str(self.grouping_table.item(row, col).text())
+                row_list.append(str(self.grouping_table.item(row, col).text()))
+            ret.append(row_list)
         return ret
 
     def clear(self):
@@ -298,7 +295,7 @@ class GroupingTableView(QtGui.QWidget):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
                 item = self.grouping_table.item(row, col)
-                if col != 2:
+                if group_table_columns[col] != 'number_of_detectors':
                     item.setFlags(QtCore.Qt.ItemIsSelectable |
                                   QtCore.Qt.ItemIsEditable |
                                   QtCore.Qt.ItemIsEnabled)

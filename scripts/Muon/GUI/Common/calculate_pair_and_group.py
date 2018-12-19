@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
+
 def calculate_group_data(context, group_name):
     processed_data = _run_pre_processing(context)
 

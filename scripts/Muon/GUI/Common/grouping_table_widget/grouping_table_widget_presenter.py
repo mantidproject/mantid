@@ -5,6 +5,8 @@ import re
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 
+maximum_number_of_groups = 20
+
 
 class GroupingTablePresenter(object):
 
@@ -33,8 +35,9 @@ class GroupingTablePresenter(object):
 
     def _is_edited_name_duplicated(self, new_name):
         is_name_column_being_edited = self._view.grouping_table.currentColumn() == 0
-        is_name_unique = (sum(
-            [new_name == name for name in self._model.group_and_pair_names]) == 0)
+        is_name_unique = True
+        if new_name in self._model.group_and_pair_names:
+            is_name_unique = False
         return is_name_column_being_edited and not is_name_unique
 
     def validate_group_name(self, text):
@@ -60,8 +63,8 @@ class GroupingTablePresenter(object):
 
     def add_group(self, group):
         """Adds a group to the model and view"""
-        if self._view.num_rows() > 19:
-            self._view.warning_popup("Cannot add more than 20 groups.")
+        if self._view.num_rows() >= maximum_number_of_groups:
+            self._view.warning_popup("Cannot add more than {} groups.".format(maximum_number_of_groups))
             return
         self.add_group_to_view(group)
         self.add_group_to_model(group)
