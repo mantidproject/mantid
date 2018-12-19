@@ -553,6 +553,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
   inc/MantidQtWidgets/Common/ProgressableView.h
+  inc/MantidQtWidgets/Common/MockProgressableView.h
   inc/MantidQtWidgets/Common/ProgressPresenter.h
   inc/MantidQtWidgets/Common/ProjectSavePresenter.h
   inc/MantidQtWidgets/Common/ProjectSaveModel.h

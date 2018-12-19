@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWMOCKOBJECT_H
-#define MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWMOCKOBJECT_H
+#ifndef MANTID_MANTIDWIDGETS_MOCKPROGRESSABLEVIEW_H
+#define MANTID_MANTIDWIDGETS_MOCKPROGRESSABLEVIEW_H
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
@@ -23,4 +23,4 @@ public:
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
-#endif /* MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWMOCKOBJECT_H */
+#endif /* MANTID_MANTIDWIDGETS_MOCKPROGRESSABLEVIEW_H */

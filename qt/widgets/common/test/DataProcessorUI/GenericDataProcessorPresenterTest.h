@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
+#include "MantidQtWidgets/Common/MockProgressableView.h"
 #include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MantidTestHelpers/DataProcessorTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
