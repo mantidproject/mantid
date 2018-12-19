@@ -208,7 +208,7 @@ PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
   } else // catch(... )
   {
     auto P1 = boost::make_shared<Geometry::Instrument>(
-        instSave->baseInstrument(), pmap);
+        instSave->baseInstrument(), instSave->makeLegacyParameterMap());
     instChange = P1;
   }
 
@@ -394,6 +394,10 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
     } else {
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
+    V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"),
+                  getParameter("SampleZOffset"));
+    peak.setSamplePos(sampOffsets);
+
 
     V3D hkl = UBinv * peak.getQSampleFrame();
 
@@ -513,6 +517,9 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       chiParamNum = phiParamNum = omegaParamNum = nParams() + 10;
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
+    V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"),
+                  getParameter("SampleZOffset"));
+    peak.setSamplePos(sampOffsets);
     // NOTE:Use getQLabFrame except for below.
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs
     // wrt GonRot*, wrt chi*,phi*,etc.
