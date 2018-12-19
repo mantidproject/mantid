@@ -394,10 +394,10 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
     } else {
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
-    V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"),
-                  getParameter("SampleZOffset"));
+    V3D sampOffsets(getParameter("SampleXOffset"),
+                    getParameter("SampleYOffset"),
+                    getParameter("SampleZOffset"));
     peak.setSamplePos(sampOffsets);
-
 
     V3D hkl = UBinv * peak.getQSampleFrame();
 
@@ -517,8 +517,9 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       chiParamNum = phiParamNum = omegaParamNum = nParams() + 10;
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
-    V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"),
-                  getParameter("SampleZOffset"));
+    V3D sampOffsets(getParameter("SampleXOffset"),
+                    getParameter("SampleYOffset"),
+                    getParameter("SampleZOffset"));
     peak.setSamplePos(sampOffsets);
     // NOTE:Use getQLabFrame except for below.
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs

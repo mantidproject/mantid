@@ -118,7 +118,7 @@ void OptimizeCrystalPlacement::init() {
   declareProperty("MaxAngularChange", 5.0,
                   "Max offset in degrees from current settings(def=5)");
 
-  declareProperty("MaxIndexingError", .25,
+  declareProperty("MaxIndexingError", 0.15,
                   "Use only peaks whose fractional "
                   "hkl values are below this "
                   "tolerance(def=.25)");
