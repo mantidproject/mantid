@@ -18,6 +18,8 @@ except ImportError:
 
 # third party imports
 from mantid.api import AnalysisDataService, WorkspaceFactory
+# register mantid projection
+import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
@@ -137,7 +139,7 @@ class FunctionsTest(TestCase):
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         fig = pcolormesh_from_names([ws_name])
 
-        self.assertEqual(1, len(fig.gca().collections))
+        self.assertEqual(1, len(fig.gca().images))
 
     def test_pcolormesh_from_names_using_existing_figure(self):
         ws_name = 'test_pcolormesh_from_names-1'
@@ -146,7 +148,7 @@ class FunctionsTest(TestCase):
         fig = pcolormesh_from_names([ws_name], fig=target_fig)
 
         self.assertEqual(fig, target_fig)
-        self.assertEqual(1, len(fig.gca().collections))
+        self.assertEqual(1, len(fig.gca().images))
 
     # ------------- Failure tests -------------
 

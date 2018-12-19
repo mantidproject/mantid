@@ -8,7 +8,17 @@
 #include "ConvFitAddWorkspaceDialog.h"
 #include "ConvFitDataTablePresenter.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/make_unique.h"
+
+namespace {
+using namespace Mantid::API;
+
+bool isWorkspaceLoaded(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -53,7 +63,7 @@ void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
 void ConvFitDataPresenter::addModelData(const std::string &name) {
   IndirectFitDataPresenter::addModelData(name);
   const auto resolution = getView()->getSelectedResolution();
-  if (!resolution.empty())
+  if (!resolution.empty() && isWorkspaceLoaded(resolution))
     m_convModel->setResolution(resolution, 0);
 }
 

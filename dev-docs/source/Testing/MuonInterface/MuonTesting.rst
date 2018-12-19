@@ -55,8 +55,8 @@ Ionic Diffusion test
 -  In the ``Results Table`` workspace
 
    -  Expected values (similar to within 50%) ..
-   -  f0.A0: 0.18235938124844153
-   -  f1.Asym: 0.0050597127151507
+   -  f0.A0: -0.083439833711330152
+   -  f1.Asym: 0.19125607982528858
    -  f1:Delta: 0.3301445010124604
    -  f1:Nu: 0.8574644977974730220884
 
@@ -67,11 +67,6 @@ Ionic Diffusion test
    -  Right-click each workspace
    -  Choose ``Plot spectrum``
    -  Choose ``1D plot`` and click ``Plot All``
-   -  The results should look like the image below:
-
-.. figure:: ../../images/CuResult.jpg
-   :alt: CuResult.png
-
 
 Possible problems
 ^^^^^^^^^^^^^^^^^

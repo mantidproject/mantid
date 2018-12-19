@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
+from mantid.api import FrameworkManager
 import numpy as np
 from sans.test_helper.test_director import TestDirector
 from sans.state.calculate_transmission import get_calculate_transmission_builder
@@ -62,6 +62,10 @@ def get_expected_for_spectrum_n(data_workspace, selected_workspace_index, value_
 class SANSCalculateTransmissionTest(unittest.TestCase):
     sample_workspace = None
     sample_workspace_2 = None
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
 
     @staticmethod
     def _load_workspace(file_name):

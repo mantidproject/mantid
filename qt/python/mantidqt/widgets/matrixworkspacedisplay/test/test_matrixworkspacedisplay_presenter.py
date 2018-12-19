@@ -13,6 +13,7 @@ import unittest
 
 from mock import Mock
 
+from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockQModelIndex, \
     MockWorkspace
@@ -21,6 +22,11 @@ from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedi
 
 
 class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Allow the MockWorkspace to work within the model
+        MatrixWorkspaceDisplayModel.ALLOWED_WORKSPACE_TYPES.append(MockWorkspace)
+
     def assertNotCalled(self, mock):
         self.assertEqual(0, mock.call_count)
 

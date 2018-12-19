@@ -278,28 +278,8 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     m_loadError = true;
   }
 
-  // Check that the type is what it is supposed to be
-  if (tof_info.type == ::NeXus::FLOAT32)
-    file.getSlab(event_time_of_flight.get(), m_loadStart, m_loadSize);
-  else {
-    m_loader.alg->getLogger().warning()
-        << "Entry " << entry_name
-        << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
-    m_loadError = true;
-  }
-
-  if (!m_loadError) {
-    std::string units;
-    file.getAttr("units", units);
-    if (units != "microsecond") {
-      m_loader.alg->getLogger().warning()
-          << "Entry " << entry_name
-          << "'s event_time_offset field's units are "
-             "not microsecond. It will be skipped.\n";
-      m_loadError = true;
-    }
-    file.closeData();
-  } // no error
+  file.getSlab(event_time_of_flight.get(), m_loadStart, m_loadSize);
+  file.closeData();
   return event_time_of_flight;
 }
 
