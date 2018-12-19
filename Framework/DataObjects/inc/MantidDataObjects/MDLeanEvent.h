@@ -144,8 +144,11 @@ public:
   static MDCoordinate<nd> indexToCoordinates(const MortonT& idx, const MDSpaceBounds<nd>& space) {
     return ConvertCoordinatesFromIntegerRange<nd, IntT>(space, Interleaver<nd, IntT, MortonT>::deinterleave(idx));
   }
+  static MortonT coordinatesToIndex(coord_t* coord, const MDSpaceBounds<nd>& space) {
+    return Interleaver<nd, IntT, MortonT>::interleave(ConvertCoordinatesToIntegerRange<nd, IntT>(space, coord));
+  }
   void retrieveIndex(const MDSpaceBounds<nd>& space) {
-      index = Interleaver<nd, IntT, MortonT>::interleave(ConvertCoordinatesToIntegerRange<nd, IntT>(space, center));
+    index = coordinatesToIndex(center, space);
   }
   void retrieveCoordinates(const MDSpaceBounds<nd>& space) {
     auto coords = indexToCoordinates(index, space);
