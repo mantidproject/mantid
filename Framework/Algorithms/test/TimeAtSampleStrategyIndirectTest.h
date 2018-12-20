@@ -8,6 +8,8 @@
 #define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYINDIRECTTEST_H_
 
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -28,9 +30,27 @@ public:
     auto ws = WorkspaceCreationHelper::
         create2DWorkspaceWithReflectometryInstrument(); // workspace has
                                                         // monitors
+
+    const size_t monitorIndex = 1; // monitor workspace index.
+    const auto &instrument = ws->getInstrument();
+    auto sample = instrument->getSample();
+    auto source = instrument->getSource();
+
+    const auto &beamDir =
+        instrument->getReferenceFrame()->vecPointingAlongBeam();
+
+    auto monitor = ws->getDetector(monitorIndex);
+
+    const double L1 = source->getPos().distance(sample->getPos());
+
     TimeAtSampleStrategyIndirect strategy(ws);
-    TS_ASSERT_THROWS(strategy.calculate(1 /*monitor index*/),
-                     std::invalid_argument &);
+    const auto correction = strategy.calculate(monitorIndex);
+
+    TSM_ASSERT_EQUALS("L1/L1m",
+                      std::abs(L1 / beamDir.scalar_prod(source->getPos() -
+                                                        monitor->getPos())),
+                      correction.factor);
+    TS_ASSERT_EQUALS(0., correction.offset);
   }
 };
 
