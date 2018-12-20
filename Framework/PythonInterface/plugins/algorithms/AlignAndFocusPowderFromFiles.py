@@ -274,7 +274,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
                     CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname,
                                    WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
-                                   Tolerance= self.kwargs['CompressTolerance'])
+                                   Tolerance= self.kwargs['CompressTolerance'],
+                                   StartTime=self.kwargs['CompressStartTime'])
         # end of inner loop
 
     def PyExec(self):
@@ -360,7 +361,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
                     CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname,
                                    WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
-                                   Tolerance= self.kwargs['CompressTolerance'])
+                                   Tolerance= self.kwargs['CompressTolerance'],
+                                   StartTime=self.kwargs['CompressStartTime'])
                     # not compressing unfocussed workspace because it is in d-spacing
                     # and is likely to be from a different part of the instrument
 
