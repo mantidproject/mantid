@@ -248,16 +248,13 @@ void RunsPresenter::startNewAutoreduction() {
     // existing table first
     // We'll prompt the user to check it's ok to delete existing rows
 
-    // TODO: enable autoprocessing
-    //   auto tablePresenter = getTablePresenter(group);
-    //   tablePresenter->setPromptUser(false);
-    //   try {
-    //     tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
-    //   } catch (const DataProcessorPresenter::DeleteAllRowsCancelledException
-    //   &)
-    //   {
-    //     return;
-    //   }
+    // TODO: prompt user if replacing a table that has been edited
+    // tablePresenter()->setPromptUser(false);
+    //try {
+    tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
+    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &) {
+    //  return;
+    //}
   }
 
   if (setupNewAutoreduction(m_view->getSearchString()))

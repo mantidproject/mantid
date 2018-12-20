@@ -332,9 +332,13 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
   auto indexToRemove = rowLocation().indexAt(location);
   assertOrThrow(indexToRemove.isValid(),
                 "removeRowAt: Attempted to remove the invisible root item.");
-  assertOrThrow(!isOnlyChildOfRoot(indexToRemove),
-                "Attempted to delete the only child of the invisible root"
-                " for the main model. Try removeAllRows() instead.");
+  // We can't delete the only child of the invisible root
+  // for the main model unless we use removeAllRows()
+  if (isOnlyChildOfRoot(indexToRemove)) {
+    removeAllRows();
+    return;
+  }
+
   if (rowRemovalWouldBeIneffective(indexToRemove)) {
     // implies that indexToRemove corresponds to an index in the filtered model.
     auto rowIndexToSwitchTo =

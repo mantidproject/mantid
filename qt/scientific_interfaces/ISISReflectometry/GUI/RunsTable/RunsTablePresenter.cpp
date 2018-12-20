@@ -298,10 +298,18 @@ void RunsTablePresenter::removeRowsAndGroupsFromModel(
   }
 }
 
+void RunsTablePresenter::removeAllRowsAndGroupsFromModel() {
+  removeAllRowsAndGroups(m_model);
+}
+
 void RunsTablePresenter::removeRowsAndGroupsFromView(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
         &locationsOfRowsToRemove) {
   m_view->jobs().removeRows(locationsOfRowsToRemove);
+}
+
+void RunsTablePresenter::removeAllRowsAndGroupsFromView() {
+  m_view->jobs().removeAllRows();
 }
 
 void RunsTablePresenter::notifyRemoveRowsRequested(
@@ -309,6 +317,11 @@ void RunsTablePresenter::notifyRemoveRowsRequested(
         &locationsOfRowsToRemove) {
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
+}
+
+void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
+  removeAllRowsAndGroupsFromModel();
+  removeAllRowsAndGroupsFromView();
 }
 
 void RunsTablePresenter::notifyCopyRowsRequested() {
