@@ -34,7 +34,6 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 // Forward decs
-class IRunsPresenter;
 class ReflSearchModel;
 
 using MantidWidgets::SlitCalculator;
@@ -50,7 +49,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsView
 public:
   RunsView(QWidget *parent, RunsTableViewFactory makeView);
 
-  void subscribe(IRunsPresenter *presenter) override;
+  void subscribe(RunsViewSubscriber *notifyee) override;
   IRunsTableView *table() const override;
 
   // Connect the model
@@ -81,7 +80,6 @@ public:
   std::string getSearchInstrument() const override;
   std::string getSearchString() const override;
 
-  IRunsPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -110,7 +108,7 @@ private:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
   // the presenter
-  IRunsPresenter *m_presenter;
+  RunsViewSubscriber *m_notifyee;
 
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;

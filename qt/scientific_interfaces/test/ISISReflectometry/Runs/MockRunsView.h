@@ -19,7 +19,7 @@ namespace CustomInterfaces {
 
 class MockRunsView : public IRunsView {
 public:
-  MOCK_METHOD1(subscribe, void(IRunsPresenter *));
+  MOCK_METHOD1(subscribe, void(RunsViewSubscriber *));
   MOCK_CONST_METHOD0(table, IRunsTableView *());
 
   MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
@@ -60,7 +60,6 @@ public:
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
-  IRunsPresenter *getPresenter() const override { return nullptr; };
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

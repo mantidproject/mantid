@@ -5,10 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsView.h"
-#include "IRunsPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
@@ -16,7 +14,6 @@
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "ReflSearchModel.h"
-#include "RunsPresenter.h"
 #include <QMessageBox>
 
 namespace MantidQt {
@@ -30,7 +27,7 @@ using namespace MantidQt::MantidWidgets;
  * @param makeRunsTableView :: The factory for the RunsTableView.
  */
 RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
-    : m_presenter(nullptr), m_calculator(new SlitCalculator(this)),
+    : m_notifyee(nullptr), m_calculator(new SlitCalculator(this)),
       m_tableView(makeRunsTableView()) {
 
   UNUSED_ARG(parent);
@@ -41,7 +38,9 @@ void RunsView::loginFailed(std::string const &fullError) {
                         "Login Failed!");
 }
 
-void RunsView::subscribe(IRunsPresenter *presenter) { m_presenter = presenter; }
+void RunsView::subscribe(RunsViewSubscriber *notifyee) {
+  m_notifyee = notifyee;
+}
 
 IRunsTableView *RunsView::table() const { return m_tableView; }
 
@@ -237,7 +236,7 @@ void RunsView::showSearch(ReflSearchModel_sptr model) {
  */
 void RunsView::startIcatSearch() {
   m_algoRunner.get()->disconnect(); // disconnect any other connections
-  m_presenter->notify(IRunsPresenter::SearchFlag);
+  m_notifyee->notifySearch();
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(icatSearchComplete()), Qt::UniqueConnection);
 }
@@ -245,9 +244,7 @@ void RunsView::startIcatSearch() {
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
-void RunsView::icatSearchComplete() {
-  m_presenter->notify(IRunsPresenter::ICATSearchCompleteFlag);
-}
+void RunsView::icatSearchComplete() { m_notifyee->notifyICATSearchComplete(); }
 
 /**
 This slot notifies the presenter that the "search" button has been pressed
@@ -259,7 +256,7 @@ This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
 void RunsView::on_actionAutoreduce_triggered() {
-  m_presenter->notify(IRunsPresenter::StartAutoreductionFlag);
+  m_notifyee->notifyStartAutoreduction();
 }
 
 /**
@@ -267,22 +264,20 @@ This slot conducts a search operation before notifying the presenter that the
 "pause autoreduce" button has been pressed
 */
 void RunsView::on_actionAutoreducePause_triggered() {
-  m_presenter->notify(IRunsPresenter::PauseAutoreductionFlag);
+  m_notifyee->notifyPauseAutoreduction();
 }
 
 /**
 This slot notifies the presenter that the "transfer" button has been pressed
 */
-void RunsView::on_actionTransfer_triggered() {
-  m_presenter->notify(IRunsPresenter::Flag::TransferFlag);
-}
+void RunsView::on_actionTransfer_triggered() { m_notifyee->notifyTransfer(); }
 
 /**
    This slot is called each time the timer times out
 */
 void RunsView::timerEvent(QTimerEvent *event) {
   if (event->timerId() == m_timer.timerId()) {
-    m_presenter->notify(IRunsPresenter::TimerEventFlag);
+    m_notifyee->notifyTimerEvent();
   } else {
     QWidget::timerEvent(event);
   }
@@ -332,7 +327,7 @@ void RunsView::instrumentChanged(int index) {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
-  // m_presenter->notify(IRunsPresenter::InstrumentChangedFlag);
+  m_notifyee->notifyInstrumentChanged();
 }
 
 /**
@@ -372,12 +367,6 @@ std::set<int> RunsView::getAllSearchRows() const {
   return rows;
 }
 
-/**
-Get a pointer to the presenter that's currently controlling this view.
-@returns A pointer to the presenter
-*/
-IRunsPresenter *RunsView::getPresenter() const { return m_presenter; }
-
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>
 RunsView::getAlgorithmRunner() const {
   return m_algoRunner;
@@ -408,7 +397,7 @@ void MantidQt::CustomInterfaces::RunsView::on_buttonStopMonitor_clicked() {
  */
 void RunsView::startMonitor() {
   m_monitorAlgoRunner.get()->disconnect(); // disconnect any other connections
-  m_presenter->notify(IRunsPresenter::StartMonitorFlag);
+  m_notifyee->notifyStartMonitor();
   connect(m_monitorAlgoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(startMonitorComplete()), Qt::UniqueConnection);
 }
@@ -417,14 +406,12 @@ void RunsView::startMonitor() {
 This slot notifies the presenter that the monitoring algorithm finished
 */
 void RunsView::startMonitorComplete() {
-  m_presenter->notify(IRunsPresenter::StartMonitorCompleteFlag);
+  m_notifyee->notifyStartMonitorComplete();
 }
 
 /** Stop live data monitoring
  */
-void RunsView::stopMonitor() {
-  m_presenter->notify(IRunsPresenter::StopMonitorFlag);
-}
+void RunsView::stopMonitor() { m_notifyee->notifyStopMonitor(); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

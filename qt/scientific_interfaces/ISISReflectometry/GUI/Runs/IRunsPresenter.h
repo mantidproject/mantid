@@ -24,22 +24,8 @@ public:
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void settingsChanged() = 0;
+  virtual void notifyInstrumentChanged() = 0;
 
-  enum Flag {
-    SearchFlag,
-    StartAutoreductionFlag,
-    PauseAutoreductionFlag,
-    TimerEventFlag,
-    ICATSearchCompleteFlag,
-    TransferFlag,
-    InstrumentChangedFlag,
-    StartMonitorFlag,
-    StopMonitorFlag,
-    StartMonitorCompleteFlag
-  };
-
-  // Tell the presenter something happened
-  virtual void notify(IRunsPresenter::Flag flag) = 0;
   virtual bool isAutoreducing() const = 0;
   virtual bool isProcessing() const = 0;
 };

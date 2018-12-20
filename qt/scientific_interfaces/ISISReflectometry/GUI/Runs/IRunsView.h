@@ -29,8 +29,26 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 namespace DataProcessor = MantidWidgets::DataProcessor;
-class IRunsPresenter;
 class ReflSearchModel;
+
+/**
+IRunsView is the base view class for the Reflectometry "Runs"
+tab. It contains no QT specific functionality as that should be handled by a
+subclass.
+*/
+class MANTIDQT_ISISREFLECTOMETRY_DLL RunsViewSubscriber {
+public:
+  virtual void notifySearch() = 0;
+  virtual void notifyStartAutoreduction() = 0;
+  virtual void notifyPauseAutoreduction() = 0;
+  virtual void notifyTimerEvent() = 0;
+  virtual void notifyICATSearchComplete() = 0;
+  virtual void notifyTransfer() = 0;
+  virtual void notifyInstrumentChanged() = 0;
+  virtual void notifyStartMonitor() = 0;
+  virtual void notifyStopMonitor() = 0;
+  virtual void notifyStartMonitorComplete() = 0;
+};
 
 /** @class IRunsView
 
@@ -43,7 +61,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsView
 public:
   virtual ~IRunsView() = default;
 
-  virtual void subscribe(IRunsPresenter *presenter) = 0;
+  virtual void subscribe(RunsViewSubscriber *notifyee) = 0;
   virtual IRunsTableView *table() const = 0;
 
   // Connect the model
@@ -68,7 +86,6 @@ public:
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
 
-  virtual IRunsPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>

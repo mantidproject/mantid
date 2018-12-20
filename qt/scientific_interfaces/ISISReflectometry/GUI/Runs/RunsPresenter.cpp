@@ -123,46 +123,33 @@ void RunsPresenter::settingsChanged() {
 /**
 Used by the view to tell the presenter something has changed
 */
-void RunsPresenter::notify(IRunsPresenter::Flag flag) {
-  switch (flag) {
-  case IRunsPresenter::SearchFlag:
-    // Start the search algorithm. If it is not started, make sure
-    // autoreduction is not left running
-    if (!search())
-      stopAutoreduction();
-    break;
-  case IRunsPresenter::StartAutoreductionFlag:
-    startNewAutoreduction();
-    break;
-  case IRunsPresenter::PauseAutoreductionFlag:
-    pauseAutoreduction();
-    break;
-  case IRunsPresenter::TimerEventFlag:
-    checkForNewRuns();
-    break;
-  case IRunsPresenter::ICATSearchCompleteFlag: {
-    icatSearchComplete();
-    break;
-  }
-  case IRunsPresenter::TransferFlag:
-    transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
-    break;
-  case IRunsPresenter::InstrumentChangedFlag:
-    changeInstrument();
-    break;
-  case IRunsPresenter::StartMonitorFlag:
-    startMonitor();
-    break;
-  case IRunsPresenter::StopMonitorFlag:
-    stopMonitor();
-    break;
-  case IRunsPresenter::StartMonitorCompleteFlag:
-    startMonitorComplete();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
+
+void RunsPresenter::notifySearch() {
+  // Start the search algorithm. If it is not started, make sure
+  // autoreduction is not left running
+  if (!search())
+    stopAutoreduction();
 }
+
+void RunsPresenter::notifyStartAutoreduction() { startNewAutoreduction(); }
+
+void RunsPresenter::notifyPauseAutoreduction() { pauseAutoreduction(); }
+
+void RunsPresenter::notifyTimerEvent() { checkForNewRuns(); }
+
+void RunsPresenter::notifyICATSearchComplete() { icatSearchComplete(); }
+
+void RunsPresenter::notifyTransfer() {
+  transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
+}
+
+void RunsPresenter::notifyInstrumentChanged() { changeInstrument(); }
+
+void RunsPresenter::notifyStartMonitor() { startMonitor(); }
+
+void RunsPresenter::notifyStopMonitor() { stopMonitor(); }
+
+void RunsPresenter::notifyStartMonitorComplete() { startMonitorComplete(); }
 
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
@@ -456,7 +443,8 @@ void RunsPresenter::updateWidgetEnabledState() const {
  */
 void RunsPresenter::changeInstrument() {
   auto const instrument = m_view->getSearchInstrument();
-  m_mainPresenter->setInstrumentName(instrument);
+  if (m_mainPresenter)
+    m_mainPresenter->setInstrumentName(instrument);
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;

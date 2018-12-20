@@ -9,6 +9,7 @@
 
 #include "DllConfig.h"
 #include "GUI/Runs/IRunsPresenter.h"
+#include "GUI/Runs/IRunsView.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IReflBatchPresenter.h"
@@ -30,7 +31,6 @@ namespace CustomInterfaces {
 
 // Forward decs
 class IReflAutoreduction;
-class IRunsView;
 class IReflMessageHandler;
 class IReflSearcher;
 class ReflSearchModel;
@@ -50,6 +50,7 @@ handles any interface functionality and model manipulation.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
     : public IRunsPresenter,
+      public RunsViewSubscriber,
       public Mantid::API::AlgorithmObserver {
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
@@ -69,7 +70,19 @@ public:
   RunsPresenter &operator=(RunsPresenter &&) = default;
 
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
-  void notify(IRunsPresenter::Flag flag) override;
+
+  // RunsViewSubscriber overrides
+  void notifySearch() override;
+  void notifyStartAutoreduction() override;
+  void notifyPauseAutoreduction() override;
+  void notifyTimerEvent() override;
+  void notifyICATSearchComplete() override;
+  void notifyTransfer() override;
+  void notifyInstrumentChanged() override;
+  void notifyStartMonitor() override;
+  void notifyStopMonitor() override;
+  void notifyStartMonitorComplete() override;
+
   void settingsChanged() override;
 
   bool isAutoreducing() const override;

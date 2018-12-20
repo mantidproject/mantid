@@ -45,7 +45,7 @@ ReflBatchPresenter::ReflBatchPresenter(
   m_runsPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
-  m_runsPresenter->notify(IRunsPresenter::InstrumentChangedFlag);
+  m_runsPresenter->notifyInstrumentChanged();
 }
 
 bool ReflBatchPresenter::requestClose() const { return true; }

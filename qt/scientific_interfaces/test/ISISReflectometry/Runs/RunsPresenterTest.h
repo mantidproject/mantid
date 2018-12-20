@@ -56,7 +56,7 @@ public:
         .Times(1)
         .WillOnce(Return(searchString));
     expectSearchFailed();
-    presenter.notify(IRunsPresenter::SearchFlag);
+    presenter.notifySearch();
     verifyAndClear();
   }
 
@@ -69,7 +69,7 @@ public:
     // TODO: add expected call to python runner when implemented
     EXPECT_CALL(m_view, noActiveICatSessions()).Times(1);
     expectSearchFailed();
-    presenter.notify(IRunsPresenter::SearchFlag);
+    presenter.notifySearch();
     verifyAndClear();
   }
 
@@ -85,7 +85,7 @@ public:
     EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
         .WillOnce(Return(true));
     expectCheckForNewRuns();
-    presenter.notify(IRunsPresenter::StartAutoreductionFlag);
+    presenter.notifyStartAutoreduction();
     verifyAndClear();
   }
 
@@ -101,28 +101,28 @@ public:
     EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
         .WillOnce(Return(true));
     expectCheckForNewRuns();
-    presenter.notify(IRunsPresenter::StartAutoreductionFlag);
+    presenter.notifyStartAutoreduction();
     verifyAndClear();
   }
 
   void testPauseAutoreduction() {
     // TODO
     // auto presenter = makePresenter();
-    // presenter.notify(IRunsPresenter::PauseAutoreductionFlag);
+    // presenter.notifyPauseAutoreduction();
     // verifyAndClear();
   }
 
   void testAutoreductionPollsForNewRunsOnTimerEvent() {
     auto presenter = makePresenter();
     expectCheckForNewRuns();
-    presenter.notify(IRunsPresenter::TimerEventFlag);
+    presenter.notifyTimerEvent();
     verifyAndClear();
   }
 
   void testICATSearchComplete() {
     // TODO
     // auto presenter = makePresenter();
-    // presenter.notify(IRunsPresenter::ICATSearchCompleteFlag);
+    // presenter.notifyICATSearchComplete();
     // verifyAndClear();
   }
 
@@ -133,7 +133,7 @@ public:
         .Times(1)
         .WillOnce(Return(selectedRows));
     EXPECT_CALL(m_view, missingRunsToTransfer()).Times(1);
-    presenter.notify(IRunsPresenter::TransferFlag);
+    presenter.notifyTransfer();
     verifyAndClear();
   }
 
@@ -142,7 +142,7 @@ public:
     expectGetValidSearchRowSelection(presenter);
     EXPECT_CALL(*m_autoreduction, running()).Times(1).WillOnce(Return(true));
     expectCreateEndlessProgressIndicator();
-    presenter.notify(IRunsPresenter::TransferFlag);
+    presenter.notifyTransfer();
     verifyAndClear();
   }
 
@@ -151,7 +151,7 @@ public:
     expectGetValidSearchRowSelection(presenter);
     EXPECT_CALL(*m_autoreduction, running()).Times(1).WillOnce(Return(false));
     expectCreatePercentageProgressIndicator();
-    presenter.notify(IRunsPresenter::TransferFlag);
+    presenter.notifyTransfer();
     verifyAndClear();
   }
 
@@ -162,7 +162,7 @@ public:
         .Times(1)
         .WillOnce(Return(instrument));
     EXPECT_CALL(m_mainPresenter, setInstrumentName(instrument)).Times(1);
-    presenter.notify(IRunsPresenter::InstrumentChangedFlag);
+    presenter.notifyInstrumentChanged();
     verifyAndClear();
   }
 
@@ -172,21 +172,21 @@ public:
   //    EXPECT_CALL(m_view, getMonitorAlgorithmRunner()).Times(1);
   //    EXPECT_CALL(m_view, getSearchInstrument()).Times(1);
   //    expectUpdateViewWhenMonitorStarting();
-  //    presenter.notify(IRunsPresenter::StartMonitorFlag);
+  //    presenter.notifyStartMonitor();
   //    verifyAndClear();
   //  }
   //
   //  void testStopMonitor() {
   //    auto presenter = makePresenter();
   //    expectUpdateViewWhenMonitorStopped();
-  //    presenter.notify(IRunsPresenter::StopMonitorFlag);
+  //    presenter.notifyStopMonitor();
   //    verifyAndClear();
   //  }
   //
   //  void testStartMonitorComplete() {
   //    auto presenter = makePresenter();
   //    expectUpdateViewWhenMonitorStarted();
-  //    presenter.notify(IRunsPresenter::StartMonitorCompleteFlag);
+  //    presenter.notifyStartMonitorComplete();
   //    verifyAndClear();
   //  }
 
