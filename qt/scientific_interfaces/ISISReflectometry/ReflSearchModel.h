@@ -47,7 +47,7 @@ public:
   /// Add details of an error
   std::vector<SearchResult> const &results() const;
 
-  SearchResult const &operator[](int index) const;
+  virtual SearchResult const &getRowData(int index) const;
 
   void setError(int index, std::string const &error);
 

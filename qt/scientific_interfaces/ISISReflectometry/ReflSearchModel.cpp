@@ -201,7 +201,7 @@ bool ReflSearchModel::runHasError(const SearchResult &run) const {
   return !(run.issues.empty());
 }
 
-SearchResult const &ReflSearchModel::operator[](int index) const {
+SearchResult const &ReflSearchModel::getRowData(int index) const {
   return m_runDetails[index];
 }
 

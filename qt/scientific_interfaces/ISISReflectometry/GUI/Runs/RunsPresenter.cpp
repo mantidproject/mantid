@@ -412,7 +412,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
     auto jobs = tablePresenter()->reductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
-      auto &result = (*m_searchModel)[rowIndex];
+      auto &result = m_searchModel->getRowData(rowIndex);
       auto resultMetadata = metadataFromDescription(result.description);
       auto row = validateRowFromRunAndTheta(jobs, result.runNumber,
                                             resultMetadata.theta);

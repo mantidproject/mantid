@@ -37,10 +37,18 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockReflSearchModel : public ReflSearchModel {
 public:
-  MockReflSearchModel()
-      : ReflSearchModel(ITableWorkspace_sptr(), std::string()) {}
+  MockReflSearchModel(std::string const &run, std::string const &description,
+                      std::string const &location)
+      : ReflSearchModel(ITableWorkspace_sptr(), std::string()),
+        m_result(run, description, location) {}
   ~MockReflSearchModel() override {}
   MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
+  MOCK_METHOD2(setError, void(int, std::string const &));
+
+  SearchResult const &getRowData(int) const override { return m_result; }
+
+private:
+  SearchResult m_result;
 };
 
 /**** Views ****/
@@ -68,6 +76,29 @@ public:
   bool isProcessing() const override { return false; }
 
   ~MockMainWindowPresenter() override{};
+};
+
+class MockReflBatchPresenter : public IReflBatchPresenter {
+public:
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+
+  MOCK_METHOD2(completedRowReductionSuccessfully,
+               void(GroupData const &, std::string const &));
+
+  MOCK_METHOD2(completedGroupReductionSuccessfully,
+               void(GroupData const &, std::string const &));
+
+  /// Transmission runs for a specific run angle
+  MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
+  /// Whether there are per-angle transmission runs specified
+  MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
+  /// Set the instrument name
+  MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &));
+  /// Data processing check for all groups
+  MOCK_CONST_METHOD0(isProcessing, bool());
+  MOCK_CONST_METHOD0(requestClose, bool());
+  MOCK_METHOD0(settingsChanged, void());
 };
 
 /**** Progress ****/

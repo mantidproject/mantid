@@ -76,6 +76,7 @@ public:
   bool isProcessing() const override;
 
 protected:
+  RunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
   boost::shared_ptr<IReflAutoreduction> m_autoreduction;
   void startNewAutoreduction();
@@ -123,7 +124,6 @@ private:
   void changeInstrument();
   void changeGroup();
   void updateWidgetEnabledState() const;
-  RunsTablePresenter *tablePresenter() const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
   /// Get runs to transfer from row indices

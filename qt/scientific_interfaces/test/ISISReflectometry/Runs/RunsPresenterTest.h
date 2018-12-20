@@ -77,8 +77,140 @@ public:
     // TODO: add this test when python runner implemented
   }
 
+  void testStartNewAutoreduction() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getSearchString()).Times(2);
+    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
+        .WillOnce(Return(true));
+    expectCheckForNewRuns();
+    presenter.notify(IRunsPresenter::StartAutoreductionFlag);
+    verifyAndClear();
+  }
+
+  void testStartNewAutoreductionWarnsUserIfTableChanged() {
+    // TODO
+  }
+
+  void testStartRepeatAutoreduction() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getSearchString()).Times(2);
+    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
+        .WillOnce(Return(true));
+    expectCheckForNewRuns();
+    presenter.notify(IRunsPresenter::StartAutoreductionFlag);
+    verifyAndClear();
+  }
+
+  void testPauseAutoreduction() {
+    // TODO
+    // auto presenter = makePresenter();
+    // presenter.notify(IRunsPresenter::PauseAutoreductionFlag);
+    // verifyAndClear();
+  }
+
+  void testAutoreductionPollsForNewRunsOnTimerEvent() {
+    auto presenter = makePresenter();
+    expectCheckForNewRuns();
+    presenter.notify(IRunsPresenter::TimerEventFlag);
+    verifyAndClear();
+  }
+
+  void testICATSearchComplete() {
+    // TODO
+    // auto presenter = makePresenter();
+    // presenter.notify(IRunsPresenter::ICATSearchCompleteFlag);
+    // verifyAndClear();
+  }
+
+  void testTransferWithNoRowsSelected() {
+    auto presenter = makePresenter();
+    auto const selectedRows = std::set<int>({});
+    EXPECT_CALL(m_view, getSelectedSearchRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(m_view, missingRunsToTransfer()).Times(1);
+    presenter.notify(IRunsPresenter::TransferFlag);
+    verifyAndClear();
+  }
+
+  void testTransferWithAutoreductionRunning() {
+    auto presenter = makePresenter();
+    expectGetValidSearchRowSelection(presenter);
+    EXPECT_CALL(*m_autoreduction, running()).Times(1).WillOnce(Return(true));
+    expectCreateEndlessProgressIndicator();
+    presenter.notify(IRunsPresenter::TransferFlag);
+    verifyAndClear();
+  }
+
+  void testTransferWithAutoreductionStopped() {
+    auto presenter = makePresenter();
+    expectGetValidSearchRowSelection(presenter);
+    EXPECT_CALL(*m_autoreduction, running()).Times(1).WillOnce(Return(false));
+    expectCreatePercentageProgressIndicator();
+    presenter.notify(IRunsPresenter::TransferFlag);
+    verifyAndClear();
+  }
+
+  void testInstrumentChanged() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    EXPECT_CALL(m_view, getSearchInstrument())
+        .Times(1)
+        .WillOnce(Return(instrument));
+    EXPECT_CALL(m_mainPresenter, setInstrumentName(instrument)).Times(1);
+    presenter.notify(IRunsPresenter::InstrumentChangedFlag);
+    verifyAndClear();
+  }
+
+  // TODO
+  //  void testStartMonitor() {
+  //    auto presenter = makePresenter();
+  //    EXPECT_CALL(m_view, getMonitorAlgorithmRunner()).Times(1);
+  //    EXPECT_CALL(m_view, getSearchInstrument()).Times(1);
+  //    expectUpdateViewWhenMonitorStarting();
+  //    presenter.notify(IRunsPresenter::StartMonitorFlag);
+  //    verifyAndClear();
+  //  }
+  //
+  //  void testStopMonitor() {
+  //    auto presenter = makePresenter();
+  //    expectUpdateViewWhenMonitorStopped();
+  //    presenter.notify(IRunsPresenter::StopMonitorFlag);
+  //    verifyAndClear();
+  //  }
+  //
+  //  void testStartMonitorComplete() {
+  //    auto presenter = makePresenter();
+  //    expectUpdateViewWhenMonitorStarted();
+  //    presenter.notify(IRunsPresenter::StartMonitorCompleteFlag);
+  //    verifyAndClear();
+  //  }
+
 private:
-  RunsPresenter makePresenter() {
+  class RunsPresenterFriend : public RunsPresenter {
+    friend class RunsPresenterTest;
+
+  public:
+    RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
+                        RunsTablePresenterFactory makeRunsTablePresenter,
+                        double thetaTolerance,
+                        std::vector<std::string> const &instruments,
+                        int defaultInstrumentIndex,
+                        IReflMessageHandler *messageHandler,
+                        boost::shared_ptr<IReflAutoreduction> autoreduction =
+                            boost::shared_ptr<IReflAutoreduction>(),
+                        boost::shared_ptr<IReflSearcher> searcher =
+                            boost::shared_ptr<IReflSearcher>())
+        : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
+                        thetaTolerance, instruments, defaultInstrumentIndex,
+                        messageHandler, autoreduction, searcher) {}
+  };
+
+  RunsPresenterFriend makePresenter() {
     auto defaultInstrumentIndex = 0;
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
     EXPECT_CALL(m_runsTableView, subscribe(_)).Times(1);
@@ -89,12 +221,13 @@ private:
         .Times(1);
     expectUpdateViewWhenMonitorStopped();
 
-    auto presenter = RunsPresenter(
+    auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView,
         MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance),
         m_thetaTolerance, m_instruments, defaultInstrumentIndex,
         &m_messageHandler, m_autoreduction, m_searcher);
 
+    presenter.acceptMainPresenter(&m_mainPresenter);
     verifyAndClear();
     return presenter;
   }
@@ -134,10 +267,41 @@ private:
     expectStopAutoreduction();
   }
 
+  void expectCheckForNewRuns() {
+    EXPECT_CALL(m_view, stopTimer()).Times(1);
+    EXPECT_CALL(m_view, startIcatSearch()).Times(1);
+  }
+
+  void expectGetValidSearchRowSelection(RunsPresenterFriend &presenter) {
+    // Select a couple of rows with random indices
+    auto row1Index = 3;
+    auto row2Index = 5;
+    auto const selectedRows = std::set<int>({row1Index, row2Index});
+    EXPECT_CALL(m_view, getSelectedSearchRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    // Set up a mock search model in the presenter to return something
+    // sensible for getRowData
+    auto searchModel = boost::make_shared<MockReflSearchModel>(
+        "13460", "my title th=0.5", "my location");
+    presenter.m_searchModel = searchModel;
+  }
+
+  void expectCreateEndlessProgressIndicator() {
+    EXPECT_CALL(m_progressView, clearProgress()).Times(1);
+    EXPECT_CALL(m_progressView, setProgressRange(_, _)).Times(2);
+  }
+
+  void expectCreatePercentageProgressIndicator() {
+    EXPECT_CALL(m_progressView, clearProgress()).Times(1);
+    EXPECT_CALL(m_progressView, setProgressRange(_, _)).Times(2);
+  }
+
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   MockRunsView m_view;
   MockRunsTableView m_runsTableView;
+  MockReflBatchPresenter m_mainPresenter;
   MockProgressableView m_progressView;
   MockMessageHandler m_messageHandler;
   boost::shared_ptr<MockReflAutoreduction> m_autoreduction;
