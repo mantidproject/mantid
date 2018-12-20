@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -7,21 +13,20 @@
 namespace Mantid {
 namespace Geometry {
 
-IObjComponent::IObjComponent() { handle = new GeometryHandler(this); }
+IObjComponent::IObjComponent() {
+  handle = std::make_unique<GeometryHandler>(this);
+}
 
 /** Constructor, specifying the GeometryHandler (renderer engine)
  * for this IObjComponent.
  */
 IObjComponent::IObjComponent(GeometryHandler *the_handler) {
-  handle = the_handler;
+  handle.reset(the_handler);
 }
 
 // Looking to get rid of the first of these constructors in due course (and
 // probably add others)
-IObjComponent::~IObjComponent() {
-  if (handle != nullptr)
-    delete handle;
-}
+IObjComponent::~IObjComponent() = default;
 
 /**
  * Set the geometry handler for IObjComponent
@@ -31,7 +36,7 @@ IObjComponent::~IObjComponent() {
 void IObjComponent::setGeometryHandler(GeometryHandler *h) {
   if (h == nullptr)
     return;
-  this->handle = h;
+  this->handle.reset(h);
 }
 
 /**
@@ -39,7 +44,7 @@ void IObjComponent::setGeometryHandler(GeometryHandler *h) {
  */
 IObjComponent::IObjComponent(const IObjComponent &) {
   // Copy constructor just creates new handle. Copies nothing.
-  handle = new GeometryHandler(this);
+  handle = std::make_unique<GeometryHandler>(this);
 }
 
 /**
@@ -50,7 +55,7 @@ IObjComponent::IObjComponent(const IObjComponent &) {
 IObjComponent &IObjComponent::operator=(const IObjComponent &rhs) {
   if (&rhs != this) {
     // Assignment operator copies nothing. Just creates new handle.
-    handle = new GeometryHandler(this);
+    handle = std::make_unique<GeometryHandler>(this);
   }
   return *this;
 }

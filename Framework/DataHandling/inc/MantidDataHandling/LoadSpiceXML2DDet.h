@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADSPICEXML2DDET_H_
 #define MANTID_DATAHANDLING_LOADSPICEXML2DDET_H_
 
@@ -37,28 +43,7 @@ public:
 };
 
 /** LoadSpiceXML2DDet : Load 2D detector data in XML format form SPICE
-
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+ */
 class DLLExport LoadSpiceXML2DDet : public API::Algorithm {
 public:
   LoadSpiceXML2DDet();
@@ -86,25 +71,29 @@ private:
   /// Process inputs
   void processInputs();
 
+  /// create workspace (good to load instrument) from vector of counts
+  API::MatrixWorkspace_sptr
+  createMatrixWorkspace(const std::vector<unsigned int> &vec_counts);
+  /// parse binary integer file
+  std::vector<unsigned int> binaryParseIntegers(std::string &binary_file_name);
+
   /// Parse SPICE XML file
-  std::vector<SpiceXMLNode> parseSpiceXML(const std::string &xmlfilename);
+  std::vector<SpiceXMLNode> xmlParseSpice(const std::string &xmlfilename);
 
   /// Create output MatrixWorkspace
-  API::MatrixWorkspace_sptr
-  createMatrixWorkspace(const std::vector<SpiceXMLNode> &vecxmlnode,
-                        const size_t &numpixelx, const size_t &numpixely,
-                        const std::string &detnodename,
-                        const bool &loadinstrument);
+  API::MatrixWorkspace_sptr xmlCreateMatrixWorkspaceKnownGeometry(
+      const std::vector<SpiceXMLNode> &vecxmlnode, const size_t &numpixelx,
+      const size_t &numpixely, const std::string &detnodename,
+      const bool &loadinstrument);
 
   /// Create output MatrixWorkspace
-  API::MatrixWorkspace_sptr
-  createMatrixWorkspaceVersion2(const std::vector<SpiceXMLNode> &vecxmlnode,
-                                const std::string &detnodename,
-                                const bool &loadinstrument);
+  API::MatrixWorkspace_sptr xmlCreateMatrixWorkspaceUnknowGeometry(
+      const std::vector<SpiceXMLNode> &vecxmlnode,
+      const std::string &detnodename, const bool &loadinstrument);
 
-  API::MatrixWorkspace_sptr parseDetectorNode(const std::string &detvaluestr,
-                                              bool loadinstrument,
-                                              double &max_counts);
+  API::MatrixWorkspace_sptr xmlParseDetectorNode(const std::string &detvaluestr,
+                                                 bool loadinstrument,
+                                                 double &max_counts);
 
   /// Set up sample logs from table workspace loaded where SPICE data file is
   /// loaded

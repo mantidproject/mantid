@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -32,8 +38,32 @@ class MaskingTablePresenterTest(unittest.TestCase):
         self.assertTrue(view.set_table.call_count == 2)
         first_call = mock.call([])
         second_call = mock.call([masking_information(first='Beam stop', second='', third='infinite-cylinder, r = 10.0'),
-                                 masking_information(first='Corners', second='', third='infinite-cylinder, r = 20.0')])  # noqa
+                                 masking_information(first='Corners', second='', third='infinite-cylinder, r = 20.0'),
+                                 masking_information(first='Phi', second='', third='L/PHI -90.0 90.0')])  # noqa
         view.set_table.assert_has_calls([first_call, second_call])
+
+    def test_that_checks_display_mask_is_reenabled_after_error(self):
+        # Arrange
+        parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
+        presenter = MaskingTablePresenter(parent_presenter)
+
+        presenter.on_processing_error_masking_display = mock.MagicMock()
+        presenter._view = mock.MagicMock()
+        presenter._view.set_display_mask_button_to_processing = mock.MagicMock()
+        presenter._view.get_current_row.side_effect = RuntimeError("Mock get_current_row failure")
+
+        try:
+            presenter.on_display()
+        except Exception as e:
+            self.assertEqual(str(e), "Mock get_current_row failure")
+        else:
+            self.assertFalse(True)  # As we expect an error to be raised
+
+        # Confirm that on_processing_error_masking_display was called
+        self.assertEqual(
+            presenter.on_processing_error_masking_display.call_count, 1,
+            "Expected on_processing_error_masking_display to have been called. Called {} times.".format(
+                presenter.on_processing_error_masking_display.call_count))
 
 
 if __name__ == '__main__':

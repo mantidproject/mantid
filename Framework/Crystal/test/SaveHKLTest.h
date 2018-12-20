@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_SAVEHKLTEST_H_
 #define MANTID_CRYSTAL_SAVEHKLTEST_H_
 
@@ -38,8 +44,7 @@ public:
     ws->setInstrument(inst);
     double smu = 0.357;
     double amu = 0.011;
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
 
     auto sampleShape = boost::make_shared<CSGObject>();
     sampleShape->setMaterial(Material("SetInSaveHKLTest", neutron, 1.0));

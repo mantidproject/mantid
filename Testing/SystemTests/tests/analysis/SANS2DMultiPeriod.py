@@ -1,14 +1,20 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,too-few-public-methods
 
 # test batch mode with sans2d and selecting a period in batch mode
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.api import AnalysisDataService
 from ISISCommandInterface import *
 from SANSBatchMode import *
 
 
-class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
+class SANS2DMultiPeriodSingle(systemtesting.MantidSystemTest):
 
     reduced=''
 
@@ -50,7 +56,7 @@ class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
         self.reduced = '5512_SANS2DBatch'
 
 
-class LARMORMultiPeriodEventModeLoading(stresstesting.MantidStressTest):
+class LARMORMultiPeriodEventModeLoading(systemtesting.MantidSystemTest):
     """
     This test checks if the positioning of all workspaces of a
     multi-period event-type file are the same.

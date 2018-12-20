@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is used to find single-crystal peaks in a
-multi-dimensional workspace (`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or
+multi-dimensional workspace (:ref:`MDEventWorkspace <MDWorkspace>` or
 :ref:`MDHistoWorkspace <MDHistoWorkspace>`). It looks for high signal
 density areas, and is based on an algorithm designed by Dennis Mikkelson
 for ISAW.

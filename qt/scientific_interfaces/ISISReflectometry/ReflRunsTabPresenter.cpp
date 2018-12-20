@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflRunsTabPresenter.h"
 #include "IReflMainWindowPresenter.h"
 #include "IReflRunsTabView.h"
@@ -23,7 +29,6 @@
 
 #include <QStringList>
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <iterator>
@@ -846,7 +851,7 @@ IAlgorithm_sptr ReflRunsTabPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
   alg->setProperty("AccumulationWorkspace", "TOF_live");
   alg->setProperty("AccumulationMethod", "Replace");
-  alg->setProperty("UpdateEvery", "60");
+  alg->setProperty("UpdateEvery", "20");
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
                    liveDataReductionOptions(instrument));

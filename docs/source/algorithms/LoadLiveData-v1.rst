@@ -31,26 +31,20 @@ Data Processing
 -  You have two options on how to process this workspace:
 
 Processing with an Algorithm
-############################
+++++++++++++++++++++++++++++
 
 -  Specify the name of the algorithm in the ``ProcessingAlgorithm``
    property.
 
-   -  This could be, e.g. a `Python Algorithm <Python Algorithm>`__
-      written for this purpose.
+   -  This could be a python algorithm written for this purpose
    -  The algorithm *must* have at least 2 properties: ``InputWorkspace``
       and ``OutputWorkspace``.
    -  Any other properties are set from the string in
       ``ProcessingProperties``.
-   -  The algorithm is then run, and its ``OutputWorkspace`` is saved.
-
-.. note:
-
-   When PreserveEvents is enabled, any rebinning done in this step will be
-   lost. Use the Post-Process step instead for EventWorkspaces.
+   -  The algorithm is then run, and its ``OutputWorkspace`` is saved
 
 Processing with a Python Script
-###############################
++++++++++++++++++++++++++++++++
 
 The python script is run using :ref:`algm-RunPythonScript`. Please see
 its documentation for details of how the script is run.
@@ -72,10 +66,13 @@ its documentation for details of how the script is run.
 
    - Contents of the file have the exact same rules as specifying the ``ProcessingScript``
 
-.. note:
+.. note::
 
-   When PreserveEvents is enabled, any rebinning done in this step will be
-   lost. Use the Post-Process step instead for EventWorkspaces.
+   When ``PreserveEvents`` is enabled and the data has not been binned
+   during the process step (with ``ProcessingAlgorithm``,
+   ``ProcessingScript``, or ``ProcessingScriptFilename``), the data
+   will be rebinned at the end of the step to include all events. Use
+   the Post-Process step instead for :ref:`EventWorkspaces <EventWorkspace>`.
 
 Data Accumulation
 #################
@@ -90,36 +87,31 @@ Data Accumulation
    -  If you select ``Append``, then the spectra from each chunk will be
       appended to the output workspace.
 
-A Warning About Events
-######################
+.. warning::
 
-Beware! If you select ``PreserveEvents=True`` and your processing
-keeps the data as :ref:`EventWorkspaces <EventWorkspace>`, you may end
-up creating **very large** EventWorkspaces in long runs. Most plots
-require re-sorting the events, which is an operation that gets much
-slower as the list gets bigger (Order of :math:`N * log(N)`). This
-could cause Mantid to run very slowly or to crash due to lack of
-memory.
+   Beware! If you select ``PreserveEvents=True`` and your processing
+   keeps the data as :ref:`EventWorkspaces <EventWorkspace>`, you may end
+   up creating **very large** EventWorkspaces in long runs. Most plots
+   require re-sorting the events, which is an operation that gets much
+   slower as the list gets bigger (Order of :math:`N * log(N)`). This
+   could cause Mantid to run very slowly or to crash due to lack of
+   memory.
 
-Additionally, the resulting EventWorkspaces produced when
-``PreserveEvents=True`` will have their X values reset to a single bin with
-boundaries that encompass all events currently in the workspace. This means
-that any rebinning that was done during the Process step will be lost. If
-custom binning is required, this should be done using the Post-Process step
-described below.
+   It is highly recommended that early in the PostProcessing step one
+   uses :ref:`CompressEvents <algm-CompressEvents>` if the data is going
+   to remain in events.
 
 Post-Processing Step
 ####################
 
--  Optionally, you can specify some processing to perform *after*
-   accumulation.
+- Optionally, you can specify some processing to perform *after*
+  accumulation.
 
-   -  You then need to specify the ``AccumulationWorkspace`` property.
+  -  You then need to specify the ``AccumulationWorkspace`` property.
 
-- Using either the ``PostProcessingAlgorithm``,
-   ``PostProcessingScript``, or ``PostProcessingScriptFilename`` (same
-   way as above), the ``AccumulationWorkspace`` is processed into the
-   ``OutputWorkspace``
+- Using either the ``PostProcessingAlgorithm``, ``PostProcessingScript``,
+  or ``PostProcessingScriptFilename`` (same way as above), the
+  ``AccumulationWorkspace`` is processed into the ``OutputWorkspace``
 
 Usage
 -----

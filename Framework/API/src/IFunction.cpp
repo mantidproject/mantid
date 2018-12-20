@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
@@ -60,13 +66,7 @@ struct TieNode {
 /**
  * Destructor
  */
-IFunction::~IFunction() {
-  m_attrs.clear();
-  if (m_handler) {
-    delete m_handler;
-    m_handler = nullptr;
-  }
-}
+IFunction::~IFunction() { m_attrs.clear(); }
 
 /**
  * Virtual copy constructor
@@ -393,6 +393,25 @@ void IFunction::removeConstraint(const std::string &parName) {
   }
 }
 
+/** Set a constraint penalty
+ * @param parName :: The name of a constraint
+ * @param c :: The penalty
+ */
+void IFunction::setConstraintPenaltyFactor(const std::string &parName,
+                                           const double &c) {
+  size_t iPar = parameterIndex(parName);
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
+    if (iPar == (**it).getLocalIndex()) {
+      (**it).setPenaltyFactor(c);
+      return;
+    }
+  }
+  g_log.warning()
+      << parName
+      << " does not have constraint so setConstraintPenaltyFactor failed"
+      << "\n";
+}
+
 /// Remove all constraints.
 void IFunction::clearConstraints() { m_constraints.clear(); }
 
@@ -490,10 +509,32 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   Expression list;
   list.parse(str);
   list.toList();
-  for (const auto &expr : list) {
-    auto c = std::unique_ptr<IConstraint>(
-        ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
-    this->addConstraint(std::move(c));
+  for (auto it = list.begin(); it != list.end(); ++it) {
+    auto expr = (*it);
+    if (expr.terms()[0].str().compare("penalty") == 0) {
+      continue;
+    }
+    if ((it + 1) != list.end()) {
+      auto next_expr = *(it + 1);
+      if (next_expr.terms()[0].str().compare("penalty") == 0) {
+        auto c = std::unique_ptr<IConstraint>(
+            ConstraintFactory::Instance().createInitialized(this, expr,
+                                                            isDefault));
+        double penalty_factor = std::stof(next_expr.terms()[1].str(), NULL);
+        c->setPenaltyFactor(penalty_factor);
+        this->addConstraint(std::move(c));
+      } else {
+        auto c = std::unique_ptr<IConstraint>(
+            ConstraintFactory::Instance().createInitialized(this, expr,
+                                                            isDefault));
+        this->addConstraint(std::move(c));
+      }
+    } else {
+      auto c = std::unique_ptr<IConstraint>(
+          ConstraintFactory::Instance().createInitialized(this, expr,
+                                                          isDefault));
+      this->addConstraint(std::move(c));
+    }
   }
 }
 
@@ -511,8 +552,8 @@ std::vector<std::string> IFunction::getParameterNames() const {
 /** Set a function handler
  * @param handler :: A new handler
  */
-void IFunction::setHandler(FunctionHandler *handler) {
-  m_handler = handler;
+void IFunction::setHandler(std::unique_ptr<FunctionHandler> handler) {
+  m_handler = std::move(handler);
   if (handler && handler->function().get() != this) {
     throw std::runtime_error("Function handler points to a different function");
   }

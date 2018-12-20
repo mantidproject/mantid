@@ -3,9 +3,8 @@
 :: Sets up the environment configured for Mantid by CMake and
 :: starts the appropriate version of Visual Studio
 
-:: Assume the buildenv.bat script exists and is in the same directory
-call %~dp0buildenv.bat
+call %~dp0thirdpartypaths.bat
 set VCVARS=@MSVC_VAR_LOCATION@
 set UseEnv=true
 :: Start command line
-%COMSPEC% /k ""%VCVARS%\vcvarsall.bat"" amd64 @SDK_VERSION@
+%COMSPEC% /k ""%VCVARS%\vcvarsall.bat"" amd64

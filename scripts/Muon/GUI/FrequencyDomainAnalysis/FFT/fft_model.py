@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from six import iteritems
@@ -94,6 +100,8 @@ class FFTModel(object):
         self.alg = mantid.AlgorithmManager.create("PaddingAndApodization")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
+        self.alg.setRethrows(True)
+
         for name, value in iteritems(preInputs):
             self.alg.setProperty(name, value)
         self.alg.execute()
@@ -109,6 +117,8 @@ class FFTModel(object):
         self.alg = mantid.AlgorithmManager.create("FFT")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
+        self.alg.setRethrows(True)
+
         for name, value in iteritems(FFTInputs):
             self.alg.setProperty(name, value)
         self.alg.execute()
@@ -128,6 +138,7 @@ class FFTModel(object):
         self.alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
+        self.alg.setRethrows(True)
 
         self.alg.setProperty("FirstGoodData", inputs["FirstGoodData"])
         self.alg.setProperty("LastGoodData", inputs["LastGoodData"])
@@ -135,6 +146,7 @@ class FFTModel(object):
         self.alg.setProperty("InputWorkspace", "MuonAnalysis")
         self.alg.setProperty("DetectorTable", "PhaseTable")
         self.alg.setProperty("DataFitted", "fits")
+
         self.alg.execute()
         mantid.AnalysisDataService.addOrReplace(
             "PhaseTable",
@@ -149,6 +161,8 @@ class FFTModel(object):
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()
         self.alg.setChild(False)
+        self.alg.setRethrows(True)
+
         self.alg.setProperty("InputWorkspace", "MuonAnalysis")
         self.alg.setProperty("PhaseTable", "PhaseTable")
         self.alg.setProperty("OutputWorkspace", "__phaseQuad__")
