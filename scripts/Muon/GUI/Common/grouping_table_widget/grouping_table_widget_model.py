@@ -21,11 +21,11 @@ class GroupingTableModel(object):
 
     @property
     def group_names(self):
-        return self._data.group_names
+        return list(self._data.group_names)
 
     @property
     def group_and_pair_names(self):
-        return self._data.group_names + self._data.pair_names
+        return list(self._data.group_names) + list(self._data.pair_names)
 
     def add_group(self, group):
         self._data.add_group(group)
