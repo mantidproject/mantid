@@ -1,22 +1,16 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
-import systemtesting
+import stresstesting
 import glob
 
 
 EXPECTED_EXT = '.expected'
 
 
-class ValidateInstrumentDefinitionFiles(systemtesting.MantidSystemTest):
+class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
     xsdFile=''
     # Explicitly specify single file to test. If None, test all.

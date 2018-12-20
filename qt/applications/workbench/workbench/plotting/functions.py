@@ -1,12 +1,19 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
+#  Copyright (C) 2017 mantidproject
 #
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Defines a collection of functions to support plotting workspaces with
 our custom window.
 """
@@ -19,12 +26,11 @@ import math
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
 import matplotlib.pyplot as plt
-
 try:
     from matplotlib.cm import viridis as DEFAULT_CMAP
 except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
-from mantid.py3compat import is_text_string
+from mantidqt.py3compat import is_text_string
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 from matplotlib.gridspec import GridSpec
 import numpy as np
@@ -87,7 +93,6 @@ def figure_title(workspaces, fig_num):
     :param fig_num: An integer denoting the figure number
     :return: A title for the figure
     """
-
     def wsname(w):
         return w.name() if hasattr(w, 'name') else w
 
@@ -129,7 +134,7 @@ def plot_from_names(names, errors, overplot, fig=None):
 
 
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
-         overplot=False, fig=None, plot_kwargs=None):
+         overplot=False, fig=None):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -141,11 +146,9 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param errors: If true then error bars are added for each plot
     :param overplot: If true then overplot over the current figure if one exists
     :param fig: If not None then use this Figure object to plot
-    :param plot_kwargs: Arguments that will be passed onto the plot function
     :return: The figure containing the plots
     """
-    if plot_kwargs is None:
-        plot_kwargs = {}
+    # check inputs
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices)
     if spectrum_nums is not None:
         kw, nums = 'specNum', spectrum_nums
@@ -167,8 +170,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     plot_fn = ax.errorbar if errors else ax.plot
     for ws in workspaces:
         for num in nums:
-            plot_kwargs[kw] = num
-            plot_fn(ws, **plot_kwargs)
+            plot_fn(ws, **{kw: num})
 
     ax.legend()
     if not overplot:
@@ -196,23 +198,6 @@ def pcolormesh_from_names(names, fig=None):
         return None
 
 
-def use_imshow(ws):
-    if not ws.isCommonBins():
-        return False
-
-    x = ws.dataX(0)
-    difference = np.diff(x)
-    if not np.all(np.isclose(difference, difference[0])):
-        return False
-
-    y = ws.getAxis(1).extractValues()
-    difference = np.diff(y)
-    if not np.all(np.isclose(difference, difference[0])):
-        return False
-
-    return True
-
-
 def pcolormesh(workspaces, fig=None):
     """
     Create a figure containing pcolor subplots
@@ -230,15 +215,12 @@ def pcolormesh(workspaces, fig=None):
     fig, axes, nrows, ncols = _create_subplots(workspaces_len, fig=fig)
 
     row_idx, col_idx = 0, 0
-    for subplot_idx in range(nrows * ncols):
+    for subplot_idx in range(nrows*ncols):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             ax.set_title(ws.name())
-            if use_imshow(ws):
-                pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto')
-            else:
-                pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
+            pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
             for lbl in ax.get_xticklabels():
                 lbl.set_rotation(45)
             if col_idx < ncols - 1:
@@ -257,7 +239,6 @@ def pcolormesh(workspaces, fig=None):
     fig.canvas.draw()
     fig.show()
     return fig
-
 
 # ----------------- Compatability functions ---------------------
 
@@ -345,11 +326,11 @@ def _create_subplots(nplots, fig=None):
     """
     square_side_len = int(math.ceil(math.sqrt(nplots)))
     nrows, ncols = square_side_len, square_side_len
-    if square_side_len * square_side_len != nplots:
+    if square_side_len*square_side_len != nplots:
         # not a square number - square_side_len x square_side_len
         # will be large enough but we could end up with an empty
         # row so chop that off
-        if nplots <= (nrows - 1) * ncols:
+        if nplots <= (nrows-1)*ncols:
             nrows -= 1
 
     if fig is None:
@@ -357,7 +338,7 @@ def _create_subplots(nplots, fig=None):
     else:
         fig.clf()
     # annoyling this repl
-    nplots = nrows * ncols
+    nplots = nrows*ncols
     gs = GridSpec(nrows, ncols)
     axes = np.empty(nplots, dtype=object)
     ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)

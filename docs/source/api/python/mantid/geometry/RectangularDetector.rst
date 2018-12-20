@@ -2,7 +2,7 @@
  RectangularDetector
 =====================
 
-This is a Python binding to the C++ class Mantid::Geometry::RectangularDetector.
+This a python binding to the C++ class Mantid::Geometry::RectangularDetector.
 
 *bases:* :py:obj:`mantid.geometry.CompAssembly`, :py:obj:`mantid.geometry.IObjComponent`
 

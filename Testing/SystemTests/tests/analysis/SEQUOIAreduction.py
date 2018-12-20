@@ -1,16 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 Test the SNS inelatic reduction scripts.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import os
 import shutil
 import glob
@@ -19,7 +13,7 @@ import mantid
 from mantid.simpleapi import *
 
 
-class DirectInelaticSNSTest(systemtesting.MantidSystemTest):
+class DirectInelaticSNSTest(stresstesting.MantidStressTest):
     _nxspe_filename=""
     customDataDir=""
 
@@ -148,7 +142,7 @@ class DirectInelaticSNSTest(systemtesting.MantidSystemTest):
         else:
             LoadNexus(Filename=os.path.join(self.customDataDir,"van.nx5"),OutputWorkspace="VAN")
 
-    #functions from systemtesting
+    #functions from stresstesting
     def requiredFiles(self):
         return ['SEQ_12384_event.nxs']
 

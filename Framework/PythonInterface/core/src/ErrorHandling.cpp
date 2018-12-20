@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
 //-------------------------------------------
@@ -97,6 +91,18 @@ std::string exceptionToString(bool withTrace) {
  * @param withTrace If true, include the full traceback in the message
  */
 PythonException::PythonException(bool withTrace)
+    : std::exception(), m_msg(exceptionToString(withTrace)) {}
+
+// -----------------------------------------------------------------------------
+// PythonRuntimeError
+// -----------------------------------------------------------------------------
+
+/**
+ * Construct an exception object where the message is populated from the
+ * current Python exception state.
+ * @param withTrace If true, include the full traceback in the message
+ */
+PythonRuntimeError::PythonRuntimeError(bool withTrace)
     : std::runtime_error(exceptionToString(withTrace)) {}
 
 } // namespace PythonInterface

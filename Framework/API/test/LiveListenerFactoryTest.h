@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LIVELISTENERFACTORYTEST_H_
 #define LIVELISTENERFACTORYTEST_H_
 
@@ -71,8 +65,9 @@ public:
 
   void setUp() override {
     auto &config = Kernel::ConfigService::Instance();
-    Poco::Path testFile = Poco::Path(config.getInstrumentDirectory())
-                              .resolve("unit_testing/UnitTestFacilities.xml");
+    Poco::Path testFile =
+        Poco::Path(config.getInstrumentDirectory())
+            .resolve("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml");
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
   }

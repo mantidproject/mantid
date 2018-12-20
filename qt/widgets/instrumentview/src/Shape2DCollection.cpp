@@ -1,13 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/Shape2DCollection.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -749,34 +740,23 @@ void Shape2DCollection::eraseFree(const QPolygonF &polygon) {
  * @param lines :: lines from the project file to load state from
  */
 void Shape2DCollection::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
   for (const auto &shapeLines : tsv.sections("shape")) {
     Shape2D *shape = Shape2D::loadFromProject(shapeLines);
     m_shapes.push_back(shape);
     emit shapeCreated();
   }
-#else
-  Q_UNUSED(lines);
-  throw std::runtime_error(
-      "Shape2DCollection::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 /** Save the state of the shape 2D collection to a Mantid project file
  * @return a string representing the state of the shape 2D collection
  */
 std::string Shape2DCollection::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   for (auto shape : m_shapes) {
     tsv.writeSection("shape", shape->saveToProject());
   }
   return tsv.outputLines();
-#else
-  throw std::runtime_error(
-      "Shape2DCollection::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 } // namespace MantidWidgets

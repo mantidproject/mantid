@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -50,17 +44,17 @@ void LoadIsawDetCal::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
-  const auto exts =
-      std::vector<std::string>({".DetCal", ".detcal", ".peaks", ".integrate"});
+  const auto exts = std::vector<std::string>({".DetCal"});
   declareProperty(
       Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
       "The input filename of the ISAW DetCal file (Two files "
       "allowed for SNAP) ");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
-                      "Filename2", "", API::FileProperty::OptionalLoad, exts),
-                  "The input filename of the second ISAW DetCal file (West "
-                  "banks for SNAP) ");
+  declareProperty(
+      Kernel::make_unique<API::FileProperty>(
+          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
+      "The input filename of the second ISAW DetCal file (West "
+      "banks for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }

@@ -1,11 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import systemtesting
+import stresstesting
 from mantid.api import FileFinder
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -26,7 +20,7 @@ def do_cleanup():
     return True
 
 
-class HFIRBackground(systemtesting.MantidSystemTest):
+class HFIRBackground(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()
@@ -52,7 +46,7 @@ class HFIRBackground(systemtesting.MantidSystemTest):
         return "BioSANS_test_data_Iq", 'HFIRBackground.nxs'
 
 
-class HFIRBackgroundTransmission(systemtesting.MantidSystemTest):
+class HFIRBackgroundTransmission(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()
@@ -78,7 +72,7 @@ class HFIRBackgroundTransmission(systemtesting.MantidSystemTest):
         return "BioSANS_test_data_Iq", 'HFIRBackgroundTransmission.nxs'
 
 
-class HFIRBackgroundDirectBeamTrans(systemtesting.MantidSystemTest):
+class HFIRBackgroundDirectBeamTrans(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()
@@ -106,7 +100,7 @@ class HFIRBackgroundDirectBeamTrans(systemtesting.MantidSystemTest):
         return "BioSANS_test_data_Iq", 'HFIRBackgroundDirectBeamTrans.nxs'
 
 
-class HFIRBackgroundBeamSpreaderTrans(systemtesting.MantidSystemTest):
+class HFIRBackgroundBeamSpreaderTrans(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()
@@ -137,7 +131,7 @@ class HFIRBackgroundBeamSpreaderTrans(systemtesting.MantidSystemTest):
         return "BioSANS_test_data_Iq", 'HFIRBackgroundBeamSpreaderTrans.nxs'
 
 
-class HFIRBackgroundTransDarkCurrent(systemtesting.MantidSystemTest):
+class HFIRBackgroundTransDarkCurrent(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()
@@ -166,7 +160,7 @@ class HFIRBackgroundTransDarkCurrent(systemtesting.MantidSystemTest):
         return "BioSANS_test_data_Iq", 'HFIRBackgroundTransDarkCurrent.nxs'
 
 
-class HFIRBackgroundDirectBeamTransDC(systemtesting.MantidSystemTest):
+class HFIRBackgroundDirectBeamTransDC(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()

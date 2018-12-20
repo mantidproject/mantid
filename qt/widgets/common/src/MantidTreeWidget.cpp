@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
 #include <MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h>
 
@@ -36,10 +30,6 @@ MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setSortOrder(Qt::AscendingOrder);
   setAcceptDrops(true);
-
-  m_doubleClickAction = [&](QString wsName) {
-    m_mantidUI->importWorkspace(wsName, false);
-  };
 }
 
 /**
@@ -141,7 +131,7 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
         m_ads.retrieve(wsName.toStdString()));
     if (!grpWSPstr) {
       if (!wsName.isEmpty()) {
-        m_doubleClickAction(wsName);
+        m_mantidUI->importWorkspace(wsName, false);
         return;
       }
     }

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """State describing the masking behaviour of the SANS reduction."""
@@ -208,9 +202,6 @@ class StateMask(StateBase):
         super(StateMask, self).__init__()
         # IDF Path
         self.idf_path = ""
-        self.phi_min = -90.0
-        self.phi_max = 90.0
-        self.use_mask_phi_mirror = True
 
     def validate(self):
         is_invalid = dict()

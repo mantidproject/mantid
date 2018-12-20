@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 
@@ -74,6 +68,8 @@ private:
 private slots:
   /// Called when the user clicks the Py button
   void exportTabPython();
+  /// Called when the Run button is pressed.  Runs current tab.
+  void run();
   /// Opens a directory dialog.
   void openDirectoryDialog();
   /// Opens the Mantid Wiki web page of the current tab.

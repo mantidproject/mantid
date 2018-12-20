@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_QUASI_H_
 #define MANTIDQTCUSTOMINTERFACES_QUASI_H_
 
@@ -44,23 +38,14 @@ private slots:
   void updateMiniPlot();
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
-
-  void runClicked();
-  void plotClicked();
-  void plotCurrentPreview();
+  // Handles saving of workspace
   void saveClicked();
+  // Handles plotting
+  void plotClicked();
+  // Handles plotting current preview
+  void plotCurrentPreview();
 
 private:
-  void displayMessageAndRun(std::string const &saveDirectory);
-  int displaySaveDirectoryMessage();
-
-  void setRunEnabled(bool enabled);
-  void setPlotResultEnabled(bool enabled);
-  void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
-
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

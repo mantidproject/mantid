@@ -1,10 +1,4 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import inspect
 import os
@@ -13,7 +7,6 @@ import unittest
 
 from mantid.kernel import (ConfigService, ConfigServiceImpl, config,
                            std_vector_str, FacilityInfo, InstrumentInfo)
-import six
 
 class ConfigServiceTest(unittest.TestCase):
 
@@ -55,7 +48,7 @@ class ConfigServiceTest(unittest.TestCase):
 
     def test_update_and_set_facility(self):
         self.assertFalse("TEST" in config.getFacilityNames())
-        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"unit_testing/UnitTestFacilities.xml"))
+        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"IDFs_for_UNIT_TESTING/UnitTestFacilities.xml"))
         ConfigService.setFacility("TEST")
         self.assertEquals(config.getFacility().name(), "TEST")
         self.assertRaises(RuntimeError, config.getFacility, "SNS")
@@ -87,36 +80,19 @@ class ConfigServiceTest(unittest.TestCase):
         self.assertEquals(type(paths), std_vector_str)
         self.assert_(len(paths) > 0)
 
-    def test_setting_paths(self):
-        def do_test(paths):
-            config.setDataSearchDirs(paths)
-            newpaths = config.getDataSearchDirs()
-            # Clean up here do that if the assert fails
-            # it doesn't bring all the other tests down
-            self._clean_up_test_areas()
-            self.assertEqual(len(newpaths), 2)
-            self.assertTrue('tmp' in newpaths[0])
-            self.assertTrue('tmp_2' in newpaths[1])
-
+    def test_setting_paths_via_single_string(self):
         new_path_list = self._setup_test_areas()
-        # test with list
-        do_test(new_path_list)
+        path_str = ';'.join(new_path_list)
+        config.setDataSearchDirs(path_str)
+        paths = config.getDataSearchDirs()
+        # Clean up here do that if the assert fails
+        # it doesn't bring all the other tests down
+        self._clean_up_test_areas()
 
-        # reset test areas or the directories don't exist to be added
-        new_path_list = self._setup_test_areas()
-        # test with single string
-        do_test(';'.join(new_path_list))
-
-
-    def test_appending_paths(self):
-        new_path_list = self._setup_test_areas()
-        try:
-            config.appendDataSearchDir(six.text_type(new_path_list[0]))
-            updated_paths = config.getDataSearchDirs()
-        finally:
-            self._clean_up_test_areas()
-
-        self.assertEqual(4, len(updated_paths))
+        self.assertTrue(len(paths), 2)
+        self.assertTrue('tmp' in paths[0])
+        self.assertTrue('tmp_2' in paths[1])
+        self._clean_up_test_areas()
 
     def test_setting_log_channel_levels(self):
         testhelpers.assertRaisesNothing(self, config.setLogLevel, 4, True)
@@ -144,7 +120,6 @@ class ConfigServiceTest(unittest.TestCase):
                            'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
                            'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu
                            'workspace.sendto.name.SansView', # related to SASview in menu
-                           'catalog.oncat.token.accessToken', 'catalog.oncat.token.expiresIn', 'catalog.oncat.token.refreshToken', 'catalog.oncat.token.scope', 'catalog.oncat.token.tokenType', # Shouldn't be changed by users.
 
                            ########## TODO should be documented!
                            'filefinder.casesensitive',

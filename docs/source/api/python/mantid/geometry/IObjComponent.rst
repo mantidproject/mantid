@@ -2,7 +2,7 @@
  IObjComponent
 ===============
 
-This is a Python binding to the C++ class Mantid::Geometry::IObjComponent.
+This a python binding to the C++ class Mantid::Geometry::IObjComponent.
 
 *bases:* :py:obj:`mantid.geometry.IComponent`
 

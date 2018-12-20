@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayProperty.h"
 
 // PropertyWithValue Definition
@@ -18,11 +12,11 @@ namespace Kernel {
  *  @param direction :: The direction (Input/Output/InOut) of this property
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(std::string name, std::vector<T> vec,
+ArrayProperty<T>::ArrayProperty(const std::string &name,
+                                const std::vector<T> &vec,
                                 IValidator_sptr validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::move(vec),
-                                        std::move(validator), direction) {}
+    : PropertyWithValue<std::vector<T>>(name, vec, validator, direction) {}
 
 /** Constructor
  *  Will lead to the property having a default-constructed (i.e. empty) vector
@@ -33,10 +27,11 @@ ArrayProperty<T>::ArrayProperty(std::string name, std::vector<T> vec,
  */
 
 template <typename T>
-ArrayProperty<T>::ArrayProperty(std::string name, IValidator_sptr validator,
+ArrayProperty<T>::ArrayProperty(const std::string &name,
+                                IValidator_sptr validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
-                                        std::move(validator), direction) {}
+    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), validator,
+                                        direction) {}
 
 /** Constructor that's useful for output properties or inputs with an empty
  * default and no validator.
@@ -46,8 +41,9 @@ ArrayProperty<T>::ArrayProperty(std::string name, IValidator_sptr validator,
  *  @param direction :: The direction (Input/Output/InOut) of this property
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(std::string name, const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
+ArrayProperty<T>::ArrayProperty(const std::string &name,
+                                const unsigned int direction)
+    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(),
                                         IValidator_sptr(new NullValidator),
                                         direction) {}
 
@@ -67,12 +63,12 @@ ArrayProperty<T>::ArrayProperty(std::string name, const unsigned int direction)
  * the array type
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(std::string name, const std::string &values,
+ArrayProperty<T>::ArrayProperty(const std::string &name,
+                                const std::string &values,
                                 IValidator_sptr validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
-                                        values, std::move(validator),
-                                        direction) {}
+    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), values,
+                                        validator, direction) {}
 
 /// 'Virtual copy constructor'
 template <typename T> ArrayProperty<T> *ArrayProperty<T>::clone() const {

@@ -42,10 +42,11 @@ when :math:`DIFA < 0`.
 This algorithm always uses a :ref:`calibration table
 <DiffractionCalibrationWorkspace>` which it either reads from the
 `CalibrationWorkspace` property, or uses :ref:`ConvertDiffCal
-<algm-ConvertDiffCal>` to produce from the ``OffsetsWorkspace``.
+<algm-ConvertDiffCal>` or :ref:`LoadCalFile <algm-LoadCalFile>` to
+produce.
 
-.. note:: The workspace that this algorithms outputs is a
-          :ref:`ragged workspace <Ragged_Workspace>`.
+**Note:** the workspace that this algorithms outputs is a 
+:ref:`ragged workspace <Ragged_Workspace>`.
 
 Restrictions on the input workspace
 ###################################

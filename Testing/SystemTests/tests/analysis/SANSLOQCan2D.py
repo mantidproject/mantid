@@ -1,20 +1,14 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
 # Test is giving odd results on Linux, but only this 2D one.
 
 
-class SANSLOQCan2D(systemtesting.MantidSystemTest):
+class SANSLOQCan2D(stresstesting.MantidStressTest):
 
     def runTest(self):
 

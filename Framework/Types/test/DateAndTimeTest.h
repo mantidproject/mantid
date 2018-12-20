@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * DateAndTimeTest.h
  *
@@ -458,16 +452,6 @@ public:
     TS_ASSERT_EQUALS(times[1], DateAndTime("1990-01-02 03:04:07.000"));
     TS_ASSERT_EQUALS(times[2], DateAndTime("1990-01-02 03:04:05.500"));
     TS_ASSERT_EQUALS(times[3], DateAndTime("1990-01-02 03:04:02.000"));
-  }
-};
-
-class DateAndTimeTestPerformance : public CxxTest::TestSuite {
-public:
-  void test_construction_from_iso8601_string() {
-    for (size_t i = 0; i < 500000; ++i) {
-      DateAndTime d("2010-03-24T14:12:51.562Z");
-      d.totalNanoseconds();
-    }
   }
 };
 

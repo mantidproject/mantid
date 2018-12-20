@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/CSGObject.h"
 
 #include "MantidGeometry/Objects/Rules.h"
@@ -140,8 +134,7 @@ bool CSGObject::hasValidShape() const {
  */
 int CSGObject::setObject(const int ON, const std::string &Ln) {
   // Split line
-  // Does the string now contain junk...
-  static const boost::regex letters("[a-zA-Z]");
+  const boost::regex letters("[a-zA-Z]"); // Does the string now contain junk...
   if (Mantid::Kernel::Strings::StrLook(Ln, letters))
     return 0;
 
@@ -915,7 +908,7 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
         }
       }
     }
-    // this break (only used if no BB defined) may be wrong if object has hole
+    // this break (only used in no BB defined) may be wrong if object has hole
     // in middle
     if (!useBB && countPhi == 0)
       break;
@@ -1058,18 +1051,6 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
           sneg += sa;
         }
       }
-      /* We assume that objects are opaque to neutrons and that objects define
-       * closed surfaces which are convex. For such objects negative solid angle
-       * equals positive solid angle. This is true providing that the winding
-       * order is defined properly such that the contribution from each triangle
-       * w.r.t the observer gets counted to either the negative or positive
-       * contribution correctly. If that is done correctly then it would only be
-       * necessary to consider the positive contribution to the solid angle.
-       *
-       * The following provides a fix to situations where the winding order is
-       * incorrectly defined. It does not matter if the contribution is positive
-       * or negative since we take the average.
-       */
       return 0.5 * (sangle - sneg);
     }
   }
@@ -1131,7 +1112,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
     //
     // No special case, do the ray trace.
     //
-    return rayTraceSolidAngle(observer);
+    return rayTraceSolidAngle(observer); // so is this
   }
   const auto &vertices = this->getTriangleVertices();
   const auto &faces = this->getTriangleFaces();
@@ -1151,6 +1132,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
       sangle += sa;
     else
       sneg += sa;
+    //    std::cout << vp1 << vp2 << vp2;
   }
   return (0.5 * (sangle - sneg));
 }

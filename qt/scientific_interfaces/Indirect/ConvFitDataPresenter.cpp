@@ -1,24 +1,8 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataPresenter.h"
 #include "ConvFitAddWorkspaceDialog.h"
 #include "ConvFitDataTablePresenter.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/make_unique.h"
-
-namespace {
-using namespace Mantid::API;
-
-bool isWorkspaceLoaded(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -40,10 +24,8 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
 }
 
 void ConvFitDataPresenter::setModelResolution(const QString &name) {
-  auto const numberOfWorkspaces = m_convModel->numberOfWorkspaces();
-  auto const index = m_convModel->getWorkspace(0) ? numberOfWorkspaces - 1
-                                                  : numberOfWorkspaces;
-  m_convModel->setResolution(name.toStdString(), index);
+  m_convModel->setResolution(name.toStdString(),
+                             m_convModel->numberOfWorkspaces() - 1);
 }
 
 void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
@@ -63,7 +45,7 @@ void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
 void ConvFitDataPresenter::addModelData(const std::string &name) {
   IndirectFitDataPresenter::addModelData(name);
   const auto resolution = getView()->getSelectedResolution();
-  if (!resolution.empty() && isWorkspaceLoaded(resolution))
+  if (!resolution.empty())
     m_convModel->setResolution(resolution, 0);
 }
 

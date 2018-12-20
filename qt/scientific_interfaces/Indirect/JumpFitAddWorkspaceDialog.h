@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFITADDWORKSPACEDIALOG_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFITADDWORKSPACEDIALOG_H_
 
@@ -20,7 +14,6 @@ public:
   explicit JumpFitAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
-  std::string parameterType() const;
   int parameterNameIndex() const;
 
   void setParameterTypes(const std::vector<std::string> &types);
@@ -33,13 +26,12 @@ public:
 
 public slots:
   void emitWorkspaceChanged(const QString &name);
-  void emitParameterTypeChanged(const QString &index);
+  void emitParameterTypeChanged(int index);
 
 signals:
   void workspaceChanged(JumpFitAddWorkspaceDialog *dialog,
                         const std::string &workspace);
-  void parameterTypeChanged(JumpFitAddWorkspaceDialog *dialog,
-                            const std::string &type);
+  void parameterTypeChanged(JumpFitAddWorkspaceDialog *dialog, int type);
 
 private:
   Ui::JumpFitAddWorkspaceDialog m_uiForm;

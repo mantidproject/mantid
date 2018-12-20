@@ -2,7 +2,7 @@
  FileAction
 ============
 
-This is a Python binding to the C++ class Mantid::API::FileProperty.
+This a python binding to the C++ class Mantid::API::FileProperty.
 
 
 .. module:`mantid.api`

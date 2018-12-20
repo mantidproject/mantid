@@ -22,8 +22,8 @@ a a simple number to set.
 In matlab, the equivalent function call would be WS[mask] =
 OtherWS[mask]
 
-See :ref:`this page on boolean
-operations <MDHistoWorkspace boolean operations>` for examples of how
+See `this page on boolean
+operations <MDHistoWorkspace#Boolean_Operations>`__ for examples of how
 to create a mask.
 
 Usage (Python)

@@ -9,7 +9,7 @@ method, that makes use of a `trust region <https://en.wikipedia.org/wiki/Trust_r
 
 It is a reimplementation of part of `RALFit_nonlinear least squares solver <https://github.com/ralna/RALFit>`__. 
 
-It is listed in :ref:`a comparison of fitting minimizers <FittingMinimizers Minimizer Comparison>`.
+It is listed in `a comparison of fitting minimizers <../concepts/FittingMinimizers.html>`__.
 
 Reference
 ---------

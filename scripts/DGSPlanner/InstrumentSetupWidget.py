@@ -1,25 +1,19 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,too-many-public-methods
 from __future__ import (absolute_import, division, print_function)
-from qtpy import QtGui, QtCore, QtWidgets
+from PyQt4 import QtGui, QtCore
 import sys
 import mantid
 import numpy
-
-sys.path.append('..')
-#the following matplotlib imports cannot be placed before the setting of the backend, so we ignore flake8 warnings
-from MPLwidgets import * # noqa
+import matplotlib
+matplotlib.use('Qt4Agg')
+matplotlib.rcParams['backend.qt4']='PyQt4'
+#the following matplotlib imports cannot be placed before the use command, so we ignore flake8 warnings
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas # noqa
 from matplotlib.figure import Figure # noqa
 from mpl_toolkits.mplot3d import Axes3D # noqa
 import matplotlib.pyplot # noqa
-
 try:
-    from qtpy.QtCore import QString
+    from PyQt4.QtCore import QString
 except ImportError:
     QString = type("")
 
@@ -28,7 +22,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
     """
     Dealing with the goniometer input
     """
-    changed=QtCore.Signal(dict) #each value is a list
+    changed=QtCore.pyqtSignal(dict) #each value is a list
 
     def __init__(self, axes, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
@@ -146,7 +140,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
         return True
 
 
-class InstrumentSetupWidget(QtWidgets.QWidget):
+class InstrumentSetupWidget(QtGui.QWidget):
     #signal when things change and valid
     changed=QtCore.pyqtSignal(dict)
 
@@ -157,7 +151,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.signaldict=dict()
         #instrument selector
         self.instrumentList=['ARCS','CNCS','DNS','EXED','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
-        self.combo = QtWidgets.QComboBox(self)
+        self.combo = QtGui.QComboBox(self)
         for inst in self.instrumentList:
             self.combo.addItem(inst)
         defaultInstrument=mantid.config.getInstrument().name()
@@ -168,7 +162,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
             self.instrument=self.instrumentList[0]
             self.combo.setCurrentIndex(0)
         self.signaldict['instrument']=self.instrument
-        self.labelInst=QtWidgets.QLabel('Instrument')
+        self.labelInst=QtGui.QLabel('Instrument')
         #S2 and Ei edits
         self.S2=0.0
         self.Ei=10.0
@@ -176,30 +170,30 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.signaldict['Ei']=self.Ei
         self.validatorS2=QtGui.QDoubleValidator(-90.,90.,5,self)
         self.validatorEi=QtGui.QDoubleValidator(1.,10000.,5,self)
-        self.labelS2=QtWidgets.QLabel('S2')
-        self.labelEi=QtWidgets.QLabel('Incident Energy')
-        self.editS2=QtWidgets.QLineEdit()
+        self.labelS2=QtGui.QLabel('S2')
+        self.labelEi=QtGui.QLabel('Incident Energy')
+        self.editS2=QtGui.QLineEdit()
         self.editS2.setValidator(self.validatorS2)
-        self.editEi=QtWidgets.QLineEdit()
+        self.editEi=QtGui.QLineEdit()
         self.editEi.setValidator(self.validatorEi)
         self.editS2.setText(QString(format(self.S2,'.2f')))
         self.editEi.setText(QString(format(self.Ei,'.1f')))
         self.editEi.setFixedWidth(metrics.width("8888.88"))
         self.editS2.setFixedWidth(metrics.width("888.88"))
         #fast checkbox
-        self.fast=QtWidgets.QCheckBox("Fast",self)
+        self.fast=QtGui.QCheckBox("Fast",self)
         self.fast.toggle()
         self.updateFast()
         #masking
-        self.labelMask=QtWidgets.QLabel('Mask file')
-        self.editMask=QtWidgets.QLineEdit()
-        self.buttonMask=QtWidgets.QPushButton("LoadMask")
+        self.labelMask=QtGui.QLabel('Mask file')
+        self.editMask=QtGui.QLineEdit()
+        self.buttonMask=QtGui.QPushButton("LoadMask")
         #goniometer settings
-        self.labelGon=QtWidgets.QLabel('Goniometer')
-        self.tableViewGon = QtWidgets.QTableView(self)
+        self.labelGon=QtGui.QLabel('Goniometer')
+        self.tableViewGon = QtGui.QTableView(self)
         self.tableViewGon.setMinimumWidth(metrics.width("Minimum ")*8)
-        self.tableViewGon.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-        self.tableViewGon.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.tableViewGon.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.tableViewGon.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.goniometerNames=['psi','gl','gs']
         self.goniometerDirections=['0,1,0','0,0,1','1,0,0']
         self.goniometerRotationSense=[1,1,1]
@@ -215,11 +209,11 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         #goniometer figure
         self.figure=Figure(figsize=(2,3))
         self.figure.patch.set_facecolor('white')
-        self.canvas=FigureCanvasQTAgg(self.figure)
+        self.canvas=FigureCanvas(self.figure)
         self.gonfig=None
         self.updateFigure()
         #layout
-        self.gridI = QtWidgets.QGridLayout()
+        self.gridI = QtGui.QGridLayout()
         self.gridI.addWidget(self.labelInst,0,0)
         self.gridI.addWidget(self.combo,0,1)
         self.gridI.addWidget(self.labelEi,0,2)
@@ -227,9 +221,9 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.gridI.addWidget(self.labelS2,0,4)
         self.gridI.addWidget(self.editS2,0,5)
         self.gridI.addWidget(self.fast,0,6)
-        self.setLayout(QtWidgets.QHBoxLayout())
-        self.rightside=QtWidgets.QVBoxLayout()
-        self.maskLayout=QtWidgets.QHBoxLayout()
+        self.setLayout(QtGui.QHBoxLayout())
+        self.rightside=QtGui.QVBoxLayout()
+        self.maskLayout=QtGui.QHBoxLayout()
         self.maskLayout.addWidget(self.labelMask)
         self.maskLayout.addWidget(self.editMask)
         self.maskLayout.addWidget(self.buttonMask)
@@ -257,8 +251,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         if self.gonfig is not None:
             self.gonfig.clear()
         self.gonfig = Axes3D(self.figure)
-        if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
-            self.gonfig.hold(True) # hold is deprecated since 2.1.0, true by default
+        self.gonfig.hold(True)
         self.gonfig.set_frame_on(False)
         self.gonfig.set_xlim3d(-0.6,0.6)
         self.gonfig.set_ylim3d(-0.6,0.6)
@@ -271,7 +264,8 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.gonfig.text(1,0,-2.5,'X',zdir=None,color='black')
         self.gonfig.plot([0,0],[-3,-3],[-2,-0.5],zdir='y',color='black',linewidth=3)
         self.gonfig.text(0,-1,-2.5,'Beam',zdir=None,color='black')
-        self.gonfig.set_aspect('equal', adjustable='datalim')
+
+        matplotlib.pyplot.gca().set_aspect('equal', adjustable='datalim')
         self.gonfig.view_init(10,45)
 
         colors=['b','g','r']
@@ -332,13 +326,11 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.updateAll(**d)
 
     def loadMaskFromFile(self):
-        fileName = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                         "Open Mask File", '',
-                                                         "Processed Nexus (*.nxs);;All Files (*)")
+        fileName = QtGui.QFileDialog.getOpenFileName(self,
+                                                     "Open Mask File", '',
+                                                     "Processed Nexus (*.nxs);;All Files (*)")
         if not fileName:
             return
-        if isinstance(fileName,tuple):
-            fileName=fileName[0]
         self.editMask.setText(QString(fileName))
         self.setMaskFile()
 
@@ -374,7 +366,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
 
 
 if __name__=='__main__':
-    app=QtWidgets.QApplication(sys.argv)
+    app=QtGui.QApplication(sys.argv)
     mainForm=InstrumentSetupWidget()
     mainForm.show()
     sys.exit(app.exec_())

@@ -12,7 +12,7 @@ Description
 This algorithm is used to fit a single peak with some checking mechanism
 to ensure its fitting result is physical.
 
-The output :ref:`TableWorkspace <Table Workspaces>` contains the following
+The output `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ contains the following
 columns...
 
 Peak profile

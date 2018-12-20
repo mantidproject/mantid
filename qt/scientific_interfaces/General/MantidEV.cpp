@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 
 #include <Poco/Path.h>
 #include <QDesktopWidget>
@@ -312,9 +306,6 @@ void MantidEV::initLayout() {
   QObject::connect(m_uiForm.SelectCellOfType_rbtn, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledSetCellTypeParams_slot(bool)));
 
-  QObject::connect(m_uiForm.CreateHKLWorkspace_ckbx, SIGNAL(clicked(bool)),
-                   this, SLOT(setEnabledCreateHKLWorkspaceParams_slot(bool)));
-
   QObject::connect(m_uiForm.SelectCellWithForm_rbtn, SIGNAL(toggled(bool)),
                    this, SLOT(setEnabledSetCellFormParams_slot(bool)));
 
@@ -455,7 +446,6 @@ void MantidEV::setDefaultState_slot() {
   m_uiForm.BestCellOnly_ckbx->setChecked(true);
   m_uiForm.AllowPermutations_ckbx->setChecked(true);
   m_uiForm.SelectCellOfType_rbtn->setChecked(false);
-  m_uiForm.CreateHKLWorkspace_ckbx->setChecked(false);
   m_uiForm.CellType_cmbx->setCurrentIndex(0);
   m_uiForm.CellCentering_cmbx->setCurrentIndex(0);
   m_uiForm.SelectCellWithForm_rbtn->setChecked(false);
@@ -956,7 +946,6 @@ void MantidEV::chooseCell_slot() {
 
   bool show_cells = m_uiForm.ShowPossibleCells_rbtn->isChecked();
   bool select_cell_type = m_uiForm.SelectCellOfType_rbtn->isChecked();
-  bool create_hkl_workspace = m_uiForm.CreateHKLWorkspace_ckbx->isChecked();
   bool select_cell_form = m_uiForm.SelectCellWithForm_rbtn->isChecked();
   bool allow_perm = m_uiForm.AllowPermutations_ckbx->isChecked();
 
@@ -1003,20 +992,6 @@ void MantidEV::chooseCell_slot() {
         m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
     worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
   }
-
-  if (create_hkl_workspace) { // Try to create the HKL md_workspace.
-    double minQ;
-    getDouble(m_uiForm.MinMagQ_ledt, minQ);
-
-    double maxQ;
-    getDouble(m_uiForm.MaxMagQ_ledt, maxQ);
-
-    std::string md_ws_name =
-        m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
-    std::string ev_ws_name =
-        m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
-    worker->convertToHKL(ev_ws_name, md_ws_name, minQ, maxQ);
-  }
 }
 
 /**
@@ -1040,9 +1015,7 @@ void MantidEV::changeHKL_slot() {
   std::string row_2_str = m_uiForm.HKL_tran_row_2_ledt->text().toStdString();
   std::string row_3_str = m_uiForm.HKL_tran_row_3_ledt->text().toStdString();
 
-  bool changed =
-      worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str);
-  if (!changed) {
+  if (!worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str)) {
     errorMessage("Failed to Change the Miller Indicies and UB");
   }
 
@@ -1053,17 +1026,6 @@ void MantidEV::changeHKL_slot() {
   std::string event_ws_name =
       m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
   worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
-
-  bool create_hkl_workspace = m_uiForm.CreateHKLWorkspace_ckbx->isChecked();
-  if (create_hkl_workspace && changed) { // Redo the HKL md_workspace
-    double minQ;
-    getDouble(m_uiForm.MinMagQ_ledt, minQ);
-
-    double maxQ;
-    getDouble(m_uiForm.MaxMagQ_ledt, maxQ);
-
-    worker->convertToHKL(event_ws_name, md_ws_name, minQ, maxQ);
-  }
 }
 
 /**
@@ -2052,8 +2014,6 @@ void MantidEV::saveSettings(const std::string &filename) {
                   m_uiForm.AllowPermutations_ckbx->isChecked());
   state->setValue("SelectCellOfType_rbtn",
                   m_uiForm.SelectCellOfType_rbtn->isChecked());
-  state->setValue("CreateHKLWorkspace_ckbx",
-                  m_uiForm.CreateHKLWorkspace_ckbx->isChecked());
   state->setValue("CellType_cmbx", m_uiForm.CellType_cmbx->currentIndex());
   state->setValue("CellCentering_cmbx",
                   m_uiForm.CellCentering_cmbx->currentIndex());
@@ -2191,7 +2151,6 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "BestCellOnly_ckbx", m_uiForm.BestCellOnly_ckbx);
   restore(state, "AllowPermutations_ckbx", m_uiForm.AllowPermutations_ckbx);
   restore(state, "SelectCellOfType_rbtn", m_uiForm.SelectCellOfType_rbtn);
-  restore(state, "CreateHKLWorkspace_ckbx", m_uiForm.CreateHKLWorkspace_ckbx);
   restore(state, "CellType_cmbx", m_uiForm.CellType_cmbx);
   restore(state, "CellCentering_cmbx", m_uiForm.CellCentering_cmbx);
   restore(state, "SelectCellWithForm_rbtn", m_uiForm.SelectCellWithForm_rbtn);

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_MULTIFILENAMEPARSERTEST_H_
 #define MANTID_KERNEL_MULTIFILENAMEPARSERTEST_H_
 
@@ -480,7 +474,7 @@ public:
 
   void test_instrument_with_multiple_padding() {
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
     Parser parser;
     parser.parse("TESTHISTOLISTENER123,299-301");

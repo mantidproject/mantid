@@ -18,22 +18,22 @@ Windows
 
 Install the following:
 
-* `Visual Studio 2017 Community Edition <https://visualstudio.microsoft.com/downloads/>`_.
+* `Visual Studio 2015 Community Edition <https://go.microsoft.com/fwlink/?LinkId=532606&clcid=0x409>`_. If you are at RAL then
+  ask for the location of the locally-cached offline version.
 
-  * When asked about installation workloads choose ``Desktop development with C++``
-  * Under the "Installation details" section verify that the following are checked:
+  * Select a custom install and include at minimum:
 
-    * ``Windows 8.1 SDK and UCRT SDK``
-    * The latest Windows 10 SDK
-
+    * Programming Languages -> Visual C++
+    * Universal Windows App Development Kits -> Tools and Windows 10 SDK
+    * Windows 8.1 and Windows Phone 8.0/8.1 Tools -> Tools and Windows SDKs
 
 * `Git <https://git-scm.com/>`_.
 
   * install the latest version and ensure that Git LFS is checked to be included
   * when the install has completed create a directory for storage of the LFS objects, e.g. ``C:\GitLFSStorage``
   * open up Git Bash and run ``git config --global lfs.storage C:/GitLFSStorage``
-
-* `CMake <https://cmake.org/download/>`_ >= 3.7
+ 
+* `CMake <https://cmake.org/download/>`_
 * `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
 
   * open the MikTeX console from the start menu
@@ -67,7 +67,7 @@ Red Hat/Cent OS/Fedora
   # Enable the mantid repo from copr
   yum copr enable mantid/mantid
 
-  # Install dependencies
+  # Install dependencies 
   yum install mantid-developer
 
 Ubuntu

@@ -2,7 +2,7 @@
  Int64TimeSeriesProperty
 =========================
 
-This is a Python binding to the C++ class Mantid::Kernel::TimeSeriesProperty.
+This a python binding to the C++ class Mantid::Kernel::TimeSeriesProperty.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

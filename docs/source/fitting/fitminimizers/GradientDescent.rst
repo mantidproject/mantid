@@ -4,7 +4,7 @@ Steepest Descent Minimizer
 ==========================
 
 This minimizer is explained at - `Wikipedia <https://en.wikipedia.org/wiki/Gradient_descent>`__  as the gradient descent method.
-It is listed in :ref:`a comparison of fitting minimizers <FittingMinimizers Minimizer Comparison>`.
+It is listed in `a comparison of fitting minimizers <../concepts/FittingMinimizers.html>`__.
 
 It makes use of the 
 `GSL (GNU Scientific Library) library

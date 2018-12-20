@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
@@ -573,7 +567,7 @@ public:
   void testHelper_ValidDateOverlap() {
     const std::string instDir =
         ConfigService::Instance().getInstrumentDirectory();
-    const std::string testDir = instDir + "unit_testing";
+    const std::string testDir = instDir + "IDFs_for_UNIT_TESTING";
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         testDir);
     ExperimentInfo helper;
@@ -586,15 +580,6 @@ public:
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         instDir);
-  }
-
-  void test_nexus_geometry_getInstrumentFilename() {
-    const std::string instrumentName = "LOKI";
-    ExperimentInfo info;
-    const auto path = info.getInstrumentFilename(instrumentName, "");
-    TS_ASSERT(!path.empty());
-    TS_ASSERT(
-        boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
   }
 
   void test_nexus() {

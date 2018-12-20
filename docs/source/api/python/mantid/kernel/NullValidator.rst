@@ -2,7 +2,7 @@
  NullValidator
 ===============
 
-This is a Python binding to the C++ class Mantid::Kernel::NullValidator.
+This a python binding to the C++ class Mantid::Kernel::NullValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 

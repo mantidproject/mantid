@@ -2,7 +2,7 @@
  DataItem
 ==========
 
-This is a Python binding to the C++ class Mantid::Kernel::DataItem.
+This a python binding to the C++ class Mantid::Kernel::DataItem.
 
 
 .. module:`mantid.kernel`

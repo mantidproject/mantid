@@ -1,22 +1,16 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 """
     Extract or compute the Q values from reduced QENS data
 """
 from __future__ import (absolute_import, division, print_function)
-from systemtesting import MantidSystemTest
+from stresstesting import MantidStressTest
 import mantid
 import mantid.simpleapi as sm
 import re
 import numpy as np
 
 
-class GlobalFitTest(MantidSystemTest):
+class GlobalFitTest(MantidStressTest):
     """Global fit of QENS data to the jump-diffusion model by Teixeira
        Fitting model. In this case:
         Convolution( A*Resolution, x*Delta + (1-x)*TeixeiraWaterSQE ) + LinearBackground

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_REFERENCEFRAMETEST_H_
 #define MANTID_GEOMETRY_REFERENCEFRAMETEST_H_
 
@@ -144,32 +138,6 @@ public:
     TS_ASSERT_EQUALS(0, z_vec[0]);
     TS_ASSERT_EQUALS(0, z_vec[1]);
     TS_ASSERT_EQUALS(1, z_vec[2]);
-  }
-
-  void testGetHorizontalDirectionVector() {
-    ReferenceFrame z1(Y, X, Right, "source");
-    V3D z_vec = z1.vecPointingHorizontal();
-    TS_ASSERT_EQUALS(0, z_vec[0]);
-    TS_ASSERT_EQUALS(0, z_vec[1]);
-    TS_ASSERT_EQUALS(1, z_vec[2]);
-
-    ReferenceFrame z2(X, Y, Right, "source");
-    z_vec = z2.vecPointingHorizontal();
-    TS_ASSERT_EQUALS(0, z_vec[0]);
-    TS_ASSERT_EQUALS(0, z_vec[1]);
-    TS_ASSERT_EQUALS(1, z_vec[2]);
-
-    ReferenceFrame y(X, Z, Right, "source");
-    V3D y_vec = y.vecPointingHorizontal();
-    TS_ASSERT_EQUALS(0, y_vec[0]);
-    TS_ASSERT_EQUALS(1, y_vec[1]);
-    TS_ASSERT_EQUALS(0, y_vec[2]);
-
-    ReferenceFrame x(Y, Z, Right, "source");
-    V3D x_vec = x.vecPointingHorizontal();
-    TS_ASSERT_EQUALS(1, x_vec[0]);
-    TS_ASSERT_EQUALS(0, x_vec[1]);
-    TS_ASSERT_EQUALS(0, x_vec[2]);
   }
 
   void testGetThetaSignAxisVector() {

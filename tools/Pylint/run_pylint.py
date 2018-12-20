@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """
     runpylint
     ~~~~~~~~~
@@ -153,7 +147,7 @@ def parse_arguments(argv):
                       help="If provided, use the given format type "
                            "[default=%s]." % DEFAULT_PYLINT_FORMAT)
     parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
-                      help="If provided, add this to the PYTHONPATH, overriding"
+                      help="If provided, use this as the MANTIDPATH, overriding"
                            "anything that is currently set.")
     parser.add_option("-n", "--nofail", action="store_true",dest="nofail",
                       help="If specified, then script will always return an exit status of 0.")
@@ -209,7 +203,8 @@ def setup_environment(mantidpath):
 def setup_mantidpath(mantidpath):
     """
     Setup the environment ready for the subprocess call.
-    Inserts the given path at the front of the PYTHONPATH
+    Inserts the given path at the front of the PYTHONPATH and
+    sets the MANTIDPATH variable
 
     Args:
       mantidpath (str): A string that points to a directory containing
@@ -220,6 +215,7 @@ def setup_mantidpath(mantidpath):
         raise ValueError("Unable to find mantid python module in '%s'"
                          % mantidpath)
 
+    os.environ["MANTIDPATH"] = mantidpath
     cur_pypath = os.environ.get("PYTHONPATH", "")
     # for subprocesses
     os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath

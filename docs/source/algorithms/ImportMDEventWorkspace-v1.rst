@@ -9,7 +9,7 @@
 Description
 -----------
 
-Creates an :ref:`MDEventWorkspace <MDWorkspace>`
+Creates an `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_
 from a plain ASCII file. Uses a simple
 format for the file described below. This algorithm is suitable for
 importing small volumes of data only. This algorithm does not scale well

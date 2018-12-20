@@ -1,15 +1,9 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import systemtesting
+import stresstesting
 from mantid.simpleapi import LoadEventNexus
 
 
-class ISISLoadingEventData(systemtesting.MantidSystemTest):
+class ISISLoadingEventData(stresstesting.MantidStressTest):
     """Older ISIS event files were actually, effectively, very finely-binned
     histograms where each "event" was assigned the TOF at the centre of a bin.
     Attempting to bin this type of data from event mode to histogram mode would

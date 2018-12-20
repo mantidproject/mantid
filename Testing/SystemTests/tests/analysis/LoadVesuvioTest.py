@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-public-methods,too-many-arguments
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 
 from mantid.api import FileFinder, MatrixWorkspace, mtd
 import mantid.simpleapi as ms
@@ -436,7 +430,7 @@ class VesuvioTests(unittest.TestCase):
 
 #====================================================================================
 
-class LoadVesuvioTest(systemtesting.MantidSystemTest):
+class LoadVesuvioTest(stresstesting.MantidStressTest):
 
     _success = False
 

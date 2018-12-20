@@ -2,7 +2,7 @@
  ScriptRepositoryFactory
 =========================
 
-This is a Python binding to the C++ class Mantid::API::ScriptRepositoryFactory.
+This a python binding to the C++ class Mantid::API::ScriptRepositoryFactory.
 
 
 .. module:`mantid.api`

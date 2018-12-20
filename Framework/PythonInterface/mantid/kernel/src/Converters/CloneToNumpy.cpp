@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -64,10 +58,9 @@ PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
     npy_datetime abstime = Converters::to_npy_datetime(cvector[i]);
-    auto scalar =
-        PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr);
-    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr), scalar);
-    Py_DECREF(scalar);
+    PyArray_SETITEM(
+        nparray, reinterpret_cast<char *>(itemPtr),
+        PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr));
   }
   return reinterpret_cast<PyObject *>(nparray);
 }
@@ -85,9 +78,8 @@ template <> PyObject *clone1D(const std::vector<bool> &cvector) {
 
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
-    auto py_bool = PyBool_FromLong(static_cast<long int>(cvector[i]));
-    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr), py_bool);
-    Py_DECREF(py_bool);
+    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr),
+                    PyBool_FromLong(static_cast<long int>(cvector[i])));
   }
   return reinterpret_cast<PyObject *>(nparray);
 }
@@ -172,7 +164,7 @@ INSTANTIATE_CLONE(double)
 INSTANTIATE_CLONE(float)
 // Need further 1D specialisation for string
 INSTANTIATE_CLONE1D(std::string)
-// Need further ND specialisation for DateAndTime
+// Need further 1D specialisation for DateAndTime
 INSTANTIATE_CLONEND(Types::Core::DateAndTime)
 // Need further ND specialisation for bool
 INSTANTIATE_CLONEND(bool)

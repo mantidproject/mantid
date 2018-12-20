@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_USAGESERVICETEST_H_
 #define MANTID_API_USAGESERVICETEST_H_
 
@@ -63,7 +57,7 @@ public:
   void test_startupMessage() {
     TestableUsageService usageService;
     std::string name = "My testing application name";
-    usageService.setApplicationName(name);
+    usageService.setApplication(name);
     std::string message = usageService.generateStartupMessage();
 
     ::Json::Reader reader;
@@ -162,11 +156,11 @@ public:
   void test_setApplicationName() {
     TestableUsageService usageService;
     // test default first
-    TS_ASSERT_EQUALS(usageService.getApplicationName(), "python");
+    TS_ASSERT_EQUALS(usageService.getApplication(), "python");
 
     std::string name = "My testing application name";
-    usageService.setApplicationName(name);
-    TS_ASSERT_EQUALS(usageService.getApplicationName(), name);
+    usageService.setApplication(name);
+    TS_ASSERT_EQUALS(usageService.getApplication(), name);
   }
 };
 

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitDataPresenter.h"
 #include "JumpFitDataTablePresenter.h"
 
@@ -22,7 +16,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
           model, view,
           Mantid::Kernel::make_unique<JumpFitDataTablePresenter>(
               model, view->getDataTable())),
-      m_activeParameterType("Width"), m_dataIndex(0),
+      m_activeParameterType(0), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
       m_jumpModel(model) {
@@ -36,9 +30,9 @@ JumpFitDataPresenter::JumpFitDataPresenter(
 
   connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(setParameterLabel(const QString &)));
-  connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(updateAvailableParameters(QString const &)));
-  connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(cbParameterType, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateAvailableParameters(int)));
+  connect(cbParameterType, SIGNAL(currentIndexChanged(int)), this,
           SIGNAL(dataChanged()));
   connect(cbParameter, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setSingleModelSpectrum(int)));
@@ -46,13 +40,9 @@ JumpFitDataPresenter::JumpFitDataPresenter(
           SIGNAL(dataChanged()));
 
   connect(view, SIGNAL(sampleLoaded(const QString &)), this,
-          SLOT(updateAvailableParameterTypes()));
-  connect(view, SIGNAL(sampleLoaded(const QString &)), this,
           SLOT(updateAvailableParameters()));
   connect(view, SIGNAL(sampleLoaded(const QString &)), this,
           SLOT(updateParameterSelectionEnabled()));
-  connect(view, SIGNAL(sampleLoaded(const QString &)), this,
-          SIGNAL(updateAvailableFitTypes()));
 
   updateParameterSelectionEnabled();
 }
@@ -71,7 +61,7 @@ void JumpFitDataPresenter::showParameterComboBoxes() {
   m_lbParameterType->show();
 }
 
-void JumpFitDataPresenter::setActiveParameterType(const std::string &type) {
+void JumpFitDataPresenter::setActiveParameterType(int type) {
   m_activeParameterType = type;
 }
 
@@ -80,26 +70,15 @@ void JumpFitDataPresenter::updateActiveDataIndex() {
 }
 
 void JumpFitDataPresenter::updateAvailableParameters() {
-  updateAvailableParameters(m_cbParameterType->currentText());
+  updateAvailableParameters(m_cbParameterType->currentIndex());
 }
 
-void JumpFitDataPresenter::updateAvailableParameters(const QString &type) {
-  if (type == "Width")
+void JumpFitDataPresenter::updateAvailableParameters(int typeIndex) {
+  if (typeIndex == 0)
     setAvailableParameters(m_jumpModel->getWidths(0));
-  else if (type == "EISF")
-    setAvailableParameters(m_jumpModel->getEISF(0));
   else
-    setAvailableParameters({});
-
-  if (!type.isEmpty())
-    setSingleModelSpectrum(m_cbParameter->currentIndex());
-}
-
-void JumpFitDataPresenter::updateAvailableParameterTypes() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_cbParameterType);
-  m_cbParameterType->clear();
-  for (const auto &type : getParameterTypes(m_dataIndex))
-    m_cbParameterType->addItem(QString::fromStdString(type));
+    setAvailableParameters(m_jumpModel->getEISF(0));
+  setSingleModelSpectrum(m_cbParameter->currentIndex());
 }
 
 void JumpFitDataPresenter::updateParameterSelectionEnabled() {
@@ -133,25 +112,24 @@ void JumpFitDataPresenter::setDialogParameterNames(
   updateParameterOptions(dialog);
 }
 
-void JumpFitDataPresenter::dialogParameterTypeUpdated(
-    JumpFitAddWorkspaceDialog *dialog, const std::string &type) {
-  setActiveParameterType(type);
+void JumpFitDataPresenter::setDialogParameterNames(
+    JumpFitAddWorkspaceDialog *dialog, int parameterType) {
+  setActiveParameterType(parameterType);
   updateParameterOptions(dialog);
 }
 
 void JumpFitDataPresenter::updateParameterOptions(
     JumpFitAddWorkspaceDialog *dialog) {
-  if (m_activeParameterType == "Width")
+  if (m_activeParameterType == 0)
     dialog->setParameterNames(m_jumpModel->getWidths(m_dataIndex));
-  else if (m_activeParameterType == "EISF")
-    dialog->setParameterNames(m_jumpModel->getEISF(m_dataIndex));
   else
-    dialog->setParameterNames({});
+    dialog->setParameterNames(m_jumpModel->getEISF(m_dataIndex));
 }
 
 void JumpFitDataPresenter::updateParameterTypes(
     JumpFitAddWorkspaceDialog *dialog) {
   dialog->setParameterTypes(getParameterTypes(m_dataIndex));
+  setActiveParameterType(0);
 }
 
 std::vector<std::string>
@@ -190,7 +168,7 @@ void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
 void JumpFitDataPresenter::setModelSpectrum(int index) {
   if (index < 0)
     throw std::runtime_error("No valid parameter was selected.");
-  else if (m_activeParameterType == "Width")
+  else if (m_activeParameterType == 0)
     m_jumpModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex);
   else
     m_jumpModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex);
@@ -215,11 +193,8 @@ JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
           SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *,
                                        const std::string &)));
   connect(dialog.get(),
-          SIGNAL(parameterTypeChanged(JumpFitAddWorkspaceDialog *,
-                                      const std::string &)),
-          this,
-          SLOT(dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *,
-                                          const std::string &)));
+          SIGNAL(parameterTypeChanged(JumpFitAddWorkspaceDialog *, int)), this,
+          SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *, int)));
   return std::move(dialog);
 }
 

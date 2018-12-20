@@ -43,9 +43,8 @@ Set up a local ``builder`` account that will be used by the slave.
 Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS.
 
 .. note::
-   For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__
-   may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`). The same
-   options should be used as for the full install.
+   For Windows the `Command line Visual C++ build tools <http://landinghub.visualstudio.com/visual-cpp-build-tools>`__
+   may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`).
 
 Windows
 -------
@@ -102,9 +101,14 @@ Service" has completed you should
 Linux
 -----
 
-Install an ssh server, ``ccache``, ``curl`` and ``xvfb``.
+Install an ssh server.
 
-From the ``builder`` account run ``ccache --max-size=20G``.
+Install ``ccache``. After installing run ``ccache --max-size=20G`` from the ``builder`` account.
+
+Install a vnc server and from the ``builder`` account run ``vncpasswd`` to set a password on the VNC server. It
+can be any password.
+
+Ensure ``curl`` is installed
 
 Any machines acting as performance test servers will require ``mysqldb`` to be installed.
 

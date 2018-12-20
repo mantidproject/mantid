@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -39,7 +33,7 @@ MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
   m_serviceBaseUrl = "https://fermi.ornl.gov/MantidRemote";
 }
 
-MantidWebServiceAPIHelper::~MantidWebServiceAPIHelper() = default;
+MantidWebServiceAPIHelper::~MantidWebServiceAPIHelper() { delete m_session; }
 
 std::istream &MantidWebServiceAPIHelper::httpGet(
     const std::string &path, const std::string &query_str,
@@ -186,7 +180,10 @@ void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
                                                 std::string extraPath,
                                                 std::string queryString) const {
   // Set up the session object
-  m_session.reset();
+  if (m_session) {
+    delete m_session;
+    m_session = nullptr;
+  }
 
   if (Poco::URI(m_serviceBaseUrl).getScheme() == "https") {
     // Create an HTTPS session
@@ -197,15 +194,15 @@ void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
         new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "",
                                Poco::Net::Context::VERIFY_NONE, 9, false,
                                "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-    m_session = std::make_unique<Poco::Net::HTTPSClientSession>(
+    m_session = new Poco::Net::HTTPSClientSession(
         Poco::URI(m_serviceBaseUrl).getHost(),
         Poco::URI(m_serviceBaseUrl).getPort(), context);
   } else {
     // Create a regular HTTP client session.  (NOTE: Using unencrypted HTTP is a
     // really bad idea! We'll be sending passwords in the clear!)
-    m_session = std::make_unique<Poco::Net::HTTPClientSession>(
-        Poco::URI(m_serviceBaseUrl).getHost(),
-        Poco::URI(m_serviceBaseUrl).getPort());
+    m_session =
+        new Poco::Net::HTTPClientSession(Poco::URI(m_serviceBaseUrl).getHost(),
+                                         Poco::URI(m_serviceBaseUrl).getPort());
   }
 
   Poco::URI uri(m_serviceBaseUrl);

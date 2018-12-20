@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """
 Defines functions to dynamically load Python modules.
 
@@ -15,7 +9,6 @@ from __future__ import (absolute_import, division,
 
 import os as _os
 import sys as _sys
-from traceback import format_exc
 try:
     from importlib.machinery import SourceFileLoader
 except ImportError:
@@ -194,8 +187,8 @@ def load_from_file(filepath):
     try:
         name, module = load_plugin(filepath)
         loaded.append(module)
-    except Exception:
-        logger.warning("Failed to load plugin %s.\nError: %s" % (filepath, format_exc()))
+    except Exception as exc:
+        logger.warning("Failed to load plugin %s. Error: %s" % (filepath, str(exc)))
 
     return loaded
 
@@ -216,19 +209,20 @@ def load_plugin(plugin_path):
 
 #======================================================================================================================
 
-def sync_attrs(source, attrs, clients):
+def sync_attrs(source_module, attrs, clients):
     """
         Syncs the attribute definitions between the
         given list from the source module & list of client modules such
         that the function defintions point to the same
         one
-        @param source :: A dictionary containing the real attribute definitions
+        @param source_module :: The module containing the "correct"
+                                definitions
         @param attrs :: The list of attributes to change in the client modules
         @param clients :: A list of modules whose attribute definitions
                           should be taken from source
     """
     for func_name in attrs:
-        attr = source[func_name]
+        attr = getattr(source_module, func_name)
         for plugin in clients:
             if hasattr(plugin, func_name):
                 setattr(plugin, func_name, attr)

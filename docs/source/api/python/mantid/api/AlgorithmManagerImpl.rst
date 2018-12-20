@@ -2,7 +2,7 @@
  AlgorithmManagerImpl
 ======================
 
-This is a Python binding to the C++ class Mantid::API::AlgorithmManagerImpl.
+This a python binding to the C++ class Mantid::API::AlgorithmManagerImpl.
 
 
 .. module:`mantid.api`

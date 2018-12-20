@@ -1,26 +1,21 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 ##########
 # Dialog to set up HTTP data downloading server and download HB3A data to local
 ##########
 import os
-from qtpy.QtWidgets import (QDialog, QFileDialog, QMessageBox)  # noqa
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
+from HFIR_4Circle_Reduction import ui_httpserversetup as ui_http
 
-import qtpy  # noqa
-from mantid.kernel import Logger
+
 try:
-    from mantidqt.utils.qt import load_ui
-except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
-    from mantidplot import load_ui
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
 
 
-class DataDownloadDialog(QDialog):
+class DataDownloadDialog(QtGui.QDialog):
     """ dialog for set up HTTP server and download files to local computer
     This feature will be valid until SNS disables the HTTP server for HFIR data
     """
@@ -32,22 +27,29 @@ class DataDownloadDialog(QDialog):
         super(DataDownloadDialog, self).__init__(parent)
 
         # set up UI
-        ui_path = "httpserversetup.ui"
-        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self.ui = ui_http.Ui_Dialog()
+        self.ui.setupUi(self)
 
         # initialize widgets
         self._init_widgets()
 
         # define event handing
-        self.ui.pushButton_testURLs.clicked.connect(self.do_test_url)
+        self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
+                     self.do_test_url)
 
-        self.ui.pushButton_downloadExpData.clicked.connect(self.do_download_spice_data)
+        self.connect(self.ui.pushButton_downloadExpData, QtCore.SIGNAL('clicked()'),
+                     self.do_download_spice_data)
 
-        self.ui.pushButton_ListScans.clicked.connect(self.do_list_scans)
+        self.connect(self.ui.pushButton_ListScans, QtCore.SIGNAL('clicked()'),
+                     self.do_list_scans)
 
-        self.ui.comboBox_mode.currentIndexChanged.connect(self.do_change_data_access_mode)
+        self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.do_change_data_access_mode)
 
-        self.ui.pushButton_browseLocalCache.clicked.connect(self.do_browse_local_cache_dir)
+        # self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
+        #              self.do_setup_dir_default)
+        self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_local_cache_dir)
 
         # Set the URL red as it is better not check at this stage. Leave it to user
         self.ui.lineEdit_url.setStyleSheet("color: black;")
@@ -63,6 +65,8 @@ class DataDownloadDialog(QDialog):
         # experiment number
         self._expNumber = None
 
+        return
+
     def _init_widgets(self):
         """
         initialize widgets
@@ -70,13 +74,15 @@ class DataDownloadDialog(QDialog):
         """
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
 
+        return
+
     def do_browse_local_cache_dir(self):
         """ Browse local cache directory
         :return:
         """
-        local_cache_dir = QFileDialog.getExistingDirectory(self, 'Get Local Cache Directory', self._homeSrcDir)
-        if isinstance(local_cache_dir, tuple):
-            local_cache_dir = local_cache_dir[0]
+        local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
+                                                                     'Get Local Cache Directory',
+                                                                     self._homeSrcDir))
 
         # Set local directory to control
         status, error_message = self._myControl.set_local_data_dir(local_cache_dir)
@@ -92,12 +98,13 @@ class DataDownloadDialog(QDialog):
         self.ui.lineEdit_localSrcDir.setText(local_cache_dir)
         # self.ui.lineEdit_localSpiceDir.setText(local_cache_dir)
 
+        return
+
     def do_change_data_access_mode(self):
         """ Change data access mode between downloading from server and local
         Event handling methods
         :return:
         """
-        pass
         # TODO/FIXME/NOW - Find out whether these widgets are used in the dialog
         # new_mode = str(self.ui.comboBox_mode.currentText())
         # self._dataAccessMode = new_mode
@@ -116,6 +123,8 @@ class DataDownloadDialog(QDialog):
         #     self.ui.lineEdit_localSrcDir.setEnabled(True)
         #     self.ui.pushButton_browseLocalCache.setEnabled(True)
         #     self._allowDownload = True
+
+        return
 
     def do_download_spice_data(self):
         """ Download SPICE data
@@ -160,6 +169,8 @@ class DataDownloadDialog(QDialog):
         # Download
         self._myControl.download_data_set(scan_list)
 
+        return
+
     def do_list_scans(self):
         """ List all scans available and show the information in a pop-up dialog
         :return:
@@ -176,6 +187,8 @@ class DataDownloadDialog(QDialog):
             message = hb3a_util.get_scans_list(url, exp_no)
 
         self.pop_one_button_dialog(message)
+
+        return
 
     def do_test_url(self):
         """ Test whether the root URL provided specified is good
@@ -199,7 +212,9 @@ class DataDownloadDialog(QDialog):
         """
         assert isinstance(message, str), 'Input message %s must a string but not %s.' \
                                          '' % (str(message), type(message))
-        QMessageBox.information(self, '4-circle Data Reduction', message)
+        QtGui.QMessageBox.information(self, '4-circle Data Reduction', message)
+
+        return
 
     def set_experiment_number(self, exp_number):
         """set the experiment number
@@ -210,3 +225,5 @@ class DataDownloadDialog(QDialog):
                                             'not a {1}.'.format(exp_number, type(exp_number))
 
         self._expNumber = exp_number
+
+        return

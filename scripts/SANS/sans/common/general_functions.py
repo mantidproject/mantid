@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module contain various general-purpose functions for the SANS reduction framework."""
 
 # pylint: disable=invalid-name
@@ -493,9 +487,9 @@ def parse_event_slice_setting(string_to_parse):
         line = re.sub(range_marker_pattern, "", line)
         value = float(line)
         if is_lower_bound:
-            return [value, -1.]
+            return [value, -1]
         else:
-            return [-1., value]
+            return [-1, value]
 
     # Check if the input actually exists.
     if not string_to_parse:

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_ARRAYPROPERTY_H_
 #define MANTID_KERNEL_ARRAYPROPERTY_H_
 
@@ -25,18 +19,39 @@ namespace Kernel {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 27/02/2008
+
+    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge National Laboratory & European Spallation Source
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template <typename T>
 class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
 public:
-  ArrayProperty(std::string name, std::vector<T> vec,
+  ArrayProperty(const std::string &name, const std::vector<T> &vec,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input);
-  ArrayProperty(std::string name, IValidator_sptr validator,
+  ArrayProperty(const std::string &name, IValidator_sptr validator,
                 const unsigned int direction = Direction::Input);
-  ArrayProperty(std::string name,
+  ArrayProperty(const std::string &name,
                 const unsigned int direction = Direction::Input);
-  ArrayProperty(std::string name, const std::string &values,
+  ArrayProperty(const std::string &name, const std::string &values,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input);
 

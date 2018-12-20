@@ -1,18 +1,14 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """Defines a set of helpers wrapped around the C++ TestHelpers package that
 are for use in unit tests only!
 """
 from __future__ import (absolute_import, division,
                         print_function)
 
-# Import mantid to set MANTIDPATH for any ConfigService call that may be done
-import mantid  # noqa
-# Add workspace creation namespace
+from six import iteritems
+# Define all mantid exported classes first
+import mantid
+
+#Add workspace creation namespace
 from . import WorkspaceCreationHelper
 
 # Define some pure-Python functions to add to the mix
@@ -44,8 +40,6 @@ def create_algorithm(name, **kwargs):
         kwargs - A dictionary of property name:value pairs
     @returns The algorithm handle
     """
-    # Initialize the whole framework
-    import mantid.simpleapi  # noqa
     if 'Version' in kwargs:
         alg = mantid.api.AlgorithmManager.createUnmanaged(name, kwargs['Version'])
         del kwargs['Version']

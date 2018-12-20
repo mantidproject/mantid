@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """ SANBatchReduction algorithm is the starting point for any new type reduction, event single reduction"""
 from __future__ import (absolute_import, division, print_function)
@@ -17,8 +11,7 @@ class SANSBatchReduction(object):
     def __init__(self):
         super(SANSBatchReduction, self).__init__()
 
-    def __call__(self, states, use_optimizations=True, output_mode=OutputMode.PublishToADS, plot_results = False,
-                 output_graph='', save_can=False):
+    def __call__(self, states, use_optimizations=True, output_mode=OutputMode.PublishToADS, plot_results = False, output_graph=''):
         """
         This is the start of any reduction.
 
@@ -31,20 +24,13 @@ class SANSBatchReduction(object):
         """
         self.validate_inputs(states, use_optimizations, output_mode, plot_results, output_graph)
 
-        return self._execute(states, use_optimizations, output_mode, plot_results, output_graph, save_can=save_can)
+        self._execute(states, use_optimizations, output_mode, plot_results, output_graph)
 
     @staticmethod
-    def _execute(states, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
+    def _execute(states, use_optimizations, output_mode, plot_results, output_graph):
         # Iterate over each state, load the data and perform the reduction
-        out_scale_factors_list = []
-        out_shift_factors_list = []
         for state in states:
-            out_scale_factors, out_shift_factors = \
-                single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph,
-                                           save_can=save_can)
-            out_shift_factors_list.append(out_shift_factors)
-            out_scale_factors_list.append(out_scale_factors)
-        return out_scale_factors_list, out_shift_factors_list
+            single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph)
 
     def validate_inputs(self, states, use_optimizations, output_mode, plot_results, output_graph):
         # We are strict about the types here.

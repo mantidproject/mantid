@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_SPECTRUMINFOTEST_H_
 #define MANTID_API_SPECTRUMINFOTEST_H_
 
@@ -497,28 +491,28 @@ public:
   void test_iterator_begin() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.cbegin();
+    auto iter = spectrumInfo.begin();
 
     // Check we start at the correct place
-    TS_ASSERT(iter != spectrumInfo.cend());
+    TS_ASSERT(iter != spectrumInfo.end());
   }
 
   void test_iterator_end() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.cend();
+    auto iter = spectrumInfo.end();
 
     // Check we start at the correct place
-    TS_ASSERT(iter != spectrumInfo.cbegin());
+    TS_ASSERT(iter != spectrumInfo.begin());
   }
 
   void test_iterator_increment_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.cbegin();
+    auto iter = spectrumInfo.begin();
 
     // Check that we start at the beginning
-    TS_ASSERT(iter == spectrumInfo.cbegin());
+    TS_ASSERT(iter == spectrumInfo.begin());
 
     // Increment iterator and check hasUniqueDetector
     for (size_t i = 0; i < m_workspace.spectrumInfo().size(); ++i) {
@@ -527,16 +521,16 @@ public:
     }
 
     // Check we've reached the end
-    TS_ASSERT(iter == spectrumInfo.cend());
+    TS_ASSERT(iter == spectrumInfo.end());
   }
 
   void test_iterator_decrement_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.cend();
+    auto iter = spectrumInfo.end();
 
     // Check that we start at the end
-    TS_ASSERT(iter == spectrumInfo.cend());
+    TS_ASSERT(iter == spectrumInfo.end());
 
     // Decrement iterator and check hasUniqueDetector
     for (size_t i = m_workspace.spectrumInfo().size(); i > 0; --i) {
@@ -545,13 +539,13 @@ public:
     }
 
     // Check we've reached the beginning
-    TS_ASSERT(iter == spectrumInfo.cbegin());
+    TS_ASSERT(iter == spectrumInfo.begin());
   }
 
   void test_iterator_advance_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.cbegin();
+    auto iter = spectrumInfo.begin();
 
     // Advance 3 places
     std::advance(iter, 3);
@@ -563,16 +557,16 @@ public:
 
     // Go to the start
     std::advance(iter, -1);
-    TS_ASSERT(iter == spectrumInfo.cbegin());
+    TS_ASSERT(iter == spectrumInfo.begin());
   }
 
   void test_copy_iterator_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.cbegin();
+    auto iter = spectrumInfo.begin();
 
     // Create a copy
-    auto iterCopy = SpectrumInfoConstIt(iter);
+    auto iterCopy = SpectrumInfoIterator(iter);
 
     // Check
     TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
@@ -585,14 +579,6 @@ public:
     // Check again
     TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
     TS_ASSERT_EQUALS(iterCopy->hasUniqueDetector(), true);
-  }
-
-  void test_mutating_via_writable_iterator() {
-    auto &spectrumInfo = m_workspace.mutableSpectrumInfo();
-    auto it = spectrumInfo.begin();
-
-    it->setMasked(true);
-    TS_ASSERT(spectrumInfo.cbegin()->isMasked() == true);
   }
 
 private:

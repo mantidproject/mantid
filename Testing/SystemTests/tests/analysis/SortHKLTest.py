@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import json
 from mantid.simpleapi import *
 from mantid.geometry import PointGroupFactory
@@ -85,7 +79,7 @@ class HKLStatisticsTestMixin(object):
         return overall_statistics
 
 
-class SortHKLTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
+class SortHKLTest(HKLStatisticsTestMixin, stresstesting.MantidStressTest):
     ''' System test for SortHKL
 
     This system test compares some of the output of SortHKL to statistics produced

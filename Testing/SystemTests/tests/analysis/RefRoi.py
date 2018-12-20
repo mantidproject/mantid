@@ -1,16 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import systemtesting
+import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
 
-class RefRoiTest(systemtesting.MantidSystemTest):
+class RefRoiTest(stresstesting.MantidStressTest):
     def runTest(self):
         workspace = Load(Filename="REF_L_119814")
         workspace = Integration(InputWorkspace=workspace)

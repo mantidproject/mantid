@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from mantid.api import Workspace
 import os
@@ -18,7 +12,7 @@ from six import with_metaclass
 
 
 #----------------------------------------------------------------------
-class ISISDirectInelasticReduction(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISDirectInelasticReduction(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     """A base class for the ISIS direct inelastic tests
 
     The workflow is defined in the runTest() method, simply
@@ -76,7 +70,7 @@ class ISISDirectInelasticReduction(with_metaclass(ABCMeta, systemtesting.MantidS
         return isinstance(obj, Workspace)
 
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
         # this is temporary parameter
         self.scale_to_fix_abf=1
 
@@ -476,7 +470,7 @@ class MERLINReduction(ISISDirectInelasticReduction):
 #
 
 
-class LETReduction(systemtesting.MantidSystemTest):
+class LETReduction(stresstesting.MantidStressTest):
     tolerance = 1e-6
     tolerance_is_reller=True
 
@@ -507,7 +501,7 @@ class LETReduction(systemtesting.MantidSystemTest):
         return self.ws_name, "LETReduction.nxs"
 
 
-class LETReductionEvent2015Multirep(systemtesting.MantidSystemTest):
+class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
     """
     written in a hope that most of the stuff find here will eventually find its way into main reduction routines
     """

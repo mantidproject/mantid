@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
@@ -190,18 +184,13 @@ SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
 }
 
 // Begin method for iterator
-SpectrumInfoIt SpectrumInfo::begin() { return SpectrumInfoIt(*this, 0); }
-
-// End method for iterator
-SpectrumInfoIt SpectrumInfo::end() { return SpectrumInfoIt(*this, size()); }
-
-const SpectrumInfoConstIt SpectrumInfo::cbegin() const {
-  return SpectrumInfoConstIt(*this, 0);
+SpectrumInfoIterator SpectrumInfo::begin() const {
+  return SpectrumInfoIterator(*this, 0);
 }
 
 // End method for iterator
-const SpectrumInfoConstIt SpectrumInfo::cend() const {
-  return SpectrumInfoConstIt(*this, size());
+SpectrumInfoIterator SpectrumInfo::end() const {
+  return SpectrumInfoIterator(*this, size());
 }
 
 } // namespace API

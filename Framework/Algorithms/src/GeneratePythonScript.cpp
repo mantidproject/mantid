@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GeneratePythonScript.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -74,11 +68,6 @@ void GeneratePythonScript::init() {
   declareProperty("IgnoreTheseAlgs", std::vector<std::string>(),
                   "A list of algorithms to filter out of the built script",
                   Direction::Input);
-
-  declareProperty(
-      "IgnoreTheseAlgProperties", std::vector<std::vector<std::string>>(),
-      "A list of algorithm properties to filter out of the built script",
-      Direction::Input);
 }
 
 /** Execute the algorithm.
@@ -92,8 +81,6 @@ void GeneratePythonScript::exec() {
   const bool appendTimestamp = getProperty("AppendTimestamp");
   const std::vector<std::string> ignoreTheseAlgs =
       getProperty("IgnoreTheseAlgs");
-  const std::vector<std::vector<std::string>> ignoreTheseAlgProperties =
-      getProperty("IgnoreTheseAlgProperties");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
@@ -125,7 +112,7 @@ void GeneratePythonScript::exec() {
     versionSpecificity = "all";
 
   ScriptBuilder builder(view, versionSpecificity, appendTimestamp,
-                        ignoreTheseAlgs, ignoreTheseAlgProperties);
+                        ignoreTheseAlgs);
   std::string generatedScript;
   generatedScript += "#########################################################"
                      "#############\n";

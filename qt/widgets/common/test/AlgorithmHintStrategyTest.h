@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGYTEST_H
 #define MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGYTEST_H
 
@@ -15,6 +9,8 @@
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
 #include <cxxtest/TestSuite.h>
+
+#include <boost/scoped_ptr.hpp>
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;

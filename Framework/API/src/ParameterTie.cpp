@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -87,8 +81,7 @@ void ParameterTie::set(const std::string &expr) {
   }
 
   // Create the template m_expression
-  static const boost::regex rx(
-      R"(\b(([[:alpha:]]|_)([[:alnum:]]|_|\.)*)\b(?!(\s*\()))");
+  boost::regex rx(R"(\b(([[:alpha:]]|_)([[:alnum:]]|_|\.)*)\b(?!(\s*\()))");
   std::string input = expr;
   boost::smatch res;
   std::string::const_iterator start = input.begin();
@@ -149,7 +142,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
       ;
     }
 
-    static const boost::regex rx(std::string("#(\\d+)"));
+    boost::regex rx(std::string("#(\\d+)"));
     boost::smatch res;
     std::string::const_iterator start = m_expression.begin();
     std::string::const_iterator end = m_expression.end();

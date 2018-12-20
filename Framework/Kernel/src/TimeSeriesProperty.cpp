@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
@@ -1959,8 +1953,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
  */
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::isTimeString(const std::string &str) {
-  static const boost::regex re(
-      "^[0-9]{4}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}");
+  boost::regex re("^[0-9]{4}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}");
   return boost::regex_search(str.begin(), str.end(), re);
 }
 

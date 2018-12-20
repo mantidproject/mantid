@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ICatalogInfo.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
@@ -25,7 +19,7 @@ std::string ICatalogInfo::transformArchivePath(const std::string &path) const {
     ret = replacePrefix(path, linuxPrefix(), windowsPrefix());
     ret = replaceAllOccurences(ret, "/", "\\");
   } else {
-    ret = replacePrefix(path, catalogPrefix(), windowsPrefix());
+    ret = path;
   }
 #endif
   return ret;

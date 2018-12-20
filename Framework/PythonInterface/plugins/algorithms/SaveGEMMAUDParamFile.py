@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import math
@@ -14,17 +8,6 @@ from string import Formatter
 
 from mantid.api import *
 from mantid.kernel import *
-import isis_powder.gem_routines
-
-_MAUD_TEMPLATE_PATH = None
-
-
-def _maud_template_path():
-    global _MAUD_TEMPLATE_PATH
-    if _MAUD_TEMPLATE_PATH is None:
-        _MAUD_TEMPLATE_PATH = os.path.join(os.path.dirname(isis_powder.gem_routines.__file__),
-                                           'maud_param_template.maud')
-    return _MAUD_TEMPLATE_PATH
 
 
 class SaveGEMMAUDParamFile(PythonAlgorithm):
@@ -63,7 +46,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
 
         self.declareProperty(FileProperty(name=self.PROP_TEMPLATE_FILE,
                                           action=FileAction.Load,
-                                          defaultValue=_maud_template_path()),
+                                          defaultValue=self._find_isis_powder_dir()),
                              doc="Template for the .maud file")
 
         self.declareProperty(IntArrayProperty(name=self.PROP_GROUPING_SCHEME),
@@ -145,6 +128,20 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         corresponding bank
         """
         return (bank_param_list[grouping_scheme[spec_num] - 1] for spec_num in spectrum_numbers)
+
+    def _find_isis_powder_dir(self):
+        script_dirs = [directory for directory in config["pythonscripts.directories"].split(";")
+                       if "Diffraction" in directory]
+
+        for directory in script_dirs:
+            path_to_test = os.path.join(directory,
+                                        "isis_powder",
+                                        "gem_routines",
+                                        "maud_param_template.maud")
+            if os.path.exists(path_to_test):
+                return path_to_test
+
+        return ""
 
     def _format_param_list(self, param_list):
         return "\n".join(str(param) for param in param_list)

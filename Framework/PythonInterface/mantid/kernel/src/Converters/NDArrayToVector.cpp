@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -133,7 +127,7 @@ NDArrayToVector<DestElementType>::NDArrayToVector(const NDArray &value)
  * @return A vector of the DestElementType created from the numpy array
  */
 template <typename DestElementType>
-typename NDArrayToVector<DestElementType>::TypedVector
+const typename NDArrayToVector<DestElementType>::TypedVector
 NDArrayToVector<DestElementType>::operator()() {
   std::vector<DestElementType> cvector(
       PyArray_SIZE((PyArrayObject *)m_arr.ptr()));

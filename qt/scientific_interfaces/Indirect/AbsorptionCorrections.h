@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ABSORPTIONCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ABSORPTIONCORRECTIONS_H_
 
@@ -23,50 +17,36 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr sampleWorkspace() const;
 
-private slots:
-  virtual void algorithmComplete(bool error);
-  void saveClicked();
-  void plotClicked();
-  void runClicked();
-  void getParameterDefaults(QString const &dataName);
-  void changeSampleDensityUnit(int);
-  void changeCanDensityUnit(int);
-  UserInputValidator doValidation();
-
 private:
   void setup() override;
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-  void addSaveWorkspace(std::string const &wsName);
+private slots:
+  virtual void algorithmComplete(bool error);
+  void saveClicked();
+  void plotClicked();
+  void getBeamDefaults(const QString &dataName);
+  void getMonteCarloDefaults(const QString &dataName);
+  void setWavelengthsValue(Mantid::Geometry::Instrument_const_sptr instrument,
+                           const std::string &wavelengthsParamName) const;
+  void setEventsValue(Mantid::Geometry::Instrument_const_sptr instrument,
+                      const std::string &eventsParamName) const;
+  void setInterpolationValue(Mantid::Geometry::Instrument_const_sptr instrument,
+                             const std::string &interpolationParamName) const;
+  void setMaxAttemptsValue(Mantid::Geometry::Instrument_const_sptr instrument,
+                           const std::string &maxAttemptsParamName) const;
+  void changeSampleDensityUnit(int);
+  void changeCanDensityUnit(int);
+  UserInputValidator doValidation();
+
+private:
+  void addSaveWorkspace(QString wsName);
   void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,
                                      QString shape);
   void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg,
-                                  QString const &shape);
-
-  void processWavelengthWorkspace();
-
-  void getParameterDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
-  void setBeamWidthValue(Mantid::Geometry::Instrument_const_sptr instrument,
-                         std::string const &beamWidthParamName) const;
-  void setBeamHeightValue(Mantid::Geometry::Instrument_const_sptr instrument,
-                          std::string const &beamHeightParamName) const;
-  void setWavelengthsValue(Mantid::Geometry::Instrument_const_sptr instrument,
-                           std::string const &wavelengthsParamName) const;
-  void setEventsValue(Mantid::Geometry::Instrument_const_sptr instrument,
-                      std::string const &eventsParamName) const;
-  void setInterpolationValue(Mantid::Geometry::Instrument_const_sptr instrument,
-                             std::string const &interpolationParamName) const;
-  void setMaxAttemptsValue(Mantid::Geometry::Instrument_const_sptr instrument,
-                           std::string const &maxAttemptsParamName) const;
-
-  void setRunEnabled(bool enabled);
-  void setPlotResultEnabled(bool enabled);
-  void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
+                                  QString shape);
 
   Ui::AbsorptionCorrections m_uiForm;
   /// alg

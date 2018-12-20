@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
 Some of the sphinx warnings come from the C++ code, from the properties of the algorithms or from the summary string
@@ -11,15 +5,15 @@ This test tries to detect the most common such errors.
 It also detects if a new category is created (i.e. someone uses Utilities instead of Utility)
 """
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import mantid
 import re
 from six import iteritems
 
 
-class SphinxWarnings(systemtesting.MantidSystemTest):
+class SphinxWarnings(stresstesting.MantidStressTest):
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
         self.allowedCategories=['Arithmetic',
                                 'CorrectionFunctions',
                                 'Crystal',

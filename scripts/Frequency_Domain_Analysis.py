@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -12,7 +6,7 @@ import sys
 import PyQt4.QtGui as QtGui
 
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
-from Muon.GUI.Common.utilities import load_utils
+from Muon.GUI.Common import load_utils
 from Muon.GUI.Common import message_box
 
 

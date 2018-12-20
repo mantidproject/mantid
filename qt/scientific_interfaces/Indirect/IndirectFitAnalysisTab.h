@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 
@@ -36,7 +30,7 @@ public:
                          QWidget *parent = nullptr);
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
-  void setPlotView(IIndirectFitPlotView *view);
+  void setPlotView(IndirectFitPlotView *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
@@ -74,7 +68,6 @@ public:
   void addComboBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions);
-  void clearFitTypeComboBox();
 
   void setBackgroundOptions(const QStringList &backgrounds);
 
@@ -112,9 +105,6 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
-public slots:
-  void setBrowserWorkspace() override;
-
 protected:
   IndirectFittingModel *fittingModel() const;
 
@@ -128,9 +118,10 @@ protected:
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
   void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
                      const std::string &parameter);
-  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace,
+               const std::size_t &index);
   void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
-                     const std::string &parameter);
+                     const std::string &parameter, const std::size_t &index);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
                     const std::string &parameterToPlot);
@@ -149,11 +140,12 @@ protected:
   void setPlotOptions(QComboBox *cbPlotType,
                       const QSet<QString> &options) const;
 
+  virtual bool shouldEnablePlotResult() = 0;
+
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
 
   virtual void setRunIsRunning(bool running) = 0;
-  virtual void setFitSingleSpectrumIsFitting(bool fitting) = 0;
 
 signals:
   void functionChanged();
@@ -173,7 +165,6 @@ protected slots:
   void updateBrowserFittingRange();
   void setBrowserWorkspace(std::size_t dataIndex);
   void setBrowserWorkspaceIndex(std::size_t spectrum);
-  void setBrowserWorkspaceIndex(int spectrum);
   void tableStartXChanged(double startX, std::size_t dataIndex,
                           std::size_t spectrum);
   void tableEndXChanged(double endX, std::size_t dataIndex,
@@ -189,30 +180,15 @@ protected slots:
   void singleFit(std::size_t dataIndex, std::size_t spectrum);
   void executeFit();
 
-  void updateAttributeValues();
-  void updateAttributeValues(Mantid::API::IFunction_sptr function,
-                             std::vector<std::string> const &attributeNames);
-  void updateAttributeValues(
-      Mantid::API::IFunction_sptr function,
-      std::vector<std::string> const &attributeNames,
-      std::unordered_map<std::string, Mantid::API::IFunction::Attribute> const
-          &attributes);
-  void updateFitBrowserAttributeValues();
-  std::unordered_map<std::string, Mantid::API::IFunction::Attribute>
-  getAttributes(Mantid::API::IFunction_sptr const &function,
-                std::vector<std::string> const &attributeNames);
+  void updateFitBrowserParameterValues();
   void updateParameterValues();
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
-  void updateFitBrowserParameterValues();
 
   virtual void updatePlotOptions() = 0;
 
   void updateResultOptions();
   void saveResult();
-
-private slots:
-  void updatePlotGuess();
 
 private:
   /// Overidden by child class.
@@ -226,8 +202,6 @@ private:
   void connectFitBrowserAndPlotPresenter();
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
-
-  void enableFitAnalysisButtons(bool enable);
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;

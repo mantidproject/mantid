@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import Logger
@@ -70,7 +64,6 @@ class DiagnosticsPagePresenter(object):
         self._view.user_file_name = user_file
 
     def on_horizontal_clicked(self):
-        self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
@@ -79,11 +72,10 @@ class DiagnosticsPagePresenter(object):
         range = self._view.horizontal_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
         detector = get_detector_from_gui_selection(self._view.detector)
-        self._work_handler.process(listener, self.run_integral, 0, range, mask, IntegralEnum.Horizontal,
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Horizontal,
                                    detector, state)
 
     def on_vertical_clicked(self):
-        self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
@@ -92,11 +84,10 @@ class DiagnosticsPagePresenter(object):
         range = self._view.vertical_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
         detector = get_detector_from_gui_selection(self._view.detector)
-        self._work_handler.process(listener, self.run_integral, 0, range, mask, IntegralEnum.Vertical,
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Vertical,
                                    detector, state)
 
     def on_time_clicked(self):
-        self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
@@ -105,11 +96,11 @@ class DiagnosticsPagePresenter(object):
         range = self._view.time_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
         detector = get_detector_from_gui_selection(self._view.detector)
-        self._work_handler.process(listener, self.run_integral, 0, range, mask, IntegralEnum.Time,
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Time,
                                    detector, state)
 
     def on_processing_finished_integral(self, result):
-        self._view.enable_integrals()
+        pass
 
     def on_processing_error_integral(self, error):
-        self._view.enable_integrals()
+        pass

@@ -1,11 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
 
@@ -45,7 +39,7 @@ def do_cleanup():
     return True
 
 
-class PG3Analysis(systemtesting.MantidSystemTest):
+class PG3Analysis(stresstesting.MantidStressTest):
     ref_file  = 'PG3_4844_reference.gsa'
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2011_08_31-HR.txt"
@@ -90,7 +84,7 @@ class PG3Analysis(systemtesting.MantidSystemTest):
         return ('PG3_4844','PG3_4844_golden')
 
 
-class PG3StripPeaks(systemtesting.MantidSystemTest):
+class PG3StripPeaks(stresstesting.MantidStressTest):
     ref_file = 'PG3_4866_reference.gsa'
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
 
@@ -196,7 +190,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         return ('PG3_4866','PG3_4866_golden')
 
 
-class SeriesAndConjoinFilesTest(systemtesting.MantidSystemTest):
+class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
     cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file  = "PG3_characterization_2012_02_23-HR-ILL.txt"
     ref_files  = ['PG3_9829_reference.gsa', 'PG3_9830_reference.gsa']
@@ -254,7 +248,7 @@ class SeriesAndConjoinFilesTest(systemtesting.MantidSystemTest):
         return ('PG3_9829','PG3_9829_golden', 'PG3_9830','PG3_9830_golden')
 
 
-class SumFilesTest(systemtesting.MantidSystemTest):
+class SumFilesTest(stresstesting.MantidStressTest):
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
     ref_file  = 'PG3_9829_sum_reference.gsa'
@@ -300,7 +294,7 @@ class SumFilesTest(systemtesting.MantidSystemTest):
         return ('PG3_9829','PG3_9829_golden')
 
 
-class ToPDFgetNTest(systemtesting.MantidSystemTest):
+class ToPDFgetNTest(stresstesting.MantidStressTest):
     cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file  = "PG3_characterization_2012_02_23-HR-ILL.txt"
     data_file = "PG3_9829_event.nxs"

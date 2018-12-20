@@ -2,7 +2,7 @@
  LockMode
 ==========
 
-This is a Python binding to the C++ class Mantid::API::LockMode.
+This a python binding to the C++ class Mantid::API::LockMode.
 
 
 .. module:`mantid.api`

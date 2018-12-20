@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import os
 from mantid.simpleapi import *
 from six import string_types
@@ -23,7 +17,7 @@ def _skip_test():
     return "Linux" not in platform.platform()
 
 
-class PG3Calibration(systemtesting.MantidSystemTest):
+class PG3Calibration(stresstesting.MantidStressTest):
     def cleanup(self):
         os.remove(self.saved_cal_file)
 
@@ -71,7 +65,7 @@ class PG3Calibration(systemtesting.MantidSystemTest):
         return ('PG3_2538_offsets','PG3_2538_golden_offsets')
 
 
-class PG3CCCalibration(systemtesting.MantidSystemTest):
+class PG3CCCalibration(stresstesting.MantidStressTest):
     def cleanup(self):
         os.remove(self.saved_cal_file)
 

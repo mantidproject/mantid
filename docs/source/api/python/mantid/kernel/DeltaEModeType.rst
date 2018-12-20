@@ -2,7 +2,7 @@
  DeltaEModeType
 ================
 
-This is a Python binding to the C++ class Mantid::Kernel::DeltaEMode.
+This a python binding to the C++ class Mantid::Kernel::DeltaEMode.
 
 
 .. module:`mantid.kernel`

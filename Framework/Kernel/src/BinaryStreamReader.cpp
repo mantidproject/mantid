@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -168,16 +162,6 @@ BinaryStreamReader &BinaryStreamReader::operator>>(std::string &value) {
   // Now the value
   value.resize(static_cast<std::string::size_type>(length));
   m_istrm.read(const_cast<char *>(value.data()), static_cast<size_t>(length));
-  return *this;
-}
-
-/**
- * Read a uint32_t from the stream
- * @param value The value is stored in the given stream
- * @return A reference to the BinaryStreamReader object
- */
-BinaryStreamReader &BinaryStreamReader::operator>>(uint32_t &value) {
-  readFromStream(m_istrm, value);
   return *this;
 }
 

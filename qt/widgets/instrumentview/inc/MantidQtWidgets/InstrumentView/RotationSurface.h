@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ROTATIONSURFACE_H
 #define ROTATIONSURFACE_H
 
@@ -54,14 +48,6 @@ protected:
 
   /// Update the view rect to offset for the U correction
   void updateViewRectForUCorrection();
-
-private:
-  void findAxes();
-  std::vector<size_t> retrieveSurfaceDetectors() const;
-  void correctUCoords(double manual_u_min, double manual_u_max);
-  void createUnwrappedDetectors();
-
-protected:
   /// Calculate UV offsets from the view rect
   std::pair<double, double> calculateViewRectOffsets();
 

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDEW_EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
 #define MDEW_EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
 

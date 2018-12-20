@@ -1,15 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import collections
 from mantid.api import mtd
 import numpy
 import numpy.testing
+from scipy import constants
 from testhelpers import illhelpers, run_algorithm
 import unittest
 
@@ -174,7 +169,7 @@ class DirectILLReductionTest(unittest.TestCase):
 
 def _groupingTestDetectors(ws):
     """Mask detectors for detector grouping tests."""
-    indexBegin = 63105  # Detector at L2 and at 2theta = 40.6.
+    indexBegin = 63106  # Detector at L2 and at 2theta = 40.6.
     kwargs = {
         'Workspace': ws,
         'StartWorkspaceIndex': 0,
@@ -182,18 +177,20 @@ def _groupingTestDetectors(ws):
         'child': True
     }
     run_algorithm('MaskDetectors', **kwargs)
-    spectrumInfo = ws.spectrumInfo()
-    reference2Theta1 = spectrumInfo.twoTheta(indexBegin)
-    reference2Theta2 = spectrumInfo.twoTheta(indexBegin + 256)
+    referenceDetector = ws.getDetector(indexBegin)
+    reference2Theta1 = ws.detectorTwoTheta(referenceDetector)
+    referenceDetector = ws.getDetector(indexBegin + 256)
+    reference2Theta2 = ws.detectorTwoTheta(referenceDetector)
     mask = list()
     tolerance = numpy.deg2rad(0.01)
     for i in range(indexBegin + 1, indexBegin + 10000):
-        twoTheta = spectrumInfo.twoTheta(i)
+        det = ws.getDetector(i)
+        twoTheta = ws.detectorTwoTheta(det)
         if abs(reference2Theta1 - twoTheta) >= tolerance and abs(reference2Theta2 - twoTheta) >= tolerance:
             mask.append(i)
     kwargs = {
         'Workspace': ws,
-        'WorkspaceIndexList': mask,
+        'DetectorList': mask,
         'child': True
     }
     run_algorithm('MaskDetectors', **kwargs)

@@ -1,14 +1,8 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantid.api import FrameworkManagerImpl, IFunction1D, FunctionFactory
+from mantid.api import IFunction1D, FunctionFactory
 
 
 class TestFunctionNoAttrs(IFunction1D):
@@ -37,10 +31,6 @@ class TestFunctionCorrectForm(IFunction1D):
 
 
 class FunctionFactoryTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        FrameworkManagerImpl.Instance()
 
     def test_get_function_factory_does_not_return_None(self):
         self.assertTrue(FunctionFactory is not None)

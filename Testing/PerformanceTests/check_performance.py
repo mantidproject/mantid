@@ -1,10 +1,4 @@
 #!/usr/bin/env python
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """ This module checks a SQL database
 to determine whether performance in a particular test has dropped.
 If so, it prints out an error message and exits with a return

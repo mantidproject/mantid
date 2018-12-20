@@ -1,22 +1,9 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, bad-builtin
 """
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script
 """
 from __future__ import (absolute_import, division, print_function)
-import xml.dom.minidom
-import sys
-import time
-import platform
-import re
-import os
-
 # Check whether Mantid is available
 # Disable unused import warning
 # pylint: disable=W0611
@@ -27,14 +14,19 @@ try:
 except (ImportError, ImportWarning):
     HAS_MANTID = False
 
-SCRIPT_EXEC_METHOD = 'exec'
 try:
     import mantidplot
-    SCRIPT_EXEC_METHOD = 'mantidplot'
+
+    HAS_MANTIDPLOT = True
 except(ImportError, ImportWarning):
-    # are we running workbench
-    if 'workbench' in sys.modules:
-        SCRIPT_EXEC_METHOD = 'async'
+    HAS_MANTIDPLOT = False
+
+import xml.dom.minidom
+import sys
+import time
+import platform
+import re
+import os
 
 
 class BaseScriptElement(object):
@@ -295,51 +287,6 @@ class BaseScriptElement(object):
         return output_str
 
 
-# Disable warning about the use of exec, which we knowingly use to
-# execute generated code.
-# pylint: disable=W0122
-def execute_script(script, error_cb=None):
-    """
-    Executes the given script code.
-
-    If MantidPlot is available it calls back to MantidPlot
-    to ensure the code is executed asynchronously, if not
-    then a simple exec call is used
-
-    @param script :: A chunk of code to execute
-    @param error_cb :: method to call on error, only registered in workbench
-    """
-    if SCRIPT_EXEC_METHOD == 'async':
-        Logger('scripter').information('using PythonCodeExecution')
-        execute_script_async(script, error_cb)
-    elif SCRIPT_EXEC_METHOD == 'mantidplot':
-        Logger('scripter').information('using runPythonScript')
-        mantidplot.runPythonScript(script, True)  # TODO this option should get removed
-    else:
-        Logger('scripter').information('using straight exec')
-        exec(script, globals(), locals())
-
-
-def execute_script_async(script, error_cb=None):
-    # Cannot define this code in execute_script as Python 2.7.5 generates an error:
-    # SyntaxError: unqualified exec is not allowed in function 'execute_script' it
-    # contains a nested function with free variables
-
-    # this is intentionally imported lazily to avoid a Qt dependency
-    # in the framework
-    from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-
-    def on_error(arg):
-        Logger('scripter').error('Failed to execute script: {}'.format(arg))
-
-    executioner = PythonCodeExecution()
-    if error_cb is None:
-        executioner.sig_exec_error.connect(on_error)
-    else:
-        executioner.sig_exec_error.connect(error_cb)
-    executioner.execute_async(script, '<string>')
-
-
 class BaseReductionScripter(object):
     """
         Organizes the set of reduction parameters that will be used to
@@ -588,7 +535,7 @@ class BaseReductionScripter(object):
                             item.state().update()
                         except (StopIteration, ImportError, NameError, TypeError, ValueError, Warning):
                             pass
-                raise  # rethrow the exception
+                raise RuntimeError(str(sys.exc_info()[1]))
         else:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
 
@@ -647,24 +594,27 @@ class BaseReductionScripter(object):
                 submit_cmd += "TransactionID=id, "
                 submit_cmd += "PythonScript=\"\"\"%s\"\"\", " % script
                 submit_cmd += "ScriptName='%s')" % script_name
-                execute_script(submit_cmd)
+                mantidplot.runPythonScript(submit_cmd, True)
         else:
             Logger("scripter").error("Mantid is unavailable to submit a reduction job")
 
+# Disable warning about the use of exec, which we knowingly use to
+# execute generated code.
+# pylint: disable=W0122
     def execute_script(self, script):
         """
-        Executes the given script code.
+            Executes the given script code.
 
-        If MantidPlot is available it calls back to MantidPlot
-        to ensure the code is executed asynchronously, if not
-        then a simple exec call is used
+            If MantidPlot is available it calls back to MantidPlot
+            to ensure the code is executed asynchronously, if not
+            then a simple exec call is used
 
-        @param script :: A chunk of code to execute
+            @param script :: A chunk of code to execute
         """
-        def on_error(arg):
-            Logger('scripter').error('Failed to execute script: {}'.format(arg))
-            raise RuntimeError(str(arg))
-        execute_script(script, on_error)
+        if HAS_MANTIDPLOT:
+            mantidplot.runPythonScript(script, True)
+        else:
+            exec(script)
 
     def reset(self):
         """

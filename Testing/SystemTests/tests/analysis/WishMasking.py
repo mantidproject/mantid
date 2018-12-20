@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 Tests masking functionality specific to WISH. Working masking behaviour is critical in general, but is heavily used on WISH.
@@ -11,12 +5,12 @@ Tests masking functionality specific to WISH. Working masking behaviour is criti
 """
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import os
 from mantid.simpleapi import *
 
 
-class WishMasking(systemtesting.MantidSystemTest):
+class WishMasking(stresstesting.MantidStressTest):
 
         # Utility function will return the masking corresponding to a workspace index from a cal file.
     def get_masking_for_index(self, cal_file, requested_index):

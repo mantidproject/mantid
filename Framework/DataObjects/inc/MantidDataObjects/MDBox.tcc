@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDBoxSaveable.h"
 #include "MantidDataObjects/MDEvent.h"
@@ -639,7 +633,7 @@ TMDE(void MDBox)::integrateCylinder(
   for (const auto &evnt : events) {
     coord_t out[2]; // radius and length of cylinder
     radiusTransform.apply(evnt.getCenter(), out);
-    if (out[0] < radius && std::fabs(out[1]) < 0.5 * length + deltaQ) {
+    if (out[0] < radius && std::fabs(out[1]) < 0.5 * length) {
       // add event to appropriate y channel
       size_t xchannel =
           static_cast<size_t>(std::floor(out[1] / deltaQ)) + numSteps / 2;

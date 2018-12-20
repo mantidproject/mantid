@@ -1,13 +1,10 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADINSTRUMENT_H_
 #define MANTID_DATAHANDLING_LOADINSTRUMENT_H_
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
+
+#include <mutex>
 
 /// @cond Exclude from doxygen documentation
 namespace Poco {
@@ -35,8 +32,8 @@ class Instrument;
 namespace DataHandling {
 /** @class LoadInstrument LoadInstrument.h DataHandling/LoadInstrument.h
 
-Loads instrument data from an XML or Nexus instrument description file and adds
-it to a workspace.
+Loads instrument data from a XML instrument description file and adds it
+to a workspace.
 
 LoadInstrument is an algorithm and as such inherits
 from the Algorithm class and overrides the init() & exec()  methods.
@@ -44,14 +41,33 @@ from the Algorithm class and overrides the init() & exec()  methods.
 Required Properties:
 <UL>
 <LI> Workspace - The name of the workspace </LI>
-<LI> Filename - The name of the instrument file <b>OR</b> InstrumentName - The
-    name of the instrument</LI>
+<LI> Filename - The name of the IDF file </LI>
 </UL>
 
 @author Nick Draper, Tessella Support Services plc
 @date 19/11/2007
 @author Anders Markvardsen, ISIS, RAL
 @date 7/3/2008
+
+Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport LoadInstrument : public API::DistributedAlgorithm {
 public:
@@ -82,13 +98,20 @@ private:
   void exec() override;
 
   /// Run the Child Algorithm LoadParameters
-  void runLoadParameterFile(const boost::shared_ptr<API::MatrixWorkspace> &ws,
-                            std::string filename);
+  void runLoadParameterFile();
 
   /// Search directory for Parameter file, return full path name if found, else
   /// "".
-  std::string getFullPathParamIDF(std::string directoryName,
-                                  std::string filename);
+  std::string getFullPathParamIDF(std::string directoryName);
+
+  /// The name and path of the input file
+  std::string m_filename;
+
+  /// Everything can reference the workspace if it needs to
+  boost::shared_ptr<API::MatrixWorkspace> m_workspace;
+
+  /// Name of the instrument
+  std::string m_instName;
 
   /// Mutex to avoid simultaneous access
   static std::recursive_mutex m_mutex;

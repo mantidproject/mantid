@@ -92,7 +92,6 @@ mtd_add_sip_module (
   HEADER_DEPS ${HEADER_DEPENDS}
   INCLUDE_DIRS
     ${CMAKE_CURRENT_LIST_DIR}
-    ${PYTHON_INCLUDE_PATH}
     ../../../Framework/PythonInterface/core/inc
   PYQT_VERSION 4
   LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}

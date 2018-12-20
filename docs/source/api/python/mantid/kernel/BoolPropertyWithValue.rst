@@ -2,7 +2,7 @@
  BoolPropertyWithValue
 =======================
 
-This is a Python binding to the C++ class Mantid::Kernel::BoolPropertyWithValue.
+This a python binding to the C++ class Mantid::Kernel::BoolPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

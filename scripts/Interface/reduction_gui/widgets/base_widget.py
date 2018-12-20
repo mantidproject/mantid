@@ -1,23 +1,16 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtCore import (QFileInfo)  # noqa
-from qtpy.QtWidgets import (QFileDialog, QHBoxLayout, QMessageBox, QWidget)  # noqa
+from PyQt4 import QtGui, QtCore
 import os
 import types
 from reduction_gui.settings.application_settings import GeneralSettings
 
-HAS_INSTRUMENT_VIEW = False
+IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
     from mantid.api import AnalysisDataService
     import mantid.simpleapi as api
-    HAS_INSTRUMENT_VIEW = True
+    IS_IN_MANTIDPLOT = True
 except:
     pass
 
@@ -38,7 +31,7 @@ def process_file_parameter(f):
     return processed_function
 
 
-class BaseWidget(QWidget):
+class BaseWidget(QtGui.QWidget):
     """
         Base widget for reduction UI
     """
@@ -46,9 +39,9 @@ class BaseWidget(QWidget):
     name = ""
 
     def __init__(self, parent=None, state=None, settings=None, data_type=None, ui_class=None, data_proxy=None):
-        QWidget.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
 
-        self._layout = QHBoxLayout()
+        self._layout = QtGui.QHBoxLayout()
         self.setLayout(self._layout)
         if ui_class is not None:
             self._content = ui_class(self)
@@ -72,7 +65,7 @@ class BaseWidget(QWidget):
         self._data_set_viewed = ''
 
         self._data_proxy = data_proxy
-        self._has_instrument_view = HAS_INSTRUMENT_VIEW and self._data_proxy is not None
+        self._in_mantidplot = IS_IN_MANTIDPLOT and self._data_proxy is not None
 
         self._is_running = True
 
@@ -124,9 +117,7 @@ class BaseWidget(QWidget):
             @param title: string to use as title
             @param multi: multiselection is enabled if True
         """
-        dirname = QFileDialog.getExistingDirectory(self, "Select Directory")
-        if isinstance(dirname, tuple):
-            dirname = dirname[0]
+        dirname = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
 
         return dirname
 
@@ -141,25 +132,27 @@ class BaseWidget(QWidget):
             data_type = self._data_type
         if title is None:
             title = "Data file - Choose a data file"
-
-        if hasattr(QFileDialog, 'getOpenFileNamesAndFilter'):
-            getOpenFileNames = QFileDialog.getOpenFileNamesAndFilter
-        else:
-            getOpenFileNames = QFileDialog.getOpenFileNames
-        flist, _ = getOpenFileNames(self, title, self._settings.data_path,
-                                    data_type)
-        if not flist:
-            return None
-
         if multi:
-            flist = [QFileInfo(item).filePath() for item in flist]
-            self._settings.data_path = flist[-1]
+            qflist = QtGui.QFileDialog.getOpenFileNames(self, title,
+                                                        self._settings.data_path,
+                                                        data_type)
+            if len(qflist)>0:
+                flist = []
+                for i in range(len(qflist)):
+                    flist.append(str(QtCore.QFileInfo(qflist[i]).filePath()))
+                # Store the location of the loaded file
+                self._settings.data_path = str(QtCore.QFileInfo(qflist[i]).path())
+                return flist
+            else:
+                return None
         else:
-            if isinstance(flist, (tuple, list)):
-                flist = flist[0]
-            flist = QFileInfo(flist).filePath()
-            self._settings.data_path = flist
-        return flist
+            fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
+                                                                       self._settings.data_path,
+                                                                       data_type)).filePath()
+            if fname:
+                # Store the location of the loaded file
+                self._settings.data_path = str(QtCore.QFileInfo(fname).path())
+            return str(fname)
 
     def data_save_dialog(self, data_type=None, title=None):
         """
@@ -171,12 +164,10 @@ class BaseWidget(QWidget):
             data_type = self._data_type
         if title is None:
             title = "Save file - Set a location and name"
-        fname = QFileDialog.getSaveFileName(self, title,
-                                            self._settings.data_path,
-                                            data_type)
-        if isinstance(fname, tuple):
-            fname = fname[0]
-        return QFileInfo(fname).filePath()
+        fname = QtCore.QFileInfo(QtGui.QFileDialog.getSaveFileName(self, title,
+                                                                   self._settings.data_path,
+                                                                   data_type)).filePath()
+        return str(fname)
 
     @process_file_parameter
     def show_instrument(self, file_name=None, workspace=None, tab=-1, reload=False, mask=None, data_proxy=None):
@@ -216,7 +207,7 @@ class BaseWidget(QWidget):
             return False
 
         # Sanity check
-        if not HAS_INSTRUMENT_VIEW:
+        if not IS_IN_MANTIDPLOT:
             return
 
         # Set up workspace name
@@ -243,6 +234,6 @@ class BaseWidget(QWidget):
                             print(e)
                     else:
                         print(proxy.errors)
-                QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
+                QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
         else:
-            QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
+            QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")

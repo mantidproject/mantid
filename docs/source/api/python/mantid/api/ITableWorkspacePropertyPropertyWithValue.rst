@@ -2,7 +2,7 @@
  ITableWorkspacePropertyPropertyWithValue
 ==========================================
 
-This is a Python binding to the C++ class Mantid::API::ITableWorkspacePropertyPropertyWithValue.
+This a python binding to the C++ class Mantid::API::ITableWorkspacePropertyPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

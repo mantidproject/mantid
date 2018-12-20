@@ -1,11 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
-import systemtesting
+import stresstesting
 
 from mantid.api import MatrixWorkspace, mtd
 from mantid.simpleapi import *
@@ -77,7 +71,7 @@ class ILLIN5Tests(unittest.TestCase):
 #====================================================================================
 
 
-class LoadILLIN5Test(systemtesting.MantidSystemTest):
+class LoadILLIN5Test(stresstesting.MantidStressTest):
     _success=False
 
     def runTest(self):

@@ -54,8 +54,8 @@ three workspaces placed in the ``DiagnosticWorkspace`` group. They are:
 * instrument resolution (delta-d/d ``_resolution``)
 
 Since multiple peak shapes can be used,
-see the documentation for the individual :ref:`fit functions
-<Fit Functions List>` to see how they relate to the effective
+see the documentation for the individual `fit functions
+<../fitfunctions/index.html>`_ to see how they relate to the effective
 values displayed in the diagnostic tables. For ``Gaussian`` and
 ``Lorentzian``, the widths and resolution are converted to values that
 can be directly compared with the results of
@@ -68,7 +68,7 @@ Usage
 
 .. code-block:: python
 
-   # If you have an old calibration it can be used as the starting point
+   # If you have a old calibration it can be used as the starting point
    oldCal = 'NOM_calibrate_d72460_2016_05_23.h5'
 
    # list of d values for diamond

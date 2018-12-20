@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """ Finds the beam centre."""
@@ -107,9 +101,10 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # Change cloned state
         # --------
         # Remove phi Masking
-        state.mask.phi_min = 90.0
-        state.mask.phi_max = -90.0
-        state.mask.use_mask_phi_mirror = True
+        if state.mask.phi_min:
+            state.mask.phi_min = 0.0
+        if state.mask.phi_max:
+            state.mask.phi_max = 0.0
 
         # Set compatibility mode
         #state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value

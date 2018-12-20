@@ -1,17 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=R0901,R0902,R0904
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import numpy as np
 import os
 
-from qtpy.QtWidgets import QSizePolicy
-from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from PyQt4.QtGui import QSizePolicy
+
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 

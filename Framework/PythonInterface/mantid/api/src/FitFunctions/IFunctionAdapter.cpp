@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
@@ -328,7 +322,7 @@ void IFunctionAdapter::evaluateDerivative(API::Jacobian *out,
   PyObject_CallMethod(getSelf(), const_cast<char *>(m_derivName.c_str()),
                       const_cast<char *>("(OO)"), xvals, jacobian);
   if (PyErr_Occurred())
-    throw PythonException();
+    throw PythonRuntimeError();
 }
 } // namespace PythonInterface
 } // namespace Mantid

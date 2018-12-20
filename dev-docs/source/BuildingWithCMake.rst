@@ -70,18 +70,14 @@ From the CMake gui
 ------------------
 
 * The cmake gui is available from, e.g., the Windows Program menu or the command line executable ``cmake-gui``.
-* Start it and click the "Browse Source" button to point to ``/path/to/Mantid``.
+* Start it and click the "Browse Source" button to point to ``/path/to/Mantid``, or to ``/path/to/Mantid/Framework`` if you only want a build of the Framework (typically not recommended, but possible nonetheless).
 * Click "Browse Build" and point to the directory you want to build into - it's recommended that you create a new directory for this (see above), though it can be the same as the source directory.
 * Click "Configure" down near the bottom of the window.
-* A new window will appear asking which 'Generator' you want to use.
-
-  * Linux/Mac developers should choose ``Ninja``
-  * Windows developers should choose ``Visual Studio 15 2017 Win64`` (the Win64 is very important)
-
+* A new window will appear asking which 'Generator' you want to use. Choose one and click OK (N.B. VS2010 = Visual Studio 10, and note that you should append Win64 to this for a 64 bit build).
 * Wait a while....
 * You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything, except perhaps checking "MAKE_VATES" if you want to build that.
 * Click "Configure" again and wait....
-* Finally, click "Generate". This will create the build files, e.g. there will be a ``Mantid.sln`` in the directory you selected as your build directory.
+* Finally, click "Generate". This will create the build files, e.g. there will be a Mantid.sln in the directory you selected as your build directory.
 
 Data Files Location
 -------------------

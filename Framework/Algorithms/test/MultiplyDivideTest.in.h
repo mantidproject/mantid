@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 // clang-format off
 #ifndef @MULTIPLYDIVIDETEST_CLASS@_H_
 #define @MULTIPLYDIVIDETEST_CLASS@_H_
@@ -155,31 +149,6 @@ public:
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), nHist-1);
-    }
-  }
-
-  void test_2D_denominator_with_fewer_spectra()
-  {
-    if(DO_DIVIDE)
-    {
-    int nHist = 5,nBins=5;
-    MatrixWorkspace_sptr numerator  = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins);
-    MatrixWorkspace_sptr denominator = WorkspaceCreationHelper::create2DWorkspace123(nHist-1, nBins); // Cropped
-    Divide alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setProperty("LHSWorkspace", numerator);
-    alg.setProperty("RHSWorkspace", denominator);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("AllowDifferentNumberSpectra", true);
-    alg.execute();
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), nHist);
-    TS_ASSERT_EQUALS(outWS->readY(0)[0], 1.0);
-    TS_ASSERT_EQUALS(outWS->readY(1)[0], 1.0);
-    TS_ASSERT_EQUALS(outWS->readY(2)[0], 1.0);
-    TS_ASSERT_EQUALS(outWS->readY(3)[0], 1.0);
-    TS_ASSERT_EQUALS(outWS->readY(4)[0], 0.0);
     }
   }
 

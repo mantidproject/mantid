@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -191,8 +185,8 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
       // dblVal = 0.;
     }
     theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-    g_log.information() << "added property " << propName << " with value "
-                        << dblVal << "\n";
+    g_log.warning() << "added property " << propName << " with value " << dblVal
+                    << "\n";
   }
 
   // add unit

@@ -21,8 +21,8 @@ The output of the program will be the converted value produced by the input valu
 Available Conversion Units
 --------------------------
 
-Some of the units available are those registered with see: :ref:`Units <Unit Factory>`.
-The units that are not specified in :ref:`Units <Unit Factory>` but are used in ToFConverter
+Some of the units available are those registered with see: `UnitFactory <http://www.mantidproject.org/Units>`__.
+The units that are not specified in `UnitFactory <http://www.mantidproject.org/Units>`__ but are used in ToFConverter
 are: 
 
 Nu (:math:`\nu`): :math:`\frac{h}{m_{N}\lambda^2}`

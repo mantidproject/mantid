@@ -1,13 +1,7 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 from mantid import config
@@ -17,7 +11,7 @@ import os.path
 # test batch mode with sans2d and selecting a period in batch mode
 
 
-class SANS2DBatch(systemtesting.MantidSystemTest):
+class SANS2DBatch(stresstesting.MantidStressTest):
 
     def runTest(self):
 
@@ -44,7 +38,7 @@ class SANS2DBatch(systemtesting.MantidSystemTest):
         return '5512p7_SANS2DBatch','SANS2DBatch.nxs'
 
 
-class SANS2DNewSettingsCarriedAcrossInBatchMode(systemtesting.MantidSystemTest):
+class SANS2DNewSettingsCarriedAcrossInBatchMode(stresstesting.MantidStressTest):
     """
     We want to make sure that any settings saved in the PropertyManager objects
     are used across all iterations of the reduction in Batch mode.  The MASKFILE
@@ -73,7 +67,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(systemtesting.MantidSystemTest):
         return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
 
 
-class SANS2DTUBESBatchWithZeroErrorCorrection(systemtesting.MantidSystemTest):
+class SANS2DTUBESBatchWithZeroErrorCorrection(stresstesting.MantidStressTest):
     """
     We want to make sure that the BatchMode can remove zero error values
     and replace them with a large default value.

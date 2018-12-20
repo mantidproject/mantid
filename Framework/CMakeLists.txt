@@ -117,8 +117,6 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
-add_subdirectory (Catalog)
-
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
@@ -153,7 +151,7 @@ add_subdirectory (ScriptRepository)
 
 set ( FRAMEWORK_LIBS Kernel HistogramData Indexing Beamline Geometry API DataObjects
                      PythonInterface DataHandling Nexus NexusGeometry Algorithms CurveFitting ICat
-                     Catalog Crystal MDAlgorithms WorkflowAlgorithms
+                     Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData RemoteAlgorithms RemoteJobManagers
                      SINQ Muon
 )

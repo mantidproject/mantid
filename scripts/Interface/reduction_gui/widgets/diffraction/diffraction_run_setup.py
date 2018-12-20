@@ -1,25 +1,15 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
-from qtpy.QtCore import (QRegExp)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)  # noqa
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 from mantid.kernel import Logger
+
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
-try:
-    from mantidqt.utils.qt import load_ui
-except ImportError:
-    Logger("SampleSetupWidget").information('Using legacy ui importer')
-    from mantidplot import load_ui
+import ui.diffraction.ui_diffraction_run_setup
+import ui.diffraction.ui_diffraction_info
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -31,8 +21,8 @@ except:
 
 
 def generateRegExpValidator(widget, expression):
-    rx = QRegExp(expression)
-    return QRegExpValidator(rx, widget)
+    rx = QtCore.QRegExp(expression)
+    return QtGui.QRegExpValidator(rx, widget)
 
 
 class RunSetupWidget(BaseWidget):
@@ -46,13 +36,13 @@ class RunSetupWidget(BaseWidget):
         """
         super(RunSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class RunSetFrame(QFrame):
+        class RunSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_run_setup.Ui_Frame):
             """ Define class linked to UI Frame
             """
 
             def __init__(self, parent=None):
-                QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_run_setup.ui', baseinstance=self)
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
         # END-DEF RunSetFrame
 
         # Instrument and facility information
@@ -107,6 +97,9 @@ class RunSetupWidget(BaseWidget):
         else:
             self._content.lineEdit_expIniFile.setEnabled(True)
             self._content.pushButton_browseExpIniFile.setEnabled(True)
+        #self._content.override_emptyrun_checkBox.setChecked(False)
+        #self._content.override_vanrun_checkBox.setChecked(False)
+        #self._content.override_vanbkgdrun_checkBox.setChecked(False)
 
         # Line edit
         self._content.emptyrun_edit.setEnabled(True)
@@ -125,37 +118,58 @@ class RunSetupWidget(BaseWidget):
         iv3 = generateRegExpValidator(self._content.vanbkgdrun_edit, expression)
         self._content.vanbkgdrun_edit.setValidator(iv3)
 
-        siv = QIntValidator(self._content.resamplex_edit)
+        siv = QtGui.QIntValidator(self._content.resamplex_edit)
         siv.setBottom(0)
         self._content.resamplex_edit.setValidator(siv)
 
         # Float/Double
-        fiv = QDoubleValidator(self._content.binning_edit)
+        fiv = QtGui.QDoubleValidator(self._content.binning_edit)
         self._content.binning_edit.setValidator(fiv)
 
         # Default states
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
 
         # Connections from action/event to function to handle
-        self._content.calfile_browse.clicked.connect(self._calfile_browse)
-        self._content.charfile_browse.clicked.connect(self._charfile_browse)
-        self._content.groupfile_browse.clicked.connect(self._groupfile_browse)
-        self._content.pushButton_browseExpIniFile.clicked.connect(self.do_browse_ini_file)
-        self._content.outputdir_browse.clicked.connect(self._outputdir_browse)
-        self._content.binning_edit.textChanged.connect(self._binvalue_edit)
-        self._content.bintype_combo.currentIndexChanged.connect(self._bintype_process)
+        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._calfile_browse)
+        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._charfile_browse)
+        self.connect(self._content.groupfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._groupfile_browse)
+        self.connect(self._content.pushButton_browseExpIniFile, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_ini_file)
+        self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),
+                     self._outputdir_browse)
+        self.connect(self._content.binning_edit, QtCore.SIGNAL("valueChanged"),
+                     self._binvalue_edit)
+        self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),
+                     self._bintype_process)
 
-        self._content.disablebkgdcorr_chkbox.clicked.connect(self._disablebkgdcorr_clicked)
-        self._content.disablevancorr_chkbox.clicked.connect(self._disablevancorr_clicked)
-        self._content.disablevanbkgdcorr_chkbox.clicked.connect(self._disablevanbkgdcorr_clicked)
+        #self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"),
+        #        self._overrideemptyrun_clicked)
+        #self.connect(self._content.override_vanrun_checkBox, QtCore.SIGNAL("clicked()"),
+        #        self._overridevanrun_clicked)
+        #self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"),
+        #        self._overridevanbkgdrun_clicked)
 
-        self._content.usebin_button.clicked.connect(self._usebin_clicked)
-        self._content.resamplex_button.clicked.connect(self._resamplex_clicked)
+        self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablebkgdcorr_clicked)
+        self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablevancorr_clicked)
+        self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablevanbkgdcorr_clicked)
 
-        self._content.help_button.clicked.connect(self._show_help)
+        self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),
+                     self._usebin_clicked)
+        self.connect(self._content.resamplex_button, QtCore.SIGNAL("clicked()"),
+                     self._resamplex_clicked)
 
-        # mutex for whether to update the linear/log drop-down
-        self._content._binning_edit_mutex = False
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                     self._show_help)
+
+        # Validated widgets
+
+        return
 
     def set_state(self, state):
         """ Populate the UI elements with the data from the given state.
@@ -169,26 +183,7 @@ class RunSetupWidget(BaseWidget):
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
         self._content.charfile_edit.setText(state.charfilename)
         self._content.sum_checkbox.setChecked(state.dosum)
-
-        # Set binning parameter
-        try:
-            binning_float = float(state.binning)
-            binning_str = '%.6f' % abs(binning_float)
-        except ValueError:
-            binning_str = str(state.binning)
-        self._content._binning_edit_mutex = True
-        self._content.binning_edit.setText(binning_str)
-        # Set ResampleX
-        try:
-            resamplex_i = int(state.resamplex)
-            resamplex_str = '%d' % abs(resamplex_i)
-        except ValueError:
-            resamplex_str = str(state.resamplex)
-        self._content.resamplex_edit.setText(resamplex_str)
-        self._content._binning_edit_mutex = False
-
-        # Set binning type (logarithm=1 or linear=0) - must be done after the
-        # binning/resamplex boxes are set or it will be lost
+        # Set binning type (logarithm or linear)
         bintype_index = 1
         if state.doresamplex is True:
             # resample x
@@ -207,6 +202,20 @@ class RunSetupWidget(BaseWidget):
         # END-IF-ELSE
         self._content.bintype_combo.setCurrentIndex(bintype_index)
 
+        # Set binning parameter
+        try:
+            binning_float = float(state.binning)
+            binning_str = '%.6f' % abs(binning_float)
+        except ValueError:
+            binning_str = str(state.binning)
+        self._content.binning_edit.setText(binning_str)
+        # Set ResampleX
+        try:
+            resamplex_i = int(state.resamplex)
+            resamplex_str = '%d' % abs(resamplex_i)
+        except ValueError:
+            resamplex_str = str(state.resamplex)
+        self._content.resamplex_edit.setText(resamplex_str)
         # Others
         self._content.binind_checkbox.setChecked(state.binindspace)
         self._content.outputdir_edit.setText(state.outputdir)
@@ -311,6 +320,8 @@ class RunSetupWidget(BaseWidget):
         if fname:
             self._content.calfile_edit.setText(fname)
 
+        return
+
     def _charfile_browse(self):
         """ Event handing for browsing calibration file
         """
@@ -318,12 +329,16 @@ class RunSetupWidget(BaseWidget):
         if fname:
             self._content.charfile_edit.setText(','.join(fname))
 
+        return
+
     def _groupfile_browse(self):
         ''' Event handling for browsing for a grouping file
         '''
         fname = self.data_browse_dialog(data_type='*.xml;;*.h5;;*')
         if fname:
             self._content.groupfile_edit.setText(fname)
+
+        return
 
     def do_browse_ini_file(self):
         """ Event handling for browsing Exp Ini file
@@ -333,12 +348,16 @@ class RunSetupWidget(BaseWidget):
         if exp_ini_file_name:
             self._content.lineEdit_expIniFile.setText(exp_ini_file_name)
 
+        return
+
     def _outputdir_browse(self):
         """ Event handling for browing output directory
         """
         dirname = self.dir_browse_dialog()
         if dirname:
             self._content.outputdir_edit.setText(dirname)
+
+        return
 
     def _binvalue_edit(self):
         """ Handling event for binning value changed
@@ -352,11 +371,11 @@ class RunSetupWidget(BaseWidget):
         else:
             self._content.bintype_combo.setCurrentIndex(0)
 
+        return
+
     def _bintype_process(self):
         """ Handling bin type changed
         """
-        if self._content._binning_edit_mutex:
-            return
         currindex = self._content.bintype_combo.currentIndex()
         curbinning = self._content.binning_edit.text()
         if curbinning != "" and curbinning is not None:
@@ -367,6 +386,8 @@ class RunSetupWidget(BaseWidget):
                 self._content.binning_edit.setText(str(-1.0*abs(curbinning)))
             #ENDIFELSE
         #ENDIF
+
+        return
 
     def validateIntegerList(self, intliststring):
         """ Validate whether the string can be divided into integer strings.
@@ -513,9 +534,9 @@ class RunSetupWidget(BaseWidget):
         return
 
     def _show_help(self):
-        class HelpDialog(QDialog):
+        class HelpDialog(QtGui.QDialog, ui.diffraction.ui_diffraction_info.Ui_Dialog):
             def __init__(self, parent=None):
-                QDialog.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_info.ui', baseinstance=self)
+                QtGui.QDialog.__init__(self, parent)
+                self.setupUi(self)
         dialog = HelpDialog(self)
         dialog.exec_()

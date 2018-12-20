@@ -2,7 +2,7 @@
  VectorFloatPropertyWithValue
 ==============================
 
-This is a Python binding to the C++ class Mantid::Kernel::VectorFloatPropertyWithValue.
+This a python binding to the C++ class Mantid::Kernel::VectorFloatPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

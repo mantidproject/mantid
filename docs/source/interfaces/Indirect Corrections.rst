@@ -195,14 +195,14 @@ References:
 2. A K Soper, W S Howells & A C Hannon, `RAL Report RAL-89-046 (1989) <http://wwwisis2.isis.rl.ac.uk/Disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0%20Intro.pdf>`_
 3. H H Paalman & C J Pings, `J Appl Phys 33 2635 (1962) <http://dx.doi.org/10.1063/1.1729034>`_
 
-Apply Absorption Corrections
-----------------------------
+Apply Paalman Pings
+-------------------
 
 .. interface:: Corrections
-  :widget: tabApplyAbsorptionCorrections
+  :widget: tabApplyPaalmanPings
 
-The Apply Corrections tab applies the corrections calculated in the Calculate Paalman 
-Pings or Calculate Monte Carlo Absorption tabs of the Indirect Data Corrections interface.
+The Apply Corrections tab applies the corrections calculated in the Calculate
+Corrections tab of the Indirect Data Analysis interface.
 
 This uses the :ref:`ApplyPaalmanPingsCorrection
 <algm-ApplyPaalmanPingsCorrection>` algorithm to apply absorption corrections in
@@ -253,12 +253,9 @@ Use Corrections
   the file or workspace name must end in either *_flt_abs* or *_cyl_abs* for the
   flat plate and cylinder geometries respectively.
 
-Plot Spectrum
-  Gives the option to create a plot of the spectrum selected in the spin box for
-  the corrected workspace.
-
-Plot Contour
-  Gives the option to create a contour plot of the corrected workspace.
+Plot Output
+  Gives the option to create either a spectra or contour plot (or both) of the
+  corrected workspace.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
@@ -418,11 +415,8 @@ Input Container
 Scale Can by Factor
   Allows the container intensity to be scaled by a given scale factor before being used in the corrections calculation.
 
-Plot Spectrum
-  Gives the option to create a plot of the spectrum selected in the spin box for the corrected workspace.
-
-Plot Contour
-  Gives the option to create a contour plot of the corrected workspace.
+Plot Output
+  Gives the option to create either a spectra or contour plot (or both) of the corrected workspace.
   
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.

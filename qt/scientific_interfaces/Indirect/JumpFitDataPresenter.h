@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
 
@@ -20,6 +14,21 @@ namespace IDA {
 
 /**
   A presenter.
+  Copyright &copy; 2015-2016 ISIS Rutherford Appleton Laboratory, NScD
+  Oak Ridge National Laboratory & European Spallation Source
+  This file is part of Mantid.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport JumpFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
@@ -28,22 +37,18 @@ public:
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter);
 
-signals:
-  void updateAvailableFitTypes();
-
 private slots:
   void hideParameterComboBoxes();
   void showParameterComboBoxes();
   void updateAvailableParameters();
-  void updateAvailableParameterTypes();
-  void updateAvailableParameters(const QString &type);
+  void updateAvailableParameters(int typeIndex);
   void updateParameterSelectionEnabled();
   void setParameterLabel(const QString &parameter);
-  void dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *dialog,
-                                  const std::string &type);
   void setDialogParameterNames(JumpFitAddWorkspaceDialog *dialog,
                                const std::string &workspace);
-  void setActiveParameterType(const std::string &type);
+  void setDialogParameterNames(JumpFitAddWorkspaceDialog *dialog,
+                               int parameterType);
+  void setActiveParameterType(int type);
   void updateActiveDataIndex();
   void setSingleModelSpectrum(int index);
 
@@ -60,7 +65,7 @@ private:
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
 
-  std::string m_activeParameterType;
+  int m_activeParameterType;
   std::size_t m_dataIndex;
 
   QComboBox *m_cbParameterType;

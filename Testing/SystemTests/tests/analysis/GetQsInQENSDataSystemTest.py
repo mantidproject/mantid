@@ -1,19 +1,13 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 """
     Extract or compute the Q values from reduced QENS data
 """
-from systemtesting import MantidSystemTest
+from stresstesting import MantidStressTest
 import mantid.simpleapi as sm
 import hashlib
 
 
-class GetQsInQENSDataSystemTest(MantidSystemTest):
+class GetQsInQENSDataSystemTest(MantidStressTest):
     """Example:
         if qvalues = [0.3, 0.5, 0.7, 0.9] for a particular file, then
         input_string = ' '.join(['{0:6.3f}'.format(Q) for Q in qvalues ])

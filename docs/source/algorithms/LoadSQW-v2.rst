@@ -12,7 +12,7 @@ Description
 
 The algorithm reads the pixel information defined in an ``.sqw`` file produced
 by the `Horace <http://horace.isis.rl.ac.uk/Main_Page>`_ program and stores
-it in a :ref:`MDEventWorkspace <MDWorkspace>`.
+it in a `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_.
 
 SQW objects in Horace can be split into 4 sections (see below for more detail):
 

@@ -2,7 +2,7 @@
  IPeaksWorkspace
 =================
 
-This is a Python binding to the C++ class Mantid::API::IPeaksWorkspace.
+This a python binding to the C++ class Mantid::API::IPeaksWorkspace.
 
 *bases:* :py:obj:`mantid.api.ITableWorkspace`, :py:obj:`mantid.api.ExperimentInfo`
 

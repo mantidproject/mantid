@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm will clones an existing
-:ref:`MDEventWorkspace <MDWorkspace>` or
+`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or
 :ref:`MDHistoWorkspace <MDHistoWorkspace>` into a new one.
 
 If the InputWorkspace is a file-backed MDEventWorkspace, then the

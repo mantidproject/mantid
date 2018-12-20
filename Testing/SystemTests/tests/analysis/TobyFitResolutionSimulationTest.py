@@ -1,14 +1,8 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """Testing of the VATES quantification using
 the TobyFitResolutionModel
 """
-from systemtesting import MantidSystemTest
+from stresstesting import MantidStressTest
 from mantid.simpleapi import *
 
 
@@ -24,7 +18,7 @@ def create_cuboid_xml(xlength,ylength,zlength):
     return xml % {"xpt": xlength/2.0,"ypt":ylength/2.0,"zpt":zlength/2.0}
 
 
-class TobyFitResolutionSimulationTest(MantidSystemTest):
+class TobyFitResolutionSimulationTest(MantidStressTest):
 
     _success = False
 

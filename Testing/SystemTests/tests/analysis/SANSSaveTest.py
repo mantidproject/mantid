@@ -1,16 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
 from __future__ import (absolute_import, division, print_function)
 import os
 import mantid
 import unittest
-import systemtesting
+import stresstesting
 
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
@@ -185,9 +179,9 @@ class SANSSaveTest(unittest.TestCase):
         self._remove_file(file_name)
 
 
-class SANSSaveRunnerTest(systemtesting.MantidSystemTest):
+class SANSSaveRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
         self._success = False
 
     def runTest(self):

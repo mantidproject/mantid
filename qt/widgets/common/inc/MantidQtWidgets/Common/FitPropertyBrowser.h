@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FITPROPERTYBROWSER_H_
 #define FITPROPERTYBROWSER_H_
 
@@ -98,8 +92,6 @@ public:
   boost::shared_ptr<const Mantid::API::IFunction> theFunction() const;
   /// Update the function parameters
   void updateParameters();
-  /// Update the function attributes
-  void updateAttributes();
   /// Get function parameter values
   QList<double> getParameterValues() const;
   /// Get function parameter names
@@ -118,9 +110,6 @@ public:
 
   /// Return the fitting function
   Mantid::API::IFunction_sptr getFittingFunction() const;
-  /// Return a function at a specific index in the composite function
-  Mantid::API::IFunction_sptr
-  getFunctionAtIndex(std::size_t const &index) const;
 
   /// Get the default function type
   std::string defaultFunctionType() const;
@@ -201,9 +190,6 @@ public:
   /// Returns true if the function is ready for a fit
   bool isFitEnabled() const;
 
-  /// Enable/disable the Fit buttons;
-  virtual void setFitEnabled(bool enable);
-
   /// Display a tip
   void setTip(const QString &txt);
 
@@ -279,8 +265,7 @@ signals:
   void currentChanged() const;
   void functionRemoved();
   void algorithmFinished(const QString &);
-  void workspaceIndexChanged(int index);
-  void updatePlotSpectrum(int index);
+  void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString &);
 
   void wsChangePPAssign(const QString &);
@@ -524,6 +509,8 @@ private:
 
   /// disable undo when the function changes
   void disableUndo();
+  /// Enable/disable the Fit button;
+  virtual void setFitEnabled(bool yes);
   /// Create a string property and set some settings
   QtProperty *addStringProperty(const QString &name) const;
   void setStringPropertyValue(QtProperty *prop, const QString &value) const;

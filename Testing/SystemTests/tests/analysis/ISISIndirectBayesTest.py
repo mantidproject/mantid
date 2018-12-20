@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import os
 from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
@@ -31,7 +25,7 @@ def _cleanup_files(dirname, filenames):
 #==============================================================================
 
 
-class QLresTest(systemtesting.MantidSystemTest):
+class QLresTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -75,7 +69,7 @@ class QLresTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class ResNormTest(systemtesting.MantidSystemTest):
+class ResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -107,7 +101,7 @@ class ResNormTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class QuestTest(systemtesting.MantidSystemTest):
+class QuestTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -146,7 +140,7 @@ class QuestTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class QSeTest(systemtesting.MantidSystemTest):
+class QSeTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -188,7 +182,7 @@ class QSeTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class QLDataTest(systemtesting.MantidSystemTest):
+class QLDataTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -232,7 +226,7 @@ class QLDataTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class QLResNormTest(systemtesting.MantidSystemTest):
+class QLResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -280,7 +274,7 @@ class QLResNormTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class QLWidthTest(systemtesting.MantidSystemTest):
+class QLWidthTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -324,10 +318,10 @@ class QLWidthTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class JumpFitFunctionTestBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class JumpFitFunctionTestBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
 
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
 
         self._sample_name = 'irs26176_graphite002_QLr_Workspace'
         self._q_range = [0.6, 1.705600]

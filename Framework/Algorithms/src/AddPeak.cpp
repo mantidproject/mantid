@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AddPeak.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -117,8 +111,8 @@ void AddPeak::exec() {
   Qy *= knorm;
   Qz *= knorm;
 
-  auto peak = std::unique_ptr<Mantid::Geometry::IPeak>(
-      peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2));
+  Mantid::Geometry::IPeak *peak =
+      peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2);
   peak->setDetectorID(detID);
   peak->setGoniometerMatrix(runWS->run().getGoniometer().getR());
   peak->setBinCount(count);
@@ -128,6 +122,7 @@ void AddPeak::exec() {
     peak->setSigmaIntensity(std::sqrt(height));
 
   peaksWS->addPeak(*peak);
+  delete peak;
   // peaksWS->modified();
 }
 

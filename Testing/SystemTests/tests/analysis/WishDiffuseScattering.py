@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 """
 Tests diffuse scattering reduction as used on WISH
@@ -11,11 +5,11 @@ If this breaks for whatever reason, there is a good chance that unregistered scr
 - Email Pascal Manuel @ ISIS if things break here and let him know how his scripts may need to be modified.
 """
 
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 
 
-class WishDiffuseScattering(systemtesting.MantidSystemTest):
+class WishDiffuseScattering(stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):
         return 2000

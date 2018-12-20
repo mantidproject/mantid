@@ -15,8 +15,8 @@
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
     <filelocation>
-      <prefix regex="\\\\isis(?:\.cclrc\.ac\.uk)?\\inst\$"></prefix>
-      <windows replacement="\\\\isis.cclrc.ac.uk\\inst$"></windows>
+      <prefix regex="\\\\isis\\inst\$"></prefix>
+      <windows replacement=""></windows>
       <linux replacement="/archive"></linux>
       <mac replacement="/archive"></mac>
     </filelocation>
@@ -375,11 +375,8 @@
 
 </facility>
 
-<facility name="HFIR" delimiter="_" FileExtensions=".nxs,.nxs.h5,.dat,.xml">
 
-   <archive>
-      <archiveSearch plugin="ORNLDataSearch" />
-   </archive>
+<facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
 
    <timezone>US/Eastern</timezone>
 
@@ -442,12 +439,23 @@
 <facility name="SNS" delimiter="_" FileExtensions=".nxs.h5,_event.nxs,.nxs,.dat,_runinfo.xml,_histo.nxs">
 
    <archive>
-      <archiveSearch plugin="ORNLDataSearch" />
+      <archiveSearch plugin="SNSDataSearch" />
    </archive>
 
    <computeResource name="Fermi">
      <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
    </computeResource>
+
+   <catalog name="ICat4Catalog">
+     <soapendpoint url="https://icat.sns.gov:8181/ICATService/ICAT"></soapendpoint>
+     <externaldownload url="https://icat.sns.gov/ids/"></externaldownload>
+     <filelocation>
+       <prefix regex=""></prefix>
+       <windows replacement=""></windows>
+       <linux replacement=""></linux>
+       <mac replacement=""></mac>
+     </filelocation>
+   </catalog>
 
    <timezone>US/Eastern</timezone>
 
@@ -849,12 +857,6 @@
   <instrument name="Bilby">
     <technique>Small Angle Scattering</technique>
   </instrument>
-
-  <instrument name="EMUau">
-    <technique>Neutron Spectroscopy</technique>
-    <technique>Reactor Indirect Geometry Spectroscopy</technique>
-  </instrument>
-
 </facility>
 
 <!-- HZB -->
@@ -915,13 +917,6 @@
     </livedata>
   </instrument>
 
-</facility>
-<!--  ESS  -->
-<facility name="ESS" FileExtensions=".nxs,.hdf5">
- <timezone>Europe/Copenhagen</timezone>
-  <instrument name="LOKI">
-    <technique>Small Angle Scattering</technique>
-  </instrument>
 </facility>
 
 </facilities>

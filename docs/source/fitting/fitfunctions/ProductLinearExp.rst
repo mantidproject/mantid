@@ -10,8 +10,8 @@ Description
 -----------
 
 This fit function computes the product of a linear and exponential
-function. See :ref:`ExpDecay <func-ExpDecay>` and
-:ref:`LinearBackground <func-LinearBackground>` for details on the component
+function. See `ExpDecay <ExpDecay>`__ and
+`LinearBackground <LinearBackground>`__ for details on the component
 functions.
 
 .. math:: \left(\mbox{A}_0 + \mbox{A}_1 x\right)\cdot h\cdot e^{-\frac{x}{\tau}}

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -15,9 +9,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
+
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include <cmath>
 #include <numeric>
@@ -59,8 +53,7 @@ void EstimateMuonAsymmetryFromCounts::init() {
 
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra",
-                                                      std::move(empty)),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to remove the exponential decay from.");
   declareProperty(
       "StartX", 0.1,
@@ -75,8 +68,7 @@ void EstimateMuonAsymmetryFromCounts::init() {
 
   declareProperty(
       make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalizationTable", "", Direction::InOut,
-          API::PropertyMode::Optional),
+          "NormalizationTable", "", Direction::InOut),
       "Name of the table containing the normalizations for the asymmetries.");
 }
 
@@ -215,20 +207,10 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   }
   // update table
   Mantid::API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
-  if (table) {
-    updateNormalizationTable(table, wsNames, norm, methods);
-    setProperty("NormalizationTable", table);
-  }
+  updateNormalizationTable(table, wsNames, norm, methods);
+  setProperty("NormalizationTable", table);
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
-
-  std::string normString = std::accumulate(
-      norm.begin() + 1, norm.end(), std::to_string(norm[0]),
-      [](const std::string &currentString, double valueToAppend) {
-        return currentString + ',' + std::to_string(valueToAppend);
-      });
-  MuonAlgorithmHelper::addSampleLog(outputWS, "analysis_asymmetry_norm",
-                                    normString);
 
   setProperty("OutputWorkspace", outputWS);
 }

@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 
 
@@ -14,7 +8,7 @@ from mantid import config
 from ISISCommandInterface import *
 
 
-class SANS2DMultiPeriodAddFiles(systemtesting.MantidSystemTest):
+class SANS2DMultiPeriodAddFiles(stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""
@@ -51,7 +45,7 @@ class SANS2DMultiPeriodAddFiles(systemtesting.MantidSystemTest):
         return '5512p7rear_1D_2.0_4.0Phi-45.0_45.0','SANS2DMultiPeriodAddFiles.nxs'
 
 
-class LARMORMultiPeriodAddEventFiles(systemtesting.MantidSystemTest):
+class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""
         return 2500

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -44,7 +38,7 @@ ForegroundModel::ForegroundModel(const API::IFunction &fittingFunction)
 
 /**
  */
-ForegroundModel::~ForegroundModel() = default;
+ForegroundModel::~ForegroundModel() { delete m_formFactorTable; }
 
 /**
  * Set a reference to the convolved fitting function. Required as we need a
@@ -135,14 +129,16 @@ const API::IFunction &ForegroundModel::functionUnderMinimization() const {
 void ForegroundModel::setFormFactorIon(const std::string &ionType) {
   // "0" indicates off
   if (ionType == "0") {
-    m_formFactorTable.reset(nullptr);
+    delete m_formFactorTable;
+    m_formFactorTable = nullptr;
   } else {
     using namespace PhysicalConstants;
     if (m_MagIonName != ionType) {
       if (m_formFactorTable) {
+        delete m_formFactorTable;
       }
-      m_formFactorTable = std::make_unique<MagneticFormFactorTable>(
-          FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
+      m_formFactorTable = new MagneticFormFactorTable(FORM_FACTOR_TABLE_LENGTH,
+                                                      getMagneticIon(ionType));
       m_MagIonName = ionType;
     }
   }

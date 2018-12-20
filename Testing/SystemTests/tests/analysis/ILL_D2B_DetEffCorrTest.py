@@ -1,18 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import systemtesting
+import stresstesting
 from mantid.simpleapi import PowderDiffILLDetEffCorr, GroupWorkspaces
 from mantid import config, mtd
 import numpy as np
 
 
-class ILL_D2B_DetEffCorrTest(systemtesting.MantidSystemTest):
+class ILL_D2B_DetEffCorrTest(stresstesting.MantidStressTest):
 
     def __init__(self):
         super(ILL_D2B_DetEffCorrTest, self).__init__()

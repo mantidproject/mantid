@@ -2,7 +2,7 @@
  UnitLabel
 ===========
 
-This is a Python binding to the C++ class Mantid::Kernel::UnitLabel.
+This a python binding to the C++ class Mantid::Kernel::UnitLabel.
 
 
 .. module:`mantid.kernel`

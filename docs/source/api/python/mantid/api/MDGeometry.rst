@@ -2,7 +2,7 @@
  MDGeometry
 ============
 
-This is a Python binding to the C++ class Mantid::API::MDGeometry.
+This a python binding to the C++ class Mantid::API::MDGeometry.
 
 
 .. module:`mantid.api`

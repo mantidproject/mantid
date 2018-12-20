@@ -1,11 +1,6 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -52,4 +47,9 @@ void export_RectangularDetector() {
            "Returns the minimum detector id")
       .def("maxDetectorID", &RectangularDetector::maxDetectorID, arg("self"),
            "Returns the maximum detector id");
+}
+
+void export_RectangularDetectorPixel() {
+  class_<RectangularDetectorPixel, bases<Detector>, boost::noncopyable>(
+      "RectangularDetectorPixel", no_init);
 }

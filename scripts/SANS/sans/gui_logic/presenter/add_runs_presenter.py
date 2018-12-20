@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from sans.gui_logic.models.run_selection import has_any_event_data
 from mantid.kernel import ConfigService, ConfigPropertyObserver
 
@@ -99,7 +93,6 @@ class AddRunsPagePresenter(object):
         run_selection = self._run_selector_presenter.run_selection()
         settings = self._summation_settings_presenter.settings()
         if self._output_directory_is_not_empty(settings):
-            self._view.disable_sum()
             self._sum_runs(run_selection,
                            settings,
                            self._sum_base_file_name(run_selection))

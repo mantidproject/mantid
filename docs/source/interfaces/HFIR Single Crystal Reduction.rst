@@ -140,36 +140,6 @@ Here is a typical use case to merge all the measuring points (Pt.) in a scan
 9.  User goes to MantidPlot to view the merged scan by SliceView or Vates.
 
 
-Workflow to calculate peak intensity of a single measurement scan
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-It is a common practice to have one measurement in a scan for a peak.  The only reason to do so is that the signal is too weak for users to have enough beam time to have multiple measurements in a single peak's scan.  Therefore, it is not straight forward to calculate peak intensity from this type of measurement.
-
-1. A user specifies the range of scan numbers that include all the neutron peaks regardless whether they are single-point measurement or multiple-points measurement.
-
-2. The user pushes button *Survey*.  Mantid will load all the SPICE files of the scans.
-
-3. The users selects *All* single-point-measurement scans by checking *Single Pt Scans*.
-
-4. The user launches single-point peak integration window from menu *Peak Integraton* and sub menu *Single Pt Integration*. Mantid will add all the single-point scans to the popped out window.
-
-5. The user will be prompted with the information about how to map single-point scan to a complete nuclear peak scan with same 2theta.
-
-6. The user may load a CSV file to which integrated peak table was exported previously.
-
-7. The user pushes button *Retrieve FWHM*. Mantid then will gather FWHM value from integrated peak.
-
-8. The user add mapped scans for each single-pt scan to peak processint tab, and integrate peaks.
-
-9. The user pushes *Retrieve FHWHM* again to make sure every scan to have an FWHM.
-
-10. The user pushes *Integrate* to integrate peaks.
-
-11. The user pushes *Export to Table* to add the integrated peaks to peak processing table for final output.
-
-
-
-
 Peak Integration with automatic background subtraction by approximation
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

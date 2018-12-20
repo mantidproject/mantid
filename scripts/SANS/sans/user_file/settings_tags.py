@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
 from sans.common.enums import serializable_enum
@@ -59,7 +53,7 @@ det_fit_range = namedtuple('det_fit_range', 'start, stop, use_fit')
 # --- DET
 @serializable_enum("reduction_mode", "rescale", "shift", "rescale_fit", "shift_fit", "correction_x", "correction_y",
                    "correction_z", "correction_rotation", "correction_radius", "correction_translation",
-                   "correction_x_tilt", "correction_y_tilt", "merge_range", "instrument")
+                   "correction_x_tilt", "correction_y_tilt", "merge_range")
 class DetectorId(object):
     pass
 

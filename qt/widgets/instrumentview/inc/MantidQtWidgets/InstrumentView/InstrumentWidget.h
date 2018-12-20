@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGET_H_
 #define INSTRUMENTWIDGET_H_
 
@@ -50,7 +44,6 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
-class InstrumentWidgetMaskTab;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
@@ -118,7 +111,7 @@ public:
   void setColorMapMaxValue(double maxValue);
   void setColorMapRange(double minValue, double maxValue);
   void selectComponent(const QString &name);
-  void setScaleType(ColorMap::ScaleType type);
+  void setScaleType(GraphOptions::ScaleType type);
   void setExponent(double nth_power);
   void setViewType(const QString &type);
   const InstrumentActor &getInstrumentActor() const {
@@ -126,7 +119,6 @@ public:
   }
   InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
-  void resetSurface();
   void selectTab(int tab);
   void selectTab(Tab tab) { selectTab(int(tab)); }
   InstrumentWidgetTab *getTab(const QString &title = "") const;
@@ -222,7 +214,7 @@ private slots:
 
 protected:
   void init(bool resetGeometry, bool autoscaling, double scaleMin,
-            double scaleMax, bool setDefaultView, bool resetActor = true);
+            double scaleMax, bool setDefaultView);
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
@@ -253,7 +245,6 @@ protected:
   /// Control tabs
   QList<InstrumentWidgetTab *> m_tabs;
   InstrumentWidgetRenderTab *m_renderTab;
-  InstrumentWidgetMaskTab *m_maskTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget *m_InstrumentDisplay;

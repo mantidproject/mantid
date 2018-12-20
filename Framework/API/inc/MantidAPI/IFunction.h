@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IFUNCTION_H_
 #define MANTID_API_IFUNCTION_H_
 
@@ -147,6 +141,27 @@ class FunctionHandler;
     @author Roman Tolchenov, Tessella Support Services plc
     @date 16/10/2009
     @date 22/12/2010
+
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL IFunction {
 public:
@@ -477,8 +492,6 @@ public:
   virtual IConstraint *getConstraint(size_t i) const;
   /// Remove a constraint
   virtual void removeConstraint(const std::string &parName);
-  virtual void setConstraintPenaltyFactor(const std::string &parName,
-                                          const double &c);
   /// Write a parameter constraint to a string
   std::string writeConstraints() const;
   /// Remove all constraints.
@@ -534,9 +547,9 @@ public:
   bool isParallel() const { return m_isParallel; }
 
   /// Set a function handler
-  void setHandler(std::unique_ptr<FunctionHandler> handler);
+  void setHandler(FunctionHandler *handler);
   /// Return the handler
-  FunctionHandler *getHandler() const { return m_handler.get(); }
+  FunctionHandler *getHandler() const { return m_handler; }
 
   /// Describe parameter status in relation to fitting:
   /// Active: Fit varies such parameter directly.
@@ -597,7 +610,7 @@ protected:
   bool m_isParallel;
 
   /// Pointer to a function handler
-  std::unique_ptr<FunctionHandler> m_handler;
+  FunctionHandler *m_handler;
 
   /// Pointer to the progress handler
   boost::shared_ptr<Kernel::ProgressBase> m_progReporter;

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_LOADPEAKSFILETEST_H_
 #define MANTID_CRYSTAL_LOADPEAKSFILETEST_H_
 
@@ -138,47 +132,6 @@ public:
     TS_ASSERT_EQUALS(G.getAxis(2).name, "phi");
     TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
     TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
-  }
-
-  /* Test for the calibrated geometry */
-  void test_exec_calibrated() {
-    LoadIsawPeaks alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    alg.setPropertyValue("Filename", "calibrated.peaks");
-    alg.setPropertyValue("OutputWorkspace", "calibrated");
-
-    TS_ASSERT(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve("calibrated")));
-    TS_ASSERT(ws);
-    if (!ws)
-      return;
-    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 14);
-
-    Peak p = ws->getPeaks()[0];
-    TS_ASSERT_EQUALS(p.getRunNumber(), 71907)
-    TS_ASSERT_DELTA(p.getH(), 0, 1e-4);
-    TS_ASSERT_DELTA(p.getK(), 0, 1e-4);
-    TS_ASSERT_DELTA(p.getL(), 0, 1e-4);
-    TS_ASSERT_EQUALS(p.getBankName(), "bank22");
-    TS_ASSERT_DELTA(p.getCol(), 5, 1e-4);
-    TS_ASSERT_DELTA(p.getRow(), 154, 1e-4);
-    TS_ASSERT_DELTA(p.getIntensity(), 0, 0.01);
-    TS_ASSERT_DELTA(p.getSigmaIntensity(), 0, 0.01);
-    TS_ASSERT_DELTA(p.getBinCount(), 8, 53);
-    TS_ASSERT_DELTA(p.getWavelength(), 0.893676, 0.001);
-    TS_ASSERT_DELTA(p.getL1(), 20.0, 1e-3);
-    TS_ASSERT_DELTA(p.getL2(), 2.51, 1e-3);
-    TS_ASSERT_DELTA(p.getTOF(), 5085.05, 0.1); // channel number is about TOF
-
-    TS_ASSERT_DELTA(p.getDSpacing(), 2.0360, 0.001);
-    TS_ASSERT_DELTA(ws->getPeaks()[1].getDSpacing(), 2.3261, 0.001);
-    TS_ASSERT_DELTA(ws->getPeaks()[2].getDSpacing(), 2.3329, 0.001);
   }
 };
 

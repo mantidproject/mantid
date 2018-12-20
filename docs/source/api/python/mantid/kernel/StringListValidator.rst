@@ -2,7 +2,7 @@
  StringListValidator
 =====================
 
-This is a Python binding to the C++ class Mantid::Kernel::StringListValidator.
+This a python binding to the C++ class Mantid::Kernel::StringListValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 

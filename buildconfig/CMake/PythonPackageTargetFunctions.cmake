@@ -36,17 +36,13 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
 
   if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
-    if ( WIN32 )
-      # add .exe in the executable name for Windows, otherwise it can't find it during the install step
-      set ( _executable_name ${pkg_name}.exe )
-      set ( _startup_script_full_name ${pkg_name}-script.pyw )
-      set ( _startup_script ${_egg_link_dir}/${_startup_script_full_name} )
-    else ()
-      set ( _startup_script_full_name )
-      set ( _startup_script )
-      set ( _executable_name ${pkg_name} )
-    endif ()
-    set ( _startup_exe ${_egg_link_dir}/${_executable_name} )
+      if ( WIN32 )
+        set ( _startup_script ${_egg_link_dir}/${pkg_name}-script.pyw )
+        set ( _startup_exe ${_egg_link_dir}/${pkg_name}.exe )
+      else ()
+        set ( _startup_script )
+        set ( _startup_exe ${_egg_link_dir}/${pkg_name} )
+      endif ()
   endif ()
 
   # create the developer setup which just creates a pth file rather than copying things over
@@ -63,38 +59,21 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     DEPENDS ${_outputs}
   )
 
-
   if ( ${PACKAGE_WORKBENCH} )
     # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have overridden
     # commands in setup.py.in to force the build directory to take place out of source. The install directory is specified here and then
     # --install-scripts=bin --install-lib=lib removes any of the platform/distribution specific install directories so we can have a flat
     # structure
     install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
-
-    # Specify the installation directory based on OS
-    if ( WIN32 )
-      # The / after lib tells cmake to copy over the _CONTENTS_ of the lib directory
-      # placing the installed files inside the DESTINATION folder. This copies the
-      # installed Python package inside the bin directory of Mantid's installation
-      set ( _package_source_directory ${_setup_py_build_root}/install/lib/ )
-      set ( _package_install_destination bin )
-    else ()
-      # NOTE the lack of slash at the end - this means the _whole_ lib directory will be moved
-      set ( _package_source_directory ${_setup_py_build_root}/install/lib )
-      set ( _package_install_destination . )
-    endif ()
-    # Registers the "installed" components with CMake so it will carry them over
-    install(DIRECTORY ${_package_source_directory}
-            DESTINATION ${_package_install_destination}
+    # register the "installed" components with cmake so it will carry them over
+    install(DIRECTORY ${_setup_py_build_root}/install/lib
+            DESTINATION .
             PATTERN "test" EXCLUDE )
 
     # install the generated executable - only tested with "workbench"
     if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
-        # On UNIX systems install the workbench executable directly.
-        # The Windows case is handled with a custom startup script installed in WindowsNSIS
-        if ( NOT WIN32 )
-          install(PROGRAMS ${_setup_py_build_root}/install/bin/${_executable_name} DESTINATION bin)
-        endif()
+      install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
+        DESTINATION bin)
     endif()
   endif()
 endfunction ()

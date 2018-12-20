@@ -1,14 +1,8 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
-import systemtesting
+import stresstesting
 from mantid.simpleapi import ConvertMultipleRunsToSingleCrystalMD, Load, AlgorithmManager, SaveMD
 
 
-class ConvertMultipleRunsToSingleCrystalMDQSampleTest(systemtesting.MantidSystemTest):
+class ConvertMultipleRunsToSingleCrystalMDQSampleTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return ["CORELLI_29782.nxs","CORELLI_29792.nxs"]
 
@@ -43,7 +37,7 @@ class ConvertMultipleRunsToSingleCrystalMDQSampleTest(systemtesting.MantidSystem
         return True
 
 
-class ConvertMultipleRunsToSingleCrystalMDHKLTest(systemtesting.MantidSystemTest):
+class ConvertMultipleRunsToSingleCrystalMDHKLTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return ["CORELLI_29782.nxs","CORELLI_29792.nxs",
                 "SingleCrystalDiffuseReduction_UB.mat"]

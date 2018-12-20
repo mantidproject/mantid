@@ -2,7 +2,7 @@
  VectorStringPropertyWithValue
 ===============================
 
-This is a Python binding to the C++ class Mantid::Kernel::VectorStringPropertyWithValue.
+This a python binding to the C++ class Mantid::Kernel::VectorStringPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

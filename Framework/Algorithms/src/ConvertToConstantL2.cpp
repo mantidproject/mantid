@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertToConstantL2.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
@@ -141,15 +135,11 @@ void ConvertToConstantL2::exec() {
  *
  */
 double ConvertToConstantL2::getRunProperty(std::string s) {
-  const auto &run = m_inputWS->run();
-  if (!run.hasProperty(s)) {
-    throw Exception::NotFoundError("Sample log property not found", s);
-  }
-  Mantid::Kernel::Property *prop = run.getProperty(s);
+  Mantid::Kernel::Property *prop = m_inputWS->run().getProperty(s);
   double val;
-  if (!Strings::convert(prop->value(), val)) {
-    const std::string mesg =
-        "Cannot convert sample log '" + s + "' to a number.";
+  if (!prop || !Strings::convert(prop->value(), val)) {
+    std::string mesg = "Run property " + s + "doesn't exist!";
+    g_log.error(mesg);
     throw std::runtime_error(mesg);
   }
   return val;
@@ -162,7 +152,8 @@ double ConvertToConstantL2::getRunProperty(std::string s) {
 double ConvertToConstantL2::getInstrumentProperty(std::string s) {
   std::vector<std::string> prop = m_instrument->getStringParameter(s);
   if (prop.empty()) {
-    const std::string mesg = "Property <" + s + "> doesn't exist!";
+    std::string mesg = "Property <" + s + "> doesn't exist!";
+    g_log.error(mesg);
     throw std::runtime_error(mesg);
   }
   g_log.debug() << "prop[0] = " << prop[0] << '\n';

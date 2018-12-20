@@ -1,18 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import mantid  # noqa
 from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, SetDetectorOffsets, Gravity, Set1D,
                                                          UseCompatibilityMode, AssignSample, WavRangeReduction)
 
 
-class SANS2DFrontNoGravTest_V2(systemtesting.MantidSystemTest):
+class SANS2DFrontNoGravTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()
@@ -33,7 +27,7 @@ class SANS2DFrontNoGravTest_V2(systemtesting.MantidSystemTest):
         return '2500front_1D_4.6_12.85', 'SANS2DFrontNoGrav.nxs'
 
 
-class SANS2DWithExtraLengthGravityTest_V2(systemtesting.MantidSystemTest):
+class SANS2DWithExtraLengthGravityTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()

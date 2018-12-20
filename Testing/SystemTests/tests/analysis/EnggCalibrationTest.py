@@ -1,11 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from six import PY2
 
@@ -32,9 +26,9 @@ def rel_err_less_delta(val, ref, epsilon):
     return check
 
 
-class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
+class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
 
         # This test makes sure that the pre-calculated values (which are extensively used in the
         # unit tests) are still the same results as we get from the actual calculations
@@ -152,10 +146,10 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
         mtd.remove(self.van_bank_curves_name)
 
 
-class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
+class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
     # pylint: disable=too-many-instance-attributes
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
         # difc and zero parameters for GSAS
         self.difa = -1
         self.difa_b2 = -1

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
@@ -31,8 +25,7 @@ class MSDFit(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='Sample input workspace')
         self.declareProperty(name='Model', defaultValue='Gauss',
-                             validator=StringListValidator(
-                                 ['Gauss', 'Peters', 'Yi']),
+                             validator=StringListValidator(['Gauss', 'Peters', 'Yi']),
                              doc='Model options : Gauss, Peters, Yi')
 
         self.declareProperty(name='XStart', defaultValue=0.0,
@@ -101,12 +94,9 @@ class MSDFit(DataProcessorAlgorithm):
         progress = Progress(self, 0.0, 0.05, 3)
         self._original_ws = self._input_ws
 
-        rename_alg = self.createChildAlgorithm(
-            "RenameWorkspace", enableLogging=False)
+        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
         rename_alg.setProperty("InputWorkspace", self._input_ws)
-        rename_alg.setProperty(
-            "OutputWorkspace",
-            self._input_ws + "_" + self._model)
+        rename_alg.setProperty("OutputWorkspace", self._input_ws + "_" + self._model)
         rename_alg.execute()
         self._input_ws = self._input_ws + "_" + self._model
         input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
@@ -115,19 +105,19 @@ class MSDFit(DataProcessorAlgorithm):
         # Fit line to each of the spectra
         if self._model == 'Gauss':
             logger.information('Model : Gaussian approximation')
-            function = 'name=MsdGauss, Height=1.0, Msd=0.1'
-            function += ',constraint=(Height>0.0, Msd>0.0)'
-            params_list = ['Height', 'Msd']
+            function = 'name=MsdGauss, Height=1.0, MSD=0.1'
+            function += ',constraint=(Height>0.0, MSD>0.0)'
+            params_list = ['Height', 'MSD']
         elif self._model == 'Peters':
             logger.information('Model : Peters & Kneller')
-            function = 'name=MsdPeters, Height=1.0, Msd=1.0, Beta=1.0'
-            function += ',constraint=(Height>0.0, Msd>0.0, 100.0>Beta>0.3)'
-            params_list = ['Height', 'Msd', 'Beta']
+            function = 'name=MsdPeters, Height=1.0, MSD=1.0, Beta=1.0'
+            function += ',constraint=(Height>0.0, MSD>0.0, 100.0>Beta>0.3)'
+            params_list = ['Height', 'MSD', 'Beta']
         elif self._model == 'Yi':
             logger.information('Model : Yi et al')
-            function = 'name=MsdYi, Height=1.0, Msd=1.0, Sigma=0.1'
-            function += ',constraint=(Height>0.0, Msd>0.0, Sigma>0.0)'
-            params_list = ['Height', 'Msd', 'Sigma']
+            function = 'name=MsdYi, Height=1.0, MSD=1.0, Sigma=0.1'
+            function += ',constraint=(Height>0.0, MSD>0.0, Sigma>0.0)'
+            params_list = ['Height', 'MSD', 'Sigma']
         else:
             raise ValueError('No Model defined')
 
@@ -141,20 +131,12 @@ class MSDFit(DataProcessorAlgorithm):
                            FitType='Sequential',
                            CreateOutput=True)
 
-        delete_alg = self.createChildAlgorithm(
-            "DeleteWorkspace", enableLogging=False)
-        delete_alg.setProperty(
-            "Workspace",
-            self._output_msd_ws +
-            '_NormalisedCovarianceMatrices')
+        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
+        delete_alg.setProperty("Workspace", self._output_msd_ws + '_NormalisedCovarianceMatrices')
         delete_alg.execute()
-        delete_alg.setProperty(
-            "Workspace",
-            self._output_msd_ws +
-            '_Parameters')
+        delete_alg.setProperty("Workspace", self._output_msd_ws + '_Parameters')
         delete_alg.execute()
-        rename_alg = self.createChildAlgorithm(
-            "RenameWorkspace", enableLogging=False)
+        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
         rename_alg.setProperty("InputWorkspace", self._output_msd_ws)
         rename_alg.setProperty("OutputWorkspace", self._output_param_ws)
         rename_alg.execute()
@@ -166,50 +148,31 @@ class MSDFit(DataProcessorAlgorithm):
         for par in params_list:
             ws_name = self._output_msd_ws + '_' + par
             parameter_ws_group.append(ws_name)
-            convert_alg = self.createChildAlgorithm(
-                "ConvertTableToMatrixWorkspace", enableLogging=False)
+            convert_alg = self.createChildAlgorithm("ConvertTableToMatrixWorkspace", enableLogging=False)
             convert_alg.setProperty("InputWorkspace", self._output_param_ws)
             convert_alg.setProperty("OutputWorkspace", ws_name)
             convert_alg.setProperty("ColumnX", 'axis-1')
             convert_alg.setProperty("ColumnY", par)
             convert_alg.setProperty("ColumnE", par + '_Err')
             convert_alg.execute()
-            mtd.addOrReplace(
-                ws_name, convert_alg.getProperty("OutputWorkspace").value)
+            mtd.addOrReplace(ws_name, convert_alg.getProperty("OutputWorkspace").value)
 
-        append_alg = self.createChildAlgorithm(
-            "AppendSpectra", enableLogging=False)
-        append_alg.setProperty(
-            "InputWorkspace1",
-            self._output_msd_ws +
-            '_' +
-            params_list[0])
-        append_alg.setProperty(
-            "InputWorkspace2",
-            self._output_msd_ws +
-            '_' +
-            params_list[1])
+        append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
+        append_alg.setProperty("InputWorkspace1", self._output_msd_ws + '_' + params_list[0])
+        append_alg.setProperty("InputWorkspace2", self._output_msd_ws + '_' + params_list[1])
         append_alg.setProperty("ValidateInputs", False)
         append_alg.setProperty("OutputWorkspace", self._output_msd_ws)
         append_alg.execute()
-        mtd.addOrReplace(
-            self._output_msd_ws,
-            append_alg.getProperty("OutputWorkspace").value)
+        mtd.addOrReplace(self._output_msd_ws, append_alg.getProperty("OutputWorkspace").value)
         if len(params_list) > 2:
             append_alg.setProperty("InputWorkspace1", self._output_msd_ws)
-            append_alg.setProperty(
-                "InputWorkspace2",
-                self._output_msd_ws +
-                '_' +
-                params_list[2])
+            append_alg.setProperty("InputWorkspace2", self._output_msd_ws + '_' + params_list[2])
             append_alg.setProperty("ValidateInputs", False)
             append_alg.setProperty("OutputWorkspace", self._output_msd_ws)
             append_alg.execute()
-            mtd.addOrReplace(self._output_msd_ws,
-                             append_alg.getProperty("OutputWorkspace").value)
+            mtd.addOrReplace(self._output_msd_ws, append_alg.getProperty("OutputWorkspace").value)
         for par in params_list:
-            delete_alg.setProperty(
-                "Workspace", self._output_msd_ws + '_' + par)
+            delete_alg.setProperty("Workspace", self._output_msd_ws + '_' + par)
             delete_alg.execute()
 
         progress.report('Change axes')
@@ -218,9 +181,7 @@ class MSDFit(DataProcessorAlgorithm):
         sort_alg.setProperty("InputWorkspace", self._output_msd_ws)
         sort_alg.setProperty("OutputWorkspace", self._output_msd_ws)
         sort_alg.execute()
-        mtd.addOrReplace(
-            self._output_msd_ws,
-            sort_alg.getProperty("OutputWorkspace").value)
+        mtd.addOrReplace(self._output_msd_ws, sort_alg.getProperty("OutputWorkspace").value)
         # Create a new x axis for the Q and Q**2 workspaces
         xunit = mtd[self._output_msd_ws].getAxis(0).setUnit('Label')
         xunit.setLabel('Temperature', 'K')
@@ -233,10 +194,7 @@ class MSDFit(DataProcessorAlgorithm):
         # Rename fit workspace group
         original_fit_ws_name = self._output_msd_ws + '_Workspaces'
         if original_fit_ws_name != self._output_fit_ws:
-            rename_alg.setProperty(
-                "InputWorkspace",
-                self._output_msd_ws +
-                '_Workspaces')
+            rename_alg.setProperty("InputWorkspace", self._output_msd_ws + '_Workspaces')
             rename_alg.setProperty("OutputWorkspace", self._output_fit_ws)
             rename_alg.execute()
 
@@ -249,8 +207,7 @@ class MSDFit(DataProcessorAlgorithm):
         copy_alg.setProperty("OutputWorkspace", self._output_fit_ws)
         copy_alg.execute()
 
-        rename_alg = self.createChildAlgorithm(
-            "RenameWorkspace", enableLogging=False)
+        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
         rename_alg.setProperty("InputWorkspace", self._input_ws)
         rename_alg.setProperty("OutputWorkspace", self._original_ws)
         rename_alg.execute()

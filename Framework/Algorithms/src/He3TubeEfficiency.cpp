@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -45,6 +39,13 @@ He3TubeEfficiency::He3TubeEfficiency()
     : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr),
       m_shapeCache(), m_samplePos(), m_spectraSkipped(), m_progress(nullptr) {
   m_shapeCache.clear();
+}
+
+/// Destructor
+He3TubeEfficiency::~He3TubeEfficiency() {
+  if (m_progress) {
+    delete m_progress;
+  }
 }
 
 /**
@@ -118,7 +119,7 @@ void He3TubeEfficiency::exec() {
   }
 
   std::size_t numHists = m_inputWS->getNumberHistograms();
-  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHists);
+  m_progress = new API::Progress(this, 0.0, 1.0, numHists);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
@@ -418,7 +419,7 @@ void He3TubeEfficiency::execEvent() {
 
   std::size_t numHistograms = m_outputWS->getNumberHistograms();
   auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
-  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHistograms);
+  m_progress = new API::Progress(this, 0.0, 1.0, numHistograms);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {

@@ -2,7 +2,7 @@
  Direction
 ===========
 
-This is a Python binding to the C++ class Mantid::Kernel::Direction.
+This a python binding to the C++ class Mantid::Kernel::Direction.
 
 
 .. module:`mantid.kernel`

@@ -1,10 +1,4 @@
 #!/usr/bin/python
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """Accepts a list of page names on the wiki and translates them to .rst
 
 The bulk of the work is done by pandoc, which is expected to be in the PATH. There is then some post processing to:

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -18,7 +12,7 @@ class SpectrumInfoTest(unittest.TestCase):
     def setUp(self):
         """ Set up code. """
         if self.__class__._ws is None:
-            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(3, 1, False) # no monitors
+            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False) # no monitors
             self.__class__._ws.getSpectrum(0).clearDetectorIDs()
 
     """
@@ -32,13 +26,13 @@ class SpectrumInfoTest(unittest.TestCase):
         """ Check that the number of spectra we initailly created
             is the same as in memory. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(len(info), 3)
+        self.assertEquals(len(info), 2)
 
     def test_size(self):
         """ Check that the number of spectra we initailly created
             is the same as in memory. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(info.size(), 3)
+        self.assertEquals(info.size(), 2)
 
     def test_isMonitor(self):
         """ Check if a monitor is present. """
@@ -119,51 +113,53 @@ class SpectrumInfoTest(unittest.TestCase):
     Iteration
     ---------------
     """
-    def test_basic_iteration(self):
-        info = self._ws.spectrumInfo()
-        expected_iterations = len(info) 
-        actual_iterations = len(list(iter(info)))
-        self.assertEquals(expected_iterations, actual_iterations)
 
-    def test_iterator_for_monitors(self):
+    def test_iteration_for_isMonitor(self):
         info = self._ws.spectrumInfo()
-        # check no monitors in instrument
-        it = iter(info)
-        next(it) # skip first as detectors cleared
-        for item in it:
-            self.assertFalse(item.isMonitor)
-            
-    def test_iterator_for_masked(self):
-        info = self._ws.spectrumInfo()
-        # nothing should be masked 
-        it = iter(info)
-        next(it) # skip first as detectors cleared
-        for item in it:
-            self.assertFalse(item.isMasked)
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.isMonitor), bool)
 
-    def test_iterator_for_setting_masked(self):
+    def test_iteration_for_isMasked(self):
         info = self._ws.spectrumInfo()
-        # nothing should be masked 
-        it = iter(info)
-        next(it) # skip first as detectors cleared
-        for item in it:
-            # mask and check
-            item.setMasked(True)
-            self.assertTrue(item.isMasked)
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.isMasked), bool)
+
+    def test_iteration_for_twoTheta(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.twoTheta), float)
+
+    def test_iteration_for_signedTwoTheta(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.signedTwoTheta), float)
+
+    def test_iteration_for_l2(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.l2), float)
+
+    def test_iteration_for_hasUniqueDetector(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            self.assertEquals(type(specInfo.hasUniqueDetector), bool)
+
+    def test_iteration_for_spectrumDefinition(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.spectrumDefinition), SpectrumDefinition)
 
     def test_iteration_for_position(self):
         info = self._ws.spectrumInfo()
-        lastY = None
-        it = iter(info)
-        next(it) # skip first as detectors cleared
-        for i,item in enumerate(it):
-            pos = item.position
-            # See test helper for position construction
-            self.assertAlmostEquals(pos.X(), 0)
-            self.assertAlmostEquals(pos.Z(), 5)
-            if(lastY):
-                self.assertTrue(pos.Y() > lastY)
-            lastY = pos.Y()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.position), V3D)
 
     """
     ----------------------------------------------------------------------------

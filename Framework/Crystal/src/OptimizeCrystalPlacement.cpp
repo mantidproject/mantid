@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 /*
  *
  * OptimizeCrystalPlacement.cpp
@@ -449,7 +443,7 @@ void OptimizeCrystalPlacement::exec() {
   UBinv.Invert();
   UBinv /= (2 * M_PI);
   for (int i = 0; i < outPeaks->getNumberPeaks(); ++i) {
-    outPeaks->getPeak(i).setSamplePos(newSampPos);
+
     int RunNum = outPeaks->getPeak(i).getRunNumber();
     std::string RunNumStr = std::to_string(RunNum);
     Matrix<double> GonMatrix;

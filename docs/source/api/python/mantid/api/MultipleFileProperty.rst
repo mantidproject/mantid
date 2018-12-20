@@ -2,7 +2,7 @@
  MultipleFileProperty
 ======================
 
-This is a Python binding to the C++ class
+This a python binding to the C++ class
 ``Mantid::API::MultipleFileProperty``.
 
 .. contents::

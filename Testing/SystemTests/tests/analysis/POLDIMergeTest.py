@@ -1,16 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
 
-class POLDIMergeTest(systemtesting.MantidSystemTest):
+class POLDIMergeTest(stresstesting.MantidStressTest):
     '''This test checks that the results of PoldiMerge match the expected outcome.'''
 
     def runTest(self):

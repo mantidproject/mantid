@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 # Set matplotlib backend to AGG before anything else. Otherwise some build servers
@@ -70,7 +64,12 @@ class DirectTest(unittest.TestCase):
 
     def test_defaultrcParams(self):
         result = directtools.defaultrcParams()
-        self.assertEqual(result, {'legend.numpoints': 1})
+        self.assertTrue(isinstance(result, dict))
+        self.assertEqual(len(result), 2)
+        self.assertTrue('legend.numpoints' in result)
+        self.assertEqual(result['legend.numpoints'], 1)
+        self.assertTrue('text.usetex' in result)
+        self.assertEqual(result['text.usetex'], True)
 
     def test_dynamicsusceptibility(self):
         xs = numpy.array([-1, 0, 1])
@@ -326,7 +325,7 @@ class DirectTest(unittest.TestCase):
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
         self.assertEquals(axes.get_xlabel(), '')
-        self.assertEquals(axes.get_ylabel(), r'$S(Q,E)$')
+        self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
@@ -337,7 +336,7 @@ class DirectTest(unittest.TestCase):
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
         self.assertEquals(axes.get_xlabel(), 'Energy (meV)')
-        self.assertEquals(axes.get_ylabel(), r'$S(Q,E)$')
+        self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
@@ -347,7 +346,7 @@ class DirectTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='MomentumTransfer', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEquals(axes.get_xlabel(), u'$Q$ (\u00c5$^{-1}$)')
+        self.assertEquals(axes.get_xlabel(), '$Q$ (\\AA$^{-1}$)')
         self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)

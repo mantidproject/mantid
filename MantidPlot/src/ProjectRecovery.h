@@ -1,15 +1,7 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROJECT_RECOVERY_H_
 #define PROJECT_RECOVERY_H_
 
-#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
-#include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
 
 #include <Poco/NObserver.h>
 
@@ -23,6 +15,7 @@
 // Forward declarations
 class ApplicationWindow;
 class Folder;
+
 namespace Poco {
 class Path;
 }
@@ -31,6 +24,26 @@ class Path;
 
 @author David Fairbrother, ISIS, RAL
 @date 07/06/2018
+
+Copyright &copy; 2007-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 namespace MantidQt {
@@ -38,7 +51,6 @@ class ProjectRecovery {
 public:
   /// Constructor
   explicit ProjectRecovery(ApplicationWindow *windowHandle);
-
   /// Destructor the ensures background thread stops
   ~ProjectRecovery();
 
@@ -46,6 +58,9 @@ public:
   void attemptRecovery();
   /// Checks if recovery is required
   bool checkForRecovery() const noexcept;
+
+  /// Clears all checkpoints in the existing folder
+  bool clearAllCheckpoints() const noexcept;
 
   /// Clears all checkpoints in the existing folder at the given path
   bool clearAllCheckpoints(Poco::Path path) const noexcept;
@@ -55,9 +70,11 @@ public:
 
   /// Starts the background thread
   void startProjectSaving();
-
   /// Stops the background thread
   void stopProjectSaving();
+
+  /// Removes checkpoints should they be older than a month old.
+  void removeOlderCheckpoints();
 
   /// Saves a project recovery checkpoint
   void saveAll(bool autoSave = true);
@@ -65,34 +82,12 @@ public:
   /// get Recovery Folder location
   std::string getRecoveryFolderOutputPR();
 
-  /// Get a list of poco paths based on recoveryFolderPaths' directory
-  std::vector<Poco::Path>
-  getListOfFoldersInDirectoryPR(const std::string &recoveryFolderPath);
-
-  /// get Recovery Folder to loads location
-  std::string getRecoveryFolderLoadPR();
-
-  /// Exposing the getRecoveryFolderCheckpoints function
-  std::vector<Poco::Path>
-  getRecoveryFolderCheckpointsPR(const std::string &recoveryFolderPath);
-
-  /// Expose the getRecoveryFolderCheck function
-  std::string getRecoveryFolderCheckPR();
-
-  /// Loads a recovery checkpoint in the given folder
-  bool loadRecoveryCheckpoint(const Poco::Path &path);
-
-  /// Open a recovery checkpoint in the scripting window
-  void openInEditor(const Poco::Path &inputFolder,
-                    const Poco::Path &historyDest);
-
-  /// Looks at the recovery checkpoints and repairs some faults
-  void repairCheckpointDirectory();
-
 private:
-  friend class RecoveryThread;
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();
+
+  /// Triggers when the config key is updated to a new value
+  void configKeyChanged(Mantid::Kernel::ConfigValChangeNotification_ptr notif);
 
   /// Creates a recovery script based on all .py scripts in a folder
   void compileRecoveryScript(const Poco::Path &inputFolder,
@@ -108,6 +103,13 @@ private:
   /// Deletes oldest "unused" checkpoints beyond the maximum number to keep
   void deleteExistingUnusedCheckpoints(size_t checkpointsToKeep) const;
 
+  /// Loads a recovery checkpoint in the given folder
+  void loadRecoveryCheckpoint(const Poco::Path &path);
+
+  /// Open a recovery checkpoint in the scripting window
+  void openInEditor(const Poco::Path &inputFolder,
+                    const Poco::Path &historyDest);
+
   /// Wraps the thread in a try catch to log any failures
   void projectSavingThreadWrapper();
 
@@ -121,55 +123,27 @@ private:
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const Poco::Path &projectDestFile);
 
-  /// Return true if the folder at the end of the path is older than a month.
+  // Return true if the folder at the end of the path is older than a month.
   bool olderThanAGivenTime(const Poco::Path &path, int64_t elapsedTime);
-
-  /// Finds any checkpoints older than a time defined inside the function and
-  /// returns paths to them
-  std::vector<std::string>
-  findOlderCheckpoints(const std::string &recoverFolder,
-                       const std::vector<int> &possiblePids);
-
-  /// Finds any checkpoints containing a Locked file and returns paths to them
-  std::vector<std::string>
-  findLockedCheckpoints(const std::string &recoverFolder,
-                        const std::vector<int> &possiblePids);
-
-  /// Finds any checkpoints believed to be from previous versions of project
-  /// recovery and returns them
-  std::vector<std::string>
-  findLegacyCheckpoints(const std::vector<Poco::Path> &checkpoints);
-
-  /// Takes a list of potentially used PIDs and removes any used PIDs from that
-  /// list
-  void checkPIDsAreNotInUse(std::vector<int> &possiblePids);
 
   /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;
 
   /// Mutex for conditional variable and background thread flag
   std::mutex m_notifierMutex;
-
   /// Flag to indicate to the thread to exit
   std::atomic<bool> m_stopBackgroundThread;
-
   /// Atomic to detect when the thread should fire or exit
   std::condition_variable m_threadNotifier;
+
+  /// Config observer to monitor the key
+  Poco::NObserver<ProjectRecovery, Mantid::Kernel::ConfigValChangeNotification>
+      m_configKeyObserver;
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
 
-  // To ignore a property you need to first put the algorithm name in the first
-  // part of the vector for which you want to ignore the property for then the
-  // property name in the second part of the vector 0 and 1 as indexes
-  // respectively
-  std::vector<std::vector<std::string>> m_propertiesToIgnore = {
-      {"StartLiveData", "MonitorLiveData"}};
-
-  ProjectRecoveryPresenter *m_recoveryGui;
-
   std::vector<std::string> m_algsToIgnore = {
-      "MonitorLiveData",
       "EnggSaveGSASIIFitResultsToHDF5",
       "EnggSaveSinglePeakFitResultsToHDF5",
       "ExampleSaveAscii",
@@ -231,6 +205,7 @@ private:
       "SaveYDA",
       "SaveZODS"};
 };
+
 } // namespace MantidQt
 
 #endif // PROJECT_RECOVERY_H_

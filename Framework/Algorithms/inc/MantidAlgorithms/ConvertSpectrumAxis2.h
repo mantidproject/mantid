@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CONVERTSPECTRUMAXIS_H_
 #define MANTID_ALGORITHMS_CONVERTSPECTRUMAXIS_H_
 
@@ -32,6 +26,25 @@ namespace Algorithms {
     <LI> Target          - The unit to which the spectrum axis should be
    converted. </LI>
     </UL>
+
+        Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge
+        National Laboratory & European Spallation Source
+
+        This file is part of Mantid.
+
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ConvertSpectrumAxis2 : public API::Algorithm {
 public:

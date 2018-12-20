@@ -1,17 +1,11 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import systemtesting
+import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 import math
 
 
-class MagnetismReflectometryReductionTest(systemtesting.MantidSystemTest):
+class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
         MagnetismReflectometryReduction(InputWorkspace=wsg[0],
@@ -47,7 +41,7 @@ class MagnetismReflectometryReductionTest(systemtesting.MantidSystemTest):
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
 
 
-class MagnetismReflectometryReductionConstQTest(systemtesting.MantidSystemTest):
+class MagnetismReflectometryReductionConstQTest(stresstesting.MantidStressTest):
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
         MagnetismReflectometryReduction(InputWorkspace=wsg[0],
@@ -78,39 +72,7 @@ class MagnetismReflectometryReductionConstQTest(systemtesting.MantidSystemTest):
         return math.fabs(refl[1] - 0.648596877775159) < 0.002
 
 
-class MagnetismReflectometryReductionSkipRebinTest(systemtesting.MantidSystemTest):
-    def runTest(self):
-        wsg = MRFilterCrossSections(Filename="REF_M_24949")
-        MagnetismReflectometryReduction(InputWorkspace=wsg[0],
-                                        NormalizationRunNumber=24945,
-                                        SignalPeakPixelRange=[125, 129],
-                                        SubtractSignalBackground=True,
-                                        SignalBackgroundPixelRange=[15, 105],
-                                        ApplyNormalization=True,
-                                        NormPeakPixelRange=[201, 205],
-                                        SubtractNormBackground=True,
-                                        NormBackgroundPixelRange=[10,127],
-                                        CutLowResDataAxis=True,
-                                        LowResDataAxisPixelRange=[91, 161],
-                                        CutLowResNormAxis=True,
-                                        LowResNormAxisPixelRange=[86, 174],
-                                        CutTimeAxis=True,
-                                        UseWLTimeAxis=False,
-                                        FinalRebin=False,
-                                        QMin=0.005,
-                                        QStep=-0.01,
-                                        TimeAxisStep=40,
-                                        TimeAxisRange=[25000, 54000],
-                                        SpecularPixel=126.9,
-                                        ConstantQBinning=False,
-                                        OutputWorkspace="r_24949")
-
-    def validate(self):
-        q_values = mtd["r_24949"].dataX(0)
-        return math.fabs(q_values[0] - 0.005) > 0.001
-
-
-class MagnetismReflectometryReductionConstQWLCutTest(systemtesting.MantidSystemTest):
+class MagnetismReflectometryReductionConstQWLCutTest(stresstesting.MantidStressTest):
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
         MagnetismReflectometryReduction(InputWorkspace=wsg[0],
@@ -141,7 +103,7 @@ class MagnetismReflectometryReductionConstQWLCutTest(systemtesting.MantidSystemT
         return math.fabs(refl[1] - 0.648596877775159) < 0.002
 
 
-class MRFilterCrossSectionsTest(systemtesting.MantidSystemTest):
+class MRFilterCrossSectionsTest(stresstesting.MantidStressTest):
     """ Test data loading and cross-section extraction """
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
@@ -178,7 +140,7 @@ class MRFilterCrossSectionsTest(systemtesting.MantidSystemTest):
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
 
 
-class MRFilterCrossSectionsWithWorkspaceTest(systemtesting.MantidSystemTest):
+class MRFilterCrossSectionsWithWorkspaceTest(stresstesting.MantidStressTest):
     """ Test data loading and cross-section extraction """
     def runTest(self):
         ws_input = LoadEventNexus(Filename="REF_M_24949",
@@ -228,7 +190,7 @@ class MRFilterCrossSectionsWithWorkspaceTest(systemtesting.MantidSystemTest):
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
 
 
-class MRNormaWorkspaceTest(systemtesting.MantidSystemTest):
+class MRNormaWorkspaceTest(stresstesting.MantidStressTest):
     """ Test data loading and cross-section extraction """
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
@@ -268,7 +230,7 @@ class MRNormaWorkspaceTest(systemtesting.MantidSystemTest):
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
 
 
-class MRDIRPIXTest(systemtesting.MantidSystemTest):
+class MRDIRPIXTest(stresstesting.MantidStressTest):
     """ Test data loading and cross-section extraction """
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
@@ -314,7 +276,7 @@ class MRDIRPIXTest(systemtesting.MantidSystemTest):
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
 
 
-class MRDANGLE0Test(systemtesting.MantidSystemTest):
+class MRDANGLE0Test(stresstesting.MantidStressTest):
     """ Test data loading and cross-section extraction """
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
@@ -360,7 +322,7 @@ class MRDANGLE0Test(systemtesting.MantidSystemTest):
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
 
 
-class MROutputTest(systemtesting.MantidSystemTest):
+class MROutputTest(stresstesting.MantidStressTest):
     """ Test the MR output algorithm """
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
@@ -400,7 +362,7 @@ class MROutputTest(systemtesting.MantidSystemTest):
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
 
 
-class MRInspectionTest(systemtesting.MantidSystemTest):
+class MRInspectionTest(stresstesting.MantidStressTest):
     def runTest(self):
         nxs_data = LoadEventNexus(Filename="REF_M_24949",
                                   NXentryName="entry-Off_Off",
@@ -412,7 +374,7 @@ class MRInspectionTest(systemtesting.MantidSystemTest):
         return mtd["r_24949"].getRun().getProperty("is_direct_beam").value == "False"
 
 
-class MRInspectionOverwritesTest(systemtesting.MantidSystemTest):
+class MRInspectionOverwritesTest(stresstesting.MantidStressTest):
     def runTest(self):
         nxs_data = LoadEventNexus(Filename="REF_M_24949",
                                   NXentryName="entry-Off_Off",
@@ -424,7 +386,7 @@ class MRInspectionOverwritesTest(systemtesting.MantidSystemTest):
         return mtd["r_24949"].getRun().getProperty("is_direct_beam").value == "False"
 
 
-class MRGetThetaTest(systemtesting.MantidSystemTest):
+class MRGetThetaTest(stresstesting.MantidStressTest):
     """ Test that the MRGetTheta algorithm produces correct results """
     def runTest(self):
         nxs_data = LoadEventNexus(Filename="REF_M_24949",

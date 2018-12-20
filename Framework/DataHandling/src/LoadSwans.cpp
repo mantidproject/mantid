@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSwans.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
@@ -14,6 +8,7 @@
 #include <algorithm>
 #include <boost/tokenizer.hpp>
 #include <fstream>
+#include <iostream>
 #include <map>
 
 namespace Mantid {
@@ -87,7 +82,7 @@ void LoadSwans::init() {
 /** Execute the algorithm.
  */
 void LoadSwans::exec() {
-  m_ws = boost::make_shared<Mantid::DataObjects::EventWorkspace>();
+
   // Load instrument here to get the necessary Parameters from the XML file
   loadInstrument();
   m_detector_size = getDetectorSize();

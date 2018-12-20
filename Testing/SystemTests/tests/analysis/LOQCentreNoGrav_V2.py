@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import mantid  # noqa
 from sans.command_interface.ISISCommandInterface import (LOQ, Set1D, Detector, MaskFile, Gravity, AssignSample,
                                                          TransmissionSample, AssignCan, TransmissionCan,
@@ -14,9 +8,9 @@ from sans.command_interface.ISISCommandInterface import (LOQ, Set1D, Detector, M
                                                          UseCompatibilityMode, FindBeamCentre)
 
 
-class LOQCentreNoGrav(systemtesting.MantidSystemTest):
+class LOQCentreNoGrav(stresstesting.MantidStressTest):
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
         self.tolerance = 1e-6
 
     def runTest(self):
@@ -42,7 +36,7 @@ class LOQCentreNoGrav(systemtesting.MantidSystemTest):
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 
-class LOQCentreNoGravDefineCentreTest_V2(systemtesting.MantidSystemTest):
+class LOQCentreNoGravDefineCentreTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
         UseCompatibilityMode()
         LOQ()

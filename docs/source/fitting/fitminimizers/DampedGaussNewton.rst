@@ -7,7 +7,7 @@ This minimizer is
 explained at `Wikipedia <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ 
 and has damping.
 
-It is listed in :ref:`a comparison of fitting minimizers <FittingMinimizers Minimizer Comparison>`.
+It is listed in `a comparison of fitting minimizers <../concepts/FittingMinimizers.html>`__.
 
 It makes use of the 
 `GSL (GNU Scientific Library) library

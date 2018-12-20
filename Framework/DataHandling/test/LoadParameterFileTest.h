@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADPARAMETERFILETEST_H_
 #define LOADPARAMETERFILETEST_H_
 
@@ -51,7 +45,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
     pLoaderPF->setPropertyValue(
-        "Filename", "unit_testing/IDF_for_UNIT_TESTING2_paramFile.xml");
+        "Filename",
+        "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2_paramFile.xml");
     pLoaderPF->setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
     TS_ASSERT(pLoaderPF->isExecuted());
@@ -225,8 +220,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from git
-    pLoadInstrument->setPropertyValue("Filename",
-                                      "unit_testing/IDF_for_UNIT_TESTING2.xml");
+    pLoadInstrument->setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     // inputFile = loaderIDF2.getPropertyValue("Filename");
     pLoadInstrument->setPropertyValue("Workspace", wsName);
     pLoadInstrument->setProperty("RewriteSpectraMap",

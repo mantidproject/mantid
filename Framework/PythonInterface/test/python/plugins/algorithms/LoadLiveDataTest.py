@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -20,7 +14,7 @@ class LoadLiveDataTest(unittest.TestCase):
 
     def setUp(self):
         FrameworkManager.clearData()
-        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"unit_testing/UnitTestFacilities.xml"))
+        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"IDFs_for_UNIT_TESTING/UnitTestFacilities.xml"))
         ConfigService.setFacility("TEST")
         pass
 
@@ -79,3 +73,4 @@ MyMethod(input, output)
 
 if __name__ == '__main__':
     unittest.main()
+

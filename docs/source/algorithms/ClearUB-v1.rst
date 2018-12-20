@@ -10,7 +10,7 @@ Description
 -----------
 
 Clears the :ref:`OrientedLattice <Lattice>` of each ExperimentInfo attached to the intput
-:ref:`Workspace <Workspace>`. Works with both single ExperimentInfos and
+`Workspace <http://www.mantidproject.org/Workspace>`_. Works with both single ExperimentInfos and
 MultipleExperimentInfo instances.
 
 Usage

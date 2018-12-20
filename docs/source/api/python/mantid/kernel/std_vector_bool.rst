@@ -2,7 +2,7 @@
  std_vector_bool
 =================
 
-This is a Python binding to the C++ class Mantid::Kernel::std_vector_bool.
+This a python binding to the C++ class Mantid::Kernel::std_vector_bool.
 
 
 .. module:`mantid.kernel`

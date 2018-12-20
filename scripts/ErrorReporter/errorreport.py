@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from PyQt4 import QtGui, QtCore
 import ui_errorreport
 from PyQt4.QtCore import pyqtSignal
@@ -94,9 +88,6 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         msg.setDefaultButton(QtGui.QMessageBox.Ok)
         msg.setEscapeButton(QtGui.QMessageBox.Ok)
         msg.exec_()
-
-    def set_report_callback(self, callback):
-        self.action.connect(callback)
 
     @property
     def input_name(self):

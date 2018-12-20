@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/core/NDArray.h"
 
 #include <boost/python/detail/prefix.hpp> // Safe include of Python.h
@@ -80,14 +74,6 @@ int NDArray::get_nd() const {
  */
 void *NDArray::get_data() const {
   return PyArray_DATA(reinterpret_cast<PyArrayObject *>(this->ptr()));
-}
-
-/**
- * See https://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html
- * @return The character code for the dtype of the array
- */
-char NDArray::get_typecode() const {
-  return PyArray_DESCR(reinterpret_cast<PyArrayObject *>(this->ptr()))->type;
 }
 
 /**

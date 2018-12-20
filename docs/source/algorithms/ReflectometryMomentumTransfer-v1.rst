@@ -11,9 +11,11 @@ Description
 
 This algorithm converts a reflectivity workspace from wavelength to momentum transfer :math:`Q_{z}` and calculates the :math:`Q_{z}` resolution. The resolution is added as the Dx (X Errors) field in the output workspace. This algorithms processes workspaces in which the pixels containing the reflectected line have been integrated into a single histogram. For conversion of a 2D workspace into :math:`Q_{x}, Q_{z}` or equivalent momentum space, see :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>`.
 
-The algorithm requires the presence of certain sample log entries for the :math:`Q_{z}` resolution computation. These can be obtained by :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>`. The log entries are: ``beam_stats.incident_angular_spread``, ``beam_stats.first_slit_angular_spread``, ``beam_stats.second_slit_angular_spread`` and ``beam_stats.sample_waviness``. See the documentation of :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` for more detailed information on the sample logs.
+The two additional input workspaces, *ReflectedBeamWorkspace* and *DirectBeamWorkspace* are the raw reflected and direct beam workspaces before foreground summation. They are needed for the resolution calculation.
 
-The instrument of *InputWorkspace* is expected to contain two components representing the two slits in the beam before the sample. The names of these components are given to the algorithm as the *FirstSlitName* and *SecondSlitName* properties. The slit openings (width or height depending on reflectometer setup) should be written in the sample logs (units 'm' or 'mm'). The log enties are named by *FirstSlitSizeSampleLog* and *SecondSlitSizeSampleLog*.
+The instruments of all three input workspaces are expected contain two components representing the two slits in the beam before the sample. The names of these components are given to the algorithm as the *FirstSlitName* and *SecondSlitName* properties. The slit openings (width or height depending on reflectometer setup) should be written in the sample logs (units 'm' or 'mm'). The log enties are named by *FirstSlitSizeSampleLog* and *SecondSlitSizeSampleLog*.
+
+The *Polarized* property should be used to indicate whether *InputWorkspace* is part of a polarization analysis dataset.
 
 The *SummationType* property reflects the type of foreground summation used to obtain the reflectivity workspace.
 
@@ -41,40 +43,26 @@ Usage
    ConvertToDistribution(reflectedWS)
    directWS = LoadILLReflectometry('ILL/D17/317369.nxs', XUnit='TimeOfFlight')
    ConvertToDistribution(directWS)
-   
+
    # Extract some instrument parameters.
    chopperPairDistance = 1e-2 * reflectedWS.run().getProperty('Distance.ChopperGap').value
    chopperSpeed = reflectedWS.run().getProperty('VirtualChopper.chopper1_speed_average').value
    chopper1Phase = reflectedWS.run().getProperty('VirtualChopper.chopper1_phase_average').value
    chopper2Phase = reflectedWS.run().getProperty('VirtualChopper.chopper2_phase_average').value
    openoffset = reflectedWS.run().getProperty('VirtualChopper.open_offset').value
-   
+
    # Normalize to time.
    duration = reflectedWS.run().getProperty('duration').value
    reflectedWS /= duration
    duration = directWS.run().getProperty('duration').value
    directWS /= duration
-   
-   # Write statistics to sample logs.
-   ReflectometryBeamStatistics(
-       reflectedWS,
-       ReflectedForeground=[198, 204, 209],
-       DirectBeamWorkspace=directWS,
-       DirectForeground=[190, 200, 210],
-       PixelSize=0.001195,
-       DetectorResolution=0.0022,
-       FirstSlitName='slit2',
-       FirstSlitSizeSampleLog='VirtualSlitAxis.s2w_actual_width',
-       SecondSlitName='slit3',
-       SecondSlitSizeSampleLog='VirtualSlitAxis.s3w_actual_width',
-   )    
-   
+
    # Calculate reflectivity.
    refForeground = SumSpectra(reflectedWS, 198, 209)
    dirForeground = SumSpectra(directWS, 190, 210)
    refForeground = RebinToWorkspace(WorkspaceToRebin=refForeground, WorkspaceToMatch=dirForeground)
    R = refForeground / dirForeground
-   
+
    # Convert TOF to wavelength, crop.
    R = ConvertUnits(R, 'Wavelength')
    R = CropWorkspace(R, XMin=4.3, XMax=14.0, StoreInADS=False)
@@ -83,11 +71,15 @@ Usage
    reflectedWS = CropWorkspaceRagged(reflectedWS, XMin=n*[4.3], XMax=n*[14.0], StoreInADS=False)
    directWS = ConvertUnits(directWS, 'Wavelength')
    directWS = CropWorkspaceRagged(directWS, XMin=n*[4.3], XMax=n*[14.0])
-   
+
    outws = ReflectometryMomentumTransfer(
        R,
+       reflectedWS,
+       directWS,
        ReflectedForeground=[198, 209],
+       DirectForeground=[190, 210],
        SummationType='SumInLambda',
+       Polarized=False,
        PixelSize=0.001195,
        DetectorResolution=0.0022,
        ChopperRadius=0.36,

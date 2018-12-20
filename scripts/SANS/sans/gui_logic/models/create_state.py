@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.api import FileFinder
@@ -31,8 +25,6 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
 
     gui_state_director = GuiStateDirector(table_model, state_model, facility)
     for row in rows:
-        if file_lookup:
-            table_model.wait_for_file_information(row)
         state = _create_row_state(row, table_model, state_model, facility, instrument, file_lookup, gui_state_director)
         if isinstance(state, State):
             states.update({row: state})
@@ -45,13 +37,6 @@ def _create_row_state(row, table_model, state_model, facility, instrument, file_
     try:
         sans_logger.information("Generating state for row {}".format(row))
         state = None
-
-        table_entry = table_model.get_table_entry(row)
-        if not table_entry.file_information and file_lookup:
-            error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
-                            "the relevant paths are added and the correct instrument is selected."
-            raise RuntimeError(error_message.format(table_entry.sample_scatter))
-
         if not __is_empty_row(row, table_model):
             row_user_file = table_model.get_row_user_file(row)
             if row_user_file:

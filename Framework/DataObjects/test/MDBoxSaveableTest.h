@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDBOX_SAVEABLE_TEST_H
 #define MDBOX_SAVEABLE_TEST_H
 
@@ -21,6 +15,7 @@
 #include "MantidTestHelpers/BoxControllerDummyIO.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>

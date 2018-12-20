@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 import unittest
@@ -26,8 +20,8 @@ SANS2DReductionShouldAcceptLoadedWorkspace and SANS2DReductionShouldAcceptLoaded
 apply the same requirements for SANS2D instruments.
 
 
-LOQReductionShouldAcceptLoadedWorkspaceSystemTest, SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest
-and SANS2DReductionShouldAcceptLoadedWorkspace are wrappers to make unittest.TestCase to fit the systemtesting
+LOQReductionShouldAcceptLoadedWorkspaceStressTest, SANS2DReductionShouldAcceptLoadedWorkspaceStressTest
+and SANS2DReductionShouldAcceptLoadedWorkspace are wrappers to make unittest.TestCase to fit the stresstesting
 framework.
 
 The other tests are here to ensure the results of providing directly workspaces will be the same that loading
@@ -124,7 +118,7 @@ class SANS2DReductionShouldAcceptLoadedWorkspaceRawFile(SANS2DReductionShouldAcc
         self.control_name = '5547front_1D_4.6_12.85'
 
 
-class LOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.MantidSystemTest):
+class LOQReductionShouldAcceptLoadedWorkspaceStressTest(stresstesting.MantidStressTest):
     cl = LOQReductionShouldAcceptLoadedWorkspace
 
     def runTest(self):
@@ -142,15 +136,15 @@ class LOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.MantidSyst
         return self._success
 
 
-class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest(LOQReductionShouldAcceptLoadedWorkspaceSystemTest):
+class SANS2DReductionShouldAcceptLoadedWorkspaceStressTest(LOQReductionShouldAcceptLoadedWorkspaceStressTest):
     cl = SANS2DReductionShouldAcceptLoadedWorkspace
 
 
-class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest2(LOQReductionShouldAcceptLoadedWorkspaceSystemTest):
+class SANS2DReductionShouldAcceptLoadedWorkspaceStressTest2(LOQReductionShouldAcceptLoadedWorkspaceStressTest):
     cl = SANS2DReductionShouldAcceptLoadedWorkspaceRawFile
 
 
-class LOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTest):
+class LOQTransFitWorkspace2DWithLoadedWorkspace(stresstesting.MantidStressTest):
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
@@ -182,13 +176,13 @@ class LOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTest):
         return '54431main_2D_3.0_4.0_suff','LOQTransFitWorkspace2D.nxs'
 
 
-class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.MantidSystemTest):
+class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.MantidStressTest):
     """ It will repeat the test done at LOQCentreNoGrav but using
     loaded workspaces
     """
 
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
         self.tolerance = 1e-6
 
     def runTest(self):
@@ -220,7 +214,7 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.Mant
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 
-class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.MantidSystemTest):
+class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(stresstesting.MantidStressTest):
     """Before ticket #8461 test LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1 used
     to produce a workspace that matches LOQCentreNoGrav.nxs. This test is created to ensure
     that if we put the same centre that was produced before, we finish in the same result
@@ -261,7 +255,7 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.Mant
         return '54431main_1D_3.0_9.0','LOQCentreNoGrav_V2.nxs'
 
 
-class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
+class SANSLOQCan2DReloadWorkspace(stresstesting.MantidStressTest):
 
     def runTest(self):
         config["default.instrument"] = "LOQ"
@@ -291,7 +285,7 @@ class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
         return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
 
 
-class SANS2DFrontNoGravReloadWorkspace(systemtesting.MantidSystemTest):
+class SANS2DFrontNoGravReloadWorkspace(stresstesting.MantidStressTest):
 
     def runTest(self):
         config["default.instrument"] = "SANS2D"
@@ -312,7 +306,7 @@ class SANS2DFrontNoGravReloadWorkspace(systemtesting.MantidSystemTest):
         return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
 
 
-class SANS2DWaveloopsReloadWorkspace(systemtesting.MantidSystemTest):
+class SANS2DWaveloopsReloadWorkspace(stresstesting.MantidStressTest):
 
     def runTest(self):
         config["default.instrument"] = "SANS2D"

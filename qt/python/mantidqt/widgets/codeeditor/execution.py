@@ -1,12 +1,19 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+#  Copyright (C) 2017 mantidproject
 #
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
@@ -20,7 +27,7 @@ from six import PY2, iteritems
 
 # local imports
 from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
-from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.utils.async import AsyncTask
 
 if PY2:
     from inspect import getargspec as getfullargspec
@@ -136,6 +143,7 @@ class PythonCodeExecution(QObject):
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
         task = AsyncTask(self.execute, args=(code_str, filename),
+                         stack_chop=2,
                          success_cb=self._on_success, error_cb=self._on_error)
         task.start()
         self._task = task

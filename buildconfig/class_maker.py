@@ -1,10 +1,4 @@
 #!/usr/bin/env python
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for generating a class file, header, and test file """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
@@ -48,13 +42,7 @@ private:
         alg_include = ""
 
     # The full text
-    s = r"""// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
-#ifndef {guard}
+    s = r"""#ifndef {guard}
 #define {guard}
 
 #include "Mantid{subproject}/DllConfig.h"
@@ -64,6 +52,27 @@ namespace Mantid {{
 namespace {subproject} {{
 
 /** {classname} : TODO: DESCRIPTION
+
+  Copyright &copy; {today} ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_{subproject_upper}_DLL {classname}{alg_class_declare} {{
 public:{algorithm_header}}};
@@ -86,12 +95,7 @@ def write_source(subproject, classname, filename, args):
     print("Writing source file to", filename)
     f = open(filename, 'w')
 
-    algorithm_top = """// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
+    algorithm_top = """
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
@@ -202,13 +206,7 @@ def write_test(subproject, classname, filename, args):
     if not args.alg:
         algorithm_test = ""
 
-    s = """// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
-#ifndef {guard}
+    s = """#ifndef {guard}
 #define {guard}
 
 #include <cxxtest/TestSuite.h>

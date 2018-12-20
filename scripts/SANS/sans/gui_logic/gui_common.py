@@ -1,12 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
-from qtpy.QtWidgets import (QFileDialog)  # noqa
-from qtpy.QtCore import (QSettings)  # noqa
+from PyQt4 import QtGui, QtCore
 import os
 
 
@@ -169,15 +162,13 @@ def get_instrument_from_gui_selection(gui_selection):
         return SANSInstrument.SANS2D
     elif gui_selection == 'ZOOM':
         return SANSInstrument.ZOOM
-    elif gui_selection == 'NoInstrument':
-        return SANSInstrument.NoInstrument
     else:
         raise RuntimeError("Instrument selection is not valid.")
 
 
 def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
     # Get the last location of the user file
-    settings = QSettings()
+    settings = QtCore.QSettings()
     settings.beginGroup(q_settings_group_key)
     last_path = settings.value(q_settings_key, "", type=str)
     settings.endGroup()
@@ -188,29 +179,13 @@ def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settin
     # Save the new location
     new_path, _ = os.path.split(func())
     if new_path:
-        set_setting(q_settings_group_key, q_settings_key, new_path)
-
-
-def load_default_file(line_edit_field, q_settings_group_key, q_settings_key):
-    settings = QSettings()
-    settings.beginGroup(q_settings_group_key)
-    default_file = settings.value(q_settings_key, "", type=str)
-    settings.endGroup()
-
-    line_edit_field.setText(default_file)
-
-
-def set_setting(q_settings_group_key, q_settings_key, value):
-    settings = QSettings()
-    settings.beginGroup(q_settings_group_key)
-    settings.setValue(q_settings_key, value)
-    settings.endGroup()
+        settings = QtCore.QSettings()
+        settings.beginGroup(q_settings_group_key)
+        settings.setValue(q_settings_key, new_path)
+        settings.endGroup()
 
 
 def open_file_dialog(line_edit, filter_text, directory):
-    file_name = QFileDialog.getOpenFileName(None, 'Open', directory, filter_text)
-    if not file_name:
-        return
-    if isinstance(file_name, tuple):
-        file_name = file_name[0]
-    line_edit.setText(file_name)
+    file_name = QtGui.QFileDialog.getOpenFileName(None, 'Open', directory, filter_text)
+    if file_name:
+        line_edit.setText(file_name)

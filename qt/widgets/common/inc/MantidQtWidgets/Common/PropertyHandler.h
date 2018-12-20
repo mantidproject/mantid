@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROPERTY_HANDLER_H
 #define PROPERTY_HANDLER_H
 
@@ -118,20 +112,11 @@ public:
   bool setAttribute(QtProperty *prop, bool resetProperties = true);
 
   /**
-   * Set function attribute value
+   * Set function's double attribute
    * @param attName :: The name of the attribute
    * @param attValue :: The new attribute value
    */
-  void setAttribute(QString const &attName,
-                    Mantid::API::IFunction::Attribute const &attValue);
-
-  /**
-   * Set function's attribute if it has type double or int
-   * @param attName :: The name of the attribute
-   * @param attValue :: The new attribute value
-   */
-  template <typename AttributeType>
-  void setAttribute(QString const &attName, AttributeType const &attValue);
+  void setAttribute(const QString &attName, const double &attValue);
 
   /**
    * Set function's attribute of any type.
@@ -146,9 +131,6 @@ public:
 
   /// Sync all parameter values with the manager
   void updateParameters();
-
-  /// Sync all parameter values with the manager
-  void updateAttributes();
 
   /// Set all parameter error values in the manager
   void updateErrors();
@@ -264,12 +246,6 @@ private:
 
   /// Applies given function to all the parameter properties recursively
   void applyToAllParameters(void (PropertyHandler::*func)(QtProperty *));
-
-  /// Sync function attribute value with the manager
-  void updateAttribute(QtProperty *prop);
-
-  /// Applies given function to all the attribute properties recursively
-  void applyToAllAttributes(void (PropertyHandler::*func)(QtProperty *));
 
   friend class CreateAttributeProperty;
 };

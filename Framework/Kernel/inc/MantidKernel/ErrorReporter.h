@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_ERRORSERVICE_H_
 #define MANTID_KERNEL_ERRORSERVICE_H_
 
@@ -17,7 +11,28 @@ namespace Mantid {
 namespace Kernel {
 
 /** ErrorReporter : The error reporter is responsible for sending error reports
- */
+
+  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
 class MANTID_KERNEL_DLL ErrorReporter {
 public:
@@ -28,11 +43,6 @@ public:
   ErrorReporter(std::string application, Types::Core::time_duration startTime,
                 std::string exitCode, bool share, std::string name,
                 std::string email, std::string textBox);
-  /// Constructor
-  ErrorReporter(std::string application, Types::Core::time_duration startTime,
-                std::string exitCode, bool share, std::string name,
-                std::string email, std::string textBox,
-                std::string recoveryFile);
   /// Sends an error report
   int sendErrorReport();
 
@@ -59,8 +69,6 @@ private:
   const std::string m_textbox;
   /// Target url
   std::string m_url;
-  /// recovery file path
-  const std::string m_recoveryFile;
 };
 
 } // namespace Kernel

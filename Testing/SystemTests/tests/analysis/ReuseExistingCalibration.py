@@ -1,19 +1,13 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 """
     Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same calibration
     in successive reductions.
 """
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 
 
-class ReuseExistingCalibration(systemtesting.MantidSystemTest):
+class ReuseExistingCalibration(stresstesting.MantidStressTest):
     det_pos_first_run = None
     det_pos_second_run = None
 

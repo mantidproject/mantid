@@ -1,16 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import systemtesting
+import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
 
-class LiquidsReflectometryReductionWithBackgroundPreciseTest(systemtesting.MantidSystemTest):
+class LiquidsReflectometryReductionWithBackgroundPreciseTest(stresstesting.MantidStressTest):
     """
         This test checks that the new liquids reflectometer reduction code
         always produces the same results.
@@ -53,7 +47,7 @@ class LiquidsReflectometryReductionWithBackgroundPreciseTest(systemtesting.Manti
         return "reflectivity_precise_119816", 'LiquidsReflectometryReductionTestWithBackground.nxs'
 
 
-class NoNormalizationTest(systemtesting.MantidSystemTest):
+class NoNormalizationTest(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -91,7 +85,7 @@ class NoNormalizationTest(systemtesting.MantidSystemTest):
         return "reflectivity_119816", 'REFL_NoNormalizationTest.nxs'
 
 
-class TOFRangeOFFTest(systemtesting.MantidSystemTest):
+class TOFRangeOFFTest(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -130,7 +124,7 @@ class TOFRangeOFFTest(systemtesting.MantidSystemTest):
         return "reflectivity_119816", 'TOFRangeOFFTest.nxs'
 
 
-class NoBackgroundTest(systemtesting.MantidSystemTest):
+class NoBackgroundTest(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -169,7 +163,7 @@ class NoBackgroundTest(systemtesting.MantidSystemTest):
         return "reflectivity_119816", 'REFL_NoBackgroundTest.nxs'
 
 
-class TOFMismatchTest(systemtesting.MantidSystemTest):
+class TOFMismatchTest(stresstesting.MantidStressTest):
     correct_exception_caught = False
 
     def runTest(self):
@@ -210,7 +204,7 @@ class TOFMismatchTest(systemtesting.MantidSystemTest):
         return self.correct_exception_caught
 
 
-class BadDataTOFRangeTest(systemtesting.MantidSystemTest):
+class BadDataTOFRangeTest(stresstesting.MantidStressTest):
     correct_exception_caught = False
 
     def runTest(self):
@@ -251,7 +245,7 @@ class BadDataTOFRangeTest(systemtesting.MantidSystemTest):
         return self.correct_exception_caught
 
 
-class BadPeakSelectionTest(systemtesting.MantidSystemTest):
+class BadPeakSelectionTest(stresstesting.MantidStressTest):
     correct_exception_caught = False
 
     def runTest(self):

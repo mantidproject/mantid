@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFit.h"
 #include "ConvFitDataPresenter.h"
 
@@ -178,31 +172,6 @@ std::string ConvFit::fitTypeString() const {
   return fitType;
 }
 
-void ConvFit::runClicked() { runTab(); }
-
-void ConvFit::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
-void ConvFit::setFitSingleSpectrumIsFitting(bool fitting) {
-  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
-      fitting ? "Fitting..." : "Fit Single Spectrum");
-  setButtonsEnabled(!fitting);
-}
-
-void ConvFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
-void ConvFit::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
-  setFitSingleSpectrumEnabled(enabled);
-}
-
 void ConvFit::setRunEnabled(bool enabled) {
   m_uiForm->pbRun->setEnabled(enabled);
 }
@@ -219,6 +188,19 @@ void ConvFit::setFitSingleSpectrumEnabled(bool enabled) {
 void ConvFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
+
+void ConvFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setFitSingleSpectrumEnabled(!running);
+}
+
+void ConvFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
+}
+
+void ConvFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -1,23 +1,15 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
 
-#include "MantidQtWidgets/InstrumentView/ColorMap.h"
-#include "MantidQtWidgets/InstrumentView/DllOption.h"
-#include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "ColorMap.h"
+#include "DllOption.h"
+#include "GLColor.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MaskBinsData.h"
-
-#include <QObject>
 
 #include <boost/weak_ptr.hpp>
 #include <vector>
@@ -71,8 +63,8 @@ public:
                       Mantid::Kernel::V3D &maxBound) const;
   /// Set a component (and all its children) visible.
   void setComponentVisible(size_t componentIndex);
-  /// Set visibilit of all components.
-  void setAllComponentsVisibility(bool);
+  /// Toggle the visibility of the child actors (if exist).
+  void setChildVisibility(bool);
   /// Check if any child is visible
   bool hasChildVisible() const;
   /// Get the underlying instrument
@@ -205,13 +197,8 @@ public:
   /// Returns indices of all non-detector components in Instrument.
   const std::vector<size_t> &components() const { return m_components; }
 
-  bool hasGridBank() const;
-  size_t getNumberOfGridLayers() const;
-  void setGridLayer(bool isUsingLayer, int layer) const;
-  const InstrumentRenderer &getInstrumentRenderer() const;
-
 signals:
-  void colorMapChanged() const;
+  void colorMapChanged();
 
 private:
   void setUpWorkspace(
@@ -262,13 +249,9 @@ private:
   /// Flag to show the guide and other components. Loaded and saved in settings.
   bool m_showGuides;
   /// Color map scale type: linear or log
-  ColorMap::ScaleType m_scaleType;
+  GraphOptions::ScaleType m_scaleType;
   /// Position to refer to when detector not found
   const Mantid::Kernel::V3D m_defaultPos;
-  /// Flag which stores whether or not a 3D GridBank is present
-  bool m_hasGrid;
-  /// Stores the number of grid Layers
-  size_t m_numGridLayers;
 
   /// Colors in order of component info
   std::vector<size_t> m_monitors;

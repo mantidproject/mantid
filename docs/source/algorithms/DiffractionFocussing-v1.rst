@@ -22,7 +22,7 @@ following:
 #. All histograms are read and rebinned to the new grid for their group.
 #. A new workspace with N histograms is created.
 
-Within the :ref:`CalFile <CalFile>` any detectors with the 'select' flag
+Within the `CalFile <http://www.mantidproject.org/CalFile>`_ any detectors with the 'select' flag
 can be set to zero or with a group number of 0 or -ve groups are not
 included in the analysis.
 
@@ -34,7 +34,7 @@ Some 2D and 3D plots will not display the data correctly.
 
 The DiffractionFocussing algorithm uses GroupDetectors algorithm to
 combine data from several spectra according to GroupingFileName file
-which is a :ref:`CalFile <CalFile>`.
+which is a `CalFile <http://www.mantidproject.org/CalFile>`_.
 
 For EventWorkspaces
 ###################

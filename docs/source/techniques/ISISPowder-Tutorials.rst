@@ -44,12 +44,7 @@ no prior knowledge or usage of the scripts and a fresh install of Mantid.
 Copying instrument example files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Open your Mantid install location, by default this
-will be `C:\\MantidInstall` on Windows, `/opt/Mantid` on Linux, and `/Applications/MantidPlot.app/` on OSX.
-
-.. note:: In Finder on OSX to see files inside the MantidPlot application you
-   need to right click on the MantidPlot application then choose "Show Package
-   Contents"
-
+will be `C:\\MantidInstall` on Windows and `/opt/Mantid` on Linux.
 Open *scripts* > *Diffraction* > *isis_powder*.
 In these tutorials we will be using Polaris examples and data
 however you may set-up a different instrument. 

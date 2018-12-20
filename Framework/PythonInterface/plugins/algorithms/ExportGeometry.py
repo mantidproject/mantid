@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
@@ -59,7 +53,7 @@ class ExportGeometry(PythonAlgorithm):
         return "ExportGeometry"
 
     def summary(self):
-        return "Extract components from larger in-memory instrument, save as IDF style xml"
+        return "Extract geometry into a variety of file formats"
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
@@ -73,7 +67,7 @@ class ExportGeometry(PythonAlgorithm):
                              doc="Euler angles convention used when writing angles.")
         self.declareProperty(StringArrayProperty("Components",
                                                  direction=Direction.Input),
-                             doc="Comma separated list of instrument component names to export")
+                             doc="Comma separated list of instrument components to export")
         self.declareProperty(FileProperty(name="Filename",
                                           defaultValue="",
                                           action=FileAction.Save,

@@ -10,10 +10,10 @@ Description
 -----------
 
 The LoadRaw algorithm stores data from the :ref:`RAW file <RAW File>` in a
-:ref:`Workspace2D <Workspace2D>`, which will naturally contain histogram
+`Workspace2D <http://www.mantidproject.org/Workspace2D>`__, which will naturally contain histogram
 data with each spectrum going into a separate histogram. The time bin
 boundaries (X values) will be common to all histograms and will have
-their :ref:`units <Unit Factory>` set to time-of-flight. The Y values will contain
+their `units <http://www.mantidproject.org/Units>`__ set to time-of-flight. The Y values will contain
 the counts and will be unit-less (i.e. no division by bin width or
 normalisation of any kind). The errors, currently assumed Gaussian, will
 be set to be the square root of the number of counts in the bin.
@@ -34,9 +34,9 @@ If the RAW file contains multiple periods of data this will be detected
 and the different periods will be output as separate workspaces, which
 after the first one will have the period number appended (e.g.
 OutputWorkspace\_period). Each workspace will share the same
-:ref:`Instrument <Instrument>`, SpectraToDetectorMap and
-:py:obj:`sample objects <mantid.api.Sample>`. If the optional 'spectrum'
-properties are set for a multiperiod dataset, then they will ignored.
+`Instrument <http://www.mantidproject.org/Instrument>`__, SpectraToDetectorMap and
+`sample objects <../api/python/mantid/api/Sample.html>`__. If the optional 'spectrum' properties are
+set for a multiperiod dataset, then they will ignored.
 
 If PeriodList property isn't empty then only periods listed there will be
 loaded.
@@ -45,7 +45,7 @@ Subalgorithms used
 ##################
 
 LoadRaw runs the following algorithms as child algorithms to populate
-aspects of the output :ref:`Workspace <Workspace>`:
+aspects of the output `Workspace <http://www.mantidproject.org/Workspace>`__:
 
 -  :ref:`algm-LoadInstrument` - Looks for an instrument
    definition file named XXX\_Definition.xml, where XXX is the 3 letter
@@ -57,10 +57,10 @@ aspects of the output :ref:`Workspace <Workspace>`:
    run instead.
 -  :ref:`algm-LoadMappingTable` - To build up the mapping
    between the spectrum numbers and the Detectors of the attached
-   :ref:`Instrument <Instrument>`.
+   `Instrument <http://www.mantidproject.org/Instrument>`__.
 -  :ref:`algm-LoadLog` - Will look for any log files in the same
    directory as the RAW file and load their data into the workspace's
-   :py:obj:`sample objects <mantid.api.Sample>`.
+   `sample objects <../api/python/mantid/api/Sample.html>`__.
 
 Previous Versions
 -----------------
@@ -75,7 +75,8 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example 1: using defaults**
+Example 1: using defaults
+#########################
 
 .. testcode:: ExLoadDataDefaults
 
@@ -91,7 +92,8 @@ Usage
   print('Workspace contains {} logs'.format(len(run.keys())))
   print('Workspace has property INT1: {}'.format(run.hasProperty('INT1')))
 
-Output:
+Output
+^^^^^^
 
 .. testoutput:: ExLoadDataDefaults
 
@@ -101,7 +103,8 @@ Output:
   Workspace has property INT1: True
 
 
-**Example 2: load without the logs**
+Example 2: load without the logs
+################################
 
 .. testcode:: ExLoadDataNoLogs
 
@@ -117,7 +120,8 @@ Output:
   print('Workspace contains {} logs'.format(len(run.keys())))
   print('Workspace has property INT1: {}'.format(run.hasProperty('INT1')))
 
-Output:
+Output
+^^^^^^
 
 .. testoutput:: ExLoadDataNoLogs
 
@@ -126,7 +130,8 @@ Output:
   Workspace contains 29 logs
   Workspace has property INT1: False
 
-**Example 3: exclude monitors**
+Example 3: exclude monitors
+###########################
 
 .. testcode:: ExLoadDataNoMonitors
 
@@ -142,7 +147,8 @@ Output:
   print('Workspace contains {} logs'.format(len(run.keys())))
   print('Workspace has property INT1: {}'.format(run.hasProperty('INT1')))
 
-Output:
+Output
+^^^^^^
 
 .. testoutput:: ExLoadDataNoMonitors
 
@@ -151,7 +157,8 @@ Output:
   Workspace contains 35 logs
   Workspace has property INT1: True
 
-**Example 4: load monitors separately**
+Example 4: load monitors separately
+###################################
 
 .. testcode:: ExLoadDataSepMonitors
 
@@ -168,7 +175,8 @@ Output:
   detid = monitorws.getSpectrum(1).getDetectorIDs()[0]
   print('Is detector {} a monitor? {}'.format(detid, monitorws.getInstrument().getDetector(detid).isMonitor()))
 
-Output:
+Output
+^^^^^^
 
 .. testoutput:: ExLoadDataSepMonitors
 

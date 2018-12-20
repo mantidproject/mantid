@@ -2,7 +2,7 @@
  PointingAlong
 ===============
 
-This is a Python binding to the C++ class Mantid::Geometry::PointingAlong.
+This a python binding to the C++ class Mantid::Geometry::PointingAlong.
 
 
 .. module:`mantid.geometry`

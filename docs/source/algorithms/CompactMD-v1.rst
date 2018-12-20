@@ -12,7 +12,8 @@ Used to crop an n-dimensional :ref:`MDHistoWorkspace <MDHistoWorkspace>` to the 
 
 Cropping
 --------
-The cropping is done by supplying :ref:`IntegrateMDHistoWorkspace <algm-IntegrateMDHistoWorkspace>` with the minimum and maximum extents associated with the first non-zero signal values in the workspace.
+The cropping is done by supplying `IntegrateMDHistoWorkspace <http://docs.mantidproject.org/nightly/algorithms/IntegrateMDHistoWorkspace-v1.html>`__ with the minimum and maximum extents associated with the first non-zero
+signal values in the workspace.
 
 
 Usage
@@ -54,6 +55,8 @@ Output:
    :width: 400px
    :align: center
 
+   
+   
 .. categories::
 
 .. sourcelink::

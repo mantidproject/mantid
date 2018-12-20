@@ -1,29 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtWidgets import QMainWindow, QMessageBox
-from qtpy.QtGui import QDoubleValidator
-from qtpy import QtCore
-import os
-from mantid.kernel import Logger
-from gui_helper import show_interface_help
+from .ui_converter import Ui_MainWindow #import line for the UI python class
+from PyQt4 import QtCore, QtGui
 import math
 import TofConverter.convertUnits
 
 
-try:
-    from mantidqt.utils.qt import load_ui
-except ImportError:
-    Logger("TofConverter").information('Using legacy ui importer')
-    from mantidplot import load_ui
-
-
-class MainWindow(QMainWindow):
+class MainWindow(QtGui.QMainWindow):
     needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
     needsThetaOutputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
     needsFlightPathInputList = ['Time of flight (microseconds)']
@@ -63,31 +46,22 @@ class MainWindow(QMainWindow):
             self.flightPathEnable(True)
 
     def __init__(self, parent=None):
-        QMainWindow.__init__(self,parent)
-        self.ui = load_ui(__file__, 'converter.ui', baseinstance=self)
-        self.ui.InputVal.setValidator(QDoubleValidator(self.ui.InputVal))
-        self.ui.totalFlightPathInput.setValidator(QDoubleValidator(self.ui.totalFlightPathInput))
-        self.ui.scatteringAngleInput.setValidator(QDoubleValidator(self.ui.scatteringAngleInput))
-        self.ui.convertButton.clicked.connect(self.convert)
-        self.ui.helpButton.clicked.connect(self.helpClicked)
-        self.ui.inputUnits.currentIndexChanged.connect(self.setInstrumentInputs)
-        self.ui.outputUnits.currentIndexChanged.connect(self.setInstrumentInputs)
+        QtGui.QMainWindow.__init__(self,parent)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.ui.InputVal.setValidator(QtGui.QDoubleValidator(self.ui.InputVal))
+        self.ui.totalFlightPathInput.setValidator(QtGui.QDoubleValidator(self.ui.totalFlightPathInput))
+        self.ui.scatteringAngleInput.setValidator(QtGui.QDoubleValidator(self.ui.scatteringAngleInput))
+        QtCore.QObject.connect(self.ui.convert, QtCore.SIGNAL("clicked()"), self.convert )
+        QtCore.QObject.connect(self.ui.helpButton, QtCore.SIGNAL("clicked()"), self.helpClicked)
+        QtCore.QObject.connect(self.ui.inputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
+        QtCore.QObject.connect(self.ui.outputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
         self.setInstrumentInputs()
 
         ##defaults
         self.flightpath = -1.0
         self.Theta = -1.0
         self.output = 0.0
-
-        #help
-        self.assistant_process = QtCore.QProcess(self)
-        # pylint: disable=protected-access
-        import mantid
-        self.mantidplot_name='TOF Converter'
-        self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
-        version = ".".join(mantid.__version__.split(".")[:2])
-        self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/TOF Converter.html'
-        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/TOF Converter.html'
 
         try:
             import mantid
@@ -97,16 +71,9 @@ class MainWindow(QMainWindow):
             pass
 
     def helpClicked(self):
-        show_interface_help(self.mantidplot_name,
-                            self.assistant_process,
-                            self.collection_file,
-                            self.qt_url,
-                            self.external_url)
-
-    def closeEvent(self, event):
-        self.assistant_process.close()
-        self.assistant_process.waitForFinished()
-        event.accept()
+        # Temporary import while method is in the wrong place
+        from pymantidplot.proxies import showCustomInterfaceHelp
+        showCustomInterfaceHelp("TOF Converter")
 
     def convert(self):
         #Always reset these values before conversion.
@@ -131,11 +98,11 @@ class MainWindow(QMainWindow):
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))
         except UnboundLocalError as ule:
-            QMessageBox.warning(self, "TofConverter", str(ule))
+            QtGui.QMessageBox.warning(self, "TofConverter", str(ule))
             return
         except ArithmeticError as ae:
-            QMessageBox.warning(self, "TofConverter", str(ae))
+            QtGui.QMessageBox.warning(self, "TofConverter", str(ae))
             return
         except RuntimeError as re:
-            QMessageBox.warning(self, "TofConverter", str(re))
+            QtGui.QMessageBox.warning(self, "TofConverter", str(re))
             return

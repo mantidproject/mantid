@@ -1,16 +1,11 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0403,R0913,R0902
 from __future__ import (absolute_import, division, print_function)
 import os
-from qtpy.QtCore import Signal as pyqtSignal
-from qtpy.QtCore import QThread   # noqa
-import HFIR_4Circle_Reduction.reduce4circleControl as r4c  # noqa
-from HFIR_4Circle_Reduction import peak_integration_utility  # noqa
+from PyQt4 import QtCore
+from PyQt4.QtCore import QThread
+
+import HFIR_4Circle_Reduction.reduce4circleControl as r4c
+from HFIR_4Circle_Reduction import peak_integration_utility
 
 
 class AddPeaksThread(QThread):
@@ -18,11 +13,11 @@ class AddPeaksThread(QThread):
     A QThread class to add peaks to Mantid to calculate UB matrix
     """
     # signal for a peak is added: int_0 = experiment number, int_1 = scan number
-    peakAddedSignal = pyqtSignal(int, int)
+    peakAddedSignal = QtCore.pyqtSignal(int, int)
     # signal for status: int_0 = experiment number, int_1 = scan number, int_2 = progress (0...)
-    peakStatusSignal = pyqtSignal(int, int, int)
+    peakStatusSignal = QtCore.pyqtSignal(int, int, int)
     # signal for final error report: int_0 = experiment number, str_1 = error message
-    peakAddedErrorSignal = pyqtSignal(int, str)
+    peakAddedErrorSignal = QtCore.pyqtSignal(int, str)
 
     def __init__(self, main_window, exp_number, scan_number_list):
         """
@@ -118,9 +113,9 @@ class IntegratePeaksThread(QThread):
     A thread to integrate peaks
     """
     # signal to emit before a merge/integration status: exp number, scan number, progress, mode
-    peakMergeSignal = pyqtSignal(int, int, float, list, int)
+    peakMergeSignal = QtCore.pyqtSignal(int, int, float, list, int)
     # signal to report state: (1) experiment, (2) scan, (3) mode, (4) message
-    mergeMsgSignal = pyqtSignal(int, int, int, str)
+    mergeMsgSignal = QtCore.pyqtSignal(int, int, int, str)
 
     def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type, num_pt_bg_left,
                  num_pt_bg_right, scale_factor=1.000):
@@ -339,7 +334,6 @@ class IntegratePeaksThread(QThread):
             return str(ass_err)
 
         # calculate lorentz correction
-        # TODO/FIXME/NOW2 : peak center Q shall be from calculation!
         lorentz_factor = peak_integration_utility.calculate_lorentz_correction_factor(peak_center_q, wavelength,
                                                                                       motor_step)
 
@@ -357,8 +351,8 @@ class MergePeaksThread(QThread):
 
     """
     # signal to report state: (1) scan, (2) message
-    mergeMsgSignal = pyqtSignal(int, str)
-    saveMsgSignal = pyqtSignal(int, str)
+    mergeMsgSignal = QtCore.pyqtSignal(int, str)
+    saveMsgSignal = QtCore.pyqtSignal(int, str)
 
     def __init__(self, main_window, exp_number, scan_number_list, md_file_list):
         """Initialization

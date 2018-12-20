@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SANSSOLIDANGLECORRECTIONTEST_H_
 #define SANSSOLIDANGLECORRECTIONTEST_H_
 
@@ -45,13 +39,8 @@ public:
     mover.setPropertyValue("ComponentName", "detector1");
     // X = (16-192.0/2.0)*5.15/1000.0 = -0.412
     // Y = (95-192.0/2.0)*5.15/1000.0 = -0.00515
-    // mover.setPropertyValue("X", "0.412");
-    // mover.setPropertyValue("Y", "0.00515");
-
-    mover.setPropertyValue("X", "0.009425");
-    mover.setPropertyValue("Y", "0.002575");
-    mover.setPropertyValue("Z", "-0.8114");
-
+    mover.setPropertyValue("X", "0.412");
+    mover.setPropertyValue("Y", "0.00515");
     mover.execute();
 
     if (!correction.isInitialized())

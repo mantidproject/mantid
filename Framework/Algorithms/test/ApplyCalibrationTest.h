@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef APPLYCALIBRATIONTEST_H_
 #define APPLYCALIBRATIONTEST_H_
 
@@ -23,8 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
+#include "WorkspaceCreationHelperTest.h"
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
@@ -106,8 +99,8 @@ public:
     const std::string wsName("ApplyCabrationWs");
     Mantid::DataHandling::LoadEmptyInstrument loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",
-                            "unit_testing/MAPS_Definition_Reduced.xml");
+    loader.setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/MAPS_Definition_Reduced.xml");
     loader.setPropertyValue("OutputWorkspace", wsName);
     loader.execute();
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();

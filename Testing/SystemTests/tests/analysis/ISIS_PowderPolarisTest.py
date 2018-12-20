@@ -1,13 +1,7 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
-import systemtesting
+import stresstesting
 import shutil
 
 import mantid.simpleapi as mantid
@@ -48,7 +42,7 @@ unsplined_van_path = os.path.join(calibration_dir, unsplined_van_rel_path)
 total_scattering_input_file = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInput.nxs")
 
 
-class CreateVanadiumTest(systemtesting.MantidSystemTest):
+class CreateVanadiumTest(stresstesting.MantidStressTest):
 
     calibration_results = None
     existing_config = config['datasearch.directories']
@@ -76,7 +70,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
 
 
-class FocusTest(systemtesting.MantidSystemTest):
+class FocusTest(stresstesting.MantidStressTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
@@ -104,7 +98,7 @@ class FocusTest(systemtesting.MantidSystemTest):
             mantid.mtd.clear()
 
 
-class TotalScatteringTest(systemtesting.MantidSystemTest):
+class TotalScatteringTest(stresstesting.MantidStressTest):
 
     pdf_output = None
 

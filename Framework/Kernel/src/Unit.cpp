@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -1188,7 +1182,7 @@ double Time::singleToTOF(const double x) const {
 
 double Time::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error("Time is not allowed to be converted from TOF. ");
+  throw std::runtime_error("Time is not allwed to be converted from TOF. ");
 }
 
 double Time::conversionTOFMax() const {
@@ -1217,12 +1211,12 @@ void Degrees::init() {}
 
 double Degrees::singleToTOF(const double x) const {
   UNUSED_ARG(x);
-  throw std::runtime_error("Degrees is not allowed to be converted to TOF. ");
+  throw std::runtime_error("Degrees is not allowed to be convert to TOF. ");
 }
 
 double Degrees::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error("Degrees is not allowed to be converted from TOF. ");
+  throw std::runtime_error("Degrees is not allwed to be converted from TOF. ");
 }
 
 double Degrees::conversionTOFMax() const {
@@ -1234,43 +1228,6 @@ double Degrees::conversionTOFMin() const {
 }
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
-
-// ================================================================================
-/* Temperature in kelvin
- * ================================================================================
- *
- * TemperatureKelvin prints Temperature in units of Kelvin as a label
- */
-
-DECLARE_UNIT(Temperature)
-
-Temperature::Temperature() : Empty(), m_label("K") {}
-
-const UnitLabel Temperature::label() const { return m_label; }
-
-void Temperature::init() {}
-
-double Temperature::singleToTOF(const double x) const {
-  UNUSED_ARG(x);
-  throw std::runtime_error(
-      "Temperature is not allowed to be converted to TOF. ");
-}
-
-double Temperature::singleFromTOF(const double tof) const {
-  UNUSED_ARG(tof);
-  throw std::runtime_error(
-      "Temperature is not allowed to be converted from TOF. ");
-}
-
-double Temperature::conversionTOFMin() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
-
-double Temperature::conversionTOFMax() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
-
-Unit *Temperature::clone() const { return new Temperature(*this); }
 
 } // namespace Units
 

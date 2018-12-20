@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_FABADAMINIMIZERTEST_H_
 #define MANTID_CURVEFITTING_FABADAMINIMIZERTEST_H_
 
@@ -12,8 +6,6 @@
 #include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
@@ -27,8 +19,6 @@ using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Functions;
 
 namespace {
-
-std::string const PDF_GROUP_NAME = "__PDF_Workspace";
 
 MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
                                          size_t XYLength = 20) {
@@ -80,13 +70,10 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
 
   size_t n = fun->nParams();
 
-  TS_ASSERT(AnalysisDataService::Instance().doesExist(PDF_GROUP_NAME));
-  auto const pdfGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          PDF_GROUP_NAME);
-  TS_ASSERT(pdfGroup);
-  auto const wsPDF =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(pdfGroup->getItem(0));
+  TS_ASSERT(AnalysisDataService::Instance().doesExist("PDF"));
+  MatrixWorkspace_sptr wsPDF = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve("PDF"));
+  TS_ASSERT(wsPDF);
   TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(), n + 1);
 
   const auto &X = wsPDF->mutableX(0);
@@ -154,7 +141,7 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
   TS_ASSERT_EQUALS(Ptable->getColumn(2)->type(), "double");
   TS_ASSERT_EQUALS(Ptable->getColumn(2)->name(), "Left's error");
   TS_ASSERT_EQUALS(Ptable->getColumn(3)->type(), "double");
-  TS_ASSERT_EQUALS(Ptable->getColumn(3)->name(), "Right's error");
+  TS_ASSERT_EQUALS(Ptable->getColumn(3)->name(), "Rigth's error");
   TS_ASSERT(Ptable->Double(0, 1) == fun->getParameter("Height"));
   TS_ASSERT(Ptable->Double(1, 1) == fun->getParameter("Lifetime"));
 }
@@ -201,12 +188,8 @@ public:
     size_t nParams = fun->nParams();
 
     // Test PDF workspace
-    auto const PDFGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            PDF_GROUP_NAME);
-    TS_ASSERT(PDFGroup);
-    auto const PDF =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(PDFGroup->getItem(0));
+    MatrixWorkspace_sptr PDF = fit.getProperty("PDF");
+    TS_ASSERT(PDF);
     TS_ASSERT_EQUALS(PDF->getNumberHistograms(), nParams + 1);
     TS_ASSERT_EQUALS(PDF->x(0).size(), 21);
     TS_ASSERT_EQUALS(PDF->y(0).size(), 20);
@@ -264,7 +247,7 @@ public:
     TS_ASSERT_EQUALS(param->getColumn(2)->type(), "double");
     TS_ASSERT_EQUALS(param->getColumn(2)->name(), "Left's error");
     TS_ASSERT_EQUALS(param->getColumn(3)->type(), "double");
-    TS_ASSERT_EQUALS(param->getColumn(3)->name(), "Right's error");
+    TS_ASSERT_EQUALS(param->getColumn(3)->name(), "Rigth's error");
     TS_ASSERT(param->Double(0, 1) == fun->getParameter("Height"));
     TS_ASSERT(param->Double(1, 1) == fun->getParameter("Lifetime"));
   }

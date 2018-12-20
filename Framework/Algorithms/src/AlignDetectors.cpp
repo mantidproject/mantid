@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -111,7 +105,12 @@ const std::string AlignDetectors::summary() const {
 }
 
 /// (Empty) Constructor
-AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
+  this->tofToDmap = nullptr;
+}
+
+/// Destructor
+AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }
 
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

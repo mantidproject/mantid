@@ -9,10 +9,10 @@
 Description
 -----------
 
-This algorithm performs :ref:`Le Bail fit <Le Bail Fit>` to powder
-diffraction data, and also supports pattern calculation. This
-algorithm will refine a specified set of the powder instrumental
-profile parameters with a previous refined background model.
+This algorithm performs `Le Bail Fit <Le Bail Fit>`__ to powder
+diffraction data, and also supports pattern calculation. This algorithm
+will refine a specified set of the powder instrumental profile
+parameters with a previous refined background model.
 
 Peak profile function for fit
 #############################
@@ -61,7 +61,7 @@ Supported functionalities
 Further Information
 ###################
 
-See :ref:`Le Bail fit concept page <Le Bail Fit>`.
+See `Le Bail Fit <Le Bail Fit>`__.
 
 .. categories::
 

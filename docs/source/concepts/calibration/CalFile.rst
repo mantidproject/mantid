@@ -33,26 +33,30 @@ The file is a simple text file with the following format
    351     201003  0.0535027  1    3
               ...
 
-- ``number``: ignored
-- ``UDET``: detector ID
-- ``offset``: calibration offset used in :ref:`AlignDetectors
-  <algm-AlignDetectors>`. Comes from the ``OffsetsWorkspace``, or 0.0
-  if none is given.
-- ``select``: 1 if selected (use the pixel). Comes from the ``MaskWorkspace``,
-  or 1 if none is given.
-- ``group``: what group to focus to in
-  :ref:`DiffractionFocussing <algm-DiffractionFocussing>`. Comes from the
-  ``GroupingWorkspace``, or 1 if none is given. Setting the group
-  as 0 specifies the detector as not to be grouped, effectively masking it.
+The first column is simply an index, the second is a UDET identifier for
+the detector, the third column corresponds to an offset in
+:math:`\delta d/d` (this is usually applied in Mantid using the
+:ref:`AlignDetectors  <algm-AlignDetectors>` algorithm). The fourth column is a
+flag to indicate whether the detector is selected and should be used in
+:ref:`DiffractionFocussing  <algm-DiffractionFocussing>`. The fifth column
+indicates the group this detector belongs to (number >=1), zero is not
+considered as a group.
 
-See :ref:`here <Powder Diffraction Calibration>` for information on
-CalFile in the greater context of time-of-flight powder diffraction
-calibration.
+Masking
+-------
 
-Related algorithms
-------------------
+The most important columns for masking are the **UDET** and the
+**select** column. The **number**, **offset** and **group** entries are
+ignored.
 
-In addition to algorithms mentioned in :ref:`powder diffraction calibration <Powder Diffraction Calibration>` there are some algorithms specifically for CalFiles.
+Algorithms that work with CalFiles
+----------------------------------
+
+Using CalFiles
+##############
+
+* :ref:`AlignDetectors  <algm-AlignDetectors>` will apply the offset from a CalFile while converting the data from time of flight to wavelength.
+* :ref:`DiffractionFocussing  <algm-DiffractionFocussing>` uses the selection and grouping columns of a CalFile to focus the diffraction data.
 
 Loading and saving CalFiles
 ###########################
@@ -62,9 +66,12 @@ Loading and saving CalFiles
 * :ref:`MaskWorkspaceToCalFile<algm-MaskWorkspaceToCalFile>` will save a mask workspace as a CalFile.
 * :ref:`ReadGroupsFromFile<algm-ReadGroupsFromFile>` Reads the groups from a CalFile, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to. This is used to visualize the grouping scheme for powder diffractometers.
 
+
 Creating CalFiles
 #################
 
+* :ref:`CalibrateRectangularDetectors<algm-CalibrateRectangularDetectors>` will output a CalFile if the SaveAs property is set to "Calibration".
+* :ref:`GetDetectorOffsets<algm-GetDetectorOffsets>` will output a CalFile if the GroupingFilename is set.
 * :ref:`CreateCalFileByNames<algm-CreateCalFileByNames>` will create a CalFile with the grouping column set according to a list of bank names.
 * :ref:`CreateDummyCalFile<algm-CreateDummyCalFile>` creates a CalFile from a workspace. All of the offsets will be zero, and the pixels will be all grouped into one group.
 

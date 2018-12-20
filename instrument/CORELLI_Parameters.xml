@@ -20,6 +20,16 @@
      <value val="true"/>
     </parameter>
 
+    <!-- Multiplier for profile fitting for BVG polar angle -->
+    <parameter name="sigX0Scale">
+     <value val="2." />
+    </parameter>
+
+    <!-- Multiplier for profile fitting for BVG azimuthal angle -->
+    <parameter name="sigY0Scale">
+     <value val="2." />
+    </parameter>
+
     <!-- Number of rows between detector gaps for profile fitting -->
     <parameter name="numDetRows" type="int">
      <value val="255" />
@@ -42,7 +52,7 @@
 
     <!-- Fraction along (h,k,l) to use for profile fitting. 0.5 is the next peak. -->
     <parameter name="fracHKL">
-     <value val="0.25" />
+     <value val="0.4" />
     </parameter>
 
     <!-- Side length of each voxel for fitting in units of angstrom^-1 -->
@@ -65,19 +75,25 @@
      <value val="10" />
     </parameter>
 
-    <!-- Initial guess parameters for coshPeakWidthModel -->
-    <parameter name="sigSC0Params" type="string">
-     <value val="0.00413132 1.54103839 1.0 -0.00266634" />
+    <!-- Constraints for ICC fitting.  Valid names are iccA, iccB, iccR, iccT0, iccScale0
+         iccHatWidth and iccKConv.  Inputs are strings with values separated by
+         spaces which are prased by the IntegratePeaksProfileFitting algorithm.  
+         If two values are given they are treated as the lower and upper bounds. If 
+         three are given they are the lower bound, upper bound, and initial guess.-->
+    <parameter name="iccA" type="string">
+     <value val="0.25 0.75 0.5" />
     </parameter>
 
-    <!-- Initial guess for sigma along the azimuthal direction (rad) -->
-    <parameter name="sigAZ0">
-     <value val="0.0025" />
+    <parameter name="iccB" type="string">
+     <value val="0.001 0.3 0.005" />
     </parameter>
 
-    <!-- Initial guess parameters for fsigP (BVG covariance) -->
-    <parameter name="sigP0Params" type="string">
-     <value val="0.1460775 1.85816592 0.26850086 -0.00725352" />
+    <parameter name="iccR" type="string">
+     <value val="0.05 0.15 0.1" />
+    </parameter>
+
+    <parameter name="iccKConv" type="string">
+     <value val="10.0 800.0 100.0" />
     </parameter>
 
   </component-link>

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_IDFOBJECTTEST_H_
 #define MANTID_GEOMETRY_IDFOBJECTTEST_H_
 
@@ -37,7 +31,7 @@ public:
   void testExists() {
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT(obj.exists());
   }
@@ -54,8 +48,9 @@ public:
   }
 
   void testGetParentDirectory() {
-    const Poco::Path expectedDir = Poco::Path(
-        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/");
+    const Poco::Path expectedDir =
+        Poco::Path(ConfigService::Instance().getInstrumentDirectory() +
+                   "/IDFs_for_UNIT_TESTING/");
     std::string filename = expectedDir.toString() + "IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(expectedDir.toString(),
@@ -65,7 +60,7 @@ public:
   void testGetFullPath() {
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(Poco::Path(filename).toString(),
                      obj.getFileFullPath().toString());
@@ -74,7 +69,7 @@ public:
   void testGetExtension() {
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(".xml", obj.getExtension());
   }
@@ -82,8 +77,8 @@ public:
   void testGetFileNameOnly() {
     const std::string filenameonly = "IDF_for_UNIT_TESTING.xml";
     const std::string filename =
-        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/" +
-        filenameonly;
+        ConfigService::Instance().getInstrumentDirectory() +
+        "/IDFs_for_UNIT_TESTING/" + filenameonly;
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(filenameonly, obj.getFileNameOnly());
   }
@@ -91,7 +86,7 @@ public:
   void testGetMangledName() {
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
 
     Poco::Path path(filename);
 
@@ -136,7 +131,7 @@ public:
   void testGetFileFullPathStr() {
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(Poco::Path(filename).toString(), obj.getFileFullPathStr());
   }

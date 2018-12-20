@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef NORMALISETOMONITORTEST_H_
 #define NORMALISETOMONITORTEST_H_
 
@@ -15,6 +9,7 @@
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -503,6 +498,40 @@ public:
           TS_ASSERT_DELTA(yValues[j], 2.0 / 15.0, 1e-12)
       }
     }
+  }
+
+  void test_with_async_scan_workspace_throws() {
+    const size_t N_DET = 10;
+    const size_t N_BINS = 5;
+
+    // Set up 2 workspaces to be merged
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        N_DET, N_BINS, true);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        N_DET, N_BINS, true);
+    auto &detInfo1 = ws1->mutableDetectorInfo();
+    auto &detInfo2 = ws2->mutableDetectorInfo();
+    for (size_t i = 0; i < N_DET; ++i) {
+      detInfo1.setScanInterval(i, {10, 20});
+      detInfo2.setScanInterval(i, {20, 30});
+    }
+    // Merge
+    auto merged = WorkspaceFactory::Instance().create(ws1, 2 * N_DET);
+    auto &detInfo = merged->mutableDetectorInfo();
+    detInfo.merge(detInfo2);
+    merged->setIndexInfo(Indexing::IndexInfo(merged->getNumberHistograms()));
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", merged))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::runtime_error & e, std::string(e.what()),
+        "More then one spectrum corresponds to the requested monitor ID. This "
+        "is unexpected in a non-scanning workspace.")
   }
 
   void test_with_single_count_point_data_workspace() {

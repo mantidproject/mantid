@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotView.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -17,7 +11,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
-    : IIndirectFitPlotView(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
+    : API::MantidWidget(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
@@ -106,11 +100,6 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
   m_plotForm->spPlotSpectrum->setMaximum(maximum);
 }
 
-void IndirectFitPlotView::setPlotSpectrum(int spectrum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_plotForm->spPlotSpectrum);
-  m_plotForm->spPlotSpectrum->setValue(spectrum);
-}
-
 void IndirectFitPlotView::setBackgroundLevel(double value) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("Background");
   MantidQt::API::SignalBlocker<QObject> blocker(selector);
@@ -188,10 +177,6 @@ void IndirectFitPlotView::enableSpectrumSelection(bool enable) {
 
 void IndirectFitPlotView::enableFitRangeSelection(bool enable) {
   m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(enable);
-}
-
-void IndirectFitPlotView::setFitSingleSpectrumText(QString const &text) {
-  m_plotForm->pbFitSingle->setText(text);
 }
 
 void IndirectFitPlotView::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }

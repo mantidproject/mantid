@@ -113,8 +113,10 @@ transmission runs or specific correction algorithms.
 When normalizing by transmission runs, i.e. when one or two transmission runs
 are given, the spectrum numbers in the
 transmission workspaces must be the same as those in the input run
-workspace. You can pass individual processing instructions to the transmission
-runs. 
+workspace. If spectrum numbers do not match, the algorithm will throw and exception
+and execution of the algorithm will be stopped. This behaviour can be optionally
+switched off by setting :literal:`StrictSpectrumChecking` to false, in which case
+a warning message will be shown instead.
 
 When normalizing by transmission run, this algorithm will run
 :ref:`algm-CreateTransmissionWorkspace` as a child algorithm, with properties :literal:`WavelengthMin`,
@@ -222,7 +224,7 @@ Usage
    IvsQ, IvsLam = ReflectometryReductionOne(InputWorkspace=run,
                                             WavelengthMin=1.0,
                                             WavelengthMax=17.0,
-                                            ProcessingInstructions='4',
+                                            ProcessingInstructions='3',
                                             I0MonitorIndex=2,
                                             MonitorBackgroundWavelengthMin=15.0,
                                             MonitorBackgroundWavelengthMax=17.0,
@@ -256,7 +258,7 @@ Output:
    IvsQ, IvsLam = ReflectometryReductionOne(InputWorkspace=run,
                                             WavelengthMin=1.0,
                                             WavelengthMax=17.0,
-                                            ProcessingInstructions='4',
+                                            ProcessingInstructions='3',
                                             I0MonitorIndex=2,
                                             MonitorBackgroundWavelengthMin=15.0,
                                             MonitorBackgroundWavelengthMax=17.0,

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_COMPONENTINFOTEST_H_
 #define MANTID_GEOMETRY_COMPONENTINFOTEST_H_
 
@@ -656,7 +650,7 @@ public:
 
     infoScan1->merge(*infoScan2);
 
-    TS_ASSERT_EQUALS(infoScan1->size() * infoScan1->scanCount(),
+    TS_ASSERT_EQUALS(infoScan1->scanSize(),
                      infoScan1->size() + infoScan2->size());
     TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 0}),
                      V3D(0, 0, 0));

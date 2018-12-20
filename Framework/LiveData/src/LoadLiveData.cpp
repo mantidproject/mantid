@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
@@ -423,24 +417,6 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
   return accumWS;
 }
 
-namespace {
-bool isUsingDefaultBinBoundaries(const EventWorkspace *workspace) {
-  // returning false for workspaces where we don't have enough events
-  // for a meaningful rebinning, and tells the caller not to try
-  // to rebin the data. See EventList::getEventXMinMax() for what the
-  // workspace binning will look like with this choice.
-  if (workspace->getNumberEvents() <= 2)
-    return false;
-
-  // only check first spectrum
-  const auto &x = workspace->binEdges(0);
-  if (x.size() > 2)
-    return false;
-  // make sure that they are sorted
-  return (x.front() < x.back());
-}
-} // namespace
-
 //----------------------------------------------------------------------------------------------
 /** Resets all HistogramX in given EventWorkspace(s) to a single bin.
  *
@@ -452,17 +428,15 @@ bool isUsingDefaultBinBoundaries(const EventWorkspace *workspace) {
  *
  * @param workspace :: Workspace(Group) that will have its bins reset
  */
-void LoadLiveData::updateDefaultBinBoundaries(API::Workspace *workspace) {
+void LoadLiveData::resetAllXToSingleBin(API::Workspace *workspace) {
   if (auto *ws_event = dynamic_cast<EventWorkspace *>(workspace)) {
-    if (isUsingDefaultBinBoundaries(ws_event))
-      ws_event->resetAllXToSingleBin();
+    ws_event->resetAllXToSingleBin();
   } else if (auto *ws_group = dynamic_cast<WorkspaceGroup *>(workspace)) {
     auto num_entries = static_cast<size_t>(ws_group->getNumberOfEntries());
     for (size_t i = 0; i < num_entries; ++i) {
       auto ws = ws_group->getItem(i);
       if (auto *ws_event = dynamic_cast<EventWorkspace *>(ws.get()))
-        if (isUsingDefaultBinBoundaries(ws_event))
-          ws_event->resetAllXToSingleBin();
+        ws_event->resetAllXToSingleBin();
     }
   }
 }
@@ -518,17 +492,18 @@ void LoadLiveData::exec() {
   this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
 
   // For EventWorkspaces, we adjust the X values such that all events fit
-  // within the bin boundaries
-  const bool preserveEvents = this->getProperty("PreserveEvents");
-  if (preserveEvents)
-    this->updateDefaultBinBoundaries(chunkWS.get());
+  // within the bin boundaries. This is done both before and after the
+  // "Process" step. Any custom rebinning should be done in Post-Processing.
+  bool PreserveEvents = this->getProperty("PreserveEvents");
+  if (PreserveEvents)
+    this->resetAllXToSingleBin(chunkWS.get());
 
   // Now we process the chunk
   Workspace_sptr processed = this->processChunk(chunkWS);
 
   EventWorkspace_sptr processedEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(processed);
-  if (!preserveEvents && processedEvent) {
+  if (!PreserveEvents && processedEvent) {
     // Convert the monitor workspace, if there is one and it's necessary
     MatrixWorkspace_sptr monitorWS = processedEvent->monitorWorkspace();
     auto monitorEventWS =
@@ -573,20 +548,18 @@ void LoadLiveData::exec() {
   g_log.notice() << "Performing the " << accum << " operation.\n";
 
   // Perform the accumulation and set the AccumulationWorkspace workspace
-  if (accum == "Replace") {
+  if (accum == "Replace")
     this->replaceChunk(processed);
-  } else if (accum == "Append") {
+  else if (accum == "Append")
     this->appendChunk(processed);
-  } else {
+  else
     // Default to Add.
     this->addChunk(processed);
 
-    // When adding events, the default bin boundaries may need to be updated.
-    // The function itself checks to see if it is appropriate
-    if (preserveEvents) {
-      this->updateDefaultBinBoundaries(m_accumWS.get());
-    }
-  }
+  // For EventWorkspaces, we adjust the X values such that all events fit
+  // within the bin boundaries. This is done both before and after the
+  // "Process" step. Any custom rebinning should be done in Post-Processing.
+  this->resetAllXToSingleBin(m_accumWS.get());
 
   // At this point, m_accumWS is set.
 

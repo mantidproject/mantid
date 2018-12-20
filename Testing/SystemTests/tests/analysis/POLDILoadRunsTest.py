@@ -1,17 +1,11 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,bare-except
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from mantid.api import *
 import numpy as np
 
 
-class POLDILoadRunsTest(systemtesting.MantidSystemTest):
+class POLDILoadRunsTest(stresstesting.MantidStressTest):
     """This assembly of test cases checks that the behavior of PoldiLoadRuns is correct."""
 
     def runTest(self):

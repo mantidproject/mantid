@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 System test that loads TOPAZ single-crystal data,
@@ -11,12 +5,12 @@ converts to Q space, finds peaks and indexes
 them.
 """
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import numpy
 from mantid.simpleapi import *
 
 
-class TOPAZPeakFinding(systemtesting.MantidSystemTest):
+class TOPAZPeakFinding(stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):
         """ Require about 2GB free """

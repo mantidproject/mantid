@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/FractionalRebinning.h"
 
 #include "MantidAPI/Progress.h"
@@ -14,28 +8,6 @@
 
 #include <cmath>
 #include <limits>
-
-namespace {
-struct AreaInfo {
-  size_t wsIndex;
-  size_t binIndex;
-  double weight;
-  AreaInfo(const size_t xi, const size_t yi, const double w)
-      : wsIndex(yi), binIndex(xi), weight(w) {}
-};
-/**
- * Private function to calculate polygon area directly to avoid the overhead
- * of initializing a ConvexPolygon instance or a V2D vector. This recursive
- * implementation uses the shoelace formula but requires the last element to
- * be the same as the first element. Also note that it returns 2x the area!
- */
-template <class T> double polyArea(T &) { return 0.; }
-template <class T, class... Ts>
-double polyArea(T &v1, T &v2, Ts &&... vertices) {
-  return v2.X() * v1.Y() - v2.Y() * v1.X() +
-         polyArea(v2, std::forward<Ts>(vertices)...);
-}
-} // namespace
 
 namespace Mantid {
 
@@ -98,25 +70,24 @@ bool getIntersectionRegion(const std::vector<double> &xAxis,
     return false;
 
   auto start_it = std::upper_bound(xAxis.cbegin(), xAxis.cend(), xn_lo);
-  auto end_it = std::upper_bound(start_it, xAxis.cend(), xn_hi);
+  auto end_it = std::upper_bound(xAxis.cbegin(), xAxis.cend(), xn_hi);
   x_start = 0;
+  x_end = xAxis.size() - 1;
   if (start_it != xAxis.cbegin()) {
     x_start = (start_it - xAxis.cbegin() - 1);
   }
-  x_end = xAxis.size() - 1;
   if (end_it != xAxis.cend()) {
     x_end = end_it - xAxis.cbegin();
   }
 
   // Q region
-  start_it =
-      std::upper_bound(verticalAxis.cbegin(), verticalAxis.cend(), yn_lo);
-  end_it = std::upper_bound(start_it, verticalAxis.cend(), yn_hi);
+  start_it = std::upper_bound(verticalAxis.begin(), verticalAxis.end(), yn_lo);
+  end_it = std::upper_bound(verticalAxis.begin(), verticalAxis.end(), yn_hi);
   qstart = 0;
+  qend = verticalAxis.size() - 1;
   if (start_it != verticalAxis.begin()) {
     qstart = (start_it - verticalAxis.begin() - 1);
   }
-  qend = verticalAxis.size() - 1;
   if (end_it != verticalAxis.end()) {
     qend = end_it - verticalAxis.begin();
   }
@@ -134,32 +105,45 @@ bool getIntersectionRegion(const std::vector<double> &xAxis,
  * @param y_end The starting y-axis index
  * @param x_start The starting x-axis index
  * @param x_end The starting x-axis index
- * @param areaInfos Output vector of indices and areas of overlapping bins
+ * @param areaInfo Output vector of indices and areas of overlapping bins
  */
-void calcRectangleIntersections(const std::vector<double> &xAxis,
-                                const std::vector<double> &yAxis,
-                                const Quadrilateral &inputQ,
-                                const size_t y_start, const size_t y_end,
-                                const size_t x_start, const size_t x_end,
-                                std::vector<AreaInfo> &areaInfos) {
+void calcRectangleIntersections(
+    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
+    const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
+    const size_t x_start, const size_t x_end,
+    std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
   std::vector<double> width;
   width.reserve(x_end - x_start);
   for (size_t xi = x_start; xi < x_end; ++xi) {
     const double x0 = (xi == x_start) ? inputQ.minX() : xAxis[xi];
     const double x1 = (xi == x_end - 1) ? inputQ.maxX() : xAxis[xi + 1];
-    width.emplace_back(x1 - x0);
+    width.push_back(x1 - x0);
   }
-  areaInfos.reserve((y_end - y_start) * (x_end - x_start));
   for (size_t yi = y_start; yi < y_end; ++yi) {
     const double y0 = (yi == y_start) ? inputQ.minY() : yAxis[yi];
     const double y1 = (yi == y_end - 1) ? inputQ.maxY() : yAxis[yi + 1];
     const double height = y1 - y0;
     auto width_it = width.begin();
     for (size_t xi = x_start; xi < x_end; ++xi) {
-      areaInfos.emplace_back(xi, yi, height * (*width_it++));
+      areaInfo.emplace_back(xi, yi, height * (*width_it++));
     }
   }
 }
+
+namespace {
+/**
+ * Private function to calculate polygon area directly to avoid the overhead
+ * of initializing a ConvexPolygon instance or a V2D vector. This recursive
+ * implementation uses the shoelace formula but requires the last element to
+ * be the same as the first element. Also note that it returns 2x the area!
+ */
+template <class T> double polyArea(T &) { return 0.; }
+template <class T, class... Ts>
+double polyArea(T &v1, T &v2, Ts &&... vertices) {
+  return v2.X() * v1.Y() - v2.Y() * v1.X() +
+         polyArea(v2, std::forward<Ts>(vertices)...);
+}
+} // namespace
 
 /**
  * Computes the output grid bins which intersect the input quad and their
@@ -171,14 +155,13 @@ void calcRectangleIntersections(const std::vector<double> &xAxis,
  * @param y_end The ending y-axis index
  * @param x_start The starting x-axis index
  * @param x_end The ending x-axis index
- * @param areaInfos Output vector of indices and areas of overlapping bins
+ * @param areaInfo Output vector of indices and areas of overlapping bins
  */
-void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
-                                 const std::vector<double> &yAxis,
-                                 const Quadrilateral &inputQ,
-                                 const size_t y_start, const size_t y_end,
-                                 const size_t x_start, const size_t x_end,
-                                 std::vector<AreaInfo> &areaInfos) {
+void calcTrapezoidYIntersections(
+    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
+    const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
+    const size_t x_start, const size_t x_end,
+    std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
   // The algorithm proceeds as follows:
   // 1. Determine the left/right bin boundaries on the x- (horizontal)-grid.
   // 2. Loop along x, for each 1-output-bin wide strip construct a new input Q.
@@ -212,8 +195,7 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
       (ul_y >= yAxis[y_start] && ul_y <= yAxis[y_start + 1]) &&
       (ur_y >= yAxis[y_start] && ur_y <= yAxis[y_start + 1]) &&
       (lr_y >= yAxis[y_start] && lr_y <= yAxis[y_start + 1])) {
-    areaInfos.emplace_back(x_start, y_start,
-                           0.5 * polyArea(ll, ul, ur, lr, ll));
+    areaInfo.emplace_back(x_start, y_start, 0.5 * polyArea(ll, ul, ur, lr, ll));
     return;
   }
 
@@ -318,7 +300,7 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
   V2D nll(ll), nul(ul), nur, nlr, l0, r0, l1, r1;
   double area(0.);
   ConvexPolygon poly;
-  areaInfos.reserve(nx * ny);
+  areaInfo.reserve(nx * ny);
   size_t vertBits = 0;
   size_t yj0, yj1;
   for (size_t xi = x_start; xi < x_end; ++xi) {
@@ -342,7 +324,7 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
       // Checks if this bin is completely inside new quadrilateral
       if (yAxis[yi] > std::max(nll.Y(), nlr.Y()) &&
           yAxis[yi + 1] < std::min(nul.Y(), nur.Y())) {
-        areaInfos.emplace_back(
+        areaInfo.emplace_back(
             xi, yi, (nlr.X() - nll.X()) * (yAxis[yi + 1] - yAxis[yi]));
         // Checks if this bin is not completely outside new quadrilateral
       } else if (yAxis[yi + 1] >= std::min(nll.Y(), nlr.Y()) &&
@@ -448,7 +430,7 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
           break;
         }
         if (area > DBL_EPS)
-          areaInfos.emplace_back(xi, yi, 0.5 * area);
+          areaInfo.emplace_back(xi, yi, 0.5 * area);
       }
     }
   }
@@ -464,16 +446,14 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
  * @param qend The starting y-axis index
  * @param x_start The starting x-axis index
  * @param x_end The starting x-axis index
- * @param areaInfos Output vector of indices and areas of overlapping bins
+ * @param areaInfo Output vector of indices and areas of overlapping bins
  */
-void calcGeneralIntersections(const std::vector<double> &xAxis,
-                              const std::vector<double> &yAxis,
-                              const Quadrilateral &inputQ, const size_t qstart,
-                              const size_t qend, const size_t x_start,
-                              const size_t x_end,
-                              std::vector<AreaInfo> &areaInfos) {
+void calcGeneralIntersections(
+    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
+    const Quadrilateral &inputQ, const size_t qstart, const size_t qend,
+    const size_t x_start, const size_t x_end,
+    std::vector<std::tuple<size_t, size_t, double>> &areaInfo) {
   ConvexPolygon intersectOverlap;
-  areaInfos.reserve((qend - qstart) * (x_end - x_start));
   for (size_t yi = qstart; yi < qend; ++yi) {
     const double vlo = yAxis[yi];
     const double vhi = yAxis[yi + 1];
@@ -485,7 +465,7 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
       const Quadrilateral outputQ(ll, lr, ur, ul);
       intersectOverlap.clear();
       if (intersection(outputQ, inputQ, intersectOverlap)) {
-        areaInfos.emplace_back(xi, yi, intersectOverlap.area());
+        areaInfo.emplace_back(xi, yi, intersectOverlap.area());
       }
     }
   }
@@ -503,7 +483,8 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
                      boost::shared_ptr<Progress> progress) {
   const bool removeBinWidth(inputWS->isDistribution() &&
                             outputWS->id() != "RebinnedOutput");
-  for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+  for (int64_t i = 0; i < static_cast<int64_t>(outputWS->getNumberHistograms());
+       ++i) {
     const auto &outputX = outputWS->x(i);
     auto &outputY = outputWS->mutableY(i);
     auto &outputE = outputWS->mutableE(i);
@@ -638,18 +619,18 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   // defined as rectangular. If the inputQ is is also rectangular or
   // trapezoidal, a simpler/faster way of calculating the intersection area
   // of all or some bins can be used.
-  std::vector<AreaInfo> areaInfos;
+  std::vector<std::tuple<size_t, size_t, double>> areaInfo;
   const double inputQArea = inputQ.area();
   const QuadrilateralType inputQType = getQuadrilateralType(inputQ);
   if (inputQType == QuadrilateralType::Rectangle) {
     calcRectangleIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
-                               x_end, areaInfos);
+                               x_end, areaInfo);
   } else if (inputQType == QuadrilateralType::TrapezoidY) {
     calcTrapezoidYIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
-                                x_end, areaInfos);
+                                x_end, areaInfo);
   } else {
     calcGeneralIntersections(X, verticalAxis, inputQ, qstart, qend, x_start,
-                             x_end, areaInfos);
+                             x_end, areaInfo);
   }
 
   // If the input is a RebinnedOutput workspace with frac. area we need
@@ -666,12 +647,14 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   }
 
   const double variance = error * error;
-  for (const auto &ai : areaInfos) {
-    const double weight = ai.weight / inputQArea;
+  for (const auto &ai : areaInfo) {
+    const size_t xi = std::get<0>(ai);
+    const size_t yi = std::get<1>(ai);
+    const double weight = std::get<2>(ai) / inputQArea;
     PARALLEL_CRITICAL(overlap) {
-      outputWS.mutableY(ai.wsIndex)[ai.binIndex] += signal * weight;
-      outputWS.mutableE(ai.wsIndex)[ai.binIndex] += variance * weight;
-      outputWS.dataF(ai.wsIndex)[ai.binIndex] += weight * inputWeight;
+      outputWS.mutableY(yi)[xi] += signal * weight;
+      outputWS.mutableE(yi)[xi] += variance * weight;
+      outputWS.dataF(yi)[xi] += weight * inputWeight;
     }
   }
 }

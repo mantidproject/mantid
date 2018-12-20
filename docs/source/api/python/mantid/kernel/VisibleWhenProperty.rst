@@ -2,7 +2,7 @@
  VisibleWhenProperty
 =====================
 
-This is a Python binding to the C++ class Mantid::Kernel::VisibleWhenProperty.
+This a python binding to the C++ class Mantid::Kernel::VisibleWhenProperty.
 
 *bases:* :py:obj:`mantid.kernel.EnabledWhenProperty`
 

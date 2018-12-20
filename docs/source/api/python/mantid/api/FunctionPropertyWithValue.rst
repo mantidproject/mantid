@@ -2,7 +2,7 @@
  FunctionPropertyWithValue
 ===========================
 
-This is a Python binding to the C++ class Mantid::API::FunctionPropertyWithValue.
+This a python binding to the C++ class Mantid::API::FunctionPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

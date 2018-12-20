@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """
 datobjects
 ==========
@@ -25,10 +19,5 @@ from __future__ import (absolute_import, division,
 ###############################################################################
 # Load the C++ library and register the C++ class exports
 ###############################################################################
-# Load library dependencies
-from ..kernel import _shared_cextension
-import mantid.api
-
-with _shared_cextension():
-    from . import _dataobjects
-    from ._dataobjects import *
+from . import _dataobjects
+from ._dataobjects import *

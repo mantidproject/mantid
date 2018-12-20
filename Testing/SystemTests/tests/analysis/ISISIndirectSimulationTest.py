@@ -1,18 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import mantid.simpleapi as ms
 
 #====================================================================================================
 
 
-class MolDynCdlTest(systemtesting.MantidSystemTest):
+class MolDynCdlTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         ms.MolDyn(Data='DISF_NaF.cdl',
@@ -58,7 +52,7 @@ class MolDynCdlTest(systemtesting.MantidSystemTest):
 
 
 #====================================================================================================
-class MolDynDatTest(systemtesting.MantidSystemTest):
+class MolDynDatTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         ms.MolDyn(Data='WSH_test.dat',

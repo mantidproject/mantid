@@ -2,7 +2,7 @@
  std_vector_int
 ================
 
-This is a Python binding to the C++ class Mantid::Kernel::std_vector_int.
+This a python binding to the C++ class Mantid::Kernel::std_vector_int.
 
 
 .. module:`mantid.kernel`

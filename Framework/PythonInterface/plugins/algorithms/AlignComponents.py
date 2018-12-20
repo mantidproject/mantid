@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, no-name-in-module
 from __future__ import (absolute_import, division, print_function)
 
@@ -447,7 +441,7 @@ class AlignComponents(PythonAlgorithm):
         """
         recursive search to find first detID of a component
         """
-        if component.type() == 'DetectorComponent' or component.type() == 'GridDetectorPixel':
+        if component.type() == 'DetectorComponent' or component.type() == 'RectangularDetectorPixel':
             return component.getID()
         else:
             return self._getFirstDetID(component[0])
@@ -456,7 +450,7 @@ class AlignComponents(PythonAlgorithm):
         """
         recursive search to find last detID of a component
         """
-        if component.type() == 'DetectorComponent' or component.type() == 'GridDetectorPixel':
+        if component.type() == 'DetectorComponent' or component.type() == 'RectangularDetectorPixel':
             return component.getID()
         else:
             return self._getLastDetID(component[component.nelements() - 1])

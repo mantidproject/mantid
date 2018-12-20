@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_
 #define ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_
 
@@ -54,7 +48,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setPropertyValue("OutputWorkspace", "outWS");
@@ -78,7 +72,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("WavelengthMax", 15.0);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
@@ -90,7 +84,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
@@ -114,7 +108,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("WavelengthMin", 15.0);
     alg.setProperty("WavelengthMax", 1.5);
     alg.setPropertyValue("OutputWorkspace", "outWS");
@@ -127,7 +121,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MonitorBackgroundWavelengthMin", 15.0);
@@ -142,7 +136,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MonitorIntegrationWavelengthMin", 1.0);
@@ -159,7 +153,7 @@ public:
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
@@ -182,7 +176,7 @@ public:
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "2+3");
+    alg.setPropertyValue("ProcessingInstructions", "1+2");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
@@ -217,10 +211,9 @@ public:
     alg.setProperty("WavelengthMin", 0.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("I0MonitorIndex", "0");
-    alg.setProperty("NormalizeByIntegratedMonitors", false);
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
     alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
@@ -239,48 +232,6 @@ public:
     // I0MonitorIndex: 0
     // MonitorBackgroundWavelengthMin : 0.5
     // MonitorBackgroundWavelengthMax : 3.0
-    // MonitorIntegrationWavelengthMin : 1.5
-    // MonitorIntegrationWavelengthMax : 15.0
-    // Normalize by integrated monitors : Yes
-
-    // Modify counts in monitor (only for this test)
-    // Modify counts only for range that will be fitted
-    auto inputWS = m_multiDetectorWS;
-    auto &Y = inputWS->mutableY(0);
-    std::fill(Y.begin(), Y.begin() + 2, 1.0);
-
-    CreateTransmissionWorkspace2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("FirstTransmissionRun", inputWS);
-    alg.setProperty("WavelengthMin", 0.0);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("I0MonitorIndex", "0");
-    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
-    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
-    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
-    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
-    alg.setProperty("NormalizeByIntegratedMonitors", true);
-    alg.setPropertyValue("ProcessingInstructions", "2");
-    alg.setPropertyValue("OutputWorkspace", "outWS");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
-
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 16);
-    TS_ASSERT(outLam->x(0)[0] >= 0.0);
-    TS_ASSERT(outLam->x(0)[7] <= 15.0);
-    // Expected values are 0.1981 = 2.0000 (detectors) / (1.26139*8) (monitors)
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.1981, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 0.1981, 0.0001);
-  }
-
-  void test_one_run_NormalizeByIntegratedMonitors_is_false() {
-    // I0MonitorIndex: 0
-    // MonitorBackgroundWavelengthMin : 0.5
-    // MonitorBackgroundWavelengthMax : 3.0
-    // MonitorIntegrationWavelengthMin : 1.5
-    // MonitorIntegrationWavelengthMax : 15.0
     // Normalize by integrated monitors : No
 
     // Modify counts in monitor (only for this test)
@@ -296,24 +247,22 @@ public:
     alg.setProperty("WavelengthMin", 0.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("I0MonitorIndex", "0");
-    alg.setProperty("NormalizeByIntegratedMonitors", false);
-    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
-    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
     alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 10);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 16);
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
-    // Expected values are 2.4996 = 3.15301 (detectors) / 1.26139 (monitors)
-    TS_ASSERT_DELTA(outLam->y(0)[2], 2.4996, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[4], 2.4996, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 2.4996, 0.0001);
+    // Expected values are 0.1981 = 2.0000 (detectors) / (1.26139*8) (monitors)
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.1981, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.1981, 0.0001);
   }
 
   void test_two_transmission_runs() {
@@ -325,7 +274,7 @@ public:
     alg.setProperty("SecondTransmissionRun", m_multiDetectorWS);
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
@@ -348,7 +297,7 @@ public:
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("Params", "0.1");
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
@@ -373,7 +322,7 @@ public:
     alg.setProperty("FirstTransmissionRun", inputWS);
     alg.setProperty("WavelengthMin", 3.0);
     alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
 
@@ -399,7 +348,7 @@ public:
     alg.setProperty("FirstTransmissionRun", inputWS);
     alg.setProperty("WavelengthMin", 3.0);
     alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
@@ -427,7 +376,7 @@ public:
     alg.setProperty("SecondTransmissionRun", inputWS2);
     alg.setProperty("WavelengthMin", 3.0);
     alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     MatrixWorkspace_sptr firstLam =
@@ -467,7 +416,7 @@ public:
     alg.setProperty("SecondTransmissionRun", inputWS2);
     alg.setProperty("WavelengthMin", 3.0);
     alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.execute();
     MatrixWorkspace_sptr firstLam =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -505,7 +454,7 @@ public:
     alg.setProperty("SecondTransmissionRun", inputWS2);
     alg.setProperty("WavelengthMin", 3.0);
     alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("ProcessingInstructions", "1");
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outWS);

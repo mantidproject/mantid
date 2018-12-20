@@ -12,7 +12,7 @@ Description
 This algorithm is responsible for processing the detector vanadium in
 the form required for the sample data normalisation in the convert to
 energy transfer process. Parameters in italics are controlled by the
-:ref:`instrument parameter file (IPF) <InstrumentParameterFile>`
+`instrument parameter file (IPF) <http://www.mantidproject.org/InstrumentParameterFile>`_
 unless provided to the algorithm via a property manager. The mappings are given
 below.
 

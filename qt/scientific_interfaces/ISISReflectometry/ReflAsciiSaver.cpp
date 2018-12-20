@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflAsciiSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -53,7 +47,7 @@ bool ReflAsciiSaver::isValidSaveDirectory(std::string const &path) const {
     try {
       auto pocoPath = Poco::Path().parseDirectory(path);
       auto pocoFile = Poco::File(pocoPath);
-      return pocoFile.exists();
+      return pocoFile.exists() && pocoFile.canWrite();
     } catch (Poco::PathSyntaxException &) {
       return false;
     }

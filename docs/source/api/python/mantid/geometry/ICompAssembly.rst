@@ -2,7 +2,7 @@
  ICompAssembly
 ===============
 
-This is a Python binding to the C++ class Mantid::Geometry::ICompAssembly.
+This a python binding to the C++ class Mantid::Geometry::ICompAssembly.
 
 *bases:* :py:obj:`mantid.geometry.IComponent`
 

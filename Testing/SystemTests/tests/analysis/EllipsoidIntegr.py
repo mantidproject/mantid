@@ -1,22 +1,16 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 # File: EllipsoidIntegr.py
 #
 #  Integrates a run using the ellipsoid technique
 
-import systemtesting
+import stresstesting
 
 from mantid.api import *
 #sys.path.append("/home/ruth/GIT_MantidBuild/bin/")
 from mantid.simpleapi import *
 
 
-class EllipsoidIntegr(systemtesting.MantidSystemTest):
+class EllipsoidIntegr( stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):
         """ Require about 12GB free """

@@ -1,28 +1,17 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtWidgets import (QMainWindow)
-from qtpy.QtCore import Signal as pyqtSignal
-from mantid.kernel import Logger
-try:
-    from mantidqt.utils.qt import load_ui
-except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
-    from mantidplot import load_ui
+from PyQt4 import QtGui, QtCore
+
+from . import ui_OptimizeLattice
 
 
-class OptimizeLatticeWindow(QMainWindow):
+class OptimizeLatticeWindow(QtGui.QMainWindow):
     """
     Main window widget to set up parameters to optimize
     """
 
     # establish signal for communicating from App2 to App1 - must be defined before the constructor
-    mySignal = pyqtSignal(int)
+    mySignal = QtCore.pyqtSignal(int)
 
     def __init__(self, parent=None):
         """
@@ -31,10 +20,10 @@ class OptimizeLatticeWindow(QMainWindow):
         :return:
         """
         # init
-        QMainWindow.__init__(self, parent)
+        QtGui.QMainWindow.__init__(self, parent)
 
-        ui_path = "OptimizeLattice.ui"
-        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self.ui = ui_OptimizeLattice.Ui_MainWindow()
+        self.ui.setupUi(self)
 
         # initialize widgets
         self.ui.comboBox_unitCellTypes.addItems(['Cubic',
@@ -50,8 +39,11 @@ class OptimizeLatticeWindow(QMainWindow):
         self.ui.lineEdit_tolerance.setText('0.12')
 
         # define event handling
-        self.ui.pushButton_Ok.clicked.connect(self.do_ok)
-        self.ui.pushButton_cancel.clicked.connect(self.do_quit)
+        self.connect(self.ui.pushButton_Ok, QtCore.SIGNAL('clicked()'),
+                     self.do_ok)
+
+        self.connect(self.ui.pushButton_cancel, QtCore.SIGNAL('clicked()'),
+                     self.do_quit)
 
         if parent is not None:
             # connect to the method to refine UB matrix by constraining lattice parameters

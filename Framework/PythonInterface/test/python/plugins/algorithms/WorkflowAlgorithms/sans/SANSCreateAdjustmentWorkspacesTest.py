@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-from mantid.api import FrameworkManager
+import mantid
 from sans.test_helper.test_director import TestDirector
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
@@ -21,10 +15,6 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
     test_wav_min = 1.
     test_wav_max = 11.
     test_wav_width = 2.
-
-    @classmethod
-    def setUpClass(cls):
-        FrameworkManager.Instance()
 
     @staticmethod
     def _get_state():

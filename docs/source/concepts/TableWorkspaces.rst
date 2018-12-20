@@ -169,11 +169,11 @@ Working with Table Workspaces in C++
 
 Table workspaces can be created using the workspace factory:
 
-``ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");``
+``ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");``
 
 Columns are added using the addColumn method:
 
-| ``table->addColumn("str","Parameter Name");``
+| ``table->addColumn("str","Parameter Name");``
 | ``table->addColumn("double","Value");``
 | ``table->addColumn("double","Error");``
 | ``table->addColumn("int","Index");``
@@ -224,26 +224,26 @@ Table rows
 Cells with the same index form a row. TableRow class represents a row.
 Use getRow(int) or getFirstRow() to access existing rows. For example:
 
-.. code-block:: c++
+.. code-block:: c
  
-    std::string key;
-    double value;
-    TableRow row = table->getFirstRow();
+    std::string key;
+    double value;
+    TableRow row = table->getFirstRow();
     do
     {
-      row >> key >> value;
-      std::cout << "key=" << key << " value=" << value << std::endl;
+      row >> key >> value;
+      std::cout << "key=" << key << " value=" << value << std::endl;
     }
     while(row.next());
 
 TableRow can also be use for writing into a table:
 
-.. code-block:: c++
+.. code-block:: c
 
-    for(int i=0; i < n; ++i)
+    for(int i=0; i < n; ++i)
     {
-        TableRow row = table->appendRow();
-        row << keys[i] << values[i];
+        TableRow row = table->appendRow();
+        row << keys[i] << values[i];
     }
 
 Defining new column types

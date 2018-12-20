@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataPresenter.h"
 #include "IndirectAddWorkspaceDialog.h"
 
@@ -194,8 +188,6 @@ void IndirectFitDataPresenter::addModelData(const std::string &name) {
     m_model->addWorkspace(name);
   } catch (const std::runtime_error &ex) {
     displayWarning("Unable to load workspace:\n" + std::string(ex.what()));
-  } catch (const std::invalid_argument &ex) {
-    displayWarning("Invalid workspace:\n" + std::string(ex.what()));
   }
 }
 

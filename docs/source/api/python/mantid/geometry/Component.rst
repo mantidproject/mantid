@@ -2,7 +2,7 @@
  Component
 ===========
 
-This is a Python binding to the C++ class Mantid::Geometry::Component.
+This a python binding to the C++ class Mantid::Geometry::Component.
 
 *bases:* :py:obj:`mantid.geometry.IComponent`
 

@@ -4,7 +4,7 @@
  Workspace
 ===========
 
-This is a Python binding to the C++ class Mantid::API::Workspace.
+This a python binding to the C++ class Mantid::API::Workspace.
 
 *bases:* :py:obj:`mantid.kernel.DataItem`
 

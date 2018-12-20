@@ -2,7 +2,7 @@
  PropertyHistory
 =================
 
-This is a Python binding to the C++ class Mantid::Kernel::PropertyHistory.
+This a python binding to the C++ class Mantid::Kernel::PropertyHistory.
 
 
 .. module:`mantid.kernel`

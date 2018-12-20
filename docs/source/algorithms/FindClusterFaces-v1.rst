@@ -14,7 +14,7 @@ Algorithm takes an image workspace (a.k.a
 the clusters contained within the image. The image is expected to be a
 labeled image workspace outputted from
 :ref:`algm-IntegratePeaksUsingClusters`. The
-algorithm generates a :ref:`TableWorkspace <Table Workspaces>` as output,
+algorithm generates a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ as output,
 which contains all the cluster edge faces required to draw the outer
 edge of all clusters within the workspace.
 

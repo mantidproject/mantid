@@ -37,7 +37,6 @@ Changes
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
    Error Reporter <error_reporter>
-   Kafka Live Streaming <kafka>
 
 Full Change Listings
 --------------------

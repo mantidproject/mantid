@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/ReflectometryHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -64,8 +58,8 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
 
   LoadInstrument instrumentLoader;
   instrumentLoader.initialize();
-  instrumentLoader.setPropertyValue("Filename",
-                                    "unit_testing/REFL_Definition.xml");
+  instrumentLoader.setPropertyValue(
+      "Filename", "IDFs_for_UNIT_TESTING/REFL_Definition.xml");
   instrumentLoader.setProperty("Workspace", workspace);
   instrumentLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
   instrumentLoader.execute();
@@ -73,8 +67,9 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
   if (!paramsType.empty()) {
     LoadParameterFile paramLoader;
     paramLoader.initialize();
-    paramLoader.setPropertyValue("Filename", "unit_testing/REFL_Parameters_" +
-                                                 paramsType + ".xml");
+    paramLoader.setPropertyValue("Filename",
+                                 "IDFs_for_UNIT_TESTING/REFL_Parameters_" +
+                                     paramsType + ".xml");
     paramLoader.setProperty("Workspace", workspace);
     paramLoader.execute();
   }

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Exception.h"
 #include <sstream>
 
@@ -19,8 +13,7 @@ namespace Exception {
 */
 FileError::FileError(const std::string &Desc, const std::string &FName)
     : std::runtime_error(Desc), fileName(FName) {
-  outMessage =
-      std::string(std::runtime_error::what()) + " in \"" + fileName + "\"";
+  outMessage = std::string(std::runtime_error::what()) + " in " + fileName;
 }
 
 /// Copy constructor

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDWS_SLICE_H_
 #define MANTID_MDWS_SLICE_H_
 
@@ -37,7 +31,7 @@ public:
 
 class MDWSTransfTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws2D;
-  std::unique_ptr<Geometry::OrientedLattice> pLattice;
+  Geometry::OrientedLattice *pLattice;
   // this is permutation matrix which transforms Mantid coordinate system (beam
   // along Z-axis)
   // to Horace coordinate system (beam along X-axis);
@@ -73,7 +67,7 @@ public:
     TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,
                      Transf.findTargetFrame(TargWSDescription));
 
-    spws->mutableSample().setOrientedLattice(pLattice.get());
+    spws->mutableSample().setOrientedLattice(pLattice);
     TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,
                      Transf.findTargetFrame(TargWSDescription));
   }
@@ -100,7 +94,7 @@ public:
                                              CnvrtToMD::SampleFrame,
                                              CnvrtToMD::HKLScale),
                       std::invalid_argument);
-    spws->mutableSample().setOrientedLattice(pLattice.get());
+    spws->mutableSample().setOrientedLattice(pLattice);
 
     WorkspaceCreationHelper::setGoniometer(spws, 20, 0, 0);
 
@@ -148,9 +142,11 @@ public:
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TWS.setMinMax(minVal, maxVal);
 
-    pLattice = std::make_unique<Geometry::OrientedLattice>(
-        5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(pLattice.get());
+    if (pLattice)
+      delete pLattice;
+    pLattice =
+        new Geometry::OrientedLattice(5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
+    ws2D->mutableSample().setOrientedLattice(pLattice);
     TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 
     std::vector<double> u(3, 0);
@@ -408,8 +404,8 @@ public:
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 13., "meV", true);
 
-    pLattice = std::make_unique<Geometry::OrientedLattice>(3, 3, 2, 90, 90, 90);
-    ws2D->mutableSample().setOrientedLattice(pLattice.get());
+    pLattice = new Geometry::OrientedLattice(3, 3, 2, 90, 90, 90);
+    ws2D->mutableSample().setOrientedLattice(pLattice);
 
     // S_mantid*k_mantid = S_hor*k_hor; -- both Mantid and Horace produce the
     // same kind of crystal frame

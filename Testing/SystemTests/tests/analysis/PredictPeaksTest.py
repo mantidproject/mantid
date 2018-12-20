@@ -1,11 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from mantid.geometry import CrystalStructure
 
@@ -16,7 +10,7 @@ from mantid.geometry import CrystalStructure
 # The WISH test has a data mismatch which might be caused by the 'old' code having a bug (issue #14105).
 # The difference is that peaks may have different d-values because they are assigned to a different detector.
 # Instead of using the CompareWorkspaces, only H, K and L are compared.
-class PredictPeaksTestWISH(systemtesting.MantidSystemTest):
+class PredictPeaksTestWISH(stresstesting.MantidStressTest):
     def runTest(self):
         simulationWorkspace = CreateSimulationWorkspace(Instrument='WISH',
                                                         BinParams='0,1,2',
@@ -57,7 +51,7 @@ class PredictPeaksTestWISH(systemtesting.MantidSystemTest):
         return True, None
 
 
-class PredictPeaksTestTOPAZ(systemtesting.MantidSystemTest):
+class PredictPeaksTestTOPAZ(stresstesting.MantidStressTest):
     def runTest(self):
         direc = config['instrumentDefinition.directory']
         xmlFile =  os.path.join(direc,'TOPAZ_Definition_2015-01-01.xml')
@@ -77,7 +71,7 @@ class PredictPeaksTestTOPAZ(systemtesting.MantidSystemTest):
         self.assertTrue(simulationWorkspaceMatch[0])
 
 
-class PredictPeaksCalculateStructureFactorsTest(systemtesting.MantidSystemTest):
+class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
     expected_num_peaks = 546
 
     def runTest(self):

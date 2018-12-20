@@ -2,7 +2,7 @@
  EnabledWhenProperty
 =====================
 
-This is a Python binding to the C++ class Mantid::Kernel::EnabledWhenProperty.
+This a python binding to the C++ class Mantid::Kernel::EnabledWhenProperty.
 
 *bases:* :py:obj:`mantid.kernel.IPropertySettings`
 

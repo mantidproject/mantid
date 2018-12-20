@@ -2,7 +2,7 @@
  Property
 ==========
 
-This is a Python binding to the C++ class Mantid::Kernel::Property.
+This a python binding to the C++ class Mantid::Kernel::Property.
 
 
 .. module:`mantid.kernel`

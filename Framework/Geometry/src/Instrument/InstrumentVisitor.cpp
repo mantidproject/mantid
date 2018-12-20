@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
@@ -264,7 +258,7 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 }
 
 /**
- * Register a rectangular bank
+ * Register a structured bank
  * @param bank : Rectangular Detector
  * @return index assigned
  */
@@ -272,18 +266,6 @@ size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
   (*m_componentType)[rangesIndex] = Beamline::ComponentType::Rectangular;
-  return index;
-}
-
-/**
- * Register a grid bank
- * @param bank : Grid Detector
- * @return index assigned
- */
-size_t InstrumentVisitor::registerGridBank(const ICompAssembly &bank) {
-  auto index = registerComponentAssembly(bank);
-  size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Grid;
   return index;
 }
 
@@ -433,6 +415,7 @@ InstrumentVisitor::makeWrappers() const {
   auto detInfo = detectorInfo();
   // Cross link Component and Detector info objects
   compInfo->setDetectorInfo(detInfo.get());
+  detInfo->setComponentInfo(compInfo.get());
 
   auto compInfoWrapper = Kernel::make_unique<ComponentInfo>(
       std::move(compInfo), componentIds(), componentIdToIndexMap(), m_shapes);

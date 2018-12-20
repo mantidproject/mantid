@@ -1,18 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 from mantid.api import *
 import os
 
 
-class EQSANSNormalisationNoFlux(systemtesting.MantidSystemTest):
+class EQSANSNormalisationNoFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
@@ -41,7 +35,7 @@ class EQSANSNormalisationNoFlux(systemtesting.MantidSystemTest):
         return "eqsans_no_flux", 'EQSANSNormalisation_NoFlux.nxs'
 
 
-class EQSANSNormalisationDefault(systemtesting.MantidSystemTest):
+class EQSANSNormalisationDefault(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
@@ -78,7 +72,7 @@ class EQSANSNormalisationDefault(systemtesting.MantidSystemTest):
         return "eqsans_default_flux", 'EQSANSNormalisation_DefaultFlux.nxs'
 
 
-class EQSANSNormalisationInputFlux(systemtesting.MantidSystemTest):
+class EQSANSNormalisationInputFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
@@ -109,7 +103,7 @@ class EQSANSNormalisationInputFlux(systemtesting.MantidSystemTest):
         return "eqsans_input_flux", 'EQSANSNormalisation_InputFlux.nxs'
 
 
-class EQSANSNormalisationBeamFlux(systemtesting.MantidSystemTest):
+class EQSANSNormalisationBeamFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
     """

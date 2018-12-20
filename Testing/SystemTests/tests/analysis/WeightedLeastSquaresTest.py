@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
 #
 # Here weighted least squares fitting tests, for which:
@@ -24,7 +18,7 @@
 #      made available to Mantid users)
 #
 
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace
 
@@ -246,7 +240,7 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
         compare_relative_errors(fitted_params, expected_params, tolerance=1e-4)
 
 
-class WeightedLeastSquaresTest(systemtesting.MantidSystemTest):
+class WeightedLeastSquaresTest(stresstesting.MantidStressTest):
 
     _success = False
 

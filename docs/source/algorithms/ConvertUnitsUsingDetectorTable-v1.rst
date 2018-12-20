@@ -12,13 +12,13 @@ Description
 
 This algorithm functions in the same basic way as :ref:`algm-ConvertUnits` but
 instead of reading the geometric parameters from the instrument, it uses values
-that are specified in a :ref:`TableWorkspace <Table Workspaces>`
+that are specified in a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__
 
 Restrictions on the input workspace
 ###################################
 
 -  Naturally, the X values must have a unit set, and that unit must be
-   known to the :ref:`Unit Factory <Unit Factory>`.
+   known to the `Unit Factory <http://www.mantidproject.org/Units>`__.
 -  Only histograms, not point data, can be handled at present.
 -  The algorithm will also fail if the source-sample distance cannot be
    calculated (i.e. the :ref:`instrument <instrument>` has not been
@@ -28,7 +28,7 @@ Available units
 ---------------
 
 The units currently available to this algorithm are listed
-:ref:`here <Unit Factory>`, along with equations specifying exactly how the
+`here <http://www.mantidproject.org/Units>`__, along with equations specifying exactly how the
 conversions are done.
 
 Usage

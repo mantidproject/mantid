@@ -2,7 +2,7 @@
  MatrixWorkspacePropertyPropertyWithValue
 ==========================================
 
-This is a Python binding to the C++ class Mantid::API::MatrixWorkspacePropertyPropertyWithValue.
+This a python binding to the C++ class Mantid::API::MatrixWorkspacePropertyPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

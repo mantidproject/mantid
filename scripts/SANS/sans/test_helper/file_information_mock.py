@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from sans.common.file_information import SANSFileInformation
 from mantid.kernel import DateAndTime
 from sans.common.enums import (SANSFacility, SANSInstrument, FileType, SampleShape)

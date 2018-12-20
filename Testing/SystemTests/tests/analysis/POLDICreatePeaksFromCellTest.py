@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 
 # These tests check the correctness of the structure factor calculation for some common crystal structures.
@@ -24,7 +18,7 @@ from mantid.simpleapi import *
 # Isotropic thermal parameters are rounded or arbitrary (the tests are meant for checking the calculations only).
 
 
-class ReflectionCheckingTest(systemtesting.MantidSystemTest):
+class ReflectionCheckingTest(stresstesting.MantidStressTest):
     def runTest(self):
         pass
 

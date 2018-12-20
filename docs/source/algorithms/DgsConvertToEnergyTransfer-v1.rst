@@ -17,7 +17,7 @@ parameter to be left blank. Also, SNS instruments need to pass a monitor
 workspace to :ref:`GetEi <algm-GetEi>`
 since they are separate from the sample workspace.
 Parameters in italics are controlled by the
-:ref:`instrument parameter file (IPF) <InstrumentParameterFile>`
+`instrument parameter file (IPF) <http://www.mantidproject.org/InstrumentParameterFile>`_
 unless provided to the algorithm via a property manager. The mappings are given
 below.
 

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_MESHOBJECT2DTEST_H_
 #define MANTID_GEOMETRY_MESHOBJECT2DTEST_H_
 
@@ -202,68 +196,6 @@ public:
     TS_ASSERT_EQUALS(1.0, mesh.distanceToPlane(V3D{0, 0.5, 1}));
   }
 
-  void test_solidAngle_side_on() {
-    using namespace Mantid::Kernel;
-    auto mesh = makeSimpleTriangleMesh();
-    auto solidAngle = mesh.solidAngle(
-        V3D{0, 2, 0}); // observer is in plane of triangle, outside the triangle
-    TS_ASSERT_EQUALS(solidAngle, 0); // seen side-on solid angle is 0
-  }
-  void test_square_solid_angle() {
-
-    // Unit square inside unit cube. Any cube face will have solid angle 1/6th
-    // of total 4pi steradians. Observer at origin.
-
-    double expected = 2.0 * M_PI / 3.0; //  4pi/6
-    // Unit square at distance cos(M_PI / 4) from observer
-    double unitSphereRadius = 1;
-    double halfSideLength = unitSphereRadius * sin(M_PI / 4);
-    double observerDistance = unitSphereRadius * cos(M_PI / 4);
-    std::vector<V3D> vertices = {
-        V3D{-halfSideLength, -halfSideLength, observerDistance},
-        V3D{-halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, -halfSideLength, observerDistance}};
-    std::vector<uint16_t> triangles{2, 1, 0, 0, 3, 2};
-    MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material{});
-    double solidAngle = mesh.solidAngle(V3D{0, 0, 0});
-    TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
-
-    // Only the positive solid angle is counted. Observe from the other side and
-    // solid angle is zero.
-    solidAngle = mesh.solidAngle(V3D{0, 0, 2 * observerDistance});
-    TS_ASSERT_DELTA(solidAngle, 0, 1e-3);
-  }
-
-  void test_solidAngle_scaled() {
-    // Unit square inside unit cube. Any cube face will have solid angle 1/6th
-    // of total 4pi steradians. Observer at origin.
-
-    double expected = 2.0 * M_PI / 3.0; //  4pi/6
-    // Unit square at distance 0.5 from observer
-    double unitSphereRadius = 1;
-    double halfSideLength = unitSphereRadius * sin(M_PI / 4);
-    double observerDistance = unitSphereRadius * cos(M_PI / 4);
-    std::vector<V3D> vertices = {
-        V3D{-halfSideLength, -halfSideLength, observerDistance},
-        V3D{-halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, -halfSideLength, observerDistance}};
-    std::vector<uint16_t> triangles{2, 1, 0, 0, 3, 2};
-    // Scaling square uniformly (and reducing distance to origin by same
-    // factor), yields same angular area 4pi/6
-    V3D scaleFactor{0.5, 0.5, 0.5};
-    MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material{});
-    double solidAngle = mesh.solidAngle(V3D{0, 0, 0}, scaleFactor);
-    TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
-
-    // Scaling square uniformly (and increasing distance to origin by same
-    // factor), yields same angular area 4pi/6
-    scaleFactor = {2, 2, 2};
-    solidAngle = mesh.solidAngle(V3D{0, 0, 0}, scaleFactor);
-    TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
-  }
-
   void test_isValid_multi_triangle() {
 
     // Make 2 Triangles bounded by the specified V3Ds
@@ -278,28 +210,36 @@ public:
     TSM_ASSERT("Just outside", !mesh.isValid(V3D{1, 1 + delta, 0}));
   }
 
+  void test_isOnTriangle() {
+    auto p1 = V3D{-1, -1, 0};
+    auto p2 = V3D{1, -1, 0};
+    auto p3 = V3D{0, 1, 0};
+    TS_ASSERT(MeshObject2D::isOnTriangle(V3D{0, 0, 0}, p1, p2, p3));
+    TS_ASSERT(MeshObject2D::isOnTriangle(p1, p1, p2, p3));
+    TS_ASSERT(MeshObject2D::isOnTriangle(p2, p1, p2, p3));
+    TS_ASSERT(MeshObject2D::isOnTriangle(p3, p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p1 - V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p1 - V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p2 + V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p2 - V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p3 + V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObject2D::isOnTriangle(p3 + V3D(0, 0.0001, 0), p1, p2, p3));
+  }
+
   void test_interceptSurface() {
 
     auto mesh = makeSimpleTriangleMesh();
 
-    // Track goes through triangle body
     Mantid::Geometry::Track onTargetTrack(V3D{0.5, 0.5, -1},
                                           V3D{0, 0, 1} /*along z*/);
     TS_ASSERT_EQUALS(mesh.interceptSurface(onTargetTrack), 1);
     TS_ASSERT_EQUALS(onTargetTrack.count(), 1);
 
-    // Track completely misses
     Mantid::Geometry::Track missTargetTrack(
         V3D{50, 0.5, -1},
         V3D{0, 0, 1} /*along z*/); // Intersects plane but no triangles
     TS_ASSERT_EQUALS(mesh.interceptSurface(missTargetTrack), 0);
     TS_ASSERT_EQUALS(missTargetTrack.count(), 0);
-
-    // Track goes through edge
-    Mantid::Geometry::Track edgeTargetTrack(
-        V3D{0, 0, -1}, V3D{0, 0, 1} /*along z*/); // Passes through lower edge
-    TS_ASSERT_EQUALS(mesh.interceptSurface(edgeTargetTrack), 1);
-    TS_ASSERT_EQUALS(edgeTargetTrack.count(), 1);
   }
 
   void test_equals() {
@@ -330,6 +270,32 @@ public:
     // Use same material
     auto c = a.cloneWithMaterial(Material{}); // same empty material
     TS_ASSERT_EQUALS(a, *c);
+  }
+
+  void test_solidAngle_side_on() {
+    using namespace Mantid::Kernel;
+
+    auto mesh = makeSimpleTriangleMesh();
+    auto solidAngle = mesh.solidAngle(
+        V3D{0, 2, 0}); // observer is in plane of triangle, outside the triangle
+
+    TS_ASSERT_EQUALS(solidAngle, 0); // seen side-on solid angle is 0
+  }
+
+  void test_solidAngle() {
+
+    double expected = M_PI / 3.0; //  0.5 * 4pi/6
+    // Unit square at distance 0.5 from observer
+    double unitSphereRadius = 1;
+    double halfSideLength = unitSphereRadius * sin(M_PI / 4);
+    double observerDistance = unitSphereRadius * cos(M_PI / 4);
+    auto mesh = makeTrapezoidMesh(
+        V3D{-halfSideLength, -halfSideLength, observerDistance},
+        V3D{-halfSideLength, halfSideLength, observerDistance},
+        V3D{halfSideLength, halfSideLength, observerDistance},
+        V3D{halfSideLength, -halfSideLength, observerDistance});
+    double solidAngle = mesh.solidAngle(V3D{0, 0, 0});
+    TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
   }
 
   void test_boundingBox() {

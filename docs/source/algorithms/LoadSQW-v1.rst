@@ -19,7 +19,7 @@ recalculated to the Crystal? frame, without HKL transformation).
 
 U matrix is set to unity but the B-matrix is read from the SQW and
 attached to the workspace which may confuse the algorithms which work
-with :ref:`MDEventWorkspace <MDWorkspace>` produced by Mantid
+with `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ produced by Mantid
 algorithms.
 
 Notes on Horace SQW files

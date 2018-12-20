@@ -336,7 +336,8 @@ Columns
 |                     |           | column will prevail over options specified                                      |
 |                     |           | in the **Settings** tab.                                                        |
 |                     |           |                                                                                 |
-|                     |           | Example: ``RegionOfDirectBeam="0,2", Params="1,2,3"``                           |
+|                     |           | Example: ``StrictSpectrumChecking=0,``                                          |
+|                     |           | ``RegionOfDirectBeam="0,2", Params="1,2,3"``                                    |
 +---------------------+-----------+---------------------------------------------------------------------------------+
 
 Search Interface

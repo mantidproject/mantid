@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_DENSITYOFSTATES_H_
 #define MANTIDQTCUSTOMINTERFACES_DENSITYOFSTATES_H_
 
@@ -31,18 +25,11 @@ private slots:
   void dosAlgoComplete(bool error);
   void handleFileChange();
   void ionLoadComplete(bool error);
-  void runClicked();
+  /// Handle plotting and saving
   void plotClicked();
   void saveClicked();
 
 private:
-  void setRunIsRunning(bool running);
-  void setPlotIsPlotting(bool plotting);
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setPlotEnabled(bool enabled);
-  void setSaveEnabled(bool enabled);
-
   /// The ui form
   Ui::DensityOfStates m_uiForm;
   /// Name of output workspace

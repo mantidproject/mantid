@@ -1,18 +1,9 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEW_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEW_H_
 
 #include "ui_IndirectFitPreviewPlot.h"
 
-#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-#include "IIndirectFitPlotView.h"
 
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -20,70 +11,77 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitPlotView : public IIndirectFitPlotView {
+class DLLExport IndirectFitPlotView : public API::MantidWidget {
   Q_OBJECT
 public:
-  IndirectFitPlotView(QWidget *parent = nullptr);
-  virtual ~IndirectFitPlotView() override;
+  IndirectFitPlotView(QWidget *parent);
+  ~IndirectFitPlotView() override;
 
-  std::size_t getSelectedSpectrum() const override;
-  int getSelectedSpectrumIndex() const override;
-  int getSelectedDataIndex() const override;
-  std::size_t dataSelectionSize() const override;
-  bool isPlotGuessChecked() const override;
+  std::size_t getSelectedSpectrum() const;
+  int getSelectedSpectrumIndex() const;
+  int getSelectedDataIndex() const;
+  std::size_t dataSelectionSize() const;
+  bool isPlotGuessChecked() const;
 
-  void hideMultipleDataSelection() override;
-  void showMultipleDataSelection() override;
+  void hideMultipleDataSelection();
+  void showMultipleDataSelection();
 
-  void setAvailableSpectra(std::size_t minimum, std::size_t maximum) override;
-  void setAvailableSpectra(
-      const std::vector<std::size_t>::const_iterator &from,
-      const std::vector<std::size_t>::const_iterator &to) override;
+  void setAvailableSpectra(std::size_t minimum, std::size_t maximum);
+  void setAvailableSpectra(const std::vector<std::size_t>::const_iterator &from,
+                           const std::vector<std::size_t>::const_iterator &to);
 
-  void setMinimumSpectrum(int minimum) override;
-  void setMaximumSpectrum(int maximum) override;
-  void setPlotSpectrum(int spectrum) override;
-  void appendToDataSelection(const std::string &dataName) override;
-  void setNameInDataSelection(const std::string &dataName,
-                              std::size_t index) override;
-  void clearDataSelection() override;
+  void setMinimumSpectrum(int minimum);
+  void setMaximumSpectrum(int maximum);
+  void appendToDataSelection(const std::string &dataName);
+  void setNameInDataSelection(const std::string &dataName, std::size_t index);
+  void clearDataSelection();
 
   void plotInTopPreview(const QString &name,
                         Mantid::API::MatrixWorkspace_sptr workspace,
-                        std::size_t spectrum, Qt::GlobalColor colour) override;
+                        std::size_t spectrum, Qt::GlobalColor colour);
   void plotInBottomPreview(const QString &name,
                            Mantid::API::MatrixWorkspace_sptr workspace,
-                           std::size_t spectrum,
-                           Qt::GlobalColor colour) override;
+                           std::size_t spectrum, Qt::GlobalColor colour);
 
-  void removeFromTopPreview(const QString &name) override;
-  void removeFromBottomPreview(const QString &name) override;
+  void removeFromTopPreview(const QString &name);
+  void removeFromBottomPreview(const QString &name);
 
-  void enableFitSingleSpectrum(bool enable) override;
-  void enablePlotGuess(bool enable) override;
-  void enableSpectrumSelection(bool enable) override;
-  void enableFitRangeSelection(bool enable) override;
+  void enableFitSingleSpectrum(bool enable);
+  void enablePlotGuess(bool enable);
+  void enableSpectrumSelection(bool enable);
+  void enableFitRangeSelection(bool enable);
 
-  void setFitSingleSpectrumText(QString const &text) override;
+  void setBackgroundLevel(double value);
 
-  void setBackgroundLevel(double value) override;
+  void setFitRange(double minimum, double maximum);
+  void setFitRangeMinimum(double minimum);
+  void setFitRangeMaximum(double maximum);
 
-  void setFitRange(double minimum, double maximum) override;
-  void setFitRangeMinimum(double minimum) override;
-  void setFitRangeMaximum(double maximum) override;
+  void setBackgroundRangeVisible(bool visible);
+  void setHWHMRangeVisible(bool visible);
 
-  void setBackgroundRangeVisible(bool visible) override;
-  void setHWHMRangeVisible(bool visible) override;
-
-  void displayMessage(const std::string &message) const override;
+  void displayMessage(const std::string &message) const;
 
 public slots:
-  void clearTopPreview() override;
-  void clearBottomPreview() override;
-  void clear() override;
-  void setHWHMRange(double minimum, double maximum) override;
-  void setHWHMMaximum(double minimum) override;
-  void setHWHMMinimum(double maximum) override;
+  void clearTopPreview();
+  void clearBottomPreview();
+  void clear();
+  void setHWHMRange(double minimum, double maximum);
+  void setHWHMMaximum(double minimum);
+  void setHWHMMinimum(double maximum);
+
+signals:
+  void selectedFitDataChanged(std::size_t);
+  void plotCurrentPreview();
+  void plotSpectrumChanged(std::size_t);
+  void plotGuessChanged(bool);
+  void fitSelectedSpectrum();
+  void startXChanged(double);
+  void endXChanged(double);
+  void hwhmMinimumChanged(double);
+  void hwhmMaximumChanged(double);
+  void hwhmChanged(double, double);
+  void backgroundChanged(double);
 
 private slots:
   void emitPlotSpectrumChanged(int);

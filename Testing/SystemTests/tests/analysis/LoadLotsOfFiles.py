@@ -1,16 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import config, Load
 from mantid.api import FrameworkManager
 import os
 import re
-import systemtesting
+import stresstesting
 
 BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 '80_tubes_Top_and_Bottom_May_2016.xml',
@@ -183,7 +177,7 @@ def useFile(direc, filename):
     return True, filename
 
 
-class LoadLotsOfFiles(systemtesting.MantidSystemTest):
+class LoadLotsOfFiles(stresstesting.MantidStressTest):
     def __getDataFileList__(self):
         # get a list of directories to look in
         dirs = config['datasearch.directories'].split(';')

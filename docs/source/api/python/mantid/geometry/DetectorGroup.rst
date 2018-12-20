@@ -2,7 +2,7 @@
  DetectorGroup
 ===============
 
-This is a Python binding to the C++ class Mantid::Geometry::DetectorGroup.
+This a python binding to the C++ class Mantid::Geometry::DetectorGroup.
 
 *bases:* :py:obj:`mantid.geometry.IDetector`
 

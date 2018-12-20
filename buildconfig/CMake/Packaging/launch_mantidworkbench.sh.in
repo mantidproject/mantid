@@ -9,6 +9,8 @@ THISFILE=$(readlink -f "$0")
 INSTALLDIR=$(dirname $THISFILE)   # directory of executable
 INSTALLDIR=$(dirname $INSTALLDIR) # root install directory
 
+@MTD_PATH_DEFINITION@
+
 @TCMALLOC_DEFINITIONS@
 
 @VIRTUAL_GL_WRAPPER@

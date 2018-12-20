@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 
@@ -118,8 +112,8 @@ void PropertyHandler::init() {
         throw std::runtime_error(
             "IFunction expected but func function of another type");
       }
-      auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
-      f->setHandler(std::move(h));
+      PropertyHandler *h = new PropertyHandler(f, m_cf, m_browser);
+      f->setHandler(h);
     }
   }
 
@@ -417,10 +411,10 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     return nullptr;
   }
 
-  auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
+  PropertyHandler *h = new PropertyHandler(f, m_cf, m_browser);
+  f->setHandler(h);
   h->setAttribute("StartX", m_browser->startX());
   h->setAttribute("EndX", m_browser->endX());
-  f->setHandler(std::move(h));
 
   // enable the change slots
   m_browser->m_changeSlotsEnabled = true;
@@ -431,10 +425,9 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     m_browser->setDefaultBackgroundType(f->name());
   }
   m_browser->setFocus();
-  auto return_ptr = static_cast<PropertyHandler *>(f->getHandler());
-  m_browser->setCurrentFunction(return_ptr);
+  m_browser->setCurrentFunction(h);
 
-  return return_ptr;
+  return h;
 }
 
 // Removes handled function from its parent function and
@@ -798,30 +791,8 @@ bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   return false;
 }
 
-/**
- * Set function attribute value
- * @param attName :: The name of the attribute
- * @param attValue :: The value of the attribute
- */
-void PropertyHandler::setAttribute(
-    QString const &attName, Mantid::API::IFunction::Attribute const &attValue) {
-  auto const attributeType = attValue.type();
-  if (attributeType == "int")
-    setAttribute(attName, attValue.asInt());
-  else if (attributeType == "double")
-    setAttribute(attName, attValue.asDouble());
-  else if (attributeType == "std::string")
-    setAttribute(attName, QString::fromStdString(attValue.asString()));
-}
-
-/**
- * Sets the function attribute value if it has type double or int
- * @param attName :: The name of the attribute
- * @param attValue :: The value of the attribute
- */
-template <typename AttributeType>
-void PropertyHandler::setAttribute(QString const &attName,
-                                   AttributeType const &attValue) {
+void PropertyHandler::setAttribute(const QString &attName,
+                                   const double &attValue) {
   if (m_fun->hasAttribute(attName.toStdString())) {
     try {
       m_fun->setAttribute(attName.toStdString(),
@@ -839,18 +810,13 @@ void PropertyHandler::setAttribute(QString const &attName,
     }
   }
   if (cfun()) {
-    for (auto i = 0u; i < cfun()->nFunctions(); ++i) {
+    for (size_t i = 0; i < cfun()->nFunctions(); ++i) {
       PropertyHandler *h = getHandler(i);
       h->setAttribute(attName, attValue);
     }
   }
 }
 
-/**
- * Sets the function attribute value if it has type QString
- * @param attName :: The name of the attribute
- * @param attValue :: The value of the attribute
- */
 void PropertyHandler::setAttribute(const QString &attName,
                                    const QString &attValue) {
   const std::string name = attName.toStdString();
@@ -888,40 +854,6 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop) {
 }
 
 /**
- * Applies the given function to all the attribute properties recursively,
- * within this context.
- * @param func :: Function to apply
- */
-void PropertyHandler::applyToAllAttributes(
-    void (PropertyHandler::*func)(QtProperty *)) {
-  for (int i = 0; i < m_attributes.size(); ++i) {
-    QtProperty *attribute = m_attributes[i];
-    (this->*(func))(attribute);
-  }
-
-  if (m_cf)
-    for (std::size_t i = 0u; i < m_cf->nFunctions(); ++i)
-      getHandler(i)->applyToAllAttributes(func);
-}
-
-/**
- * Updates all string, double and int attributes which have changed in a
- * function
- */
-void PropertyHandler::updateAttributes() {
-  applyToAllAttributes(&PropertyHandler::updateAttribute);
-}
-
-/**
- * @param attribute :: An attribute of the function
- */
-void PropertyHandler::updateAttribute(QtProperty *attribute) {
-  auto const attributeValue =
-      function()->getAttribute(attribute->propertyName().toStdString());
-  setAttribute(attribute->propertyName(), attributeValue);
-}
-
-/**
  * Applies given function to all the parameter properties recursively, within
  * this context.
  * @param func :: Function to apply
@@ -956,7 +888,7 @@ void PropertyHandler::clearErrors() {
  * @param prop :: Property of the parameter
  */
 void PropertyHandler::updateParameter(QtProperty *prop) {
-  double const parValue =
+  double parValue =
       function()->getParameter(prop->propertyName().toStdString());
   m_browser->m_parameterManager->setValue(prop, parValue);
 }
@@ -1039,11 +971,10 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     emit m_browser->removePlotSignal(this);
 
     Mantid::API::IFunction_sptr f_old = function();
-    std::unique_ptr<PropertyHandler> h =
-        std::make_unique<PropertyHandler>(f, m_parent, m_browser, m_item);
+    PropertyHandler *h = new PropertyHandler(f, m_parent, m_browser, m_item);
     if (this == m_browser->m_autoBackground) {
       if (dynamic_cast<Mantid::API::IBackgroundFunction *>(f.get())) {
-        m_browser->m_autoBackground = h.get();
+        m_browser->m_autoBackground = h;
         h->fit();
 
       } else {
@@ -1053,12 +984,12 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     if (m_parent) {
       m_parent->replaceFunctionPtr(f_old, f);
     }
+    f->setHandler(h);
     // calculate the baseline
     if (h->pfun()) {
       h->setCentre(h->centre()); // this sets m_ci
       h->calcBase();
     }
-    f->setHandler(std::move(h));
     // at this point this handler does not exist any more. only return is
     // possible
     return f;

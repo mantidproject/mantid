@@ -1,17 +1,11 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
 
-class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
+class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
     """The system test currently checks that the calculation of 2D spectra
     works correctly."""
 
@@ -95,7 +89,7 @@ class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
                 self.assertLessThan(maxDifference, 0.07)
 
 
-class POLDIFitPeaks2DPawleyTest(systemtesting.MantidSystemTest):
+class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
         corr = PoldiAutoCorrelation('si_data_6904')
@@ -129,7 +123,7 @@ class POLDIFitPeaks2DPawleyTest(systemtesting.MantidSystemTest):
         DeleteWorkspace(peaks_ref_2d)
 
 
-class POLDIFitPeaks2DIntegratedIntensities(systemtesting.MantidSystemTest):
+class POLDIFitPeaks2DIntegratedIntensities(stresstesting.MantidStressTest):
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
         corr = PoldiAutoCorrelation('si_data_6904')

@@ -2,7 +2,7 @@
  ProgressBase
 ==============
 
-This is a Python binding to the C++ class Mantid::Kernel::ProgressBase.
+This a python binding to the C++ class Mantid::Kernel::ProgressBase.
 
 
 .. module:`mantid.kernel`

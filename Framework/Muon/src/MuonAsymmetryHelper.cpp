@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,7 +6,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -122,7 +115,7 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
       std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-  return std::distance(xData.rawData().begin(), upper);
+  return std::distance(xData.rawData().begin(), upper + 1);
 }
 /**
  * find the first index in bin edges that is after

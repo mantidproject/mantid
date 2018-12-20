@@ -9,7 +9,7 @@
 Description
 -----------
 
-:ref:`MDEventWorkspaces <MDWorkspace>` and
+`MDEventWorkspaces <http://www.mantidproject.org/MDEventWorkspace>`_ and
 :ref:`MDHistoWorkspaces <MDHistoWorkspace>` can be used with any type of
 coordinate system. On the other hand
 :ref:`PeaksWorkspaces <PeaksWorkspace>` may be plotted either in QLab,

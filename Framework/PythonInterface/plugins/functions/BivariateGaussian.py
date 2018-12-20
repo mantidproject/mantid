@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
@@ -116,7 +110,7 @@ class BivariateGaussian(IFunction1D):
     def getMuSigma(self):
         return self.getMu(), self.getSigma()
 
-    def setConstraints(self, boundsDict, penalty=None):
+    def setConstraints(self, boundsDict):
         """
         setConstraints sets fitting constraints for the mbvg function.
         Intput:
@@ -130,10 +124,9 @@ class BivariateGaussian(IFunction1D):
                     constraintString = "{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][0], param, boundsDict[param][1])
                     self.addConstraints(constraintString)
                 else:
-                    self.addConstraints("{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][1], param, boundsDict[param][0]))
-                if penalty is not None:
-                    self.setConstraintPenaltyFactor(param, penalty)
+                    self.addConstraints("{:4.4e} < A < {:4.4e}".format(boundsDict[param][1], boundsDict[param][0]))
             except ValueError:
+                raise
                 raise UserWarning("Cannot set parameter {:s} for mbvg.  Valid choices are " +
                                   "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
 

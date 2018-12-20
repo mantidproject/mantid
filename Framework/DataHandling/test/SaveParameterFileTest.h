@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVEPARAMETERFILETEST_H_
 #define SAVEPARAMETERFILETEST_H_
 
@@ -181,8 +175,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    loaderIDF2.setPropertyValue("Filename",
-                                "unit_testing/IDF_for_UNIT_TESTING2.xml");
+    loaderIDF2.setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     loaderIDF2.setPropertyValue("Workspace", wsName);
     loaderIDF2.setProperty("RewriteSpectraMap",
                            Mantid::Kernel::OptionalBool(true));

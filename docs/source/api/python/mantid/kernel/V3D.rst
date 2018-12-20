@@ -2,7 +2,7 @@
  V3D
 =====
 
-This is a Python binding to the C++ class Mantid::Kernel::V3D.
+This a python binding to the C++ class Mantid::Kernel::V3D.
 
 
 .. module:`mantid.kernel`

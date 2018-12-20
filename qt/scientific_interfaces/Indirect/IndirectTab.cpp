@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -257,10 +251,9 @@ void IndirectTab::plotMultipleSpectra(
  * This uses the plotSpectrum function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param spectraIndex Index of spectrum from each workspace to plot
+ * @param wsIndex Index of spectrum from each workspace to plot
  */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               int spectraIndex) {
+void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
   if (workspaceNames.isEmpty())
     return;
 
@@ -269,7 +262,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
   pyInput += "plotSpectrum(['";
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
-  pyInput += QString::number(spectraIndex);
+  pyInput += QString::number(wsIndex);
   pyInput += ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
@@ -280,15 +273,15 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
  * index.
  *
  * @param workspaceName Names of workspace to plot
- * @param spectraIndex Workspace Index of spectrum to plot
+ * @param wsIndex Workspace Index of spectrum to plot
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int spectraIndex) {
+void IndirectTab::plotSpectrum(const QString &workspaceName, int wsIndex) {
   if (workspaceName.isEmpty())
     return;
 
   QStringList workspaceNames;
   workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, spectraIndex);
+  plotSpectrum(workspaceNames, wsIndex);
 }
 
 /**
@@ -628,7 +621,7 @@ void IndirectTab::algorithmFinished(bool error) {
 /**
  * Run Python code and return anything printed to stdout.
  *
- * @param code Python code to execute
+ * @param code Python code the execute
  * @param no_output Enable to ignore any output
  * @returns What was printed to stdout
  */

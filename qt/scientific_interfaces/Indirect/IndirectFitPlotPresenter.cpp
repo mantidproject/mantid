@@ -1,16 +1,10 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace {
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
-using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
+using MantidQt::CustomInterfaces::IDA::IndirectFitPlotView;
 
 std::string createPlotString(const std::string &workspaceName,
                              const std::string &spectra) {
@@ -26,7 +20,7 @@ std::string createPlotString(const std::string &workspaceName,
 
 struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
-  explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
+  explicit UpdateAvailableSpectra(IndirectFitPlotView *view) : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) {
     m_view->setAvailableSpectra(spectra.first, spectra.second);
@@ -37,7 +31,7 @@ public:
   }
 
 private:
-  IIndirectFitPlotView *m_view;
+  IndirectFitPlotView *m_view;
 };
 } // namespace
 
@@ -48,7 +42,7 @@ namespace IDA {
 using namespace Mantid::API;
 
 IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
-                                                   IIndirectFitPlotView *view)
+                                                   IndirectFitPlotView *view)
     : m_model(new IndirectFitPlotModel(model)), m_view(view),
       m_plotGuessInSeparateWindow(false) {
   connect(m_view, SIGNAL(selectedFitDataChanged(std::size_t)), this,
@@ -169,13 +163,6 @@ void IndirectFitPlotPresenter::setStartX(double startX) {
 
 void IndirectFitPlotPresenter::setEndX(double endX) {
   m_view->setFitRangeMaximum(endX);
-}
-
-void IndirectFitPlotPresenter::updatePlotSpectrum(int spectrum) {
-  m_view->setPlotSpectrum(spectrum);
-  setActiveSpectrum(static_cast<std::size_t>(spectrum));
-  updatePlots();
-  updateFitRangeSelector();
 }
 
 void IndirectFitPlotPresenter::updateRangeSelectors() {

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init,too-many-lines
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
@@ -268,8 +262,8 @@ class SNAPReduce(DataProcessorAlgorithm):
             maskFile = self.getProperty('MaskingFilename').value
         # TODO not reading the correct mask file geometry
         elif masking == 'Horizontal' or masking == 'Vertical':
-            maskWSname = masking + 'Mask'  # append the work 'Mask' for the wksp name
-            if not mtd.doesExist(maskWSname):  # only load if it isn't already loaded
+            maskWSname = masking + 'Mask' # append the work 'Mask' for the wksp name
+            if not mtd.doesExist(maskWSname): # only load if it isn't already loaded
                 maskFile = '/SNS/SNAP/shared/libs/%s_Mask.xml' % masking
 
         if maskFile is not None:
@@ -314,7 +308,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                 peak_clip_WS.setY(h, self.peak_clip(peak_clip_WS.readY(h), win=window, decrese=True,
                                                     LLS=True, smooth_window=smooth_range))
             return str(peak_clip_WS)
-        else:  # other values are already held in normWS
+        else: # other values are already held in normWS
             return normWS
 
     def _save(self, saveDir, basename, outputWksp):
@@ -348,16 +342,20 @@ class SNAPReduce(DataProcessorAlgorithm):
         return wsname
 
     def PyExec(self):
+        # Retrieve all relevant notice
+
         in_Runs = self.getProperty("RunNumbers").value
+
         maskWSname = self._getMaskWSname()
+
         progress = Progress(self, 0., .25, 3)
 
         # default arguments for AlignAndFocusPowder
-        alignAndFocusArgs = {'TMax': 50000,
-                             'RemovePromptPulseWidth': 1600,
-                             'PreserveEvents': False,
-                             'Dspacing': True,  # binning parameters in d-space
-                             'Params': self.getProperty("Binning").value}
+        alignAndFocusArgs={'TMax':50000,
+                           'RemovePromptPulseWidth':1600,
+                           'PreserveEvents':False,
+                           'Dspacing':True,  # binning parameters in d-space
+                           'Params':self.getProperty("Binning").value}
 
         # workspace for loading metadata only to be used in LoadDiffCal and
         # CreateGroupingWorkspace
@@ -408,7 +406,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         progStart = .25
         progDelta = (1.-progStart)/len(in_Runs)
-        for i, runnumber in enumerate(in_Runs):
+        for runnumber in in_Runs:
             self.log().notice("processing run %s" % runnumber)
             self.log().information(str(self.get_IPTS_Local(runnumber)))
 
@@ -440,8 +438,8 @@ class SNAPReduce(DataProcessorAlgorithm):
                                 MaskWorkspace=maskWSname,  # can be empty string
                                 GroupingWorkspace=group,
                                 UnfocussedWorkspace=unfocussedWksp,  # can be empty string
-                                startProgress=progStart,
-                                endProgress=progStart + .5 * progDelta,
+                                startProgress = progStart,
+                                endProgress = progStart + .5 * progDelta,
                                 **alignAndFocusArgs)
             progStart += .5 * progDelta
 
@@ -507,17 +505,12 @@ class SNAPReduce(DataProcessorAlgorithm):
             self.setProperty(propertyName, outputWksp)
 
             # declare some things as extra outputs in set-up
-            if Process_Mode != "Production":
-                prefix = 'OuputWorkspace_{:d}_'.format(i)
-                propNames = [prefix + it for it in ['d', 'norm', 'normalizer']]
-                wkspNames = ['%s_%s_d' % (new_Tag, runnumber),
-                             basename + '_red',
-                             '%s_%s_normalizer' % (new_Tag, runnumber)]
+            if Process_Mode != "Production":  # TODO set them as workspace properties
+                propNames = ['OuputWorkspace_'+str(it) for it in ['d', 'norm', 'normalizer']]
+                wkspNames = ['%s_%s_d' % (new_Tag, runnumber), basename + '_red', '%s_%s_normalizer' % (new_Tag, runnumber)]
                 for (propName, wkspName) in zip(propNames, wkspNames):
                     if mtd.doesExist(wkspName):
-                        self.declareProperty(WorkspaceProperty(propName,
-                                                               wkspName,
-                                                               Direction.Output))
+                        self.declareProperty(WorkspaceProperty(propName, wkspName, Direction.Output))
                         self.setProperty(propName, wkspName)
 
 

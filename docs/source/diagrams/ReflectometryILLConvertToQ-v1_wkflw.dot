@@ -6,7 +6,10 @@ digraph ReflectometryILLConvertToQ {
     $param_style
     input             [label="InputWorkspace"]
     output            [label="OutputWorkspace"]
+    direct            [label="DirectBeamWorkspace"]
     direct_foreground [label="DirectForegroundWorkspace"]
+    reflected         [label="ReflectedBeamWorkspace"]
+    polarized         [label="Polarized"]
     q_grouping        [label="GroupingQFraction"]
   }
 
@@ -27,6 +30,9 @@ digraph ReflectometryILLConvertToQ {
   }
 
   input -> refl_to_q
+  reflected -> refl_to_q
+  direct -> refl_to_q
+  polarized -> refl_to_q
   refl_to_q -> refl_to_point_data
   refl_to_point_data -> refl_group_points
   refl_group_points -> if_direct_foreground

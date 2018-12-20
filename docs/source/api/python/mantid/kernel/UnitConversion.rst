@@ -2,7 +2,7 @@
  UnitConversion
 ================
 
-This is a Python binding to the C++ class Mantid::Kernel::UnitConversion.
+This a python binding to the C++ class Mantid::Kernel::UnitConversion.
 
 
 .. module:`mantid.kernel`

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-lines
 #pylint: disable=too-many-instance-attributes,non-parent-init-called,abstract-method,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
@@ -21,7 +15,7 @@ For diagrams on the intended work flow of the IDR and IDA interfaces see:
 
 System test class hierarchy as shown below:
 
-systemtesting.MantidSystemTest
+stresstesting.MantidStressTest
  |
  +--ISISIndirectInelasticBase
      |
@@ -74,7 +68,7 @@ systemtesting.MantidSystemTest
 '''
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
@@ -85,7 +79,7 @@ import platform
 from six import with_metaclass
 
 
-class ISISIndirectInelasticBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISIndirectInelasticBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
     '''

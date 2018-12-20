@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
 #define MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
 
@@ -16,6 +10,7 @@
 using namespace Mantid::Geometry;
 using namespace Mantid;
 using namespace testing;
+using boost::regex;
 
 class PeakTransformSelectorTest : public CxxTest::TestSuite {
 private:

@@ -1,12 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitData.h"
-
-#include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -17,7 +9,6 @@ using namespace Mantid::API;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
-using namespace Mantid::Kernel::Strings;
 
 std::string rangeToString(const std::pair<std::size_t, std::size_t> &range,
                           const std::string &delimiter = "-") {
@@ -99,53 +90,6 @@ private:
   const std::string m_rangeDelimiter;
 };
 
-std::string constructSpectraString(std::vector<int> const &spectras) {
-  return joinCompress(spectras.begin(), spectras.end());
-}
-
-std::vector<std::string> splitStringBy(std::string const &str,
-                                       std::string const &delimiter) {
-  std::vector<std::string> subStrings;
-  boost::split(subStrings, str, boost::is_any_of(delimiter));
-  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
-                                  [](std::string const &subString) {
-                                    return subString.empty();
-                                  }),
-                   subStrings.end());
-  return subStrings;
-}
-
-std::string getSpectraRange(std::string const &string) {
-  auto bounds = splitStringBy(string, "-");
-  return bounds[0] > bounds[1] ? bounds[1] + "-" + bounds[0] : string;
-}
-
-std::string rearrangeSpectraSubString(std::string const &string) {
-  return string.find("-") != std::string::npos ? getSpectraRange(string)
-                                               : string;
-}
-
-// Swaps the two numbers in a spectra range if they go from large to small
-std::string rearrangeSpectraRangeStrings(std::string const &string) {
-  std::string spectraString;
-  std::vector<std::string> subStrings = splitStringBy(string, ",");
-  for (auto it = subStrings.begin(); it < subStrings.end(); ++it) {
-    spectraString += rearrangeSpectraSubString(*it);
-    spectraString += it != subStrings.end() ? "," : "";
-  }
-  return spectraString;
-}
-
-std::string createSpectraString(std::string string) {
-  string.erase(std::remove_if(string.begin(), string.end(), isspace),
-               string.end());
-  std::vector<int> spectras = parseRange(rearrangeSpectraRangeStrings(string));
-  std::sort(spectras.begin(), spectras.end());
-  // Remove duplicate entries
-  spectras.erase(std::unique(spectras.begin(), spectras.end()), spectras.end());
-  return constructSpectraString(spectras);
-}
-
 struct CombineSpectra : boost::static_visitor<Spectra> {
   Spectra
   operator()(const std::pair<std::size_t, std::size_t> &spectra1,
@@ -154,16 +98,15 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
       return std::make_pair(spectra1.first, spectra2.second);
     else if (spectra2.second + 1 == spectra1.first)
       return std::make_pair(spectra2.first, spectra1.second);
-    else {
-      return DiscontinuousSpectra<std::size_t>(createSpectraString(
-          rangeToString(spectra1) + "," + rangeToString(spectra2)));
-    }
+    else
+      return DiscontinuousSpectra<std::size_t>(rangeToString(spectra1) + "," +
+                                               rangeToString(spectra2));
   }
 
   Spectra operator()(const Spectra &spectra1, const Spectra &spectra2) const {
-    return DiscontinuousSpectra<std::size_t>(createSpectraString(
+    return DiscontinuousSpectra<std::size_t>(
         boost::apply_visitor(SpectraToString(), spectra1) + "," +
-        boost::apply_visitor(SpectraToString(), spectra2)));
+        boost::apply_visitor(SpectraToString(), spectra2));
   }
 };
 
@@ -222,45 +165,6 @@ tryPassFormatArgument(boost::basic_format<char> &formatString,
 std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
-
-double convertBoundToDoubleAndFormat(std::string const &str) {
-  return std::round(std::stod(str) * 10) / 10;
-}
-
-std::string constructExcludeRegionString(std::vector<double> const &bounds) {
-  std::string excludeRegion;
-  for (auto it = bounds.begin(); it < bounds.end(); ++it) {
-    auto splitDouble = splitStringBy(std::to_string(*it), ".");
-    excludeRegion += splitDouble[0] + "." + splitDouble[1].front();
-    excludeRegion += it == bounds.end() - 1 ? "" : ",";
-  }
-  return excludeRegion;
-}
-
-std::string orderExcludeRegionString(std::vector<double> &bounds) {
-  for (auto it = bounds.begin(); it < bounds.end() - 1; it += 2)
-    if (*it > *(it + 1))
-      std::iter_swap(it, it + 1);
-  return constructExcludeRegionString(bounds);
-}
-
-std::vector<double>
-getBoundsAsDoubleVector(std::vector<std::string> const &boundStrings) {
-  std::vector<double> bounds;
-  bounds.reserve(boundStrings.size());
-  for (auto bound : boundStrings)
-    bounds.emplace_back(convertBoundToDoubleAndFormat(bound));
-  return bounds;
-}
-
-std::string createExcludeRegionString(std::string regionString) {
-  regionString.erase(
-      std::remove_if(regionString.begin(), regionString.end(), isspace),
-      regionString.end());
-  auto bounds = getBoundsAsDoubleVector(splitStringBy(regionString, ","));
-  return orderExcludeRegionString(bounds);
-}
-
 } // namespace
 
 namespace MantidQt {
@@ -314,9 +218,7 @@ std::size_t IndirectFitData::numberOfSpectra() const {
 }
 
 bool IndirectFitData::zeroSpectra() const {
-  if (m_workspace->getNumberHistograms())
-    return boost::apply_visitor(CheckZeroSpectrum(), m_spectra);
-  return true;
+  return boost::apply_visitor(CheckZeroSpectrum(), m_spectra);
 }
 
 std::pair<double, double>
@@ -339,15 +241,8 @@ IndirectFitData::excludeRegionsVector(std::size_t spectrum) const {
   return vectorFromString<double>(getExcludeRegion(spectrum));
 }
 
-void IndirectFitData::setSpectra(std::string const &spectra) {
-  try {
-    const Spectra spec =
-        DiscontinuousSpectra<std::size_t>(createSpectraString(spectra));
-    setSpectra(spec);
-  } catch (std::exception &ex) {
-    throw std::runtime_error("Spectra too large for cast: " +
-                             std::string(ex.what()));
-  }
+void IndirectFitData::setSpectra(const std::string &spectra) {
+  setSpectra(DiscontinuousSpectra<std::size_t>(spectra));
 }
 
 void IndirectFitData::setSpectra(Spectra &&spectra) {
@@ -355,12 +250,12 @@ void IndirectFitData::setSpectra(Spectra &&spectra) {
   m_spectra = std::move(spectra);
 }
 
-void IndirectFitData::setSpectra(Spectra const &spectra) {
+void IndirectFitData::setSpectra(const Spectra &spectra) {
   validateSpectra(spectra);
   m_spectra = spectra;
 }
 
-void IndirectFitData::validateSpectra(Spectra const &spectra) {
+void IndirectFitData::validateSpectra(const Spectra &spectra) {
   const auto visitor =
       SpectraOutOfRange<std::size_t>(0, workspace()->getNumberHistograms() - 1);
   auto notInRange = boost::apply_visitor(visitor, spectra);
@@ -372,8 +267,7 @@ void IndirectFitData::validateSpectra(Spectra const &spectra) {
   }
 }
 
-void IndirectFitData::setStartX(double const &startX,
-                                std::size_t const &spectrum) {
+void IndirectFitData::setStartX(double startX, std::size_t spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.first = startX;
@@ -384,7 +278,7 @@ void IndirectFitData::setStartX(double const &startX,
         "Unable to set StartX: Workspace no longer exists.");
 }
 
-void IndirectFitData::setEndX(double const &endX, std::size_t const &spectrum) {
+void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.second = endX;
@@ -394,15 +288,12 @@ void IndirectFitData::setEndX(double const &endX, std::size_t const &spectrum) {
     throw std::runtime_error("Unable to set EndX: Workspace no longer exists.");
 }
 
-void IndirectFitData::setExcludeRegionString(
-    std::string const &excludeRegionString, std::size_t const &spectrum) {
-  if (!excludeRegionString.empty())
-    m_excludeRegions[spectrum] = createExcludeRegionString(excludeRegionString);
-  else
-    m_excludeRegions[spectrum] = excludeRegionString;
+void IndirectFitData::setExcludeRegionString(const std::string &excludeRegion,
+                                             std::size_t spectrum) {
+  m_excludeRegions[spectrum] = excludeRegion;
 }
 
-IndirectFitData &IndirectFitData::combine(IndirectFitData const &fitData) {
+IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {
   m_workspace = fitData.m_workspace;
   setSpectra(
       boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra));

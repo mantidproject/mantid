@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,attribute-defined-outside-init
 """
 These tests ensure that all the steps that the SANS Interface GUI performs to reduce SANS data
@@ -20,7 +14,7 @@ Test was first created to apply to Mantid Release 3.0.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 import isis_reducer
 import ISISCommandInterface as i
@@ -36,7 +30,7 @@ def s(obj):
     print('!'+str(obj)+'!',type(obj))
 
 
-class SANS2DMinimalBatchReduction(systemtesting.MantidSystemTest):
+class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):
     """Minimal script to perform full reduction in batch mode
   """
 

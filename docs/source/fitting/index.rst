@@ -14,7 +14,7 @@ for setting up the function, as well as some examples of how to use different fu
 
 *Fitting minimizers* gives links to detailed descriptions of the various minimizers available in 
 Mantid. Choosing the right minimizer is an art as much as a science, a discussion of choosing 
-the right minimizer is provided :ref:`here <FittingMinimizers>`.
+the right minimizer is provided `here. <http://docs.mantidproject.org/nightly/concepts/FittingMinimizers.html>`_
 
 .. toctree::
    :maxdepth: 1

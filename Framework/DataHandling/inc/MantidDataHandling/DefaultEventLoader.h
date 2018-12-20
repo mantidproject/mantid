@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_DEFAULTEVENTLOADER_H_
 #define MANTID_DATAHANDLING_DEFAULTEVENTLOADER_H_
 
@@ -20,6 +14,27 @@ class LoadEventNexus;
 /** Helper class for LoadEventNexus that is specific to the current default
   loading code for NXevent_data entries in Nexus files, in particular
   LoadBankFromDiskTask and ProcessBankData.
+
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_DATAHANDLING_DLL DefaultEventLoader {
 public:
@@ -126,9 +141,10 @@ void DefaultEventLoader::makeMapToEventLists(
       }
     }
   } else {
-    // To avoid going out of range in the vector, this is the MAX INDEX that can
+    // To avoid going out of range in the vector, this is the MAX index that can
     // go into it
-    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size());
+    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size()) +
+                  pixelID_to_wi_offset;
 
     // Make an array where index = pixel ID
     // Set the value to NULL by default
@@ -136,7 +152,8 @@ void DefaultEventLoader::makeMapToEventLists(
       vectors[i].resize(eventid_max + 1, nullptr);
     }
 
-    for (size_t j = 0; j < pixelID_to_wi_vector.size(); j++) {
+    for (size_t j = size_t(pixelID_to_wi_offset);
+         j < pixelID_to_wi_vector.size(); j++) {
       size_t wi = pixelID_to_wi_vector[j];
       // Save a POINTER to the vector
       if (wi < m_ws.getNumberHistograms()) {

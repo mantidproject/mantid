@@ -1,11 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,attribute-defined-outside-init
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 
 import platform
@@ -77,7 +71,7 @@ def tolerance():
 #------------------------------------------------------------------------------------------------------------------
 
 
-class VesuvioFittingTest(systemtesting.MantidSystemTest):
+class VesuvioFittingTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         do_fit_no_background(k_is_free=False)
@@ -94,7 +88,7 @@ class VesuvioFittingTest(systemtesting.MantidSystemTest):
 #------------------------------------------------------------------------------------------------------------------
 
 
-class VesuvioFittingWithKFreeTest(systemtesting.MantidSystemTest):
+class VesuvioFittingWithKFreeTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         do_fit_no_background(k_is_free=True)
@@ -111,7 +105,7 @@ class VesuvioFittingWithKFreeTest(systemtesting.MantidSystemTest):
 #------------------------------------------------------------------------------------------------------------------
 
 
-class VesuvioFittingWithQuadraticBackgroundTest(systemtesting.MantidSystemTest):
+class VesuvioFittingWithQuadraticBackgroundTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         do_fit_with_quadratic_background()

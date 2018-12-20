@@ -1,17 +1,11 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.geometry import *
 from six import iteritems
 
 
-class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
+class SpaceGroupUnitCellTest(stresstesting.MantidStressTest):
     '''
     This test checks that SpaceGroup.isAllowedUnitCell produces the expected result for each registered space group.
     '''

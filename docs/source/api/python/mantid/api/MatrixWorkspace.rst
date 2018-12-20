@@ -4,7 +4,7 @@
  MatrixWorkspace
 =================
 
-This is a Python binding to the C++ class Mantid::API::MatrixWorkspace.
+This a python binding to the C++ class Mantid::API::MatrixWorkspace.
 
 *bases:* :py:obj:`mantid.api.ExperimentInfo`, :py:obj:`mantid.api.IMDWorkspace`
 

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentWindow.h"
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
@@ -172,8 +166,7 @@ void InstrumentWindow::selectComponent(const QString &name) {
 }
 
 void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
-  return m_instrumentWidget->setScaleType(
-      static_cast<MantidColorMap::ScaleType>(type));
+  return m_instrumentWidget->setScaleType(type);
 }
 
 void InstrumentWindow::setViewType(const QString &type) {

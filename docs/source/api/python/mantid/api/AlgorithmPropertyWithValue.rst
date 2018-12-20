@@ -2,7 +2,7 @@
  AlgorithmPropertyWithValue
 ============================
 
-This is a Python binding to the C++ class Mantid::API::AlgorithmPropertyWithValue.
+This a python binding to the C++ class Mantid::API::AlgorithmPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

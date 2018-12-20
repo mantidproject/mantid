@@ -2494,16 +2494,6 @@
              </layout>
             </item>
             <item>
-             <widget class="QCheckBox" name="CreateHKLWorkspace_ckbx">
-              <property name="toolTip">
-               <string>Convert the event workspace after cell is chosen into an MD HKL Workspace.</string>
-              </property>
-              <property name="text">
-               <string>Create MD HKL Workspace</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="verticalSpacer_4">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -3018,7 +3008,7 @@
                 </item>
                 <item>
                  <property name="text">
-                  <string>Bk2BkExpConvPV</string>
+                  <string>Bk2BKExpConvPV</string>
                  </property>
                 </item>
                 <item>

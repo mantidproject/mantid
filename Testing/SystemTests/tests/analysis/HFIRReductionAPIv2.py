@@ -1,11 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import systemtesting
+import stresstesting
 from mantid.api import FileFinder
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -26,7 +20,7 @@ def do_cleanup():
     return True
 
 
-class HFIRReductionAPIv2(systemtesting.MantidSystemTest):
+class HFIRReductionAPIv2(stresstesting.MantidStressTest):
     """
         Simple reduction example
     """
@@ -56,7 +50,7 @@ class HFIRReductionAPIv2(systemtesting.MantidSystemTest):
         return "BioSANS_test_data_Iq", "HFIRReduction.nxs"
 
 
-class HFIRAbsoluteScalingReference(systemtesting.MantidSystemTest):
+class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
     """
         Test absolute scaling using a reference data set
     """
@@ -87,7 +81,7 @@ class HFIRAbsoluteScalingReference(systemtesting.MantidSystemTest):
         return "BioSANS_test_data_Iq", "HFIRAbsoluteScalingReference.nxs"
 
 
-class HFIRAbsoluteScalingValue(systemtesting.MantidSystemTest):
+class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
     """
         Test absolute scaling using a reference data set
     """

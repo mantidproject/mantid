@@ -2,7 +2,7 @@
  IntListValidator
 ==================
 
-This is a Python binding to the C++ class Mantid::Kernel::IntListValidator.
+This a python binding to the C++ class Mantid::Kernel::IntListValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 

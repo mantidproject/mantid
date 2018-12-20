@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include <MantidKernel/StringTokenizer.h>
 #include <algorithm>
 #include <boost/algorithm/string/replace.hpp>
@@ -220,9 +214,9 @@ void PlotPeakByLogValue::exec() {
 
   setProperty("OutputWorkspace", result);
 
-  std::vector<MatrixWorkspace_sptr> fitWorkspaces;
-  std::vector<ITableWorkspace_sptr> parameterWorkspaces;
-  std::vector<ITableWorkspace_sptr> covarianceWorkspaces;
+  std::vector<std::string> covariance_workspaces;
+  std::vector<std::string> fit_workspaces;
+  std::vector<std::string> parameter_workspaces;
 
   double dProg = 1. / static_cast<double>(wsNames.size());
   double Prog = 0.;
@@ -250,9 +244,9 @@ void PlotPeakByLogValue::exec() {
     }
 
     if (createFitOutput) {
-      covarianceWorkspaces.reserve(covarianceWorkspaces.size() + jend);
-      fitWorkspaces.reserve(fitWorkspaces.size() + jend);
-      parameterWorkspaces.reserve(parameterWorkspaces.size() + jend);
+      covariance_workspaces.reserve(covariance_workspaces.size() + jend);
+      fit_workspaces.reserve(fit_workspaces.size() + jend);
+      parameter_workspaces.reserve(parameter_workspaces.size() + jend);
     }
 
     dProg /= abs(jend - j);
@@ -305,7 +299,8 @@ void PlotPeakByLogValue::exec() {
         bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
         // Fit the function
-        auto fit = this->createChildAlgorithm("Fit");
+        API::IAlgorithm_sptr fit =
+            AlgorithmManager::Instance().createUnmanaged("Fit");
         fit->initialize();
         fit->setPropertyValue("EvaluationType",
                               getPropertyValue("EvaluationType"));
@@ -340,18 +335,15 @@ void PlotPeakByLogValue::exec() {
         chi2 = fit->getProperty("OutputChi2overDoF");
 
         if (createFitOutput) {
-          MatrixWorkspace_sptr outputFitWorkspace =
-              fit->getProperty("OutputWorkspace");
-          ITableWorkspace_sptr outputParamWorkspace =
-              fit->getProperty("OutputParameters");
-          ITableWorkspace_sptr outputCovarianceWorkspace =
-              fit->getProperty("OutputNormalisedCovarianceMatrix");
-          fitWorkspaces.emplace_back(outputFitWorkspace);
-          parameterWorkspaces.emplace_back(outputParamWorkspace);
-          covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
+          covariance_workspaces.push_back(wsBaseName +
+                                          "_NormalisedCovarianceMatrix");
+          parameter_workspaces.push_back(wsBaseName + "_Parameters");
+          fit_workspaces.push_back(wsBaseName + "_Workspace");
         }
+
         g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
                       << ' ' << chi2 << '\n';
+
       } catch (...) {
         g_log.error("Error in Fit ChildAlgorithm");
         throw;
@@ -380,33 +372,37 @@ void PlotPeakByLogValue::exec() {
           ifun->setParameter(i, initialParams[i]);
         }
       }
+
     } // for(;j < jend;++j)
   }
 
   if (createFitOutput) {
     // collect output of fit for each spectrum into workspace groups
-    WorkspaceGroup_sptr covarianceGroup = boost::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : covarianceWorkspaces)
-      covarianceGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(
-        m_baseName + "_NormalisedCovarianceMatrices", covarianceGroup);
+    API::IAlgorithm_sptr groupAlg =
+        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", covariance_workspaces);
+    groupAlg->setProperty("OutputWorkspace",
+                          m_baseName + "_NormalisedCovarianceMatrices");
+    groupAlg->execute();
 
-    WorkspaceGroup_sptr parameterGroup = boost::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : parameterWorkspaces)
-      parameterGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(m_baseName + "_Parameters",
-                                                 parameterGroup);
+    groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
+    groupAlg->setProperty("OutputWorkspace", m_baseName + "_Parameters");
+    groupAlg->execute();
 
-    WorkspaceGroup_sptr fitGroup = boost::make_shared<WorkspaceGroup>();
-    for (auto const &workspace : fitWorkspaces)
-      fitGroup->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(m_baseName + "_Workspaces",
-                                                 fitGroup);
+    groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", fit_workspaces);
+    groupAlg->setProperty("OutputWorkspace", m_baseName + "_Workspaces");
+    groupAlg->execute();
   }
 
   for (auto &minimizerWorkspace : m_minimizerWorkspaces) {
     const std::string paramName = minimizerWorkspace.first;
-    auto groupAlg = this->createChildAlgorithm("GroupWorkspaces");
+    API::IAlgorithm_sptr groupAlg =
+        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", minimizerWorkspace.second);
     groupAlg->setProperty("OutputWorkspace", m_baseName + "_" + paramName);

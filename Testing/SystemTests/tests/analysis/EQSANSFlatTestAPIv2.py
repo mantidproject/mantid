@@ -1,11 +1,5 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -13,7 +7,7 @@ from reduction_workflow.instruments.sans.hfir_command_interface import *
 FILE_LOCATION = "/SNS/EQSANS/IPTS-5636/data/"
 
 
-class EQSANSFlatTest(systemtesting.MantidSystemTest):
+class EQSANSFlatTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
         files = []
         files.append(FILE_LOCATION+"EQSANS_5704_event.nxs")

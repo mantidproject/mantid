@@ -1,13 +1,7 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,attribute-defined-outside-init
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 
 from mantid.simpleapi import *
 import ISISCommandInterface as i
@@ -16,7 +10,7 @@ MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
 
 
-class SANS2DMinimalBatchReductionSliced(systemtesting.MantidSystemTest):
+class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
     def __init__(self):
         super(SANS2DMinimalBatchReductionSliced, self).__init__()
         config['default.instrument']='SANS2D'

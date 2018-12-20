@@ -9,7 +9,6 @@ run_selector_widget.ui
 summation_settings_widget.ui
 beam_centre.ui
 diagnostics_page.ui
-save_other_dialog.ui
  )
 
 UiToPy( UI_FILES CompileUISANSDataProcessorInterface)

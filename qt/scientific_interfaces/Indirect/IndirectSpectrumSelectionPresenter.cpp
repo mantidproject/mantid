@@ -1,13 +1,7 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSpectrumSelectionPresenter.h"
 
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Strings.h"
+
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <algorithm>
@@ -18,7 +12,6 @@
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
-using namespace Mantid::Kernel::Strings;
 
 struct SetViewSpectra : boost::static_visitor<> {
   explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
@@ -42,53 +35,6 @@ std::string OR(const std::string &lhs, const std::string &rhs) {
 
 std::string NATURAL_NUMBER(std::size_t digits) {
   return OR("0", "[1-9][0-9]{," + std::to_string(digits - 1) + "}");
-}
-
-std::string constructSpectraString(std::vector<int> const &spectras) {
-  return joinCompress(spectras.begin(), spectras.end());
-}
-
-std::vector<std::string> splitStringBy(std::string const &str,
-                                       std::string const &delimiter) {
-  std::vector<std::string> subStrings;
-  boost::split(subStrings, str, boost::is_any_of(delimiter));
-  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
-                                  [](std::string const &subString) {
-                                    return subString.empty();
-                                  }),
-                   subStrings.end());
-  return subStrings;
-}
-
-std::string getSpectraRange(std::string const &string) {
-  auto bounds = splitStringBy(string, "-");
-  return bounds[0] > bounds[1] ? bounds[1] + "-" + bounds[0] : string;
-}
-
-std::string rearrangeSpectraSubString(std::string const &string) {
-  return string.find("-") != std::string::npos ? getSpectraRange(string)
-                                               : string;
-}
-
-// Swaps the two numbers in a spectra range if they go from large to small
-std::string rearrangeSpectraRangeStrings(std::string const &string) {
-  std::string spectraString;
-  std::vector<std::string> subStrings = splitStringBy(string, ",");
-  for (auto it = subStrings.begin(); it < subStrings.end(); ++it) {
-    spectraString += rearrangeSpectraSubString(*it);
-    spectraString += it != subStrings.end() ? "," : "";
-  }
-  return spectraString;
-}
-
-std::string createSpectraString(std::string string) {
-  string.erase(std::remove_if(string.begin(), string.end(), isspace),
-               string.end());
-  std::vector<int> spectras = parseRange(rearrangeSpectraRangeStrings(string));
-  std::sort(spectras.begin(), spectras.end());
-  // Remove duplicate entries
-  spectras.erase(std::unique(spectras.begin(), spectras.end()), spectras.end());
-  return constructSpectraString(spectras);
 }
 
 namespace Regexes {
@@ -125,8 +71,6 @@ IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
   connect(m_view.get(),
           SIGNAL(selectedSpectraChanged(std::size_t, std::size_t)), this,
           SLOT(updateSpectraRange(std::size_t, std::size_t)));
-  connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
-          this, SLOT(displaySpectraList(const std::string &)));
 
   connect(m_view.get(), SIGNAL(maskSpectrumChanged(int)), this,
           SLOT(setMaskIndex(int)));
@@ -134,8 +78,6 @@ IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
           SLOT(displayBinMask()));
   connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
           SLOT(setBinMask(const std::string &)));
-  connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
-          SLOT(displayBinMask()));
   connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
           SIGNAL(maskChanged(const std::string &)));
 
@@ -186,7 +128,7 @@ void IndirectSpectrumSelectionPresenter::setSpectraRange(std::size_t minimum,
 }
 
 void IndirectSpectrumSelectionPresenter::setModelSpectra(
-    Spectra const &spectra) {
+    const Spectra &spectra) {
   try {
     m_model->setSpectra(spectra, m_activeIndex);
     m_spectraError.clear();
@@ -200,9 +142,8 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
-    std::string const &spectraList) {
-  setModelSpectra(
-      DiscontinuousSpectra<std::size_t>(createSpectraString(spectraList)));
+    const std::string &spectraList) {
+  setModelSpectra(DiscontinuousSpectra<std::size_t>(spectraList));
   emit spectraChanged(m_activeIndex);
 }
 
@@ -213,20 +154,15 @@ void IndirectSpectrumSelectionPresenter::updateSpectraRange(
 }
 
 void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
-    std::string const &spectra) {
+    const std::string &spectra) {
   if (m_spectraError.empty())
     m_view->setMaskSpectraList(vectorFromString<std::size_t>(spectra));
   else
     m_view->setMaskSpectraList({});
 }
 
-void IndirectSpectrumSelectionPresenter::displaySpectraList(
-    std::string const &spectra) {
-  m_view->displaySpectra(createSpectraString(spectra));
-}
-
 void IndirectSpectrumSelectionPresenter::setBinMask(
-    std::string const &maskString) {
+    const std::string &maskString) {
   auto validator = validateMaskBinsString();
 
   if (validator.isAllInputValid()) {

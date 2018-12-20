@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.kernel import config
 from mantid.api import FileFinder
 from sans.command_interface.ISISCommandInterface import (UseCompatibilityMode, LOQ, MaskFile, BatchReduce)
@@ -15,7 +9,7 @@ MASKFILE = FileFinder.getFullPath('MaskLOQData.txt')
 BATCHFILE = FileFinder.getFullPath('loq_batch_mode_reduction.csv')
 
 
-class LOQMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
+class LOQMinimalBatchReductionTest_V2(stresstesting.MantidStressTest):
     def __init__(self):
         super(LOQMinimalBatchReductionTest_V2, self).__init__()
         config['default.instrument'] = 'LOQ'

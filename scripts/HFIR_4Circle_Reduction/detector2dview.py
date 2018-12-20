@@ -1,15 +1,9 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
 from __future__ import (absolute_import, division, print_function)
 from HFIR_4Circle_Reduction import mpl2dgraphicsview
+from PyQt4 import QtCore
 import numpy as np
 import os
-from qtpy.QtCore import Signal as pyqtSignal
 
 
 class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
@@ -22,7 +16,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         LEFT = 1
         RIGHT = 3
 
-    newROIDefinedSignal = pyqtSignal(int, int, int, int)  # return coordinate of the
+    newROIDefinedSignal = QtCore.pyqtSignal(int, int, int, int)  # return coordinate of the
 
     def __init__(self, parent):
         """
@@ -61,6 +55,25 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
+    # def add_roi(self, roi_start, roi_end):
+    #     """ Add region of interest
+    #     :param roi_start:
+    #     :param roi_end:
+    #     :return:
+    #     """
+    #     # check
+    #     assert isinstance(roi_start, tuple) and len(roi_start) == 2
+    #     assert isinstance(roi_end, tuple) and len(roi_end) == 2
+    #
+    #     # set
+    #     self._roiStart = roi_start
+    #     self._roiEnd = roi_end
+    #
+    #     # plot
+    #     self.plot_roi()
+    #
+    #     return
+
     def clear_canvas(self):
         """
         clear canvas (override base class)
@@ -79,24 +92,28 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
-    def enter_roi_mode(self, roi_state):
+    def enter_roi_mode(self, state):
         """
         Enter or leave the region of interest (ROI) selection mode
         :return:
         """
-        assert isinstance(roi_state, bool), 'ROI mode state {} must be a boolean but not a {}.' \
-                                            ''.format(roi_state, type(roi_state))
+        assert isinstance(state, bool), 'blabla'
 
         # set
-        self._roiSelectMode = roi_state
+        self._roiSelectMode = state
 
-        if roi_state:
+        if state:
             # new in add-ROI mode
             self.remove_roi()
         else:
             # reset roi start and roi end
             self._roiStart = None
             self._roiEnd = None
+
+        # # reset _myPolygen
+        # if state is False:
+        #     if self._myPolygon is not None:
+        #         self.remove_roi()
 
         return
 
@@ -189,7 +206,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return lower_left, upper_right
 
-    def plot_detector_counts(self, raw_det_data, title=None):
+    def plot_detector_counts(self, raw_det_data):
         """
         plot detector counts as 2D plot
         :param raw_det_data:
@@ -202,9 +219,6 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         count_plot = self.add_plot_2d(raw_det_data, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                                       hold_prev_image=False)
-        if title is None:
-            title = 'No Title'
-        self.set_title(title)
 
         if self._myPolygon is not None:
             print ('[DB...BAT...] Add PATCH')
@@ -221,8 +235,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         # check
-        assert self._roiStart is not None, 'Starting point of region-of-interest cannot be None'
-        assert self._roiEnd is not None, 'Ending point of region-of-interest cannot be None'
+        # TODO FIXME - Fill blabla
+        assert self._roiStart is not None, 'blabla'
+        assert self._roiEnd is not None, 'blabla'
 
         # create a vertex list of a rectangular
         vertex_array = np.ndarray(shape=(4, 2))

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_SCRIPTBUILDER_H_
 #define MANTID_API_SCRIPTBUILDER_H_
 
@@ -27,15 +21,35 @@ namespace API {
 
     @author Samuel Jackson, ISIS, RAL
     @date 21/01/2008
+
+    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
 class MANTID_API_DLL ScriptBuilder {
 public:
-  ScriptBuilder(
-      boost::shared_ptr<HistoryView> view,
-      std::string versionSpecificity = "old", bool appendTimestamp = false,
-      std::vector<std::string> ignoreTheseAlgs = {},
-      std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {});
+  ScriptBuilder(boost::shared_ptr<HistoryView> view,
+                std::string versionSpecificity = "old",
+                bool appendTimestamp = false,
+                std::vector<std::string> ignoreTheseAlgs = {});
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();
@@ -50,8 +64,7 @@ private:
   const std::string buildCommentString(const AlgorithmHistory &algHistory);
   const std::string buildAlgorithmString(const AlgorithmHistory &algHistory);
   const std::string
-  buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory,
-                      const std::string &algName);
+  buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory);
   void createStringForAlg(
       std::ostringstream &os,
       boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);
@@ -61,7 +74,6 @@ private:
   std::string m_versionSpecificity;
   bool m_timestampCommands;
   std::vector<std::string> m_algsToIgnore;
-  std::vector<std::vector<std::string>> m_propertiesToIgnore;
 };
 
 } // namespace API

@@ -17,7 +17,7 @@ is then searched for patterns consistent with the presence of a peak.
 The list of candidate peaks found is passed to a fitting routine and
 those that are successfully fitted are kept and returned in the output
 workspace (and logged at information level). The output
-:ref:`TableWorkspace <Table Workspaces>` contains columns,
+`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ contains columns,
 which reflect the fact that the peak has been fitted to a peak function atop
 a background: spectrum, centre, width, height, backgroundintercept and
 backgroundslope. Setting ``RawPeakParameters=True`` will give the actual
@@ -82,7 +82,7 @@ observed data.
    #. If peak centre is restricted to given value, then the peak range will be from 1/6 to 5/6 of the given data points;
    #. If peak centre is set to observed value, then the 3 leftmost data points will be used for background.
 
-.. seealso:: The :ref:`list of available functions <Fit Functions List>` for details on the various functions and the :ref:`documentation for minimizers <fitminimizers>`.
+.. seealso:: The `peak shape functions <../fitfunctions/categories/Peak.html>`_ and `background functions </fitfunctions/categories/Background.html>`_ for details on the various functions. The `documentation for minimizers <../fitminimizers/>`_.
 
 References
 ----------

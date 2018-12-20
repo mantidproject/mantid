@@ -1,11 +1,6 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
@@ -23,8 +18,8 @@
 
 using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
+namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
-using ExtractStdString = extract<std::string>;
 
 GET_POINTER_SPECIALIZATION(IPropertyManager)
 
@@ -37,18 +32,30 @@ namespace {
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void setProperty(IPropertyManager &self, const std::string &name,
+void setProperty(IPropertyManager &self, const boost::python::object &name,
                  const boost::python::object &value) {
-  ExtractStdString valuecpp(value);
+  std::string namestr;
+  try {
+    namestr = Converters::pyObjToStr(name);
+  } catch (std::invalid_argument &) {
+    throw std::invalid_argument("Failed to convert property name to a string");
+  }
+
+  extract<std::string> valuecpp(value);
   if (valuecpp.check()) {
-    self.setPropertyValue(name, valuecpp());
+    self.setPropertyValue(namestr, valuecpp());
+#if PY_VERSION_HEX < 0x03000000
+  } else if (PyUnicode_Check(value.ptr())) {
+    self.setPropertyValue(namestr,
+                          extract<std::string>(str(value).encode("utf-8"))());
+#endif
   } else {
     try {
-      Property *p = self.getProperty(name);
+      Property *p = self.getProperty(namestr);
       const auto &entry = Registry::TypeRegistry::retrieve(*(p->type_info()));
-      entry.set(&self, name, value);
+      entry.set(&self, namestr, value);
     } catch (std::invalid_argument &e) {
-      throw std::invalid_argument("When converting parameter \"" + name +
+      throw std::invalid_argument("When converting parameter \"" + namestr +
                                   "\": " + e.what());
     }
   }
@@ -64,7 +71,7 @@ void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
   auto begin = stl_input_iterator<object>(objectItems);
   auto end = stl_input_iterator<object>();
   for (auto it = begin; it != end; ++it) {
-    setProperty(self, ExtractStdString((*it)[0])(), (*it)[1]);
+    setProperty(self, (*it)[0], (*it)[1]);
   }
 }
 
@@ -75,10 +82,11 @@ void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void declareProperty(IPropertyManager &self, const std::string &name,
+void declareProperty(IPropertyManager &self, const boost::python::object &name,
                      boost::python::object value) {
+  std::string nameStr = Converters::pyObjToStr(name);
   auto p = std::unique_ptr<Property>(
-      Registry::PropertyWithValueFactory::create(name, value, 0));
+      Registry::PropertyWithValueFactory::create(nameStr, value, 0));
   self.declareProperty(std::move(p));
 }
 
@@ -90,9 +98,11 @@ void declareProperty(IPropertyManager &self, const std::string &name,
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void declareOrSetProperty(IPropertyManager &self, const std::string &name,
+void declareOrSetProperty(IPropertyManager &self,
+                          const boost::python::object &name,
                           boost::python::object value) {
-  bool propExists = self.existsProperty(name);
+  std::string nameStr = Converters::pyObjToStr(name);
+  bool propExists = self.existsProperty(nameStr);
   if (propExists) {
     setProperty(self, name, value);
   } else {

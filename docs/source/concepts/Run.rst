@@ -181,8 +181,6 @@ ISIS (not including ISIS Muon data)
 -  **mon\_sum3** - Monitor sum 3
 -  **rb\_proposal** - The proposal number
 
-.. _RunInfoOnISISMuonData:
-
 ISIS Muon data
 ##############
 

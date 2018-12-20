@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectBayes.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
@@ -49,6 +43,7 @@ IndirectBayes::IndirectBayes(QWidget *parent)
 
   // Connect statements for the buttons shared between all tabs on the Indirect
   // Bayes interface
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
@@ -98,6 +93,21 @@ void IndirectBayes::loadSettings() {
   }
 
   settings.endGroup();
+}
+
+/**
+ * Slot to run the underlying algorithm code based on the currently selected
+ * tab.
+ *
+ * This method checks the tabs validate method is passing before calling
+ * the run method.
+ */
+void IndirectBayes::runClicked() {
+  int tabIndex = m_uiForm.indirectBayesTabs->currentIndex();
+
+  if (m_bayesTabs[tabIndex]->validateTab()) {
+    m_bayesTabs[tabIndex]->runTab();
+  }
 }
 
 /**

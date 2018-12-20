@@ -1,28 +1,20 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTER_H_
 
-#include "DllConfig.h"
-
 #include "IndirectFitPlotModel.h"
 
-#include "IIndirectFitPlotView.h"
+#include "IndirectFitPlotView.h"
 #include "LazyAsyncRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
+class DLLExport IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 public:
   IndirectFitPlotPresenter(IndirectFittingModel *model,
-                           IIndirectFitPlotView *view);
+                           IndirectFitPlotView *view);
 
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
@@ -32,7 +24,6 @@ public:
 public slots:
   void setStartX(double);
   void setEndX(double);
-  void updatePlotSpectrum(int spectrum);
   void hideMultipleDataSelection();
   void showMultipleDataSelection();
   void updateRangeSelectors();
@@ -98,7 +89,7 @@ private:
   std::string getPlotString(std::size_t spectrum) const;
 
   std::unique_ptr<IndirectFitPlotModel> m_model;
-  IIndirectFitPlotView *m_view;
+  IndirectFitPlotView *m_view;
 
   bool m_plotGuessInSeparateWindow;
   MantidQt::API::PythonRunner m_pythonRunner;

@@ -110,7 +110,6 @@ clean_orphaned_pyc_files ( ${CMAKE_CURRENT_SOURCE_DIR}/plugins )
 ###########################################################################
 # tests
 ###########################################################################
-set ( PYTHONINTERFACE_PLUGINS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/plugins )
 add_subdirectory( test )
 
 ###########################################################################

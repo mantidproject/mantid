@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef UNITTEST_H_
 #define UNITTEST_H_
 
@@ -1390,54 +1384,10 @@ public:
     }
   }
 
-  //----------------------------------------------------------------------
-  // Degrees tests
-  //----------------------------------------------------------------------
-
-  void test_that_caption_returns_the_correct_label_for_the_Degrees_unit() {
+  /// Test unit Degress
+  void testDegress() {
     TS_ASSERT_EQUALS(degrees.caption(), "Scattering angle");
-  }
-
-  void test_that_unitID_returns_the_correct_ID_for_the_Degrees_unit() {
     TS_ASSERT_EQUALS(degrees.unitID(), "Degrees");
-  }
-
-  void test_that_label_returns_the_correct_unit_for_Degrees() {
-    TS_ASSERT_EQUALS(degrees.label(), "degrees");
-  }
-
-  void test_that_singleToTOF_throws_for_the_Degrees_unit() {
-    TS_ASSERT_THROWS(degrees.singleToTOF(1.0), std::runtime_error);
-  }
-
-  void test_that_singleFromTOF_throws_for_the_Degrees_unit() {
-    TS_ASSERT_THROWS(degrees.singleFromTOF(1.0), std::runtime_error);
-  }
-
-  //----------------------------------------------------------------------
-  // TemperatureKelvin tests
-  //----------------------------------------------------------------------
-
-  void
-  test_that_caption_returns_the_correct_label_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_EQUALS(temperature.caption(), "Temperature");
-  }
-
-  void
-  test_that_unitID_returns_the_correct_ID_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_EQUALS(temperature.unitID(), "Temperature");
-  }
-
-  void test_that_label_returns_the_correct_unit_for_TemperatureKelvin() {
-    TS_ASSERT_EQUALS(temperature.label(), "K");
-  }
-
-  void test_that_singleToTOF_throws_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_THROWS(temperature.singleToTOF(1.0), std::runtime_error);
-  }
-
-  void test_that_singleFromTOF_throws_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_THROWS(temperature.singleFromTOF(1.0), std::runtime_error);
   }
 
 private:
@@ -1457,7 +1407,6 @@ private:
   Units::SpinEchoLength delta;
   Units::SpinEchoTime tau;
   Units::Degrees degrees;
-  Units::Temperature temperature;
 };
 
 #endif /*UNITTEST_H_*/

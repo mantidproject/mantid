@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -60,7 +54,7 @@ void LevenbergMarquardtMinimizer::initialize(
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           costFunction);
   if (leastSquares) {
-    m_data = std::make_unique<GSL_FitData>(leastSquares);
+    m_data = new GSL_FitData(leastSquares);
   } else {
     throw std::runtime_error("LevenbergMarquardt can only be used with Least "
                              "squares cost function.");
@@ -73,10 +67,9 @@ void LevenbergMarquardtMinimizer::initialize(
   gslContainer.f = &gsl_f;
   gslContainer.df = &gsl_df;
   gslContainer.fdf = &gsl_fdf;
-
   gslContainer.n = m_data->n;
   gslContainer.p = m_data->p;
-  gslContainer.params = m_data.get();
+  gslContainer.params = m_data;
 
   // setup GSL solver
   m_gslSolver = gsl_multifit_fdfsolver_alloc(T, m_data->n, m_data->p);
@@ -93,6 +86,9 @@ void LevenbergMarquardtMinimizer::initialize(
 }
 
 LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer() {
+  if (m_data) {
+    delete m_data;
+  }
   if (m_gslSolver) {
     gsl_multifit_fdfsolver_free(m_gslSolver);
   }

@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 
 ######################################################################
@@ -118,7 +112,7 @@ def validateMD(result,reference,tol=1.e-5,class_name='dummy',mismatchName=None):
         return True
 
 
-class SNSConvertToMDNoHistNoProjTest(systemtesting.MantidSystemTest):
+class SNSConvertToMDNoHistNoProjTest(stresstesting.MantidStressTest):
     truth_file = "SEQ_11499_md_enp.nxs"
     output_ws=None
     tolerance=0.0
@@ -143,7 +137,7 @@ class SNSConvertToMDNoHistNoProjTest(systemtesting.MantidSystemTest):
         return validateMD(self.output_ws, self.gold_ws_name,self.tolerance,self.__class__.__name__)
 
 
-class SNSConvertToMDHistNoProjTest(systemtesting.MantidSystemTest):
+class SNSConvertToMDHistNoProjTest(stresstesting.MantidStressTest):
     truth_file = "SEQ_11499_md_hnp.nxs"
     output_ws=None
     tolerance=0.0
@@ -169,7 +163,7 @@ class SNSConvertToMDHistNoProjTest(systemtesting.MantidSystemTest):
         return validateMD(self.output_ws, self.gold_ws_name,self.tolerance,self.__class__.__name__,self.gold_ws_name)
 
 
-class SNSConvertToMDNoHistProjTest(systemtesting.MantidSystemTest):
+class SNSConvertToMDNoHistProjTest(stresstesting.MantidStressTest):
     truth_file = "SEQ_11499_md_ewp.nxs"
     output_ws=None
     tolerance=0.0
@@ -195,7 +189,7 @@ class SNSConvertToMDNoHistProjTest(systemtesting.MantidSystemTest):
         #return (self.output_ws, self.gold_ws_name)
 
 
-class SNSConvertToMDHistProjTest(systemtesting.MantidSystemTest):
+class SNSConvertToMDHistProjTest(stresstesting.MantidStressTest):
     truth_file = "SEQ_11499_md_hwp.nxs"
     output_ws=None
     tolerance=0.0

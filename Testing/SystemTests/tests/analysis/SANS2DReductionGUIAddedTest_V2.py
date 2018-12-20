@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 
 """
@@ -12,7 +6,7 @@ One test has been removed from the port since it uses the ReductionSingleton.
 
 from __future__ import (absolute_import, division, print_function)
 import mantid  # noqa
-import systemtesting
+import stresstesting
 import os
 from mantid.api import AnalysisDataService
 from mantid.kernel import config
@@ -23,7 +17,7 @@ from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, 
                                                          TransmissionCan, WavRangeReduction, UseCompatibilityMode)
 
 
-class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
+class SANS2DAddedEventFilesWithOverlayTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()
@@ -62,7 +56,7 @@ class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
         os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
-class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSystemTest):
+class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()
@@ -106,7 +100,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSy
         os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
-class SANS2DAddedEventFilesWithoutOverlayTest_V2(systemtesting.MantidSystemTest):
+class SANS2DAddedEventFilesWithoutOverlayTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()

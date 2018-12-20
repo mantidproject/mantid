@@ -1,18 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from mantid.geometry import *
 from six import iteritems
 
 
-class SpaceGroupReflectionConditionsTest(systemtesting.MantidSystemTest):
+class SpaceGroupReflectionConditionsTest(stresstesting.MantidStressTest):
     '''
     This test uses PoldiCreatePeaksFromCell to generate lists of reflections for fake crystal structures, one for each
     registered space group and one atom in the general position. The algorithm uses structure factor calculation for

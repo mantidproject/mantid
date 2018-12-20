@@ -1,13 +1,7 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
+import mantid
 
-from mantid.api import FrameworkManager
 from mantid.kernel import DateAndTime
 from mantid.dataobjects import Workspace2D
 from sans.common.general_functions import (create_unmanaged_algorithm)
@@ -46,11 +40,6 @@ def provide_workspace_with_proton_charge(is_event=True):
 
 
 class SANSSliceEventTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        FrameworkManager.Instance()
-
     @staticmethod
     def _provide_workspaces(is_event=True):
         workspace = provide_workspace_with_proton_charge(is_event=is_event)

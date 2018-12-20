@@ -102,3 +102,6 @@ Error Reporter test
 - Click the `Yes, share information` box
 - Mantid should shut down
 - Check with the database admin
+
+---------------
+

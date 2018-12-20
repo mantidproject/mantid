@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -88,8 +82,7 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         ExecptionThrownOnBadLogName = False
         try:
             alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs",
-                                     LastFile = "emu00006475.nxs", LogNames="WrongTemp", OutputWorkspace = outputWorskapceName,
-                                     rethrow=True)
+                                     LastFile = "emu00006475.nxs", LogNames="WrongTemp", OutputWorkspace = outputWorskapceName)
         except RuntimeError:
             ExecptionThrownOnBadLogName = True
         self.assertEqual(True, ExecptionThrownOnBadLogName)
@@ -98,8 +91,7 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         ExecptionThrownOnBadFileParameter = False
         try:
             alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu0000000.nxs",
-                LastFile = "emu00006475.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName,
-                rethrow=True)
+                LastFile = "emu00006475.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
             self.assertFalse(alg_test.isExecuted())
         except:
             ExecptionThrownOnBadFileParameter = True
@@ -109,8 +101,7 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         ExecptionThrownOnBadFileParameter = False
         try:
             alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs",
-                LastFile = "emu9999999.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName,
-                rethrow=True)
+                LastFile = "emu9999999.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
             self.assertFalse(alg_test.isExecuted())
         except:
             ExecptionThrownOnBadFileParameter = True

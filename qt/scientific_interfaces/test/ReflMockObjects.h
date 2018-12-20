@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
@@ -130,8 +124,6 @@ public:
   MOCK_CONST_METHOD0(getCAlpha, std::string());
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
-  MOCK_CONST_METHOD0(getFloodCorrection, std::string());
-  MOCK_CONST_METHOD0(getFloodWorkspace, std::string());
   MOCK_CONST_METHOD0(getIntMonCheck, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());

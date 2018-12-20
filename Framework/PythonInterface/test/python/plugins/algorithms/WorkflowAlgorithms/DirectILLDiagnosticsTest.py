@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
@@ -186,34 +180,6 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
                 self.assertEquals(ys[0], 1)
             else:
                 self.assertEquals(ys[0], 0)
-
-    def testMaskedComponents(self):
-        inWS = mtd[self._RAW_WS_NAME]
-        spectraCount = inWS.getNumberHistograms()
-        outWSName = 'diagnosticsWS'
-        kwargs = {
-            'InputWorkspace': self._RAW_WS_NAME,
-            'OutputWorkspace': outWSName,
-            'ElasticPeakDiagnostics': 'Peak Diagnostics OFF',
-            'BkgDiagnostics': 'Bkg Diagnostics OFF',
-            'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF',
-            'DefaultMask': 'Default Mask OFF',
-            'MaskedComponents': 'tube_1',
-            'rethrow': True
-        }
-        run_algorithm('DirectILLDiagnostics', **kwargs)
-        self.assertTrue(mtd.doesExist(outWSName))
-        outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), spectraCount)
-        self.assertEquals(outWS.blocksize(), 1)
-        for i in range(spectraCount):
-            Ys = outWS.readY(i)
-            detector = outWS.getDetector(i)
-            componentName = detector.getFullName()
-            if 'tube_1' in componentName:
-                self.assertEquals(Ys[0], 1)
-            else:
-                self.assertEquals(Ys[0], 0)
 
     def testOutputIsUsable(self):
         inWS = mtd[self._RAW_WS_NAME]

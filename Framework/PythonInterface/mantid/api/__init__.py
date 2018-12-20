@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 """
 api
 ===
@@ -15,9 +9,20 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 # Load the C++ library
-from ..kernel import _shared_cextension
-with _shared_cextension():
-    from ._api import *
+from . import _api
+from ._api import *
+
+# stdlib imports
+import atexit as _atexit
+
+###############################################################################
+# Start the framework
+###############################################################################
+FrameworkManagerImpl.Instance()
+_atexit.register(FrameworkManagerImpl.Instance().shutdown)
+
+# Declare any additional C++ algorithms defined in this package
+_api._declareCPPAlgorithms()
 
 ###############################################################################
 # Make aliases accessible in this namespace

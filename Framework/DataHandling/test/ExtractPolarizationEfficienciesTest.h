@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_EXTRACTPOLARIZATIONEFFICIENCIESTEST_H_
 #define MANTID_DATAHANDLING_EXTRACTPOLARIZATIONEFFICIENCIESTEST_H_
 
@@ -398,14 +392,15 @@ public:
     auto workspace = createPointWS(1, 0, 10);
     LoadInstrument loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "unit_testing/REFL_Definition.xml");
+    loader.setPropertyValue("Filename",
+                            "IDFs_for_UNIT_TESTING/REFL_Definition.xml");
     loader.setProperty("Workspace", workspace);
     loader.setProperty("RewriteSpectraMap", OptionalBool(true));
     loader.execute();
     LoadParameterFile paramLoader;
     paramLoader.initialize();
-    paramLoader.setPropertyValue("Filename",
-                                 "unit_testing/REFL_Parameters_Fredrikze.xml");
+    paramLoader.setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/REFL_Parameters_Fredrikze.xml");
     paramLoader.setProperty("Workspace", workspace);
     paramLoader.execute();
 

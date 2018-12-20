@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Data catalog for EQSANS
@@ -11,20 +5,19 @@
 from __future__ import (absolute_import, division, print_function)
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
 from reduction_gui.reduction.sans.data_cat import DataSet,  DataType
-from reduction_gui.reduction.scripter import execute_script
 import re
 import datetime
 
 # Check whether Mantid is available
 try:
     from mantid.api import AnalysisDataService
-    from mantid.simpleapi import LoadEventNexus
+    import mantid.simpleapi as api
     HAS_MANTID = True
 except:
     HAS_MANTID = False
 
 try:
-    import mantidplot  # noqa
+    import mantidplot
     IN_MANTIDPLOT = True
 except:
     IN_MANTIDPLOT = False
@@ -46,11 +39,11 @@ class EQSANSDataSet(DataSet):
         try:
             if IN_MANTIDPLOT:
                 script = "LoadEventNexus(Filename='%s', OutputWorkspace='%s', MetaDataOnly=True)" % (file_path, outputWorkspace)
-                execute_script(script)
+                mantidplot.runPythonScript(script, True)
                 if not AnalysisDataService.doesExist(outputWorkspace):
                     return False
             else:
-                LoadEventNexus(Filename=file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
+                api.LoadEventNexus(Filename=file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
             return True
         except:
             return False

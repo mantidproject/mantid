@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CREATESAMPLEWORKSPACE_H_
 #define MANTID_ALGORITHMS_CREATESAMPLEWORKSPACE_H_
 
@@ -20,10 +14,32 @@ namespace Algorithms {
 
 /** CreateSampleWorkspace : This algorithm is intended for the creation of
   sample workspaces for usage examples and other situations
+
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport CreateSampleWorkspace : public API::Algorithm {
 public:
   CreateSampleWorkspace();
+  ~CreateSampleWorkspace() override;
 
   const std::string name() const override;
   int version() const override;
@@ -71,7 +87,7 @@ private:
   void addChopperParameters(API::MatrixWorkspace_sptr &ws);
 
   /// A pointer to the random number generator
-  std::unique_ptr<Kernel::PseudoRandomNumberGenerator> m_randGen;
+  Kernel::PseudoRandomNumberGenerator *m_randGen;
   std::map<std::string, std::string> m_preDefinedFunctionmap;
 };
 

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/ConcretePeaksPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -21,6 +15,7 @@
 #include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
 #include "MantidQtWidgets/SliceViewer/ZoomableOnDemand.h"
 #include <boost/regex.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

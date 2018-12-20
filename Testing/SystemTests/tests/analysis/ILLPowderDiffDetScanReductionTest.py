@@ -1,18 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 
 
 # A dummy test class to subclass from.
 # Sets up the facility and data search directories.
-class _DiffReductionTest(systemtesting.MantidSystemTest):
+class _DiffReductionTest(stresstesting.MantidStressTest):
 
     _facility = ''
     _directories = ''

@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-from mantid.api import FrameworkManager
+import mantid
 
 from sans.test_helper.test_director import TestDirector
 from sans.state.normalize_to_monitor import get_normalize_to_monitor_builder
@@ -44,10 +38,6 @@ def get_expected_for_spectrum_1_case(monitor_workspace, selected_detector):
 
 
 class SANSNormalizeToMonitorTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        FrameworkManager.Instance()
 
     @staticmethod
     def _get_monitor_workspace(data=None):

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CONJOINXRUNS_H_
 #define MANTID_ALGORITHMS_CONJOINXRUNS_H_
 
@@ -17,8 +11,29 @@ namespace Mantid {
 namespace Algorithms {
 
 /** ConjoinXRuns : This algorithms joins the input workspaces horizontally,
- * i.e. by appending (concatenating) their columns.
- */
+* i.e. by appending (concatenating) their columns.
+
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 class MANTID_ALGORITHMS_DLL ConjoinXRuns : public API::Algorithm {
 public:
   const std::string name() const override;
@@ -26,15 +41,6 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
-
-  /// ConjoinXRuns parameter names of the paramter file for sample log merging
-  static const std::string SUM_MERGE;
-  static const std::string TIME_SERIES_MERGE;
-  static const std::string LIST_MERGE;
-  static const std::string WARN_MERGE;
-  static const std::string WARN_MERGE_TOLERANCES;
-  static const std::string FAIL_MERGE;
-  static const std::string FAIL_MERGE_TOLERANCES;
 
 protected:
   void fillHistory() override;

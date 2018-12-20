@@ -9,7 +9,7 @@
 Description
 -----------
 
-For testing :ref:`MDEventWorkspaces <MDWorkspace>`,
+For testing `MDEventWorkspaces <http://www.mantidproject.org/MDEventWorkspace>`_,
 this algorithm either creates a uniform, random distribution of events, or generates
 regular events placed in boxes, or fills peaks around given points with a given
 number of events.
@@ -17,7 +17,7 @@ number of events.
 Usage
 -----
 
-This algorithm can be run on a pre-existing :ref:`MDEventWorkspace <MDWorkspace>`
+This algorithm can be run on a pre-existing `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_
 or a newly created one. All of the examples below will be done with newly created ones
 using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
 

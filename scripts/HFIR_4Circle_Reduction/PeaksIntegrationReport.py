@@ -1,24 +1,11 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
 
-from qtpy.QtWidgets import (QDialog, QFileDialog)  # noqa
-from mantid.kernel import Logger
-try:
-    from mantidqt.utils.qt import load_ui
-except ImportError:
-    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
-    from mantidplot import load_ui
-from qtpy.QtWidgets import (QVBoxLayout)
-from HFIR_4Circle_Reduction.hfctables import PeaksIntegrationSpreadSheet
+from PyQt4 import QtGui, QtCore
+from . import ui_PeakIntegrationSpreadSheet
 
 
-class PeaksIntegrationReportDialog(QDialog):
+class PeaksIntegrationReportDialog(QtGui.QDialog):
     """
     Dialog to report the details of peaks integration
     """
@@ -30,42 +17,38 @@ class PeaksIntegrationReportDialog(QDialog):
         super(PeaksIntegrationReportDialog, self).__init__(parent)
 
         # set up UI
-        ui_path = "PeakIntegrationSpreadSheet.ui"
-        self.ui = load_ui(__file__, ui_path, baseinstance=self)
-        self._promote_widgets()
+        self.ui = ui_PeakIntegrationSpreadSheet.Ui_Dialog()
+        self.ui.setupUi(self)
 
         # initialize widget
         self.ui.tableWidget_spreadsheet.setup()
 
         # set up handlers
-        self.ui.pushButton_exportTable.clicked.connect(self.do_export_table)
-        self.ui.pushButton_quit.clicked.connect(self.do_quit)
+        self.connect(self.ui.pushButton_exportTable, QtCore.SIGNAL('clicked()'),
+                     self.do_export_table)
 
-        return
-
-    def _promote_widgets(self):
-        tableWidget_spreadsheet_layout = QVBoxLayout()
-        self.ui.frame_tableWidget_spreadsheet.setLayout(tableWidget_spreadsheet_layout)
-        self.ui.tableWidget_spreadsheet = PeaksIntegrationSpreadSheet(self)
-        tableWidget_spreadsheet_layout.addWidget(self.ui.tableWidget_spreadsheet)
+        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
+                     self.do_quit)
 
         return
 
     def do_export_table(self):
         """
-        export table to a file
+
         :return:
         """
         default_dir = os.getcwd()
-        output_file = QFileDialog.getSaveFileName(self, 'Export table to csv file', default_dir,
-                                                  'Data Files (*.dat);;All  Files (*.*)')
-        if not output_file:
+        output_file = str(QtGui.QFileDialog.getSaveFileName(self, 'Export table to csv file', default_dir,
+                                                            'Data Files (*.dat);;All  Files (*.*)'))
+
+        # return if cancelled
+        if len(output_file) == 0:
             return
-        if isinstance(output_file, tuple):
-            output_file = output_file[0]
 
         # write
         self.ui.tableWidget_spreadsheet.export_table_csv(output_file)
+
+        return
 
     def do_quit(self):
         """

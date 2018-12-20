@@ -2,7 +2,7 @@
 StringContainsValidator
 =======================
 
-This is a Python binding to the C++ class Mantid::Kernel::StringContainsValidator.
+This a python binding to the C++ class Mantid::Kernel::StringContainsValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 

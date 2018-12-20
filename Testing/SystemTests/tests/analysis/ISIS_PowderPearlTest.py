@@ -1,13 +1,7 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
-import systemtesting
+import stresstesting
 import shutil
 
 import mantid.simpleapi as mantid
@@ -44,7 +38,7 @@ calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 
 
-class _CreateVanadiumTest(systemtesting.MantidSystemTest):
+class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
     existing_config = config['datasearch.directories']
     focus_mode = None
@@ -106,7 +100,7 @@ class CreateVanadiumModsTest(_CreateVanadiumTest):
         return False
 
 
-class FocusTest(systemtesting.MantidSystemTest):
+class FocusTest(stresstesting.MantidStressTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
@@ -124,7 +118,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
 
     def validate(self):
-        self.tolerance = 5e-9  # Required for difference in spline data between operating systems
+        self.tolerance = 1e-10  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
@@ -136,7 +130,7 @@ class FocusTest(systemtesting.MantidSystemTest):
             mantid.mtd.clear()
 
 
-class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
+class FocusWithAbsorbCorrectionsTest(stresstesting.MantidStressTest):
 
     focus_results = None
     existing_config = config["datasearch.directories"]
@@ -160,7 +154,7 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
             mantid.mtd.clear()
 
 
-class CreateCalTest(systemtesting.MantidSystemTest):
+class CreateCalTest(stresstesting.MantidStressTest):
 
     calibration_results = None
     existing_config = config["datasearch.directories"]

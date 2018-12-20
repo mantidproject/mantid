@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ARRAYPROPERTYTEST_H_
 #define ARRAYPROPERTYTEST_H_
 
@@ -47,17 +41,17 @@ public:
     TS_ASSERT(sProp->operator()().empty())
 
     std::vector<int> i(5, 2);
-    ArrayProperty<int> ip("ip", std::move(i));
+    ArrayProperty<int> ip("ip", i);
     TS_ASSERT_EQUALS(ip.operator()().size(), 5)
     TS_ASSERT_EQUALS(ip.operator()()[3], 2)
 
     std::vector<double> d(4, 6.66);
-    ArrayProperty<double> dp("dp", std::move(d));
+    ArrayProperty<double> dp("dp", d);
     TS_ASSERT_EQUALS(dp.operator()().size(), 4)
     TS_ASSERT_EQUALS(dp.operator()()[1], 6.66)
 
     std::vector<std::string> s(3, "yyy");
-    ArrayProperty<std::string> sp("sp", std::move(s));
+    ArrayProperty<std::string> sp("sp", s);
     TS_ASSERT_EQUALS(sp.operator()().size(), 3)
     TS_ASSERT(!sp.operator()()[2].compare("yyy"))
   }
@@ -77,8 +71,7 @@ public:
     // should only be the size of the
     // parent vector that is counted.
     std::vector<std::vector<int>> input{{10}};
-    Property *b =
-        new ArrayProperty<std::vector<int>>("vec_property", std::move(input));
+    Property *b = new ArrayProperty<std::vector<int>>("vec_property", input);
     TS_ASSERT_EQUALS(1, b->size());
     delete b;
   }
@@ -186,15 +179,15 @@ public:
 
   void testValue() {
     std::vector<int> i(3, 3);
-    ArrayProperty<int> ip("ip", std::move(i));
+    ArrayProperty<int> ip("ip", i);
     TS_ASSERT(!ip.value().compare("3,3,3"))
 
     std::vector<double> d(4, 1.23);
-    ArrayProperty<double> dp("dp", std::move(d));
+    ArrayProperty<double> dp("dp", d);
     TS_ASSERT(!dp.value().compare("1.23,1.23,1.23,1.23"))
 
     std::vector<std::string> s(2, "yyy");
-    ArrayProperty<std::string> sp("sp", std::move(s));
+    ArrayProperty<std::string> sp("sp", s);
     TS_ASSERT(!sp.value().compare("yyy,yyy"))
   }
 

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.routines.param_map_entry import ParamMapEntry
@@ -25,7 +19,6 @@ attr_mapping = \
         ParamMapEntry(ext_name="cross_corr_x_max",                int_name="cross_corr_x_max"),
         ParamMapEntry(ext_name="do_absorb_corrections",           int_name="absorb_corrections"),
         ParamMapEntry(ext_name="file_ext",                        int_name="file_extension", optional=True),
-        ParamMapEntry(ext_name="focused_bin_widths",              int_name="focused_bin_widths"),
         ParamMapEntry(ext_name="focused_cropping_values",         int_name="tof_cropping_values"),
         ParamMapEntry(ext_name="focus_mode",                      int_name="focus_mode", enum_class=PEARL_FOCUS_MODES),
         ParamMapEntry(ext_name="generate_absorb_corrections",     int_name="gen_absorb"),

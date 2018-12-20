@@ -43,7 +43,7 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Save File</string>
+      <string>Output File</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
@@ -64,7 +64,7 @@
       <item>
        <widget class="QLabel" name="outputDirectoryLabel">
         <property name="text">
-         <string>Save Directory:</string>
+         <string>Output Directory:</string>
         </property>
        </widget>
       </item>

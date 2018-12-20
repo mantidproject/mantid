@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #########################################################
@@ -1548,7 +1542,7 @@ def can_load_as_event_workspace(filename):
             # and check for event_eventworkspace in the next level
             with h5.File(filename) as h5f:
                 try:
-                    rootKeys = list(h5f.keys()) # python3 fix
+                    rootKeys = h5f.keys()
                     entry0 = h5f[rootKeys[0]]
                     ew = entry0['event_workspace']
                     is_event_workspace = ew is not None

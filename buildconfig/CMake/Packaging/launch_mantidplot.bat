@@ -2,7 +2,7 @@
 setlocal enableextensions
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Launch script for MantidPlot
-::
+:: 
 :: Sets the required environment variables for MantidPlot to run correctly.
 :: All variables that are passed to this script are passed directly to
 :: MantidPlot.exe
@@ -24,6 +24,7 @@ set _EXTRA_PATH_DIRS=%_INSTALL_DIR%\bin;%_INSTALL_DIR%\plugins\qt4
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Required environment variables for Mantid
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set MANTIDPATH=%_BIN_DIR%
 set PATH=%_EXTRA_PATH_DIRS%;%PATH%
 set PV_PLUGIN_PATH=%_INSTALL_DIR%\plugins\paraview\qt4
 :: Matplotlib backend should default to Qt if not set (requires matplotlib >= 1.5)

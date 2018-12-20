@@ -24,24 +24,5 @@
 		<parameter name="sample_logs_fail_tolerances" type="string">
 			<value val="0, 0, 0, 0" />
 		</parameter>
-                <!-- ConjoinXRuns behavior when merging sample logs when using Stitch1D or Stitch1DMany. -->
-		<parameter name="conjoin_sample_logs_sum" type="string">
-			<value val="" />
-		</parameter>
-		<parameter name="conjoin_sample_logs_time_series" type="string">
-			<value val="" />
-		</parameter>
-		<parameter name="conjoin_sample_logs_warn" type="string">
-			<value val="" />
-		</parameter>
-		<parameter name="conjoin_sample_logs_warn_tolerances" type="string">
-			<value val="" />
-		</parameter>
-		<parameter name="conjoin_sample_logs_fail" type="string">
-			<value val="" />
-		</parameter>
-		<parameter name="conjoin_sample_logs_fail_tolerances" type="string">
-			<value val="" />
-		</parameter>        
 	</component-link>
 </parameter-file>

@@ -2,7 +2,7 @@
  EventType
 ===========
 
-This is a Python binding to the C++ class Mantid::API::EventType.
+This a python binding to the C++ class Mantid::API::EventType.
 
 
 .. module:`mantid.api`

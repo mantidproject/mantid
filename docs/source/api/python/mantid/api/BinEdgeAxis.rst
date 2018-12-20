@@ -2,7 +2,7 @@
  BinEdgeAxis
 =============
 
-This is a Python binding to the C++ class Mantid::API::BinEdgeAxis.
+This a python binding to the C++ class Mantid::API::BinEdgeAxis.
 
 *bases:* :py:obj:`mantid.api.NumericAxis`
 

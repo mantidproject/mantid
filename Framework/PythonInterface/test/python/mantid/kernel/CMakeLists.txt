@@ -33,7 +33,6 @@ set ( TEST_PY_FILES
   PropertyManagerDataServiceTest.py
   PropertyManagerPropertyTest.py
   PythonPluginsTest.py
-  RebinParamsValidatorTest.py
   StatisticsTest.py
   StringContainsValidatorTest.py
   TimeSeriesPropertyTest.py

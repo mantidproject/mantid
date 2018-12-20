@@ -2,7 +2,7 @@
  Detector
 ==========
 
-This is a Python binding to the C++ class Mantid::Geometry::Detector.
+This a python binding to the C++ class Mantid::Geometry::Detector.
 
 *bases:* :py:obj:`mantid.geometry.IDetector`, :py:obj:`mantid.geometry.ObjComponent`
 

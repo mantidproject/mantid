@@ -12,7 +12,6 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
-                        ../../TestHelpers/src/ONCatHelper.cpp
                         ../../TestHelpers/src/ParallelRunner.cpp
                         NXcanSASTestHelper.cpp
       )
@@ -20,7 +19,6 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
   target_include_directories( DataHandlingTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
   target_link_libraries( DataHandlingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
-            Catalog
             DataHandling
             Nexus
             ${NEXUS_LIBRARIES}

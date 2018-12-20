@@ -2,7 +2,7 @@
  WorkspaceHistory
 ==================
 
-This is a Python binding to the C++ class Mantid::API::WorkspaceHistory.
+This a python binding to the C++ class Mantid::API::WorkspaceHistory.
 
 
 .. module:`mantid.api`

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import six
 '''
@@ -18,13 +12,13 @@ From mantidplot:
 .config/Mantid/MantidPlot.conf
 '''
 
-from qtpy.QtCore import (QObject, QSettings, Signal)  # noqa
+from PyQt4 import QtCore
 
 if six.PY3:
     unicode = str
 
 
-class GeneralSettings(QObject):
+class GeneralSettings(QtCore.QObject):
     """
         Settings class that will be passed from the main application
         to the control widgets.
@@ -47,8 +41,8 @@ class GeneralSettings(QObject):
 
     # Mantid Python API version
     api2 = True
-    data_updated = Signal('PyQt_PyObject','PyQt_PyObject')
-    progress = Signal(int)
+    data_updated = QtCore.pyqtSignal('PyQt_PyObject','PyQt_PyObject')
+    progress = QtCore.pyqtSignal(int)
 
     def __init__(self, settings=None):
         """
@@ -59,7 +53,7 @@ class GeneralSettings(QObject):
         if settings is not None:
             self._settings = settings
         else:
-            self._settings = QSettings()
+            self._settings = QtCore.QSettings()
 
     def emit_key_value(self, key, value):
         """

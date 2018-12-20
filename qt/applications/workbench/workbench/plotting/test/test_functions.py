@@ -1,12 +1,19 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
+#  Copyright (C) 2018 mantidproject
 #
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__  import absolute_import
 
 # std imports
@@ -18,8 +25,6 @@ except ImportError:
 
 # third party imports
 from mantid.api import AnalysisDataService, WorkspaceFactory
-# register mantid projection
-import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
@@ -139,7 +144,7 @@ class FunctionsTest(TestCase):
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
         fig = pcolormesh_from_names([ws_name])
 
-        self.assertEqual(1, len(fig.gca().images))
+        self.assertEqual(1, len(fig.gca().collections))
 
     def test_pcolormesh_from_names_using_existing_figure(self):
         ws_name = 'test_pcolormesh_from_names-1'
@@ -148,7 +153,7 @@ class FunctionsTest(TestCase):
         fig = pcolormesh_from_names([ws_name], fig=target_fig)
 
         self.assertEqual(fig, target_fig)
-        self.assertEqual(1, len(fig.gca().images))
+        self.assertEqual(1, len(fig.gca().collections))
 
     # ------------- Failure tests -------------
 

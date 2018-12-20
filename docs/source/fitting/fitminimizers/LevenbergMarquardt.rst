@@ -4,7 +4,7 @@ Levenberg-Marquardt Minimizer
 =============================
 
 This minimizer is explained at - `Wikipedia <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ 
-It is the default minimizer and is listed in :ref:`a comparison of fitting minimizers <FittingMinimizers Minimizer Comparison>`.
+It is the default minimizer and is listed in `a comparison of fitting minimizers <../concepts/FittingMinimizers.html>`__.
 
 It makes use of the 
 `GSL (GNU Scientific Library) library

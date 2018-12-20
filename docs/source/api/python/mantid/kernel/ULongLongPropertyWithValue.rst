@@ -2,7 +2,7 @@
  ULongLongPropertyWithValue
 ============================
 
-This is a Python binding to the C++ class Mantid::Kernel::ULongLongPropertyWithValue.
+This a python binding to the C++ class Mantid::Kernel::ULongLongPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

@@ -1,20 +1,14 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 import ISISCommandInterface as i
-import systemtesting
+import stresstesting
 
 
-class SANSMergedDetectorsTest(systemtesting.MantidSystemTest):
+class SANSMergedDetectorsTest(stresstesting.MantidStressTest):
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
 
     def runTest(self):
         # Select instrument and user file

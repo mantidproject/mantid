@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm takes an ``InputWorkspace`` and ``Characterizations``
-:ref:`TableWorkspace <Table Workspaces>` and
+`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ and
 creates a PropertyManager with the appropriate characterization runs.
 This is done by determining the effective accelerator frequency and
 center wavelength and choosing the appropriate row from the table.
@@ -58,14 +58,14 @@ wavelength_min      double       0
 wavelength_max      double       0
 =================== ============ ======= ============
 
-In the case of extra columns existing in the :ref:`TableWorkspace
-<Table Workspaces>` denoting ``SampleContainer`` information: if the
+In the case of extra columns existing in the `TableWorkspace
+<TableWorkspace>`__ denoting ``SampleContainer`` information: if the
 ``SampleContainer`` isn't a property on the workspace, or the value
 isn't one of the column labels, the value of the ``container`` column
-in the supplied :ref:`TableWorkspace <Table Workspaces>` will be used
+in the supplied `TableWorkspace <TableWorkspace>`__ will be used
 instead.
 
-For a description of the  :ref:`TableWorkspace <Table Workspaces>`
+For a description of the  `TableWorkspace <TableWorkspace>`__
 see :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>`.
 
 .. categories::

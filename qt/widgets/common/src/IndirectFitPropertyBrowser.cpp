@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -174,6 +168,9 @@ void IndirectFitPropertyBrowser::init() {
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
+  connect(this, SIGNAL(functionChanged()), this, SLOT(updatePlotGuess()));
+  connect(this, SIGNAL(workspaceNameChanged(const QString &)), this,
+          SLOT(updatePlotGuess()));
   connect(this, SIGNAL(visibilityChanged(bool)), this,
           SLOT(browserVisibilityChanged(bool)));
   connect(this, SIGNAL(customSettingChanged(QtProperty *)), this,
@@ -709,14 +706,6 @@ void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
 }
 
 /**
- * Removes all current Fit Type options from the fit type combo-box in this
- * property browser.
- */
-void IndirectFitPropertyBrowser::clearFitTypeComboBox() {
-  m_enumManager->setEnumNames(m_functionsInComboBox, {"None"});
-}
-
-/**
  * Adds a custom function group to this fit property browser, with the specified
  * name and the associated specified functions.
  *
@@ -815,11 +804,10 @@ void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
 
 /**
  * Updates the plot guess feature in this indirect fit property browser.
- * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess(
-    MatrixWorkspace_const_sptr sampleWorkspace) {
-  if (sampleWorkspace && compositeFunction()->nFunctions() > 0)
+void IndirectFitPropertyBrowser::updatePlotGuess() {
+
+  if (getWorkspace() && compositeFunction()->nFunctions() > 0)
     setPeakToolOn(true);
   else
     setPeakToolOn(false);
@@ -947,10 +935,6 @@ void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
 
 void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
   FitPropertyBrowser::setWorkspaceIndex(i);
-}
-
-void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {
-  FitPropertyBrowser::setFitEnabled(enable);
 }
 
 /**

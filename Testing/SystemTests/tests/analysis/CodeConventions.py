@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import re
 import mantid
 from mantid.simpleapi import *
@@ -81,7 +75,7 @@ FUNC_BAD_PARAMS = {
     }
 
 
-class Algorithms(systemtesting.MantidSystemTest):
+class Algorithms(stresstesting.MantidStressTest):
 
     def __init__(self):
         super(Algorithms, self).__init__()
@@ -167,7 +161,7 @@ class Algorithms(systemtesting.MantidSystemTest):
         return True
 
 
-class FitFunctions(systemtesting.MantidSystemTest):
+class FitFunctions(stresstesting.MantidStressTest):
     def __init__(self):
         super(FitFunctions, self).__init__()
         self.__ranOk = 0

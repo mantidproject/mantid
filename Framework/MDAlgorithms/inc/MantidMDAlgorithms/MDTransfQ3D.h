@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_Q3D_TRANSF_H
 #define MANTID_MDALGORITHMS_Q3D_TRANSF_H
 //
@@ -27,6 +21,28 @@ namespace MDAlgorithms {
   inherigs from ModQ to utilize this.
   *
   * @date 31-05-2012
+
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+        This file is part of Mantid.
+
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+        File change history is stored at:
+  <https://github.com/mantidproject/mantid>
+        Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport MDTransfQ3D : public MDTransfModQ {
@@ -44,6 +60,7 @@ public:
   //
   void initialize(const MDWSDescription &ConvParams) override;
 
+  /** */
   std::vector<double> getExtremumPoints(const double xMin, const double xMax,
                                         size_t det_num) const override;
 

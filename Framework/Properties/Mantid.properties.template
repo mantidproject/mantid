@@ -69,9 +69,16 @@ openclKernelFiles.directory = @MANTID_ROOT@/Framework/GPUAlgorithms/src
 # Where to load colormap files (.map)
 colormaps.directory = @COLORMAPS_FOLDER@
 
+# Location of Python scripts that are required for certain aspects of Mantid to function
+# correctly, i.e. customized interfaces
+#
+# WARNING: Altering this value will almost certainly break Mantid functionality
+#
+requiredpythonscript.directories = @REQUIREDSCRIPT_DIRS@
+
 # Additional directories for Python scripts. These are added to the Python path by the Python API.
 # This key is NOT recursive so sub-directories must be added in addition
-pythonscripts.directories =
+pythonscripts.directories = @PYTHONSCRIPT_DIRS@
 
 # Setting this to 1 will allow python algorithms to be reloaded before execution.
 pythonalgorithms.refresh.allowed = 0

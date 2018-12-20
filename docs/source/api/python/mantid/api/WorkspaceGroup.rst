@@ -2,7 +2,7 @@
  WorkspaceGroup
 ================
 
-This is a Python binding to the C++ class Mantid::API::WorkspaceGroup.
+This a python binding to the C++ class Mantid::API::WorkspaceGroup.
 
 *bases:* :py:obj:`mantid.api.Workspace`
 

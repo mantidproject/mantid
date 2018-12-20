@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MergeRuns.h"
 
 #include "MantidAPI/ADSValidator.h"
@@ -16,7 +10,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -125,19 +118,16 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
       *outWS, numOutputSpectra, outWS->histogram(0).binEdges());
 
-  newOutWS->mutableComponentInfo().merge(addeeWS->componentInfo());
+  newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
 
-  if (newOutWS->detectorInfo().size() * newOutWS->detectorInfo().scanCount() ==
-      outWS->detectorInfo().size() * outWS->detectorInfo().scanCount()) {
+  if (newOutWS->detectorInfo().scanSize() == outWS->detectorInfo().scanSize()) {
     // In this case the detector info objects were identical. We just add the
     // workspaces as we normally would for MergeRuns.
     g_log.information()
         << "Workspaces had identical detector scan information and were "
            "merged.";
     return outWS + addeeWS;
-  } else if (newOutWS->detectorInfo().size() *
-                 newOutWS->detectorInfo().scanCount() !=
-             numOutputSpectra) {
+  } else if (newOutWS->detectorInfo().scanSize() != numOutputSpectra) {
     throw std::runtime_error("Unexpected DetectorInfo size. Merging workspaces "
                              "with some, but not all overlapping scan "
                              "intervals is not currently supported.");
@@ -150,8 +140,9 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
   const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
 
-  const auto newAddeeSpecDefs = buildScanIntervals(
-      addeeSpecDefs, addeeWS->detectorInfo(), newOutWS->detectorInfo());
+  const auto newAddeeSpecDefs =
+      buildScanIntervals(addeeSpecDefs, addeeWS->detectorInfo(),
+                         outWS->detectorInfo(), newOutWS->detectorInfo());
 
   outSpecDefs.insert(outSpecDefs.end(), newAddeeSpecDefs.begin(),
                      newAddeeSpecDefs.end());
@@ -344,17 +335,19 @@ void MergeRuns::execEvent() {
 }
 
 void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
-  SampleLogsBehaviour::SampleLogNames logEntries = {};
-  logEntries.sampleLogsSum = getPropertyValue(SampleLogsBehaviour::SUM_PROP);
-  logEntries.sampleLogsTimeSeries =
-      getPropertyValue(SampleLogsBehaviour::TIME_SERIES_PROP);
-  logEntries.sampleLogsList = getPropertyValue(SampleLogsBehaviour::LIST_PROP);
-  logEntries.sampleLogsWarn = getPropertyValue(SampleLogsBehaviour::WARN_PROP);
-  logEntries.sampleLogsWarnTolerances =
-      getPropertyValue(SampleLogsBehaviour::WARN_TOL_PROP);
-  logEntries.sampleLogsFail = getPropertyValue(SampleLogsBehaviour::FAIL_PROP);
-  logEntries.sampleLogsFailTolerances =
-      getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
+  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
+  const std::string sampleLogsTimeSeries =
+      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
+  const std::string sampleLogsList =
+      getProperty(SampleLogsBehaviour::LIST_PROP);
+  const std::string sampleLogsWarn =
+      getProperty(SampleLogsBehaviour::WARN_PROP);
+  const std::string sampleLogsWarnTolerances =
+      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
+  const std::string sampleLogsFail =
+      getProperty(SampleLogsBehaviour::FAIL_PROP);
+  const std::string sampleLogsFailTolerances =
+      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
 
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
 
@@ -368,16 +361,10 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
   if (rebinParams) {
     outWS = this->rebinInput(outWS, *rebinParams);
   }
-  SampleLogsBehaviour::ParameterName parName = {
-      MergeRunsParameter::SUM_MERGE,
-      MergeRunsParameter::TIME_SERIES_MERGE,
-      MergeRunsParameter::LIST_MERGE,
-      MergeRunsParameter::WARN_MERGE,
-      MergeRunsParameter::WARN_MERGE_TOLERANCES,
-      MergeRunsParameter::FAIL_MERGE,
-      MergeRunsParameter::FAIL_MERGE_TOLERANCES};
-  Algorithms::SampleLogsBehaviour sampleLogsBehaviour =
-      SampleLogsBehaviour(outWS, g_log, logEntries, parName);
+  Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
+      *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
+      sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
+      sampleLogsFailTolerances);
 
   auto isScanning = outWS->detectorInfo().isScanning();
 
@@ -397,21 +384,21 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
     // Add the current workspace to the total
     // Update the sample logs
     try {
-      sampleLogsBehaviour.mergeSampleLogs(*it, outWS);
-      sampleLogsBehaviour.removeSampleLogsFromWorkspace(addee);
+      sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
+      sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
       if (isScanning)
         outWS = buildScanningOutputWorkspace(outWS, addee);
       else
         outWS = outWS + addee;
-      sampleLogsBehaviour.setUpdatedSampleLogs(outWS);
-      sampleLogsBehaviour.readdSampleLogToWorkspace(addee);
+      sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
+      sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error()
             << "Could not merge run: " << it->get()->getName() << ". Reason: \""
             << e.what()
             << "\". MergeRuns will continue but this run will be skipped.\n";
-        sampleLogsBehaviour.resetSampleLogs(outWS);
+        sampleLogsBehaviour.resetSampleLogs(*outWS);
       } else {
         throw std::invalid_argument(e);
       }
@@ -721,26 +708,27 @@ void MergeRuns::fillHistory() {
  *the scan times for the addee workspace and output workspace are the same this
  *builds the same indexing as the workspace had before. Otherwise, the correct
  *time indexes are set here.
- *
- *This function translates time indices from the addee to the new workspace.
  */
 std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
     const std::vector<SpectrumDefinition> &addeeSpecDefs,
-    const DetectorInfo &addeeDetInfo, const DetectorInfo &newOutDetInfo) {
+    const DetectorInfo &addeeDetInfo, const DetectorInfo &outDetInfo,
+    const DetectorInfo &newOutDetInfo) {
   std::vector<SpectrumDefinition> newAddeeSpecDefs(addeeSpecDefs.size());
-
-  auto addeeScanIntervals = addeeDetInfo.scanIntervals();
-  auto newOutScanIntervals = newOutDetInfo.scanIntervals();
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
     for (auto &index : addeeSpecDefs[i]) {
       SpectrumDefinition newSpecDef;
-      for (size_t time_index = 0; time_index < newOutDetInfo.scanCount();
-           time_index++) {
-        if (addeeScanIntervals[index.second] ==
-            newOutScanIntervals[time_index]) {
-          newSpecDef.add(index.first, time_index);
+      const auto &addeeScanInterval = addeeDetInfo.scanInterval(index);
+      if (addeeScanInterval == outDetInfo.scanInterval(index)) {
+        newSpecDef.add(index.first, index.second);
+      } else {
+        // Find the correct time index for this entry
+        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
+          if (addeeScanInterval ==
+              newOutDetInfo.scanInterval({index.first, i})) {
+            newSpecDef.add(index.first, i);
+          }
         }
       }
       newAddeeSpecDefs[i] = newSpecDef;

@@ -1,20 +1,14 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
-import systemtesting
+import stresstesting
 import os
 from mantid.simpleapi import *
 #pylint: disable=too-many-instance-attributes
 
 
-class GEMTest(systemtesting.MantidSystemTest):
+class GEMTest(stresstesting.MantidStressTest):
     validate=None
 
     def __init__(self):
-        systemtesting.MantidSystemTest.__init__(self)
+        stresstesting.MantidStressTest.__init__(self)
         self.gss_file = ''
         self.ref_gss_file = 'GEM58654.gss'
         self.xye_tof_files = []

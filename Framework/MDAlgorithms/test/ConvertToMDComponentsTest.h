@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHM_CONVERT2MD_COMPONENTS_TEST_H
 #define MANTID_MDALGORITHM_CONVERT2MD_COMPONENTS_TEST_H
 // tests for different parts of ConvertToMD exec functions

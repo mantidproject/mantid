@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef Q1DWEIGHTEDTEST_H_
 #define Q1DWEIGHTEDTEST_H_
 
@@ -287,13 +281,8 @@ private:
     // located at N_pixel / 2 + 0.5
     // X = (16-192.0/2.0+0.5)*5.15/1000.0 = -0.409425
     // Y = (95-192.0/2.0+0.5)*5.15/1000.0 = -0.002575
-    // mover.setPropertyValue("X", "0.409425");
-    // mover.setPropertyValue("Y", "0.002575");
-
-    mover.setPropertyValue("X", "0.009425");
+    mover.setPropertyValue("X", "0.409425");
     mover.setPropertyValue("Y", "0.002575");
-    mover.setPropertyValue("Z", "-0.8114");
-
     mover.execute();
   }
 

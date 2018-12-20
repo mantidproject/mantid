@@ -1,17 +1,11 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
-import systemtesting
+import stresstesting
 import os.path
 import numpy as np
 
 
-class WISHDiffractionFocussingReductionTest(systemtesting.MantidSystemTest):
+class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
         return ["WISH00035991.raw", "35922_h00_RW.cal", "35991-foc-h00.nxs"]
@@ -80,7 +74,7 @@ class WISHDiffractionFocussingReductionTest(systemtesting.MantidSystemTest):
         return ws, "35991-foc-h00.nxs"
 
 
-class WISHDiffractionFocussingAnalysisTest(systemtesting.MantidSystemTest):
+class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
         return ["35979-foc-h00.nxs",

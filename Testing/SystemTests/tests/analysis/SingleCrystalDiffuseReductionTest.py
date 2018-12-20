@@ -1,14 +1,8 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
-import systemtesting
+import stresstesting
 from mantid.simpleapi import SingleCrystalDiffuseReduction, Load, AlgorithmManager, SaveMD
 
 
-class SingleCrystalDiffuseTest(systemtesting.MantidSystemTest):
+class SingleCrystalDiffuseTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return ["CORELLI_29782.nxs","CORELLI_29792.nxs",
                 "SingleCrystalDiffuseReduction_SA.nxs",

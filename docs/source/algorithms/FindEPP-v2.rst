@@ -16,7 +16,7 @@ This utility algorithm attempts to search for the elastic peak position (EPP) in
 .. note::
     This algorithm uses very simple approach to search for an elastic peak: it suggests that the elastic peak has maximal intensity. This approach may fail in the case if the dataset contains Bragg peaks with higher intensities.
 
-As a result, :ref:`TableWorkspace <Table Workspaces>` with the following columns is produced: *WorkspaceIndex*, *PeakCentre*, *PeakCentreError*, *Sigma*, *SigmaError*, *Height*, *HeightError*, *chiSq* and *FitStatus*. Table rows correspond to the workspace indices.
+As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with the following columns is produced: *WorkspaceIndex*, *PeakCentre*, *PeakCentreError*, *Sigma*, *SigmaError*, *Height*, *HeightError*, *chiSq* and *FitStatus*. Table rows correspond to the workspace indices.
 
 Last column will contain the status of peak finding as follows:
 

@@ -23,7 +23,7 @@ The error of :math:`f = a * b` is propagated with
 
    -  Every element of the MDHistoWorkspace is multiplied by the scalar.
 
--  **:ref:`MDEventWorkspace <MDWorkspace>`'s**
+-  **`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_'s**
 
    -  This operation is not supported, as it is not clear what its
       meaning would be.

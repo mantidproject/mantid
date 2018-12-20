@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import FindSatellitePeaks, Load
 import unittest
-import systemtesting
+import stresstesting
 
 
 def load_files():
@@ -19,7 +13,7 @@ def load_files():
     return md_workspace, main_peaks, satellite_peaks
 
 
-class FindSatellitePeaksTestFixedNumQ(systemtesting.MantidSystemTest):
+class FindSatellitePeaksTestFixedNumQ(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
         return ["WISH_md_small.nxs", "WISH_peak_hkl_small.nxs", "WISH_peak_hkl_frac_small.nxs"]
@@ -43,7 +37,7 @@ class FindSatellitePeaksTestFixedNumQ(systemtesting.MantidSystemTest):
         return self._satellites_refined.name(), 'refine_satellites_fixed_q_test.nxs'
 
 
-class FindSatellitePeaksTestAutoFindQ(systemtesting.MantidSystemTest):
+class FindSatellitePeaksTestAutoFindQ(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
         return ["WISH_md_small.nxs", "WISH_peak_hkl_small.nxs", "WISH_peak_hkl_frac_small.nxs"]

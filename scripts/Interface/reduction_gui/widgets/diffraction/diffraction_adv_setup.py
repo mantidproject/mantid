@@ -1,24 +1,14 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 ################################################################################
 # Advanced Setup Widget
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
-from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
+
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
-try:
-    from mantidqt.utils.qt import load_ui
-except ImportError:
-    from mantid.kernel import Logger
-    Logger("AdvancedSetupWidget").information('Using legacy ui importer')
-    from mantidplot import load_ui
+import ui.diffraction.ui_diffraction_adv_setup
+import ui.diffraction.ui_diffraction_info
 
 
 class AdvancedSetupWidget(BaseWidget):
@@ -32,13 +22,13 @@ class AdvancedSetupWidget(BaseWidget):
         """
         super(AdvancedSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class AdvancedSetFrame(QFrame):
+        class AdvancedSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_adv_setup.Ui_Frame):
             """ Define class linked to UI Frame
             """
 
             def __init__(self, parent=None):
-                QFrame.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_adv_setup.ui', baseinstance=self)
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
 
         self._content = AdvancedSetFrame(self)
         self._layout.addWidget(self._content)
@@ -57,38 +47,38 @@ class AdvancedSetupWidget(BaseWidget):
         """ Initialize content/UI
         """
         # Constraints/Validator
-        iv4 = QIntValidator(self._content.maxchunksize_edit)
+        iv4 = QtGui.QIntValidator(self._content.maxchunksize_edit)
         iv4.setBottom(0)
         self._content.maxchunksize_edit.setValidator(iv4)
 
-        dv0 = QDoubleValidator(self._content.unwrap_edit)
+        dv0 = QtGui.QDoubleValidator(self._content.unwrap_edit)
         self._content.unwrap_edit.setValidator(dv0)
 
-        dv2 = QDoubleValidator(self._content.lowres_edit)
+        dv2 = QtGui.QDoubleValidator(self._content.lowres_edit)
         self._content.lowres_edit.setValidator(dv2)
 
-        dv3 = QDoubleValidator(self._content.cropwavelengthmin_edit)
+        dv3 = QtGui.QDoubleValidator(self._content.cropwavelengthmin_edit)
         dv3.setBottom(0.0)
         self._content.cropwavelengthmin_edit.setValidator(dv3)
 
-        dv3b = QDoubleValidator(self._content.lineEdit_croppedWavelengthMax)
+        dv3b = QtGui.QDoubleValidator(self._content.lineEdit_croppedWavelengthMax)
         dv3b.setBottom(0.1)
         self._content.lineEdit_croppedWavelengthMax.setValidator(dv3b)
 
-        dv4 = QDoubleValidator(self._content.removepromptwidth_edit)
+        dv4 = QtGui.QDoubleValidator(self._content.removepromptwidth_edit)
         dv4.setBottom(0.0)
         self._content.removepromptwidth_edit.setValidator(dv4)
         self._content.removepromptwidth_edit.setText("50.0")
 
-        dv5 = QDoubleValidator(self._content.vanpeakfwhm_edit)
+        dv5 = QtGui.QDoubleValidator(self._content.vanpeakfwhm_edit)
         dv5.setBottom(0.0)
         self._content.vanpeakfwhm_edit.setValidator(dv5)
 
-        dv6 = QDoubleValidator(self._content.vanpeaktol_edit)
+        dv6 = QtGui.QDoubleValidator(self._content.vanpeaktol_edit)
         dv6.setBottom(0.0)
         self._content.vanpeaktol_edit.setValidator(dv6)
 
-        dv7 = QDoubleValidator(self._content.scaledata_edit)
+        dv7 = QtGui.QDoubleValidator(self._content.scaledata_edit)
         dv7.setBottom(0.0)
         self._content.scaledata_edit.setValidator(dv7)
 
@@ -98,15 +88,17 @@ class AdvancedSetupWidget(BaseWidget):
 
         self._content.preserveevents_checkbox.setChecked(True)
 
-        dv8 = QDoubleValidator(self._content.filterbadpulses_edit)
+        dv8 = QtGui.QDoubleValidator(self._content.filterbadpulses_edit)
         dv8.setBottom(0.0)
         self._content.filterbadpulses_edit.setValidator(dv8)
         self._content.filterbadpulses_edit.setText("95.")
 
         # Connections from action/event to function to handle
-        self._content.stripvanpeaks_chkbox.clicked.connect(self._stripvanpeaks_clicked)
+        self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._stripvanpeaks_clicked)
 
-        self._content.help_button.clicked.connect(self._show_help)
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                     self._show_help)
         # Handler for events
         # TODO - Need to add an event handler for the change of instrument and facility
 
@@ -186,11 +178,10 @@ class AdvancedSetupWidget(BaseWidget):
         return
 
     def _show_help(self):
-
-        class HelpDialog(QDialog):
+        class HelpDialog(QtGui.QDialog, ui.diffraction.ui_diffraction_info.Ui_Dialog):
             def __init__(self, parent=None):
-                QDialog.__init__(self, parent)
-                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_info.ui', baseinstance=self)
+                QtGui.QDialog.__init__(self, parent)
+                self.setupUi(self)
         dialog = HelpDialog(self)
         dialog.exec_()
 

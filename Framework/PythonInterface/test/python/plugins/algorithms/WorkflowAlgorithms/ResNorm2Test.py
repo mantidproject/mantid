@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -19,9 +13,9 @@ class ResNorm2Test(unittest.TestCase):
 
     def setUp(self):
         self._res_ws = Load(Filename='irs26173_graphite002_res.nxs',
-                            OutputWorkspace='irs26173_graphite002_res')
+                            OutputWorkspace='__ResNormTest_Resolution')
         self._van_ws = Load(Filename='irs26173_graphite002_red.nxs',
-                            OutputWorkspace='irs26173_graphite002_red')
+                            OutputWorkspace='__ResNormTest_Vanadium')
 
 
     def _validate_result(self, result):

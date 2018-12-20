@@ -108,7 +108,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="detector_group_box">
+    <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
       <string>Detector1</string>
      </property>

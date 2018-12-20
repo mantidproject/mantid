@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "DensityOfStates.h"
 
 #include "../General/UserInputValidator.h"
@@ -28,10 +22,9 @@ DensityOfStates::DensityOfStates(QWidget *parent)
 
   connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this,
           SLOT(handleFileChange()));
-
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  // Handle plot and save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
@@ -69,10 +62,8 @@ bool DensityOfStates::validate() {
  * Configures and executes the DensityOfStates algorithm.
  */
 void DensityOfStates::run() {
-  setRunIsRunning(true);
-
   // Get the SimulatedDensityOfStates algorithm
-  auto dosAlgo =
+  IAlgorithm_sptr dosAlgo =
       AlgorithmManager::Instance().create("SimulatedDensityOfStates");
 
   const auto filename = m_uiForm.mwInputFile->getFirstFilename();
@@ -156,11 +147,8 @@ void DensityOfStates::dosAlgoComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(dosAlgoComplete(bool)));
 
-  setRunIsRunning(false);
-  if (error) {
-    setPlotEnabled(false);
-    setSaveEnabled(false);
-  }
+  if (error)
+    return;
 }
 
 /**
@@ -218,7 +206,7 @@ void DensityOfStates::ionLoadComplete(bool error) {
     g_log.error("Could not get a list of ions from .phonon file");
 
   // Get the list of ions from algorithm
-  auto ionTable =
+  ITableWorkspace_sptr ionTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
   Column_sptr ionColumn = ionTable->getColumn("Species");
   size_t numIons = ionColumn->size();
@@ -238,6 +226,9 @@ void DensityOfStates::ionLoadComplete(bool error) {
 
   // Select all ions by default
   m_uiForm.lwIons->selectAll();
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
@@ -250,16 +241,12 @@ void DensityOfStates::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
 }
 
-void DensityOfStates::runClicked() { runTab(); }
-
 /**
  * Handle mantid plotting of workspace
  */
 void DensityOfStates::plotClicked() {
-  setPlotIsPlotting(true);
   if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), true))
     plotSpectrum(m_outputWsName);
-  setPlotIsPlotting(false);
 }
 
 /**
@@ -269,34 +256,6 @@ void DensityOfStates::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), false))
     addSaveWorkspaceToQueue(m_outputWsName);
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-void DensityOfStates::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
-void DensityOfStates::setPlotIsPlotting(bool running) {
-  m_uiForm.pbPlot->setText(running ? "Plotting..." : "Plot Result");
-  setButtonsEnabled(!running);
-}
-
-void DensityOfStates::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotEnabled(enabled);
-  setSaveEnabled(enabled);
-}
-
-void DensityOfStates::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
-
-void DensityOfStates::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-}
-
-void DensityOfStates::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
 }
 
 } // namespace CustomInterfaces

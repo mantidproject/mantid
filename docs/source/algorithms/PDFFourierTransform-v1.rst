@@ -11,10 +11,10 @@ Description
 
 The algorithm transforms a single spectrum workspace containing 
 spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]` 
-(as a function of **MomentumTransfer** or **dSpacing** :ref:`units <Unit Factory>`) to a PDF 
+(as a function of **MomentumTransfer** or **dSpacing** `units <http://www.mantidproject.org/Units>`_ ) to a PDF 
 (pair distribution function) as described below.
 
-The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ ) :ref:`units <Unit Factory>` .
+The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ ) `units <http://www.mantidproject.org/Units>`_ . 
 (d-spacing is not supported any more. Contact development team to fix that and enable **dSpacing** again)
 
 References

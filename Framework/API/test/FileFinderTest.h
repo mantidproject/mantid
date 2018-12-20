@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FILEFINDERTEST_H_
 #define FILEFINDERTEST_H_
 
@@ -77,7 +71,7 @@ public:
         "  <facility name=\"SNS\" delimiter=\"_\" "
         "FileExtensions=\"_event.nxs,.nxs,.dat\">"
         "    <archive>"
-        "      <archiveSearch plugin=\"ORNLDataSearch\" />"
+        "      <archiveSearch plugin=\"SNSDataSearch\" />"
         "    </archive>"
         "    <instrument name=\"SEQUOIA\" shortname=\"SEQ\">"
         "      <technique>Inelastic Spectroscopy</technique>"
@@ -396,8 +390,8 @@ public:
 #endif
     Poco::File file(path);
     TS_ASSERT(file.exists());
-    std::string path2 =
-        fileFinder.getFullPath("UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+    std::string path2 = fileFinder.getFullPath(
+        "IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File file2(path2);
     TS_ASSERT(file2.exists());
 
@@ -407,11 +401,11 @@ public:
     Poco::File fileOn(pathOn);
 
     std::string pathOn2 = FileFinder::Instance().getFullPath(
-        "unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");
+        "IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn2(pathOn2);
 
     std::string pathOn3 = FileFinder::Instance().getFullPath(
-        "unit_testing/IDF_for_UNiT_TESTiNG.xMl");
+        "IDFs_for_UNIT_TESTING/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn3(pathOn3);
 
     std::string pathOn4 = FileFinder::Instance().getFullPath("CSp78173.Raw");

@@ -2,7 +2,7 @@
  LiveListenerInfo
 ==================
 
-This is a Python binding to the C++ class Mantid::Kernel::LiveListenerInfo.
+This a python binding to the C++ class Mantid::Kernel::LiveListenerInfo.
 
 
 .. module:`mantid.kernel`

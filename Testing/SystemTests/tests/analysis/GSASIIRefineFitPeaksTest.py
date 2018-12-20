@@ -1,21 +1,15 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from abc import ABCMeta, abstractmethod
 import os
 import re
 import mantid
 import site
-import systemtesting
+import stresstesting
 import tempfile
 from mantid.simpleapi import GSASIIRefineFitPeaks, Load
 
 
-class _AbstractGSASIIRefineFitPeaksTest(systemtesting.MantidSystemTest):
+class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
 
     __metaclass__ = ABCMeta
 

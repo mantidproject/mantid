@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/TransformMD.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -48,16 +42,16 @@ void TransformMD::init() {
                   "Any input MDWorkspace.");
 
   std::vector<double> defaultScaling(1, 1.0);
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Scaling", std::move(defaultScaling)),
-                  "Scaling value multiplying each coordinate. Default "
-                  "1.\nEither a single value or a list for each dimension.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Scaling", defaultScaling),
+      "Scaling value multiplying each coordinate. Default "
+      "1.\nEither a single value or a list for each dimension.");
 
   std::vector<double> defaultOffset(1, 0.0);
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Offset", std::move(defaultOffset)),
-                  "Offset value to add to each coordinate. Default 0.\nEither "
-                  "a single value or a list for each dimension.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Offset", defaultOffset),
+      "Offset value to add to each coordinate. Default 0.\nEither "
+      "a single value or a list for each dimension.");
 
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

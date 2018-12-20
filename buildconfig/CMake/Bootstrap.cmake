@@ -10,7 +10,7 @@ if( MSVC )
   include ( ExternalProject )
   set( EXTERNAL_ROOT ${PROJECT_SOURCE_DIR}/external CACHE PATH "Location to clone third party dependencies to" )
   set( THIRD_PARTY_GIT_URL "https://github.com/mantidproject/thirdparty-msvc2015.git" )
-  set ( THIRD_PARTY_GIT_SHA1 80b72f1c5ad30675c03967ead71c8223fbe50d4f )
+  set ( THIRD_PARTY_GIT_SHA1 755f17f2f075abfa311a997a7bf0a9ae87e0da89 )
   set ( THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty )
   # Generates a script to do the clone/update in tmp
   set ( _project_name ThirdParty )
@@ -74,7 +74,6 @@ if( MSVC )
 
   # Set variables to help CMake find components
   set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY_DIR}/include" )
-  include_directories ( ${THIRD_PARTY_DIR}/include )
   set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY_DIR}/lib" )
   set ( CMAKE_PREFIX_PATH "${THIRD_PARTY_DIR};${THIRD_PARTY_DIR}/lib/qt4" )
   set ( BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}" )

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTTEST_H_
 #define INSTRUMENTTEST_H_
 
@@ -401,14 +395,6 @@ public:
     TS_ASSERT_EQUALS(dets.size(), 9);
   }
 
-  void test_getDetectorsInBank_throwsIfBankNotFound() {
-    Instrument_const_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    std::vector<IDetector_const_sptr> dets;
-    TS_ASSERT_THROWS(inst->getDetectorsInBank(dets, "bank_in_the_dark_side"),
-                     Exception::NotFoundError)
-  }
-
   void test_getDetectors() {
     // 5 banks with 6x6 pixels in them.
     Instrument_sptr inst =
@@ -650,8 +636,8 @@ public:
     const auto legacyMap = instr->makeLegacyParameterMap();
 
     // Legacy instrument does not support positions in ParameterMap for
-    // GridDetectorPixel (parameters ignored by
-    // GridDetectorPixel::getRelativePos), so we cannot support this.
+    // RectangularDetectorPixel (parameters ignored by
+    // RectangularDetectorPixel::getRelativePos), so we cannot support this.
     detInfo.setPosition(3, detInfo.position(3) + detOffset);
     TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), std::runtime_error);
 

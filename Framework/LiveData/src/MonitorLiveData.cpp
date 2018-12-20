@@ -1,14 +1,7 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
@@ -110,7 +103,6 @@ void MonitorLiveData::doClone(const std::string &originalName,
 /** Execute the algorithm.
  */
 void MonitorLiveData::exec() {
-  auto &ads = AnalysisDataService::Instance();
   double UpdateEvery = getProperty("UpdateEvery");
   if (UpdateEvery <= 0)
     throw std::runtime_error("UpdateEvery must be > 0");
@@ -136,16 +128,6 @@ void MonitorLiveData::exec() {
 
   std::string NextAccumulationMethod =
       this->getPropertyValue("AccumulationMethod");
-
-  // Grab a copy of the WorkspaceHistory StartLiveData object from original
-  // workspace
-  auto outputWorkspaceExists = ads.doesExist(OutputWorkspace);
-  std::unique_ptr<Mantid::API::WorkspaceHistory> originalHistory =
-      std::make_unique<Mantid::API::WorkspaceHistory>();
-
-  if (outputWorkspaceExists)
-    originalHistory = std::make_unique<Mantid::API::WorkspaceHistory>(
-        ads.retrieveWS<Workspace>(OutputWorkspace)->history());
 
   // Keep going until you get cancelled
   while (true) {
@@ -183,13 +165,6 @@ void MonitorLiveData::exec() {
 
       // Run the LoadLiveData
       loadAlg->executeAsChildAlg();
-
-      // Copy StartLiveData to new workspace
-      if (outputWorkspaceExists)
-        AnalysisDataService::Instance()
-            .retrieveWS<Workspace>(OutputWorkspace)
-            ->history()
-            .addHistory(*originalHistory);
 
       NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
 

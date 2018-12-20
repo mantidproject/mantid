@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -15,7 +9,6 @@ import numpy as np
 from SANSDarkRunBackgroundCorrection import DarkRunMonitorAndDetectorRemover
 from SANSDarkRunBackgroundCorrection import SANSDarkRunBackgroundCorrection
 from six.moves import range
-
 
 class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
     #-----
@@ -59,7 +52,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
         # Assert
         # We should sum up all bins in the dark run (all y values, hence bin_boundaries_dark_run - 1).
-        # Then multpliy by the normalization ratio
+        # Then multpliy by the normalization ratio 
         # Then divide by the bins in the scatterer.
         expected_integration = y_value_dark_run* float(bin_boundaries_dark_run - 1)
         expected_correction_value = (normalization_ratio*expected_integration/float(bin_boundaries_scatter - 1))
@@ -87,7 +80,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         bin_boundaries_dark_run = 20
         y_value_spectra_even_dark_run = [0.3 for element in range(bin_boundaries_dark_run - 1)]
         y_value_spectra_odd_dark_run = [0.2 for element in range(bin_boundaries_dark_run - 1)]
-        y_value_dark_run = (y_value_spectra_even_dark_run + y_value_spectra_odd_dark_run +
+        y_value_dark_run = (y_value_spectra_even_dark_run + y_value_spectra_odd_dark_run + 
                             y_value_spectra_even_dark_run + y_value_spectra_odd_dark_run)
         e_value_dark_run = 0
         name_dark_run = "_dark_run_SANS_test"
@@ -158,16 +151,16 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                     DarkRun = name_dark_run,
                     Mean = mean,
                     Uniform =uniform,
-                    NormalizationRatio=normalization_ratio,
+                    NormalizationRatio=normalization_ratio, 
                     OutputWorkspace = out_ws_name,
                     ApplyToDetectors = True,
                     ApplyToMonitors = False,
                     SelectedMonitors = [],
                     rethrow = True)
-
+        
         # Assert
         # We should sum up all bins in the dark run (all y values, hence bin_boundaries_dark_run - 1).
-        # Then multpliy by the normalization ratio
+        # Then multpliy by the normalization ratio 
         # Then divide by the bins in the scatterer.
         expected_correction_value = normalization_ratio
         self.assertTrue(AnalysisDataService.doesExist(out_ws_name))
@@ -247,7 +240,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         applyToMonitors = True
         applyToDetectors = False
         out_ws_name = "out_test"
-        selected_monitor = [2]
+        selected_monitor = [2] 
         # Act
         ws = self._do_run_dark_subtraction(scatter_ws, dark_run, mean, uniform, normalization_ratio,
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
@@ -402,8 +395,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
         AnalysisDataService.add(scatter_name, scatter_ws)
         AnalysisDataService.add(dark_name, dark_run)
-        self.assertRaises(RuntimeError, run_algorithm, 'SANSDarkRunBackgroundCorrection',
-                          rethrow=True, **kwds)
+        self.assertRaises(RuntimeError, SANSDarkRunBackgroundCorrection, **kwds)
 
         # Clean up
         ws_to_clean = [scatter_name, dark_name]
@@ -448,8 +440,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
         AnalysisDataService.add(scatter_name, scatter_ws)
         AnalysisDataService.add(dark_name, dark_run)
-        self.assertRaises(RuntimeError, run_algorithm, 'SANSDarkRunBackgroundCorrection',
-                          rethrow=True, **kwds)
+        self.assertRaises(RuntimeError, SANSDarkRunBackgroundCorrection, **kwds)
 
         # Clean up
         ws_to_clean = [scatter_name, dark_name]
@@ -529,7 +520,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         out_ws_name = "sans_workspace_test"
         if as_dark_run:
             out_ws_name = "dark_run_workspace_test"
-
+        
         alg_load  = AlgorithmManager.createUnmanaged("LoadNexusProcessed")
         alg_load.initialize()
         alg_load.setChild(True)

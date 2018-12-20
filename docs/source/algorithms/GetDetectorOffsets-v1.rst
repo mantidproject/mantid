@@ -23,7 +23,7 @@ calculated as:
 
 :math:`-peakCentre*step/(dreference+PeakCentre*step)`
 
-This is then written into a :ref:`.cal file <CalFile>` for every detector
+This is then written into a `.cal file <http://www.mantidproject.org/CalFile>`__ for every detector
 that contributes to that spectrum. All of the entries in the cal file
 are initially set to both be included, but also to all group into a
 single group on :ref:`algm-DiffractionFocussing`. The

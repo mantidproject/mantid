@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # ICConvoluted.py
 #
 # Defines the IPeakFunction IkedaCarpenterConvoluted
@@ -26,8 +20,8 @@ class IkedaCarpenterConvoluted(IFunction1D):
         self.declareParameter("HatWidth") #width of square wave
         self.declareParameter("KConv") #KConv for Gaussian
 
-    #use penalty=None to not use default mantid penalty
-    def setPenalizedConstraints(self, A0=None, B0=None, R0=None, T00=None, Scale0=None, HatWidth0=None, KConv0=None, penalty=None):
+    #n.b. pass penalty=None to not use default mantid penalty - useful for development
+    def setPenalizedConstraints(self, A0=None, B0=None, R0=None, T00=None, Scale0=None, HatWidth0=None, KConv0=None, penalty=1.0e20):
         if A0 is not None:
             self.addConstraints("{:4.4e} < A < {:4.4e}".format(A0[0], A0[1]))
             if penalty is not None:

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
 import unittest
@@ -23,12 +17,8 @@ except ImportError:
 
 
 class PeriodicTablePresenterTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.qapp = mock_widget.mockQapp()
-
     def setUp(self):
+        self._qapp = mock_widget.mockQapp()
         self._model = mock.create_autospec(PeriodicTableModel)
         self.view = PeriodicTableView()
         self.presenter = PeriodicTablePresenter(

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflSettingsPresenter.h"
 #include "ExperimentOptionDefaults.h"
 #include "IReflSettingsTabPresenter.h"
@@ -160,8 +154,6 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
   }
 
   if (m_view->instrumentSettingsEnabled()) {
-    setTransmissionOption(options, "NormalizeByIntegratedMonitors",
-                          m_view->getIntMonCheck());
     setTransmissionOption(options, "MonitorIntegrationWavelengthMin",
                           m_view->getMonitorIntegralMin());
     setTransmissionOption(options, "MonitorIntegrationWavelengthMax",
@@ -231,16 +223,14 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     auto const pa = m_view->getPolarisationCorrections();
     addIfNotEmpty(options, "PolarizationAnalysis", pa);
     if (pa == "PA") {
-      addIfNotEmpty(options, "CRho", m_view->getCRho());
-      addIfNotEmpty(options, "CAlpha", m_view->getCAlpha());
-      addIfNotEmpty(options, "CAp", m_view->getCAp());
-      addIfNotEmpty(options, "CPp", m_view->getCPp());
+      addIfNotEmpty(options, "Rho", m_view->getCRho());
+      addIfNotEmpty(options, "Alpha", m_view->getCAlpha());
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
     } else if (pa == "PNR") {
-      addIfNotEmpty(options, "CAp", m_view->getCAp());
-      addIfNotEmpty(options, "CPp", m_view->getCPp());
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
     }
-    addIfNotEmpty(options, "FloodCorrection", m_view->getFloodCorrection());
-    addIfNotEmpty(options, "FloodWorkspace", m_view->getFloodWorkspace());
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
 

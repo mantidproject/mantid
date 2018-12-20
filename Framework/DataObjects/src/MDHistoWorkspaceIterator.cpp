@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/System.h"
@@ -168,7 +162,7 @@ void MDHistoWorkspaceIterator::init(
 
   m_begin = beginPos;
   m_pos = m_begin;
-  m_function.reset(function);
+  m_function = function;
 
   m_max = endPos;
   if (m_max > m_ws->getNPoints())
@@ -249,7 +243,12 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
   delete[] m_index;
   delete[] m_indexMax;
   delete[] m_indexMaker;
+
+  if (m_function)
+    delete m_function;
+  m_function = nullptr;
 }
+
 //----------------------------------------------------------------------------------------------
 /** @return the number of points to be iterated on */
 size_t MDHistoWorkspaceIterator::getDataSize() const {

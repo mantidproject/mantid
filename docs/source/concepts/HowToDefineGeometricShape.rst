@@ -48,17 +48,19 @@ Axes and units of measure
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 All objects are defined with respect to cartesian axes (x,y,z), and the
-:ref:`default <Using defaults>` unit of all supplied values are
+`default <IDF#Using_.3Cdefaults.3E>`__ unit of all supplied values are
 metres(m). Objects may be defined so that the origin (0,0,0) is at the
 centre, so that when rotations are applied they do not also apply an
 unexpected translation.
 
 Within instrument definitions we support the concept of defining a
-rotation by specifying what point the object is :ref:`facing <Using facing>`.
-To apply that correctly the side of the object we consider to be the front
-is the xy plane. Hence, when planning to use :ref:`facing <Using facing>`
-the shape should be defined such that the positive y-axis is considered
-to be up, the x-axis the width, and the z-axis the depth of the shape.
+rotation by specifying what point the object is
+`facing <InstrumentDefinitionFile#Using_.3Cfacing.3E>`__. To apply that
+correctly the side of the object we consider to be the front is the xy
+plane. Hence, when planning to use
+`facing <InstrumentDefinitionFile#Using_.3Cfacing.3E>`__ the shape
+should be defined such that the positive y-axis is considered to be up,
+the x-axis the width, and the z-axis the depth of the shape.
 
 To be aware of
 --------------

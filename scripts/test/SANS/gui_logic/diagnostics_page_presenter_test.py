@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import sys
@@ -35,33 +29,33 @@ class DiagnosticsPagePresenterTest(unittest.TestCase):
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
         self.assertEqual(self.presenter._work_handler.process.call_args[0][1], self.run_integral)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.horizontal_range)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], self.presenter._view.horizontal_mask)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], IntegralEnum.Horizontal)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], DetectorType.LAB)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][7], self.state)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][2], self.presenter._view.horizontal_range)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.horizontal_mask)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], IntegralEnum.Horizontal)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], DetectorType.LAB)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], self.state)
 
     def test_that_on_vertical_clicked_calls_work_handler_with_correct_parameters(self):
         self.presenter.on_vertical_clicked()
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
         self.assertEqual(self.presenter._work_handler.process.call_args[0][1], self.run_integral)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.vertical_range)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], self.presenter._view.vertical_mask)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], IntegralEnum.Vertical)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], DetectorType.LAB)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][7], self.state)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][2], self.presenter._view.vertical_range)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.vertical_mask)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], IntegralEnum.Vertical)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], DetectorType.LAB)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], self.state)
 
     def test_that_on_time_clicked_calls_work_handler_with_correct_parameters(self):
         self.presenter.on_time_clicked()
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
         self.assertEqual(self.presenter._work_handler.process.call_args[0][1], self.run_integral)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.time_range)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], self.presenter._view.time_mask)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], IntegralEnum.Time)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], DetectorType.LAB)
-        self.assertEqual(self.presenter._work_handler.process.call_args[0][7], self.state)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][2], self.presenter._view.time_range)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][3], self.presenter._view.time_mask)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][4], IntegralEnum.Time)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][5], DetectorType.LAB)
+        self.assertEqual(self.presenter._work_handler.process.call_args[0][6], self.state)
 
     def test_that_on_user_file_load_sets_user_file_name_on_view(self):
         user_file_name = 'user_file_name'

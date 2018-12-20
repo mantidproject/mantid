@@ -2,7 +2,7 @@
  GraphOptions
 ==============
 
-This is a Python binding to the C++ class Mantidplot::GraphOptions.
+This a python binding to the C++ class Mantidplot::GraphOptions.
 
 
 .. module:`mantidplot`

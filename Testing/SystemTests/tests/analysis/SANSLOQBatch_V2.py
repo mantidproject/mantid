@@ -1,13 +1,7 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import os.path
 from mantid.kernel import config
 from mantid.api import FileFinder
@@ -16,7 +10,7 @@ from sans.command_interface.ISISCommandInterface import (LOQ, Detector, Set1D, M
                                                          BatchReduce, UseCompatibilityMode)
 
 
-class SANSLOQBatchTest_V2(systemtesting.MantidSystemTest):
+class SANSLOQBatchTest_V2(stresstesting.MantidStressTest):
 
     def runTest(self):
         UseCompatibilityMode()

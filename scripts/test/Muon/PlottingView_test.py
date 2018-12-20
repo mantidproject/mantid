@@ -1,19 +1,8 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-import os, sys
+import os
 os.environ["QT_API"] = "pyqt"  # noqa E402
 
-from matplotlib.figure import Figure
-
-from mantid import WorkspaceFactory
-from mantid import plots
-from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 
@@ -25,26 +14,7 @@ except ImportError:
     import mock
 
 
-def get_subPlot(name):
-    data_x, data_y = [1, 2, 3, 4], [4, 5, 6, 7]
-    nspec = 2
-    ws1 = WorkspaceFactory.create("Workspace2D", nspec, len(data_x), len(data_y))
-    for i in range(ws1.getNumberHistograms()):
-        ws1.setX(i, data_x)
-        ws1.setY(i, data_y)
-    label1 = "test"
-    # create real lines
-    fig = Figure()
-    sub = fig.add_subplot(1, 1, 1)
-    line1 = plots.plotfunctions.plot(sub, ws1, specNum=1)
-    # add them both
-    subplot = subPlot(name)
-    subplot.addLine(label1, line1, ws1, 2)
-    return subplot, ws1
-
-@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
 class PlottingViewHelperFunctionTests(unittest.TestCase):
-
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
 
@@ -69,6 +39,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view.canvas.draw = mock.Mock()
 
         self.view.plots = {self.plot_name: self.plots_return_value}
+        self.view.workspaces = {self.plot_name: [self.plots_return_value]}
         self.mock_plot = mock.Mock()
         self.mock_plot.get_xlim = mock.Mock()
         self.mock_plot.get_ylim = mock.Mock()
@@ -242,19 +213,12 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         args = [self.plot_name, self.plots_return_value, True]
         self.view._modify_errors_list = mock.Mock()
         self.view.plot = mock.Mock()
-        # create subplot object
-        subplot, ws = get_subPlot(self.plot_name)
-        self.view.plot_storage = {self.plot_name: subplot}
-        self.view.plot_storage[self.plot_name].delete = mock.Mock()
-
+        self.view.workspace_plots[args[0]] = [self.plots_return_value]
         self.view._change_plot_errors(*args)
         self.view._modify_errors_list.assert_called_once_with(*args[::2])
-        self.assertEquals(
-            self.view.plot_storage[
-                self.plot_name].delete.call_count,
-            1)
+        self.assertEquals(self.plots_return_value.remove.call_count, 1)
         self.view.plot.assert_called_once_with(
-            self.plot_name, ws)
+            self.plot_name, self.plots_return_value)
 
     def test_set_positions(self):
         self.view._set_positions([[0, 0]])
@@ -298,10 +262,19 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view.plot_selector.addItems.assert_called_once_with(
             list(self.view.plots.keys()))
 
+    def test_add_workspace_name_if_not_in_workspaces(self):
+        self.view._add_workspace_name(self.plot_name, self.mock_workspace)
+        self.assertEquals(self.view.workspaces[self.plot_name], [
+                          self.plots_return_value, self.mock_workspace])
 
-@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
+    def test_add_workspace_name_if_in_workspaces(self):
+        self.view.workspaces = {}
+        self.view._add_workspace_name(self.plot_name, self.mock_workspace)
+        self.assertEquals(self.view.workspaces[self.plot_name], [
+                          self.mock_workspace])
+
+
 class PlottingViewPlotFunctionsTests(unittest.TestCase):
-
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
 
@@ -331,6 +304,7 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.view._set_bounds = mock.Mock()
 
         self.view.plots = {self.plot_name: self.plots_return_value}
+        self.view.workspaces = {self.plot_name: self.plots_return_value}
         self.view.plot_additions = {self.plot_name: self.plots_return_value}
 
     def test_plot_errors_in_errors_list(self):
@@ -349,25 +323,13 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.view._set_bounds.assert_called_once_with(self.plot_name)
 
     @mock.patch("mantid.plots.plotfunctions.errorbar")
-    #@mock.patch("mantid.plots.plotfunctions.plot")
-    def test_plot_workspace_errors(self, error_bar):  # , normal_plot):
-        self.view._add_plotted_line = mock.Mock()
+    def test_plot_workspace_errors(self, error_bar):
         error_bar.return_value = tuple([[] for i in range(3)])
-        mock_line = mock.Mock()
-        mock_line.get_label = mock.Mock(return_value="test")
-        mock_line.remove = mock.Mock()
-        with mock.patch("mantid.plots.plotfunctions.plot") as normal_plot:
-            normal_plot.return_value = tuple([mock_line])
-            self.view.plot_workspace_errors(
-                self.plot_name,
-                self.mock_workspace)
-            self.assertEquals(error_bar.call_count, 1)
-            self.assertEquals(self.view._add_plotted_line.call_count, 1)
-            self.assertEquals(normal_plot.call_count, 1)
+        self.view.plot_workspace_errors(self.plot_name, self.mock_workspace)
+        self.assertEquals(error_bar.call_count, 1)
 
     @mock.patch("mantid.plots.plotfunctions.plot")
     def test_plot_workspace(self, plot):
-        self.view._add_plotted_line = mock.Mock()
         plot.return_value = tuple([mock.Mock()])
         self.view.plot_workspace(self.plot_name, self.mock_workspace)
         self.assertEquals(plot.call_count, 1)
@@ -394,14 +356,10 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.assertEquals(return_value, True)
 
     def test_remove_subplot(self):
-        self.view.plot_storage = {self.plot_name: get_subPlot(self.plot_name)}
-        self.view.subplotRemovedSignal = mock.Mock()
         self.view.remove_subplot(self.plot_name)
-        self.view.subplotRemovedSignal.callled_once_with(self.plot_name)
         self.view.figure.delaxes.assert_called_once_with(
             self.plots_return_value)
-        print(self.view.plots)
-        for _dict in [self.view.plots, self.view.plot_storage]:
+        for _dict in [self.view.plots, self.view.workspaces]:
             self.assertEquals(_dict, {})
         self.view._update_gridspec.assert_called_once_with(
             len(self.view.plots))

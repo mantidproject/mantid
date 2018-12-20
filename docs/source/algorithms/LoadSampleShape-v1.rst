@@ -15,8 +15,8 @@ The following types of input file are supported:
 
 * ``*.stl`` stereolithography `https://en.wikipedia.org/wiki/STL_(file_format) <https://en.wikipedia.org/wiki/STL_(file_format)>`_
   This is a file format consisting of a list of faces specified by their vertex coordinates.
-  The file may be in ASCII or Binary format, and all the faces must be triangular. 
-  The normals are ignored, but the vertices must be in the order required by the standard 
+  The file must is in ASCII for and all the faces must be triangular. The normals are ignored,
+  but the vertices must be in the order required by the standard 
   (counter-clockwise when viewed from outside).
 * ``*.off`` Object File Format `https://en.wikipedia.org/wiki/OFF_(file_format) <https://en.wikipedia.org/wiki/OFF_(file_format)>`_
   This is a file format consisting of a list of vertices and a list of faces specified by the position of 

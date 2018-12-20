@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODERTEST_H_
 #define MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODERTEST_H_
 
@@ -37,13 +31,14 @@ public:
     auto &config = ConfigService::Instance();
     auto baseInstDir = config.getInstrumentDirectory();
     Poco::Path testFile =
-        Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
+        Poco::Path(baseInstDir)
+            .resolve("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml");
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
     config.setFacility("TEST");
     // Update instrument search directory
     config.setString("instrumentDefinition.directory",
-                     baseInstDir + "/unit_testing");
+                     baseInstDir + "/IDFs_for_UNIT_TESTING");
   }
 
   void tearDown() override {

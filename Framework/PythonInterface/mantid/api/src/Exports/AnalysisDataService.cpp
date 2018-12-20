@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
@@ -24,31 +18,6 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(AnalysisDataServiceImpl)
 
 namespace {
-std::once_flag INIT_FLAG;
-
-/**
- * Returns a reference to the AnalysisDataService object, creating it
- * if necessary. In addition to creating the object the first call also:
- *   - register AnalysisDataService.clear as an atexit function
- * @return A reference to the FrameworkManagerImpl instance
- */
-AnalysisDataServiceImpl &instance() {
-  // start the framework (if necessary)
-  auto &ads = AnalysisDataService::Instance();
-  std::call_once(INIT_FLAG, []() {
-    PyRun_SimpleString("import atexit\n"
-                       "from mantid.api import AnalysisDataService\n"
-                       "atexit.register(lambda: AnalysisDataService.clear())");
-  });
-  return ads;
-}
-
-/**
- * @param self A reference to the AnalysisDataServiceImpl
- * @param names The list of names to extract
- * @param unrollGroups If true unroll the workspace groups
- * @return a python list of the workspaces in the ADS
- */
 list retrieveWorkspaces(AnalysisDataServiceImpl &self, const list &names,
                         bool unrollGroups = false) {
   return Converters::ToPyList<Workspace_sptr>()(self.retrieveWorkspaces(
@@ -70,7 +39,7 @@ void export_AnalysisDataService() {
       DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>;
   auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
   pythonClass
-      .def("Instance", instance,
+      .def("Instance", &AnalysisDataService::Instance,
            return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
       .staticmethod("Instance")

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 try:
     from mantidplot import *
@@ -14,7 +8,7 @@ from PyQt4 import QtGui
 from mantid.simpleapi import *
 from mantidqtpython import MantidQt
 from ui.poldi.ui_poldi_window import Ui_PoldiWindow
-from reduction_gui.reduction.scripter import execute_script
+
 
 canMantidPlot = True
 
@@ -221,4 +215,4 @@ class PoldiGui(QtGui.QMainWindow, Ui_PoldiWindow):
         """
         Re-emits 'runPytonScript' signal
         """
-        execute_script(text)
+        mantidplot.runPythonScript(text, True)

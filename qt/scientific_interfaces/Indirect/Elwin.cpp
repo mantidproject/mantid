@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "Elwin.h"
 #include "../General/UserInputValidator.h"
 
@@ -19,17 +13,7 @@ using namespace MantidQt::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
 }
-
-bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
-  return workspace->y(0).size() > 1;
-}
-
-} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -266,9 +250,8 @@ void Elwin::unGroupInput(bool error) {
       ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
       ungroupAlg->execute();
     }
-  } else {
-    setPlotResultEnabled(false);
-    setSaveResultEnabled(false);
+    setPlotResultEnabled(true);
+    setSaveResultEnabled(true);
   }
 }
 
@@ -375,8 +358,9 @@ void Elwin::newInputFiles() {
 
   // Default to the first file
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
-  QString const wsname = m_uiForm.cbPreviewFile->currentText();
-  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
+  QString wsname = m_uiForm.cbPreviewFile->currentText();
+  auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsname.toStdString());
   setInputWorkspace(inputWs);
 }
 
@@ -401,8 +385,9 @@ void Elwin::newPreviewFileSelected(int index) {
     return;
   }
 
-  auto const ws = getADSMatrixWorkspace(wsName.toStdString());
-  int const numHist = static_cast<int>(ws->getNumberHistograms()) - 1;
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsName.toStdString());
+  int numHist = static_cast<int>(ws->getNumberHistograms()) - 1;
 
   m_uiForm.spPreviewSpec->setMaximum(numHist);
   m_uiForm.spPreviewSpec->setValue(0);
@@ -480,26 +465,26 @@ void Elwin::updateRS(QtProperty *prop, double val) {
 void Elwin::plotClicked() {
   setPlotResultIsPlotting(true);
 
-  auto const workspaceBaseName =
+  auto workspaceBaseName =
       getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
-  plotResult(workspaceBaseName + "_eq");
-  plotResult(workspaceBaseName + "_eq2");
-  plotResult(workspaceBaseName + "_elf");
-  plotResult(workspaceBaseName + "_elt");
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
+                                   true))
+    plotSpectrum(workspaceBaseName + "_eq");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
+                                   true))
+    plotSpectrum(workspaceBaseName + "_eq2");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
+                                   true))
+    plotSpectrum(workspaceBaseName + "_elf");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
+                                   true, false))
+    plotSpectrum(workspaceBaseName + "_elt");
 
   setPlotResultIsPlotting(false);
-}
-
-void Elwin::plotResult(QString const &workspaceName) {
-  auto const name = workspaceName.toStdString();
-  if (checkADSForPlotSaveWorkspace(name, true)) {
-    if (isWorkspacePlottable(getADSMatrixWorkspace(name)))
-      plotSpectrum(workspaceName);
-    else
-      showMessageBox("Plotting a spectrum of the workspace " + workspaceName +
-                     " failed : Workspace only has one data point");
-  }
 }
 
 /**
@@ -538,20 +523,14 @@ void Elwin::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
-void Elwin::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
-}
-
 void Elwin::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
+  setRunEnabled(!running);
 }
 
 void Elwin::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setButtonsEnabled(!plotting);
+  setPlotResultEnabled(!plotting);
 }
 
 void Elwin::runClicked() { runTab(); }

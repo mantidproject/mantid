@@ -2,7 +2,7 @@
  DateAndTime
 =============
 
-This is a Python binding to the C++ class Mantid::Kernel::DateAndTime.
+This a python binding to the C++ class Mantid::Kernel::DateAndTime.
 
 The equivalent object in python is :class:`numpy.datetime64`. The two
 classes have a different EPOCH. Note that

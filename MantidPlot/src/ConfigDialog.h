@@ -138,8 +138,6 @@ private:
   void initMantidPage();
   void initDirSearchTab();
   void initCurveFittingTab();
-  void initProjectRecoveryTab();
-  void updateProjectRecovery();
 
   void initCurvesPage();
   void initPlots3DPage();
@@ -231,14 +229,6 @@ private:
   QCheckBox *m_sendToPrograms;
   QTreeWidget *treeCategories;
   QTreeWidget *treePrograms;
-  /// mantid project recovery pahe
-  QWidget *projectRecovery;
-  QLabel *lblWarningToRestartProjRec;
-  QCheckBox *ckEnableProjectRecovery;
-  QLabel *lblTimeBetweenCheckpoints;
-  QSpinBox *boxTimeBetweenCheckpoints;
-  QLabel *lblNumCheckpoints;
-  QSpinBox *boxNumCheckpoint;
 
   // MDPlotting
   QTabWidget *mdPlottingTabWidget;

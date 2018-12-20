@@ -1,16 +1,8 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -51,7 +43,6 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
-#include <QMimeData>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSettings>
@@ -154,9 +145,6 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   setBackgroundColor(
       settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
 
-  m_instrumentActor.reset(
-      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
-
   // Create the b=tabs
   createTabs(settings);
 
@@ -200,9 +188,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
 
-  const bool resetActor(false);
-  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView,
-       resetActor);
+  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView);
 }
 
 /**
@@ -260,15 +246,13 @@ InstrumentWidget::getSurfaceAxis(const int surfaceType) const {
  * @param scaleMax :: Maximum value of the colormap scale. Ignored if
  * autoscaling == true.
  * @param setDefaultView :: Set the default surface type
- * @param resetActor :: If true reset the instrumentActor object
  */
 void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
                             double scaleMin, double scaleMax,
-                            bool setDefaultView, bool resetActor) {
-  if (resetActor) {
-    m_instrumentActor.reset(
-        new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
-  }
+                            bool setDefaultView) {
+  // Previously in (now removed) setWorkspaceName method
+  m_instrumentActor.reset(
+      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
                                 m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(
@@ -305,12 +289,6 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
 void InstrumentWidget::resetInstrument(bool resetGeometry) {
   init(resetGeometry, true, 0.0, 0.0, false);
   updateInstrumentDetectors();
-}
-
-void InstrumentWidget::resetSurface() {
-  auto surface = getSurface();
-  surface->updateDetectors();
-  update();
 }
 
 /**
@@ -432,29 +410,19 @@ void InstrumentWidget::setSurfaceType(int type) {
       auto sample_pos = componentInfo.samplePosition();
       auto axis = getSurfaceAxis(surfaceType);
 
-      m_maskTab->setDisabled(false);
-
       // create the surface
       if (surfaceType == FULL3D) {
-        m_renderTab->forceLayers(false);
-
-        if (m_instrumentActor->hasGridBank())
-          m_maskTab->setDisabled(true);
-
         surface = new Projection3D(m_instrumentActor.get(),
                                    getInstrumentDisplayWidth(),
                                    getInstrumentDisplayHeight());
       } else if (surfaceType <= CYLINDRICAL_Z) {
-        m_renderTab->forceLayers(true);
         surface =
             new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
       } else if (surfaceType <= SPHERICAL_Z) {
-        m_renderTab->forceLayers(true);
         surface =
             new UnwrappedSphere(m_instrumentActor.get(), sample_pos, axis);
       } else // SIDE_BY_SIDE
       {
-        m_renderTab->forceLayers(true);
         surface = new PanelsSurface(m_instrumentActor.get(), sample_pos, axis);
       }
     } catch (InstrumentHasNoSampleError &) {
@@ -652,8 +620,8 @@ void InstrumentWidget::selectComponent(const QString &name) {
  * Set the scale type programmatically
  * @param type :: The scale choice
  */
-void InstrumentWidget::setScaleType(ColorMap::ScaleType type) {
-  emit scaleTypeChanged(static_cast<int>(type));
+void InstrumentWidget::setScaleType(GraphOptions::ScaleType type) {
+  emit scaleTypeChanged(type);
 }
 
 /**
@@ -1206,13 +1174,13 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   pickTab->loadSettings(settings);
 
   // Mask controls
-  m_maskTab = new InstrumentWidgetMaskTab(this);
-  mControlsTab->addTab(m_maskTab, QString("Draw"));
-  connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
+  InstrumentWidgetMaskTab *maskTab = new InstrumentWidgetMaskTab(this);
+  mControlsTab->addTab(maskTab, QString("Draw"));
+  connect(maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
-  connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
+  connect(m_xIntegration, SIGNAL(changed(double, double)), maskTab,
           SLOT(changedIntegrationRange(double, double)));
-  m_maskTab->loadSettings(settings);
+  maskTab->loadSettings(settings);
 
   // Instrument tree controls
   InstrumentWidgetTreeTab *treeTab = new InstrumentWidgetTreeTab(this);
@@ -1222,7 +1190,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
 
-  m_tabs << m_renderTab << pickTab << m_maskTab << treeTab;
+  m_tabs << m_renderTab << pickTab << maskTab << treeTab;
 }
 
 /**
@@ -1230,7 +1198,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
  * configuration.
  */
 QString InstrumentWidget::getSettingsGroupName() const {
-  return QString::fromLatin1(InstrumentWidgetSettingsGroup);
+  return QString::fromAscii(InstrumentWidgetSettingsGroup);
 }
 
 /**
@@ -1238,7 +1206,7 @@ QString InstrumentWidget::getSettingsGroupName() const {
  * configuration.
  */
 QString InstrumentWidget::getInstrumentSettingsGroupName() const {
-  return QString::fromLatin1(InstrumentWidgetSettingsGroup) + "/" +
+  return QString::fromAscii(InstrumentWidgetSettingsGroup) + "/" +
          QString::fromStdString(getInstrumentActor().getInstrumentName());
 }
 
@@ -1397,7 +1365,6 @@ int InstrumentWidget::getCurrentTab() const {
  * @return string representing the current state of the instrumet widget.
  */
 std::string InstrumentWidget::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   TSVSerialiser tsv;
 
   // serialise widget properties
@@ -1413,10 +1380,6 @@ std::string InstrumentWidget::saveToProject() const {
   tsv.writeSection("tabs", saveTabs());
 
   return tsv.outputLines();
-#else
-  throw std::runtime_error(
-      "InstrumentWidget::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 /**
@@ -1447,7 +1410,6 @@ void InstrumentWidget::loadTabs(const std::string &lines) const {
  * file.
  */
 void InstrumentWidget::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("SurfaceType")) {
@@ -1487,11 +1449,6 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
   }
 
   updateInstrumentView();
-#else
-  Q_UNUSED(lines);
-  throw std::runtime_error(
-      "InstrumentWidget::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 } // namespace MantidWidgets

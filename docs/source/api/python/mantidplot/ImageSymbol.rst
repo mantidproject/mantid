@@ -2,7 +2,7 @@
  ImageSymbol
 =============
 
-This is a Python binding to the C++ class Mantidplot::ImageSymbol.
+This a python binding to the C++ class Mantidplot::ImageSymbol.
 
 *bases:* :py:obj:`mantidplot.PlotSymbol`
 

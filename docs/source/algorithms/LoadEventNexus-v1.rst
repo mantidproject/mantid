@@ -12,7 +12,7 @@ Description
 The LoadEventNeXus algorithm loads data from an EventNexus file into an
 :ref:`EventWorkspace <EventWorkspace>`. The default histogram bin
 boundaries consist of a single bin able to hold all events (in all
-pixels), and will have their :ref:`units <Unit Factory>` set to time-of-flight.
+pixels), and will have their `units <http://www.mantidproject.org/units>`_ set to time-of-flight.
 Since it is an :ref:`EventWorkspace <EventWorkspace>`, it can be rebinned
 to finer bins with no loss of data.
 
@@ -25,18 +25,10 @@ also loaded using :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
 **Monitors** are loaded using :ref:`LoadNexusMonitors
 <algm-LoadNexusMonitors>`.
 
-**Instrument geometry**
+**Instrument geometry** is loaded using :ref:`LoadIDFFromNexus
+<algm-LoadIDFFromNexus>`. If the instrument geometry is not in the
+file :ref:`LoadInstrument <algm-LoadInstrument>` is used.
 
-There are a series of approaches for extracting the instrument geometry. 
-These follow the escalation path as follows:
-
-- Tries to load embedded instrument_xml from the NXinstrument if present 
-  using :ref:`LoadIDFFromNexus <algm-LoadIDFFromNexus>`.
-- Else tries to load embedded nexus geometry from the NXinstrument if present
-- Else tries to load the instrument using the name extracted from NXinstrument 
-
-The latter two possibilities are achieved via 
-:ref:`LoadInstrument <algm-LoadInstrument>`
 
 Optional properties
 ###################

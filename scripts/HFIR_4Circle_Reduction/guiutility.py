@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #
 # GUI Utility Methods
 #
@@ -12,8 +6,7 @@ from six.moves import range
 import math
 import numpy
 import os
-from qtpy.QtWidgets import (QDialog, QLineEdit, QVBoxLayout, QDialogButtonBox, QLabel, QPlainTextEdit)  # noqa
-from qtpy import QtCore  # noqa
+from PyQt4 import QtGui, QtCore
 
 
 def convert_str_to_matrix(matrix_str, matrix_shape):
@@ -275,10 +268,10 @@ def parse_float_editors(line_edits, allow_blank=False):
     # Set flag
     return_single_value = False
 
-    if isinstance(line_edits, QLineEdit):
+    if isinstance(line_edits, QtGui.QLineEdit) is True:
         line_edit_list = [line_edits]
         return_single_value = True
-    elif isinstance(line_edits, list):
+    elif isinstance(line_edits, list) is True:
         line_edit_list = line_edits
     else:
         raise RuntimeError('Input is not LineEdit or list of LineEdit.')
@@ -287,7 +280,7 @@ def parse_float_editors(line_edits, allow_blank=False):
     float_list = []
 
     for line_edit in line_edit_list:
-        assert isinstance(line_edit, QLineEdit)
+        assert isinstance(line_edit, QtGui.QLineEdit)
         str_value = str(line_edit.text()).strip()
         if len(str_value) == 0 and allow_blank:
             # allow blank and use None
@@ -332,10 +325,10 @@ def parse_integers_editors(line_edits, allow_blank=False):
     # Set flag
     return_single_value = False
 
-    if isinstance(line_edits, QLineEdit):
+    if isinstance(line_edits, QtGui.QLineEdit) is True:
         line_edit_list = [line_edits]
         return_single_value = True
-    elif isinstance(line_edits, list):
+    elif isinstance(line_edits, list) is True:
         line_edit_list = line_edits
     else:
         raise RuntimeError('Input is not LineEdit or list of LineEdit.')
@@ -344,7 +337,7 @@ def parse_integers_editors(line_edits, allow_blank=False):
     integer_list = list()
 
     for line_edit in line_edit_list:
-        assert isinstance(line_edit, QLineEdit)
+        assert isinstance(line_edit, QtGui.QLineEdit)
         str_value = str(line_edit.text()).strip()
         if len(str_value) == 0 and allow_blank:
             # allowed empty string
@@ -354,9 +347,7 @@ def parse_integers_editors(line_edits, allow_blank=False):
             try:
                 int_value = int(str_value)
             except ValueError as value_err:
-                # compose error message
-                error_message += 'Unable to parse a line edit {0} with value \'{1}\' to an integer due to {2}' \
-                                 ''.format(line_edit.objectName(), str_value, value_err)
+                error_message += 'Unable to parse a line edit with value %s to integer. %s\n' % (str_value, value_err)
             else:
                 if str_value != '%d' % int_value:
                     error_message += 'Value %s is not a proper integer.\n' % str_value
@@ -374,136 +365,61 @@ def parse_integers_editors(line_edits, allow_blank=False):
     return True, integer_list
 
 
-class GetValueDialog(QDialog):
+class GetValueDialog(QtGui.QDialog):
     """
     A dialog that gets a single value
     """
-    def __init__(self, parent=None, label_name=''):
+    def __init__(self, parent=None):
         """
+
         :param parent:
-        :param label_name
         """
         super(GetValueDialog, self).__init__(parent)
 
-        layout = QVBoxLayout(self)
-
-        # details information
-        self.info_line = QPlainTextEdit(self)
-        self.info_line.setEnabled(False)
-        layout.addWidget(self.info_line)
-
-        # input
-        self.label = QLabel(self)
-        self.value_edit = QLineEdit(self)
-        layout.addWidget(self.label)
-        layout.addWidget(self.value_edit)
-        # END-IF-ELSE
+        layout = QtGui.QVBoxLayout(self)
 
         # nice widget for editing the date
+        self.value_edit = QtGui.QLineEdit(self)
+        layout.addWidget(self.value_edit)
+
+        self.setWindowTitle('Workspace Name')
+
         # self.datetime = QDateTimeEdit(self)
         # self.datetime.setCalendarPopup(True)
         # self.datetime.setDateTime(QDateTime.currentDateTime())
         # layout.addWidget(self.datetime)
 
         # OK and Cancel buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
-                                   QtCore.Qt.Horizontal, self)
+        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
+                                         QtCore.Qt.Horizontal, self)
 
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-        # set some values
-        self.setWindowTitle('Get user input')
-        self.label.setText(label_name)
-
         return
+
+    # def accept(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.close()
+    #
+    # def reject(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.close()
 
     # get current date and time from the dialog
     def get_value(self):
-        """ get the value in string
+        """
+
         :return:
         """
         return str(self.value_edit.text())
-
-    def set_message_type(self, message_type):
-        """
-
-        :param message_type:
-        :return:
-        """
-        if message_type == 'error':
-            self.value_edit.setStyleSheet("color: rgb(255, 0, 0);")
-        else:
-            self.value_edit.setStyleSheet('color: blue')
-
-        return
-
-    def set_title(self, title):
-        """
-        set window/dialog title
-        :param title:
-        :return:
-        """
-        self.setWindowTitle(title)
-
-        return
-
-    def show_message(self, message):
-        """
-        set or show message
-        :param message:
-        :return:
-        """
-        self.info_line.setPlainText(message)
-
-        return
-# END-DEF-CLASS
-
-
-class DisplayDialog(QDialog):
-    """
-    This is a simple dialog display which can be configured by users
-    """
-    def __init__(self, parent=None, name='Test'):
-        """ init
-        :param parent:
-        """
-        super(DisplayDialog, self).__init__(parent)
-
-        layout = QVBoxLayout(self)
-
-        # nice widget for editing the date
-        self.message_edit = QPlainTextEdit(self)
-        self.message_edit.setReadOnly(True)
-        layout.addWidget(self.message_edit)
-
-        self.setWindowTitle('Merged Scans Workspace Names')
-
-        # OK and Cancel buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok, QtCore.Qt.Horizontal, self)
-
-        buttons.accepted.connect(self.accept)
-        layout.addWidget(buttons)
-
-        self.name = name
-
-        return
-
-    def set_name(self, new_name):
-
-        self.name = new_name
-
-    def show_message(self, message):
-        """
-        show message
-        :param message:
-        :return:
-        """
-        self.message_edit.setPlainText(message)
-
-        return
-# END-DEF-CLASS
 
 
 # static method to create the dialog and return (date, time, accepted)
@@ -516,36 +432,47 @@ def get_value(parent=None):
     result = dialog.exec_()
     value = dialog.get_value()
 
-    return value, result == QDialog.Accepted
+    return value, result == QtGui.QDialog.Accepted
 
 
-def get_value_from_dialog(parent, title, details, label_name='Equation'):
-    """
-    pop a dialog with user-specified message and take a value (string) from the dialog to return
-    :param title:
-    :param details:
-    :param label_name:
-    :return:
-    """
-    # start dialog
-    dialog = GetValueDialog(parent, label_name=label_name)
+class DisplayDialog(QtGui.QDialog):
+    def __init__(self, parent=None):
+        """
 
-    # set up title
-    dialog.set_title(title)
-    dialog.show_message(details)
+        :param parent:
+        """
+        super(DisplayDialog, self).__init__(parent)
 
-    # launch and get result
-    result = dialog.exec_()
-    print ('Method get_value_from_dialog: returned result is {}'.format(result))
-    if result is False:
-        return None
+        layout = QtGui.QVBoxLayout(self)
 
-    str_value = dialog.get_value()
+        # nice widget for editing the date
+        self.message_edit = QtGui.QPlainTextEdit(self)
+        self.message_edit.setReadOnly(True)
+        layout.addWidget(self.message_edit)
 
-    return str_value
+        self.setWindowTitle('Merged Scans Workspace Names')
+
+        # OK and Cancel buttons
+        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok,
+                                         QtCore.Qt.Horizontal, self)
+
+        buttons.accepted.connect(self.accept)
+        layout.addWidget(buttons)
+
+        return
+
+    def show_message(self, message):
+        """
+        show message
+        :param message:
+        :return:
+        """
+        self.message_edit.setPlainText(message)
+
+        return
 
 
-def show_message(parent=None, message='show message here!', message_type='info'):
+def show_message(parent=None, message='show message here!'):
     """
     show message
     :param parent:
@@ -553,10 +480,8 @@ def show_message(parent=None, message='show message here!', message_type='info')
     :return: True for accepting.  False for rejecting or cancelling
     """
     dialog = DisplayDialog(parent)
-    # dialog.set_name('Teset new name')
     dialog.show_message(message)
-    dialog.set_message_type(message)
+
     result = dialog.exec_()
-    # Dialog object: dialog still exists after exec_()
 
     return result

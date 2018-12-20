@@ -2,7 +2,7 @@
  ExperimentInfo
 ================
 
-This is a Python binding to the C++ class Mantid::API::ExperimentInfo.
+This a python binding to the C++ class Mantid::API::ExperimentInfo.
 
 
 .. module:`mantid.api`

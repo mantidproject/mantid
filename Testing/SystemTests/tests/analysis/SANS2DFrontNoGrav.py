@@ -1,18 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
 
-class SANS2DFrontNoGrav(systemtesting.MantidSystemTest):
+class SANS2DFrontNoGrav(stresstesting.MantidStressTest):
 
     def runTest(self):
 
@@ -34,7 +28,7 @@ class SANS2DFrontNoGrav(systemtesting.MantidSystemTest):
         return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
 
 
-class SANS2DWithExtraLengthGravity(systemtesting.MantidSystemTest):
+class SANS2DWithExtraLengthGravity(stresstesting.MantidStressTest):
     def runTest(self):
         SANS2D()
         MaskFile('MASKSANS2D_094i_RKH.txt')

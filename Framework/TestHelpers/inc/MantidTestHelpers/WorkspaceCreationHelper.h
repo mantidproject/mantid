@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -271,9 +265,6 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist,
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
                                            int numBins);
-Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspace123WithMaskedBin(int numHist, int numBins,
-                                  int maskedWorkspaceIndex, int maskedBinIndex);
 
 /** Create an Eventworkspace with an instrument that contains
  * RectangularDetector's */

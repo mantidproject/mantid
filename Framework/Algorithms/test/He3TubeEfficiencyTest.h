@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef HE3TUBEEFFICIENCYTEST_H_
 #define HE3TUBEEFFICIENCYTEST_H_
 
@@ -53,7 +47,8 @@ void createWorkspace2DInADS(const std::string inputWS) {
 
   LoadInstrument loader;
   loader.initialize();
-  loader.setPropertyValue("Filename", "unit_testing/DUM_Definition.xml");
+  loader.setPropertyValue("Filename",
+                          "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
   loader.setPropertyValue("Workspace", inputWS);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loader.execute();
@@ -67,7 +62,8 @@ void createEventWorkspaceInADS(const std::string inputEvWS) {
 
   LoadInstrument loader;
   loader.initialize();
-  loader.setPropertyValue("Filename", "unit_testing/DUM_Definition.xml");
+  loader.setPropertyValue("Filename",
+                          "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
   loader.setPropertyValue("Workspace", inputEvWS);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loader.execute();

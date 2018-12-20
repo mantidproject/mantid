@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_MONITORLIVEDATATEST_H_
 #define MANTID_LIVEDATA_MONITORLIVEDATATEST_H_
 
@@ -42,7 +36,8 @@ public:
   static void destroySuite(MonitorLiveDataTest *suite) { delete suite; }
 
   MonitorLiveDataTest()
-      : loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {}
+      : loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml",
+                         "TEST") {}
 
   void setUp() override {
     // Register algorithms

@@ -283,7 +283,7 @@
         <string>Convert To:</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="convertButton">
+      <widget class="QPushButton" name="convert">
        <property name="geometry">
         <rect>
          <x>130</x>

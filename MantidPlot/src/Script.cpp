@@ -29,6 +29,7 @@
 #include "Script.h"
 #include "ScriptingEnv.h"
 
+#include <QRegExp>
 #include <stdexcept>
 
 //--------------------------------------------------------------------------------------------------

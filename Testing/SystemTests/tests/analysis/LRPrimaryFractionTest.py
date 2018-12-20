@@ -1,16 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import systemtesting
+import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
 
-class LRPrimaryFractionTest(systemtesting.MantidSystemTest):
+class LRPrimaryFractionTest(stresstesting.MantidStressTest):
     scaling_factor = None
 
     def runTest(self):
@@ -28,7 +22,7 @@ class LRPrimaryFractionTest(systemtesting.MantidSystemTest):
         return True
 
 
-class LRPrimaryFractionWithRangeTest(systemtesting.MantidSystemTest):
+class LRPrimaryFractionWithRangeTest(stresstesting.MantidStressTest):
     scaling_factor = None
 
     def runTest(self):
@@ -47,7 +41,7 @@ class LRPrimaryFractionWithRangeTest(systemtesting.MantidSystemTest):
         return True
 
 
-class ApplyToReducedDataTest(systemtesting.MantidSystemTest):
+class ApplyToReducedDataTest(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")

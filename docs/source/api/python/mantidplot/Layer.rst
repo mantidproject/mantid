@@ -2,7 +2,7 @@
  Layer
 =======
 
-This is a Python binding to the C++ class Mantidplot::Layer.
+This a python binding to the C++ class Mantidplot::Layer.
 
 
 .. module:`mantidplot`

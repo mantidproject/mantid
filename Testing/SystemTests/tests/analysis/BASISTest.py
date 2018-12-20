@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import systemtesting
+import stresstesting
 from mantid import config
 from mantid.simpleapi import (BASISCrystalDiffraction, Load, GroupWorkspaces,
                               ElasticWindowMultiple, MSDFit,
@@ -29,7 +23,7 @@ class PreppingMixin(object):
             config[key] = value  # config object does not have update method like python dict
 
 
-class ElwinTest(systemtesting.MantidSystemTest, PreppingMixin):
+class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
     r"""ELWIN tab of the Indirect Inelastic Interface
     """
 
@@ -77,7 +71,7 @@ class ElwinTest(systemtesting.MantidSystemTest, PreppingMixin):
         return 'outQ2', 'BASIS_elwin_eq2.nxs'
 
 
-class GaussianMSDTest(systemtesting.MantidSystemTest, PreppingMixin):
+class GaussianMSDTest(stresstesting.MantidStressTest, PreppingMixin):
     r"""MSD tab of the Indirect Inelastic Interface
     """
 
@@ -113,7 +107,7 @@ class GaussianMSDTest(systemtesting.MantidSystemTest, PreppingMixin):
         return 'outMSD', 'BASIS_63652_63720_Gaussian_msd.nxs'
 
 
-class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
+class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
     r"""Reduction for a scan of runs probing different orientations of a crystal.
     """
 
@@ -164,7 +158,7 @@ class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
         return 'peaky', 'BASISOrientedSample.nxs'
 
 
-class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
+class PowderSampleTest(stresstesting.MantidStressTest, PreppingMixin):
     r"""Run a elastic reduction for powder sample"""
 
     def __init__(self):
@@ -174,8 +168,8 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
-                'BSS_74799_event.nxs', 'BSS_75527_event.nxs',
-                'BSS_64642_event.nxs', 'BASISPowderSample.nxs']
+                'BSS_74799_event.nxs',
+                'BASISPowderSample.nxs']
 
     def runTest(self):
         r"""

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileProperty.h"
 
 #include "MantidAPI/FileFinder.h"
@@ -360,10 +354,14 @@ std::string FileProperty::setLoadProperty(const std::string &propValue) {
       if (!m_defaultExt.empty()) {
         addExtension(m_defaultExt, exts);
 
-        std::string lower = Mantid::Kernel::Strings::toLower(m_defaultExt);
+        std::string lower(m_defaultExt);
+        std::transform(m_defaultExt.begin(), m_defaultExt.end(), lower.begin(),
+                       tolower);
         addExtension(lower, exts);
 
-        std::string upper = Mantid::Kernel::Strings::toUpper(m_defaultExt);
+        std::string upper(m_defaultExt);
+        std::transform(m_defaultExt.begin(), m_defaultExt.end(), upper.begin(),
+                       toupper);
         addExtension(upper, exts);
       }
       for (auto &ext : allowedExts) {

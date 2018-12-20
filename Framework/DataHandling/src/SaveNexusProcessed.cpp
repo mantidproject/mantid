@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 // SaveNexusProcessed
 // @author Ronald Fowler, based on SaveNexus
 #include "MantidDataHandling/SaveNexusProcessed.h"
@@ -14,7 +8,6 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
@@ -22,6 +15,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <Poco/File.h>
+#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -167,8 +161,6 @@ void SaveNexusProcessed::doExec(
       boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
   OffsetsWorkspace_const_sptr offsetsWorkspace =
       boost::dynamic_pointer_cast<const OffsetsWorkspace>(inputWorkspace);
-  MaskWorkspace_const_sptr maskWorkspace =
-      boost::dynamic_pointer_cast<const MaskWorkspace>(inputWorkspace);
   if (peaksWorkspace)
     g_log.debug("We have a peaks workspace");
   // check if inputWorkspace is something we know how to save
@@ -195,11 +187,10 @@ void SaveNexusProcessed::doExec(
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
       (workspaceID.find("RebinnedOutput") == std::string::npos) &&
-      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace &&
-      !maskWorkspace)
+      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace)
     throw Exception::NotImplementedError(
         "SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, "
-        "EventWorkspace, ITableWorkspace, OffsetsWorkspace or MaskWorkspace.");
+        "EventWorkspace, ITableWorkspace, or OffsetsWorkspace.");
 
   // Create progress object for initial part - depends on whether events are
   // processed
@@ -255,18 +246,14 @@ void SaveNexusProcessed::doExec(
     // Write out the data (2D or event)
     if (m_eventWorkspace && PreserveEvents) {
       this->execEvent(nexusFile.get(), uniformSpectra, spec);
-    } else {
-      std::string workspaceTypeGroupName;
-      if (offsetsWorkspace)
-        workspaceTypeGroupName = "offsets_workspace";
-      else if (maskWorkspace)
-        workspaceTypeGroupName = "mask_workspace";
-      else
-        workspaceTypeGroupName = "workspace";
-
+    } else if (offsetsWorkspace) {
+      g_log.warning() << "Writing SpecialWorkspace2D ID=" << workspaceID
+                      << "\n";
       nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra,
-                                           spec, workspaceTypeGroupName.c_str(),
-                                           true);
+                                           spec, "offsets_workspace", true);
+    } else {
+      nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra,
+                                           spec, "workspace", true);
     }
 
     cppFile.openGroup("instrument", "NXinstrument");

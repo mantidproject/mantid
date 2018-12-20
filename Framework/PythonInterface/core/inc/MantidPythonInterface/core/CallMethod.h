@@ -1,12 +1,26 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_CALLMETHOD_H_
 #define MANTID_PYTHONINTERFACE_CALLMETHOD_H_
+/**
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>
+*/
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WrapperHelpers.h"
@@ -41,7 +55,13 @@ ReturnType callMethodImpl(PyObject *obj, const char *methodName,
     return boost::python::call_method<ReturnType, Args...>(obj, methodName,
                                                            args...);
   } catch (boost::python::error_already_set &) {
-    throw PythonException();
+    PyObject *exception = PyErr_Occurred();
+    assert(exception);
+    if (PyErr_GivenExceptionMatches(exception, PyExc_RuntimeError)) {
+      throw PythonRuntimeError();
+    } else {
+      throw PythonException();
+    }
   }
 }
 } // namespace detail
@@ -60,23 +80,6 @@ ReturnType callMethodNoCheck(PyObject *obj, const char *methodName,
                              const Args &... args) {
   GlobalInterpreterLock gil;
   return detail::callMethodImpl<ReturnType, Args...>(obj, methodName, args...);
-}
-
-/**
- * Wrapper around boost::python::call_method to acquire GIL for duration
- * of call. If the call raises a Python error then this is translated to
- * a C++ exception object inheriting from std::exception or std::runtime_error
- * depending on the type of Python error. Overload for boost::python::object
- * @param obj Reference to boost.python.object wrapper
- * @param methodName Name of the method call
- * @param args A list of arguments to forward to call_method
- */
-template <typename ReturnType, typename... Args>
-ReturnType callMethodNoCheck(const boost::python::object &obj,
-                             const char *methodName, const Args &... args) {
-  GlobalInterpreterLock gil;
-  return detail::callMethodImpl<ReturnType, Args...>(obj.ptr(), methodName,
-                                                     args...);
 }
 
 /**

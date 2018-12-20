@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
@@ -47,18 +41,28 @@ namespace Algorithms {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 22/09/2008
-*/
 
-namespace MergeRunsParameter {
-/// MergeRuns parameter names of the paramter file for sample log merging
-static const std::string SUM_MERGE = "sample_logs_sum";
-static const std::string TIME_SERIES_MERGE = "sample_logs_time_series";
-static const std::string LIST_MERGE = "sample_logs_list";
-static const std::string WARN_MERGE = "sample_logs_warn";
-static const std::string WARN_MERGE_TOLERANCES = "sample_logs_warn_tolerances";
-static const std::string FAIL_MERGE = "sample_logs_fail";
-static const std::string FAIL_MERGE_TOLERANCES = "sample_logs_fail_tolerances";
-} // namespace MergeRunsParameter
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
@@ -161,6 +165,7 @@ private:
   std::vector<SpectrumDefinition>
   buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
                      const Geometry::DetectorInfo &addeeDetInfo,
+                     const Geometry::DetectorInfo &outDetInfo,
                      const Geometry::DetectorInfo &newOutDetInfo);
 };
 

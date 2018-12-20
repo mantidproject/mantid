@@ -1,15 +1,9 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 
 
-class CompressEventsTesting(systemtesting.MantidSystemTest):
+class CompressEventsTesting(stresstesting.MantidStressTest):
     event_files = ["PG3_4844_event.nxs"] # /SNS/PG3/IPTS-2767/0/ for 2.5 hours
 
     def requiredFiles(self):

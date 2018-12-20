@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
 
@@ -31,8 +25,6 @@ public:
   bool zeroEISF(std::size_t dataIndex) const;
 
   bool isMultiFit() const override;
-
-  std::vector<std::string> getSpectrumDependentAttributes() const override;
 
   std::string getFitParameterName(std::size_t dataIndex,
                                   std::size_t spectrum) const;

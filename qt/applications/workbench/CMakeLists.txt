@@ -21,8 +21,6 @@ set ( TEST_FILES
   workbench/test/test_import.py
 
   workbench/plotting/test/test_functions.py
-  workbench/plotting/test/test_figuretype.py
-  workbench/plotting/test/test_globalfiguremanager.py
 
   workbench/widgets/plotselector/test/test_plotselector_model.py
   workbench/widgets/plotselector/test/test_plotselector_presenter.py

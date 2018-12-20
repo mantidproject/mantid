@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,super-on-old-class
 """
     Defines a system test for converting a set of reduced direct inelastic data
@@ -14,7 +8,7 @@
     repository & required to be accessible from any machine that wishes to run the test.
 """
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import os
 from mantid.simpleapi import *
 
@@ -22,7 +16,7 @@ from mantid.simpleapi import *
 FILE_LOCATIONS = ["/isis/mantid/localtestdata/"]#,"d:/Data/MantidSystemTests/BigData/Dropbox/LoadSQW"]
 
 
-class BuildSQWTest(systemtesting.MantidSystemTest):
+class BuildSQWTest(stresstesting.MantidStressTest):
 
     _startrun = 15058
     _endrun = 15178

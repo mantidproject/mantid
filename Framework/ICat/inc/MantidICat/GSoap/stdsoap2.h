@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2000 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 /*
         stdsoap2.h 2.8.15
 
@@ -30,6 +24,18 @@ WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
 for the specific language governing rights and limitations under the License.
 
 The Initial Developer of the Original Code is Robert A. van Engelen.
+Copyright (C) 2000-2013, Robert van Engelen, Genivia Inc., All Rights Reserved.
+--------------------------------------------------------------------------------
+GPL license.
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
 this program; if not, write to the Free Software Foundation, Inc., 59 Temple
@@ -1833,6 +1839,8 @@ struct soap_xlist {
 };
 #endif
 
+/******************************************************************************/
+
 #ifndef WITH_LEANER
 #ifdef __cplusplus
 class soap_dom_attribute_iterator {
@@ -1948,6 +1956,8 @@ extern std::ostream &operator<<(std::ostream &,
 extern std::istream &operator>>(std::istream &, struct soap_dom_element &);
 extern "C" {
 #endif
+
+/******************************************************************************/
 
 #ifdef WIN32
 #ifdef SOAP_STD_EXPORTS
@@ -2665,6 +2675,7 @@ SOAP_FMAC1 void SOAP_FMAC2 soap_set_sent_logfile(struct soap *, const char *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_set_test_logfile(struct soap *, const char *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_close_logfiles(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_open_logfile(struct soap *, int);
+/* */
 
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_value(struct soap *);
 

@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 import math
@@ -1607,9 +1601,8 @@ class LARMOR(ISISInstrument):
 
             start = log_data.getLogData('run_start')
             dt_0 = format_date(start.value, "%Y-%m-%dT%H:%M:%S", 19)
-            property_times = property.times
             for i in range(0, size):
-                dt = format_date(str(property_times[i]), "%Y-%m-%dT%H:%M:%S", 19)
+                dt = format_date(str(property.times[i]), "%Y-%m-%dT%H:%M:%S", 19)
                 if dt > dt_0:
                     if i == 0:
                         return float(log_data.getLogData(log_name).value[0])

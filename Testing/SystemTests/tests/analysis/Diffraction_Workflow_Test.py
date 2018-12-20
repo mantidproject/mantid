@@ -1,23 +1,17 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 """
 System test that loads TOPAZ single-crystal data,
 and runs Diffraction Workflow.
 """
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 import numpy
 import os
 from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 
-class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
+class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 
     def cleanup(self):
         Files = ["TOPAZ_3132.hkl",

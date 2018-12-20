@@ -6,7 +6,7 @@ BFGS (Broyden-Fletcher-Goldfarb-Shanno) minimizer
 This minimizer is
 explained at `Wikipedia <https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm>`__ 
 
-It is listed in :ref:`a comparison of fitting minimizers <FittingMinimizers Minimizer Comparison>`.
+It is listed in `a comparison of fitting minimizers <../concepts/FittingMinimizers.html>`__.
 
 It makes use of the 
 `GSL (GNU Scientific Library) library

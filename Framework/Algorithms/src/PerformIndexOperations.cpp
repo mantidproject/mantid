@@ -1,15 +1,10 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PerformIndexOperations.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -177,8 +172,7 @@ class AdditionParserRange : public CommandParserBase<AdditionCommand> {
 public:
 private:
   boost::regex getRegex() const override {
-    static const boost::regex r(R"(^\s*[0-9]+\s*\-\s*[0-9]+\s*$)");
-    return r;
+    return boost::regex(R"(^\s*[0-9]+\s*\-\s*[0-9]+\s*$)");
   }
   std::string getSeparator() const override { return "-"; }
 };
@@ -190,7 +184,7 @@ class AdditionParser : public CommandParser {
 public:
   Command *interpret(const std::string &instruction) const override {
     Command *command = nullptr;
-    static const boost::regex ex(R"(^\s*[0-9]+\s*\+\s*[0-9]+\s*$)");
+    boost::regex ex(R"(^\s*[0-9]+\s*\+\s*[0-9]+\s*$)");
     if (boost::regex_match(instruction, ex)) {
       std::vector<std::string> arguments;
       boost::split(arguments, instruction, boost::is_any_of("+"));
@@ -216,8 +210,7 @@ class CropParserRange : public CommandParserBase<CropCommand> {
 public:
 private:
   boost::regex getRegex() const override {
-    static const boost::regex r(R"(^\s*[0-9]+\s*:\s*[0-9]+\s*$)");
-    return r;
+    return boost::regex(R"(^\s*[0-9]+\s*:\s*[0-9]+\s*$)");
   }
   std::string getSeparator() const override { return ":"; }
 };
@@ -229,7 +222,7 @@ class CropParserIndex : public CommandParser {
 public:
   Command *interpret(const std::string &instruction) const override {
     Command *command = nullptr;
-    static const boost::regex ex("^\\s*[0-9]+\\s*$");
+    boost::regex ex("^\\s*[0-9]+\\s*$");
     if (boost::regex_match(instruction, ex)) {
       int index = -1;
       Mantid::Kernel::Strings::convert<int>(instruction, index);

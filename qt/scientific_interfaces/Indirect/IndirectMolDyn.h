@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTMOLDYN_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTMOLDYN_H_
 
@@ -28,19 +22,11 @@ public:
 
 private slots:
   void versionSelected(const QString &);
-  void runClicked();
+  // Handle plotting and saving
   void plotClicked();
   void saveClicked();
-  void algorithmComplete(bool error);
 
 private:
-  void setRunIsRunning(bool running);
-  void setPlotIsPlotting(bool plotting);
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setPlotEnabled(bool enabled);
-  void setSaveEnabled(bool enabled);
-
   // The ui form
   Ui::IndirectMolDyn m_uiForm;
 };

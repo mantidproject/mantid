@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
 from mantid import config
@@ -17,7 +11,7 @@ import SANSadd2 as sansadd
 import os
 
 
-class SANSAddBatch(systemtesting.MantidSystemTest):
+class SANSAddBatch(stresstesting.MantidStressTest):
     output_file = '99630sannotrans'
     csv_file = 'input.csv'
     result = ''

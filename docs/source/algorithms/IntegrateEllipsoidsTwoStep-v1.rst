@@ -25,7 +25,7 @@ from :ref:`algm-IntegratePeaksMD` in several critical ways.
 
 -  This algorithm works directly with raw or weighted events
    while :ref:`algm-IntegratePeaksMD` uses **MDEvents** from
-   :ref:`MDEventWorkspace <MDWorkspace>`.
+   `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_.
 -  This algorithm uses 3D ellipsoidal regions with aspect ratios that
    are adapted to the set of events that are near the peak center, while
    :ref:`algm-IntegratePeaksMD` uses spherical regions.

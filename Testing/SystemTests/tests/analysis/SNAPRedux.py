@@ -1,12 +1,6 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 import os
 
@@ -43,7 +37,7 @@ def do_cleanup():
     return True
 
 
-class SNAP_short(systemtesting.MantidSystemTest):
+class SNAP_short(stresstesting.MantidStressTest):
     def skipTests(self):
         return _skip_test()
 
@@ -70,7 +64,7 @@ class SNAP_short(systemtesting.MantidSystemTest):
         return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
 
 
-class SNAP_short_detcal(systemtesting.MantidSystemTest):
+class SNAP_short_detcal(stresstesting.MantidStressTest):
     def skipTests(self):
         return _skip_test()
 

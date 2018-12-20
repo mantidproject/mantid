@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Property.h"
 
 #include "MantidKernel/DateAndTime.h"
@@ -25,9 +19,9 @@ namespace Kernel {
  *  @param direction :: Whether this is a Direction::Input, Direction::Output or
  * Direction::InOut (Input & Output) property
  */
-Property::Property(std::string name, const std::type_info &type,
+Property::Property(const std::string &name, const std::type_info &type,
                    const unsigned int direction)
-    : m_name(std::move(name)), m_documentation(""), m_typeinfo(&type),
+    : m_name(name), m_documentation(""), m_typeinfo(&type),
       m_direction(direction), m_units(""), m_group(""), m_remember(true),
       m_autotrim(true) {
   // Make sure a random int hasn't been passed in for the direction

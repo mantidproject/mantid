@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -17,7 +11,7 @@
 namespace {
 using namespace Mantid::API;
 
-// The name of the conjoined input and guess workspaces -- required for
+// The name of the conjoined input and guess name -- required for
 // creating an external guess plot.
 const std::string INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
 
@@ -124,13 +118,11 @@ void IndirectFitPlotModel::setActiveSpectrum(std::size_t spectrum) {
 }
 
 void IndirectFitPlotModel::setStartX(double startX) {
-  if (getRange().second > startX)
-    m_fittingModel->setStartX(startX, m_activeIndex, m_activeSpectrum);
+  m_fittingModel->setStartX(startX, m_activeIndex, m_activeSpectrum);
 }
 
 void IndirectFitPlotModel::setEndX(double endX) {
-  if (getRange().first < endX)
-    m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
+  m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
 }
 
 void IndirectFitPlotModel::setFWHM(double fwhm) {
@@ -184,9 +176,7 @@ std::size_t IndirectFitPlotModel::numberOfWorkspaces() const {
 }
 
 std::string IndirectFitPlotModel::getFitDataName(std::size_t index) const {
-  if (m_fittingModel->getWorkspace(index))
-    return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
-  return "";
+  return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
 }
 
 std::string IndirectFitPlotModel::getFitDataName() const {
@@ -194,10 +184,7 @@ std::string IndirectFitPlotModel::getFitDataName() const {
 }
 
 std::string IndirectFitPlotModel::getLastFitDataName() const {
-  auto const numberOfWorkspaces = m_fittingModel->numberOfWorkspaces();
-  if (numberOfWorkspaces > 0)
-    return getFitDataName(numberOfWorkspaces - 1);
-  return "";
+  return getFitDataName(m_fittingModel->numberOfWorkspaces() - 1);
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {

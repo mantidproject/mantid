@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
@@ -25,10 +19,8 @@ WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(
     const int nNeighbours)
     : m_workspace(workspace) {
   std::vector<specnum_t> spectrumNumbers;
-  const auto nhist = m_workspace.getNumberHistograms();
-  spectrumNumbers.reserve(nhist);
-  for (size_t i = 0; i < nhist; ++i)
-    spectrumNumbers.emplace_back(m_workspace.getSpectrum(i).getSpectrumNo());
+  for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i)
+    spectrumNumbers.push_back(m_workspace.getSpectrum(i).getSpectrumNo());
 
   m_nearestNeighbours = Kernel::make_unique<WorkspaceNearestNeighbours>(
       nNeighbours, workspace.spectrumInfo(), std::move(spectrumNumbers),

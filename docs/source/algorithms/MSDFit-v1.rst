@@ -53,17 +53,16 @@ Usage
     print('A0: ' + str(y_msd.readY(0)))
     print('A1: ' + str(y_msd.readY(1)))
 
-Output (the numbers on your machine my not match exactly):
+Output:
 
 .. testoutput:: ExGeneratedDataFit
-  :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
-	
+
     Using Gauss Model
-    A0: [ 0.87...]
-    A1: [ 0.03...]
+    A0: [ 0.87079958]
+    A1: [ 0.03278263]
     Using Yi Model
-    A0: [ 0.95...]
-    A1: [ 0.58...]
+    A0: [ 0.75677983]
+    A1: [ 1.76943372]
 
 .. categories::
 

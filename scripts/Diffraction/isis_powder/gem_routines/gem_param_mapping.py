@@ -1,9 +1,3 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.routines.param_map_entry import ParamMapEntry
@@ -35,7 +29,6 @@ attr_mapping = \
      ParamMapEntry(ext_name="save_maud_calib",           int_name="save_maud_calib"),
      ParamMapEntry(ext_name="save_maud",                 int_name="save_maud"),
      ParamMapEntry(ext_name="spline_coefficient",        int_name="spline_coeff"),
-     ParamMapEntry(ext_name="subtract_empty_instrument", int_name="subtract_empty_inst", optional =True),
      ParamMapEntry(ext_name="suffix",                    int_name="suffix",         optional=True),
      ParamMapEntry(ext_name="texture_mode",              int_name="texture_mode",         optional=True),
      ParamMapEntry(ext_name="output_directory",          int_name="output_dir"),

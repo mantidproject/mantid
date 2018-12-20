@@ -371,8 +371,6 @@ The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands
 
 There are more examples how to `Extract and manipulate workspace data here <http://www.mantidproject.org/Extracting_And_Manipulating_Data>`_.
 
-.. _MatrixWorkspace Algebra:
-
 Workspace algebra
 #################
 

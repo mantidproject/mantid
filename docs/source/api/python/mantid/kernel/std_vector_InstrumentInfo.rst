@@ -2,7 +2,7 @@
  std_vector_InstrumentInfo
 ===========================
 
-This is a Python binding to the C++ class Mantid::Kernel::std_vector_InstrumentInfo.
+This a python binding to the C++ class Mantid::Kernel::std_vector_InstrumentInfo.
 
 
 .. module:`mantid.kernel`

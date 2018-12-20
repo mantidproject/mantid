@@ -1,16 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import systemtesting
+import stresstesting
 from mantid.simpleapi import *
 from isis_reflectometry import quick
 
 
-class ReflectometryQuickPointDetector(systemtesting.MantidSystemTest):
+class ReflectometryQuickPointDetector(stresstesting.MantidStressTest):
     """
     This is a system test for the top-level quick routines. Quick is the name given to the
     ISIS reflectometry reduction scripts. Uses the point detector functionality with real transmission corrections.

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MiniPlotQwt_H_
 #define MiniPlotQwt_H_
 
@@ -30,9 +24,9 @@ class MiniPlotQwt : public QwtPlot {
 public:
   explicit MiniPlotQwt(QWidget *parent);
   ~MiniPlotQwt() override;
-  void setXLabel(QString xunit);
-  void setData(std::vector<double> x, std::vector<double> y, QString xunit,
-               QString curveLabel);
+  void setData(const double *x, const double *y, int dataSize,
+               const std::string &xUnits = "");
+  void setLabel(const QString &label);
   QString label() const { return m_label; }
   void setYAxisLabelRotation(double degrees);
   void addPeakLabel(const PeakMarker2D *);
@@ -46,7 +40,7 @@ public:
   void recalcXAxisDivs();
   void recalcYAxisDivs();
   bool isYLogScale() const;
-  QString getXUnits() const { return m_xUnits; }
+  const std::string &getXUnits() const { return m_xUnits; }
 public slots:
   void setXScale(double from, double to);
   void setYScale(double from, double to);
@@ -75,7 +69,7 @@ private:
   QMap<QString, QwtPlotCurve *> m_stored; ///< stored curves
   QList<QColor> m_colors;                 ///< colors for stored curves
   int m_colorIndex;
-  QString m_xUnits;
+  std::string m_xUnits;
 };
 
 class PeakLabel : public QwtPlotItem {

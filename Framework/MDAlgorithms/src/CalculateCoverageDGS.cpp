@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -120,21 +114,21 @@ void CalculateCoverageDGS::init() {
   Q1[0] = 1.;
   Q2[1] = 1.;
   Q3[2] = 1.;
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Q1Basis", std::move(Q1), mustBe3D->clone()),
-                  "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
-                  "must not be coplanar");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Q2Basis", std::move(Q2), mustBe3D->clone()),
-                  "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
-                  "must not be coplanar");
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Q3Basis", std::move(Q3), std::move(mustBe3D)),
-                  "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
-                  "must not be coplanar");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Q1Basis", Q1, mustBe3D),
+      "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
+      "must not be coplanar");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Q2Basis", Q2, mustBe3D),
+      "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
+      "must not be coplanar");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Q3Basis", Q3, mustBe3D),
+      "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
+      "must not be coplanar");
   declareProperty(
       make_unique<PropertyWithValue<double>>("IncidentEnergy", EMPTY_DBL(),
-                                             std::move(mustBePositive),
+                                             mustBePositive,
                                              Mantid::Kernel::Direction::Input),
       "Incident energy. If set, will override Ei in the input workspace");
 

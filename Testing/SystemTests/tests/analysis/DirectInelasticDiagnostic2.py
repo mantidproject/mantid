@@ -1,13 +1,7 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name,no-init
 import os
-from systemtesting import MantidSystemTest
+from stresstesting import MantidStressTest
 from mantid.simpleapi import *
 from mantid.kernel import PropertyManager
 from mantid import config
@@ -22,7 +16,7 @@ def getNamedParameter(ws, name):
     return ws.getInstrument().getNumberParameter(name)[0]
 
 
-class DirectInelasticDiagnostic2(MantidSystemTest):
+class DirectInelasticDiagnostic2(MantidStressTest):
 
     saved_diag_file=''
 
