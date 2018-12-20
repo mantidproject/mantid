@@ -278,11 +278,11 @@ Options
 
 Sample
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
-  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+  \omega)` file (*_sqw.nxs*, *_sqw.dave*) or workspace (*_sqw*).
 
 Resolution
   Either a resolution file (_res.nxs) or workspace (_res) or an :math:`S(Q,
-  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+  \omega)` file (*_sqw.nxs*, *_sqw.dave*) or workspace (*_sqw*).
 
 Use Delta Function
   Found under 'Custom Function Groups'. Enables use of a delta function.

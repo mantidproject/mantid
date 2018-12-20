@@ -35,7 +35,7 @@ Improvements
 - When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle
   Fit Types are selected in the ConvFit Tab, the Q values are retrieved from the workspaces, preventing a crash
   when plotting a guess.
-- The Plot buttons in MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit are disabled after a Run when the result workspace only 
+- The Plot buttons in MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit are disabled after a Run when the result workspace only
   has one data point to plot.
 - There is now an option to choose which output parameter to plot in MSDFit.
 - An option to skip the calculation of Monte Carlo Errors on the I(Q,t) Tab has been added.
@@ -47,6 +47,8 @@ Improvements
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
 - Fit and Fit Sequential in the Fit combobox above the FitPropertyBrowser are now disabled while fitting is taking place.
 - The option to choose which workspace index to Plot Spectrum for and from which output workspace is now given in Elwin.
+- ConvFit now allows the loading of Dave ASCII files which end with '_sqw.dave'.
+
 
 Bugfixes
 ########
@@ -63,7 +65,7 @@ Bugfixes
 - A bug where fixed parameters don't remain fixed when using the FABADA minimizer in ConvFit has been corrected.
 - The expression for the Fit type Yi in MSDFit was incorrect and has now been corrected.
 - The x-axis labels in the output plots for MSDFit are now correct.
-- An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading 
+- An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading
   a reduced file.
 
 
