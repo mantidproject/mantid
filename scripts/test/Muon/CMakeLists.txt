@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
    AxisChangerView_test.py
    FFTModel_test.py
    FFTPresenter_test.py
+   home_instrument_widget_test.py
    load_run_widget/loadrun_model_test.py
    load_run_widget/loadrun_presenter_current_run_test.py
    load_run_widget/loadrun_presenter_single_file_test.py

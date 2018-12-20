@@ -36,8 +36,8 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._on_dead_time_from_data_selected = None
         self._on_dead_time_from_other_file_selected = lambda: 0
 
-        self.firstgooddata_checkbox.setChecked(1)
-        self.timezero_checkbox.setChecked(1)
+        self.firstgooddata_checkbox.setChecked(True)
+        self.timezero_checkbox.setChecked(True)
         self.time_zero_edit_enabled(True)
         self.first_good_data_edit_enabled(True)
 
@@ -140,8 +140,8 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.dead_time_file_loader_hidden(True)
 
     def set_checkboxes_to_defualt(self):
-        self.timezero_checkbox.setChecked(1)
-        self.firstgooddata_checkbox.setChecked(1)
+        self.timezero_checkbox.setChecked(True)
+        self.firstgooddata_checkbox.setChecked(True)
 
     def warning_popup(self, message):
         self._message_box.setText(message)
@@ -262,7 +262,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.timezero_edit.setEnabled(not enabled)
 
     def is_time_zero_checked(self):
-        return self.timezero_checkbox.checkState()
+        return self.timezero_checkbox.isChecked()
 
     def on_time_zero_changed(self, slot):
         self._on_time_zero_changed = slot
@@ -271,10 +271,10 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.timezero_checkbox.stateChanged.connect(slot)
 
     def time_zero_state(self):
-        return self.timezero_checkbox.checkState()
+        return self.timezero_checkbox.isChecked()
 
     def on_time_zero_checkbox_state_change(self):
-        self.time_zero_edit_enabled(self.timezero_checkbox.checkState())
+        self.time_zero_edit_enabled(self.timezero_checkbox.isChecked())
 
     # ------------------------------------------------------------------------------------------------------------------
     # First good data
@@ -540,10 +540,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_steps_edit.hide()
         self.rebin_variable_label.hide()
         self.rebin_variable_edit.hide()
-
-        # self.layout.addWidget(self.rebin_label, 5, 0)
-        # self.layout.addWidget(self.rebin_selector, 5, 1)
-        # self.layout.addItem(self.horizontal_layout_5, 5, 2)
 
     def rebin_fixed_hidden(self, hidden=True):
         if hidden:

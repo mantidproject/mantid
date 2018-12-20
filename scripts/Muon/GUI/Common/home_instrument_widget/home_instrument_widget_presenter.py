@@ -35,6 +35,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
         self._view.on_instrument_changed(self.handle_instrument_changed)
 
+        self.handle_loaded_time_zero_checkState_change()
+        self.handle_loaded_first_good_data_checkState_change()
+
         # notifier for instrument changes
         self.instrumentNotifier = InstrumentWidgetPresenter.InstrumentNotifier(self)
 
@@ -89,11 +92,11 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_fixed_rebin_changed(self):
-        fixed_bin_size = float(self._view.get_fixed_bin_text())
+        fixed_bin_size = self._view.get_fixed_bin_text()
         self._model.add_fixed_binning(fixed_bin_size)
 
     def handle_variable_rebin_changed(self):
-        variable_bin_size = float(self._view.get_fixed_bin_text())
+        variable_bin_size = self._view.get_variable_bin_text()
         self._model.add_variable_binning(variable_bin_size)
 
     # ------------------------------------------------------------------------------------------------------------------
