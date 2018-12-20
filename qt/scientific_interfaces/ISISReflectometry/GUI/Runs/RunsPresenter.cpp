@@ -436,19 +436,17 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
  * widgets based on whether processing is in progress or not.
  */
 void RunsPresenter::updateWidgetEnabledState() const {
-  auto const processing = isProcessing();
-  auto const autoreducing = isAutoreducing();
-
   // Update the menus
-  m_view->updateMenuEnabledState(processing);
+  // TODO: reinstate isProcessing when implemented
+  m_view->updateMenuEnabledState(false /*isProcessing()*/);
 
   // Update components
-  m_view->setTransferButtonEnabled(!processing && !autoreducing);
-  m_view->setInstrumentComboEnabled(!processing && !autoreducing);
-  m_view->setAutoreducePauseButtonEnabled(autoreducing);
-  m_view->setSearchTextEntryEnabled(!autoreducing);
-  m_view->setSearchButtonEnabled(!autoreducing);
-  m_view->setAutoreduceButtonEnabled(!autoreducing && !processing);
+  m_view->setTransferButtonEnabled(/*!isProcessing() &&*/ !isAutoreducing());
+  m_view->setInstrumentComboEnabled(/*!isProcessing() &&*/ !isAutoreducing());
+  m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
+  m_view->setSearchTextEntryEnabled(!isAutoreducing());
+  m_view->setSearchButtonEnabled(!isAutoreducing());
+  m_view->setAutoreduceButtonEnabled(!isAutoreducing() /*&& !isProcessing()*/);
 }
 
 /** Changes the current instrument in the data processor widget. Also clears
