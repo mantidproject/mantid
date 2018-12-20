@@ -39,6 +39,7 @@ set ( TEST_PY_FILES
    utilities/run_string_utils_operator_test.py
    utilities/run_string_utils_conversion_test.py
    subplotObject_test.py
+   help_widget_presenter_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

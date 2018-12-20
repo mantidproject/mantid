@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 import Muon.GUI.Common.message_box as message_box
 
 # determine whether the interface is opened from within Mantid or not
@@ -62,5 +62,3 @@ class HelpWidgetView(QtGui.QWidget):
             MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
         else:
             self.warning_popup("Cannot open user directories dailog outside MantidPlot.")
-
-
