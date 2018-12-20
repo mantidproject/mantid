@@ -29,7 +29,8 @@ or on fedora, with slightly different package names
      python3-sphinx-theme-bootstrap python3-dateutil python3-matplotlib python3-ipython-gui \
      boost-python3-devel python3-h5py python3-yaml
 
-then set ``-DPYTHON_EXECUTABLE=/usr/bin/python3`` when running cmake before building.
+then set ``-DPYTHON_EXECUTABLE=/usr/bin/python3`` when running cmake before building. Please note that
+reconfiguring an existing Python 2 build is not supported - a build in a fresh build directory is required.
 
 .. warning::
    If any of these packages are installed via pip, this could cause conflicts.
