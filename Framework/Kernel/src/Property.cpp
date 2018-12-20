@@ -25,9 +25,9 @@ namespace Kernel {
  *  @param direction :: Whether this is a Direction::Input, Direction::Output or
  * Direction::InOut (Input & Output) property
  */
-Property::Property(const std::string &name, const std::type_info &type,
+Property::Property(std::string name, const std::type_info &type,
                    const unsigned int direction)
-    : m_name(name), m_documentation(""), m_typeinfo(&type),
+    : m_name(std::move(name)), m_documentation(""), m_typeinfo(&type),
       m_direction(direction), m_units(""), m_group(""), m_remember(true),
       m_autotrim(true) {
   // Make sure a random int hasn't been passed in for the direction

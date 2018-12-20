@@ -34,7 +34,7 @@ public:
   }
 
   void testSuccessfullValidateInputsAtomicNumber() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -64,7 +64,7 @@ public:
   }
 
   void testFailureValidateInputsNoMaterial() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 0;
       setMaterial.massNumber = 0;
@@ -78,7 +78,7 @@ public:
   }
 
   void testSuccessfullValidateInputsSampleNumber() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -93,7 +93,7 @@ public:
   }
 
   void testSuccessfullValidateInputsZParam() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -109,7 +109,7 @@ public:
   }
 
   void testSuccessfullValidateInputsSampleMass() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -124,7 +124,7 @@ public:
   }
 
   void testFailureValidateInputsSampleNumberAndZParam() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -142,7 +142,7 @@ public:
   }
 
   void testFailureValidateInputsZParamWithSampleMass() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -160,7 +160,7 @@ public:
   }
 
   void testFailureValidateInputsZParamWithoutUnitCell() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -176,7 +176,7 @@ public:
   }
 
   void testFailureValidateInputsSampleNumWithSampleMass() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
