@@ -8,7 +8,6 @@
 #define MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXING_H_
 
 #include  "MantidMDAlgorithms/ConvToMDEventsWS.h"
-#include "queue"
 
 namespace Mantid {
 // Forward declarations
@@ -28,10 +27,6 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
     GRID,
     LEAF,
   };
-
-  template<size_t ND, template <size_t> class MDEventType>
-  using BoxStructureType = md_structure_ws::MDBox<ND, typename MDEventType<ND>::IntT,
-                                                  typename MDEventType<ND>::MortonT, MDEventType>;
 
   template <size_t ND>
   MD_EVENT_TYPE mdEventType();
@@ -87,33 +82,15 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
     }
   }
 
-  template<size_t ND, template <size_t> class MDEventType>
-  struct StructureToNativeBox {
-    unsigned level;
-    std::reference_wrapper<const ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>> sBox;
-    std::reference_wrapper<DataObjects::MDGridBox<MDEventType<ND>, ND>> nBox;
 
-    friend bool operator<(const StructureToNativeBox& a, const StructureToNativeBox& b) {return a.level < b.level; }
-  };
+
 
   template<size_t ND, template <size_t> class MDEventType>
-  void convertToNativeBoxStructureRecursive(const ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>& sBoxCur,
-                                            DataObjects::MDGridBox<MDEventType<ND>, ND>& nBoxCur,
-                                            const MDSpaceBounds<ND>& space,
-                                            const API::BoxController_sptr &bc,
-                                            unsigned level, unsigned partialLevel,
-                                            std::vector<StructureToNativeBox<ND, MDEventType>>& boxMapBuffer);
-
-  template<size_t ND, template <size_t> class MDEventType>
-  DataObjects::MDBoxBase<MDEventType<ND>, ND>*
-  convertToNativeBoxStructure(const BoxStructureType<ND, MDEventType>& mdBox,
-                              const MDSpaceBounds<ND>& space,
-                              const API::BoxController_sptr &bc);
-
-  template<size_t ND, template <size_t> class MDEventType>
-  std::unique_ptr<ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>>
+  static DataObjects::MDBoxBase<MDEventType<ND>, ND>*
   buildStructureFromSortedEvents(const API::BoxController_sptr &bc,
-                                 const std::vector<MDEventType<ND>> &mdEvents);
+                                 std::vector<MDEventType<ND>> &mdEvents,
+                                 const MDSpaceBounds<ND>& space,
+                                 const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>& extents);
 
   template<typename EventType, size_t ND, template <size_t> class MDEventType>
   std::vector<MDEventType<ND>> convertEvents();
@@ -129,15 +106,9 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
     }
   };
 
-  template <size_t ND, template <size_t> class MDEventType>
-  static DataObjects::MDBoxBase<MDEventType<ND>, ND>* makeMDBox(BoxStructureType<ND, MDEventType> sBox,
-                                                                const MD_BOX_TYPE& type,
-                                                                const MDSpaceBounds<ND>& space,
-                                                                const API::BoxController_sptr &bc,
-                                                                const unsigned& level);
 
   template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
-  void distributeEvents(DataObjects::MDBoxBase<MDEventType<ND>, ND>* root,
+  static void distributeEvents(DataObjects::MDBoxBase<MDEventType<ND>, ND>* root,
                                                   const EventIterator begin,
                                                   const EventIterator end,
                                                   const typename MDEventType<ND>::MortonT lower,
@@ -232,99 +203,18 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
 
 
 template<size_t ND, template <size_t> class MDEventType>
-void ConvToMDEventsWSIndexing::convertToNativeBoxStructureRecursive(
-    const ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>& sBoxCur,
-    DataObjects::MDGridBox<MDEventType<ND>, ND>& nBoxCur,
-    const MDSpaceBounds<ND>& space,
-    const API::BoxController_sptr &bc,
-    unsigned level, unsigned partialLevel,
-    std::vector<StructureToNativeBox<ND, MDEventType>>& boxMapBuffer) {
-  std::vector<StructureToNativeBox<ND, MDEventType>> boxMapBufferLocal;
-  const auto& sChildren = sBoxCur.children();
-  std::vector<API::IMDNode *> children;
-  for(unsigned i = 0; i < sChildren.size(); ++i) {
-    children.reserve(sChildren.size());
-    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
-    if(sChildren[i].isLeaf()) {
-      bc->incBoxesCounter(level);
-      children.emplace_back(makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::LEAF, space, bc, level));
-    } else {
-      bc->incGridBoxesCounter(level);
-      auto gridBoxPtr =
-          static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND>*>
-          (makeMDBox<ND, MDEventType>(sChildren[i], ConvToMDEventsWSIndexing::GRID, space, bc, level));
-      children.emplace_back(gridBoxPtr);
-      boxMapBufferLocal.emplace_back(StructureToNativeBox<ND, MDEventType>{level, std::cref(sChildren[i]), std::ref(*gridBoxPtr)});
-    }
-  }
-  nBoxCur.setChildren(children, 0, children.size());
-
-  ++level;
-  if(level < partialLevel) {
-    for (auto &bm: boxMapBufferLocal) {
-      ConvToMDEventsWSIndexing::
-      convertToNativeBoxStructureRecursive<ND, MDEventType>(bm.sBox, bm.nBox, space, bc, level, partialLevel, boxMapBuffer);
-    }
-  } else {
-    boxMapBuffer.insert(boxMapBuffer.end(), boxMapBufferLocal.begin(), boxMapBufferLocal.end());
-  }
-}
-
-template<size_t ND, template <size_t> class MDEventType>
-DataObjects::MDBoxBase<MDEventType<ND>, ND>* ConvToMDEventsWSIndexing::
-convertToNativeBoxStructure(const ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType> & mdBox,
-                            const MDSpaceBounds<ND>& space, const API::BoxController_sptr &bc) {
-
-  if(mdBox.isLeaf()) {
-    bc->incBoxesCounter(0);
-    return makeMDBox<ND, MDEventType>(mdBox, ConvToMDEventsWSIndexing::LEAF, space, bc, 0);
-  }
-  else {
-    bc->incGridBoxesCounter(0);
-    DataObjects::MDGridBox<MDEventType<ND>, ND>*
-        res(
-        static_cast<DataObjects::MDGridBox<MDEventType<ND>, ND> *>
-        (makeMDBox<ND, MDEventType>(mdBox, ConvToMDEventsWSIndexing::GRID, space, bc, 0))
-    );
-    std::vector<ConvToMDEventsWSIndexing::StructureToNativeBox<ND, MDEventType>> mapBoxBuf, dummy;
-    if(m_NumThreads == 1) {
-      convertToNativeBoxStructureRecursive<ND, MDEventType>(mdBox, *res, space, bc, 1, bc->getMaxDepth() + 1, mapBoxBuf);
-      return res;
-    } else {
-      //this has the same behavior as in ConvertToMdEventsWS class
-      unsigned nThreads = m_NumThreads > 0 ? m_NumThreads : Kernel::ThreadPool::getNumPhysicalCores();
-      // How many preliminary steps we need to have enough jobs for parallelizind ~10*nThreads
-      unsigned toLevel = log(10*nThreads)/(ND*log(bc->getSplitInto(0))) + 1;
-      convertToNativeBoxStructureRecursive<ND, MDEventType>(mdBox, *res, space, bc, 1, toLevel, mapBoxBuf);
-      std::cerr << "toLevel = " << toLevel << "  Jobs count: " << mapBoxBuf.size() << "\n"; //TODO tmp
-#pragma omp parallel for num_threads(nThreads)
-      for(unsigned i = 0; i < mapBoxBuf.size(); ++i)
-        convertToNativeBoxStructureRecursive<ND, MDEventType>(mapBoxBuf[i].sBox, mapBoxBuf[i].nBox, space, bc, toLevel, bc->getMaxDepth() + 1, dummy);
-      return res;
-    }
-  }
-}
-
-template<size_t ND, template <size_t> class MDEventType>
-std::unique_ptr<ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>>
+DataObjects::MDBoxBase<MDEventType<ND>, ND>*
 ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxController_sptr &bc,
-                                                         const std::vector<MDEventType<ND>> &mdEvents) {
-  auto rootMdBox =
-      std::make_unique<ConvToMDEventsWSIndexing::BoxStructureType<ND, MDEventType>>(mdEvents.cbegin(), mdEvents.cend());
-  rootMdBox->distributeEvents(bc->getSplitThreshold(), bc->getMaxDepth() + 1);
-
-  auto leafs = rootMdBox->leafs();
-  size_t maxEvents = 0;
-  size_t maxDepth = 0;
-  for(auto& leaf: leafs) {
-    if(leaf.level > maxDepth)
-      maxDepth = leaf.level;
-    if(leaf.box.eventCount() > maxEvents)
-      maxEvents = leaf.box.eventCount();
-  }
-  return rootMdBox;
+                                                         std::vector<MDEventType<ND>> &mdEvents,
+                                                         const MDSpaceBounds<ND>& space,
+                                                         const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>& extents) {
+  auto root = new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), 0, extents, mdEvents.begin(), mdEvents.end());
+  auto mortonMin = md_structure_ws::calculateDefaultBound<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT>(std::numeric_limits<typename MDEventType<ND>::IntT>::min());
+  auto mortonMax = md_structure_ws::calculateDefaultBound<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT>(std::numeric_limits<typename MDEventType<ND>::IntT>::max());
+  distributeEvents(root, mdEvents.begin(), mdEvents.end(), mortonMin, mortonMax,
+                   space, bc->getNumSplit() , bc->getSplitThreshold(), bc->getMaxDepth()+1, 1 , bc);
+  return root;
 }
-
 
 
 template<typename EventType, size_t ND, template <size_t> class MDEventType>
@@ -348,8 +238,10 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
     extents.rbegin()->setExtents(pws->getDimension(ax)->getMinimum(), pws->getDimension(ax)->getMaximum());
   }
 
+  pProgress->report(0);
+
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << bc->getNumMDBoxes()[1] << " " << "Convert events: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr << "Convert events: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
   start = std::chrono::high_resolution_clock::now();
 
 
@@ -357,10 +249,10 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
   for(size_t i = 0; i < mdEvents.size(); ++i)
     mdEvents[i].retrieveIndex(space);
 
-  pProgress->report(0);
+  pProgress->report(1);
 
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << bc->getNumMDBoxes()[1] << " " << "Retrieve morton: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr << "Retrieve morton: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
   start = std::chrono::high_resolution_clock::now();
 
 
@@ -369,46 +261,19 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
     return a.getIndex() < b.getIndex();
   });
 
-  pProgress->report(1);
-
-
-  end = std::chrono::high_resolution_clock::now();
-  std::cerr << bc->getNumMDBoxes()[1] << " " << "Sort: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
-  start = std::chrono::high_resolution_clock::now();
-
-
-  auto rootMdBox = buildStructureFromSortedEvents<ND, MDEventType>(bc, mdEvents);
-
   pProgress->report(2);
 
+
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << bc->getNumMDBoxes()[1] << " " <<  "Build boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr << "Sort: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
   start = std::chrono::high_resolution_clock::now();
 
-
-//#pragma omp parallel for
-//  for(size_t i = 0; i < mdEvents.size(); ++i)
-//    mdEvents[i].retrieveCoordinates(space);
-//
-//
-//  end = std::chrono::high_resolution_clock::now();
-//  std::cerr << bc->getNumMDBoxes()[1] << " " <<  "Retrieve cordinates: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
-//  start = std::chrono::high_resolution_clock::now();
-//
-//
-//  m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure<ND, MDEventType>(*(rootMdBox.get()), space, bc));
-
-  bc->incGridBoxesCounter(0);
-  auto root = new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), 0, extents, mdEvents.begin(), mdEvents.end());
-  auto mortonMin = md_structure_ws::calculateDefaultBound<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT>(std::numeric_limits<typename MDEventType<ND>::IntT>::min());
-  auto mortonMax = md_structure_ws::calculateDefaultBound<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT>(std::numeric_limits<typename MDEventType<ND>::IntT>::max());
-  distributeEvents(root, mdEvents.begin(), mdEvents.end(), mortonMin, mortonMax,
-      space, bc->getNumSplit() , bc->getSplitThreshold(), bc->getMaxDepth()+1, 1 , bc);
+  auto root = buildStructureFromSortedEvents<ND, MDEventType>(bc, mdEvents, space, extents);
   m_OutWSWrapper->pWorkspace()->setBox(root);
   pProgress->report(3);
 
   end = std::chrono::high_resolution_clock::now();
-  std::cerr << bc->getNumMDBoxes()[1] << " " <<  "Build native boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  std::cerr <<  "Build native boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
 }
 
 
@@ -442,27 +307,6 @@ ConvToMDEventsWSIndexing::MD_EVENT_TYPE ConvToMDEventsWSIndexing::mdEventType() 
   return NONE;
 }
 
-template <size_t ND, template <size_t> class MDEventType>
-DataObjects::MDBoxBase<MDEventType<ND>, ND>*
-ConvToMDEventsWSIndexing::makeMDBox(BoxStructureType<ND, MDEventType> sbox, const MD_BOX_TYPE& type,
-                                    const MDSpaceBounds<ND>& space, const API::BoxController_sptr &bc,
-                                    const unsigned& level) {
-  std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
-  auto minCoord = MDEventType<ND>::indexToCoordinates(sbox.min(), space);
-  auto maxCoord = MDEventType<ND>::indexToCoordinates(sbox.max(), space);
-  for(unsigned i = 0; i < ND; ++i) {
-    extents[i].setExtents(minCoord[i], maxCoord[i]);
-  }
-  switch(type) {
-  case LEAF: {
-    return new DataObjects::MDBox<MDEventType<ND>, ND>(bc.get(), level, extents, sbox.eventBegin(), sbox.eventEnd());
-  }
-  case GRID:
-    return new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), level, extents, sbox.eventBegin(), sbox.eventEnd());
-  default:
-    throw std::logic_error("Wrong MD box type detected.");
-  }
-}
 
 
 template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
@@ -483,7 +327,7 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
   using Box = DataObjects::MDBox<MDEvent, ND>;
   using GridBox = DataObjects::MDGridBox<MDEvent, ND>;
 
-  if (maxDepth-- == 1 || std::distance(begin, end) <= splitThreshold) {
+  if (maxDepth-- == 1 || std::distance(begin, end) <= static_cast<int>(splitThreshold)) {
     return;
   }
 
@@ -533,7 +377,7 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
     }
 
     BoxBase* newBox;
-    if(std::distance(boxEventStart, eventIt) <= splitThreshold || maxDepth == 1) {
+    if(std::distance(boxEventStart, eventIt) <= static_cast<int>(splitThreshold) || maxDepth == 1) {
       for(auto it = boxEventStart; it < eventIt; ++it)
         it->retrieveCoordinates(space);
       bc->incBoxesCounter(level);

@@ -10,7 +10,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
-#include "MantidDataObjects/MortonIndex/MDBox.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"

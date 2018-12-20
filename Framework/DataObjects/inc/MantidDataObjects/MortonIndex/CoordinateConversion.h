@@ -14,11 +14,67 @@
 #include <iomanip>
 #include <iostream>
 
+namespace md_structure_ws {
+
+template<size_t ND, typename IntT, typename MortonT> class MortonMask {
+public:
+  const static MortonT mask[];
+};
+
+/**
+ * Performs a dimension-wise comparison on two Morton numbers by masking the
+ * bits of each interleaved integer.
+ *
+ * @param a Left hand operand
+ * @param b Right hand operand
+ * @return True if comparison passes for all dimensions
+ */
+template<size_t ND, typename IntT, typename MortonT>
+bool masked_morton_lte(const MortonT a, const MortonT b) {
+  using MMask = MortonMask<ND, IntT, MortonT>;
+
+  /* For each dimension */
+  for (size_t i = 0; i < ND; i++) {
+    /* Perform comparison on masked morton numbers */
+    if ((a | MMask::mask[i]) > (b | MMask::mask[i])) {
+      /* Return on the first failed comparison */
+      return false;
+    }
+  }
+
+  /* All comparisons passed */
+  return true;
+}
+
+/**
+ * Checks if a point defined by a Morton number is within the box bounds (as
+ * defined by an upper and lower Morton number).
+ *
+ * A box contains a Morton number if it is within the upper and lower bounds,
+ * inclusive of the box bounds themselves.
+ *
+ * @param lower Lower bound
+ * @param upper Upper bound
+ * @param value Morton value to test
+ */
+template<typename MortonT>
+bool morton_contains(const MortonT lower, const MortonT upper,
+                     const MortonT value) {
+  return lower <= value && value <= upper;
+}
+
+template<size_t ND, typename IntT, typename MortonT>
+MortonT calculateDefaultBound(IntT intBound) {
+  IntArray<ND, IntT> minCoord;
+  minCoord.fill(intBound);
+  return Interleaver<ND, IntT, MortonT>::interleave(minCoord);
+}
+
 /**
  * Calculates the required width of the interleaved integer to accurately
  * represent coordinates in a given space at a given resolution.
  */
-template <int ND>
+template<int ND>
 size_t CalculateRequiredCoordinateIntegerWidth(const MDSpaceBounds<ND> &bounds,
                                                const MDSpaceSteps<ND> &steps) {
   size_t maxBits(0);
@@ -42,7 +98,7 @@ size_t CalculateRequiredCoordinateIntegerWidth(const MDSpaceBounds<ND> &bounds,
  * Sets bounds to the next lowest (for lower axis bound) or highest (for upper
  * axis bound) representable floating point value.
  */
-template <int ND> void ExpandBounds(MDSpaceBounds<ND> &bounds) {
+template<int ND> void ExpandBounds(MDSpaceBounds<ND> &bounds) {
   for (size_t i = 0; i < ND; ++i) {
     bounds(i, 0) =
         std::nexttoward(bounds(i, 0), std::numeric_limits<float>::lowest());
@@ -54,7 +110,7 @@ template <int ND> void ExpandBounds(MDSpaceBounds<ND> &bounds) {
 /**
  * Checks that a coordinate is within the extents of an MD space.
  */
-template <int ND>
+template<int ND>
 bool CheckCoordinatesInMDSpace(const MDSpaceBounds<ND> &bounds,
                                const MDCoordinate<ND> &coord) {
   for (size_t i = 0; i < coord.rows(); i++) {
@@ -69,24 +125,22 @@ bool CheckCoordinatesInMDSpace(const MDSpaceBounds<ND> &bounds,
   return true;
 }
 
-
-
 /**
  * Converts a point to integer range given a range of floating point
  * coordinates.
  */
-template <int ND, typename IntT>
+template<int ND, typename IntT>
 Eigen::Array<IntT, ND, 1> ConvertCoordinatesToIntegerRange(const MDSpaceBounds<ND> &bounds,
-                                                           const float* crd) {
+                                                           const float *crd) {
   MDCoordinate<ND> coord(crd);
   const MDCoordinate<ND> range = bounds.col(1) - bounds.col(0);
   const MDCoordinate<ND> coordFactorOfRange = (coord - bounds.col(0)) / range;
   const MDCoordinate<ND> n = coordFactorOfRange * std::numeric_limits<IntT>::max();
   Eigen::Array<IntT, ND, 1> res = n.template cast<IntT>();
-  for(unsigned i = 0; i < ND; ++i)
-    if(coord[i] == bounds(i, 1))
+  for (unsigned i = 0; i < ND; ++i)
+    if (coord[i] == bounds(i, 1))
       res[i] = std::numeric_limits<IntT>::max();
-    else if(coord[i] == bounds(i, 0))
+    else if (coord[i] == bounds(i, 0))
       res[i] = 0;
   return res;
 }
@@ -95,36 +149,36 @@ Eigen::Array<IntT, ND, 1> ConvertCoordinatesToIntegerRange(const MDSpaceBounds<N
  * Converts a point expressed as integer coordinates back to floating point,
  * given bounds of the original coordinate space.
  */
-template <int ND, typename IntT>
+template<int ND, typename IntT>
 MDCoordinate<ND>
 ConvertCoordinatesFromIntegerRange(const MDSpaceBounds<ND> &bounds,
                                    const Eigen::Array<IntT, ND, 1> &intCoord) {
   const auto range = bounds.col(1) - bounds.col(0);
   const auto coordFactorOfRange =
-      intCoord.template cast<float>() / (float)std::numeric_limits<IntT>::max();
+      intCoord.template cast<float>() / (float) std::numeric_limits<IntT>::max();
   return bounds.col(0) + (coordFactorOfRange * range);
 }
 
 /**
  * Converts a single floating point coordinate to an integer range.
  */
-template <typename IntT>
+template<typename IntT>
 IntT ConvertCoordinateToIntegerRange(float value, float lower, float upper) {
   const float coordFactorOfRange = (value - lower) / (upper - lower);
   const float intValue = coordFactorOfRange * std::numeric_limits<IntT>::max();
-  return (IntT)intValue;
+  return (IntT) intValue;
 }
 
 /**
  * Converts a single integer coordinate to a floating point.
  */
-template <typename IntT>
+template<typename IntT>
 float ConvertCoordinateFromIntegerRange(IntT value, float lower, float upper) {
   const float coordFactorOfRange =
-      (float)value / (float)std::numeric_limits<IntT>::max();
+      (float) value / (float) std::numeric_limits<IntT>::max();
   return lower + (coordFactorOfRange * (upper - lower));
 }
 
-
+} //md_structure_ws
 
 #endif //MANTID_DATAOBJECTS_MORTONINDEX_COORDINATE_CONVERSION_H_
