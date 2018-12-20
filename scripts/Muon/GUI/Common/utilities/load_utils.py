@@ -15,7 +15,6 @@ from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 
 class LoadUtils(object):
@@ -213,12 +212,12 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
-
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = MuonWorkspaceWrapper(load_result["OutputWorkspace"])
         run = int(workspace.getRunNumber())
+        # load_result["OutputWorkspace"].show(str(run))
 
     load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
     load_result["DeadTimeTable"] = None

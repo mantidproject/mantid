@@ -92,8 +92,15 @@ def run_string_to_list(run_string):
         if len(runs) == 1:
             run_list += [int(runs)]
         else:
-            range_max = int(split_runs[-1])
-            range_min = int(split_runs[0])
+            range_max = split_runs[-1]
+            range_min = split_runs[0]
+            max_length = len(range_max)
+            min_length = len(range_min)
+            if(max_length < min_length):
+                range_max = range_min[:max_length - min_length + 1] + range_max
+
+            range_max = int(range_max)
+            range_min = int(range_min)
             if (range_max - range_min) > max_run_list_size:
                 raise IndexError(
                     "Too many runs ({}) must be <{}".format(range_max - range_min, max_run_list_size))
