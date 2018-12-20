@@ -34,6 +34,11 @@ if NOT DEFINED MANTID_DATA_STORE (
 md %WORKSPACE%\build
 cd %WORKSPACE%\build
 
+:: Remove (possibly) stale files
+::   build/ExternalData/**: data files will change over time and removing
+::                          the links helps keep it fresh
+rmdir /S /Q %WORKSPACE%\build\ExternalData
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration if it has not already been configured.
 :: We use the special flag that only creates the targets for the data
@@ -70,6 +75,9 @@ echo CheckMantidVersion.OnStartup = 0 >> %USERPROPS_RELEASE%
 echo UpdateInstrumentDefinitions.OnStartup = 0 > %USERPROPS_NIGHTLY%
 echo usagereports.enabled = 0 >> %USERPROPS_NIGHTLY%
 echo CheckMantidVersion.OnStartup = 0 >> %USERPROPS_NIGHTLY%
+:: Remove user instrument directory
+rmdir /S /Q %APPDATA%\mantidproject\mantid\instrument
+
 
 :: Run
 set PKGDIR=%WORKSPACE%\build
