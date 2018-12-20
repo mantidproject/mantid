@@ -201,6 +201,7 @@ set ( TEST_FILES
 	SaveLauenormTest.h
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h
+    SetCrystalLocation.h
 	SetGoniometerTest.h
 	SetSpecialCoordinatesTest.h
 	SetUBTest.h
