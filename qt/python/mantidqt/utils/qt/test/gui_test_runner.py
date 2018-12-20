@@ -109,7 +109,8 @@ class ScriptRunner(object):
                 self.error = e
 
 
-def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_on_finish=False, is_cli=False):
+def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
+                   close_on_finish=False, is_cli=False, in_workbench=False):
     """
     Displays a widget in a window.
     :param widget_or_name: A widget to display.
@@ -139,6 +140,7 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
     :param close_on_finish: An option to close the widget after the script finishes.
     :param is_cli: If true the script is to be run from a command line tool. Exceptions are
         treated slightly differently in this case.
+    :param in_workbench: Set to True if the script will be run inside the workbench application.
     """
     global app
     if attach_debugger:
@@ -176,9 +178,12 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
             if not is_cli:
                 raise e
 
-    ret = app.exec_()
-    if not is_cli and script_runner is not None and script_runner.error is not None:
-        raise script_runner.error
+    if not in_workbench:
+        ret = app.exec_()
+        if not is_cli and script_runner is not None and script_runner.error is not None:
+            raise script_runner.error
+    else:
+        ret = 0
     return ret
 
 

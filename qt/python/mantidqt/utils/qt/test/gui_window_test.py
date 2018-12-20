@@ -169,7 +169,7 @@ class WorkbenchGuiTest(GuiWindowTest):
     @classmethod
     def tearDownClass(cls):
         runner = MultiTestRunner(cls.test_methods)
-        open_in_window(cls.widget, runner, close_on_finish=True, attach_debugger=False)
+        open_in_window(cls.widget, runner, close_on_finish=True, attach_debugger=False, in_workbench=True)
 
     def create_widget(self):
         qapp = QApplication.instance()
