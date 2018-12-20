@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
@@ -17,12 +23,11 @@
 namespace MantidQt {
 namespace MantidWidgets {
 /**
- * Constructor.
- * @param type The scale type, e.g. "Linear" or "Log10"
+ * Constructor giving a colorbar
  * @param parent A parent widget
  * @param minPositiveValue A minimum positive value for the Log10 scale
  */
-DraggableColorBarWidget::DraggableColorBarWidget(int type, QWidget *parent,
+DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent,
                                                  const double &minPositiveValue)
     : QFrame(parent), m_minPositiveValue(minPositiveValue), m_dragging(false),
       m_y(0), m_dtype(), m_nth_power(2.0) {
@@ -59,7 +64,7 @@ DraggableColorBarWidget::DraggableColorBarWidget(int type, QWidget *parent,
   m_scaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
   m_scaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
   m_scaleOptions->addItem("Power", QVariant(GraphOptions::Power));
-  m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
+  m_scaleOptions->setCurrentIndex(1); // linear default
   connect(m_scaleOptions, SIGNAL(currentIndexChanged(int)), this,
           SLOT(scaleOptionsChanged(int)));
 
@@ -107,14 +112,14 @@ void DraggableColorBarWidget::setupColorBarScaling(
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
 
-  GraphOptions::ScaleType type = colorMap.getScaleType();
-  if (type == GraphOptions::Linear) {
+  auto type = colorMap.getScaleType();
+  if (type == MantidColorMap::ScaleType::Linear) {
     QwtLinearScaleEngine linScaler;
     m_scaleWidget->setScaleDiv(
         linScaler.transformation(),
         linScaler.divideScale(minValue, maxValue, 20, 5));
     m_scaleWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), colorMap);
-  } else if (type == GraphOptions::Power) {
+  } else if (type == MantidColorMap::ScaleType::Power) {
     PowerScaleEngine powerScaler;
     m_scaleWidget->setScaleDiv(
         powerScaler.transformation(),
@@ -140,8 +145,9 @@ void DraggableColorBarWidget::setupColorBarScaling(
     m_scaleWidget->setColorMap(QwtDoubleInterval(logmin, maxValue), colorMap);
   }
   m_scaleOptions->blockSignals(true);
-  m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
-  if (m_scaleOptions->findData(type) == 2) {
+  m_scaleOptions->setCurrentIndex(
+      m_scaleOptions->findData(static_cast<int>(type)));
+  if (m_scaleOptions->findData(static_cast<int>(type)) == 2) {
     m_dspnN->setEnabled(true);
   } else {
     m_dspnN->setEnabled(false);
@@ -157,6 +163,17 @@ void DraggableColorBarWidget::minValueChanged() {
 /// Send the maxValueChanged signal
 void DraggableColorBarWidget::maxValueChanged() {
   emit maxValueChanged(m_maxValueBox->text().toDouble());
+}
+
+/**
+ * Update the minimum and maximum range of the scale
+ * @param vmin New minimum of the scale
+ * @param vmax New maximum of the scale
+ */
+
+void DraggableColorBarWidget::setClim(double vmin, double vmax) {
+  setMinValue(vmin);
+  setMaxValue(vmax);
 }
 
 /**
@@ -200,9 +217,7 @@ QString DraggableColorBarWidget::getMaxValue() const {
 /**
  * returns the mnth powder as QString
  */
-QString DraggableColorBarWidget::getNth_power() const {
-  return m_dspnN->text();
-}
+QString DraggableColorBarWidget::getNthPower() const { return m_dspnN->text(); }
 
 /**
  * Update the min value text box.
@@ -334,7 +349,7 @@ void DraggableColorBarWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
 std::string DraggableColorBarWidget::saveToProject() const {
   API::TSVSerialiser tsv;
   tsv.writeLine("ScaleType") << getScaleType();
-  tsv.writeLine("Power") << getNth_power();
+  tsv.writeLine("Power") << getNthPower();
   tsv.writeLine("MinValue") << getMinValue();
   tsv.writeLine("MaxValue") << getMaxValue();
   return tsv.outputLines();

@@ -1,13 +1,19 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from tempfile import gettempdir
 from os import path, remove
-import stresstesting
+import systemtesting
 from mantid.simpleapi import PowderDiffILLDetEffCorr, SaveNexusProcessed
 from mantid import config, mtd
 
 
-class ILLPowderDiffDetEffCorrClosureTest(stresstesting.MantidStressTest):
+class ILLPowderDiffDetEffCorrClosureTest(systemtesting.MantidSystemTest):
 
     _m_tmp_file = None
 

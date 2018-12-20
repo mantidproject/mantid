@@ -1,28 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import
 
 # system imports
+import traceback
 import unittest
 
 # 3rdparty imports
 
 # local imports
-from mantidqt.utils.async import AsyncTask, blocking_async_task
+from mantidqt.utils.asynchronous import AsyncTask, blocking_async_task
 
 
 class AsyncTaskTest(unittest.TestCase):
@@ -40,7 +34,7 @@ class AsyncTaskTest(unittest.TestCase):
             self.error_cb_called = True
             self.task_exc_type = task_result.exc_type
             self.task_exc = task_result.exc_value
-            self.task_exc_stack = task_result.stack
+            self.task_exc_stack = traceback.extract_tb(task_result.stack)
 
         def on_finished(self):
             self.finished_cb_called = True
@@ -111,11 +105,12 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError),
                         msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
+
         self.assertEqual(2, len(recv.task_exc_stack))
-        # line number of self.target in async.py
-        self.assertEqual(100, recv.task_exc_stack[0][1])
+        # line number of self.target in asynchronous.py
+        self.assertEqual(91, recv.task_exc_stack[0][1])
         # line number of raise statement above
-        self.assertEqual(101, recv.task_exc_stack[1][1])
+        self.assertEqual(95, recv.task_exc_stack[1][1])
 
     def test_unsuccessful_args_and_kwargs_operation_calls_error_and_finished_callback(self):
         def foo(scale, shift):
@@ -133,7 +128,7 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError))
 
-    def test_unsuccessful_operation_with_error_cb_and_stack_chop(self):
+    def test_unsuccessful_operation_with_error_cb(self):
         def foo(scale, shift):
             def bar():
                 raise RuntimeError("Bad operation")
@@ -141,15 +136,15 @@ class AsyncTaskTest(unittest.TestCase):
 
         recv = AsyncTaskTest.Receiver()
         scale, shift = 2, 4
-        t = AsyncTask(foo, args = (scale,), kwargs={'shift': shift}, stack_chop=1,
+        t = AsyncTask(foo, args = (scale,), kwargs={'shift': shift},
                       error_cb=recv.on_error)
         t.start()
         t.join()
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError))
-        self.assertEqual(2, len(recv.task_exc_stack))
-        self.assertEqual(140, recv.task_exc_stack[0][1])
-        self.assertEqual(139, recv.task_exc_stack[1][1])
+        self.assertEqual(3, len(recv.task_exc_stack))
+        self.assertEqual(135, recv.task_exc_stack[1][1])
+        self.assertEqual(134, recv.task_exc_stack[2][1])
 
     # ---------------------------------------------------------------
     # Failure cases

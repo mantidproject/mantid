@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 #define MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 
@@ -40,6 +46,9 @@ public:
   void dropEvent(QDropEvent *de) override;
   QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
   getSelectedMatrixWorkspaces() const;
+
+  /// Action that is executed when a workspace in the tree is double clicked.
+  std::function<void(QString)> m_doubleClickAction = nullptr;
 
 protected:
   void dragMoveEvent(QDragMoveEvent *de) override;

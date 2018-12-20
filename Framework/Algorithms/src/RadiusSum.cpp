@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RadiusSum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -51,22 +57,23 @@ void RadiusSum::init() {
   auto twoOrThreeElements =
       boost::make_shared<ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "Centre", myInput, twoOrThreeElements),
-                  "Coordinate of the centre of the ring");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("Centre", std::move(myInput),
+                                                 std::move(twoOrThreeElements)),
+      "Coordinate of the centre of the ring");
 
   auto nonNegative = boost::make_shared<BoundedValidator<double>>();
   nonNegative->setLower(0);
-  declareProperty("MinRadius", 0.0, nonNegative,
+  declareProperty("MinRadius", 0.0, nonNegative->clone(),
                   "Length of the inner ring. Default=0");
-  declareProperty(
-      make_unique<PropertyWithValue<double>>(
-          "MaxRadius", std::numeric_limits<double>::max(), nonNegative),
-      "Length of the outer ring. Default=ImageSize.");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MaxRadius", std::numeric_limits<double>::max(),
+                      std::move(nonNegative)),
+                  "Length of the outer ring. Default=ImageSize.");
 
   auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
-  declareProperty("NumBins", 100, nonNegativeInt,
+  declareProperty("NumBins", 100, std::move(nonNegativeInt),
                   "Number of slice bins for the output. Default=100");
 
   const char *normBy = "NormalizeByRadius";
