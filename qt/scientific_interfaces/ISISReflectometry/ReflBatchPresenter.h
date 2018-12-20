@@ -49,12 +49,13 @@ public:
   bool hasPerAngleOptions() const override;
   MantidWidgets::DataProcessor::OptionsQMap
   getOptionsForAngle(const double angle) const override;
-  void setInstrumentName(const std::string &instName) const override;
+  void notifyInstrumentChanged(const std::string &instName) const override;
   bool isProcessing() const override;
   bool requestClose() const override;
   void settingsChanged() override;
 
 private:
+  void setInstrumentName(const std::string &instName) const;
   void reductionPaused();
   void reductionResumed();
   void reductionCompletedForGroup(

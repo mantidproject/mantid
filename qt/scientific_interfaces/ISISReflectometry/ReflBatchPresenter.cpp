@@ -53,6 +53,11 @@ ReflBatchPresenter::ReflBatchPresenter(
 
 bool ReflBatchPresenter::requestClose() const { return true; }
 
+void ReflBatchPresenter::notifyInstrumentChanged(
+    const std::string &instrumentName) const {
+  setInstrumentName(instrumentName);
+}
+
 void ReflBatchPresenter::notifyReductionResumed() { reductionResumed(); }
 
 void ReflBatchPresenter::notifyReductionPaused() { reductionPaused(); }

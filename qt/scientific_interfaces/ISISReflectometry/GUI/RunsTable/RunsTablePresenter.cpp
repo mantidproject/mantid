@@ -101,9 +101,13 @@ void RunsTablePresenter::removeGroupsFromModel(
     removeGroup(m_model, *it);
 }
 
-void RunsTablePresenter::notifyPauseRequested() {}
+void RunsTablePresenter::notifyReductionResumed() {
+  m_mainPresenter->notifyReductionResumed();
+}
 
-void RunsTablePresenter::notifyProcessRequested() { prettyPrintModel(m_model); }
+void RunsTablePresenter::notifyReductionPaused() {
+  m_mainPresenter->notifyReductionPaused();
+}
 
 void RunsTablePresenter::notifyInsertRowRequested() {
   auto selected = m_view->jobs().selectedRowLocations();

@@ -166,9 +166,12 @@ void RunsTableView::onCollapseAllGroupsPressed(bool) {
 }
 
 void RunsTableView::onProcessPressed(bool) {
-  m_notifyee->notifyProcessRequested();
+  m_notifyee->notifyReductionResumed();
 }
-void RunsTableView::onPausePressed(bool) { m_notifyee->notifyPauseRequested(); }
+
+void RunsTableView::onPausePressed(bool) {
+  m_notifyee->notifyReductionPaused();
+}
 
 void RunsTableView::onInsertRowPressed(bool) {
   m_notifyee->notifyInsertRowRequested();

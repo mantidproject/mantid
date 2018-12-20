@@ -16,8 +16,8 @@ namespace CustomInterfaces {
 class RunsTableViewSubscriber
     : public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
 public:
-  virtual void notifyProcessRequested() = 0;
-  virtual void notifyPauseRequested() = 0;
+  virtual void notifyReductionResumed() = 0;
+  virtual void notifyReductionPaused() = 0;
   virtual void notifyInsertRowRequested() = 0;
   virtual void notifyInsertGroupRequested() = 0;
   virtual void notifyDeleteRowRequested() = 0;

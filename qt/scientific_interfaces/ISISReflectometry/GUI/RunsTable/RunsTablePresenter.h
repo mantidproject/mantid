@@ -37,8 +37,8 @@ public:
   void setInstrumentName(std::string const &instrumentName) override;
 
   // RunsTableViewSubscriber overrides
-  void notifyProcessRequested() override;
-  void notifyPauseRequested() override;
+  void notifyReductionResumed() override;
+  void notifyReductionPaused() override;
   void notifyInsertRowRequested() override;
   void notifyInsertGroupRequested() override;
   void notifyDeleteRowRequested() override;

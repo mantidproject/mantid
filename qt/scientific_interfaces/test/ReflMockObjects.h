@@ -92,7 +92,7 @@ public:
   /// Whether there are per-angle transmission runs specified
   MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
   /// Set the instrument name
-  MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &));
+  MOCK_CONST_METHOD1(notifyInstrumentChanged, void(const std::string &));
   /// Data processing check for all groups
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(requestClose, bool());

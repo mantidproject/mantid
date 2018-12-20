@@ -76,6 +76,8 @@ public:
   bool isAutoreducing() const override;
   bool isProcessing() const override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyReductionResumed() override;
+  void notifyReductionPaused() override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;

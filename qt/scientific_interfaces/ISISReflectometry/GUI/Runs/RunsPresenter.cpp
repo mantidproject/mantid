@@ -142,12 +142,22 @@ void RunsPresenter::notifyTransfer() {
 void RunsPresenter::notifyInstrumentChanged() {
   auto const instrumentName = m_view->getSearchInstrument();
   if (m_mainPresenter)
-    m_mainPresenter->setInstrumentName(instrumentName);
+    m_mainPresenter->notifyInstrumentChanged(instrumentName);
 }
 
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   if (m_mainPresenter)
-    m_mainPresenter->setInstrumentName(instrumentName);
+    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+}
+
+void RunsPresenter::notifyReductionResumed() {
+  if (m_mainPresenter)
+    m_mainPresenter->notifyReductionResumed();
+}
+
+void RunsPresenter::notifyReductionPaused() {
+  if (m_mainPresenter)
+    m_mainPresenter->notifyReductionPaused();
 }
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }

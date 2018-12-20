@@ -25,6 +25,9 @@ public:
 
   virtual void settingsChanged() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
+  virtual void notifyReductionResumed() = 0;
+  virtual void notifyReductionPaused() = 0;
+
   virtual void setInstrumentName(std::string const &instrumentName) = 0;
 
   virtual bool isAutoreducing() const = 0;

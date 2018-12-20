@@ -26,6 +26,7 @@ public:
   /// Destructor
   virtual ~IReflBatchPresenter() = default;
 
+  virtual void notifyInstrumentChanged(const std::string &instName) const = 0;
   virtual void notifyReductionPaused() = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyReductionCompletedForGroup(
@@ -40,8 +41,6 @@ public:
   getOptionsForAngle(const double angle) const = 0;
   /// Whether there are per-angle transmission runs specified
   virtual bool hasPerAngleOptions() const = 0;
-  /// Set the instrument name
-  virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
   virtual bool requestClose() const = 0;

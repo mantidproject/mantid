@@ -161,7 +161,7 @@ public:
     EXPECT_CALL(m_view, getSearchInstrument())
         .Times(1)
         .WillOnce(Return(instrument));
-    EXPECT_CALL(m_mainPresenter, setInstrumentName(instrument)).Times(1);
+    EXPECT_CALL(m_mainPresenter, notifyInstrumentChanged(instrument)).Times(1);
     presenter.notifyInstrumentChanged();
     verifyAndClear();
   }
