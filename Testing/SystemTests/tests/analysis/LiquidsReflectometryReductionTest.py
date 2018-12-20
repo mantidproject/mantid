@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 import os
-import stresstesting
+import systemtesting
 from mantid import *
 
 from mantid.simpleapi import *
@@ -16,7 +22,7 @@ def get_file_path(filename):
     return alg.getProperty('OutputFilename').value
 
 
-class LiquidsReflectometryReductionTest(stresstesting.MantidStressTest):
+class LiquidsReflectometryReductionTest(systemtesting.MantidSystemTest):
     def runTest(self):
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
 
@@ -53,7 +59,7 @@ class LiquidsReflectometryReductionTest(stresstesting.MantidStressTest):
         return "reflectivity_119814", 'REFL_119814_combined_data_v2.nxs'
 
 
-class LRReflectivityOutputTest(stresstesting.MantidStressTest):
+class LRReflectivityOutputTest(systemtesting.MantidSystemTest):
     """
         Test the reflectivity output algorithm
     """

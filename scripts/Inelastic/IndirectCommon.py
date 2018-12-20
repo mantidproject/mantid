@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,redefined-builtin
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
@@ -43,7 +49,13 @@ def get_run_number(ws_name):
         if match:
             run_number = match.group(2)
         else:
-            raise RuntimeError("Could not find run number associated with workspace.")
+            # attempt reading from the logs (ILL)
+            run = workspace.getRun()
+            if run.hasProperty('run_number'):
+                log = run.getLogData('run_number').value
+                run_number = log.split(',')[0]
+            else:
+                raise RuntimeError("Could not find run number associated with workspace.")
 
     return run_number
 

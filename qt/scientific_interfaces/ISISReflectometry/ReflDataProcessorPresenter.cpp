@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflDataProcessorPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
@@ -793,6 +799,12 @@ QString ReflDataProcessorPresenter::loadRun(const QString &run,
   algLoadRun->execute();
   if (!algLoadRun->isExecuted()) {
     // Run not loaded from disk
+    runFound = false;
+    return "";
+  } else if (loader == "LoadEventNexus" && !this->retrieveWorkspace(outputName)
+                                                ->run()
+                                                .hasProperty("proton_charge")) {
+    /*ISIS event nexus files require the proton_charge log to be present*/
     runFound = false;
     return "";
   }

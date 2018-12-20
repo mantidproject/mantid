@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DRAGGABLECOLORBARWIDGET_H_
 #define DRAGGABLECOLORBARWIDGET_H_
 
@@ -22,14 +28,15 @@ class EXPORT_OPT_MANTIDQT_LEGACYQWT DraggableColorBarWidget : public QFrame {
   enum DragType { Bottom, Top };
 
 public:
-  DraggableColorBarWidget(int type, QWidget *parent,
+  DraggableColorBarWidget(QWidget *parent,
                           const double &minPositiveValue = 0.0001);
   void setupColorBarScaling(const MantidColorMap &);
+  void setClim(double vmin, double vmax);
   void setMinValue(double);
   void setMaxValue(double);
   QString getMinValue() const;
   QString getMaxValue() const;
-  QString getNth_power() const;
+  QString getNthPower() const;
   void setMinPositiveValue(double);
   int getScaleType() const;
   void setScaleType(int);

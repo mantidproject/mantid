@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ These constants  are used in the SANS reducer framework. We want a central place for them."""
 
 # pylint: disable=too-few-public-methods
@@ -52,10 +58,14 @@ CALIBRATION_WORKSPACE_TAG = "sans_applied_calibration_file"
 LAB_CAN_SUFFIX = "_lab_can"
 LAB_CAN_COUNT_SUFFIX = "_lab_can_count"
 LAB_CAN_NORM_SUFFIX = "_lab_can_norm"
+LAB_SAMPLE_SUFFIX = "_lab_sample"
 
 HAB_CAN_SUFFIX = "_hab_can"
 HAB_CAN_COUNT_SUFFIX = "_hab_can_count"
 HAB_CAN_NORM_SUFFIX = "_hab_can_norm"
+HAB_SAMPLE_SUFFIX = "_hab_sample"
 
 REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION = "LAB_and_HAB_workspaces_from_merged_reduction"
 REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION = "reduced_can_and_partial_can_workspaces"
+CAN_COUNT_AND_NORM_FOR_OPTIMIZATION = "optimization"
+CAN_AND_SAMPLE_WORKSPACE = "unsubtracted_can_and_sam"

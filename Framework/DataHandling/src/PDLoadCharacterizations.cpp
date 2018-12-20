@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -33,6 +39,9 @@ static const std::string ZERO("0.");
 static const std::string EXP_INI_VAN_KEY("Vana");
 static const std::string EXP_INI_EMPTY_KEY("VanaBg");
 static const std::string EXP_INI_CAN_KEY("MTc");
+/// the offset difference between the information in the table and the the
+/// information in version=1 files
+static const size_t INFO_OFFSET_V1(6);
 // in the filenames vector, each index has a unique location
 static const int F_INDEX_V0 = 0;
 static const int F_INDEX_V1 = 1;
@@ -70,7 +79,7 @@ extra_columns(const std::vector<std::string> &filenames) {
       if (result.size() == 2) {
         line = Strings::strip(result[1]);
         Kernel::StringTokenizer tokenizer(
-            line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+            line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
         for (const auto &token : tokenizer) {
           columnSet.insert(token);
         }
@@ -344,8 +353,8 @@ int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
   // confirm that everything is the same length
   if (specIds.size() != l2.size() || specIds.size() != polar.size() ||
       specIds.size() != azi.size())
-    throw std::runtime_error(
-        "Found different number of spectra, L2 and polar angles");
+    throw Exception::FileError(
+        "Found different number of spectra, L2 and polar angles", filename);
 
   // set the values
   this->setProperty("SpectrumIDs", specIds);
@@ -483,7 +492,6 @@ int findRow(API::ITableWorkspace_sptr &wksp,
   // fall through behavior is -1
   return -1;
 }
-} // namespace
 
 void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
                const std::vector<std::string> &names,
@@ -494,9 +502,10 @@ void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
   wksp->getRef<std::string>("empty_instrument", rowNum) = values[5];
   for (size_t i = 0; i < names.size(); ++i) {
     const auto name = names[i];
-    wksp->getRef<std::string>(name, rowNum) = values[i + 6];
+    wksp->getRef<std::string>(name, rowNum) = values[i + INFO_OFFSET_V1];
   }
 }
+} // namespace
 
 void PDLoadCharacterizations::readVersion1(const std::string &filename,
                                            API::ITableWorkspace_sptr &wksp) {
@@ -520,7 +529,8 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
     g_log.debug() << "Found version " << result[1] << "\n";
   } else {
     file.close();
-    throw std::runtime_error("file must have \"version=1\" as the first line");
+    throw Exception::ParseError(
+        "file must have \"version=1\" as the first line", filename, 0);
   }
 
   // store the names of the columns in order
@@ -540,21 +550,28 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
       if (result.size() == 2) {
         line = Strings::strip(result[1]);
         Kernel::StringTokenizer tokenizer(
-            line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+            line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
         for (const auto &token : tokenizer) {
           columnNames.push_back(token);
         }
       }
     } else {
       if (columnNames.empty()) // should never happen
-        throw std::runtime_error("file missing column names");
+        throw Exception::FileError("file missing column names", filename);
 
       line = Strings::strip(line);
       Kernel::StringTokenizer tokenizer(
-          line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+          line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       std::vector<std::string> valuesAsStr;
       for (const auto &token : tokenizer) {
         valuesAsStr.push_back(token);
+      }
+      if (valuesAsStr.size() < columnNames.size() + INFO_OFFSET_V1) {
+        std::stringstream msg;
+        msg << "Number of data columns (" << valuesAsStr.size()
+            << ") not compatible with number of column labels ("
+            << (columnNames.size() + INFO_OFFSET_V1) << ")";
+        throw Exception::ParseError(msg.str(), filename, linenum);
       }
 
       const int row = findRow(wksp, valuesAsStr);
@@ -581,7 +598,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
         row << 0.;                              // wavelength_min
         row << 0.;                              // wavelength_max
         // insert all the extras
-        for (size_t i = 6; i < valuesAsStr.size(); ++i) {
+        for (size_t i = INFO_OFFSET_V1; i < valuesAsStr.size(); ++i) {
           row << valuesAsStr[i];
         }
       }
@@ -605,7 +622,8 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
 
   g_log.debug() << "readExpIni(" << filename << ", wksp)\n";
 
-  if (wksp->rowCount() == 0)
+  const size_t rowCount = wksp->rowCount();
+  if (rowCount == 0)
     throw std::runtime_error("Characterizations file does not have any "
                              "characterizations information");
 
@@ -631,13 +649,15 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
     if (splitted.size() < 2)
       continue;
 
-    // update the various charaterization runs
-    if (splitted[0] == EXP_INI_VAN_KEY) {
-      wksp->getRef<std::string>("vanadium", 0) = splitted[1];
-    } else if (splitted[0] == EXP_INI_EMPTY_KEY) {
-      wksp->getRef<std::string>("vanadium_background", 0) = splitted[1];
-    } else if (splitted[0] == EXP_INI_CAN_KEY) {
-      wksp->getRef<std::string>("container", 0) = splitted[1];
+    // update the various charaterization runs in every row
+    for (size_t row = 0; row < rowCount; ++row) {
+      if (splitted[0] == EXP_INI_VAN_KEY) {
+        wksp->getRef<std::string>("vanadium", row) = splitted[1];
+      } else if (splitted[0] == EXP_INI_EMPTY_KEY) {
+        wksp->getRef<std::string>("vanadium_background", row) = splitted[1];
+      } else if (splitted[0] == EXP_INI_CAN_KEY) {
+        wksp->getRef<std::string>("container", row) = splitted[1];
+      }
     }
   }
 }

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -356,9 +362,7 @@ void AnvredCorrection::retrieveBaseProperties() {
       m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
-                        m_amu);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
     auto shape = boost::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInAnvredCorrection", neutron, 1.0)));

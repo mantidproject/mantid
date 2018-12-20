@@ -104,21 +104,23 @@ Columns
 Save Options
 ^^^^^^^^^^^^
 
-.. image::  ../images/sans_isis_v2_run_tab_save_options.png
+.. image::  ../images/sans_isis_save_options.png
    :align: center
-   :width: 300px
-
+   :width: 500px
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **1** | **Save location**        | This sets where the reduced data will be made available for the user. The user          |
+| **1** | **Save Other**           | Opens up the save other dialog box :ref:`Save Other <save-other>` which allows          |
+|       |                          | for manual saving of reduced data.                                                      |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **2** | **Save location**        | This sets where the reduced data will be made available for the user. The user          |
 |       |                          | can select to have it only in memory (RAM) with the **Memory** option, saved out as     |
 |       |                          | a file with the **File** option or saved both to file and memory with the **Both**      |
 |       |                          | option.                                                                                 |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **2** | **Save file formats**    | Allows the user to specify the save file format for the reduced data.                   |
+| **3** | **Save file formats**    | Allows the user to specify the save file format for the reduced data.                   |
 |       |                          |                                                                                         |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **3** | **Other**                | The **zero error free** option ensures that zero error entries get artificially         |
+| **4** | **Other**                | The **zero error free** option ensures that zero error entries get artificially         |
 |       |                          | inflated when the data is saved to a file. This is beneficial if the data is to be      |
 |       |                          | loaded into other analysis software.                                                    |
 |       |                          | The **Use optimizations** option will reuse already loaded data. This can speed up the  |

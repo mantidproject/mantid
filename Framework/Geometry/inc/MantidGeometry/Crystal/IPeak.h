@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IPEAK_H_
 #define MANTID_API_IPEAK_H_
 
@@ -44,6 +50,9 @@ public:
   virtual void setL(double m_L) = 0;
   virtual void setHKL(double H, double K, double L) = 0;
   virtual void setHKL(const Mantid::Kernel::V3D &HKL) = 0;
+  virtual void setSamplePos(double samX, double samY, double samZ) = 0;
+  virtual void setSamplePos(const Mantid::Kernel::V3D &XYZ) = 0;
+  virtual Mantid::Kernel::V3D getSamplePos() const = 0;
   virtual Mantid::Kernel::V3D getDetectorPosition() const = 0;
   virtual Mantid::Kernel::V3D getDetectorPositionNoCheck() const = 0;
 

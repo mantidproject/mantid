@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLSANS.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -8,10 +14,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Path.h>
 #include <cmath>
@@ -52,7 +61,7 @@ const std::string LoadILLSANS::category() const {
 
 /// Algorithm's summary. @see Algorithm::summery
 const std::string LoadILLSANS::summary() const {
-  return "Loads a ILL nexus files for SANS instruments D11, D22, D33.";
+  return "Loads ILL nexus files for SANS instruments D11, D22, D33.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -133,6 +142,7 @@ void LoadILLSANS::exec() {
 
   progress.report("Setting sample logs");
   setFinalProperties(filename);
+  setPixelSize();
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
@@ -250,7 +260,6 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
       dataUp.dim0() * dataUp.dim1());
 
   g_log.debug("Creating empty workspace...");
-  // TODO : Must put this 2 somewhere else: number of monitors!
   createEmptyWorkspace(numberOfHistograms + N_MONITORS,
                        static_cast<size_t>(dataRear.dim2()));
 
@@ -287,19 +296,52 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
     g_log.debug("Source distance computed, moving moderator to Z=-" +
                 std::to_string(m_sourcePos));
     g_log.debug("Getting wavelength bins from the nexus file...");
-    std::string binPathPrefix(instrumentPath + "/tof/tof_wavelength_detector");
-
-    binningRear =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "1");
-    binningRight =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "2");
-    binningLeft =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "3");
-    binningDown =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "4");
-    binningUp =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "5");
+    bool vtof = true;
+    // try VTOF mode
+    try {
+      NXInt channelWidthSum =
+          firstEntry.openNXInt(m_instrumentName + "/tof/chwidth_sum");
+      NXFloat channelWidthTimes =
+          firstEntry.openNXFloat(m_instrumentName + "/tof/chwidth_times");
+      channelWidthSum.load();
+      channelWidthTimes.load();
+      std::string distancePrefix(instrumentPath + "/tof/tof_distance_detector");
+      binningRear = getVariableTimeBinning(firstEntry, distancePrefix + "1",
+                                           channelWidthSum, channelWidthTimes);
+      binningRight = getVariableTimeBinning(firstEntry, distancePrefix + "2",
+                                            channelWidthSum, channelWidthTimes);
+      binningLeft = getVariableTimeBinning(firstEntry, distancePrefix + "3",
+                                           channelWidthSum, channelWidthTimes);
+      binningDown = getVariableTimeBinning(firstEntry, distancePrefix + "4",
+                                           channelWidthSum, channelWidthTimes);
+      binningUp = getVariableTimeBinning(firstEntry, distancePrefix + "5",
+                                         channelWidthSum, channelWidthTimes);
+    } catch (std::runtime_error) {
+      vtof = false;
+    }
+    if (!vtof) {
+      try {
+        // LTOF mode
+        std::string binPathPrefix(instrumentPath +
+                                  "/tof/tof_wavelength_detector");
+        binningRear = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "1");
+        binningRight = m_loader.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "2");
+        binningLeft = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "3");
+        binningDown = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "4");
+        binningUp = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                         binPathPrefix + "5");
+      } catch (std::runtime_error &e) {
+        throw std::runtime_error(
+            "Unable to load the wavelength axes for TOF data " +
+            std::string(e.what()));
+      }
+    }
   }
+
   g_log.debug("Loading the data into the workspace...");
 
   size_t nextIndex =
@@ -454,6 +496,9 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
   // Move in Y
   moveDetectorVertical(detPos.shiftUp, "front_detector_top");
   moveDetectorVertical(-detPos.shiftDown, "front_detector_bottom");
+  // Set the sample log
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  runDetails.addProperty<double>("L2", detPos.distanceSampleRear, true);
 }
 
 /**
@@ -475,6 +520,8 @@ void LoadILLSANS::moveDetectorDistance(double distance,
   mover->executeAsChildAlg();
   g_log.debug() << "Moving component '" << componentName
                 << "' to Z = " << distance << '\n';
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  runDetails.addProperty<double>("L2", distance, true);
 }
 
 /**
@@ -580,8 +627,17 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
                                "scientist!");
     }
   } else {
-    double wavelengthRes =
-        entry.getFloat(instrumentNamePath + "/selector/wavelength_res");
+    double wavelengthRes = 10.;
+    const std::string entryResolution = instrumentNamePath + "/selector/";
+    try {
+      wavelengthRes = entry.getFloat(entryResolution + "wavelength_res");
+    } catch (std::runtime_error) {
+      try {
+        wavelengthRes = entry.getFloat(entryResolution + "wave_length_res");
+      } catch (std::runtime_error) {
+        g_log.warning("Could not find wavelength resolution, assuming 10%");
+      }
+    }
     runDetails.addProperty<double>("wavelength", wavelength);
     double ei = m_loader.calculateEnergy(wavelength);
     runDetails.addProperty<double>("Ei", ei, true);
@@ -589,55 +645,9 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
-}
-
-/**
- * @param lambda : wavelength in Angstroms
- * @param twoTheta : twoTheta in degreess
- * @return Q : momentum transfer [Aˆ-1]
- */
-double LoadILLSANS::calculateQ(const double lambda,
-                               const double twoTheta) const {
-  return (4 * M_PI * std::sin(twoTheta * (M_PI / 180) / 2)) / (lambda);
-}
-
-/**
- * Calculates the max and min Q
- * @return pair<min, max>
- */
-std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
-  double min = std::numeric_limits<double>::max(),
-         max = std::numeric_limits<double>::min();
-  g_log.debug("Calculating Qmin Qmax...");
-  std::size_t nHist = m_localWorkspace->getNumberHistograms();
-  const auto &spectrumInfo = m_localWorkspace->spectrumInfo();
-  for (std::size_t i = 0; i < nHist; ++i) {
-    if (!spectrumInfo.isMonitor(i)) {
-      const auto &lambdaBinning = m_localWorkspace->x(i);
-      Kernel::V3D detPos = spectrumInfo.position(i);
-      double r, theta, phi;
-      detPos.getSpherical(r, theta, phi);
-      double v1 = calculateQ(*(lambdaBinning.begin()), theta);
-      double v2 = calculateQ(*(lambdaBinning.end() - 1), theta);
-      if (i == 0) {
-        min = v1;
-        max = v1;
-      }
-      if (v1 < min) {
-        min = v1;
-      }
-      if (v2 < min) {
-        min = v2;
-      }
-      if (v1 > max) {
-        max = v1;
-      }
-      if (v2 > max) {
-        max = v2;
-      }
-    }
-  }
-  return std::pair<double, double>(min, max);
+  // Add a log called timer with the value of duration
+  const double duration = entry.getFloat("duration");
+  runDetails.addProperty<double>("timer", duration);
 }
 
 /**
@@ -647,9 +657,6 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   runDetails.addProperty("is_frame_skipping", 0);
-  std::pair<double, double> minmax = LoadILLSANS::calculateQMaxQMin();
-  runDetails.addProperty("qmin", minmax.first);
-  runDetails.addProperty("qmax", minmax.second);
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
   if (nxStat != NX_ERROR) {
@@ -709,6 +716,66 @@ void LoadILLSANS::moveSource() {
   mover->setProperty("Z", -m_sourcePos);
   mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
+}
+
+/**
+ * Sets the width (x) and height (y) of the pixel
+ */
+void LoadILLSANS::setPixelSize() {
+  const auto instrument = m_localWorkspace->getInstrument();
+  const std::string component =
+      (m_instrumentName == "D33") ? "back_detector" : "detector";
+  auto detector = instrument->getComponentByName(component);
+  auto rectangle =
+      boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
+          detector);
+  if (rectangle) {
+    const double dx = rectangle->xstep();
+    const double dy = rectangle->ystep();
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty<double>("pixel_width", dx);
+    runDetails.addProperty<double>("pixel_height", dy);
+  } else {
+    g_log.debug("No pixel size available");
+  }
+}
+
+/**
+ * Returns the wavelength axis computed in VTOF mode
+ * @param entry : opened root nexus entry
+ * @param path : path of the detector distance entry
+ * @param sum : loaded channel width sums
+ * @param times : loaded channel width times
+ * @return binning : wavelength bin boundaries
+ */
+std::vector<double>
+LoadILLSANS::getVariableTimeBinning(const NXEntry &entry,
+                                    const std::string &path, const NXInt &sum,
+                                    const NXFloat &times) const {
+  const int nBins = sum.dim0();
+  std::vector<double> binCenters;
+  binCenters.reserve(nBins);
+  NXFloat distance = entry.openNXFloat(path);
+  distance.load();
+  for (int bin = 0; bin < nBins; ++bin) {
+    // sum is in nanoseconds, times is in microseconds
+    const double tof = sum[bin] * 1E-9 - times[bin] * 1E-6 / 2.;
+    // velocity in m/s
+    const double velocity = distance[0] / tof;
+    // wavelength in AA
+    const double lambda = PhysicalConstants::h /
+                          PhysicalConstants::NeutronMass / velocity * 1E+10;
+    binCenters.emplace_back(lambda);
+  }
+  std::vector<double> binEdges;
+  binEdges.reserve(nBins + 1);
+  VectorHelper::convertToBinBoundary(binCenters, binEdges);
+  // after conversion to bin edges, the first item might get negative,
+  // which is not physical, set to 0
+  if (binEdges[0] < 0.) {
+    binEdges[0] = 0.;
+  }
+  return binEdges;
 }
 
 } // namespace DataHandling

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from numpy import array
 
@@ -16,6 +22,23 @@ general_params = {
     },
 
     "subtract_empty_instrument": True,
+    "focused_bin_widths": [
+        # Note you want these to be negative for logarithmic (dt / t) binning
+        -0.0006,  # Bank 1
+        -0.0006,  # Bank 2
+        -0.0006,  # Bank 3
+        -0.0006,  # Bank 4
+        -0.0006,  # Bank 5
+        -0.0006,  # Bank 6
+        -0.0006,  # Bank 7
+        -0.0006,  # Bank 8
+        -0.0006,  # Bank 9
+        -0.0006,  # Bank 10
+        -0.0006,  # Bank 11
+        -0.0006,  # Bank 12
+        -0.0006,  # Bank 13
+        -0.0006,  # Bank 14
+    ],
 }
 
 long_mode_off_params = {
