@@ -44,6 +44,7 @@
 #include "MantidAPI/Algorithm.tcc"
 
 using namespace Mantid::Kernel;
+using VectorStringProperty = PropertyWithValue<std::vector<std::string>>;
 
 namespace Mantid {
 namespace API {
@@ -65,6 +66,75 @@ public:
 private:
   const std::string &m_value;
 };
+
+/**
+ * Check if a given validator is an ADS validator
+ * @param validator A reference to a validator object
+ * @return True if the object is an ADSValidator or a Composite containing an
+ * ADSValidator
+ */
+bool isADSValidator(const IValidator &validator) {
+  if (dynamic_cast<const ADSValidator *>(&validator)) {
+    return true;
+  }
+  const auto *compositeValidator =
+      dynamic_cast<const CompositeValidator *>(&validator);
+  if (!compositeValidator)
+    return false;
+
+  const std::list<IValidator_sptr> validatorList =
+      compositeValidator->getChildren();
+  for (const IValidator_sptr &childValidator : validatorList) {
+    if (isADSValidator(*childValidator)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Attempt to return a pointer to a Workspace from a Property
+ * @param prop A reference to a Property object
+ * @param ads A reference to the ADS
+ * @param strValue The string value of the property. Used for the ADS lookup
+ * if applicable
+ * @param checkADS If true then check the ADS for the string value as a name
+ * if look up on the property fail
+ * @return A null pointer if we cannot access a workspace
+ * @throws Exception::NotFoundError if the strValue cannot be found on the ADS
+ */
+Workspace_sptr workspaceFromWSProperty(const IWorkspaceProperty &prop,
+                                       const AnalysisDataServiceImpl &ads,
+                                       const std::string &strValue,
+                                       bool checkADS) {
+  auto workspace = prop.getWorkspace();
+  if (workspace)
+    return workspace;
+
+  if (checkADS) {
+    return ads.retrieve(strValue);
+  }
+  return Workspace_sptr();
+}
+
+/**
+ * Attempt to extract a list of workspaces from the
+ * @param prop A reference to the string list property
+ * @param ads A reference to the ADS
+ * @return A list of workspaces
+ */
+std::vector<Workspace_sptr>
+workspacesFromStringList(const VectorStringProperty &prop,
+                         const AnalysisDataServiceImpl &ads) {
+  std::vector<Workspace_sptr> workspaces;
+  const auto &names = prop();
+  workspaces.reserve(names.size());
+  for (const auto &name : names) {
+    workspaces.emplace_back(ads.retrieve(name));
+  }
+  return workspaces;
+}
+
 } // namespace
 
 // Doxygen can't handle member specialization at the moment:
@@ -948,54 +1018,13 @@ void Algorithm::initializeFromProxy(const AlgorithmProxy &proxy) {
 /** Fills History, Algorithm History and Algorithm Parameters
  */
 void Algorithm::fillHistory() {
-  // this is not a child algorithm. Add the history algorithm to the
-  // WorkspaceHistory object.
+  std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
   if (!isChild()) {
     // Create two vectors to hold a list of pointers to the input & output
     // workspaces (InOut's go in both)
-    std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
-    std::vector<Workspace_sptr>::iterator outWS;
-    std::vector<Workspace_sptr>::const_iterator inWS;
-
     findWorkspaceProperties(inputWorkspaces, outputWorkspaces);
-
-    // Loop over the output workspaces
-    for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end();
-         ++outWS) {
-      WorkspaceGroup_sptr wsGroup =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(*outWS);
-
-      // Loop over the input workspaces, making the call that copies their
-      // history to the output ones
-      // (Protection against copy to self is in
-      // WorkspaceHistory::copyAlgorithmHistory)
-      for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end();
-           ++inWS) {
-        (*outWS)->history().addHistory((*inWS)->getHistory());
-
-        // Add history to each child of output workspace group
-        if (wsGroup) {
-          for (size_t i = 0; i < wsGroup->size(); i++) {
-            wsGroup->getItem(i)->history().addHistory((*inWS)->getHistory());
-          }
-        }
-      }
-
-      // Add the history for the current algorithm to all the output workspaces
-      (*outWS)->history().addHistory(m_history);
-
-      // Add history to each child of output workspace group
-      if (wsGroup) {
-        for (size_t i = 0; i < wsGroup->size(); i++) {
-          wsGroup->getItem(i)->history().addHistory(m_history);
-        }
-      }
-    }
   }
-  // this is a child algorithm, but we still want to keep the history.
-  else if (m_recordHistoryForChild && m_parentHistory) {
-    m_parentHistory->addChildHistory(m_history);
-  }
+  fillHistory(inputWorkspaces, outputWorkspaces);
 }
 
 /**
@@ -1060,7 +1089,7 @@ void Algorithm::trackAlgorithmHistory(
   m_parentHistory = parentHist;
 }
 
-/** Check if we are tracking history for thus algorithm
+/** Check if we are tracking history for this algorithm
  *  @return if we are tracking the history of this algorithm
  */
 bool Algorithm::trackingHistory() {
@@ -1069,102 +1098,58 @@ bool Algorithm::trackingHistory() {
 
 /** Populate lists of the input & output workspace properties.
  *  (InOut workspaces go in both lists)
- *  @param inputWorkspaces ::  A reference to a vector for the input workspaces
- *  @param outputWorkspaces :: A reference to a vector for the output workspaces
+ * @param inputWorkspaces A reference to a vector for the input workspaces
+ * @param outputWorkspaces A reference to a vector for the output workspaces
+ * @param checkADSForOutputs If true, check the ADS for workspace references
+ * if the check on the workspace property fails. Most useful for finding group
+ * workspaces that are never stored on the property
  */
 void Algorithm::findWorkspaceProperties(
     std::vector<Workspace_sptr> &inputWorkspaces,
-    std::vector<Workspace_sptr> &outputWorkspaces) const {
+    std::vector<Workspace_sptr> &outputWorkspaces,
+    bool checkADSForOutputs) const {
   // Loop over properties looking for the workspace properties and putting them
   // in the right list
-  const std::vector<Property *> &algProperties = getProperties();
-  std::vector<Property *>::const_iterator it;
-  for (it = algProperties.begin(); it != algProperties.end(); ++it) {
-    const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(*it);
-    if (wsProp) {
-      const Property *wsPropProp = dynamic_cast<Property *>(*it);
-      // Check we actually have a workspace, it may have been optional
-      Workspace_sptr workspace = wsProp->getWorkspace();
-      if (!workspace)
-        continue;
-      unsigned int direction = wsPropProp->direction();
-      if (direction == Direction::Input || direction == Direction::InOut) {
-        inputWorkspaces.emplace_back(workspace);
-      }
-      if (direction == Direction::Output || direction == Direction::InOut) {
-        outputWorkspaces.emplace_back(workspace);
-      }
-    }
-    // If it is a list of strings of workspace names make sure to add history
-    const Mantid::Kernel::PropertyWithValue<std::vector<std::string>>
-        *propProp = dynamic_cast<
-            Mantid::Kernel::PropertyWithValue<std::vector<std::string>> *>(*it);
-    if (propProp && hasAnADSValidator(propProp->getValidator())) {
-      const auto propPropValue = propProp->value();
-      const auto direction = propProp->direction();
-      std::string currentWS = "";
-      for (auto i = 0u; i < propPropValue.size(); ++i) {
-        if (propPropValue[i] == ',') {
-          constructWorkspaceVectorForHistoryHelper(
-              inputWorkspaces, outputWorkspaces, direction, currentWS);
-          currentWS = "";
-        } else {
-          currentWS.push_back(propPropValue[i]);
-        }
-      }
-      constructWorkspaceVectorForHistoryHelper(
-          inputWorkspaces, outputWorkspaces, direction, currentWS);
-    }
-  }
-}
-
-bool Algorithm::hasAnADSValidator(const IValidator_sptr propProp) const {
-  const Mantid::API::ADSValidator *ADSPropPropValidator =
-      dynamic_cast<Mantid::API::ADSValidator *>(propProp.get());
-  if (ADSPropPropValidator) {
-    return true;
-  }
-
-  const Mantid::Kernel::CompositeValidator *propPropCompValidator =
-      dynamic_cast<Mantid::Kernel::CompositeValidator *>(propProp.get());
-  if (propPropCompValidator) {
-    const std::list<IValidator_sptr> validatorList =
-        propPropCompValidator->getChildren();
-    for (IValidator_sptr i : validatorList) {
-      if (hasAnADSValidator(i) == true) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-void Algorithm::constructWorkspaceVectorForHistoryHelper(
-    std::vector<Workspace_sptr> &inputWorkspaces,
-    std::vector<Workspace_sptr> &outputWorkspaces, const unsigned int direction,
-    std::string &currentWS) const {
-  const auto &ADS = AnalysisDataService::Instance();
-  try {
+  auto appendWS = [&inputWorkspaces,
+                   &outputWorkspaces](const Workspace_sptr &workspace,
+                                      const unsigned int direction) {
+    if (!workspace)
+      return false;
     if (direction == Direction::Input || direction == Direction::InOut) {
-      inputWorkspaces.emplace_back(ADS.retrieveWS<Workspace>(currentWS));
+      inputWorkspaces.emplace_back(workspace);
     }
-  } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
-    const std::string errorMsg(error.what());
-    g_log.information("The ADS was unable to find the input workspaces "
-                      "when attaching history: " +
-                      errorMsg);
-  }
-  try {
+    // InOut needs to go in both lists
     if (direction == Direction::Output || direction == Direction::InOut) {
-      outputWorkspaces.emplace_back(ADS.retrieveWS<Workspace>(currentWS));
+      outputWorkspaces.emplace_back(workspace);
     }
-  } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
-    const std::string errorMsg(error.what());
-    g_log.information("The ADS was unable to find the output workspaces "
-                      "when attaching history: " +
-                      errorMsg);
+    return true;
+  };
+
+  const std::vector<Property *> &algProperties = getProperties();
+  const auto &ads = AnalysisDataService::Instance();
+  for (const auto &prop : algProperties) {
+    const unsigned int direction = prop->direction();
+    if (const auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
+      const bool checkADS =
+          checkADSForOutputs && (direction != Direction::Input);
+      if (!appendWS(
+              workspaceFromWSProperty(*wsProp, ads, prop->value(), checkADS),
+              direction)) {
+        continue;
+      }
+    }
+    // Some algorithms take list of strings that are supposed to refer to
+    // workspace names in the ADS
+    const auto *strListProp = dynamic_cast<VectorStringProperty *>(prop);
+    if (strListProp && isADSValidator(*strListProp->getValidator())) {
+      auto workspaces = workspacesFromStringList(*strListProp, ads);
+      for (const auto &ws : workspaces) {
+        appendWS(ws, direction);
+      }
+    }
   }
 }
+
 /** Sends out algorithm parameter information to the logger */
 void Algorithm::logAlgorithmInfo() const {
   auto &logger = getLogger();
@@ -1246,7 +1231,8 @@ bool Algorithm::checkGroups() {
       numGroups++;
       processGroups = true;
       std::vector<std::string> names = wsGroup->getNames();
-      for (auto &name : names) {
+      thisGroup.reserve(names.size());
+      for (const auto &name : names) {
         Workspace_sptr memberWS =
             AnalysisDataService::Instance().retrieve(name);
         if (!memberWS)
@@ -1305,6 +1291,13 @@ bool Algorithm::checkGroups() {
       }
     }
   } // end for each group
+
+  // Remove empty groups from m_groupWorkspaces
+  m_groupWorkspaces.erase(
+      std::remove_if(std::begin(m_groupWorkspaces), std::end(m_groupWorkspaces),
+                     [](const WorkspaceGroup_sptr &wsGroup) -> bool {
+                       return wsGroup.get() == nullptr;
+                     }), std::end(m_groupWorkspaces));
 
   // If you get here, then the groups are compatible
   return processGroups;
@@ -1404,6 +1397,56 @@ bool Algorithm::doCallProcessGroups(
       new FinishedNotification(this, isExecuted()));
 
   return completed;
+}
+
+/**
+ * Copies history between the inputs and outputs and adds a record for this
+ * algorithm
+ *  @param inputWorkspaces ::  A reference to a vector for the input workspaces.
+ * Used in the non-child case
+ *  @param outputWorkspaces :: A reference to a vector for the output
+ * workspaces. Used in the non-child case
+ */
+void Algorithm::fillHistory(
+    const std::vector<Workspace_sptr> &inputWorkspaces,
+    const std::vector<Workspace_sptr> &outputWorkspaces) {
+  // this is not a child algorithm. Add the history algorithm to the
+  // WorkspaceHistory object.
+  if (!isChild()) {
+    // Loop over the output workspaces
+    for (auto &outWS : outputWorkspaces) {
+      auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+
+      // Loop over the input workspaces, making the call that copies their
+      // history to the output ones
+      // (Protection against copy to self is in
+      // WorkspaceHistory::copyAlgorithmHistory)
+      for (const auto &inWS : inputWorkspaces) {
+        outWS->history().addHistory(inWS->getHistory());
+
+        // Add history to each child of output workspace group
+        if (wsGroup) {
+          for (size_t i = 0; i < wsGroup->size(); i++) {
+            wsGroup->getItem(i)->history().addHistory(inWS->getHistory());
+          }
+        }
+      }
+
+      // Add the history for the current algorithm to all the output workspaces
+      outWS->history().addHistory(m_history);
+
+      // Add history to each child of output workspace group
+      if (wsGroup) {
+        for (size_t i = 0; i < wsGroup->size(); i++) {
+          wsGroup->getItem(i)->history().addHistory(m_history);
+        }
+      }
+    }
+  }
+  // this is a child algorithm, but we still want to keep the history.
+  else if (m_recordHistoryForChild && m_parentHistory) {
+    m_parentHistory->addChildHistory(m_history);
+  }
 }
 
 //--------------------------------------------------------------------------------------------

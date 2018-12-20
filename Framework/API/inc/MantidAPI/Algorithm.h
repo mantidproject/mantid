@@ -293,7 +293,8 @@ public:
   using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
 
   void findWorkspaceProperties(WorkspaceVector &inputWorkspaces,
-                               WorkspaceVector &outputWorkspaces) const;
+                               WorkspaceVector &outputWorkspaces,
+                               bool checkADSForOutputs = false) const;
 
   // ------------------ For WorkspaceGroups ------------------------------------
   virtual bool checkGroups();
@@ -419,6 +420,9 @@ private:
 
   bool doCallProcessGroups(Mantid::Types::Core::DateAndTime &start_time);
 
+  void fillHistory(const std::vector<Workspace_sptr> &inputWorkspaces,
+                   const std::vector<Workspace_sptr> &outputWorkspaces);
+
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,
                        const bool groupProcessing = false);
@@ -431,13 +435,6 @@ private:
   void setupSkipValidationMasterOnly();
 
   bool isCompoundProperty(const std::string &name) const;
-
-  bool hasAnADSValidator(const Mantid::Kernel::IValidator_sptr propProp) const;
-
-  void constructWorkspaceVectorForHistoryHelper(
-      std::vector<Workspace_sptr> &inputWorkspaces,
-      std::vector<Workspace_sptr> &outputWorkspaces,
-      const unsigned int direction, std::string &currentWS) const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
