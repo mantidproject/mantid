@@ -106,8 +106,7 @@ void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   // When doing so, the inner presenters will notify this
   // presenter with the list of commands
 
-  // for (const auto &presenter : m_tablePresenters)
-  //  presenter->accept(this);
+  //  tablePresenter()->accept(this);
 
   // Note this must be done here since notifying the gdpp of its view
   // will cause it to request settings only accessible via the main
@@ -115,8 +114,7 @@ void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
 }
 
 void RunsPresenter::settingsChanged() {
-  // assert(static_cast<std::size_t>(group) < m_tablePresenters.size());
-  // m_tablePresenters[group]->settingsChanged();
+  // tablePresenter()->settingsChanged();
 }
 
 /**
@@ -148,9 +146,6 @@ void RunsPresenter::notify(IRunsPresenter::Flag flag) {
     break;
   case IRunsPresenter::InstrumentChangedFlag:
     changeInstrument();
-    break;
-  case IRunsPresenter::GroupChangedFlag:
-    changeGroup();
     break;
   case IRunsPresenter::StartMonitorFlag:
     startMonitor();
@@ -248,11 +243,11 @@ void RunsPresenter::startNewAutoreduction() {
     // existing table first
     // We'll prompt the user to check it's ok to delete existing rows
 
-    // TODO: prompt user if replacing a table that has been edited
     // tablePresenter()->setPromptUser(false);
-    //try {
-    tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
-    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &) {
+    // try {
+    //  tablePresenter()->notify(DataProcessorPresenter::DeleteAllFlag);
+    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
+    //{
     //  return;
     //}
   }
@@ -298,9 +293,8 @@ void RunsPresenter::autoreduceNewRuns() {
   if (rowsToTransfer.size() > 0) {
     transfer(rowsToTransfer, TransferMatch::Strict);
     // TODO: enable autoprocessing
-    //    auto tablePresenter = getTablePresenter(autoreductionGroup());
-    //    tablePresenter->setPromptUser(false);
-    //    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
+    //    tablePresenter()->setPromptUser(false);
+    //    tablePresenter()->notify(DataProcessorPresenter::ProcessAllFlag);
   } else {
     // confirmReductionCompleted();
   }
@@ -309,8 +303,7 @@ void RunsPresenter::autoreduceNewRuns() {
 void RunsPresenter::pauseAutoreduction() {
   // TODO: enable autoprocessing
   //  if (isAutoreducing())
-  //    getTablePresenter(autoreductionGroup())
-  //        ->notify(DataProcessorPresenter::PauseFlag);
+  //    tablePresenter()->notify(DataProcessorPresenter::PauseFlag);
 }
 
 void RunsPresenter::stopAutoreduction() {

@@ -33,7 +33,6 @@ public:
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,
-    GroupChangedFlag,
     StartMonitorFlag,
     StopMonitorFlag,
     StartMonitorCompleteFlag
