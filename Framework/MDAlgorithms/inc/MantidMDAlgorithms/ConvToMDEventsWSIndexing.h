@@ -135,6 +135,12 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
 #pragma omp parallel for
   for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra; ++workspaceIndex) {
     const auto& pws{m_OutWSWrapper->pWorkspace()};
+    std::array<std::pair<coord_t, coord_t >, ND> bounds;
+    for(size_t ax = 0; ax < ND; ++ ax) {
+      bounds[ax] = std::make_pair(
+          pws->getDimension(ax)->getMinimum(),
+          pws->getDimension(ax)->getMaximum());
+    }
     const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
 
     size_t numEvents = el.getNumberEvents();
@@ -179,10 +185,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
       bool isInOutWSBox = true;
       for(size_t ax = 0; ax < ND; ++ ax) {
         const coord_t& coord{mdEventsForSpectrum.back().getCenter(ax)};
-        if (
-            coord < pws->getDimension(ax)->getMinimum() ||
-                coord >pws->getDimension(ax)->getMaximum()
-            )
+        if (coord < bounds[ax].first || coord > bounds[ax].second)
           isInOutWSBox = false;
       }
 
