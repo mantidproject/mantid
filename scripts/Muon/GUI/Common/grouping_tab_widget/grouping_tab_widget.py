@@ -8,6 +8,7 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
 
+
 class GroupingTabWidget(object):
     def __init__(self, context):
 
