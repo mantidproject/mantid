@@ -81,7 +81,7 @@ class PairingTablePresenter(object):
         self._view.disable_updates()
 
         self._view.clear()
-        for name, pair in self._model.pairs.items():
+        for pair in self._model.pairs:
             self.add_pair_to_view(pair)
 
         self._view.enable_updates()
