@@ -23,7 +23,7 @@ namespace Crystal {
 /** SetCrystalLocation
 
 Description:
-This algorithm provides a convenient interface to sets the 
+This algorithm provides a convenient interface to sets the
 sample position of an events workspace.
 @author Brendan Sullivan, SNS,ORNL
 @date Dec 20 2018
