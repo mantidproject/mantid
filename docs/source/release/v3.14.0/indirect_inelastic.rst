@@ -46,6 +46,7 @@ Improvements
 - The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed.
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
 - Fit and Fit Sequential in the Fit combobox above the FitPropertyBrowser are now disabled while fitting is taking place.
+- The option to choose which workspace index to Plot Spectrum for and from which output workspace is now given in Elwin.
 
 Bugfixes
 ########
