@@ -37,27 +37,22 @@ public:
                      std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                      std::unique_ptr<ISavePresenter> savePresenter);
 
-  /// Returns values passed for 'Transmission run(s)'
-  MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(const double angle) const override;
-  /// Whether there are per-angle transmission runs specified
-  bool hasPerAngleOptions() const override;
-  /// Set the instrument name
-  void setInstrumentName(const std::string &instName) const override;
-
-  /// Returns whether the Runs Tab is currently processing any runs
-  bool isProcessing() const override;
-  void settingsChanged() override;
+  // IReflBatchPresenter overrides
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
-  bool requestClose() const override;
-
   void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
   void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
+  bool hasPerAngleOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angle) const override;
+  void setInstrumentName(const std::string &instName) const override;
+  bool isProcessing() const override;
+  bool requestClose() const override;
+  void settingsChanged() override;
 
 private:
   /// Pauses reduction in the Runs Tab

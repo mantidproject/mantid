@@ -34,6 +34,8 @@ RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
 
   connect(m_ui.filterBox, SIGNAL(textEdited(QString const &)), this,
           SLOT(onFilterChanged(QString const &)));
+  connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(onInstrumentChanged(int)));
 }
 
 void RunsTableView::invalidSelectionForCopy() {
@@ -75,6 +77,19 @@ void RunsTableView::mustSelectGroupOrRow() {
 
 void RunsTableView::onFilterChanged(QString const &filter) {
   m_notifyee->notifyFilterChanged(filter.toStdString());
+}
+
+void RunsTableView::onInstrumentChanged(int index) {
+  UNUSED_ARG(index);
+  m_notifyee->notifyInstrumentChanged();
+}
+
+std::string RunsTableView::getInstrumentName() const {
+  return m_ui.instrumentSelector->currentText().toStdString();
+}
+
+void RunsTableView::setInstrumentName(std::string const &instrumentName) {
+  setSelected(*m_ui.instrumentSelector, instrumentName);
 }
 
 void RunsTableView::resetFilterBox() { m_ui.filterBox->clear(); }
@@ -179,6 +194,14 @@ void RunsTableView::onCutPressed(bool) { m_notifyee->notifyCutRowsRequested(); }
 
 void RunsTableView::onPastePressed(bool) {
   m_notifyee->notifyPasteRowsRequested();
+}
+
+/** Set a combo box to the given value
+ */
+void RunsTableView::setSelected(QComboBox &box, std::string const &str) {
+  auto const index = box.findText(QString::fromStdString(str));
+  if (index != -1)
+    box.setCurrentIndex(index);
 }
 
 RunsTableViewFactory::RunsTableViewFactory(

@@ -78,6 +78,7 @@ public:
   std::set<int> getSelectedSearchRows() const override;
   std::set<int> getAllSearchRows() const override;
   std::string getSearchInstrument() const override;
+  void setSearchInstrument(std::string const &instrumentName) override;
   std::string getSearchString() const override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -107,13 +108,13 @@ private:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
-  // the presenter
+  void setSelected(QComboBox &box, std::string const &str);
+
   RunsViewSubscriber *m_notifyee;
 
-  // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
-  // Command adapters
   std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
+
   // the interface (uses actions owned by m_commands)
   Ui::RunsWidget ui;
   // the slit calculator

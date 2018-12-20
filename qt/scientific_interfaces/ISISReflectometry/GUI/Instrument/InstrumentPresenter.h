@@ -28,13 +28,15 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
 public:
   // TODO Inject the Instrument model into the constructor.
   InstrumentPresenter(IInstrumentView *view, Instrument instrument);
-
   Instrument const &instrument() const;
 
-  void notifySettingsChanged() override;
-
+  // IInstrumentPresenver overrides
   void onReductionPaused() override;
   void onReductionResumed() override;
+  void setInstrumentName(std::string const &instrumentName) override;
+
+  // InstrumentViewSubscriber overrides
+  void notifySettingsChanged() override;
 
 private:
   IInstrumentView *m_view;

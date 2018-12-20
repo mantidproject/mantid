@@ -11,12 +11,18 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IReflBatchView.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+// unnamed namespace
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+}
 
 /** Constructor
  * @param view :: [input] The view we are managing
@@ -43,9 +49,6 @@ ReflBatchPresenter::ReflBatchPresenter(
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
-
-  // Trigger the setting of the current instrument name in settings tab
-  m_runsPresenter->notifyInstrumentChanged();
 }
 
 bool ReflBatchPresenter::requestClose() const { return true; }
@@ -97,12 +100,17 @@ bool ReflBatchPresenter::hasPerAngleOptions() const {
 }
 
 /**
-Tells the setting tab presenter what to set its current instrument name to
-* @param instName : The name of the instrument to be set
+Tells the setting tab presenter what to set its current instrument name to.
+* Also updates the config service, printing an information message
+* @param instrumentName : The name of the instrument to be set
 */
 void ReflBatchPresenter::setInstrumentName(
-    const std::string & /*instName*/) const {
-  return; // TODO m_settingsPresenter->setInstrumentName(instName);
+    const std::string &instrumentName) const {
+  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
+                                                      instrumentName);
+  g_log.information() << "Instrument changed to " << instrumentName;
+  m_runsPresenter->setInstrumentName(instrumentName);
+  m_instrumentPresenter->setInstrumentName(instrumentName);
 }
 
 /**

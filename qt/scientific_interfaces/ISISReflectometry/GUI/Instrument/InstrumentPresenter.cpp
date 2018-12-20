@@ -34,6 +34,11 @@ void InstrumentPresenter::onReductionPaused() { m_view->enableAll(); }
 
 void InstrumentPresenter::onReductionResumed() { m_view->disableAll(); }
 
+void InstrumentPresenter::setInstrumentName(std::string const &instrumentName) {
+  UNUSED_ARG(instrumentName);
+  // TODO: set defaults for the given instrument
+}
+
 boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
   auto range = RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());
   auto const bothOrNoneMustBeSet = false;

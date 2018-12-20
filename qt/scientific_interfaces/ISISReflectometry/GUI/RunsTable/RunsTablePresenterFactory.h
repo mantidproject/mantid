@@ -8,7 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #include "DllConfig.h"
-#include "RunsTablePresenter.h"
+#include "IRunsTablePresenter.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -16,11 +16,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IRunsTableView;
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenterFactory {
 public:
   RunsTablePresenterFactory(std::vector<std::string> const &instruments,
                             double thetaTolerance);
-  virtual std::unique_ptr<RunsTablePresenter>
+  virtual std::unique_ptr<IRunsTablePresenter>
   operator()(IRunsTableView *view) const;
 
 protected:

@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
+#include "../RunsTable/RunsTablePresenter.h"
 #include "IReflMainWindowPresenter.h"
 #include "IReflMessageHandler.h"
 #include "IRunsView.h"
@@ -12,7 +13,6 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/CatalogInfo.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UserCatalogInfo.h"
@@ -46,11 +46,6 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// unnamed namespace
-namespace {
-Mantid::Kernel::Logger g_log("Reflectometry GUI");
-}
-
 /** Constructor
  * @param mainView :: [input] The view we're managing
  * @param progressableView :: [input] The view reporting progress
@@ -82,6 +77,7 @@ RunsPresenter::RunsPresenter(
   assert(m_view != nullptr);
   m_view->subscribe(this);
   m_tablePresenter = m_makeRunsTablePresenter(m_view->table());
+  m_tablePresenter->acceptMainPresenter(this);
 
   m_view->setInstrumentList(instruments, defaultInstrumentIndex);
 
@@ -143,7 +139,16 @@ void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
 }
 
-void RunsPresenter::notifyInstrumentChanged() { changeInstrument(); }
+void RunsPresenter::notifyInstrumentChanged() {
+  auto const instrumentName = m_view->getSearchInstrument();
+  if (m_mainPresenter)
+    m_mainPresenter->setInstrumentName(instrumentName);
+}
+
+void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
+  if (m_mainPresenter)
+    m_mainPresenter->setInstrumentName(instrumentName);
+}
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
 
@@ -321,7 +326,7 @@ void RunsPresenter::icatSearchComplete() {
   }
 }
 
-RunsTablePresenter *RunsPresenter::tablePresenter() const {
+IRunsTablePresenter *RunsPresenter::tablePresenter() const {
   return m_tablePresenter.get();
 }
 
@@ -436,19 +441,15 @@ void RunsPresenter::updateWidgetEnabledState() const {
   m_view->setAutoreduceButtonEnabled(!isAutoreducing() /*&& !isProcessing()*/);
 }
 
-/** Changes the current instrument in the data processor widget. Also clears
- * the
- * and the table selection model and updates the config service, printing an
- * information message
+/** Changes the current instrument in the data processor widget.  Currently
+ * just updates the view and sets a flag to indicate it has changed. Longer
+ * term we'll want to store the result in a model.
  */
-void RunsPresenter::changeInstrument() {
-  auto const instrument = m_view->getSearchInstrument();
-  if (m_mainPresenter)
-    m_mainPresenter->setInstrumentName(instrument);
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                      instrument);
-  g_log.information() << "Instrument changed to " << instrument;
+void RunsPresenter::setInstrumentName(std::string const &instrumentName) {
+  UNUSED_ARG(instrumentName)
   m_instrumentChanged = true;
+  m_view->setSearchInstrument(instrumentName);
+  m_tablePresenter->setInstrumentName(instrumentName);
 }
 
 void RunsPresenter::changeGroup() { updateWidgetEnabledState(); }

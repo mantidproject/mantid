@@ -84,6 +84,7 @@ public:
   virtual std::set<int> getSelectedSearchRows() const = 0;
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
+  virtual void setSearchInstrument(std::string const &instrumentName) = 0;
   virtual std::string getSearchString() const = 0;
 
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>

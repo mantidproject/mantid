@@ -31,6 +31,9 @@ public:
   MOCK_METHOD0(mustSelectGroup, void());
   MOCK_METHOD0(mustNotSelectGroup, void());
   MOCK_METHOD0(mustSelectGroupOrRow, void());
+
+  MOCK_CONST_METHOD0(getInstrumentName, std::string());
+  MOCK_METHOD1(setInstrumentName, void(std::string const &));
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

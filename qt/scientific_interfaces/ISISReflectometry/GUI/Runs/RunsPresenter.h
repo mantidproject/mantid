@@ -10,7 +10,7 @@
 #include "DllConfig.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/IRunsView.h"
-#include "GUI/RunsTable/RunsTablePresenter.h"
+#include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IReflBatchPresenter.h"
 #include "MantidAPI/AlgorithmObserver.h"
@@ -69,7 +69,13 @@ public:
   RunsPresenter(RunsPresenter &&) = default;
   RunsPresenter &operator=(RunsPresenter &&) = default;
 
+  // IRunsPresenter overrides
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void settingsChanged() override;
+  void setInstrumentName(std::string const &instrumentName) override;
+  bool isAutoreducing() const override;
+  bool isProcessing() const override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
@@ -83,13 +89,8 @@ public:
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
 
-  void settingsChanged() override;
-
-  bool isAutoreducing() const override;
-  bool isProcessing() const override;
-
 protected:
-  RunsTablePresenter *tablePresenter() const;
+  IRunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
   boost::shared_ptr<IReflAutoreduction> m_autoreduction;
   void startNewAutoreduction();
@@ -105,7 +106,7 @@ private:
   ProgressableView *m_progressView;
   RunsTablePresenterFactory m_makeRunsTablePresenter;
   /// The data processor presenters stored in a vector
-  std::unique_ptr<RunsTablePresenter> m_tablePresenter;
+  std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The main presenter
   IReflBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
@@ -134,7 +135,6 @@ private:
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer,
                 const TransferMatch matchType = TransferMatch::Any);
-  void changeInstrument();
   void changeGroup();
   void updateWidgetEnabledState() const;
   /// Check that a given set of row indices are valid to transfer

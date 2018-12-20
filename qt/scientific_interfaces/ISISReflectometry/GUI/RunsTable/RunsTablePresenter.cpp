@@ -29,6 +29,10 @@ RunsTablePresenter::RunsTablePresenter(
   m_view->subscribe(this);
 }
 
+void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
+
 ReductionJobs const &RunsTablePresenter::reductionJobs() const {
   return m_model;
 }
@@ -119,6 +123,12 @@ void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
     m_view->jobs().filterRowsBy(std::move(regexFilter));
   } catch (boost::regex_error &) {
   }
+}
+
+void RunsTablePresenter::notifyInstrumentChanged() {
+  auto const instrumentName = m_view->getInstrumentName();
+  if (m_mainPresenter)
+    m_mainPresenter->notifyInstrumentChanged(instrumentName);
 }
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
@@ -354,6 +364,10 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
   } else {
     m_view->invalidSelectionForPaste();
   }
+}
+
+void RunsTablePresenter::setInstrumentName(std::string const &instrumentName) {
+  m_view->setInstrumentName(instrumentName);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

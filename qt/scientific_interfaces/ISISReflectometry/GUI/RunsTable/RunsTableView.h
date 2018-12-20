@@ -36,6 +36,9 @@ public:
   void mustNotSelectGroup() override;
   void mustSelectGroupOrRow() override;
 
+  std::string getInstrumentName() const override;
+  void setInstrumentName(std::string const &instrumentName) override;
+
 private slots:
   void onProcessPressed(bool);
   void onPausePressed(bool);
@@ -49,12 +52,15 @@ private slots:
   void onCutPressed(bool);
   void onPastePressed(bool);
   void onFilterChanged(QString const &);
+  void onInstrumentChanged(int index);
 
 private:
   void addToolbarActions();
   QAction *addToolbarItem(std::string const &iconPath,
                           std::string const &description);
   void showAlgorithmPropertyHintsInOptionsColumn();
+  void setSelected(QComboBox &box, std::string const &str);
+
   Ui::RunsTableView m_ui;
   std::unique_ptr<MantidQt::MantidWidgets::Batch::JobTreeView> m_jobs;
   std::vector<std::string> m_instruments;

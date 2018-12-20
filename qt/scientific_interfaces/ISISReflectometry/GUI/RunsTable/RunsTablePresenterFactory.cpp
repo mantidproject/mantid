@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTablePresenterFactory.h"
 #include "MantidKernel/make_unique.h"
+#include "RunsTablePresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -14,7 +15,7 @@ RunsTablePresenterFactory::RunsTablePresenterFactory(
     std::vector<std::string> const &instruments, double thetaTolerance)
     : m_instruments(instruments), m_thetaTolerance(thetaTolerance) {}
 
-std::unique_ptr<RunsTablePresenter> RunsTablePresenterFactory::
+std::unique_ptr<IRunsTablePresenter> RunsTablePresenterFactory::
 operator()(IRunsTableView *view) const {
   return Mantid::Kernel::make_unique<RunsTablePresenter>(
       view, m_instruments, m_thetaTolerance, ReductionJobs());

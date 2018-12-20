@@ -338,6 +338,10 @@ std::string RunsView::getSearchInstrument() const {
   return ui.comboSearchInstrument->currentText().toStdString();
 }
 
+void RunsView::setSearchInstrument(std::string const &instrumentName) {
+  setSelected(*ui.comboSearchInstrument, instrumentName);
+}
+
 /**
 Get the indices of the highlighted search result rows
 @returns a set of ints containing the selected row numbers
@@ -413,5 +417,12 @@ void RunsView::startMonitorComplete() {
  */
 void RunsView::stopMonitor() { m_notifyee->notifyStopMonitor(); }
 
+/** Set a combo box to the given value
+ */
+void RunsView::setSelected(QComboBox &box, std::string const &str) {
+  auto const index = box.findText(QString::fromStdString(str));
+  if (index != -1)
+    box.setCurrentIndex(index);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

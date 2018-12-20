@@ -23,6 +23,7 @@ public:
   virtual void notifyDeleteRowRequested() = 0;
   virtual void notifyDeleteGroupRequested() = 0;
   virtual void notifyFilterChanged(std::string const &filterValue) = 0;
+  virtual void notifyInstrumentChanged() = 0;
   virtual void notifyExpandAllRequested() = 0;
   virtual void notifyCollapseAllRequested() = 0;
 
@@ -38,19 +39,22 @@ be handled by a subclass.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsTableView {
 public:
+  virtual void subscribe(RunsTableViewSubscriber *notifyee) = 0;
+  virtual void setProgress(int value) = 0;
+  virtual void resetFilterBox() = 0;
+  virtual MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() = 0;
+
   virtual void invalidSelectionForCopy() = 0;
   virtual void invalidSelectionForPaste() = 0;
-
   virtual void invalidSelectionForCut() = 0;
+
   virtual void mustSelectRow() = 0;
   virtual void mustSelectGroup() = 0;
   virtual void mustNotSelectGroup() = 0;
   virtual void mustSelectGroupOrRow() = 0;
 
-  virtual void subscribe(RunsTableViewSubscriber *notifyee) = 0;
-  virtual void setProgress(int value) = 0;
-  virtual void resetFilterBox() = 0;
-  virtual MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() = 0;
+  virtual std::string getInstrumentName() const = 0;
+  virtual void setInstrumentName(std::string const &instrumentName) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

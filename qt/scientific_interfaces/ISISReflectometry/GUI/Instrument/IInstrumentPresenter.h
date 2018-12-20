@@ -23,6 +23,7 @@ public:
 
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
+  virtual void setInstrumentName(std::string const &instrumentName) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
