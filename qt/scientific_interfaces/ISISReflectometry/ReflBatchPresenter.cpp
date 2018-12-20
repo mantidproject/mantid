@@ -72,6 +72,16 @@ void ReflBatchPresenter::notifyReductionCompletedForRow(
   reductionCompletedForRow(group, workspaceName);
 }
 
+void ReflBatchPresenter::notifyAutoreductionResumed() {
+  autoreductionResumed();
+}
+
+void ReflBatchPresenter::notifyAutoreductionPaused() { autoreductionPaused(); }
+
+void ReflBatchPresenter::notifyAutoreductionCompleted() {
+  autoreductionCompleted();
+}
+
 void ReflBatchPresenter::reductionResumed() {
   m_savePresenter->reductionResumed();
   m_eventPresenter->reductionResumed();
@@ -95,6 +105,12 @@ void ReflBatchPresenter::reductionCompletedForRow(
     GroupData const &group, std::string const &workspaceName) {
   m_savePresenter->reductionCompletedForRow(group, workspaceName);
 }
+
+void ReflBatchPresenter::autoreductionResumed() {}
+
+void ReflBatchPresenter::autoreductionPaused() {}
+
+void ReflBatchPresenter::autoreductionCompleted() {}
 
 void ReflBatchPresenter::settingsChanged() {
   m_runsPresenter->settingsChanged();

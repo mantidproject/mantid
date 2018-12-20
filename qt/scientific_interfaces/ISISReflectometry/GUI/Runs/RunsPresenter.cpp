@@ -297,18 +297,16 @@ void RunsPresenter::autoreduceNewRuns() {
 
   if (rowsToTransfer.size() > 0) {
     transfer(rowsToTransfer, TransferMatch::Strict);
-    // TODO: enable autoprocessing
-    //    tablePresenter()->setPromptUser(false);
-    //    tablePresenter()->notify(DataProcessorPresenter::ProcessAllFlag);
-  } else {
-    // confirmReductionCompleted();
+    if (m_mainPresenter)
+      m_mainPresenter->notifyAutoreductionResumed();
+  } else if (m_mainPresenter) {
+    m_mainPresenter->notifyAutoreductionCompleted();
   }
 }
 
 void RunsPresenter::pauseAutoreduction() {
-  // TODO: enable autoprocessing
-  //  if (isAutoreducing())
-  //    tablePresenter()->notify(DataProcessorPresenter::PauseFlag);
+  if (isAutoreducing() && m_mainPresenter)
+    m_mainPresenter->notifyAutoreductionPaused();
 }
 
 void RunsPresenter::stopAutoreduction() {

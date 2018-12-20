@@ -46,6 +46,9 @@ public:
   void notifyReductionCompletedForRow(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionCompleted() override;
   bool hasPerAngleOptions() const override;
   MantidWidgets::DataProcessor::OptionsQMap
   getOptionsForAngle(const double angle) const override;
@@ -56,14 +59,17 @@ public:
 
 private:
   void setInstrumentName(const std::string &instName) const;
-  void reductionPaused();
   void reductionResumed();
+  void reductionPaused();
   void reductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName);
   void
   reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
                            std::string const &workspaceName);
+  void autoreductionResumed();
+  void autoreductionPaused();
+  void autoreductionCompleted();
   /// The view we are handling
   IReflBatchView *m_view;
   /// The presenter of tab 'Runs'

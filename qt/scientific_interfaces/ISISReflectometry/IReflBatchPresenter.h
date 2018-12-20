@@ -35,6 +35,9 @@ public:
   virtual void notifyReductionCompletedForRow(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
+  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyAutoreductionCompleted() = 0;
 
   /// Transmission runs for a specific run angle
   virtual MantidWidgets::DataProcessor::OptionsQMap
