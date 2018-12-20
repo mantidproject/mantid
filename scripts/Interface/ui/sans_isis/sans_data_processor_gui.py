@@ -794,24 +794,25 @@ class SANSDataProcessorGui(QMainWindow,
                 self._setup_add_runs_page()
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
-        # There are two types of values that can be passed:
+        # There are three types of values that can be passed:
         # Lists: we set the combo box to the values in the list
         # expected_type: we set the expected type
+        # str (in the case of "Variable" Q rebin): We set the combo box to the text if it is an option
+        gui_element = getattr(self, combo_box)
         if isinstance(value, list):
-            gui_element = getattr(self, combo_box)
             gui_element.clear()
             for element in value:
                 self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
                                                     expected_type=expected_type)
+        elif expected_type.has_member(value):
+            self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value,
+                                                   expected_type=expected_type)
+        elif isinstance(value, str):
+            index = gui_element.findText(value)
+            if index != -1:
+                gui_element.setCurrentIndex(index)
         else:
-            # Convert the value to the correct GUI string
-            if issubclass(value, expected_type):
-                gui_element = getattr(self, combo_box)
-                self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value,
-                                                       expected_type=expected_type)
-            else:
-                raise RuntimeError(
-                    "Expected an input of type {}, but got {}".format(expected_type, type(value)))
+            raise RuntimeError("Expected an input of type {}, but got {}".format(expected_type, type(value)))
 
     def _add_list_element_to_combo_box(self, gui_element, element, expected_type=None):
         if expected_type is not None and isclass(element) and issubclass(element, expected_type):
@@ -1551,15 +1552,6 @@ class SANSDataProcessorGui(QMainWindow,
                 for element in value:
                     self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
                                                         expected_type=RangeStepType)
-            else:
-                gui_element = getattr(self, "q_1d_step_type_combo_box")
-                if issubclass(value, RangeStepType):
-                    self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value,
-                                                           expected_type=RangeStepType)
-                else:
-                    index = gui_element.findText(value)
-                    if index != -1:
-                        gui_element.setCurrentIndex(index)
 
     @property
     def q_xy_max(self):

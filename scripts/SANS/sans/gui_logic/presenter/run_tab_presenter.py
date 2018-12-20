@@ -15,6 +15,8 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
+import traceback
+
 from mantid.kernel import Logger, ConfigService
 from mantid.api import (FileFinder)
 
@@ -282,6 +284,7 @@ class RunTabPresenter(object):
         """
         Loads the user file. Populates the models and the view.
         """
+        error_msg = "Loading of the user file failed"
         try:
             # 1. Get the user file path from the view
             user_file_path = self._view.get_user_file_path()
@@ -294,31 +297,44 @@ class RunTabPresenter(object):
                 raise RuntimeError(
                     "The user path {} does not exist. Make sure a valid user file path"
                     " has been specified.".format(user_file_path))
-            self._table_model.user_file = user_file_path
-            # Clear out the current view
-            self._view.reset_all_fields_to_default()
+        except RuntimeError as path_error:
+            self.display_errors(path_error, error_msg + " when finding file.")
+        else:
+            try:
+                self._table_model.user_file = user_file_path
+                # Clear out the current view
+                self._view.reset_all_fields_to_default()
 
-            # 3. Read and parse the user file
-            user_file_reader = UserFileReader(user_file_path)
-            user_file_items = user_file_reader.read_user_file()
+                # 3. Read and parse the user file
+                user_file_reader = UserFileReader(user_file_path)
+                user_file_items = user_file_reader.read_user_file()
+            except (RuntimeError, ValueError) as e:
+                self.display_errors(e, error_msg + " when reading file.", use_error_name=True)
+            else:
+                try:
+                    # 4. Populate the model
+                    self._state_model = StateGuiModel(user_file_items)
+                    # 5. Update the views.
+                    self._update_view_from_state_model()
+                    self._beam_centre_presenter.update_centre_positions(self._state_model)
 
-            # 4. Populate the model
-            self._state_model = StateGuiModel(user_file_items)
-            # 5. Update the views.
-            self._update_view_from_state_model()
-            self._beam_centre_presenter.update_centre_positions(self._state_model)
+                    self._beam_centre_presenter.on_update_rows()
+                    self._masking_table_presenter.on_update_rows()
+                    self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
-            self._beam_centre_presenter.on_update_rows()
-            self._masking_table_presenter.on_update_rows()
-            self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
+                    # 6. Warning if user file did not contain a recognised instrument
+                    if self._view.instrument == SANSInstrument.NoInstrument:
+                        raise RuntimeError("User file did not contain a SANS Instrument.")
 
-            # 6. Warning if user file did not contain a recognised instrument
-            if self._view.instrument == SANSInstrument.NoInstrument:
-                raise RuntimeError("User file did not contain a SANS Instrument.")
-
-        except Exception as e:
-            self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
-            self.display_warning_box('Warning', 'Loading of the user file failed.', str(e))
+                except RuntimeError as instrument_e:
+                    # Only catch the error we know about
+                    # If a new exception is caused, we can now see the stack trace
+                    self.display_errors(instrument_e, error_msg + " when reading instrument.")
+                except Exception as other_error:
+                    # If we don't catch all exceptions, SANS can fail to open if last loaded
+                    # user file contains an error
+                    traceback.print_exc()
+                    self.display_errors(other_error, "Unknown error in loading user file.", use_error_name=True)
 
     def on_batch_file_load(self):
         """
@@ -549,6 +565,22 @@ class RunTabPresenter(object):
             self._view.show_period_columns()
         else:
             self._view.hide_period_columns()
+
+    def display_errors(self, error, context_msg, use_error_name=False):
+        """
+        Code for alerting the user to a caught error
+        :param error: a caught exception
+        :param context_msg: string. Text to explain what SANS was trying to do
+                            when the error occurred. e.g. 'Loading of the user file failed'.
+        :param use_error_name: bool. If True, append type of error (e.g. RuntimeError) to context_msg
+        :return:
+        """
+        logger_msg = context_msg
+        if use_error_name:
+            logger_msg += " {}:".format(type(error).__name__)
+        logger_msg += " {}"
+        self.sans_logger.error(logger_msg.format(str(error)))
+        self.display_warning_box('Warning', context_msg, str(error))
 
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)

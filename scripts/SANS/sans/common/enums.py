@@ -69,6 +69,15 @@ def string_convertible(cls):
                 return value
         raise RuntimeError("Could not convert {0} from string. Unknown value.".format(convert_from_string))
 
+    def has_member(elements, convert):
+        if PY3 and isinstance(convert, bytes):
+            convert = convert.decode()
+        for key, value in list(elements.items()):
+            print(key, value)
+            if convert == key or convert == value:
+                return True
+        return False
+
     # First get all enum/sub-class elements
     convertible_elements = {}
     for attribute_name, attribute_value in list(cls.__dict__.items()):
@@ -78,8 +87,10 @@ def string_convertible(cls):
     # Add the new static methods to the class
     partial_to_string = partial(to_string, convertible_elements)
     partial_from_string = partial(from_string, convertible_elements)
+    partial_has_member = partial(has_member, convertible_elements)
     setattr(cls, "to_string", staticmethod(partial_to_string))
     setattr(cls, "from_string", staticmethod(partial_from_string))
+    setattr(cls, "has_member", staticmethod(partial_has_member))
     return cls
 
 
