@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-import Muon.GUI.Common.load_utils as load_utils
-from Muon.GUI.Common.muon_file_utils import filter_for_extensions
+import Muon.GUI.Common.utilities.load_utils as load_utils
+from Muon.GUI.Common.utilities.muon_file_utils import filter_for_extensions
 from Muon.GUI.Common.observer_pattern import Observable
 
 
@@ -113,6 +113,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
                 # User selects "Ok"
                 self._model.clear_data()
                 self.clear_view()
+                self._model._data.instrument = instrument
                 self._view.set_instrument(instrument, block=True)
                 self.instrumentNotifier.notify_subscribers(instrument)
             else:

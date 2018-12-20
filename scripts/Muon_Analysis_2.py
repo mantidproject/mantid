@@ -12,6 +12,8 @@ import sys
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 from mantid.kernel import ConfigServiceImpl
+from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
+
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
@@ -21,6 +23,7 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
+from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 
 Name = "Muon_Analysis_2"
 
@@ -66,18 +69,34 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
+        self.home_tab = HomeTabWidget(self.context)
+        self.setup_tabs()
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget.load_widget_view)
+        splitter.addWidget(self.tabs)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
+
+        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(self.home_tab.home_tab_widget.instrumentObserver)
+        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(self.load_widget.load_widget.instrumentObserver)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)
 
     def closeEvent(self, event):
         print("Muon Analysis Close Event")
         self.load_widget.load_widget_view = None
         self.load_widget.load_run_view = None
         self.load_widget.load_file_view = None
+
+    def setup_tabs(self):
+        """
+        Set up the tabbing structure; the tabs work similarly to conventional
+        web browsers.
+        """
+        self.tabs = DetachableTabWidget(self)
+        self.tabs.addTab(self.home_tab.home_tab_view, 'Home')
+        # self.tabs.addTab(self.group_tab_view, 'Grouping')
 
 
 class MuonAnalysis2Gui(QtGui.QMainWindow):

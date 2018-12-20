@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 from Muon.GUI.Common.observer_pattern import Observable
-from Muon.GUI.Common.run_string_utils import run_string_to_list
+from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 
 class HomeGroupingWidgetPresenter(HomeTabSubWidget):
 

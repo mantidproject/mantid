@@ -4,8 +4,8 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
 
-from Muon.GUI.Common.muon_file_utils import allowed_instruments
-from Muon.GUI.Common.run_string_utils import valid_float_regex
+from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
+from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
 
 
 class InstrumentWidgetView(QtGui.QWidget):

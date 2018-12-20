@@ -1,12 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
 # import mantid.simpleapi as mantid
-from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 
 
 class HomeTabModel(object):
 
-    def __init__(self, muon_data=MuonContext()):
+    def __init__(self, muon_data=MuonDataContext()):
         self._data = muon_data
 
     def is_data_loaded(self):

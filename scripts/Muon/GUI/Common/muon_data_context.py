@@ -29,12 +29,12 @@ from collections import OrderedDict
 from mantid.kernel import ConfigServiceImpl, ConfigService
 
 
-def get_default_grouping(instrument, main_field_direction):
+def get_default_grouping(workspace, instrument, main_field_direction):
     parameter_name = "Default grouping file"
     if instrument == "MUSR":
         parameter_name += " - " + main_field_direction
     try:
-        grouping_file = ConfigService.getInstrument(instrument).getStringParameter(parameter_name)[0]
+        grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
     except IndexError:
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
@@ -102,6 +102,8 @@ class MuonDataContext(object):
         self._loaded_data = load_data
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
+        self._instrument = ConfigService.getInstrument().name()
+
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
 
@@ -114,8 +116,11 @@ class MuonDataContext(object):
 
     @property
     def instrument(self):
-        inst = ConfigService.getInstrument().name()
-        return inst
+        return self._instrument
+
+    @instrument.setter
+    def instrument(self, value):
+        self._instrument = value
 
     @property
     def current_run(self):
@@ -288,7 +293,7 @@ class MuonDataContext(object):
             calculate_group_data(self, group_name)
 
     def set_groups_and_pairs_to_default(self):
-        groups, pairs = get_default_grouping(self.instrument, self.main_field_direction)
+        groups, pairs = get_default_grouping(self.loaded_workspace, self.instrument, self.main_field_direction)
 
         self.clear_groups()
         for group in groups:
