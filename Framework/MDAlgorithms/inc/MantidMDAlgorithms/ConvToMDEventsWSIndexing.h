@@ -208,12 +208,25 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
                                                          std::vector<MDEventType<ND>> &mdEvents,
                                                          const MDSpaceBounds<ND>& space,
                                                          const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>& extents) {
-  auto root = new DataObjects::MDGridBox<MDEventType<ND>, ND>(bc.get(), 0, extents, mdEvents.begin(), mdEvents.end());
-  auto mortonMin = md_structure_ws::calculateDefaultBound<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT>(std::numeric_limits<typename MDEventType<ND>::IntT>::min());
-  auto mortonMax = md_structure_ws::calculateDefaultBound<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT>(std::numeric_limits<typename MDEventType<ND>::IntT>::max());
-  distributeEvents(root, mdEvents.begin(), mdEvents.end(), mortonMin, mortonMax,
-                   space, bc->getNumSplit() , bc->getSplitThreshold(), bc->getMaxDepth()+1, 1 , bc);
-  return root;
+  using MDEvent = MDEventType<ND>;
+  using IntT = typename MDEvent::IntT;
+  using MortonT = typename MDEvent::MortonT;
+  if(mdEvents.size() <= bc->getSplitThreshold()) {
+    bc->incBoxesCounter(0);
+    return new DataObjects::MDBox<MDEvent, ND>(bc.get(), 0, extents, mdEvents.begin(), mdEvents.end());
+  } else {
+    auto root = new DataObjects::MDGridBox<MDEvent, ND>(bc.get(), 0, extents, mdEvents.begin(), mdEvents.end());
+    auto mortonMin =
+        md_structure_ws::calculateDefaultBound<ND, IntT, MortonT>(
+            std::numeric_limits<IntT>::min());
+    auto mortonMax =
+        md_structure_ws::calculateDefaultBound<ND, IntT, MortonT>(
+            std::numeric_limits<IntT>::max());
+    distributeEvents(root, mdEvents.begin(), mdEvents.end(),
+        mortonMin, mortonMax, space, bc->getNumSplit(),
+        bc->getSplitThreshold(), bc->getMaxDepth() + 1, 1, bc);
+    return root;
+  }
 }
 
 
@@ -225,7 +238,6 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
 
   std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
   start = std::chrono::high_resolution_clock::now();
-
 
   std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
   MDSpaceBounds<ND> space;
@@ -357,14 +369,11 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
 
     const auto boxEventStart = eventIt;
 
-    /* Iterate over event list to find the first event that should not be in
-     * the current child box */
-    while (md_structure_ws::morton_contains<MortonT>(boxLower, boxUpper,
-                                                     eventIt->getIndex()) &&
-        eventIt != end) {
-      /* Event was in the box, increment the event iterator */
-      ++eventIt;
-    }
+    if (md_structure_ws::morton_contains<MortonT>(boxLower, boxUpper,eventIt->getIndex()))
+      eventIt = std::upper_bound(boxEventStart, end, boxUpper,
+          [](const MortonT& m, const typename std::iterator_traits<EventIterator>::value_type& event){
+            return m < event.getIndex();
+          });
 
     /* Add new child box. */
     /* As we are adding as we iterate over Morton numbers and parent events
