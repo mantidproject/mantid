@@ -30,9 +30,9 @@ void InstrumentPresenter::notifySettingsChanged() { updateModelFromView(); }
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
 
-void InstrumentPresenter::onReductionPaused() { m_view->enableAll(); }
+void InstrumentPresenter::reductionPaused() { m_view->enableAll(); }
 
-void InstrumentPresenter::onReductionResumed() { m_view->disableAll(); }
+void InstrumentPresenter::reductionResumed() { m_view->disableAll(); }
 
 void InstrumentPresenter::setInstrumentName(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);

@@ -39,14 +39,14 @@ public:
   void notifyAutosaveEnabled() override;
   void notifySavePathChanged() override;
 
-  void completedGroupReductionSuccessfully(
+  void reductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
-  void completedRowReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
-  void onReductionPaused() override;
-  void onReductionResumed() override;
+  void
+  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
+                           std::string const &workspaceName) override;
+  void reductionPaused() override;
+  void reductionResumed() override;
 
 private:
   bool isValidSaveDirectory(std::string const &directory);

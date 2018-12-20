@@ -51,13 +51,13 @@ void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 
-void SavePresenter::onReductionPaused() {
+void SavePresenter::reductionPaused() {
   populateWorkspaceList();
   m_view->enableAutosaveControls();
   m_view->enableFileFormatAndLocationControls();
 }
 
-void SavePresenter::onReductionResumed() {
+void SavePresenter::reductionResumed() {
   m_view->disableAutosaveControls();
   if (shouldAutosave())
     m_view->disableFileFormatAndLocationControls();
@@ -80,7 +80,9 @@ void SavePresenter::onSavePathChanged() {
     warnInvalidSaveDirectory();
 }
 
-void SavePresenter::completedGroupReductionSuccessfully(
+bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
+
+void SavePresenter::reductionCompletedForGroup(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
   UNUSED_ARG(group);
@@ -93,9 +95,7 @@ void SavePresenter::completedGroupReductionSuccessfully(
   }
 }
 
-bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
-
-void SavePresenter::completedRowReductionSuccessfully(
+void SavePresenter::reductionCompletedForRow(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
   if (!MantidWidgets::DataProcessor::canPostprocess(group) &&

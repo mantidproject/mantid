@@ -42,7 +42,7 @@ public:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
-    presenter.onReductionPaused();
+    presenter.reductionPaused();
 
     verifyAndClear();
   }
@@ -51,7 +51,7 @@ public:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
-    presenter.onReductionResumed();
+    presenter.reductionResumed();
 
     verifyAndClear();
   }

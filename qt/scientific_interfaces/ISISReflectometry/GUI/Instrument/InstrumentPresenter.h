@@ -31,8 +31,8 @@ public:
   Instrument const &instrument() const;
 
   // IInstrumentPresenver overrides
-  void onReductionPaused() override;
-  void onReductionResumed() override;
+  void reductionPaused() override;
+  void reductionResumed() override;
   void setInstrumentName(std::string const &instrumentName) override;
 
   // InstrumentViewSubscriber overrides

@@ -28,12 +28,10 @@ public:
 
   virtual void notifyReductionPaused() = 0;
   virtual void notifyReductionResumed() = 0;
-
-  virtual void completedRowReductionSuccessfully(
+  virtual void notifyReductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
-
-  virtual void completedGroupReductionSuccessfully(
+  virtual void notifyReductionCompletedForRow(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
 

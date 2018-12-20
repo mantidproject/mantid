@@ -27,8 +27,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL EventPresenter
 public:
   EventPresenter(IEventView *view);
 
-  void onReductionPaused() override;
-  void onReductionResumed() override;
+  void reductionPaused() override;
+  void reductionResumed() override;
 
   void notifySliceTypeChanged(SliceType newSliceType) override;
   void notifyUniformSliceCountChanged(int sliceCount) override;

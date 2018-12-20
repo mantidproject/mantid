@@ -44,12 +44,12 @@ void EventPresenter::notifyLogBlockNameChanged(std::string) {
   setLogValueSlicingFromView();
 }
 
-void EventPresenter::onReductionPaused() {
+void EventPresenter::reductionPaused() {
   m_view->enableSliceType(m_sliceType);
   m_view->enableSliceTypeSelection();
 }
 
-void EventPresenter::onReductionResumed() {
+void EventPresenter::reductionResumed() {
   m_view->disableSliceType(m_sliceType);
   m_view->disableSliceTypeSelection();
 }

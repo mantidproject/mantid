@@ -230,7 +230,7 @@ public:
     auto group = makeGroupWithTwoRows();
     enableAutosave(presenter);
     expectSaveWorkspaces(std::vector<std::string>{"test2"});
-    presenter.completedGroupReductionSuccessfully(group, "test2");
+    presenter.reductionCompletedForGroup(group, "test2");
     verifyAndClear();
   }
 
@@ -240,7 +240,7 @@ public:
     disableAutosave(presenter);
     EXPECT_CALL(m_view, getSelectedParameters()).Times(0);
     EXPECT_CALL(m_view, getSavePath()).Times(0);
-    presenter.completedGroupReductionSuccessfully(group, "test2");
+    presenter.reductionCompletedForGroup(group, "test2");
     verifyAndClear();
   }
 
@@ -251,7 +251,7 @@ public:
     auto group = makeGroupWithOneRow();
     enableAutosave(presenter);
     expectSaveWorkspaces(std::vector<std::string>{"test2"});
-    presenter.completedRowReductionSuccessfully(group, "test2");
+    presenter.reductionCompletedForRow(group, "test2");
     verifyAndClear();
   }
 
@@ -263,7 +263,7 @@ public:
     enableAutosave(presenter);
     EXPECT_CALL(m_view, getSelectedParameters()).Times(0);
     EXPECT_CALL(m_view, getSavePath()).Times(0);
-    presenter.completedRowReductionSuccessfully(group, "test2");
+    presenter.reductionCompletedForRow(group, "test2");
     verifyAndClear();
   }
 
@@ -273,7 +273,7 @@ public:
     disableAutosave(presenter);
     EXPECT_CALL(m_view, getSelectedParameters()).Times(0);
     EXPECT_CALL(m_view, getSavePath()).Times(0);
-    presenter.completedRowReductionSuccessfully(group, "test2");
+    presenter.reductionCompletedForRow(group, "test2");
     verifyAndClear();
   }
 
@@ -283,7 +283,7 @@ public:
     expectSetWorkspaceListFromADS(workspaceNames);
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
-    presenter.onReductionPaused();
+    presenter.reductionPaused();
     verifyAndClear();
   }
 
@@ -292,7 +292,7 @@ public:
     enableAutosave(presenter);
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
-    presenter.onReductionResumed();
+    presenter.reductionResumed();
     verifyAndClear();
   }
 
@@ -301,7 +301,7 @@ public:
     disableAutosave(presenter);
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(0);
-    presenter.onReductionResumed();
+    presenter.reductionResumed();
     verifyAndClear();
   }
 

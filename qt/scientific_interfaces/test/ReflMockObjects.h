@@ -82,11 +82,9 @@ class MockReflBatchPresenter : public IReflBatchPresenter {
 public:
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyReductionResumed, void());
-
-  MOCK_METHOD2(completedRowReductionSuccessfully,
+  MOCK_METHOD2(notifyReductionCompletedForGroup,
                void(GroupData const &, std::string const &));
-
-  MOCK_METHOD2(completedGroupReductionSuccessfully,
+  MOCK_METHOD2(notifyReductionCompletedForRow,
                void(GroupData const &, std::string const &));
 
   /// Transmission runs for a specific run angle

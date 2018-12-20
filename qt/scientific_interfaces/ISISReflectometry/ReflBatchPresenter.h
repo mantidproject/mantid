@@ -40,10 +40,10 @@ public:
   // IReflBatchPresenter overrides
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
-  void completedGroupReductionSuccessfully(
+  void notifyReductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
-  void completedRowReductionSuccessfully(
+  void notifyReductionCompletedForRow(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
   bool hasPerAngleOptions() const override;
@@ -55,10 +55,14 @@ public:
   void settingsChanged() override;
 
 private:
-  /// Pauses reduction in the Runs Tab
-  void pauseReduction() const;
-  /// Resumes reduction in the Runs Tab
-  void resumeReduction() const;
+  void reductionPaused();
+  void reductionResumed();
+  void reductionCompletedForGroup(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName);
+  void
+  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
+                           std::string const &workspaceName);
   /// The view we are handling
   IReflBatchView *m_view;
   /// The presenter of tab 'Runs'

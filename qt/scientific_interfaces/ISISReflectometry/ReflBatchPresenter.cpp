@@ -53,28 +53,42 @@ ReflBatchPresenter::ReflBatchPresenter(
 
 bool ReflBatchPresenter::requestClose() const { return true; }
 
-void ReflBatchPresenter::completedGroupReductionSuccessfully(
+void ReflBatchPresenter::notifyReductionResumed() { reductionResumed(); }
+
+void ReflBatchPresenter::notifyReductionPaused() { reductionPaused(); }
+
+void ReflBatchPresenter::notifyReductionCompletedForGroup(
     GroupData const &group, std::string const &workspaceName) {
-  m_savePresenter->completedGroupReductionSuccessfully(group, workspaceName);
+  reductionCompletedForGroup(group, workspaceName);
 }
 
-void ReflBatchPresenter::completedRowReductionSuccessfully(
+void ReflBatchPresenter::notifyReductionCompletedForRow(
     GroupData const &group, std::string const &workspaceName) {
-  m_savePresenter->completedRowReductionSuccessfully(group, workspaceName);
+  reductionCompletedForRow(group, workspaceName);
 }
 
-void ReflBatchPresenter::notifyReductionPaused() {
-  m_savePresenter->onReductionPaused();
-  m_eventPresenter->onReductionPaused();
-  m_experimentPresenter->onReductionPaused();
-  m_instrumentPresenter->onReductionPaused();
+void ReflBatchPresenter::reductionResumed() {
+  m_savePresenter->reductionResumed();
+  m_eventPresenter->reductionResumed();
+  m_experimentPresenter->reductionResumed();
+  m_instrumentPresenter->reductionResumed();
 }
 
-void ReflBatchPresenter::notifyReductionResumed() {
-  m_savePresenter->onReductionResumed();
-  m_eventPresenter->onReductionResumed();
-  m_experimentPresenter->onReductionResumed();
-  m_instrumentPresenter->onReductionResumed();
+void ReflBatchPresenter::reductionPaused() {
+  m_savePresenter->reductionPaused();
+  m_eventPresenter->reductionPaused();
+  m_experimentPresenter->reductionPaused();
+  m_instrumentPresenter->reductionPaused();
+}
+
+void ReflBatchPresenter::reductionCompletedForGroup(
+    GroupData const &group, std::string const &workspaceName) {
+  m_savePresenter->reductionCompletedForGroup(group, workspaceName);
+}
+
+void ReflBatchPresenter::reductionCompletedForRow(
+    GroupData const &group, std::string const &workspaceName) {
+  m_savePresenter->reductionCompletedForRow(group, workspaceName);
 }
 
 void ReflBatchPresenter::settingsChanged() {

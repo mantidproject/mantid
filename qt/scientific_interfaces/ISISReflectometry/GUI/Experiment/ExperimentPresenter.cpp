@@ -59,9 +59,9 @@ void ExperimentPresenter::notifyPerAngleDefaultsChanged(int, int column) {
     m_view->showPerAngleThetasNonUnique(m_thetaTolerance);
 }
 
-void ExperimentPresenter::onReductionPaused() { m_view->enableAll(); }
+void ExperimentPresenter::reductionPaused() { m_view->enableAll(); }
 
-void ExperimentPresenter::onReductionResumed() { m_view->disableAll(); }
+void ExperimentPresenter::reductionResumed() { m_view->disableAll(); }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const correctionType = polarizationCorrectionTypeFromString(

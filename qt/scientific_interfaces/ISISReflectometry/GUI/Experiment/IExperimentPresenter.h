@@ -16,8 +16,8 @@ class IExperimentPresenter {
 public:
   virtual ~IExperimentPresenter() = default;
 
-  virtual void onReductionPaused() = 0;
-  virtual void onReductionResumed() = 0;
+  virtual void reductionPaused() = 0;
+  virtual void reductionResumed() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -21,17 +21,17 @@ class ISavePresenter {
 public:
   virtual ~ISavePresenter() = default;
 
-  virtual void completedGroupReductionSuccessfully(
+  virtual void reductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
 
-  virtual void completedRowReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) = 0;
+  virtual void
+  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
+                           std::string const &workspaceName) = 0;
 
   /// Tell the presenter something happened
-  virtual void onReductionPaused() = 0;
-  virtual void onReductionResumed() = 0;
+  virtual void reductionPaused() = 0;
+  virtual void reductionResumed() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

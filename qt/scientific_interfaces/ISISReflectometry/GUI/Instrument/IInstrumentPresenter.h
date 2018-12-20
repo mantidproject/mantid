@@ -21,8 +21,8 @@ class IInstrumentPresenter {
 public:
   virtual ~IInstrumentPresenter() = default;
 
-  virtual void onReductionPaused() = 0;
-  virtual void onReductionResumed() = 0;
+  virtual void reductionPaused() = 0;
+  virtual void reductionResumed() = 0;
   virtual void setInstrumentName(std::string const &instrumentName) = 0;
 };
 } // namespace CustomInterfaces

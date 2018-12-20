@@ -58,8 +58,8 @@ public:
   void notifyRemovePerAngleDefaultsRequested(int index) override;
   void notifyPerAngleDefaultsChanged(int row, int column) override;
 
-  void onReductionPaused() override;
-  void onReductionResumed() override;
+  void reductionPaused() override;
+  void reductionResumed() override;
 
 private:
   ExperimentValidationResult validateExperimentFromView();
