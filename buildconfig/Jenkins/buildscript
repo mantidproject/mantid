@@ -363,6 +363,16 @@ fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
+# Remove GUI qsettings files
+if [[ ${ON_MACOS} == true ]] ; then
+  rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
+  rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
+  rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
+else
+  rm -f ~/.config/Mantid/MantidPlot.conf
+fi
+rm -f ~/.config/mantidproject/mantidworkbench.ini
+
 mkdir -p $userconfig_dir
 # use a fixed number of openmp threads to avoid overloading the system
 userprops_file=$userconfig_dir/Mantid.user.properties
