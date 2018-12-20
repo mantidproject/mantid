@@ -38,7 +38,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
           SLOT(setParameterLabel(const QString &)));
   connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateAvailableParameters(QString const &)));
-  connect(cbParameterType, SIGNAL(currentIndexChanged(int)), this,
+  connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SIGNAL(dataChanged()));
   connect(cbParameter, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setSingleModelSpectrum(int)));
