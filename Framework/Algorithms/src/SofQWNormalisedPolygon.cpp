@@ -24,7 +24,10 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <boost/math/special_functions/pow.hpp>
+
 using Mantid::Geometry::rad2deg;
+using boost::math::pow;
 
 namespace {
 namespace Prop {
@@ -35,6 +38,89 @@ const std::string DET_ID{"Detector ID"};
 const std::string LOWER_2THETA{"Lower two theta"};
 const std::string UPPER_2THETA{"Upper two theta"};
 } // namespace Col
+
+double twoThetaFromLocalPoint(const Mantid::Geometry::DetectorInfo &detInfo,
+                              const size_t detIndex,
+                              const Mantid::Kernel::V3D &samplePos,
+                              const Mantid::Kernel::V3D &beamDir,
+                              Mantid::Kernel::V3D point) {
+  const auto rotation = detInfo.rotation(detIndex);
+  const auto position = detInfo.position(detIndex);
+  rotation.rotate(point);
+  point += position;
+  point -= samplePos;
+  const auto twoTheta = point.angle(beamDir);
+  return twoTheta;
+}
+
+std::pair<double, double>
+cuboidTwoThetaRange(const Mantid::Geometry::DetectorInfo &detInfo,
+                    const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
+                    const Mantid::Kernel::V3D &beamDir,
+                    const std::vector<Mantid::Kernel::V3D> &shapeVectors) {
+  // Convention from ShapeFactory::createGeometryHandler()
+  const auto &leftFrontBottom = shapeVectors[0];
+  const auto &leftFrontTop = shapeVectors[1];
+  const auto &leftBackBottom = shapeVectors[2];
+  const auto &rightFrontBottom = shapeVectors[3];
+  const auto back = leftBackBottom - leftFrontBottom;
+  const auto up = leftFrontTop - leftFrontBottom;
+  const auto right = rightFrontBottom - leftFrontBottom;
+  const std::array<Mantid::Kernel::V3D, 8> ring{
+      leftFrontBottom,     leftFrontBottom + back * 0.5,
+      leftBackBottom,      leftBackBottom + up * 0.5,
+      leftBackBottom + up, leftFrontTop + back * 0.5,
+      leftFrontTop,        leftFrontBottom + up * 0.5};
+  double minTwoTheta{std::numeric_limits<double>::max()};
+  double maxTwoTheta{std::numeric_limits<double>::lowest()};
+  for (int width = 0; width < 3; ++width) {
+    const auto offset = right * (0.5 * static_cast<double>(width));
+    for (const auto &pointInRing : ring) {
+      const auto point = pointInRing + offset;
+      const auto current = twoThetaFromLocalPoint(detInfo, detIndex, samplePos,
+                                                  beamDir, std::move(point));
+      minTwoTheta = std::min(minTwoTheta, current);
+      maxTwoTheta = std::max(maxTwoTheta, current);
+    }
+  }
+  return std::make_pair(minTwoTheta, maxTwoTheta);
+}
+
+std::pair<double, double> cylinderTwoThetaRange(
+    const Mantid::Geometry::DetectorInfo &detInfo, const size_t detIndex,
+    const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir,
+    const std::vector<Mantid::Kernel::V3D> &shapeVectors, const double radius,
+    const double height) {
+  // Convention from ShapeFactory::createGeometryHandler()
+  const auto &centerOfBottom = shapeVectors[0];
+  const auto &longAxisDir = shapeVectors[1];
+  const auto inverseXYSumSq =
+      1. / (pow<2>(longAxisDir.X()) + pow<2>(longAxisDir.Y()));
+  const auto basisX = std::sqrt(1. - pow<2>(longAxisDir.X()) * inverseXYSumSq);
+  const auto basisY = longAxisDir.X() * std::sqrt(inverseXYSumSq);
+  const Mantid::Kernel::V3D basis1{basisX, basisY, 0.};
+  const Mantid::Kernel::V3D basis2 = longAxisDir.cross_prod(basis1);
+  const std::array<double, 8> angles{0.,          0.25 * M_PI, 0.5 * M_PI,
+                                     0.75 * M_PI, M_PI,        1.25 * M_PI,
+                                     1.5 * M_PI,  1.75 * M_PI};
+  double minTwoTheta{std::numeric_limits<double>::max()};
+  double maxTwoTheta{std::numeric_limits<double>::lowest()};
+  for (size_t i = 0; i < angles.size(); ++i) {
+    const auto basePoint =
+        centerOfBottom +
+        (basis1 * std::cos(angles[i]) + basis2 * std::sin(angles[i])) * radius;
+    for (int i = 0; i < 3; ++i) {
+      const auto point =
+          basePoint + longAxisDir * (0.5 * height * static_cast<double>(i));
+      const auto current = twoThetaFromLocalPoint(detInfo, detIndex, samplePos,
+                                                  beamDir, std::move(point));
+      minTwoTheta = std::min(minTwoTheta, current);
+      maxTwoTheta = std::max(maxTwoTheta, current);
+    }
+  }
+  return std::make_pair(minTwoTheta, maxTwoTheta);
+}
+
 /**
  * Calculate the 2theta at detector surface for a given direction.
  * @param detInfo a DetectorInfo object
@@ -44,21 +130,62 @@ const std::string UPPER_2THETA{"Upper two theta"};
  * @param sideDir a unit vector pointing to the chosen direction
  * @return the 2theta in radians
  */
-double twoTheta(const Mantid::Geometry::DetectorInfo &detInfo,
-                const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
-                const Mantid::Kernel::V3D &beamDir,
-                const Mantid::Kernel::V3D &sideDir) {
+double twoThetaFromBoundingBox(const Mantid::Geometry::DetectorInfo &detInfo,
+                               const size_t detIndex,
+                               const Mantid::Kernel::V3D &samplePos,
+                               const Mantid::Kernel::V3D &beamDir,
+                               const Mantid::Kernel::V3D &sideDir) {
   const auto shape = detInfo.detector(detIndex).shape();
   const Mantid::Geometry::BoundingBox bbox = shape->getBoundingBox();
   const auto maxPoint = bbox.maxPoint();
   auto side = maxPoint * sideDir;
-  const auto rotation = detInfo.rotation(detIndex);
-  const auto position = detInfo.position(detIndex);
-  rotation.rotate(side);
-  side += position;
-  side -= samplePos;
-  const auto sideAngle = side.angle(beamDir);
-  return sideAngle;
+  return twoThetaFromLocalPoint(detInfo, detIndex, samplePos, beamDir, side);
+}
+
+std::pair<double, double> generalTwoThetaRange(
+    const Mantid::Geometry::DetectorInfo &detInfo, const size_t detIndex,
+    const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir) {
+  double minTwoTheta{std::numeric_limits<double>::max()};
+  double maxTwoTheta{std::numeric_limits<double>::lowest()};
+  const std::array<Mantid::Kernel::V3D, 6> dirs{Mantid::Kernel::V3D{1., 0., 0.},
+                                                {0., 1., 0.},
+                                                {0., 0., 1.},
+                                                {
+                                                    -1.,
+                                                    0.,
+                                                    0.,
+                                                },
+                                                {0., -1., 0.},
+                                                {0., 0., -1.}};
+  for (const auto &dir : dirs) {
+    const auto current =
+        twoThetaFromBoundingBox(detInfo, detIndex, samplePos, beamDir, dir);
+    minTwoTheta = std::min(minTwoTheta, current);
+    maxTwoTheta = std::max(maxTwoTheta, current);
+  }
+  return std::make_pair(minTwoTheta, maxTwoTheta);
+}
+
+std::pair<double, double>
+minMaxTwoTheta(const Mantid::Geometry::DetectorInfo &detInfo,
+               const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
+               const Mantid::Kernel::V3D &beamDir) {
+  const auto shape = detInfo.detector(detIndex).shape();
+  Mantid::Geometry::detail::ShapeInfo::GeometryShape geometry;
+  std::vector<Mantid::Kernel::V3D> shapeVectors;
+  double radius;
+  double height;
+  shape->GetObjectGeom(geometry, shapeVectors, radius, height);
+  switch (geometry) {
+  case Mantid::Geometry::detail::ShapeInfo::GeometryShape::CUBOID:
+    return cuboidTwoThetaRange(detInfo, detIndex, samplePos, beamDir,
+                               shapeVectors);
+  case Mantid::Geometry::detail::ShapeInfo::GeometryShape::CYLINDER:
+    return cylinderTwoThetaRange(detInfo, detIndex, samplePos, beamDir,
+                                 shapeVectors, radius, height);
+  default:
+    return generalTwoThetaRange(detInfo, detIndex, samplePos, beamDir);
+  }
 }
 
 std::pair<double, double> twoThetasFromTable(
@@ -279,10 +406,6 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
   auto inst = workspace.getInstrument();
   const auto referenceFrame = inst->getReferenceFrame();
   const auto beamDir = referenceFrame->vecPointingAlongBeam();
-  const auto upDir = referenceFrame->vecPointingUp();
-  const auto horizontalDir = referenceFrame->vecPointingHorizontal();
-  const std::array<const V3D, 6> dirs{beamDir, -beamDir,      upDir,
-                                      -upDir,  horizontalDir, -horizontalDir};
 
   const auto &detectorInfo = workspace.detectorInfo();
   const auto &spectrumInfo = workspace.spectrumInfo();
@@ -307,23 +430,17 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
     double maxTwoTheta{minTwoTheta};
     if (spectrumInfo.hasUniqueDetector(i)) {
       const auto detInfoIndex = detectorInfo.indexOf(det.getID());
-      for (const auto &dir : dirs) {
-        const auto current =
-            twoTheta(detectorInfo, detInfoIndex, samplePos, beamDir, dir);
-        minTwoTheta = std::min(minTwoTheta, current);
-        maxTwoTheta = std::max(maxTwoTheta, current);
-      }
+      std::tie(minTwoTheta, maxTwoTheta) =
+          minMaxTwoTheta(detectorInfo, detInfoIndex, samplePos, beamDir);
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto ids = group.getDetectorIDs();
       for (const auto id : ids) {
         const auto detInfoIndex = detectorInfo.indexOf(id);
-        for (const auto &dir : dirs) {
-          const auto current =
-              twoTheta(detectorInfo, detInfoIndex, samplePos, beamDir, dir);
-          minTwoTheta = std::min(minTwoTheta, current);
-          maxTwoTheta = std::max(maxTwoTheta, current);
-        }
+        const auto current =
+            minMaxTwoTheta(detectorInfo, detInfoIndex, samplePos, beamDir);
+        minTwoTheta = std::min(minTwoTheta, current.first);
+        maxTwoTheta = std::max(maxTwoTheta, current.second);
       }
     }
     m_twoThetaLowers[i] = minTwoTheta;
@@ -344,14 +461,11 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
   table->getColumn(1)->setPlotType(2);
   table->addColumn("double", Col::UPPER_2THETA);
   table->getColumn(2)->setPlotType(2);
-  table->addColumn("double", "Width");
-  table->getColumn(3)->setPlotType(2);
   table->setRowCount(m_twoThetaLowers.size());
   for (size_t i = 0; i < m_twoThetaLowers.size(); ++i) {
     table->Double(i, 0) = spectrumInfo.twoTheta(i);
-    table->Double(i, 1) = m_twoThetaLowers[i];
-    table->Double(i, 2) = m_twoThetaUppers[i];
-    table->Double(i, 3) = m_twoThetaUppers[i] - m_twoThetaLowers[i];
+    table->Double(i, 1) = m_twoThetaLowers[i] - spectrumInfo.twoTheta(i);
+    table->Double(i, 2) = m_twoThetaUppers[i] - spectrumInfo.twoTheta(i);
   }
   AnalysisDataService::Instance().addOrReplace("out_width_table", table);
 }
@@ -435,7 +549,8 @@ void SofQWNormalisedPolygon::initAngularCachesTable(
     }
 
     if (spectrumInfo.hasUniqueDetector(i)) {
-      const auto twoThetas = twoThetasFromTable(det.getID(), detIDs, lowers, uppers);
+      const auto twoThetas =
+          twoThetasFromTable(det.getID(), detIDs, lowers, uppers);
       m_twoThetaLowers[i] = twoThetas.first;
       m_twoThetaUppers[i] = twoThetas.second;
     } else {
