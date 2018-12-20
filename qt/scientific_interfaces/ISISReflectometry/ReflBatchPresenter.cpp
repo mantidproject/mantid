@@ -64,14 +64,14 @@ void ReflBatchPresenter::completedRowReductionSuccessfully(
 }
 
 void ReflBatchPresenter::notifyReductionPaused() {
-  m_savePresenter->onAnyReductionPaused();
+  m_savePresenter->onReductionPaused();
   m_eventPresenter->onReductionPaused();
   m_experimentPresenter->onReductionPaused();
   m_instrumentPresenter->onReductionPaused();
 }
 
 void ReflBatchPresenter::notifyReductionResumed() {
-  m_savePresenter->onAnyReductionResumed();
+  m_savePresenter->onReductionResumed();
   m_eventPresenter->onReductionResumed();
   m_experimentPresenter->onReductionResumed();
   m_instrumentPresenter->onReductionResumed();

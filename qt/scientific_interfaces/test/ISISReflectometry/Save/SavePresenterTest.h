@@ -283,7 +283,7 @@ public:
     expectSetWorkspaceListFromADS(workspaceNames);
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
-    presenter.onAnyReductionPaused();
+    presenter.onReductionPaused();
     verifyAndClear();
   }
 
@@ -292,7 +292,7 @@ public:
     enableAutosave(presenter);
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
-    presenter.onAnyReductionResumed();
+    presenter.onReductionResumed();
     verifyAndClear();
   }
 
@@ -301,7 +301,7 @@ public:
     disableAutosave(presenter);
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(0);
-    presenter.onAnyReductionResumed();
+    presenter.onReductionResumed();
     verifyAndClear();
   }
 

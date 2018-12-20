@@ -51,13 +51,13 @@ void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 
-void SavePresenter::onAnyReductionPaused() {
+void SavePresenter::onReductionPaused() {
   populateWorkspaceList();
   m_view->enableAutosaveControls();
   m_view->enableFileFormatAndLocationControls();
 }
 
-void SavePresenter::onAnyReductionResumed() {
+void SavePresenter::onReductionResumed() {
   m_view->disableAutosaveControls();
   if (shouldAutosave())
     m_view->disableFileFormatAndLocationControls();

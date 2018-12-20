@@ -45,8 +45,8 @@ public:
   void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
-  void onAnyReductionPaused() override;
-  void onAnyReductionResumed() override;
+  void onReductionPaused() override;
+  void onReductionResumed() override;
 
 private:
   bool isValidSaveDirectory(std::string const &directory);
