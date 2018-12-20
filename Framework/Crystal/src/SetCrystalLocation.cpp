@@ -60,9 +60,9 @@ void SetCrystalLocation::init() {
 void SetCrystalLocation::exec() {
   EventWorkspace_sptr events = getProperty("InputWorkspace");
   EventWorkspace_sptr outEvents = getProperty("OutputWorkspace");
-  double newX = getProperty("NewX");
-  double newY = getProperty("NewY");
-  double newZ = getProperty("NewZ");
+  const double newX = getProperty("NewX");
+  const double newY = getProperty("NewY");
+  const double newZ = getProperty("NewZ");
   V3D newSamplePos = V3D(newX, newY, newZ);
   if (events != outEvents) {
     outEvents = events->clone();
