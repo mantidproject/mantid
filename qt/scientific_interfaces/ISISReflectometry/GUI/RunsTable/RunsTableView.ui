@@ -104,7 +104,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../widgets/common/MantidPlot/icons/icons.qrc"/>
+  <include location="../../../../widgets/common/MantidPlot/icons/icons.qrc"/>
  </resources>
  <connections/>
 </ui>
