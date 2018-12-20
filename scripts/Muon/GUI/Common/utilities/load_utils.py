@@ -258,6 +258,7 @@ def get_table_workspace_names_from_ADS():
 def combine_loaded_runs(model, run_list):
     return_ws = model._loaded_data_store.get_data(run=run_list[0])["workspace"]
     running_total = return_ws["OutputWorkspace"].workspace
+
     for run in run_list[1:]:
         ws = model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
         running_total = algorithm_utils.run_Plus({

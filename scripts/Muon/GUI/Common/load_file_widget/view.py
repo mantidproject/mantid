@@ -40,7 +40,6 @@ class BrowseFileWidgetView(QtGui.QWidget):
         size_policy.setHeightForWidth(self.browse_button.sizePolicy().hasHeightForWidth())
 
         self.browse_button.setSizePolicy(size_policy)
-        # self.browse_button.setMinimumSize(QtCore.QSize(100, 50))
         self.browse_button.setObjectName("browseButton")
         self.browse_button.setText("Browse")
 
@@ -52,7 +51,6 @@ class BrowseFileWidgetView(QtGui.QWidget):
         size_policy.setHeightForWidth(self.file_path_edit.sizePolicy().hasHeightForWidth())
 
         self.file_path_edit.setSizePolicy(size_policy)
-        # self.file_path_edit.setMinimumSize(QtCore.QSize(200, 50))
         self.file_path_edit.setToolTip("")
         self.file_path_edit.setObjectName("filePathEdit")
 
