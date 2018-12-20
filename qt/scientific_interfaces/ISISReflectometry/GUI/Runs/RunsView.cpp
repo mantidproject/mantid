@@ -63,10 +63,10 @@ void RunsView::initLayout() {
 
   // Custom context menu for table
   connect(ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)),
-          this, SLOT(showSearchContextMenu(const QPoint &)));
+          this, SLOT(onShowSearchContextMenuRequested(const QPoint &)));
   // Synchronize the slit calculator
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(instrumentChanged(int)));
+          SLOT(onInstrumentChanged(int)));
 
   // Synchronize the instrument selection widgets
   // Processing table in group 1
@@ -238,13 +238,13 @@ void RunsView::startIcatSearch() {
   m_algoRunner.get()->disconnect(); // disconnect any other connections
   m_notifyee->notifySearch();
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(icatSearchComplete()), Qt::UniqueConnection);
+          SLOT(onSearchComplete()), Qt::UniqueConnection);
 }
 
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
-void RunsView::icatSearchComplete() { m_notifyee->notifyICATSearchComplete(); }
+void RunsView::onSearchComplete() { m_notifyee->notifyICATSearchComplete(); }
 
 /**
 This slot notifies the presenter that the "search" button has been pressed
@@ -296,7 +296,7 @@ void RunsView::stopTimer() { m_timer.stop(); }
 /**
 This slot shows the slit calculator
 */
-void RunsView::slitCalculatorTriggered() {
+void RunsView::onShowSlitCalculatorRequested() {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->currentText().toStdString());
   m_calculator->show();
@@ -306,7 +306,7 @@ void RunsView::slitCalculatorTriggered() {
 This slot is triggered when the user right clicks on the search results table
 @param pos : The position of the right click within the table
 */
-void RunsView::showSearchContextMenu(const QPoint &pos) {
+void RunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
   if (!ui.tableSearchResults->indexAt(pos).isValid())
     return;
 
@@ -320,7 +320,7 @@ void RunsView::showSearchContextMenu(const QPoint &pos) {
  * notifies the main presenter and updates the Slit Calculator
  * @param index : The index of the combo box
  */
-void RunsView::instrumentChanged(int index) {
+void RunsView::onInstrumentChanged(int index) {
   ui.textSearch->clear();
   if (m_searchModel)
     m_searchModel->clear();
@@ -403,13 +403,13 @@ void RunsView::startMonitor() {
   m_monitorAlgoRunner.get()->disconnect(); // disconnect any other connections
   m_notifyee->notifyStartMonitor();
   connect(m_monitorAlgoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(startMonitorComplete()), Qt::UniqueConnection);
+          SLOT(onStartMonitorComplete()), Qt::UniqueConnection);
 }
 
 /**
 This slot notifies the presenter that the monitoring algorithm finished
 */
-void RunsView::startMonitorComplete() {
+void RunsView::onStartMonitorComplete() {
   m_notifyee->notifyStartMonitorComplete();
 }
 

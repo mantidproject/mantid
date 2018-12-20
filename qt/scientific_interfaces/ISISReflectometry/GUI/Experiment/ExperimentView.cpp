@@ -107,7 +107,7 @@ void ExperimentView::initLayout() {
   // connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
   //         SLOT(requestExpDefaults()));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(summationTypeChanged(int)));
+          SLOT(onSummationTypeChanged(int)));
   connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this,
           SLOT(onNewPerThetaDefaultsRowRequested()));
 }
@@ -205,7 +205,7 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
-void ExperimentView::summationTypeChanged(int reductionTypeIndex) {
+void ExperimentView::onSummationTypeChanged(int reductionTypeIndex) {
   UNUSED_ARG(reductionTypeIndex);
   m_notifyee->notifySummationTypeChanged();
 }

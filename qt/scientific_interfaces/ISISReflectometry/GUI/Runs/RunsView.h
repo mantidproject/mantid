@@ -129,13 +129,13 @@ private slots:
   void on_actionAutoreduce_triggered();
   void on_actionAutoreducePause_triggered();
   void on_actionTransfer_triggered();
-  void slitCalculatorTriggered();
-  void icatSearchComplete();
-  void startMonitorComplete();
-  void instrumentChanged(int index);
-  void showSearchContextMenu(const QPoint &pos);
   void on_buttonMonitor_clicked();
   void on_buttonStopMonitor_clicked();
+  void onStartMonitorComplete();
+  void onSearchComplete();
+  void onInstrumentChanged(int index);
+  void onShowSlitCalculatorRequested();
+  void onShowSearchContextMenuRequested(const QPoint &pos);
 };
 
 } // namespace CustomInterfaces
