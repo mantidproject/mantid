@@ -104,19 +104,22 @@ class GroupingTablePresenter(object):
             self._view.remove_last_row()
             self._model.remove_groups_by_name([name])
 
-    def handle_data_change(self):
-        self.update_model_from_view()
+    def handle_data_change(self, row, col):
+        changed_item = self._view.get_table_item_text(row, col)
+        update_model = True
+        if col == 0 and not self.validate_group_name(changed_item):
+            update_model = False
+        if col == 1 and not self.validate_detector_ids(changed_item):
+            update_model = False
+        if update_model:
+            self.update_model_from_view()
+
         self.update_view_from_model()
         self._view.notify_data_changed()
         self.notify_data_changed()
 
     def update_model_from_view(self):
         table = self._view.get_table_contents()
-        for row in table:
-            valid_name  = self.validate_group_name(row[0])
-            valid_decectors = self.validate_detector_ids(row[1])
-            if not valid_name or not valid_decectors:
-                return
         self._model.clear_groups()
         for entry in table:
             detector_list = run_utils.run_string_to_list(str(entry[1]))
