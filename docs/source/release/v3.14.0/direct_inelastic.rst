@@ -67,5 +67,13 @@ Improved
 
 - The ``directtools`` plotting and utility module has been updated with improved automatic E ranges, cut labels and other visuals. All functions now should also be applicable to non-ILL data as well.
 
+Instrument definitions
+----------------------
+
+Improved
+########
+
+- IN5: pixel radius and height are now more realistic and the detector ID of the monitor is now 100000 instead of 0.
+
 :ref:`Release 3.14.0 <v3.14.0>`
 

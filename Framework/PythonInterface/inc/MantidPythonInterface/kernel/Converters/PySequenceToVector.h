@@ -62,7 +62,7 @@ template <typename DestElementType> struct DLLExport PySequenceToVector {
    * @return A std::vector<ElementType> containing the values
    * from the Python sequence
    */
-  inline const TypedVector operator()() {
+  inline TypedVector operator()() {
     TypedVector cvector(srcSize());
     copyTo(cvector);
     return cvector;

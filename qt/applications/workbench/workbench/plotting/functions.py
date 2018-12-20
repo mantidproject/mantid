@@ -196,6 +196,23 @@ def pcolormesh_from_names(names, fig=None):
         return None
 
 
+def use_imshow(ws):
+    if not ws.isCommonBins():
+        return False
+
+    x = ws.dataX(0)
+    difference = np.diff(x)
+    if not np.all(np.isclose(difference, difference[0])):
+        return False
+
+    y = ws.getAxis(1).extractValues()
+    difference = np.diff(y)
+    if not np.all(np.isclose(difference, difference[0])):
+        return False
+
+    return True
+
+
 def pcolormesh(workspaces, fig=None):
     """
     Create a figure containing pcolor subplots
@@ -218,7 +235,10 @@ def pcolormesh(workspaces, fig=None):
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             ax.set_title(ws.name())
-            pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
+            if use_imshow(ws):
+                pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto')
+            else:
+                pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
             for lbl in ax.get_xticklabels():
                 lbl.set_rotation(45)
             if col_idx < ncols - 1:

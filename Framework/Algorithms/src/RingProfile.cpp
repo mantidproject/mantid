@@ -56,20 +56,20 @@ void RingProfile::init() {
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      "Centre", myInput, twoOrThree),
+                      "Centre", std::move(myInput), std::move(twoOrThree)),
                   "Coordinate of the centre of the ring");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<double>>();
   nonNegative->setLower(0);
 
-  declareProperty<double>("MinRadius", 0, nonNegative,
+  declareProperty<double>("MinRadius", 0, nonNegative->clone(),
                           "Radius of the inner ring(m)");
-  declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
-          "MaxRadius", std::numeric_limits<double>::max(), nonNegative),
-      "Radius of the outer ring(m)");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+                      "MaxRadius", std::numeric_limits<double>::max(),
+                      std::move(nonNegative)),
+                  "Radius of the outer ring(m)");
   auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
-  declareProperty<int>("NumBins", 100, nonNegativeInt,
+  declareProperty<int>("NumBins", 100, std::move(nonNegativeInt),
                        "Number of slice bins for the output");
   auto degreesLimits = boost::make_shared<Kernel::BoundedValidator<double>>();
   degreesLimits->setLower(-360);

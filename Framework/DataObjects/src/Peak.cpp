@@ -811,6 +811,27 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
   m_L = HKL.Z();
 }
 
+/** Set sample position
+ *
+ * @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
+ */
+void Peak::setSamplePos(double samX, double samY, double samZ) {
+
+  this->samplePos[0] = samX;
+  this->samplePos[1] = samY;
+  this->samplePos[2] = samZ;
+}
+
+/** Set sample position
+ *
+ * @param XYZ :: vector x,y,z-> samplePos(x), samplePos(y), samplePos(z)
+ */
+void Peak::setSamplePos(const Mantid::Kernel::V3D &XYZ) {
+
+  this->samplePos[0] = XYZ[0];
+  this->samplePos[1] = XYZ[1];
+  this->samplePos[2] = XYZ[2];
+}
 //----------------------------------------------------------------------------------------------
 /** Return the # of counts in the bin at its peak*/
 double Peak::getBinCount() const { return m_binCount; }
@@ -922,6 +943,10 @@ void Peak::setPeakNumber(int m_peakNumber) {
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
 Mantid::Kernel::V3D Peak::getDetPos() const { return detPos; }
+
+// -------------------------------------------------------------------------------------
+/** Return the sample position vector */
+Mantid::Kernel::V3D Peak::getSamplePos() const { return samplePos; }
 
 // -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
