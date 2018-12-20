@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 import Muon.GUI.Common.message_box as message_box
 
 
@@ -51,8 +51,6 @@ class HomePlotWidgetView(QtGui.QWidget):
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.plot_button)
         self.horizontal_layout.addSpacing(50)
-
-
 
         self.vertical_layout = QtGui.QVBoxLayout()
         self.vertical_layout.setObjectName("verticalLayout")
