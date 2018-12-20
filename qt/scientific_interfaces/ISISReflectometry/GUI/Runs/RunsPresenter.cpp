@@ -85,6 +85,9 @@ RunsPresenter::RunsPresenter(
 
   m_view->setInstrumentList(instruments, defaultInstrumentIndex);
 
+  if (!m_autoreduction)
+    m_autoreduction.reset(new ReflAutoreduction());
+
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
