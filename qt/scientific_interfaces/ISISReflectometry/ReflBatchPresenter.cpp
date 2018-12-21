@@ -45,7 +45,8 @@ ReflBatchPresenter::ReflBatchPresenter(
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)) {
+      m_savePresenter(std::move(savePresenter)), m_isProcessing(false),
+      m_isAutoreducing(false) {
   UNUSED_ARG(view);
 
   // Tell the tab presenters that this is going to be the main presenter
