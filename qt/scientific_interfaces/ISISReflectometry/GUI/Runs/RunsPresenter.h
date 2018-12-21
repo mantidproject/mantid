@@ -73,8 +73,8 @@ public:
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void settingsChanged() override;
   void setInstrumentName(std::string const &instrumentName) override;
-  bool isAutoreducing() const override;
   bool isProcessing() const override;
+  bool isAutoreducing() const override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyReductionResumed() override;
   void notifyReductionPaused() override;
@@ -118,6 +118,10 @@ private:
   IReflMessageHandler *m_messageHandler;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
+  /// The list of instruments
+  std::vector<std::string> m_instruments;
+  /// The default index in the instrument list
+  int m_defaultInstrumentIndex;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
   /// The name to use for the live data workspace
@@ -130,7 +134,6 @@ private:
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   /// autoreduction
   bool requireNewAutoreduction() const;
-  bool setupNewAutoreduction(const std::string &searchString);
   void checkForNewRuns();
   void autoreduceNewRuns();
   void stopAutoreduction();

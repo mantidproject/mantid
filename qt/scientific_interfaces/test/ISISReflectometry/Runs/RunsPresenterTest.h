@@ -91,6 +91,10 @@ public:
     verifyAndClear();
   }
 
+  void testReductionResumed() {}
+
+  void testReductionPaused() {}
+
   void testNotifyAutoreductionResumed() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, notifyAutoreductionResumed());

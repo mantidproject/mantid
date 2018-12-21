@@ -53,9 +53,10 @@ public:
   MantidWidgets::DataProcessor::OptionsQMap
   getOptionsForAngle(const double angle) const override;
   void notifyInstrumentChanged(const std::string &instName) const override;
-  bool isProcessing() const override;
   bool requestClose() const override;
   void settingsChanged() override;
+  bool isProcessing() const override;
+  bool isAutoreducing() const override;
 
 private:
   void setInstrumentName(const std::string &instName) const;
@@ -81,6 +82,10 @@ private:
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   /// The presenter of tab 'Save ASCII'
   std::unique_ptr<ISavePresenter> m_savePresenter;
+  /// True if currently reducing runs
+  bool m_isProcessing;
+  /// True if autoprocessing is currently running (i.e. polling for new runs)
+  bool m_isAutoreducing;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

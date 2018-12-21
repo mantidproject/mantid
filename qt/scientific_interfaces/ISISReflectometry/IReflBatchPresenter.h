@@ -46,6 +46,7 @@ public:
   virtual bool hasPerAngleOptions() const = 0;
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
+  virtual bool isAutoreducing() const = 0;
   virtual bool requestClose() const = 0;
   virtual void settingsChanged() = 0;
 };

@@ -35,8 +35,8 @@ public:
   virtual void autoreductionResumed() = 0;
   virtual void setInstrumentName(std::string const &instrumentName) = 0;
 
-  virtual bool isAutoreducing() const = 0;
   virtual bool isProcessing() const = 0;
+  virtual bool isAutoreducing() const = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

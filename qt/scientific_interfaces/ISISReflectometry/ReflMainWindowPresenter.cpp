@@ -45,7 +45,10 @@ Used by the view to tell the presenter something has changed
 void ReflMainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
 bool ReflMainWindowPresenter::isProcessing() const {
-  // TODO Implement this once you have ownership of child presenters.
+  for (auto batchPresenter : m_batchPresenters) {
+    if (batchPresenter->isProcessing())
+      return true;
+  }
   return false;
 }
 

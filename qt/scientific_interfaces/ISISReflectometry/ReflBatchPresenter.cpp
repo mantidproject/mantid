@@ -84,6 +84,7 @@ void ReflBatchPresenter::notifyAutoreductionCompleted() {
 }
 
 void ReflBatchPresenter::reductionResumed() {
+  m_isProcessing = true;
   m_savePresenter->reductionResumed();
   m_eventPresenter->reductionResumed();
   m_experimentPresenter->reductionResumed();
@@ -92,6 +93,7 @@ void ReflBatchPresenter::reductionResumed() {
 }
 
 void ReflBatchPresenter::reductionPaused() {
+  m_isProcessing = false;
   m_savePresenter->reductionPaused();
   m_eventPresenter->reductionPaused();
   m_experimentPresenter->reductionPaused();
@@ -110,10 +112,12 @@ void ReflBatchPresenter::reductionCompletedForRow(
 }
 
 void ReflBatchPresenter::autoreductionResumed() {
+  m_isAutoreducing = true;
   m_runsPresenter->autoreductionResumed();
 }
 
 void ReflBatchPresenter::autoreductionPaused() {
+  m_isAutoreducing = false;
   m_runsPresenter->autoreductionPaused();
 }
 
@@ -156,11 +160,16 @@ void ReflBatchPresenter::setInstrumentName(
 }
 
 /**
-Checks whether or not data is currently being processed in the Runs Tab
+Checks whether or not data is currently being processed in this batch
 * @return : Bool on whether data is being processed
 */
-bool ReflBatchPresenter::isProcessing() const {
-  return m_runsPresenter->isProcessing();
-}
+bool ReflBatchPresenter::isProcessing() const { return m_isProcessing; }
+
+/**
+Checks whether or not autoprocessing is currently running in this batch
+* i.e. whether we are polling for new runs
+* @return : Bool on whether data is being processed
+*/
+bool ReflBatchPresenter::isAutoreducing() const { return m_isAutoreducing; }
 } // namespace CustomInterfaces
 } // namespace MantidQt

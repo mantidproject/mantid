@@ -98,6 +98,7 @@ public:
   MOCK_CONST_METHOD1(notifyInstrumentChanged, void(const std::string &));
   /// Data processing check for all groups
   MOCK_CONST_METHOD0(isProcessing, bool());
+  MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_METHOD0(settingsChanged, void());
 };

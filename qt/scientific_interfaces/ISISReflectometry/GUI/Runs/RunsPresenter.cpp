@@ -71,15 +71,14 @@ RunsPresenter::RunsPresenter(
       m_progressView(progressableView),
       m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_searcher(searcher), m_instrumentChanged(false),
-      m_thetaTolerance(thetaTolerance) {
+      m_searcher(searcher), m_instruments(instruments),
+      m_defaultInstrumentIndex(defaultInstrumentIndex),
+      m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
   m_tablePresenter = m_makeRunsTablePresenter(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
-
-  m_view->setInstrumentList(instruments, defaultInstrumentIndex);
 
   if (!m_autoreduction)
     m_autoreduction.reset(new ReflAutoreduction());
@@ -101,6 +100,9 @@ RunsPresenter::~RunsPresenter() {
  */
 void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
+  // Must do this after setting main presenter or notifications don't get
+  // through
+  m_view->setInstrumentList(m_instruments, m_defaultInstrumentIndex);
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
   // presenter with the list of commands
@@ -142,28 +144,23 @@ void RunsPresenter::notifyInstrumentChanged() {
 }
 
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
-  if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+  m_mainPresenter->notifyInstrumentChanged(instrumentName);
 }
 
 void RunsPresenter::notifyReductionResumed() {
-  if (m_mainPresenter)
-    m_mainPresenter->notifyReductionResumed();
+  m_mainPresenter->notifyReductionResumed();
 }
 
 void RunsPresenter::notifyReductionPaused() {
-  if (m_mainPresenter)
-    m_mainPresenter->notifyReductionPaused();
+  m_mainPresenter->notifyReductionPaused();
 }
 
 void RunsPresenter::notifyAutoreductionResumed() {
-  if (m_mainPresenter)
-    m_mainPresenter->notifyAutoreductionResumed();
+  m_mainPresenter->notifyAutoreductionResumed();
 }
 
 void RunsPresenter::notifyAutoreductionPaused() {
-  if (isAutoreducing() && m_mainPresenter)
-    m_mainPresenter->notifyAutoreductionPaused();
+  m_mainPresenter->notifyAutoreductionPaused();
 }
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
@@ -267,11 +264,17 @@ void RunsPresenter::autoreductionResumed() {
     //}
   }
 
-  if (setupNewAutoreduction(m_view->getSearchString()))
+  if (m_autoreduction->setupNewAutoreduction(m_view->getSearchString()))
     checkForNewRuns();
+
+  updateWidgetEnabledState();
 }
 
-void RunsPresenter::autoreductionPaused() {}
+void RunsPresenter::autoreductionPaused() {
+  m_view->stopTimer();
+  m_autoreduction->stop();
+  updateWidgetEnabledState();
+}
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
  * either the search number, transfer method or instrument has changed
@@ -282,10 +285,6 @@ bool RunsPresenter::requireNewAutoreduction() const {
       m_autoreduction->searchStringChanged(m_view->getSearchString());
 
   return searchNumChanged || m_instrumentChanged;
-}
-
-bool RunsPresenter::setupNewAutoreduction(const std::string &searchString) {
-  return m_autoreduction->setupNewAutoreduction(searchString);
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
@@ -309,7 +308,7 @@ void RunsPresenter::autoreduceNewRuns() {
 
   if (rowsToTransfer.size() > 0) {
     transfer(rowsToTransfer, TransferMatch::Strict);
-  } else if (m_mainPresenter) {
+  } else {
     m_mainPresenter->notifyAutoreductionCompleted();
   }
 }
@@ -319,13 +318,12 @@ void RunsPresenter::stopAutoreduction() {
   m_autoreduction->stop();
 }
 
-bool RunsPresenter::isAutoreducing() const {
-  return m_autoreduction->running();
+bool RunsPresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
 }
 
-bool RunsPresenter::isProcessing() const {
-  // TODO define this properly when we enable processing
-  return false;
+bool RunsPresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
 }
 
 void RunsPresenter::icatSearchComplete() {
@@ -442,16 +440,15 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
  */
 void RunsPresenter::updateWidgetEnabledState() const {
   // Update the menus
-  // TODO: reinstate isProcessing when implemented
-  m_view->updateMenuEnabledState(false /*isProcessing()*/);
+  m_view->updateMenuEnabledState(isProcessing());
 
   // Update components
-  m_view->setTransferButtonEnabled(/*!isProcessing() &&*/ !isAutoreducing());
-  m_view->setInstrumentComboEnabled(/*!isProcessing() &&*/ !isAutoreducing());
-  m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
+  m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing());
   m_view->setSearchButtonEnabled(!isAutoreducing());
-  m_view->setAutoreduceButtonEnabled(!isAutoreducing() /*&& !isProcessing()*/);
+  m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing());
+  m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
+  m_view->setTransferButtonEnabled(!isProcessing() && !isAutoreducing());
 }
 
 /** Changes the current instrument in the data processor widget.  Currently
