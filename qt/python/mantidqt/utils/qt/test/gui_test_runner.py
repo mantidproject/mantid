@@ -43,6 +43,12 @@ def create_widget(widget_path):
     return widget_generator()
 
 
+def _next(script_iter):
+    if hasattr(script_iter, 'next'):
+        return script_iter.next()
+    return script_iter.__next__()
+
+
 class ScriptRunner(object):
     """
     Runs a script that interacts with a widget (tests it).
@@ -83,7 +89,7 @@ class ScriptRunner(object):
                         app.exit()
                     return
                 # Run test script until the next 'yield'
-                ret = next(script_iter)
+                ret = _next(script_iter)
                 while ret is not None:
                     if inspect.isgenerator(ret):
                         self.script_iter.append(ret)
