@@ -823,7 +823,6 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
   m_L = HKL.Z();
 }
 
-<<<<<<< HEAD
 /** Set int HKL
  *
  * @param HKL :: vector with integer x,y,z -> h,k,l
@@ -833,7 +832,6 @@ void Peak::setIntHKL(V3D HKL) {
                  boost::math::iround(HKL[2]));
 }
 
-=======
 /** Set sample position
  *
  * @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
@@ -855,7 +853,6 @@ void Peak::setSamplePos(const Mantid::Kernel::V3D &XYZ) {
   this->samplePos[1] = XYZ[1];
   this->samplePos[2] = XYZ[2];
 }
->>>>>>> origin/master
 //----------------------------------------------------------------------------------------------
 /** Return the # of counts in the bin at its peak*/
 double Peak::getBinCount() const { return m_binCount; }
