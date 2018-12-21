@@ -63,6 +63,10 @@ void ExperimentPresenter::reductionPaused() { m_view->enableAll(); }
 
 void ExperimentPresenter::reductionResumed() { m_view->disableAll(); }
 
+void ExperimentPresenter::autoreductionPaused() { reductionPaused(); }
+
+void ExperimentPresenter::autoreductionResumed() { reductionResumed(); }
+
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const correctionType = polarizationCorrectionTypeFromString(
       m_view->getPolarizationCorrectionType());

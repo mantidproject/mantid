@@ -48,6 +48,8 @@ public:
                            std::string const &workspaceName) override;
   void reductionPaused() override;
   void reductionResumed() override;
+  void autoreductionPaused() override;
+  void autoreductionResumed() override;
 
 private:
   bool isValidSaveDirectory(std::string const &directory);

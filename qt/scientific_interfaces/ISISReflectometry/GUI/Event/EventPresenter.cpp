@@ -54,6 +54,10 @@ void EventPresenter::reductionResumed() {
   m_view->disableSliceTypeSelection();
 }
 
+void EventPresenter::autoreductionPaused() { reductionPaused(); }
+
+void EventPresenter::autoreductionResumed() { reductionResumed(); }
+
 void EventPresenter::setUniformSlicingByTimeFromView() {
   m_slicing = UniformSlicingByTime(m_view->uniformSliceLength());
 }

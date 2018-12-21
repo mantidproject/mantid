@@ -160,6 +160,7 @@ private:
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;
   std::string getText(QComboBox const &box) const;
+  void setEnabledStateForAllWidgets(bool enabled);
   /// The stitch params entry widget
   MantidQt::MantidWidgets::HintingLineEdit *m_stitchEdit;
 

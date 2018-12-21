@@ -89,7 +89,7 @@ void ReflBatchPresenter::reductionResumed() {
   m_eventPresenter->reductionResumed();
   m_experimentPresenter->reductionResumed();
   m_instrumentPresenter->reductionResumed();
-  m_runsPresenter->reductionPaused();
+  m_runsPresenter->reductionResumed();
 }
 
 void ReflBatchPresenter::reductionPaused() {
@@ -113,11 +113,19 @@ void ReflBatchPresenter::reductionCompletedForRow(
 
 void ReflBatchPresenter::autoreductionResumed() {
   m_isAutoreducing = true;
+  m_savePresenter->autoreductionResumed();
+  m_eventPresenter->autoreductionResumed();
+  m_experimentPresenter->autoreductionResumed();
+  m_instrumentPresenter->autoreductionResumed();
   m_runsPresenter->autoreductionResumed();
 }
 
 void ReflBatchPresenter::autoreductionPaused() {
   m_isAutoreducing = false;
+  m_savePresenter->autoreductionPaused();
+  m_eventPresenter->autoreductionPaused();
+  m_experimentPresenter->autoreductionPaused();
+  m_instrumentPresenter->autoreductionPaused();
   m_runsPresenter->autoreductionPaused();
 }
 

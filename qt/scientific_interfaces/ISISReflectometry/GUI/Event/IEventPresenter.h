@@ -24,6 +24,8 @@ public:
   virtual ~IEventPresenter() = default;
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
+  virtual void autoreductionPaused() = 0;
+  virtual void autoreductionResumed() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

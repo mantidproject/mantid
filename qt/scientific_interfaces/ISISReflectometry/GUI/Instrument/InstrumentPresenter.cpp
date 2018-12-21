@@ -34,6 +34,10 @@ void InstrumentPresenter::reductionPaused() { m_view->enableAll(); }
 
 void InstrumentPresenter::reductionResumed() { m_view->disableAll(); }
 
+void InstrumentPresenter::autoreductionPaused() { reductionPaused(); }
+
+void InstrumentPresenter::autoreductionResumed() { reductionResumed(); }
+
 void InstrumentPresenter::setInstrumentName(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
   // TODO: set defaults for the given instrument

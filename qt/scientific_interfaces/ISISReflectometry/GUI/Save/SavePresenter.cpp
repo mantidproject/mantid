@@ -63,6 +63,10 @@ void SavePresenter::reductionResumed() {
     m_view->disableFileFormatAndLocationControls();
 }
 
+void SavePresenter::autoreductionPaused() { reductionPaused(); }
+
+void SavePresenter::autoreductionResumed() { reductionResumed(); }
+
 void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
     m_shouldAutosave = true;

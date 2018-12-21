@@ -29,6 +29,11 @@ public:
 
   virtual void mergeAdditionalJobs(ReductionJobs const &jobs) = 0;
   virtual void setInstrumentName(std::string const &instrumentName) = 0;
+
+  virtual void reductionPaused() = 0;
+  virtual void reductionResumed() = 0;
+  virtual void autoreductionPaused() = 0;
+  virtual void autoreductionResumed() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

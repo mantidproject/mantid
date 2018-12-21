@@ -22,6 +22,8 @@ public:
 
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
+  virtual void autoreductionPaused() = 0;
+  virtual void autoreductionResumed() = 0;
   virtual void setInstrumentName(std::string const &instrumentName) = 0;
 };
 } // namespace CustomInterfaces

@@ -60,6 +60,8 @@ public:
 
   void reductionPaused() override;
   void reductionResumed() override;
+  void autoreductionPaused() override;
+  void autoreductionResumed() override;
 
 private:
   ExperimentValidationResult validateExperimentFromView();

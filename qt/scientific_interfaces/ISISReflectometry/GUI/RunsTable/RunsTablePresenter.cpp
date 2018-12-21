@@ -137,6 +137,14 @@ void RunsTablePresenter::notifyInstrumentChanged() {
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
 
+void RunsTablePresenter::reductionResumed() {}
+
+void RunsTablePresenter::reductionPaused() {}
+
+void RunsTablePresenter::autoreductionResumed() {}
+
+void RunsTablePresenter::autoreductionPaused() {}
+
 void RunsTablePresenter::appendRowsToGroupsInView(
     std::vector<int> const &groupIndices) {
   for (auto const &groupIndex : groupIndices)
