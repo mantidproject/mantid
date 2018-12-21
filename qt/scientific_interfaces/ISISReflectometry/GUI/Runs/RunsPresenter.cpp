@@ -127,10 +127,6 @@ void RunsPresenter::notifySearch() {
     stopAutoreduction();
 }
 
-void RunsPresenter::notifyStartAutoreduction() { startNewAutoreduction(); }
-
-void RunsPresenter::notifyPauseAutoreduction() { pauseAutoreduction(); }
-
 void RunsPresenter::notifyTimerEvent() { checkForNewRuns(); }
 
 void RunsPresenter::notifyICATSearchComplete() { icatSearchComplete(); }
@@ -158,6 +154,16 @@ void RunsPresenter::notifyReductionResumed() {
 void RunsPresenter::notifyReductionPaused() {
   if (m_mainPresenter)
     m_mainPresenter->notifyReductionPaused();
+}
+
+void RunsPresenter::notifyAutoreductionResumed() {
+  if (m_mainPresenter)
+    m_mainPresenter->notifyAutoreductionResumed();
+}
+
+void RunsPresenter::notifyAutoreductionPaused() {
+  if (isAutoreducing() && m_mainPresenter)
+    m_mainPresenter->notifyAutoreductionPaused();
 }
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
@@ -239,10 +245,14 @@ void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   }
 }
 
+void RunsPresenter::reductionResumed() { updateWidgetEnabledState(); }
+
+void RunsPresenter::reductionPaused() { updateWidgetEnabledState(); }
+
 /** Searches ICAT for runs with given instrument and investigation id, transfers
  * runs to table and processes them. Clears any existing table data first.
  */
-void RunsPresenter::startNewAutoreduction() {
+void RunsPresenter::autoreductionResumed() {
   if (requireNewAutoreduction()) {
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
@@ -260,6 +270,8 @@ void RunsPresenter::startNewAutoreduction() {
   if (setupNewAutoreduction(m_view->getSearchString()))
     checkForNewRuns();
 }
+
+void RunsPresenter::autoreductionPaused() {}
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
  * either the search number, transfer method or instrument has changed
@@ -297,16 +309,9 @@ void RunsPresenter::autoreduceNewRuns() {
 
   if (rowsToTransfer.size() > 0) {
     transfer(rowsToTransfer, TransferMatch::Strict);
-    if (m_mainPresenter)
-      m_mainPresenter->notifyAutoreductionResumed();
   } else if (m_mainPresenter) {
     m_mainPresenter->notifyAutoreductionCompleted();
   }
-}
-
-void RunsPresenter::pauseAutoreduction() {
-  if (isAutoreducing() && m_mainPresenter)
-    m_mainPresenter->notifyAutoreductionPaused();
 }
 
 void RunsPresenter::stopAutoreduction() {

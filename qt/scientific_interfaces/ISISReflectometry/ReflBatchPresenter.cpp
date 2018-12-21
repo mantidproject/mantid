@@ -88,6 +88,7 @@ void ReflBatchPresenter::reductionResumed() {
   m_eventPresenter->reductionResumed();
   m_experimentPresenter->reductionResumed();
   m_instrumentPresenter->reductionResumed();
+  m_runsPresenter->reductionPaused();
 }
 
 void ReflBatchPresenter::reductionPaused() {
@@ -95,6 +96,7 @@ void ReflBatchPresenter::reductionPaused() {
   m_eventPresenter->reductionPaused();
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
+  m_runsPresenter->reductionPaused();
 }
 
 void ReflBatchPresenter::reductionCompletedForGroup(
@@ -107,9 +109,13 @@ void ReflBatchPresenter::reductionCompletedForRow(
   m_savePresenter->reductionCompletedForRow(group, workspaceName);
 }
 
-void ReflBatchPresenter::autoreductionResumed() {}
+void ReflBatchPresenter::autoreductionResumed() {
+  m_runsPresenter->autoreductionResumed();
+}
 
-void ReflBatchPresenter::autoreductionPaused() {}
+void ReflBatchPresenter::autoreductionPaused() {
+  m_runsPresenter->autoreductionPaused();
+}
 
 void ReflBatchPresenter::autoreductionCompleted() {}
 

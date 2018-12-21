@@ -256,7 +256,7 @@ This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
 void RunsView::on_actionAutoreduce_triggered() {
-  m_notifyee->notifyStartAutoreduction();
+  m_notifyee->notifyAutoreductionResumed();
 }
 
 /**
@@ -264,7 +264,7 @@ This slot conducts a search operation before notifying the presenter that the
 "pause autoreduce" button has been pressed
 */
 void RunsView::on_actionAutoreducePause_triggered() {
-  m_notifyee->notifyPauseAutoreduction();
+  m_notifyee->notifyAutoreductionPaused();
 }
 
 /**

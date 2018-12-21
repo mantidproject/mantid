@@ -39,8 +39,8 @@ subclass.
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsViewSubscriber {
 public:
   virtual void notifySearch() = 0;
-  virtual void notifyStartAutoreduction() = 0;
-  virtual void notifyPauseAutoreduction() = 0;
+  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyTimerEvent() = 0;
   virtual void notifyICATSearchComplete() = 0;
   virtual void notifyTransfer() = 0;

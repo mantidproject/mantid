@@ -77,32 +77,62 @@ public:
     // TODO: add this test when python runner implemented
   }
 
-  void testStartNewAutoreduction() {
+  void testNotifyReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getSearchString()).Times(2);
-    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
-        .WillOnce(Return(true));
-    expectCheckForNewRuns();
-    presenter.notifyStartAutoreduction();
+    EXPECT_CALL(m_mainPresenter, notifyReductionResumed());
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
-  void testStartNewAutoreductionWarnsUserIfTableChanged() {
+  void testNotifyReductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyReductionPaused());
+    presenter.notifyReductionPaused();
+    verifyAndClear();
+  }
+
+  void testNotifyAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyAutoreductionResumed());
+    presenter.notifyAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testNotifyAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyAutoreductionPaused());
+    presenter.notifyAutoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testAutoreductionResumedWithNewSettings() {
+    auto settingsChanged = true;
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getSearchString()).Times(2);
+    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
+        .WillOnce(Return(settingsChanged));
+    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
+        .WillOnce(Return(true));
+    expectCheckForNewRuns();
+    presenter.autoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionResumedWithSameSettings() {
+    auto settingsChanged = false;
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getSearchString()).Times(2);
+    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
+        .WillOnce(Return(settingsChanged));
+    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
+        .WillOnce(Return(true));
+    expectCheckForNewRuns();
+    presenter.autoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionResumedWarnsUserIfTableChanged() {
     // TODO
-  }
-
-  void testStartRepeatAutoreduction() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getSearchString()).Times(2);
-    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
-        .WillOnce(Return(true));
-    expectCheckForNewRuns();
-    presenter.notifyStartAutoreduction();
-    verifyAndClear();
   }
 
   void testPauseAutoreduction() {

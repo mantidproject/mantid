@@ -78,11 +78,15 @@ public:
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyReductionResumed() override;
   void notifyReductionPaused() override;
+  void reductionPaused() override;
+  void reductionResumed() override;
+  void autoreductionResumed() override;
+  void autoreductionPaused() override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
-  void notifyStartAutoreduction() override;
-  void notifyPauseAutoreduction() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
   void notifyTimerEvent() override;
   void notifyICATSearchComplete() override;
   void notifyTransfer() override;
@@ -95,7 +99,6 @@ protected:
   IRunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
   boost::shared_ptr<IReflAutoreduction> m_autoreduction;
-  void startNewAutoreduction();
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The current transfer method
@@ -130,7 +133,6 @@ private:
   bool setupNewAutoreduction(const std::string &searchString);
   void checkForNewRuns();
   void autoreduceNewRuns();
-  void pauseAutoreduction();
   void stopAutoreduction();
   bool shouldUpdateExistingSearchResults() const;
 
