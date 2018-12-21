@@ -465,8 +465,6 @@ void RunsPresenter::setInstrumentName(std::string const &instrumentName) {
   m_tablePresenter->setInstrumentName(instrumentName);
 }
 
-void RunsPresenter::changeGroup() { updateWidgetEnabledState(); }
-
 void RunsPresenter::handleError(const std::string &message,
                                 const std::exception &e) {
   m_messageHandler->giveUserCritical(message + ": " + std::string(e.what()),

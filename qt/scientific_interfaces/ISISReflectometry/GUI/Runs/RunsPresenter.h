@@ -139,7 +139,6 @@ private:
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer,
                 const TransferMatch matchType = TransferMatch::Any);
-  void changeGroup();
   void updateWidgetEnabledState() const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
