@@ -300,9 +300,9 @@ MDNormalization::validateInputs() {
 /** Execute the algorithm.
  */
 void MDNormalization::exec() {
+
   // symmetry operations
   std::string symOps = this->getProperty("SymmetryOperations");
-
   std::vector<Geometry::SymmetryOperation> symmetryOps;
   if (symOps.empty()){
     symOps="x,y,z";
@@ -322,21 +322,12 @@ void MDNormalization::exec() {
     g_log.debug()<<so.identifier()<<"\n";
   }
 
-  // calculate dimensions for binning
+  //get the workspaces
   Mantid::API::IMDEventWorkspace_sptr inputWS =
         this->getProperty("InputWorkspace");
-  std::vector<double> Q1Basis{1., 0., 0.}, Q2Basis{0., 1., 0.},Q3Basis{0., 0., 1.};
-  DblMatrix UB;
-  bool isRLU = getProperty("RLU");
-  if (isRLU) {
-    Q1Basis = getProperty("QDimension1");
-    Q2Basis = getProperty("QDimension2");
-    Q3Basis = getProperty("QDimension3");
-    UB = inputWS->getExperimentInfo(0)->sample().getOrientedLattice().getUB()*2*M_PI;
-    Q1Basis = UB * Q1Basis;
-    Q2Basis = UB * Q2Basis;
-    Q3Basis = UB * Q3Basis;
-  }
+  Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
+        this->getProperty("TemporaryDataWorkspace");
+  Mantid::API::Workspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
   std::vector<std::string> originalDimensionNames;
   originalDimensionNames.push_back("QDimension1");
@@ -346,6 +337,66 @@ void MDNormalization::exec() {
     originalDimensionNames.push_back(inputWS->getDimension(i)->getName());
   }
 
+  // get binning dimensions
+  std::vector<std::string> binDimensionNames;
+  std::vector<std::vector<double>> binDimensionBinning;
+
+  for(std::size_t i=0;i<6;i++) {
+    std::string propName = "Dimension"+Strings::toString(i)+"Name";
+    std::string binningName = "Dimension"+Strings::toString(i)+"Binning";
+    std::string dimName = getProperty(propName);
+    std::vector<double> binning = getProperty(binningName);
+    if (!dimName.empty()) {
+      binDimensionNames.push_back(dimName);
+      binDimensionBinning.push_back(binning);
+    }
+  }
+
+
+  bool isRLU = getProperty("RLU");
+
+
+  std::vector<double> Q1Basis{1., 0., 0.}, Q2Basis{0., 1., 0.},Q3Basis{0., 0., 1.};
+  DblMatrix UB;
+  if (isRLU) {
+    Q1Basis = getProperty("QDimension1");
+    Q2Basis = getProperty("QDimension2");
+    Q3Basis = getProperty("QDimension3");
+    UB = inputWS->getExperimentInfo(0)->sample().getOrientedLattice().getUB()*2*M_PI;
+  }
+  double soIndex = 0;
+  for(auto so:symmetryOps){
+    // calculate dimensions for binning
+    V3D Q1,Q2,Q3;
+    Q1=so.transformHKL(V3D(Q1Basis[0],Q1Basis[1],Q1Basis[2]));
+    Q2=so.transformHKL(V3D(Q2Basis[0],Q2Basis[1],Q2Basis[2]));
+    Q3=so.transformHKL(V3D(Q3Basis[0],Q3Basis[1],Q3Basis[2]));
+
+    if (isRLU) {
+      Q1 = UB * Q1;
+      Q2 = UB * Q2;
+      Q3 = UB * Q3;
+    }
+
+    // bin the data
+    IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", soIndex*0.3, (soIndex+1)*0.3);
+    binMD->setPropertyValue("AxisAligned", "0");
+    binMD->setProperty("InputWorkspace",inputWS);
+    binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
+    binMD->setPropertyValue("NormalizeBasisVectors",0);
+    binMD->setProperty("OutputWorkspace",outputWS);
+    //set binning properties
+    for(size_t i=0;i<binDimensionNames.size();i++){
+      std::string basisVector;
+
+    }
+
+    //execute algorithm
+    binMD->executeAsChildAlg();
+    // set the temporary workspace to be the output workspace, so it keeps adding different symmetries
+    soIndex+=1;
+  }
+  this->setProperty("OutputWorkspace",outputWS);
 }
 
 } // namespace MDAlgorithms
