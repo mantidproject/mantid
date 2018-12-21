@@ -39,6 +39,11 @@ public:
   std::string getInstrumentName() const override;
   void setInstrumentName(std::string const &instrumentName) override;
 
+  void setJobsTableEnabled(bool enable) override;
+  void setInstrumentSelectorEnabled(bool enable) override;
+  void setProcessButtonEnabled(bool enable) override;
+  void setActionEnabled(Action action, bool enable) override;
+
 private slots:
   void onProcessPressed(bool);
   void onPausePressed(bool);
@@ -56,15 +61,17 @@ private slots:
 
 private:
   void addToolbarActions();
-  QAction *addToolbarItem(std::string const &iconPath,
+  QAction *addToolbarItem(Action action, std::string const &iconPath,
                           std::string const &description);
   void showAlgorithmPropertyHintsInOptionsColumn();
   void setSelected(QComboBox &box, std::string const &str);
+  void setEnabledStateForAllWidgets(bool enabled);
 
   Ui::RunsTableView m_ui;
   std::unique_ptr<MantidQt::MantidWidgets::Batch::JobTreeView> m_jobs;
   std::vector<std::string> m_instruments;
   RunsTableViewSubscriber *m_notifyee;
+  std::map<Action, QAction *> m_actions;
 };
 
 class RunsTableViewFactory {

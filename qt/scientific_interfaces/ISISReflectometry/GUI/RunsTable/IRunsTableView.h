@@ -39,6 +39,20 @@ be handled by a subclass.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsTableView {
 public:
+  enum class Action {
+    Process,
+    Pause,
+    InsertRow,
+    InsertGroup,
+    DeleteRow,
+    DeleteGroup,
+    Copy,
+    Paste,
+    Cut,
+    Expand,
+    Collapse
+  };
+
   virtual void subscribe(RunsTableViewSubscriber *notifyee) = 0;
   virtual void setProgress(int value) = 0;
   virtual void resetFilterBox() = 0;
@@ -55,6 +69,11 @@ public:
 
   virtual std::string getInstrumentName() const = 0;
   virtual void setInstrumentName(std::string const &instrumentName) = 0;
+
+  virtual void setJobsTableEnabled(bool enable) = 0;
+  virtual void setInstrumentSelectorEnabled(bool enable) = 0;
+  virtual void setProcessButtonEnabled(bool enable) = 0;
+  virtual void setActionEnabled(Action action, bool enable) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -99,6 +99,9 @@ void ReflBatchPresenter::reductionPaused() {
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
+
+  // Also stop autoreduction
+  autoreductionPaused();
 }
 
 void ReflBatchPresenter::reductionCompletedForGroup(

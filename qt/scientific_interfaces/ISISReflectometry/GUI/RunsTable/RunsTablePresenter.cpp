@@ -137,13 +137,28 @@ void RunsTablePresenter::notifyInstrumentChanged() {
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
 
-void RunsTablePresenter::reductionResumed() {}
+void RunsTablePresenter::updateWidgetEnabledState(bool isProcessing) {
+  m_view->setJobsTableEnabled(!isProcessing);
+  m_view->setInstrumentSelectorEnabled(!isProcessing);
+  m_view->setProcessButtonEnabled(!isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Process, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Pause, isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::InsertRow, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::InsertGroup, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::DeleteRow, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::DeleteGroup, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Copy, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Paste, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Cut, !isProcessing);
+}
 
-void RunsTablePresenter::reductionPaused() {}
+void RunsTablePresenter::reductionResumed() { updateWidgetEnabledState(true); }
 
-void RunsTablePresenter::autoreductionResumed() {}
+void RunsTablePresenter::reductionPaused() { updateWidgetEnabledState(false); }
 
-void RunsTablePresenter::autoreductionPaused() {}
+void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
+
+void RunsTablePresenter::autoreductionPaused() { reductionPaused(); }
 
 void RunsTablePresenter::appendRowsToGroupsInView(
     std::vector<int> const &groupIndices) {

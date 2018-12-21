@@ -34,6 +34,10 @@ public:
 
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD1(setInstrumentName, void(std::string const &));
+  MOCK_METHOD1(setJobsTableEnabled, void(bool));
+  MOCK_METHOD1(setInstrumentSelectorEnabled, void(bool));
+  MOCK_METHOD1(setProcessButtonEnabled, void(bool));
+  MOCK_METHOD2(setActionEnabled, void(Action, bool));
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

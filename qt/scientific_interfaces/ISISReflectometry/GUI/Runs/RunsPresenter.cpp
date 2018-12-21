@@ -242,9 +242,15 @@ void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   }
 }
 
-void RunsPresenter::reductionResumed() { updateWidgetEnabledState(); }
+void RunsPresenter::reductionResumed() {
+  updateWidgetEnabledState();
+  m_tablePresenter->reductionResumed();
+}
 
-void RunsPresenter::reductionPaused() { updateWidgetEnabledState(); }
+void RunsPresenter::reductionPaused() {
+  updateWidgetEnabledState();
+  m_tablePresenter->reductionPaused();
+}
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
  * runs to table and processes them. Clears any existing table data first.
@@ -268,12 +274,14 @@ void RunsPresenter::autoreductionResumed() {
     checkForNewRuns();
 
   updateWidgetEnabledState();
+  m_tablePresenter->autoreductionResumed();
 }
 
 void RunsPresenter::autoreductionPaused() {
   m_view->stopTimer();
   m_autoreduction->stop();
   updateWidgetEnabledState();
+  m_tablePresenter->autoreductionPaused();
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the

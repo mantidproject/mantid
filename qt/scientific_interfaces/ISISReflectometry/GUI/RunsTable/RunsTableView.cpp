@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
                              int defaultInstrumentIndex)
     : m_jobs(), m_instruments(instruments) {
@@ -109,35 +110,69 @@ void RunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
               "MomentumTransferStep", "ScaleFactor"}));
 }
 
-QAction *RunsTableView::addToolbarItem(std::string const &iconPath,
+void RunsTableView::setJobsTableEnabled(bool enabled) {
+  static const auto editTriggers = m_jobs->editTriggers();
+
+  if (enabled)
+    m_jobs->setEditTriggers(editTriggers);
+  else
+    m_jobs->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+void RunsTableView::setActionEnabled(Action action, bool enable) {
+  m_actions[action]->setEnabled(enable);
+}
+
+void RunsTableView::setInstrumentSelectorEnabled(bool enable) {
+  m_ui.instrumentSelector->setEnabled(enable);
+}
+
+void RunsTableView::setProcessButtonEnabled(bool enable) {
+  m_ui.processButton->setEnabled(enable);
+}
+
+QAction *RunsTableView::addToolbarItem(Action action,
+                                       std::string const &iconPath,
                                        std::string const &description) {
-  return m_ui.toolBar->addAction(QIcon(QString::fromStdString(iconPath)),
-                                 QString::fromStdString(description));
+  m_actions[action] =
+      m_ui.toolBar->addAction(QIcon(QString::fromStdString(iconPath)),
+                              QString::fromStdString(description));
+  return m_actions[action];
 }
 
 void RunsTableView::addToolbarActions() {
-  connect(addToolbarItem("://stat_rows.png", "Process selected runs."),
+  connect(addToolbarItem(Action::Process, "://stat_rows.png",
+                         "Process selected runs."),
           SIGNAL(triggered(bool)), this, SLOT(onProcessPressed(bool)));
-  connect(addToolbarItem("://pause.png", "Pause processing of runs."),
+  connect(addToolbarItem(Action::Pause, "://pause.png",
+                         "Pause processing of runs."),
           SIGNAL(triggered(bool)), this, SLOT(onPausePressed(bool)));
-  connect(addToolbarItem("://insert_row.png", "Insert row into selected"),
+  connect(addToolbarItem(Action::InsertRow, "://insert_row.png",
+                         "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));
-  connect(addToolbarItem("://insert_group.png",
+  connect(addToolbarItem(Action::InsertGroup, "://insert_group.png",
                          "Insert group after first selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertGroupPressed(bool)));
-  connect(addToolbarItem("://delete_row.png", "Delete all selected rows"),
+  connect(addToolbarItem(Action::DeleteRow, "://delete_row.png",
+                         "Delete all selected rows"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteRowPressed(bool)));
-  connect(addToolbarItem("://delete_group.png", "Delete all selected groups"),
+  connect(addToolbarItem(Action::DeleteGroup, "://delete_group.png",
+                         "Delete all selected groups"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteGroupPressed(bool)));
-  connect(addToolbarItem("://copy.png", "Copy the current selection"),
-          SIGNAL(triggered(bool)), this, SLOT(onCopyPressed(bool)));
-  connect(addToolbarItem("://paste.png", "Paste over the current selection"),
+  connect(
+      addToolbarItem(Action::Copy, "://copy.png", "Copy the current selection"),
+      SIGNAL(triggered(bool)), this, SLOT(onCopyPressed(bool)));
+  connect(addToolbarItem(Action::Paste, "://paste.png",
+                         "Paste over the current selection"),
           SIGNAL(triggered(bool)), this, SLOT(onPastePressed(bool)));
-  connect(addToolbarItem("://cut.png", "Cut the current selection"),
-          SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
-  connect(addToolbarItem("://expand_all.png", "Expand all groups"),
-          SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
-  connect(addToolbarItem("://collapse_all.png", "Collapse all groups"),
+  connect(
+      addToolbarItem(Action::Cut, "://cut.png", "Cut the current selection"),
+      SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
+  connect(
+      addToolbarItem(Action::Expand, "://expand_all.png", "Expand all groups"),
+      SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
+  connect(addToolbarItem(Action::Collapse, "://collapse_all.png",
+                         "Collapse all groups"),
           SIGNAL(triggered(bool)), this,
           SLOT(onCollapseAllGroupsPressed(bool)));
 }

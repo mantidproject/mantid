@@ -111,6 +111,7 @@ private:
   updateRowField(MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex,
                  int column, std::string const &oldValue,
                  std::string const &newValue);
+  void updateWidgetEnabledState(bool isProcessing);
 
   static auto constexpr DEPTH_LIMIT = 2;
 
