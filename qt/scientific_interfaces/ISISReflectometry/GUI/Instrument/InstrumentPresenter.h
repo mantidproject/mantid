@@ -11,7 +11,6 @@
 #include "../../Reduction/Instrument.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
-#include "IReflBatchPresenter.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {

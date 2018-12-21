@@ -9,6 +9,7 @@
 
 #include "../../DllConfig.h"
 #include "../../IReflAsciiSaver.h"
+#include "../../IReflBatchPresenter.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
 #include "MantidKernel/ConfigPropertyObserver.h"
@@ -80,8 +81,6 @@ private:
   /// The view
   ISaveView *m_view;
   std::unique_ptr<IReflAsciiSaver> m_saver;
-  /// The main presenter
-  IReflBatchPresenter *m_mainPresenter;
   bool m_shouldAutosave;
 };
 } // namespace CustomInterfaces

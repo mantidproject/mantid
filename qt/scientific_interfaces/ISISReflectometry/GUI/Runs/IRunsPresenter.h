@@ -7,11 +7,12 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 
-#include "IReflBatchPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class IReflBatchPresenter;
 
 /** @class IRunsPresenter
 

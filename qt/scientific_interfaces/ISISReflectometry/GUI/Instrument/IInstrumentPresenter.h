@@ -7,7 +7,6 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IINSTRUMENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IINSTRUMENTPRESENTER_H
 
-#include "../../IReflBatchPresenter.h"
 #include <string>
 
 namespace MantidQt {
