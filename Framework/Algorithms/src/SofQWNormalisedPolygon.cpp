@@ -30,15 +30,6 @@ using Mantid::Geometry::rad2deg;
 using boost::math::pow;
 
 namespace {
-namespace Prop {
-const std::string ANGULAR_WIDTHS{"AngularWidths"};
-}
-namespace Col {
-const std::string DET_ID{"Detector ID"};
-const std::string LOWER_2THETA{"Lower two theta"};
-const std::string UPPER_2THETA{"Upper two theta"};
-} // namespace Col
-
 /**
  * Calculate 2theta for a point in detector's local coordinates.
  * @param detInfo a detector info
@@ -262,8 +253,7 @@ std::pair<double, double> twoThetasFromTable(
   const auto range = std::equal_range(detectorIDs.cbegin(), detectorIDs.cend(),
                                       static_cast<int>(detID));
   if (std::distance(range.first, range.second) > 1) {
-    throw std::invalid_argument("Duplicate detector IDs in " +
-                                Prop::ANGULAR_WIDTHS + " table.");
+    throw std::invalid_argument("Duplicate detector IDs in 'AngularWidths' table.");
   }
   if (range.first == detectorIDs.cend()) {
     throw std::invalid_argument("No 2theta width found for detector ID " +
@@ -312,14 +302,6 @@ const std::string SofQWNormalisedPolygon::category() const {
  */
 void SofQWNormalisedPolygon::init() {
   SofQW::createCommonInputProperties(*this);
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
-          Prop::ANGULAR_WIDTHS, "", Direction::Input, PropertyMode::Optional),
-      "A table workspace with a '" + Col::DET_ID +
-          "' column listing detector IDs as well as '" + Col::LOWER_2THETA +
-          "' and '" + Col::UPPER_2THETA +
-          "' columns listing corresponding min and max 2thetas in "
-          "radians.");
 }
 
 /**
@@ -352,7 +334,7 @@ void SofQWNormalisedPolygon::exec() {
   m_progress = boost::make_shared<API::Progress>(this, 0.0, 1.0, nreports);
 
   // Index theta cache
-  TableWorkspace_sptr widthTable = getProperty(Prop::ANGULAR_WIDTHS);
+  TableWorkspace_sptr widthTable = getProperty("AngularWidths");
   if (widthTable) {
     initAngularCachesTable(*inputWS, *widthTable);
   } else {
@@ -525,9 +507,9 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
   auto table = WorkspaceFactory::Instance().createTable("TableWorkspace");
   table->addColumn("double", "Two theta");
   table->getColumn(0)->setPlotType(1);
-  table->addColumn("double", Col::LOWER_2THETA);
+  table->addColumn("double", "Lower two theta");
   table->getColumn(1)->setPlotType(2);
-  table->addColumn("double", Col::UPPER_2THETA);
+  table->addColumn("double", "Upper two theta");
   table->getColumn(2)->setPlotType(2);
   table->setRowCount(m_twoThetaLowers.size());
   for (size_t i = 0; i < m_twoThetaLowers.size(); ++i) {
@@ -600,9 +582,9 @@ void SofQWNormalisedPolygon::initAngularCachesTable(
   const size_t nhist = workspace.getNumberHistograms();
   m_twoThetaLowers = std::vector<double>(nhist, skipDetector);
   m_twoThetaUppers = std::vector<double>(nhist, skipDetector);
-  const auto &detIDs = widthTable.getColVector<int>(Col::DET_ID);
-  const auto &lowers = widthTable.getColVector<double>(Col::LOWER_2THETA);
-  const auto &uppers = widthTable.getColVector<double>(Col::UPPER_2THETA);
+  const auto &detIDs = widthTable.getColVector<int>("Detector ID");
+  const auto &lowers = widthTable.getColVector<double>("Lower two theta");
+  const auto &uppers = widthTable.getColVector<double>("Upper two theta");
   const auto &spectrumInfo = workspace.spectrumInfo();
   for (size_t i = 0; i < nhist; ++i) {
     m_progress->report("Reading detector angles");

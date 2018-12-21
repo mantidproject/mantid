@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -27,8 +28,9 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQW)
 
-using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
+using namespace Kernel;
 
 /**
  * @return A summary of the algorithm
@@ -106,6 +108,12 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
           "EAxisBinning", boost::make_shared<RebinParamsValidator>(true)),
       "The bin parameters to use for the E axis (optional, in the format "
       "used by the :ref:`algm-Rebin` algorithm).");
+  alg.declareProperty(
+      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+          "AngularWidths", "", Direction::Input, PropertyMode::Optional),
+      "A table workspace with a 'Detector ID' column listing detector IDs as "
+      "well as 'Lower two theta' and 'Upper two theta' columns listing "
+      "corresponding min and max 2thetas in radians.");
 }
 
 void SofQW::exec() {
