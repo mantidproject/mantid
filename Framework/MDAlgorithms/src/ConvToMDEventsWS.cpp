@@ -133,8 +133,6 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
 
   appendEventsFromInputWS(pProgress, bc);
 
-  // Recount totals at the end.
-  m_OutWSWrapper->pWorkspace()->refreshCache();
   // m_OutWSWrapper->refreshCentroid();
   pProgress->report();
 
@@ -202,6 +200,9 @@ void ConvToMDEventsWS::appendEventsFromInputWS(API::Progress *pProgress, const A
   } else {
     m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(nullptr);
   }
+
+  // Recount totals at the end.
+  m_OutWSWrapper->pWorkspace()->refreshCache();
 }
 
 } // namespace MDAlgorithms
