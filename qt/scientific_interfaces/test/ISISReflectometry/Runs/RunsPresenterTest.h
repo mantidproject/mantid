@@ -118,6 +118,7 @@ public:
     EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
         .WillOnce(Return(true));
     expectCheckForNewRuns();
+    expectWidgetsEnabledForAutoreducing();
     presenter.autoreductionResumed();
     verifyAndClear();
   }
@@ -131,6 +132,7 @@ public:
     EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
         .WillOnce(Return(true));
     expectCheckForNewRuns();
+    expectWidgetsEnabledForAutoreducing();
     presenter.autoreductionResumed();
     verifyAndClear();
   }
@@ -140,10 +142,12 @@ public:
   }
 
   void testPauseAutoreduction() {
-    // TODO
-    // auto presenter = makePresenter();
-    // presenter.notifyPauseAutoreduction();
-    // verifyAndClear();
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, stopTimer()).Times(1);
+    EXPECT_CALL(*m_autoreduction, stop()).Times(1);
+    expectWidgetsEnabledForPaused();
+    presenter.autoreductionPaused();
+    verifyAndClear();
   }
 
   void testAutoreductionPollsForNewRunsOnTimerEvent() {
@@ -331,10 +335,74 @@ private:
     EXPECT_CALL(m_progressView, setProgressRange(_, _)).Times(2);
   }
 
+  void expectWidgetsEnabledForAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, updateMenuEnabledState(false));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
+    EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(true));
+    EXPECT_CALL(m_view, setTransferButtonEnabled(false));
+  }
+
+  void expectWidgetsEnabledForProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, updateMenuEnabledState(false));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
+    EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+    EXPECT_CALL(m_view, setTransferButtonEnabled(false));
+  }
+
+  void expectWidgetsEnabledForProcessingAndAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, updateMenuEnabledState(false));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
+    EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(true));
+    EXPECT_CALL(m_view, setTransferButtonEnabled(false));
+  }
+
+  void expectWidgetsEnabledForPaused() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, updateMenuEnabledState(true));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(true));
+    EXPECT_CALL(m_view, setSearchButtonEnabled(true));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+    EXPECT_CALL(m_view, setTransferButtonEnabled(true));
+  }
+
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   MockRunsView m_view;
-  MockRunsTableView m_runsTableView;
+  NiceMock<MockRunsTableView> m_runsTableView;
   MockReflBatchPresenter m_mainPresenter;
   MockProgressableView m_progressView;
   MockMessageHandler m_messageHandler;
