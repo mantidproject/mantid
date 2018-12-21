@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SavePresenter.h"
+#include "../../IReflBatchPresenter.h"
 #include "../../IReflMainWindowPresenter.h"
 #include "ISaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -35,6 +36,10 @@ SavePresenter::SavePresenter(ISaveView *view,
   m_view->subscribe(this);
 }
 
+void SavePresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
+
 void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }
 
 void SavePresenter::notifyFilterWorkspaceList() { filterWorkspaceNames(); }
@@ -45,9 +50,15 @@ void SavePresenter::notifySaveSelectedWorkspaces() { saveSelectedWorkspaces(); }
 
 void SavePresenter::notifySuggestSaveDir() { suggestSaveDir(); }
 
-void SavePresenter::notifyAutosaveDisabled() { disableAutosave(); }
+void SavePresenter::notifyAutosaveDisabled() {
+  disableAutosave();
+  m_mainPresenter->notifySettingsChanged();
+}
 
-void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
+void SavePresenter::notifyAutosaveEnabled() {
+  enableAutosave();
+  m_mainPresenter->notifySettingsChanged();
+}
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 

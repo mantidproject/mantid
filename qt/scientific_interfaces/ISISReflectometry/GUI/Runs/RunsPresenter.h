@@ -12,7 +12,6 @@
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
-#include "IReflBatchPresenter.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
@@ -71,8 +70,6 @@ public:
 
   // IRunsPresenter overrides
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
-  void settingsChanged() override;
-  void setInstrumentName(std::string const &instrumentName) override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
@@ -82,6 +79,8 @@ public:
   void reductionResumed() override;
   void autoreductionResumed() override;
   void autoreductionPaused() override;
+  void instrumentChanged(std::string const &instrumentName) override;
+  void settingsChanged() override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;

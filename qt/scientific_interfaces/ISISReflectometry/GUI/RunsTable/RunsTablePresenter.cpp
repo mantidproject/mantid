@@ -160,6 +160,14 @@ void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
 
 void RunsTablePresenter::autoreductionPaused() { reductionPaused(); }
 
+void RunsTablePresenter::instrumentChanged(std::string const &instrumentName) {
+  m_view->setInstrumentName(instrumentName);
+}
+
+void RunsTablePresenter::settingsChanged() {
+  // TODO: reset state in reduction jobs
+}
+
 void RunsTablePresenter::appendRowsToGroupsInView(
     std::vector<int> const &groupIndices) {
   for (auto const &groupIndex : groupIndices)
@@ -391,10 +399,6 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
   } else {
     m_view->invalidSelectionForPaste();
   }
-}
-
-void RunsTablePresenter::setInstrumentName(std::string const &instrumentName) {
-  m_view->setInstrumentName(instrumentName);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

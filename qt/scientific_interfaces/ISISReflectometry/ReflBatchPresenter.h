@@ -49,17 +49,16 @@ public:
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionCompleted() override;
+  void notifyInstrumentChanged(const std::string &instName) override;
+  void notifySettingsChanged() override;
   bool hasPerAngleOptions() const override;
   MantidWidgets::DataProcessor::OptionsQMap
   getOptionsForAngle(const double angle) const override;
-  void notifyInstrumentChanged(const std::string &instName) const override;
   bool requestClose() const override;
-  void settingsChanged() override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
 
 private:
-  void setInstrumentName(const std::string &instName) const;
   void reductionResumed();
   void reductionPaused();
   void reductionCompletedForGroup(
@@ -71,6 +70,8 @@ private:
   void autoreductionResumed();
   void autoreductionPaused();
   void autoreductionCompleted();
+  void instrumentChanged(const std::string &instName);
+  void settingsChanged();
   // The view we are handling (currently unused)
   /*IReflBatchView *m_view;*/
   /// The presenter of tab 'Runs'

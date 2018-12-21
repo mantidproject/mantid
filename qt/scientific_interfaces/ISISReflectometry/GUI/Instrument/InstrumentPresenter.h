@@ -30,11 +30,12 @@ public:
   Instrument const &instrument() const;
 
   // IInstrumentPresenver overrides
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void reductionPaused() override;
   void reductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionResumed() override;
-  void setInstrumentName(std::string const &instrumentName) override;
+  void instrumentChanged(std::string const &instrumentName) override;
 
   // InstrumentViewSubscriber overrides
   void notifySettingsChanged() override;
@@ -42,6 +43,7 @@ public:
 private:
   IInstrumentView *m_view;
   Instrument m_model;
+  IReflBatchPresenter *m_mainPresenter;
 
   boost::optional<RangeInLambda> wavelengthRangeFromView();
   boost::optional<RangeInLambda> monitorBackgroundRangeFromView();

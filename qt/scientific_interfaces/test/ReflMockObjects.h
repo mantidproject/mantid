@@ -90,17 +90,13 @@ public:
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionCompleted, void());
 
-  /// Transmission runs for a specific run angle
   MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
-  /// Whether there are per-angle transmission runs specified
   MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
-  /// Set the instrument name
-  MOCK_CONST_METHOD1(notifyInstrumentChanged, void(const std::string &));
-  /// Data processing check for all groups
+  MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
+  MOCK_METHOD0(notifySettingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(requestClose, bool());
-  MOCK_METHOD0(settingsChanged, void());
 };
 
 /**** Progress ****/

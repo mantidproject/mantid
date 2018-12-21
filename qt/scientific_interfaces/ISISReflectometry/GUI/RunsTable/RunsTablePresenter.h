@@ -34,7 +34,8 @@ public:
   void acceptMainPresenter(IRunsPresenter *mainPresenter) override;
   ReductionJobs const &reductionJobs() const override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
-  void setInstrumentName(std::string const &instrumentName) override;
+  void instrumentChanged(std::string const &instrumentName) override;
+  void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides
   void notifyReductionResumed() override;

@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
+#include "../../IReflBatchPresenter.h"
 #include "../RunsTable/RunsTablePresenter.h"
 #include "IReflMainWindowPresenter.h"
 #include "IReflMessageHandler.h"
@@ -114,10 +115,6 @@ void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   // presenter.
 }
 
-void RunsPresenter::settingsChanged() {
-  // tablePresenter()->settingsChanged();
-}
-
 /**
 Used by the view to tell the presenter something has changed
 */
@@ -168,6 +165,57 @@ void RunsPresenter::notifyStartMonitor() { startMonitor(); }
 void RunsPresenter::notifyStopMonitor() { stopMonitor(); }
 
 void RunsPresenter::notifyStartMonitorComplete() { startMonitorComplete(); }
+
+void RunsPresenter::reductionResumed() {
+  updateWidgetEnabledState();
+  tablePresenter()->reductionResumed();
+}
+
+void RunsPresenter::reductionPaused() {
+  updateWidgetEnabledState();
+  tablePresenter()->reductionPaused();
+}
+
+/** Searches ICAT for runs with given instrument and investigation id, transfers
+ * runs to table and processes them. Clears any existing table data first.
+ */
+void RunsPresenter::autoreductionResumed() {
+  if (requireNewAutoreduction()) {
+    // If starting a brand new autoreduction, delete all rows / groups in
+    // existing table first
+    // We'll prompt the user to check it's ok to delete existing rows
+
+    // tablePresenter()->setPromptUser(false);
+    // try {
+    //  tablePresenter()->notify(DataProcessorPresenter::DeleteAllFlag);
+    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
+    //{
+    //  return;
+    //}
+  }
+
+  if (m_autoreduction->setupNewAutoreduction(m_view->getSearchString()))
+    checkForNewRuns();
+
+  updateWidgetEnabledState();
+  tablePresenter()->autoreductionResumed();
+}
+
+void RunsPresenter::autoreductionPaused() {
+  m_view->stopTimer();
+  m_autoreduction->stop();
+  updateWidgetEnabledState();
+  tablePresenter()->autoreductionPaused();
+}
+
+void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
+  UNUSED_ARG(instrumentName)
+  m_instrumentChanged = true;
+  m_view->setSearchInstrument(instrumentName);
+  tablePresenter()->instrumentChanged(instrumentName);
+}
+
+void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
@@ -240,48 +288,6 @@ void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
         results, m_view->getSearchInstrument());
     m_view->showSearch(m_searchModel);
   }
-}
-
-void RunsPresenter::reductionResumed() {
-  updateWidgetEnabledState();
-  m_tablePresenter->reductionResumed();
-}
-
-void RunsPresenter::reductionPaused() {
-  updateWidgetEnabledState();
-  m_tablePresenter->reductionPaused();
-}
-
-/** Searches ICAT for runs with given instrument and investigation id, transfers
- * runs to table and processes them. Clears any existing table data first.
- */
-void RunsPresenter::autoreductionResumed() {
-  if (requireNewAutoreduction()) {
-    // If starting a brand new autoreduction, delete all rows / groups in
-    // existing table first
-    // We'll prompt the user to check it's ok to delete existing rows
-
-    // tablePresenter()->setPromptUser(false);
-    // try {
-    //  tablePresenter()->notify(DataProcessorPresenter::DeleteAllFlag);
-    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
-    //{
-    //  return;
-    //}
-  }
-
-  if (m_autoreduction->setupNewAutoreduction(m_view->getSearchString()))
-    checkForNewRuns();
-
-  updateWidgetEnabledState();
-  m_tablePresenter->autoreductionResumed();
-}
-
-void RunsPresenter::autoreductionPaused() {
-  m_view->stopTimer();
-  m_autoreduction->stop();
-  updateWidgetEnabledState();
-  m_tablePresenter->autoreductionPaused();
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
@@ -457,17 +463,6 @@ void RunsPresenter::updateWidgetEnabledState() const {
   m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
   m_view->setTransferButtonEnabled(!isProcessing() && !isAutoreducing());
-}
-
-/** Changes the current instrument in the data processor widget.  Currently
- * just updates the view and sets a flag to indicate it has changed. Longer
- * term we'll want to store the result in a model.
- */
-void RunsPresenter::setInstrumentName(std::string const &instrumentName) {
-  UNUSED_ARG(instrumentName)
-  m_instrumentChanged = true;
-  m_view->setSearchInstrument(instrumentName);
-  m_tablePresenter->setInstrumentName(instrumentName);
 }
 
 void RunsPresenter::handleError(const std::string &message,

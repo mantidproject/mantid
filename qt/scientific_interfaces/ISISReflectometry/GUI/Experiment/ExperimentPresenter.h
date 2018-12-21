@@ -12,7 +12,6 @@
 #include "../../ValidationResult.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
-#include "IReflBatchPresenter.h"
 #include "PerThetaDefaultsTableValidationError.h"
 #include <boost/optional.hpp>
 
@@ -50,6 +49,7 @@ public:
   ExperimentPresenter(IExperimentView *view, Experiment experiment,
                       double defaultsThetaTolerance);
 
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   Experiment const &experiment() const;
 
   void notifySettingsChanged() override;
@@ -64,6 +64,7 @@ public:
   void autoreductionResumed() override;
 
 private:
+  IReflBatchPresenter *m_mainPresenter;
   ExperimentValidationResult validateExperimentFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();

@@ -11,6 +11,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IReflBatchPresenter;
+
 /** @class ISavePresenter
 
 ISavePresenter is an interface which defines the functions that need
@@ -19,6 +21,8 @@ to be implemented by a concrete 'Save ASCII' tab presenter
 class ISavePresenter {
 public:
   virtual ~ISavePresenter() = default;
+
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
 
   virtual void reductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,

@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EventPresenter.h"
+#include "../../IReflBatchPresenter.h"
 #include "IEventPresenter.h"
 #include "IEventView.h"
 #include "Parse.h"
@@ -22,26 +23,44 @@ EventPresenter::EventPresenter(IEventView *view)
   m_view->subscribe(this);
 }
 
+void EventPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
+
 Slicing const &EventPresenter::slicing() const { return m_slicing; }
 
 void EventPresenter::notifyUniformSliceCountChanged(int) {
   setUniformSlicingByNumberOfSlicesFromView();
+  m_mainPresenter->notifySettingsChanged();
 }
 
 void EventPresenter::notifyUniformSecondsChanged(double) {
   setUniformSlicingByTimeFromView();
+  m_mainPresenter->notifySettingsChanged();
 }
 
 void EventPresenter::notifyCustomSliceValuesChanged(std::string) {
   setCustomSlicingFromView();
+  m_mainPresenter->notifySettingsChanged();
 }
 
 void EventPresenter::notifyLogSliceBreakpointsChanged(std::string) {
   setLogValueSlicingFromView();
+  m_mainPresenter->notifySettingsChanged();
 }
 
 void EventPresenter::notifyLogBlockNameChanged(std::string) {
   setLogValueSlicingFromView();
+  m_mainPresenter->notifySettingsChanged();
+}
+
+void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
+  std::cout << m_slicing << std::endl;
+  m_view->disableSliceType(m_sliceType);
+  m_view->enableSliceType(newSliceType);
+  m_sliceType = newSliceType;
+  setSlicingFromView();
+  m_mainPresenter->notifySettingsChanged();
 }
 
 void EventPresenter::reductionPaused() {
@@ -111,14 +130,6 @@ void EventPresenter::setSlicingFromView() {
   default:
     throw std::runtime_error("Unrecognized slice type.");
   }
-}
-
-void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
-  std::cout << m_slicing << std::endl;
-  m_view->disableSliceType(m_sliceType);
-  m_view->enableSliceType(newSliceType);
-  m_sliceType = newSliceType;
-  setSlicingFromView();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

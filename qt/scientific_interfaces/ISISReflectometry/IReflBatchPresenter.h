@@ -26,7 +26,6 @@ public:
   /// Destructor
   virtual ~IReflBatchPresenter() = default;
 
-  virtual void notifyInstrumentChanged(const std::string &instName) const = 0;
   virtual void notifyReductionPaused() = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyReductionCompletedForGroup(
@@ -38,6 +37,8 @@ public:
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionCompleted() = 0;
+  virtual void notifyInstrumentChanged(const std::string &instName) = 0;
+  virtual void notifySettingsChanged() = 0;
 
   /// Transmission runs for a specific run angle
   virtual MantidWidgets::DataProcessor::OptionsQMap
@@ -48,7 +49,6 @@ public:
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
   virtual bool requestClose() const = 0;
-  virtual void settingsChanged() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

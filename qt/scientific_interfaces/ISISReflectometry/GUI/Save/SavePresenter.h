@@ -9,7 +9,6 @@
 
 #include "../../DllConfig.h"
 #include "../../IReflAsciiSaver.h"
-#include "../../IReflBatchPresenter.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
 #include "MantidKernel/ConfigPropertyObserver.h"
@@ -31,6 +30,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter,
 public:
   SavePresenter(ISaveView *view, std::unique_ptr<IReflAsciiSaver> saver);
 
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
@@ -52,6 +52,7 @@ public:
   void autoreductionResumed() override;
 
 private:
+  IReflBatchPresenter *m_mainPresenter;
   bool isValidSaveDirectory(std::string const &directory);
   void onSavePathChanged();
   void warnInvalidSaveDirectory();

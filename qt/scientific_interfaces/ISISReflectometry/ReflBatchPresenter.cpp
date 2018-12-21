@@ -49,15 +49,21 @@ ReflBatchPresenter::ReflBatchPresenter(
   UNUSED_ARG(view);
 
   // Tell the tab presenters that this is going to be the main presenter
+  m_savePresenter->acceptMainPresenter(this);
+  m_eventPresenter->acceptMainPresenter(this);
+  m_experimentPresenter->acceptMainPresenter(this);
+  m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
 }
 
 bool ReflBatchPresenter::requestClose() const { return true; }
 
 void ReflBatchPresenter::notifyInstrumentChanged(
-    const std::string &instrumentName) const {
-  setInstrumentName(instrumentName);
+    const std::string &instrumentName) {
+  instrumentChanged(instrumentName);
 }
+
+void ReflBatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
 void ReflBatchPresenter::notifyReductionResumed() { reductionResumed(); }
 
@@ -134,6 +140,14 @@ void ReflBatchPresenter::autoreductionPaused() {
 
 void ReflBatchPresenter::autoreductionCompleted() {}
 
+void ReflBatchPresenter::instrumentChanged(const std::string &instrumentName) {
+  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
+                                                      instrumentName);
+  g_log.information() << "Instrument changed to " << instrumentName;
+  m_runsPresenter->instrumentChanged(instrumentName);
+  m_instrumentPresenter->instrumentChanged(instrumentName);
+}
+
 void ReflBatchPresenter::settingsChanged() {
   m_runsPresenter->settingsChanged();
 }
@@ -154,20 +168,6 @@ ReflBatchPresenter::getOptionsForAngle(const double /*angle*/) const {
  * */
 bool ReflBatchPresenter::hasPerAngleOptions() const {
   return false; // TODO m_settingsPresenter->hasPerAngleOptions();
-}
-
-/**
-Tells the setting tab presenter what to set its current instrument name to.
-* Also updates the config service, printing an information message
-* @param instrumentName : The name of the instrument to be set
-*/
-void ReflBatchPresenter::setInstrumentName(
-    const std::string &instrumentName) const {
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                      instrumentName);
-  g_log.information() << "Instrument changed to " << instrumentName;
-  m_runsPresenter->setInstrumentName(instrumentName);
-  m_instrumentPresenter->setInstrumentName(instrumentName);
 }
 
 /**

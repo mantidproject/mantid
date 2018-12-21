@@ -11,6 +11,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class IReflBatchPresenter;
+
 /** @class IInstrumentPresenter
 
 IInstrumentPresenter is an interface which defines the functions that need
@@ -20,11 +23,12 @@ class IInstrumentPresenter {
 public:
   virtual ~IInstrumentPresenter() = default;
 
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
-  virtual void setInstrumentName(std::string const &instrumentName) = 0;
+  virtual void instrumentChanged(std::string const &instrumentName) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

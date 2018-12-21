@@ -16,6 +16,7 @@ class IExperimentPresenter {
 public:
   virtual ~IExperimentPresenter() = default;
 
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;

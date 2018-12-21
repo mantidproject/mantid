@@ -24,7 +24,6 @@ public:
   virtual ~IRunsPresenter() = default;
   virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
 
-  virtual void settingsChanged() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyReductionPaused() = 0;
@@ -33,7 +32,8 @@ public:
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
-  virtual void setInstrumentName(std::string const &instrumentName) = 0;
+  virtual void instrumentChanged(std::string const &instrumentName) = 0;
+  virtual void settingsChanged() = 0;
 
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;

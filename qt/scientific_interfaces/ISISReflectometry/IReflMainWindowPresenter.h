@@ -24,7 +24,6 @@ request information from other tabs.
 class IReflMainWindowPresenter : public ReflMainWindowSubscriber {
 public:
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
-  //  virtual void setInstrumentName(const std::string &instName) const = 0;
   virtual bool isProcessing() const = 0;
   virtual ~IReflMainWindowPresenter() = default;
 };
