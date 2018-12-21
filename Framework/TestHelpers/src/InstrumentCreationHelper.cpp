@@ -30,7 +30,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
       pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
   const double detZPos(5.0);
-  // Careful! Do not use size_t or auto, the unisgned will break the -=2 below.
+  // Careful! Do not use size_t or auto, the unsigned will break the -=2 below.
   int ndets = static_cast<int>(workspace.getNumberHistograms());
   if (includeMonitors)
     ndets -= 2;
