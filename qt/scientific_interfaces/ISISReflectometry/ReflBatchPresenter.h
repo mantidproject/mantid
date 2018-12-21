@@ -70,8 +70,8 @@ private:
   void autoreductionResumed();
   void autoreductionPaused();
   void autoreductionCompleted();
-  /// The view we are handling
-  IReflBatchView *m_view;
+  // The view we are handling (currently unused)
+  /*IReflBatchView *m_view;*/
   /// The presenter of tab 'Runs'
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   /// The presenter of tab 'Event Handling'
