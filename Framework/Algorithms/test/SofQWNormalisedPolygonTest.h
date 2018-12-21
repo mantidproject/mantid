@@ -48,37 +48,37 @@ public:
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(6), 2.0);
 
     constexpr double delta(1e-08);
-    TS_ASSERT_DELTA(result->y(0)[1160], 21.7492665499, delta);
-    TS_ASSERT_DELTA(result->e(0)[1160], 0.3661303434, delta);
+    TS_ASSERT_DELTA(result->y(0)[1160], 22.8567683273, delta);
+    TS_ASSERT_DELTA(result->e(0)[1160], 0.3135249168, delta);
 
-    TS_ASSERT_DELTA(result->y(1)[1145], 8.4143946314, delta);
-    TS_ASSERT_DELTA(result->e(1)[1145], 0.1878948997, delta);
+    TS_ASSERT_DELTA(result->y(1)[1145], 8.0538512599, delta);
+    TS_ASSERT_DELTA(result->e(1)[1145], 0.1923409971, delta);
 
-    TS_ASSERT_DELTA(result->y(2)[1200], 2.1954044126, delta);
-    TS_ASSERT_DELTA(result->e(2)[1200], 0.0909131832, delta);
+    TS_ASSERT_DELTA(result->y(2)[1200], 2.0998983601, delta);
+    TS_ASSERT_DELTA(result->e(2)[1200], 0.0926743353, delta);
 
-    TS_ASSERT_DELTA(result->y(3)[99], 0.0419982252, delta);
-    TS_ASSERT_DELTA(result->e(3)[99], 0.0235660816, delta);
+    TS_ASSERT_DELTA(result->y(3)[99], 0.0417524389, delta);
+    TS_ASSERT_DELTA(result->e(3)[99], 0.0234250637, delta);
 
-    TS_ASSERT_DELTA(result->y(4)[1654], 0.0172573768, delta);
-    TS_ASSERT_DELTA(result->e(4)[1654], 0.0056298227, delta);
+    TS_ASSERT_DELTA(result->y(4)[1654], 0.0172245635, delta);
+    TS_ASSERT_DELTA(result->e(4)[1654], 0.0057608185, delta);
 
-    TS_ASSERT_DELTA(result->y(5)[1025], 0.0819132030, delta);
-    TS_ASSERT_DELTA(result->e(5)[1025], 0.0240475922, delta);
+    TS_ASSERT_DELTA(result->y(5)[1025], 0.0808168496, delta);
+    TS_ASSERT_DELTA(result->e(5)[1025], 0.0208023523, delta);
 
     // Spectra-detector mapping
     constexpr size_t nspectra(6);
     using IDSet = std::set<int>;
     std::vector<IDSet> expectedIDs(nspectra);
-    IDSet s1 = {13};
+    IDSet s1 = {};
     expectedIDs[0] = s1;
-    IDSet s2 = {23};
+    IDSet s2 = {13};
     expectedIDs[1] = s2;
     IDSet s3 = {23};
     expectedIDs[2] = s3;
-    IDSet s4 = {33};
+    IDSet s4 = {23, 33};
     expectedIDs[3] = s4;
-    IDSet s5 = {43};
+    IDSet s5 = {33, 43};
     expectedIDs[4] = s5;
     IDSet s6 = {43};
     expectedIDs[5] = s6;
