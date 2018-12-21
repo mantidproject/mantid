@@ -121,7 +121,7 @@ void OptimizeCrystalPlacement::init() {
   declareProperty("MaxIndexingError", 0.15,
                   "Use only peaks whose fractional "
                   "hkl values are below this "
-                  "tolerance(def=.25)");
+                  "tolerance(def=0.15)");
 
   declareProperty("MaxHKLPeaks2Use", -1.0,
                   "If less than 0 all peaks are used, "
