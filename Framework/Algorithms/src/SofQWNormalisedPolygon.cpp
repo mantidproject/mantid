@@ -39,6 +39,15 @@ const std::string LOWER_2THETA{"Lower two theta"};
 const std::string UPPER_2THETA{"Upper two theta"};
 } // namespace Col
 
+/**
+ * Calculate 2theta for a point in detector's local coordinates.
+ * @param detInfo a detector info
+ * @param detIndex an index to the detector info, not detector ID
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @param point a point in detector's local coordinates
+ * @return 2theta angle in global coordinates, in radians
+ */
 double twoThetaFromLocalPoint(const Mantid::Geometry::DetectorInfo &detInfo,
                               const size_t detIndex,
                               const Mantid::Kernel::V3D &samplePos,
@@ -53,6 +62,16 @@ double twoThetaFromLocalPoint(const Mantid::Geometry::DetectorInfo &detInfo,
   return twoTheta;
 }
 
+/** Calculate min and max 2theta for cuboid shape.
+ * Calculates the scattering angles for each corner and edge center and
+ * returns the extrema.
+ * @param detInfo a detector info
+ * @param detIndex an index to the detector info, not detector ID
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @param shapeVectors vectors describing a cuboid shape
+ * @return a pair (min(2theta), max(2theta)), units radians
+ */
 std::pair<double, double>
 cuboidTwoThetaRange(const Mantid::Geometry::DetectorInfo &detInfo,
                     const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
@@ -66,25 +85,49 @@ cuboidTwoThetaRange(const Mantid::Geometry::DetectorInfo &detInfo,
   const auto back = leftBackBottom - leftFrontBottom;
   const auto up = leftFrontTop - leftFrontBottom;
   const auto right = rightFrontBottom - leftFrontBottom;
-  const std::array<Mantid::Kernel::V3D, 8> ring{
+  const std::array<Mantid::Kernel::V3D, 8> capRing{
       leftFrontBottom,     leftFrontBottom + back * 0.5,
       leftBackBottom,      leftBackBottom + up * 0.5,
       leftBackBottom + up, leftFrontTop + back * 0.5,
       leftFrontTop,        leftFrontBottom + up * 0.5};
   double minTwoTheta{std::numeric_limits<double>::max()};
   double maxTwoTheta{std::numeric_limits<double>::lowest()};
-  for (int width = 0; width < 3; ++width) {
-    const auto offset = right * (0.5 * static_cast<double>(width));
-    for (const auto &pointInRing : ring) {
-      const auto point = pointInRing + offset;
+  for (int width = 0; width < 2; ++width) {
+    const auto offset = right * static_cast<double>(width);
+    for (const auto &pointInRing : capRing) {
+      auto point = pointInRing;
+      if (width != 0) {
+        point += offset;
+      }
       const auto current = twoThetaFromLocalPoint(detInfo, detIndex, samplePos,
                                                   beamDir, std::move(point));
       minTwoTheta = std::min(minTwoTheta, current);
       maxTwoTheta = std::max(maxTwoTheta, current);
     }
   }
+  const auto beltOffset = right * 0.5;
+  for (size_t beltIndex = 0; beltIndex < capRing.size(); beltIndex += 2) {
+    const auto point = capRing[beltIndex] + beltOffset;
+    const auto current = twoThetaFromLocalPoint(detInfo, detIndex, samplePos,
+                                                beamDir, std::move(point));
+    minTwoTheta = std::min(minTwoTheta, current);
+    maxTwoTheta = std::max(maxTwoTheta, current);
+  }
   return std::make_pair(minTwoTheta, maxTwoTheta);
 }
+
+/** Calculate min and max 2theta for cylinder shape.
+ * Calculates the scattering angles at a number of points around the
+ * outer rim at top, center and bottom of the cylinder.
+ * @param detInfo a detector info
+ * @param detIndex an index to the detector info, not detector ID
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @param shapeVectors vectors describing a cuboid shape
+ * @param radius cylinder radius
+ * @param height cylinder height
+ * @return a pair (min(2theta), max(2theta)), units radians
+ */
 
 std::pair<double, double> cylinderTwoThetaRange(
     const Mantid::Geometry::DetectorInfo &detInfo, const size_t detIndex,
@@ -122,7 +165,7 @@ std::pair<double, double> cylinderTwoThetaRange(
 }
 
 /**
- * Calculate the 2theta at detector surface for a given direction.
+ * Calculate the 2theta at bounding box surface for a given direction.
  * @param detInfo a DetectorInfo object
  * @param detIndex index of the detector within detInfo
  * @param samplePos a V3D pointing to the sample position
@@ -142,6 +185,15 @@ double twoThetaFromBoundingBox(const Mantid::Geometry::DetectorInfo &detInfo,
   return twoThetaFromLocalPoint(detInfo, detIndex, samplePos, beamDir, side);
 }
 
+/** Calculate min and max 2theta for a general shape.
+ * The calculation is done using the bounding box. The 2thetas are
+ * computed for the centers of the six faces of the box.
+ * @param detInfo a detector info
+ * @param detIndex an index to the detector info, not detector ID
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @return a pair (min(2theta), max(2theta)), in radians.
+ */
 std::pair<double, double> generalTwoThetaRange(
     const Mantid::Geometry::DetectorInfo &detInfo, const size_t detIndex,
     const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir) {
@@ -166,6 +218,15 @@ std::pair<double, double> generalTwoThetaRange(
   return std::make_pair(minTwoTheta, maxTwoTheta);
 }
 
+/**
+ * Calculate the scattering angle extrema for a detector.
+ * The chosen method depends on the detector shape.
+ * @param detInfo a detector info
+ * @param detIndex an index to the detector info, not detector ID
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @return a pair (min(2theta), max(2theta)), in radians
+ */
 std::pair<double, double>
 minMaxTwoTheta(const Mantid::Geometry::DetectorInfo &detInfo,
                const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
@@ -188,6 +249,13 @@ minMaxTwoTheta(const Mantid::Geometry::DetectorInfo &detInfo,
   }
 }
 
+/** Return the tabulated scattering angle extrema for a detector.
+ * @param detID detector id for which to find the 2thetas
+ * @param detectorIDs list of tabulated detector ids
+ * @param lowers list of min(2theta) corresponding to an id in detectorIDs
+ * @param uppers list of max(2theta) corresponding to an id in detectorIDs
+ * @return a pair (min(2theta), max(2theta)), in radians
+ */
 std::pair<double, double> twoThetasFromTable(
     const Mantid::detid_t detID, const std::vector<int> &detectorIDs,
     const std::vector<double> &lowers, const std::vector<double> &uppers) {
