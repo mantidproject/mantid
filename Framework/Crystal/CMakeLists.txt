@@ -60,6 +60,7 @@ set ( SRC_FILES
 	src/SaveLauenorm.cpp
 	src/SelectCellOfType.cpp
 	src/SelectCellWithForm.cpp
+	src/SetCrystalLocation.cpp
 	src/SetGoniometer.cpp
 	src/SetSpecialCoordinates.cpp
 	src/SetUB.cpp
@@ -136,6 +137,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SaveLauenorm.h
 	inc/MantidCrystal/SelectCellOfType.h
 	inc/MantidCrystal/SelectCellWithForm.h
+	inc/MantidCrystal/SetCrystalLocation.h
 	inc/MantidCrystal/SetGoniometer.h
 	inc/MantidCrystal/SetSpecialCoordinates.h
 	inc/MantidCrystal/SetUB.h
@@ -205,6 +207,7 @@ set ( TEST_FILES
 	SaveLauenormTest.h
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h
+    SetCrystalLocationTest.h
 	SetGoniometerTest.h
 	SetSpecialCoordinatesTest.h
 	SetUBTest.h

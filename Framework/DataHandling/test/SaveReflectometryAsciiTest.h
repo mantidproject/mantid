@@ -344,7 +344,7 @@ public:
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
   }
 
-  void test_defined_log() {
+  void test_user_log() {
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
@@ -353,6 +353,10 @@ public:
     Mantid::Kernel::PropertyWithValue<int> *a =
         new Mantid::Kernel::PropertyWithValue<int>("a", 5);
     ws->mutableRun().addLogData(a);
+    Mantid::Kernel::PropertyWithValue<double> *b =
+        new Mantid::Kernel::PropertyWithValue<double>("b", 3.4382);
+    ws->mutableRun().addLogData(b);
+    ws->mutableRun().getProperty("b")->setUnits("MyUnit");
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveReflectometryAscii alg;
@@ -360,8 +364,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("LogList", std::vector<std::string>{"a"}))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogList", "a, b"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
@@ -389,8 +392,126 @@ public:
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Theta 3 + dir + ref numbers : Not defined")
     std::getline(in, line);
-    TS_ASSERT_EQUALS(line, "a : 5")
+    TS_ASSERT_EQUALS(line, "a : 5 ")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "b : 3.4382000000000001 MyUnit")
+    for (int i = 0; i < 7; ++i) {
+      std::getline(in, line);
+      TS_ASSERT_EQUALS(line, "Parameter  : Not defined")
+    }
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Number of file format : 40")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Number of data points : 2")
+  }
+
+  void test_user_log_overrides_fixed_log() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    ws->initialize(1, histogram);
+    // User wants to add the Instrument name header line
+    Mantid::Kernel::PropertyWithValue<std::string> *a =
+        new Mantid::Kernel::PropertyWithValue<std::string>("Instrument", "ABC");
+    ws->mutableRun().addLogData(a);
+    // The workspace has an entry already for the instrument name
+    Mantid::Kernel::PropertyWithValue<std::string> *b =
+        new Mantid::Kernel::PropertyWithValue<std::string>("instrument.name",
+                                                           "DEF");
+    ws->mutableRun().addLogData(b);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("LogList", "Instrument, instrument.name"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    std::ifstream in(filename);
+    std::string line;
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "MFT")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Instrument : DEF ")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "User-local contact : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Title : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Subtitle : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Start date + time : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "End date + time : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Theta 1 + dir + ref numbers : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Theta 2 + dir + ref numbers : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Theta 3 + dir + ref numbers : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Instrument : ABC ")
     for (int i = 0; i < 8; ++i) {
+      std::getline(in, line);
+      TS_ASSERT_EQUALS(line, "Parameter  : Not defined")
+    }
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Number of file format : 40")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Number of data points : 2")
+  }
+
+  void test_automatic_log_filling() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    ws->initialize(1, histogram);
+    // Should use this instrument name
+    Mantid::Kernel::PropertyWithValue<std::string> *a =
+        new Mantid::Kernel::PropertyWithValue<std::string>("instrument.name",
+                                                           "DEF");
+    ws->mutableRun().addLogData(a);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
+    std::ifstream in(filename);
+    std::string line;
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "MFT")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Instrument : DEF ")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "User-local contact : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Title : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Subtitle : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Start date + time : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "End date + time : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Theta 1 + dir + ref numbers : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Theta 2 + dir + ref numbers : Not defined")
+    std::getline(in, line);
+    TS_ASSERT_EQUALS(line, "Theta 3 + dir + ref numbers : Not defined")
+    for (int i = 0; i < 9; ++i) {
       std::getline(in, line);
       TS_ASSERT_EQUALS(line, "Parameter  : Not defined")
     }

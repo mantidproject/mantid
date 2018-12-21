@@ -25,7 +25,6 @@ namespace Algorithms {
 class DLLExport WorkspaceJoiners : public API::Algorithm {
 public:
   WorkspaceJoiners();
-  ~WorkspaceJoiners() override;
 
   const std::string category() const override;
 
@@ -51,7 +50,7 @@ protected:
                                   const API::MatrixWorkspace &ws2,
                                   API::MatrixWorkspace &output) = 0;
 
-  API::Progress *m_progress; ///< Progress reporting object
+  std::unique_ptr<API::Progress> m_progress; ///< Progress reporting object
 };
 
 } // namespace Algorithms

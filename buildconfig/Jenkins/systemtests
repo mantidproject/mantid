@@ -50,6 +50,11 @@ fi
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
 cd $WORKSPACE/build
 
+# Remove (possibly) stale files
+#   build/ExternalData/**: data files will change over time and removing
+#                          the links helps keep it fresh
+rm -rf $WORKSPACE/build/ExternalData
+
 ###############################################################################
 # CMake configuration if it has not already been configured.
 # We use the special flag that only creates the targets for the data
@@ -69,10 +74,22 @@ ${CMAKE_EXE} --build . -- SystemTestData
 ###############################################################################
 # Run the tests
 ###############################################################################
-# Remove any Mantid.user.properties file
-userprops=~/.mantid/Mantid.user.properties
-rm -f $userprops
+# Remove any user settings
+userconfig_dir=$HOME/.mantid
+rm -fr $userconfig_dir
+# Remove GUI qsettings files
+if [[ ${ON_MACOS} == true ]] ; then
+  rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
+  rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
+  rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
+else
+  rm -f ~/.config/Mantid/MantidPlot.conf
+fi
+rm -f ~/.config/mantidproject/mantidworkbench.ini
+
 # Turn off any auto updating on startup
+mkdir -p $userconfig_dir
+userprops=$userconfig_dir/Mantid.user.properties
 echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
 echo "usagereports.enabled = 0" >> $userprops
 echo "CheckMantidVersion.OnStartup = 0" >> $userprops

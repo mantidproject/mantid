@@ -29,13 +29,14 @@ Improvements
 ############
 
 - The Run button is now above the output options, and is disabled during fitting along with the output buttons.
+- The Run button in the Data Analysis tabs is now above the output options, and is disabled during fitting.
 - The Fit Single Spectrum buttons in the Data Analysis tabs MSDFit, ConvFit, I(Q,t)Fit and F(Q)Fit are now disabled
   during fitting.
 - When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle
   Fit Types are selected in the ConvFit Tab, the Q values are retrieved from the workspaces, preventing a crash
   when plotting a guess.
-- The Plot buttons in MSDFit and F(Q)Fit are disabled after a Run when the result workspace only has one
-  data point to plot.
+- The Plot buttons in MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit are disabled after a Run when the result workspace only
+  has one data point to plot.
 - There is now an option to choose which output parameter to plot in MSDFit.
 - An option to skip the calculation of Monte Carlo Errors on the I(Q,t) Tab has been added.
 - During the calculation of Monte Carlo Errors, a progress bar is now shown.
@@ -44,10 +45,16 @@ Improvements
   maximum of 18 plots.
 - The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed.
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
+- Fit and Fit Sequential in the Fit combobox above the FitPropertyBrowser are now disabled while fitting is taking place.
+- The option to choose which workspace index to Plot Spectrum for and from which output workspace is now given in Elwin.
+- ConvFit now allows the loading of Dave ASCII files which end with '_sqw.dave'.
+
 
 Bugfixes
 ########
 
+- The workspace(s) loaded into F(Q) Fit are checked for EISF or Width values, and an error message is displayed
+  if neither are present. This prevents an unexpected crash.
 - The parameter values for a selected spectrum are now updated properly when a Fit is run using the Fit String
   option in ConvFit.
 - An unexpected crash is prevented when Plot Current Preview is clicked when no data is loaded. A meaningful error
@@ -58,6 +65,8 @@ Bugfixes
 - A bug where fixed parameters don't remain fixed when using the FABADA minimizer in ConvFit has been corrected.
 - The expression for the Fit type Yi in MSDFit was incorrect and has now been corrected.
 - The x-axis labels in the output plots for MSDFit are now correct.
+- An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading
+  a reduced file.
 
 
 Data Corrections Interface
@@ -102,6 +111,8 @@ Improvements
 
 - The Run button is now above the output options.
 - The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- There is no longer a plot output option for 'Fit' in the Quasi Tab. The graph 'Fit.2' is also now plotted when you click
+  Plot Current Preview.
 - The sample logs are now copied over properly for the result workspace in the ResNorm tab.
 - Sqw files can now be loaded as Vanadium in the ResNorm interface.
 
@@ -109,6 +120,16 @@ Bugfixes
 ########
 
 - An unwanted 'Fit' plot is no longer plotted in ResNorm when you click `Plot` in the output options.
+
+
+Simulations Interface
+---------------------
+
+Improvements
+############
+
+- The Run button is now above the output options.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
 
 
 Diffraction Interface

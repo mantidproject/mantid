@@ -449,7 +449,7 @@ void OptimizeCrystalPlacement::exec() {
   UBinv.Invert();
   UBinv /= (2 * M_PI);
   for (int i = 0; i < outPeaks->getNumberPeaks(); ++i) {
-
+    outPeaks->getPeak(i).setSamplePos(newSampPos);
     int RunNum = outPeaks->getPeak(i).getRunNumber();
     std::string RunNumStr = std::to_string(RunNum);
     Matrix<double> GonMatrix;

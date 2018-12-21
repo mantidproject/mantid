@@ -24,7 +24,8 @@ Project Recovery
 ----------------
 New
 ###
-- Project recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
+- Project Recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
+- Project Recovery now adds a lock file at the start of saving so if MantidPlot crashes when saving it will no longer use that checkpoint as it is incomplete.
 - If project recovery fails when attempting to recover a checkpoint it will open a new GUI offering multiple checkpoints to the user and the ability to open them in a script window. (See image below)
 
 .. figure:: ../../images/ProjectRecoveryFailureDialog.png
@@ -62,6 +63,7 @@ Bugfixes
 - Fixed an issue where Project Recovery would start regardless of the config options
 - Project recovery will now successfully recover live data, it will however be unable to recover any data that was up at the time, but will start the live data streams again from scratch.
 - If an empty group workspace is present in the ADS it will no longer crash the save thread of project recovery and instead will delete it from the ADS and ignore it.
+- A bug has been fixed in Indirect I(Q,t) interface when analyzing IN16B reduced data.
 
 MantidPlot
 ----------
@@ -71,11 +73,23 @@ Changes
 
 - All File Browser dialog boxes will now (by default) display all valid file extensions as the first file filter.
 - Plot -> Advanced now allows for plotting against any property in the ``Run`` object that can be represented as a single number. It uses the time-average value for time series properties and the average for others.
+- A new option in the right-click menu for the results log allows users to set the number of lines retained by the widget. The default is 8192. This avoids memory problems for long running instances.
 
 BugFixes
 ########
 
 - Fixed issue where an open set of data from ITableWorkspace wouldn't update if the data was changed via python
 - Fixed an issue where MantidPlot would crash when renaming workspaces.
+- Fixed issue with filenames containing spaces that are passed to Mantid when launched from the command line
+
+MantidWorkbench
+---------------
+
+Changes
+#######
+- Colorfill plots with uniform bin widths were made more responsive by resampling to 4K resolution and using :func:`~mantid.plots.MantidAxes.imshow`.
+
+BugFixes
+########
 
 :ref:`Release 3.14.0 <v3.14.0>`

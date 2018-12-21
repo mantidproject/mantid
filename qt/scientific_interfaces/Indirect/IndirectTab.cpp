@@ -167,19 +167,23 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
  */
 void IndirectTab::addSaveWorkspaceToQueue(const QString &wsName,
                                           const QString &filename) {
+  addSaveWorkspaceToQueue(wsName.toStdString(), filename.toStdString());
+}
+
+void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName,
+                                          const std::string &filename) {
   // Setup the input workspace property
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-  saveProps["InputWorkspace"] = wsName.toStdString();
+  saveProps["InputWorkspace"] = wsName;
 
   // Setup the algorithm
-  IAlgorithm_sptr saveAlgo =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
+  auto saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
   saveAlgo->initialize();
 
-  if (filename.isEmpty())
-    saveAlgo->setProperty("Filename", wsName.toStdString() + ".nxs");
+  if (filename.empty())
+    saveAlgo->setProperty("Filename", wsName + ".nxs");
   else
-    saveAlgo->setProperty("Filename", filename.toStdString());
+    saveAlgo->setProperty("Filename", filename);
 
   // Add the save algorithm to the batch
   m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);

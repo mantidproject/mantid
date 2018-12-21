@@ -203,12 +203,13 @@ if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
+add_custom_target ( AllTests )
+add_dependencies( AllTests FrameworkTests )
 if ( ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH )
   add_custom_target ( GUITests )
   add_dependencies ( check GUITests )
   # Collect all tests together
-  add_custom_target ( AllTests )
-  add_dependencies ( AllTests FrameworkTests GUITests )
+  add_dependencies ( AllTests GUITests )
   add_subdirectory ( qt )
 endif()
 
@@ -311,7 +312,7 @@ if ( ENABLE_CPACK )
                                        "sip >= 4.18,"
                                        "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
                                        "python-requests,"
-                                       "scipy,"
+                                       "scipy,python2-scikit-image,"
                                        "hdf,hdf5,jsoncpp >= 0.7.0" )
       if (ENABLE_MANTIDPLOT)
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,PyQt4,qwtplot3d-qt4" )
@@ -394,6 +395,7 @@ if ( ENABLE_CPACK )
                                            "python3-six,"
                                            "python3-matplotlib,"
                                            "python3-scipy,"
+                                           "python3-skimage,"
                                            "python3-pycifrw (>= 4.2.1),"
                                            "python3-yaml,"
                                            "python3-qtawesome,"
@@ -413,6 +415,7 @@ if ( ENABLE_CPACK )
                                            "python-six,"
                                            "python-matplotlib,"
                                            "python-scipy,"
+                                           "python-skimage"
                                            "python-pycifrw (>= 4.2.1),"
                                            "python-yaml,"
                                            "python-qtawesome,"

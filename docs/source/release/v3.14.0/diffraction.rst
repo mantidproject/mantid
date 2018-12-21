@@ -58,6 +58,7 @@ Improvements
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 - SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
 - :ref:`IntegratePeaksUsingClusters <algm-IntegratePeaksUsingClusters>` will now treat NaN's as background.
+- :ref:`SetCrystalLocation <algm-SetCrystalLocation>` is a new algorithm to set the sample location in events workspaces.
 
 - :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
 
@@ -70,6 +71,9 @@ Bugfixes
 
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` now finds peaks correctly with the crystallography convention setting and reduction with crystallography convention is tested with a system test.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` does not have duplicate peak numbers when saving PeaksWorkspaces with more than one RunNumber.
+- :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now loads the calibration from the peaks file correctly.
+
+- :ref:`OptimizeCrystalPlacement <algm-OptimizeCrystalPlacement>` now updates the sample location used by peaks.  Previously, the sample was effectively left unmoved.
 
 Powder Diffraction
 ------------------

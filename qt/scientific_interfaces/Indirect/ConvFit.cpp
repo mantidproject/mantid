@@ -53,9 +53,9 @@ void ConvFit::setupFitTab() {
   setConvolveMembers(true);
 
   setSampleWSSuffices({"_red", "_sqw"});
-  setSampleFBSuffices({"_red.nxs", "_sqw.nxs"});
+  setSampleFBSuffices({"_red.nxs", "_sqw.nxs", "_sqw.dave"});
   setResolutionWSSuffices({"_res", "_red", "_sqw"});
-  setResolutionFBSuffices({"_res.nxs", "_red.nxs", "_sqw.nxs"});
+  setResolutionFBSuffices({"_res.nxs", "_red.nxs", "_sqw.nxs", "_sqw.dave"});
 
   // Initialise fitTypeStrings
   m_fitStrings["None"] = "";
@@ -178,6 +178,31 @@ std::string ConvFit::fitTypeString() const {
   return fitType;
 }
 
+void ConvFit::runClicked() { runTab(); }
+
+void ConvFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void ConvFit::setFitSingleSpectrumIsFitting(bool fitting) {
+  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
+      fitting ? "Fitting..." : "Fit Single Spectrum");
+  setButtonsEnabled(!fitting);
+}
+
+void ConvFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void ConvFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
+}
+
 void ConvFit::setRunEnabled(bool enabled) {
   m_uiForm->pbRun->setEnabled(enabled);
 }
@@ -194,25 +219,6 @@ void ConvFit::setFitSingleSpectrumEnabled(bool enabled) {
 void ConvFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
-
-void ConvFit::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
-  setFitSingleSpectrumEnabled(enabled);
-}
-
-void ConvFit::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
-void ConvFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
-void ConvFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

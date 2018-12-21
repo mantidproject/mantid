@@ -12,6 +12,19 @@
 SCRIPT_DIR=$(dirname "$0")
 
 ###############################################################################
+# Terminate existing Xvfb sessions
+###############################################################################
+if [[ -n ${CLEAN_XVFB} && "${CLEAN_XVFB}" == true ]] && [ $(command -v xvfb-run) ]; then
+  echo "Terminating existing Xvfb sessions"
+
+  # Kill Xvfb processes
+  killall Xvfb || true
+
+  # Remove Xvfb X server lock files
+  rm -f /tmp/.X*-lock
+fi
+
+###############################################################################
 # System discovery
 ###############################################################################
 USE_CORE_DUMPS=true
@@ -350,6 +363,16 @@ fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
+# Remove GUI qsettings files
+if [[ ${ON_MACOS} == true ]] ; then
+  rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
+  rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
+  rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
+else
+  rm -f ~/.config/Mantid/MantidPlot.conf
+fi
+rm -f ~/.config/mantidproject/mantidworkbench.ini
+
 mkdir -p $userconfig_dir
 # use a fixed number of openmp threads to avoid overloading the system
 userprops_file=$userconfig_dir/Mantid.user.properties
