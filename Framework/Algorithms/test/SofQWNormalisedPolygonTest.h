@@ -7,16 +7,20 @@
 #ifndef MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
 #define MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
 
+#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "SofQWTest.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace WorkspaceCreationHelper;
 
 class SofQWNormalisedPolygonTest : public CxxTest::TestSuite {
 public:
@@ -90,6 +94,51 @@ public:
       TS_ASSERT_EQUALS(specNoExpected, specNoActual);
       TS_ASSERT_EQUALS(expectedIDs[i], spectrum.getDetectorIDs());
     }
+  }
+
+  void testCylindricalDetectors() {
+    constexpr int nhist{2};
+    constexpr int nbins{10};
+    constexpr bool includeMonitors{false};
+    constexpr bool startYNegative{true};
+    auto input = create2DWorkspaceWithFullInstrument(nhist, nbins, includeMonitors, startYNegative);
+    auto &componentInfo = input->mutableComponentInfo();
+    for (size_t i = 0; i < nhist; ++i) {
+      const std::string name = "pixel-" + std::to_string(i) + ")";
+      const auto index = componentInfo.indexOfAny(name);
+      auto position = componentInfo.position(index);
+      position.setY(position.Y() + 0.33);
+      componentInfo.setPosition(index, position);
+    }
+    input->getAxis(0)->setUnit("DeltaE");
+    input->mutableRun().addProperty("Ei", 23.);
+    SofQWNormalisedPolygon alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_for_child"))
+    const std::vector<double> qParams{0., 0.1, 1.};
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr output = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 10)
+    TS_ASSERT_EQUALS(output->blocksize(), nbins)
+    auto axis = output->getAxis(1);
+    std::cout << '\n' << axis->getMin() << ' ' << axis->getMax() << '\n';
+    double sum{0.};
+    for (size_t i = 0; i < 3; ++i) {
+      const auto &Ys = output->y(i);
+      for (size_t j = 0; j < nbins; ++j) {
+        const auto y = Ys[j];
+        if (std::isfinite(y)) {
+          sum += y;
+        }
+      }
+    }
+    TS_ASSERT_DELTA(sum, 12., 1e-10)
   }
 
   void testEAndQBinningParams() {
