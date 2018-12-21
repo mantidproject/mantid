@@ -5,14 +5,27 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtReflMainWindowView.h"
+#include "IndexOf.h"
 #include "MantidKernel/make_unique.h"
 #include "QtReflBatchView.h"
-
 #include <QMessageBox>
 #include <QToolButton>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+namespace {
+
+int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
+  auto instrumentName =
+      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+  auto result = indexOfValue(instruments, instrumentName);
+  if (result)
+    return *result;
+  // If not found, use first instrument
+  return 0;
+}
+} // namespace
 
 DECLARE_SUBWINDOW(QtReflMainWindowView)
 
@@ -53,9 +66,7 @@ void QtReflMainWindowView::initLayout() {
   auto thetaTolerance = 0.01;
   auto makeRunsTablePresenter =
       RunsTablePresenterFactory(instruments, thetaTolerance);
-  auto defaultInstrumentIndex = 0;
-  // TODO: Look this up properly by comparing the default instrument to the
-  // values in the list;
+  auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto autoreduction = boost::shared_ptr<IReflAutoreduction>();
   auto searcher = boost::shared_ptr<IReflSearcher>();
   auto messageHandler = this;
