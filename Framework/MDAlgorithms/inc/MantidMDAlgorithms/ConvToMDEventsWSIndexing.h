@@ -114,12 +114,12 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
                                                   const typename MDEventType<ND>::MortonT lower,
                                                   const typename MDEventType<ND>::MortonT upper,
                                                   const MDSpaceBounds<ND>& space,
-                                                  const size_t childBoxCount,
-                                                  const size_t splitThreshold,
                                                   size_t maxDepth,
                                                   unsigned level,
                                                   const API::BoxController_sptr &bc);
 };
+
+/*-------------------------------definitions-------------------------------------*/
 
 
 template<typename EventType, size_t ND, template <size_t> class MDEventType>
@@ -152,7 +152,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     // create local QConverter
     MDTransf_sptr localQConverter(m_QConverter->clone());
 
-    uint32_t detID = m_detID[workspaceIndex];
+    int32_t detID = m_detID[workspaceIndex];
     uint16_t runIndexLoc = m_RunIndex;
 
     std::vector<coord_t> locCoord(m_Coord);
@@ -226,8 +226,7 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
         md_structure_ws::calculateDefaultBound<ND, IntT, MortonT>(
             std::numeric_limits<IntT>::max());
     distributeEvents(root, mdEvents.begin(), mdEvents.end(),
-        mortonMin, mortonMax, space, bc->getNumSplit(),
-        bc->getSplitThreshold(), bc->getMaxDepth() + 1, 1, bc);
+        mortonMin, mortonMax, space, bc->getMaxDepth() + 1, 1, bc);
     return root;
   }
 }
@@ -331,8 +330,6 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
                                                 const typename MDEventType<ND>::MortonT lowerBound,
                                                 const typename MDEventType<ND>::MortonT upperBound,
                                                 const MDSpaceBounds<ND>& space,
-                                                const size_t childBoxCount,
-                                                const size_t splitThreshold,
                                                 size_t maxDepth,
                                                 unsigned level,
                                                 const API::BoxController_sptr &bc) {
@@ -342,12 +339,12 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
   using Box = DataObjects::MDBox<MDEvent, ND>;
   using GridBox = DataObjects::MDGridBox<MDEvent, ND>;
 
+  const size_t childBoxCount = bc->getNumSplit();
+  const size_t splitThreshold = bc->getSplitThreshold();
+
   if (maxDepth-- == 1 || std::distance(begin, end) <= static_cast<int>(splitThreshold)) {
     return;
   }
-
-  std::vector<API::IMDNode *> children;
-  children.reserve(childBoxCount);
 
 /* Determine the "width" of this box in Morton number */
   const MortonT thisBoxWidth = upperBound - lowerBound;
@@ -357,8 +354,13 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
 
   auto eventIt = begin;
 
-  std::vector<std::pair<EventIterator, EventIterator>> eventRanges;
-  std::vector<std::pair<MortonT, MortonT>> mortonBounds;
+  struct RecursionHelper {
+    std::pair<EventIterator, EventIterator> eventRange;
+    std::pair<MortonT, MortonT> mortonBounds;
+    BoxBase* box;
+  };
+  std::vector<RecursionHelper> children;
+  children.reserve(childBoxCount);
 
   /* For each new child box */
   for (size_t i = 0; i < childBoxCount; ++i) {
@@ -399,12 +401,24 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
       newBox = new GridBox(bc.get(), level, extents, boxEventStart, eventIt);
     }
 
-    children.emplace_back(newBox);
-    eventRanges.emplace_back(std::make_pair(boxEventStart, eventIt));
-    mortonBounds.emplace_back(std::make_pair(boxLower, boxUpper));
+    children.emplace_back(RecursionHelper{{boxEventStart, eventIt}, {boxLower, boxUpper}, newBox});
   }
-
-  root->setChildren(children, 0, children.size());
+  //sorting is needed due to fast finding the proper box for given coordinate,
+  //during drawing
+  std::sort(children.begin(), children.end(), [](RecursionHelper& a, RecursionHelper& b) {
+    unsigned i = ND; while(i-->0) {
+    const auto& ac = a.box->getExtents(i).getMin();
+    const auto& bc = b.box->getExtents(i).getMin();
+      if (ac < bc) return true;
+      if (ac > bc) return false;
+    }
+    return true;
+  });
+  std::vector<API::IMDNode *> boxes;
+  boxes.reserve(childBoxCount);
+  for(auto& ch: children)
+    boxes.emplace_back(ch.box);
+  root->setChildren(boxes, 0, boxes.size());
 
   /* Distribute events within child boxes */
   /* See https://en.wikibooks.org/wiki/OpenMP/Tasks */
@@ -412,15 +426,11 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
    * threads. */
   ++level;
 #pragma omp parallel for
-  for (size_t i = 0; i < eventRanges.size(); i++) {
-    BoxBase* childPtr = static_cast<BoxBase*>(children[i]);
-    auto chBegin = eventRanges[i].first;
-    auto chEnd = eventRanges[i].second;
-    auto lower = mortonBounds[i].first;
-    auto upper = mortonBounds[i].second;
-    distributeEvents(childPtr, chBegin, chEnd, lower, upper,
-                     space, childBoxCount, splitThreshold,
-                     maxDepth, level, bc);
+  for (size_t i = 0; i < children.size(); i++) {
+    auto& ch = children[i];
+    distributeEvents(ch.box, ch.eventRange.first, ch.eventRange.second,
+                     ch.mortonBounds.first, ch.mortonBounds.second,
+                     space, maxDepth, level, bc);
   }
 }
 
