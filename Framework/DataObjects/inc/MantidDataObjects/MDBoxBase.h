@@ -69,6 +69,8 @@ public:
   /// contain.
   unsigned int getCoordType() const override { return sizeof(coord_t); }
 
+  bool isLeaf() const override final { return getNumChildren() == 0; }
+
   ///@return The special ID which specify location of this node in the chain of
   /// ordered boxes (e.g. on a file)
   size_t getID() const override { return m_fileID; }

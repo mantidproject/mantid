@@ -209,6 +209,8 @@ public:
   void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
                 bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function) override;
+
+  void getBoxes(std::vector<API::IMDNode *>& outBoxes, std::function<bool(API::IMDNode *)> cond) final override;
   //------------------------------------------------------------------------------------------------------------------------------------
   void transformDimensions(std::vector<double> &scaling,
                            std::vector<double> &offset) override;

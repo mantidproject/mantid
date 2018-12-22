@@ -648,7 +648,20 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
       outBoxes.push_back(this);
   }
 }
-
+//-----------------------------------------------------------------------------------------------
+/** Return all boxes contained within.
+ *
+ * @param outBoxes :: vector to fill
+ * @param cond :: condition to check
+ *(leaves on the tree)
+ */
+TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *>& outBoxes, std::function<bool(API::IMDNode *)> cond) {
+  if(cond(this))
+    outBoxes.emplace_back(this);
+  for(API::IMDNode * child: m_Children){
+    child->getBoxes(outBoxes, cond);
+  }
+}
 //-----------------------------------------------------------------------------------------------
 /** Returns the lowest-level box at the given coordinates
  * @param coords :: nd-sized array of the coordinate of the point to look at

@@ -225,6 +225,18 @@ TMDE(void MDBox)::getBoxes(
 }
 
 //-----------------------------------------------------------------------------------------------
+/** Return all boxes contained within.
+ *
+ * @param outBoxes :: vector to fill
+ * @param cond :: condition to check
+ *(leaves on the tree)
+ */
+TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *>& outBoxes, std::function<bool(API::IMDNode *)> cond) {
+  if(cond(this))
+    outBoxes.emplace_back(this);
+}
+
+//-----------------------------------------------------------------------------------------------
 /** Returns the total number of points (events) in this box either they are all
  * in memory, or on disk or partially on memory and partially on disk
  * for partially loaded object substantially relies on correct settings of
