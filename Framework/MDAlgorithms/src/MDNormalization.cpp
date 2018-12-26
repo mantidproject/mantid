@@ -32,6 +32,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
+static bool abs_compare(int a, int b) {
+    return (std::abs(a) < std::abs(b));
+}
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormalization)
 
@@ -352,7 +355,6 @@ void MDNormalization::exec() {
     }
   }
 
-
   bool isRLU = getProperty("RLU");
 
 
@@ -382,22 +384,96 @@ void MDNormalization::exec() {
     IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", soIndex*0.3, (soIndex+1)*0.3);
     binMD->setPropertyValue("AxisAligned", "0");
     binMD->setProperty("InputWorkspace",inputWS);
+    std::cout<<"Nims:"<<inputWS->getNumDims()<<"\n";
     binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
-    binMD->setPropertyValue("NormalizeBasisVectors",0);
-    binMD->setProperty("OutputWorkspace",outputWS);
+    binMD->setPropertyValue("NormalizeBasisVectors","0");
+    binMD->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
     //set binning properties
+    std::stringstream extents;
+    std::stringstream nbins;
     for(size_t i=0;i<binDimensionNames.size();i++){
-      std::string basisVector;
-
+      std::stringstream basisVector;
+      std::vector<double> projection(binDimensionNames.size(),0.);
+      if (binDimensionNames[i]=="QDimension1") {
+          if (!isRLU) {
+            projection[0]=1.;
+            basisVector<<"Q_sample_x,A^{-1}";
+          } else {
+            projection[0]=Q1.X();
+            projection[1]=Q1.Y();
+            projection[2]=Q1.Z();
+            basisVector<<QDimensionName(Q1Basis)<<", r.l.u.";
+          }
+      } else if (binDimensionNames[i]=="QDimension2") {
+          if (!isRLU) {
+            projection[1]=1.;
+            basisVector<<"Q_sample_y,A^{-1}";
+          } else {
+            projection[0]=Q2.X();
+            projection[1]=Q2.Y();
+            projection[2]=Q2.Z();
+            basisVector<<QDimensionName(Q2Basis)<<", r.l.u.";
+          }
+      } else if (binDimensionNames[i]=="QDimension3") {
+          if (!isRLU) {
+            projection[2]=1.;
+            basisVector<<"Q_sample_z,A^{-1}";
+          } else {
+            projection[0]=Q3.X();
+            projection[1]=Q3.Y();
+            projection[2]=Q3.Z();
+            basisVector<<QDimensionName(Q3Basis)<<", r.l.u.";
+          }
+      } else {
+          size_t dimIndex=inputWS->getDimensionIndexByName(binDimensionNames[i]);
+          projection[dimIndex]=1.;
+          basisVector<<binDimensionNames[i]<<","<<inputWS->getDimension(dimIndex)->getUnits().ascii();
+      }
+      for(auto v:projection){
+        basisVector<<','<<v;
+      }
+      g_log.warning()<<basisVector.str()<<"\n";
+      std::stringstream basisVectorName;
+      basisVectorName<<"BasisVector"<<i;
+      binMD->setPropertyValue(basisVectorName.str(),basisVector.str());
     }
-
+binMD->setPropertyValue("OutputExtents","-3,3,-3,3,-3,3,-3,3");
+binMD->setPropertyValue("OutputBins","100,1,1,100");
     //execute algorithm
     binMD->executeAsChildAlg();
+    outputWS=binMD->getProperty("OutputWorkspace");
     // set the temporary workspace to be the output workspace, so it keeps adding different symmetries
     soIndex+=1;
   }
+
+  Mantid::API::IMDHistoWorkspace_sptr normWS =  boost::dynamic_pointer_cast<IMDHistoWorkspace>(outputWS)->clone();
+  this->setProperty("OutputNormalizationWorkspace",normWS);
   this->setProperty("OutputWorkspace",outputWS);
 }
 
+std::string MDNormalization::QDimensionName(std::vector<double> projection) {
+  std::vector<double>::iterator result;
+  result = std::max_element(projection.begin(), projection.end(), abs_compare);
+  std::vector<char> symbol{'H','K','L'};
+  char character=symbol[std::distance(projection.begin(), result)];
+  std::stringstream name;
+  name<<"[";
+  for(size_t i=0;i<3;i++){
+    if(projection[i]==0){
+      name<<"0";
+    } else if (projection[i]==1){
+      name<<character;
+    } else if (projection[i]==-1){
+      name<<"-"<<character;
+    } else {
+      name<<std::defaultfloat<<std::setprecision(3)<<projection[i]<<character;
+    }
+    if(i!=2){
+      name<<",";
+    }
+  }
+  name<<"]";
+  return name.str();
+}
 } // namespace MDAlgorithms
 } // namespace Mantid
