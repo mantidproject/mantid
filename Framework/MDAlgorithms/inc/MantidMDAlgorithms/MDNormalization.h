@@ -9,11 +9,13 @@
 
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** MDNormalization : TODO: DESCRIPTION
+/** MDNormalization : Bin single crystal diffraction or direct geometry inelastic
+ * data and calculate the corresponding statistical weight
 */
 class MANTID_MDALGORITHMS_DLL MDNormalization : public API::Algorithm {
 public:
@@ -29,6 +31,21 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override final;
   std::string QDimensionName(std::vector<double> projection);
+  std::map<std::string, std::string> getBinParameters();
+  void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
+
+  /// Normalization workspace
+  DataObjects::MDHistoWorkspace_sptr m_normWS;
+  /// Input workspace
+  API::IMDEventWorkspace_sptr m_inputWS;
+  /// The projection vectors
+  std::vector<double> m_Q1Basis{1., 0., 0.}, m_Q2Basis{0., 1., 0.},m_Q3Basis{0., 0., 1.};
+  // UB matrix
+  Mantid::Kernel::DblMatrix m_UB;
+  // W matrix
+  Mantid::Kernel::DblMatrix m_W;
+
+  bool m_accumulate;
 };
 
 } // namespace MDAlgorithms
