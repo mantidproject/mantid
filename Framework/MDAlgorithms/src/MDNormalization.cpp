@@ -358,57 +358,56 @@ void MDNormalization::exec() {
     binMD->setPropertyValue("NormalizeBasisVectors","0");
     binMD->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
     //set binning properties
-    for(size_t i=0;i<binDimensionNames.size();i++){
+    size_t qindex=0;
+    for( auto const& p : parameters ) {
+      auto key=p.first;
+      auto value=p.second;
+
       std::stringstream basisVector;
-      std::vector<double> projection(binDimensionNames.size(),0.);
-      if (binDimensionNames[i]=="QDimension1") {
+      std::vector<double> projection(m_inputWS->getNumDims(),0.);
+      if (key.find("QDimension1")!=std::string::npos) {
           if (!isRLU) {
             projection[0]=1.;
             basisVector<<"Q_sample_x,A^{-1}";
           } else {
-            qDimensionIndices.push_back(i);
+            qDimensionIndices.push_back(qindex);
             projection[0]=Q1.X();
             projection[1]=Q1.Y();
             projection[2]=Q1.Z();
             basisVector<<QDimensionName(m_Q1Basis)<<", r.l.u.";
           }
-      } else if (binDimensionNames[i]=="QDimension2") {
+      } else if (key.find("QDimension2")!=std::string::npos) {
           if (!isRLU) {
             projection[1]=1.;
             basisVector<<"Q_sample_y,A^{-1}";
           } else {
-            qDimensionIndices.push_back(i);
+            qDimensionIndices.push_back(qindex);
             projection[0]=Q2.X();
             projection[1]=Q2.Y();
             projection[2]=Q2.Z();
             basisVector<<QDimensionName(m_Q2Basis)<<", r.l.u.";
           }
-      } else if (binDimensionNames[i]=="QDimension3") {
+      } else if (key.find("QDimension3")!=std::string::npos) {
           if (!isRLU) {
             projection[2]=1.;
             basisVector<<"Q_sample_z,A^{-1}";
           } else {
-            qDimensionIndices.push_back(i);
+            qDimensionIndices.push_back(qindex);
             projection[0]=Q3.X();
             projection[1]=Q3.Y();
             projection[2]=Q3.Z();
             basisVector<<QDimensionName(m_Q3Basis)<<", r.l.u.";
           }
-      } else {
-          size_t dimIndex=m_inputWS->getDimensionIndexByName(binDimensionNames[i]);
-          projection[dimIndex]=1.;
-          basisVector<<binDimensionNames[i]<<","<<m_inputWS->getDimension(dimIndex)->getUnits().ascii();
       }
-      for(auto v:projection){
-        basisVector<<','<<v;
+      if (!basisVector.str().empty()){
+          for(auto const& proji: projection){
+              basisVector<<","<<proji;
+          }
+          value=basisVector.str();
       }
-      g_log.warning()<<basisVector.str()<<"\n";
-      std::stringstream basisVectorName;
-      basisVectorName<<"BasisVector"<<i;
-      binMD->setPropertyValue(basisVectorName.str(),basisVector.str());
+      binMD->setPropertyValue(key, value);
+      qindex++;
     }
-binMD->setPropertyValue("OutputExtents","-3,3,-3,3,-3,3,-3,3");
-binMD->setPropertyValue("OutputBins","100,1,1,100");
     //execute algorithm
     binMD->executeAsChildAlg();
     outputWS=binMD->getProperty("OutputWorkspace");
@@ -471,8 +470,8 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
     originalDimensionNames.push_back("QDimension1");
     originalDimensionNames.push_back("QDimension2");
     originalDimensionNames.push_back("QDimension3");
-    for (size_t i=3; i<inputWS->getNumDims(); i++) {
-      originalDimensionNames.push_back(inputWS->getDimension(i)->getName());
+    for (size_t i=3; i<m_inputWS->getNumDims(); i++) {
+      originalDimensionNames.push_back(m_inputWS->getDimension(i)->getName());
     }
 
     bool isRLU = getProperty("RLU");
@@ -489,9 +488,41 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
     m_W = DblMatrix(W);
     m_W.Transpose();
 
-    //FIXME:
-    double maxQ=10.;
+    // Find maximum Q
+    bool diffraction=true;
+    if ((m_inputWS->getNumDims() >3) && (m_inputWS->getDimension(3)->getMDFrame().name()=="DeltaE")) {
+      diffraction = false;
+    }
+    auto &exptInfo0 = *(m_inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
+    auto upperLimitsVector = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
+                exptInfo0.getLog("MDNorm_high"))))();
+    double maxQ;
+    if(diffraction){
+      maxQ=2.*(*std::max_element(upperLimitsVector.begin(),upperLimitsVector.end()));
+    } else {
+      double Ei;
+      double maxDE = *std::max_element(upperLimitsVector.begin(),upperLimitsVector.end());
+      auto loweLimitsVector = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
+                  exptInfo0.getLog("MDNorm_low"))))();
+      double minDE = *std::min_element(loweLimitsVector.begin(),loweLimitsVector.end());
+      if (exptInfo0.run().hasProperty("Ei")) {
+        Kernel::Property *eiprop = exptInfo0.run().getProperty("Ei");
+        Ei = boost::lexical_cast<double>(eiprop->value());
+        if (Ei <= 0) {
+          throw std::invalid_argument("Ei stored in the workspace is not positive");
+        }
+      } else {
+        throw std::invalid_argument("Could not find Ei value in the workspace.");
+      }
+      const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
+                               PhysicalConstants::meV * 1e-20 /
+                               (PhysicalConstants::h * PhysicalConstants::h);
+      double ki = std::sqrt(energyToK * Ei);
+      double kfmin = std::sqrt(energyToK * (Ei - minDE));
+      double kfmax = std::sqrt(energyToK * (Ei - maxDE));
 
+      maxQ=ki+std::max(kfmin,kfmax);
+    }
     size_t basisVectorIndex=0;
     for(std::size_t i=0;i<6;i++) {
       std::string propName = "Dimension"+Strings::toString(i)+"Name";
@@ -504,11 +535,11 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
           std::stringstream propertyValue;
           propertyValue<<dimName;
           //get the index in the original workspace
-          auto dimIndex=std::distance(std::find(originalDimensionNames.begin(),originalDimensionNames.end(),dimName),originalDimensionNames.begin());
+          auto dimIndex=std::distance(originalDimensionNames.begin(),std::find(originalDimensionNames.begin(),originalDimensionNames.end(),dimName));
           auto dimension=m_inputWS->getDimension(dimIndex);
           propertyValue<<","<<dimension->getMDUnits().getUnitLabel().ascii();
-          for (size_t j;j<originalDimensionNames.size();j++){
-              if(j==dimIndex){
+          for (size_t j=0;j<originalDimensionNames.size();j++){
+              if(j==static_cast<size_t>(dimIndex)){
                 propertyValue<<",1";
               } else {
                 propertyValue<<",0";
@@ -522,13 +553,13 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
              Mantid::Geometry::OrientedLattice ol;
              ol.setUB(m_UB*m_W); //note that this is already multiplied by 2Pi
              if(dimIndex==0) {
-                 dimMax=ol.a()*maxQ;
+                 dimMax=static_cast<coord_t>(ol.a()*maxQ);
                  dimMin=-dimMax;
              } else if (dimIndex==1){
-                 dimMax=ol.b()*maxQ;
+                 dimMax=static_cast<coord_t>(ol.b()*maxQ);
                  dimMin=-dimMax;
              } else if (dimIndex==2){
-                 dimMax=ol.c()*maxQ;
+                 dimMax=static_cast<coord_t>(ol.c()*maxQ);
                  dimMin=-dimMax;
              }
           }
@@ -546,9 +577,9 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
             bins<<nsteps<<",";
             extents<<dimMin<<","<<dimMin+nsteps*step<<",";
           } else if (binning.size()==3){
-              dimMin=binning[0];
+              dimMin=static_cast<coord_t>(binning[0]);
               auto step=binning[1];
-              dimMax=binning[2];
+              dimMax=static_cast<coord_t>(binning[2]);
               int nsteps=static_cast<int>(std::ceil((dimMax-dimMin)/step));
               bins<<nsteps<<",";
               extents<<dimMin<<","<<dimMin+nsteps*step<<",";
