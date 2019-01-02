@@ -213,7 +213,11 @@ on ``A1`` in the above polynomial, the code is:
 
 .. code:: python
 
+    # Find the parameter by index
     error_A1 = p.getError(1)
+    # Find the parameter by name
+    error_A1 = p.getError('A1')
+
 
 Plotting
 --------
