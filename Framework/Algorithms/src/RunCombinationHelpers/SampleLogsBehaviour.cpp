@@ -419,7 +419,7 @@ bool SampleLogsBehaviour::setNumericValue(const std::string &item,
 void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace_sptr addeeWS,
                                           MatrixWorkspace_sptr outWS) {
   for (const auto &item : m_logMap) {
-    std::string logName = item.first.first;
+    const std::string logName = item.first.first;
 
     Property *addeeWSProperty = addeeWS->getLog(logName);
     const std::string logUnit = addeeWS->getLog(logName)->units();

@@ -196,6 +196,7 @@ set ( SRC_FILES
 	src/MaxEnt/MaxentTransformMultiFourier.cpp
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
+       src/MergeLogs.cpp
 	src/MergeRuns.cpp
 	src/Min.cpp
 	src/Minus.cpp
@@ -537,6 +538,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
+       inc/MantidAlgorithms/MergeLogs.h
 	inc/MantidAlgorithms/MergeRuns.h
 	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
@@ -883,6 +885,7 @@ set ( TEST_FILES
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
 	MedianDetectorTestTest.h
+       MergeLogsTest.h
 	MergeRunsTest.h
 	MinusTest.h
 	ModeratorTzeroLinearTest.h
