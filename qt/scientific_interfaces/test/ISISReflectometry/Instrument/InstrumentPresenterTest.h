@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_INSTRUMENTPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentPresenter.h"
+#include "../../ReflMockObjects.h"
 #include "MockInstrumentView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -15,6 +16,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -206,8 +208,18 @@ public:
     verifyAndClear();
   }
 
+  void testSettingsChangedNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockInstrumentView> m_view;
+  NiceMock<MockReflBatchPresenter> m_mainPresenter;
 
   Instrument makeModel() {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
@@ -219,7 +231,11 @@ private:
   }
 
   InstrumentPresenter makePresenter() {
-    return InstrumentPresenter(&m_view, makeModel());
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = InstrumentPresenter(&m_view, makeModel());
+    presenter.acceptMainPresenter(&m_mainPresenter);
+    verifyAndClear();
+    return presenter;
   }
 
   void verifyAndClear() {
