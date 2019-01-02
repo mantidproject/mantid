@@ -15,7 +15,7 @@ namespace CustomInterfaces {
 
 /** @class IEventPresenter
 
-IReflEventPresenter is an interface which defines the functions that need
+IEventPresenter is an interface which defines the functions that need
 to be implemented by a concrete 'Event' presenter
 */
 
