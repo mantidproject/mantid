@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLAUTOREDUCTION_H
-#define MANTID_ISISREFLECTOMETRY_IREFLAUTOREDUCTION_H
+#ifndef MANTID_ISISREFLECTOMETRY_IAUTOREDUCTION_H
+#define MANTID_ISISREFLECTOMETRY_IAUTOREDUCTION_H
 
 #include "Common/DllConfig.h"
 #include <string>
@@ -17,9 +17,9 @@ namespace CustomInterfaces {
 
 Class to hold information about an autoreduction process
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL IReflAutoreduction {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IAutoreduction {
 public:
-  virtual ~IReflAutoreduction() = default;
+  virtual ~IAutoreduction() = default;
 
   virtual bool running() const = 0;
   virtual bool
@@ -33,4 +33,4 @@ public:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLAUTOREDUCTION_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IAUTOREDUCTION_H */

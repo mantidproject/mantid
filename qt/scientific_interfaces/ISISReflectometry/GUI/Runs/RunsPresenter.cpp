@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
+#include "Autoreduction.h"
 #include "Common/IMessageHandler.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
@@ -21,7 +22,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "ReflAutoreduction.h"
 #include "ReflCatalogSearcher.h"
 #include "ReflSearchModel.h"
 
@@ -58,13 +58,15 @@ namespace CustomInterfaces {
  * @param autoreduction :: [input] The autoreduction implementation
  * @param searcher :: [input] The search implementation
  */
-RunsPresenter::RunsPresenter(
-    IRunsView *mainView, ProgressableView *progressableView,
-    RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
-    std::vector<std::string> const &instruments, int defaultInstrumentIndex,
-    IMessageHandler *messageHandler,
-    boost::shared_ptr<IReflAutoreduction> autoreduction,
-    boost::shared_ptr<IReflSearcher> searcher)
+RunsPresenter::RunsPresenter(IRunsView *mainView,
+                             ProgressableView *progressableView,
+                             RunsTablePresenterFactory makeRunsTablePresenter,
+                             double thetaTolerance,
+                             std::vector<std::string> const &instruments,
+                             int defaultInstrumentIndex,
+                             IMessageHandler *messageHandler,
+                             boost::shared_ptr<IAutoreduction> autoreduction,
+                             boost::shared_ptr<IReflSearcher> searcher)
     : m_autoreduction(autoreduction), m_view(mainView),
       m_progressView(progressableView),
       m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
@@ -79,7 +81,7 @@ RunsPresenter::RunsPresenter(
   m_tablePresenter->acceptMainPresenter(this);
 
   if (!m_autoreduction)
-    m_autoreduction.reset(new ReflAutoreduction());
+    m_autoreduction.reset(new Autoreduction());
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)

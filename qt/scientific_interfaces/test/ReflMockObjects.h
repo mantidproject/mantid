@@ -12,7 +12,7 @@
 #include "GUI/Instrument/InstrumentOptionDefaults.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
-#include "GUI/Runs/IReflAutoreduction.h"
+#include "GUI/Runs/IAutoreduction.h"
 #include "GUI/Runs/IReflSearcher.h"
 #include "GUI/Runs/ReflSearchModel.h"
 #include "GUI/Save/IAsciiSaver.h"
@@ -147,7 +147,7 @@ public:
 };
 
 /**** Autoreduction ****/
-class MockReflAutoreduction : public IReflAutoreduction {
+class MockAutoreduction : public IAutoreduction {
 public:
   MOCK_CONST_METHOD0(running, bool());
   MOCK_CONST_METHOD1(searchStringChanged, bool(const std::string &));

@@ -38,10 +38,10 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
-      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
-                                              "POLREF", "OFFSPEC"},
-        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(new MockReflAutoreduction),
+      : m_thetaTolerance(0.01),
+        m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
+        m_runsTableView(), m_progressView(), m_messageHandler(),
+        m_autoreduction(new MockAutoreduction),
         m_searcher(new MockReflSearcher) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
@@ -272,8 +272,8 @@ private:
                         std::vector<std::string> const &instruments,
                         int defaultInstrumentIndex,
                         IMessageHandler *messageHandler,
-                        boost::shared_ptr<IReflAutoreduction> autoreduction =
-                            boost::shared_ptr<IReflAutoreduction>(),
+                        boost::shared_ptr<IAutoreduction> autoreduction =
+                            boost::shared_ptr<IAutoreduction>(),
                         boost::shared_ptr<IReflSearcher> searcher =
                             boost::shared_ptr<IReflSearcher>())
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
@@ -429,7 +429,7 @@ private:
   NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
-  boost::shared_ptr<MockReflAutoreduction> m_autoreduction;
+  boost::shared_ptr<MockAutoreduction> m_autoreduction;
   boost::shared_ptr<MockReflSearcher> m_searcher;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
 };

@@ -67,7 +67,7 @@ void MainWindowView::initLayout() {
   auto makeRunsTablePresenter =
       RunsTablePresenterFactory(instruments, thetaTolerance);
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
-  auto autoreduction = boost::shared_ptr<IReflAutoreduction>();
+  auto autoreduction = boost::shared_ptr<IAutoreduction>();
   auto searcher = boost::shared_ptr<IReflSearcher>();
   auto messageHandler = this;
 

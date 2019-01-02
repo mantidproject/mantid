@@ -2,7 +2,7 @@ set ( RUNS_SRC_FILES
     RunsPresenter.cpp
     RunsView.cpp
     ReflCatalogSearcher.cpp
-    ReflAutoreduction.cpp
+    Autoreduction.cpp
     ReflSearchModel.cpp
 )
 
@@ -14,9 +14,9 @@ set ( RUNS_INC_FILES
     RunsPresenter.h
     RunsPresenterFactory.h
     RunsView.h
-    IReflAutoreduction.h
+    IAutoreduction.h
     IReflSearcher.h
-    ReflAutoreduction.h
+    Autoreduction.h
     ReflCatalogSearcher.h
     ReflSearchModel.h
 )

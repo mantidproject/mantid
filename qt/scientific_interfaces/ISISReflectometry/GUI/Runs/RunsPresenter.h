@@ -29,7 +29,7 @@ class ProgressableView;
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflAutoreduction;
+class IAutoreduction;
 class IMessageHandler;
 class IReflSearcher;
 class ReflSearchModel;
@@ -57,8 +57,8 @@ public:
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
                 int defaultInstrumentIndex, IMessageHandler *messageHandler,
-                boost::shared_ptr<IReflAutoreduction> autoreduction =
-                    boost::shared_ptr<IReflAutoreduction>(),
+                boost::shared_ptr<IAutoreduction> autoreduction =
+                    boost::shared_ptr<IAutoreduction>(),
                 boost::shared_ptr<IReflSearcher> searcher =
                     boost::shared_ptr<IReflSearcher>());
   RunsPresenter(RunsPresenter const &) = delete;
@@ -97,7 +97,7 @@ public:
 protected:
   IRunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
-  boost::shared_ptr<IReflAutoreduction> m_autoreduction;
+  boost::shared_ptr<IAutoreduction> m_autoreduction;
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The current transfer method

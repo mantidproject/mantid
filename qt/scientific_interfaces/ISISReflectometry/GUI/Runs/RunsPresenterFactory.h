@@ -26,7 +26,7 @@ public:
                        std::vector<std::string> instruments,
                        int defaultInstrumentIndex,
                        IMessageHandler *messageHandler,
-                       boost::shared_ptr<IReflAutoreduction> autoreduction,
+                       boost::shared_ptr<IAutoreduction> autoreduction,
                        boost::shared_ptr<IReflSearcher> searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
@@ -49,7 +49,7 @@ private:
   std::vector<std::string> m_instruments;
   int m_defaultInstrumentIndex;
   IMessageHandler *m_messageHandler;
-  boost::shared_ptr<IReflAutoreduction> m_autoreduction;
+  boost::shared_ptr<IAutoreduction> m_autoreduction;
   boost::shared_ptr<IReflSearcher> m_searcher;
 };
 } // namespace CustomInterfaces

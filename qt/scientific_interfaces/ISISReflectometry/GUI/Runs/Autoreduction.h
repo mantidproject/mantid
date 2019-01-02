@@ -8,7 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_REFLAUTOREDUCTION_H
 
 #include "Common/DllConfig.h"
-#include "IReflAutoreduction.h"
+#include "IAutoreduction.h"
 #include <string>
 
 namespace MantidQt {
@@ -18,10 +18,9 @@ namespace CustomInterfaces {
 
     Class to hold information about an autoreduction process
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ReflAutoreduction
-    : public IReflAutoreduction {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Autoreduction : public IAutoreduction {
 public:
-  ReflAutoreduction();
+  Autoreduction();
 
   bool running() const override;
   bool searchStringChanged(const std::string &newSearchString) const override;
