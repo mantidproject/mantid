@@ -1368,9 +1368,15 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
         convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
 
     if (workspace) {
-      auto const allowedIndices = m_allowedSpectra.empty() ? QList<int>() : m_allowedSpectra[QString::fromStdString(workspaceName())];
-      auto const firstIndex = m_allowedSpectra.empty() ? 0 : allowedIndices.front();
-      auto const lastIndex = m_allowedSpectra.empty() ? getNumberOfSpectra(workspace) - 1 : allowedIndices.back();
+      auto const allowedIndices =
+          m_allowedSpectra.empty()
+              ? QList<int>()
+              : m_allowedSpectra[QString::fromStdString(workspaceName())];
+      auto const firstIndex =
+          m_allowedSpectra.empty() ? 0 : allowedIndices.front();
+      auto const lastIndex = m_allowedSpectra.empty()
+                                 ? getNumberOfSpectra(workspace) - 1
+                                 : allowedIndices.back();
       int const currentIndex = workspaceIndex();
       if (currentIndex == m_oldWorkspaceIndex) {
         return;
@@ -1381,7 +1387,8 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
         allowedIndex = firstIndex;
       } else if (currentIndex > lastIndex) {
         allowedIndex = lastIndex;
-      } else if (!m_allowedSpectra.empty() && !allowedIndices.contains(currentIndex)) {
+      } else if (!m_allowedSpectra.empty() &&
+                 !allowedIndices.contains(currentIndex)) {
         allowedIndex = m_oldWorkspaceIndex;
         auto i = allowedIndices.indexOf(m_oldWorkspaceIndex);
         if (i >= 0) {
@@ -1823,7 +1830,8 @@ void FitPropertyBrowser::addHandle(
     const std::string &wsName,
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
   auto const qName = QString::fromStdString(wsName);
-  if (!isWorkspaceValid(ws) || (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName)))
+  if (!isWorkspaceValid(ws) ||
+      (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName)))
     return;
   QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
@@ -3333,12 +3341,13 @@ int MantidQt::MantidWidgets::FitPropertyBrowser::sizeOfFunctionsGroup() const {
   return m_functionsGroup->children().size();
 }
 
-void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<int> &wsSpectra) {
+void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
+                                           const QList<int> &wsSpectra) {
   auto const name = wsName.toStdString();
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
   if (ws) {
     QList<int> indices;
-    for(auto const i : wsSpectra) {
+    for (auto const i : wsSpectra) {
       indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
     }
     m_allowedSpectra.insert(wsName, indices);
