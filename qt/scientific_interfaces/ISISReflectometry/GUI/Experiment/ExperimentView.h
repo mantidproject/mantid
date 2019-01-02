@@ -7,7 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_EXPERIMENTVIEW_H_
 #define MANTID_CUSTOMINTERFACES_EXPERIMENTVIEW_H_
 
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "IExperimentView.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include "ui_ExperimentWidget.h"

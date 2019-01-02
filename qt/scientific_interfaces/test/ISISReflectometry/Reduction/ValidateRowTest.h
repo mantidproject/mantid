@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
 #define MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
-#include "../../../ISISReflectometry/Parse.h"
+#include "../../../ISISReflectometry/Common/Parse.h"
 #include "../../../ISISReflectometry/Reduction/ValidateRow.h"
 #include <cxxtest/TestSuite.h>
 

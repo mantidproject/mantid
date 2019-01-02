@@ -7,7 +7,7 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <boost/optional.hpp>
 
 #include "Group.h"

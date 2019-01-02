@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H
 
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "GUI/RunsTable/IRunsTableView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 #include <boost/shared_ptr.hpp>

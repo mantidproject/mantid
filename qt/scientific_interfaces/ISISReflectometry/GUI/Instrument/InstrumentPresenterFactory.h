@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTERFACTORY_H
 #include "../../Reduction/Instrument.h"
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
 #include "InstrumentPresenter.h"

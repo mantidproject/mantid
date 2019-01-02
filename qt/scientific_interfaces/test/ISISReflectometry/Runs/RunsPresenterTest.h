@@ -271,7 +271,7 @@ private:
                         double thetaTolerance,
                         std::vector<std::string> const &instruments,
                         int defaultInstrumentIndex,
-                        IReflMessageHandler *messageHandler,
+                        IMessageHandler *messageHandler,
                         boost::shared_ptr<IReflAutoreduction> autoreduction =
                             boost::shared_ptr<IReflAutoreduction>(),
                         boost::shared_ptr<IReflSearcher> searcher =
@@ -426,7 +426,7 @@ private:
   std::vector<std::string> m_instruments;
   NiceMock<MockRunsView> m_view;
   NiceMock<MockRunsTableView> m_runsTableView;
-  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
   boost::shared_ptr<MockReflAutoreduction> m_autoreduction;

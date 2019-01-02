@@ -222,7 +222,7 @@ public:
 
 private:
   NiceMock<MockEventView> m_view;
-  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockBatchPresenter> m_mainPresenter;
 
   EventPresenter makePresenter() {
     auto presenter = EventPresenter(&m_view);

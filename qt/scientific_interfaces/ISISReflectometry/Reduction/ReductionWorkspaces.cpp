@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ReductionWorkspaces.h"
-#include "../Map.h"
+#include "Common/Map.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

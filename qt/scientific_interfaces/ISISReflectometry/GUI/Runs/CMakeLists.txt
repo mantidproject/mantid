@@ -1,6 +1,9 @@
 set ( RUNS_SRC_FILES
     RunsPresenter.cpp
     RunsView.cpp
+    ReflCatalogSearcher.cpp
+    ReflAutoreduction.cpp
+    ReflSearchModel.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -11,10 +14,16 @@ set ( RUNS_INC_FILES
     RunsPresenter.h
     RunsPresenterFactory.h
     RunsView.h
+    IReflAutoreduction.h
+    IReflSearcher.h
+    ReflAutoreduction.h
+    ReflCatalogSearcher.h
+    ReflSearchModel.h
 )
 
 set ( RUNS_MOC_FILES
     RunsView.h
+    ReflSearchModel.h
 )
 
 set ( RUNS_UI_FILES

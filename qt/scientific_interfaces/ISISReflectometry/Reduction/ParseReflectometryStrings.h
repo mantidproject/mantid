@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGS_H_
 #define MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGS_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include "RangeInQ.h"
 #include "TransmissionRunPair.h"
 #include <boost/optional.hpp>

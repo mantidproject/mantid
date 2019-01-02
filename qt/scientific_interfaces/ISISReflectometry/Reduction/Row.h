@@ -7,7 +7,7 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_RUN_H_
 #define MANTID_CUSTOMINTERFACES_RUN_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"

@@ -12,7 +12,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IReflBatchPresenter;
+class IBatchPresenter;
 
 /** @class IInstrumentPresenter
 
@@ -23,7 +23,7 @@ class IInstrumentPresenter {
 public:
   virtual ~IInstrumentPresenter() = default;
 
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
+  virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;

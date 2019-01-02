@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ValidatePerThetaDefaults.h"
-#include "../Parse.h"
+#include "Common/Parse.h"
 #include "AllInitialized.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string/trim.hpp>

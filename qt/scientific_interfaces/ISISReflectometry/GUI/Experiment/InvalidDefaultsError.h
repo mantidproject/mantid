@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H
 #define MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H
-#include "../../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <vector>
 
 namespace MantidQt {

@@ -7,12 +7,11 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
 #define MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
-#include "../ValidationResult.h"
-#include "DllConfig.h"
+#include "Common/ValidationResult.h"
+#include "Common/DllConfig.h"
 #include "ParseReflectometryStrings.h"
 #include "PerThetaDefaults.h"
 #include "TransmissionRunPair.h"
-#include "ValidationResult.h"
 #include <array>
 #include <boost/optional.hpp>
 namespace MantidQt {

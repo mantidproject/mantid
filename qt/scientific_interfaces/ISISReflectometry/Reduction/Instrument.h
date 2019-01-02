@@ -7,7 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INSTRUMENT_H_
 #define MANTID_CUSTOMINTERFACES_INSTRUMENT_H_
 
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include "DetectorCorrections.h"
 #include "MonitorCorrections.h"
 #include "RangeInLambda.h"

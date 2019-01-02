@@ -11,7 +11,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IReflBatchPresenter;
+class IBatchPresenter;
 
 /** @class ISavePresenter
 
@@ -22,7 +22,7 @@ class ISavePresenter {
 public:
   virtual ~ISavePresenter() = default;
 
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
+  virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
 
   virtual void reductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,

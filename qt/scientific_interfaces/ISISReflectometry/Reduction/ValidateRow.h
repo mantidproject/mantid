@@ -7,12 +7,12 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
 #define MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
+#include "Common/ValidationResult.h"
 #include "ParseReflectometryStrings.h"
 #include "Reduction/ReductionJobs.h"
 #include "Row.h"
 #include "TransmissionRunPair.h"
-#include "ValidationResult.h"
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {

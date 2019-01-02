@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSTABVIEW_H_
 #define MANTID_ISISREFLECTOMETRY_RUNSTABVIEW_H_
 
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "GUI/RunsTable/RunsTableView.h"
 #include "IRunsView.h"
 #include "MantidKernel/System.h"

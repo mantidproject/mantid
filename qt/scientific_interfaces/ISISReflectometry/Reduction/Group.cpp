@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Group.h"
-#include "../IndexOf.h"
-#include "../Map.h"
+#include "Common/IndexOf.h"
+#include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <cmath>
 

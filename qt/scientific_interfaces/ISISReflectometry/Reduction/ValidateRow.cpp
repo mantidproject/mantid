@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ValidateRow.h"
-#include "../Parse.h"
+#include "Common/Parse.h"
 #include "AllInitialized.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>

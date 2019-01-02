@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SavePresenter.h"
-#include "../../IReflBatchPresenter.h"
-#include "../../IReflMainWindowPresenter.h"
+#include "GUI/Batch/IBatchPresenter.h"
 #include "ISaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -36,7 +35,7 @@ SavePresenter::SavePresenter(ISaveView *view,
   m_view->subscribe(this);
 }
 
-void SavePresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
+void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 

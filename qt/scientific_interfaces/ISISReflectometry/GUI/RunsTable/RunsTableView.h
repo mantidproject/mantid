@@ -7,7 +7,7 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "IRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 #include "ui_RunsTableView.h"

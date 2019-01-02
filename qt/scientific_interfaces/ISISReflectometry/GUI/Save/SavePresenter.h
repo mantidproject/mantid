@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
 
-#include "../../DllConfig.h"
-#include "../../IReflAsciiSaver.h"
+#include "Common/DllConfig.h"
+#include "IReflAsciiSaver.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
 #include "MantidKernel/ConfigPropertyObserver.h"
@@ -22,15 +22,15 @@ namespace CustomInterfaces {
 
 /** @class SavePresenter
 
-SavePresenter is a presenter class for the tab 'Save ASCII' in the
-ISIS Reflectometry Interface.
+    SavePresenter is a presenter class for the tab 'Save ASCII' in the
+    ISIS Reflectometry Interface.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter,
                                                      public SaveViewSubscriber {
 public:
   SavePresenter(ISaveView *view, std::unique_ptr<IReflAsciiSaver> saver);
 
-  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
@@ -52,7 +52,7 @@ public:
   void autoreductionResumed() override;
 
 private:
-  IReflBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter;
   bool isValidSaveDirectory(std::string const &directory);
   void onSavePathChanged();
   void warnInvalidSaveDirectory();

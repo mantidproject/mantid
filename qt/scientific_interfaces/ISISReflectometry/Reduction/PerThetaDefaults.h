@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
 #define MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
 #include <boost/optional.hpp>

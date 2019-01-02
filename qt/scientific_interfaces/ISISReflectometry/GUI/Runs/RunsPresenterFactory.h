@@ -8,7 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
 #include "../General/IReflSearcher.h"
 #include "../RunsTable/RunsTablePresenterFactory.h"
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
@@ -25,7 +25,7 @@ public:
                        // cppcheck-suppress passedByValue
                        std::vector<std::string> instruments,
                        int defaultInstrumentIndex,
-                       IReflMessageHandler *messageHandler,
+                       IMessageHandler *messageHandler,
                        boost::shared_ptr<IReflAutoreduction> autoreduction,
                        boost::shared_ptr<IReflSearcher> searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
@@ -48,7 +48,7 @@ private:
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   int m_defaultInstrumentIndex;
-  IReflMessageHandler *m_messageHandler;
+  IMessageHandler *m_messageHandler;
   boost::shared_ptr<IReflAutoreduction> m_autoreduction;
   boost::shared_ptr<IReflSearcher> m_searcher;
 };

@@ -5,10 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
-#include "../../IReflBatchPresenter.h"
-#include "../RunsTable/RunsTablePresenter.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflMessageHandler.h"
+#include "Common/IMessageHandler.h"
+#include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -24,8 +23,6 @@
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflAutoreduction.h"
 #include "ReflCatalogSearcher.h"
-#include "ReflFromStdStringMap.h"
-#include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
 
 #include <QStringList>
@@ -65,7 +62,7 @@ RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
     std::vector<std::string> const &instruments, int defaultInstrumentIndex,
-    IReflMessageHandler *messageHandler,
+    IMessageHandler *messageHandler,
     boost::shared_ptr<IReflAutoreduction> autoreduction,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_autoreduction(autoreduction), m_view(mainView),
@@ -99,7 +96,7 @@ RunsPresenter::~RunsPresenter() {
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
  */
-void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
+void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
   // Must do this after setting main presenter or notifications don't get
   // through
@@ -116,7 +113,7 @@ void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
 }
 
 /**
-Used by the view to tell the presenter something has changed
+   Used by the view to tell the presenter something has changed
 */
 
 void RunsPresenter::notifySearch() {

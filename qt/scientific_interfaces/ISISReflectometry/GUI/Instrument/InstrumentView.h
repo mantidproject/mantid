@@ -7,7 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INSTRUMENTVIEW_H_
 #define MANTID_CUSTOMINTERFACES_INSTRUMENTVIEW_H_
 
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "IInstrumentView.h"
 #include "ui_InstrumentWidget.h"
 #include <QCheckBox>

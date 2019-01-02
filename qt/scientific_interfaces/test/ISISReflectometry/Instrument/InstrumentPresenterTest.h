@@ -225,7 +225,7 @@ public:
 
 private:
   NiceMock<MockInstrumentView> m_view;
-  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockBatchPresenter> m_mainPresenter;
 
   Instrument makeModel() {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);

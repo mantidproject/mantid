@@ -7,12 +7,12 @@
 #ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H
 
-#include "../../DllConfig.h"
-#include "../../Reduction/Experiment.h"
-#include "../../ValidationResult.h"
+#include "Common/DllConfig.h"
+#include "Common/ValidationResult.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
 #include "PerThetaDefaultsTableValidationError.h"
+#include "Reduction/Experiment.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -49,7 +49,7 @@ public:
   ExperimentPresenter(IExperimentView *view, Experiment experiment,
                       double defaultsThetaTolerance);
 
-  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   Experiment const &experiment() const;
 
   void notifySettingsChanged() override;
@@ -64,7 +64,7 @@ public:
   void autoreductionResumed() override;
 
 private:
-  IReflBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter;
   ExperimentValidationResult validateExperimentFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();

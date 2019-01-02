@@ -7,7 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_EXPERIMENT_H_
 #define MANTID_CUSTOMINTERFACES_EXPERIMENT_H_
 
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include "AnalysisMode.h"
 #include "FloodCorrections.h"
 #include "PerThetaDefaults.h"

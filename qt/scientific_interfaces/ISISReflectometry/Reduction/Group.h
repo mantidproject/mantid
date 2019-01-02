@@ -7,7 +7,7 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_GROUP_H_
 #define MANTID_CUSTOMINTERFACES_GROUP_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include "Row.h"
 #include <boost/optional.hpp>
 #include <string>

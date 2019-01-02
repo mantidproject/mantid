@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
 
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
@@ -30,7 +30,7 @@ namespace CustomInterfaces {
 
 // Forward decs
 class IReflAutoreduction;
-class IReflMessageHandler;
+class IMessageHandler;
 class IReflSearcher;
 class ReflSearchModel;
 
@@ -56,7 +56,7 @@ public:
                 RunsTablePresenterFactory makeRunsTablePresenter,
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
-                int defaultInstrumentIndex, IReflMessageHandler *messageHandler,
+                int defaultInstrumentIndex, IMessageHandler *messageHandler,
                 boost::shared_ptr<IReflAutoreduction> autoreduction =
                     boost::shared_ptr<IReflAutoreduction>(),
                 boost::shared_ptr<IReflSearcher> searcher =
@@ -69,7 +69,7 @@ public:
   RunsPresenter &operator=(RunsPresenter &&) = default;
 
   // IRunsPresenter overrides
-  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
@@ -112,9 +112,9 @@ private:
   /// The data processor presenters stored in a vector
   std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The main presenter
-  IReflBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
-  IReflMessageHandler *m_messageHandler;
+  IMessageHandler *m_messageHandler;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
   /// The list of instruments

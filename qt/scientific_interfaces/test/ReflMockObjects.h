@@ -7,15 +7,15 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "../ISISReflectometry/IReflAsciiSaver.h"
-#include "../ISISReflectometry/IReflAutoreduction.h"
-#include "../ISISReflectometry/IReflBatchPresenter.h"
-#include "../ISISReflectometry/IReflMainWindowPresenter.h"
-#include "../ISISReflectometry/IReflMainWindowView.h"
-#include "../ISISReflectometry/IReflMessageHandler.h"
-#include "../ISISReflectometry/IReflSearcher.h"
-#include "../ISISReflectometry/InstrumentOptionDefaults.h"
-#include "../ISISReflectometry/ReflSearchModel.h"
+#include "Common/IMessageHandler.h"
+#include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Instrument/InstrumentOptionDefaults.h"
+#include "GUI/MainWindow/IMainWindowPresenter.h"
+#include "GUI/MainWindow/IMainWindowView.h"
+#include "GUI/Runs/IReflAutoreduction.h"
+#include "GUI/Runs/IReflSearcher.h"
+#include "GUI/Runs/ReflSearchModel.h"
+#include "GUI/Save/IReflAsciiSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/ICatalogInfo.h"
@@ -53,7 +53,7 @@ private:
 
 /**** Views ****/
 
-class MockMainWindowView : public IReflMainWindowView {
+class MockMainWindowView : public IMainWindowView {
 public:
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
@@ -69,7 +69,7 @@ public:
 
 /**** Presenters ****/
 
-class MockMainWindowPresenter : public IReflMainWindowPresenter {
+class MockMainWindowPresenter : public IMainWindowPresenter {
 public:
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   MOCK_METHOD1(settingsChanged, void(int));
@@ -78,7 +78,7 @@ public:
   ~MockMainWindowPresenter() override{};
 };
 
-class MockReflBatchPresenter : public IReflBatchPresenter {
+class MockBatchPresenter : public IBatchPresenter {
 public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyReductionPaused, void());
@@ -139,7 +139,7 @@ public:
 };
 
 /**** Catalog ****/
-class MockMessageHandler : public IReflMessageHandler {
+class MockMessageHandler : public IMessageHandler {
 public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));

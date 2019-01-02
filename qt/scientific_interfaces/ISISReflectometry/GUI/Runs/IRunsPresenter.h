@@ -12,7 +12,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IReflBatchPresenter;
+class IBatchPresenter;
 
 /** @class IRunsPresenter
 
@@ -22,7 +22,7 @@ reflectometry interface presenter needs to support.
 class IRunsPresenter {
 public:
   virtual ~IRunsPresenter() = default;
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
+  virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
 
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyReductionResumed() = 0;

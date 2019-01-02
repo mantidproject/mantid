@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTERFACTORY_H
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "EventPresenter.h"
 #include "IEventPresenter.h"
 #include "IEventView.h"

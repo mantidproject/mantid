@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_RANGEINLAMBDA_H_
 #define MANTID_CUSTOMINTERFACES_RANGEINLAMBDA_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 namespace MantidQt {
 namespace CustomInterfaces {
 

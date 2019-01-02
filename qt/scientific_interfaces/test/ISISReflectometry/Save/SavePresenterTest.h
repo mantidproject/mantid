@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
 
-#include "../../../ISISReflectometry/GUI/Save/SavePresenter.h"
-#include "../../../ISISReflectometry/IReflAsciiSaver.h"
+#include "GUI/Save/SavePresenter.h"
+#include "GUI/Save/IReflAsciiSaver.h"
 #include "../../ReflMockObjects.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -463,7 +463,7 @@ private:
   }
 
   NiceMock<MockSaveView> m_view;
-  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockReflAsciiSaver> *m_asciiSaver;
   std::string m_savePath;
   // file format options for ascii saver

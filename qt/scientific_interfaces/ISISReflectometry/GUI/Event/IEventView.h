@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H
 
-#include "../../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <string>
 
 namespace MantidQt {
