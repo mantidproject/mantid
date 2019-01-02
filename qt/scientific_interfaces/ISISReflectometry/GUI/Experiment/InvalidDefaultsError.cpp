@@ -11,7 +11,7 @@ namespace CustomInterfaces {
 
 InvalidDefaultsError::InvalidDefaultsError(int row,
                                            std::vector<int> invalidColumns)
-    : m_invalidColumns(invalidColumns), m_row(row) {}
+    : m_invalidColumns(std::move(invalidColumns)), m_row(row) {}
 
 std::vector<int> const &InvalidDefaultsError::invalidColumns() const {
   return m_invalidColumns;
