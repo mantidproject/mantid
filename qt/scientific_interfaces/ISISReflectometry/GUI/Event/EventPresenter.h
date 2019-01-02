@@ -41,7 +41,7 @@ public:
   notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) override;
   void notifyLogBlockNameChanged(std::string blockName) override;
 
-  Slicing const &slicing() const;
+  Slicing const &slicing() const override;
 
 private:
   IBatchPresenter *m_mainPresenter;

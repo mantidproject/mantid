@@ -114,6 +114,10 @@ void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   // presenter.
 }
 
+ReductionJobs const &RunsPresenter::reductionJobs() const {
+  return tablePresenter()->reductionJobs();
+}
+
 /**
    Used by the view to tell the presenter something has changed
 */
@@ -428,7 +432,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
   UNUSED_ARG(matchType);
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
-    auto jobs = tablePresenter()->reductionJobs();
+    auto jobs = reductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
       auto &result = m_searchModel->getRowData(rowIndex);

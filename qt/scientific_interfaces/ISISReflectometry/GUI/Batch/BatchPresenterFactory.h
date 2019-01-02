@@ -35,6 +35,7 @@ public:
         m_savePresenterFactory(std::move(savePresenterFactory)) {}
 
   std::unique_ptr<IBatchPresenter> make(IBatchView *view) {
+    /// TODO: inject models containing defaults from the reduction algorithm
     auto runsPresenter = m_runsPresenterFactory.make(view->runs());
     auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto experimentPresenter =
@@ -43,10 +44,14 @@ public:
         m_instrumentPresenterFactory.make(view->instrument());
     auto savePresenter = m_savePresenterFactory.make(view->save());
 
+    auto model = Batch(
+        experimentPresenter->experiment(), instrumentPresenter->instrument(),
+        runsPresenter->reductionJobs(), eventPresenter->slicing());
+
     return std::make_unique<BatchPresenter>(
-        view, std::move(runsPresenter), std::move(eventPresenter),
-        std::move(experimentPresenter), std::move(instrumentPresenter),
-        std::move(savePresenter));
+        view, std::move(model), std::move(runsPresenter),
+        std::move(eventPresenter), std::move(experimentPresenter),
+        std::move(instrumentPresenter), std::move(savePresenter));
   }
 
 private:

@@ -45,12 +45,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
     : public ExperimentViewSubscriber,
       public IExperimentPresenter {
 public:
-  // TODO Inject the Experiment model into the constructor.
   ExperimentPresenter(IExperimentView *view, Experiment experiment,
                       double defaultsThetaTolerance);
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
-  Experiment const &experiment() const;
+  Experiment const &experiment() const override;
 
   void notifySettingsChanged() override;
   void notifySummationTypeChanged() override;

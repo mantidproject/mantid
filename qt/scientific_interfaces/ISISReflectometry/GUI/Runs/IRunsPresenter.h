@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 
+#include "Reduction/ReductionJobs.h"
 #include <string>
 
 namespace MantidQt {
@@ -23,6 +24,7 @@ class IRunsPresenter {
 public:
   virtual ~IRunsPresenter() = default;
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
+  virtual ReductionJobs const &reductionJobs() const = 0;
 
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyReductionResumed() = 0;

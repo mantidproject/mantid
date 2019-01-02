@@ -15,6 +15,7 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
+#include "Reduction/Batch.h"
 #include <memory>
 
 namespace MantidQt {
@@ -24,15 +25,15 @@ class IBatchView;
 
 /** @class BatchPresenter
 
-BatchPresenter is the concrete main window presenter implementing the
-functionality defined by the interface IBatchPresenter.
+    BatchPresenter is the concrete main window presenter implementing the
+    functionality defined by the interface IBatchPresenter.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
     : public IBatchPresenter,
       public BatchViewSubscriber {
 public:
   /// Constructor
-  BatchPresenter(IBatchView *view,
+  BatchPresenter(IBatchView *view, Batch model,
                  std::unique_ptr<IRunsPresenter> runsPresenter,
                  std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
@@ -74,20 +75,16 @@ private:
   void autoreductionCompleted();
   void instrumentChanged(const std::string &instName);
   void settingsChanged();
-  // The view we are handling (currently unused)
+
+  Batch m_model;
+  // The view is currently unused
   /*IBatchView *m_view;*/
-  /// The presenter of tab 'Runs'
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
-  /// The presenter of tab 'Event Handling'
   std::unique_ptr<IEventPresenter> m_eventPresenter;
-  /// The presenter of tab 'Settings'
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
-  /// The presenter of tab 'Save ASCII'
   std::unique_ptr<ISavePresenter> m_savePresenter;
-  /// True if currently reducing runs
   bool m_isProcessing;
-  /// True if autoprocessing is currently running (i.e. polling for new runs)
   bool m_isAutoreducing;
 };
 } // namespace CustomInterfaces

@@ -30,7 +30,7 @@ private:
   double m_thetaTolerance;
 
   Experiment makeModel() {
-    // TODO get defaults from algorithm
+    // TODO inject model instead of creating it here
     auto polarizationCorrections =
         PolarizationCorrections(PolarizationCorrectionType::None);
     auto floodCorrections(FloodCorrectionType::Workspace);

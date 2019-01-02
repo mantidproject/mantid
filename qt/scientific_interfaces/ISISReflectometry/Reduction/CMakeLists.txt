@@ -8,6 +8,7 @@ set ( REDUCTION_SRC_FILES
     Slicing.cpp
     ParseReflectometryStrings.cpp
 
+    Batch.cpp
     DetectorCorrections.cpp
     Experiment.cpp
     FloodCorrections.cpp
@@ -34,6 +35,7 @@ set ( REDUCTION_INC_FILES
     ValidatePerThetaDefaults.h
 
     AnalysisMode.h
+    Batch.h
     DetectorCorrections.h
     Experiment.h
     FloodCorrections.h

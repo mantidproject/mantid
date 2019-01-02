@@ -36,12 +36,14 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
 BatchPresenter::BatchPresenter(
-    IBatchView *view, std::unique_ptr<IRunsPresenter> runsPresenter,
+    IBatchView *view, Batch model,
+    std::unique_ptr<IRunsPresenter> runsPresenter,
     std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
     std::unique_ptr<ISavePresenter> savePresenter)
-    : /*m_view(view),*/ m_runsPresenter(std::move(runsPresenter)),
+    : /*m_view(view),*/ m_model(std::move(model)),
+      m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),

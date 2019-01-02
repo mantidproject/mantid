@@ -8,6 +8,7 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "Reduction/Batch.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
@@ -40,7 +41,7 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
 }
 
 /**
-Used by the view to tell the presenter something has changed
+   Used by the view to tell the presenter something has changed
 */
 void MainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
@@ -58,10 +59,10 @@ void MainWindowPresenter::showHelp() {
 }
 
 /**
-Tells the view to show the user the dialog for an algorithm
-* @param pythonCode : [input] The algorithm as python code
-* @return : Result of the execution
-*/
+   Tells the view to show the user the dialog for an algorithm
+   * @param pythonCode : [input] The algorithm as python code
+   * @return : Result of the execution
+   */
 std::string
 MainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
   return m_view->runPythonAlgorithm(pythonCode);
