@@ -8,7 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
 
 #include "Common/DllConfig.h"
-#include "IReflAsciiSaver.h"
+#include "IAsciiSaver.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
 #include "MantidKernel/ConfigPropertyObserver.h"
@@ -28,7 +28,7 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter,
                                                      public SaveViewSubscriber {
 public:
-  SavePresenter(ISaveView *view, std::unique_ptr<IReflAsciiSaver> saver);
+  SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver);
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void notifyPopulateWorkspaceList() override;
@@ -83,7 +83,7 @@ private:
 
   /// The view
   ISaveView *m_view;
-  std::unique_ptr<IReflAsciiSaver> m_saver;
+  std::unique_ptr<IAsciiSaver> m_saver;
   bool m_shouldAutosave;
 };
 } // namespace CustomInterfaces

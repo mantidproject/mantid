@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ReflAsciiSaver.h"
+#include "AsciiSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 Mantid::API::IAlgorithm_sptr
-ReflAsciiSaver::algorithmForFormat(NamedFormat format) {
+AsciiSaver::algorithmForFormat(NamedFormat format) {
   auto create =
       [](std::string const &algorithmName) -> Mantid::API::IAlgorithm_sptr {
     return Mantid::API::AlgorithmManager::Instance().create(algorithmName);
@@ -33,7 +33,7 @@ ReflAsciiSaver::algorithmForFormat(NamedFormat format) {
   }
 }
 
-std::string ReflAsciiSaver::extensionForFormat(NamedFormat format) {
+std::string AsciiSaver::extensionForFormat(NamedFormat format) {
   switch (format) {
   case NamedFormat::Custom:
     return ".dat";
@@ -48,7 +48,7 @@ std::string ReflAsciiSaver::extensionForFormat(NamedFormat format) {
   }
 }
 
-bool ReflAsciiSaver::isValidSaveDirectory(std::string const &path) const {
+bool AsciiSaver::isValidSaveDirectory(std::string const &path) const {
   if (!path.empty()) {
     try {
       auto pocoPath = Poco::Path().parseDirectory(path);
@@ -70,16 +70,17 @@ void setPropertyIfSupported(Mantid::API::IAlgorithm_sptr alg,
 }
 } // namespace
 
-std::string ReflAsciiSaver::assembleSavePath(
-    std::string const &saveDirectory, std::string const &prefix,
-    std::string const &name, std::string const &extension) const {
+std::string AsciiSaver::assembleSavePath(std::string const &saveDirectory,
+                                         std::string const &prefix,
+                                         std::string const &name,
+                                         std::string const &extension) const {
   auto path = Poco::Path(saveDirectory).makeDirectory();
   path.append(prefix + name + extension);
   return path.toString();
 }
 
 Mantid::API::MatrixWorkspace_sptr
-ReflAsciiSaver::workspace(std::string const &workspaceName) const {
+AsciiSaver::workspace(std::string const &workspaceName) const {
   auto const &ads = Mantid::API::AnalysisDataService::Instance();
 
   if (!ads.doesExist(workspaceName))
@@ -88,11 +89,11 @@ ReflAsciiSaver::workspace(std::string const &workspaceName) const {
   return ads.retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
 }
 
-Mantid::API::IAlgorithm_sptr ReflAsciiSaver::setUpSaveAlgorithm(
-    std::string const &saveDirectory,
-    Mantid::API::MatrixWorkspace_sptr workspace,
-    std::vector<std::string> const &logParameters,
-    FileFormatOptions const &fileFormat) const {
+Mantid::API::IAlgorithm_sptr
+AsciiSaver::setUpSaveAlgorithm(std::string const &saveDirectory,
+                               Mantid::API::MatrixWorkspace_sptr workspace,
+                               std::vector<std::string> const &logParameters,
+                               FileFormatOptions const &fileFormat) const {
   auto saveAlg = algorithmForFormat(fileFormat.format());
   auto extension = extensionForFormat(fileFormat.format());
   if (fileFormat.shouldIncludeTitle())
@@ -109,10 +110,10 @@ Mantid::API::IAlgorithm_sptr ReflAsciiSaver::setUpSaveAlgorithm(
   return saveAlg;
 }
 
-void ReflAsciiSaver::save(std::string const &saveDirectory,
-                          std::vector<std::string> const &workspaceNames,
-                          std::vector<std::string> const &logParameters,
-                          FileFormatOptions const &fileFormat) const {
+void AsciiSaver::save(std::string const &saveDirectory,
+                      std::vector<std::string> const &workspaceNames,
+                      std::vector<std::string> const &logParameters,
+                      FileFormatOptions const &fileFormat) const {
   // Setup the appropriate save algorithm
   if (isValidSaveDirectory(saveDirectory)) {
     for (auto const &name : workspaceNames) {

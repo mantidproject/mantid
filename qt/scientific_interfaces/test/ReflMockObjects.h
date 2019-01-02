@@ -15,7 +15,7 @@
 #include "GUI/Runs/IReflAutoreduction.h"
 #include "GUI/Runs/IReflSearcher.h"
 #include "GUI/Runs/ReflSearchModel.h"
-#include "GUI/Save/IReflAsciiSaver.h"
+#include "GUI/Save/IAsciiSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/ICatalogInfo.h"
@@ -123,14 +123,14 @@ public:
   ~MockICatalogInfo() override {}
 };
 
-class MockReflAsciiSaver : public IReflAsciiSaver {
+class MockAsciiSaver : public IAsciiSaver {
 public:
   MOCK_CONST_METHOD1(isValidSaveDirectory, bool(std::string const &));
   MOCK_CONST_METHOD4(save,
                      void(std::string const &, std::vector<std::string> const &,
                           std::vector<std::string> const &,
                           FileFormatOptions const &));
-  virtual ~MockReflAsciiSaver() = default;
+  virtual ~MockAsciiSaver() = default;
 };
 
 class MockReflSearcher : public IReflSearcher {

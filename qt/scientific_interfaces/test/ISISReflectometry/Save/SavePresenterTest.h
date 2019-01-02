@@ -7,9 +7,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
 
-#include "GUI/Save/SavePresenter.h"
-#include "GUI/Save/IReflAsciiSaver.h"
 #include "../../ReflMockObjects.h"
+#include "GUI/Save/IAsciiSaver.h"
+#include "GUI/Save/SavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -329,8 +329,7 @@ public:
 
 private:
   SavePresenter makePresenter() {
-    auto asciiSaver =
-        Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
+    auto asciiSaver = Mantid::Kernel::make_unique<NiceMock<MockAsciiSaver>>();
     m_asciiSaver = asciiSaver.get();
     auto presenter = SavePresenter(&m_view, std::move(asciiSaver));
     presenter.acceptMainPresenter(&m_mainPresenter);
@@ -464,7 +463,7 @@ private:
 
   NiceMock<MockSaveView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
-  NiceMock<MockReflAsciiSaver> *m_asciiSaver;
+  NiceMock<MockAsciiSaver> *m_asciiSaver;
   std::string m_savePath;
   // file format options for ascii saver
   NamedFormat m_fileFormat;

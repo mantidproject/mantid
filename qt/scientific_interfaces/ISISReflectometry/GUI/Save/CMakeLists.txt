@@ -1,8 +1,8 @@
 set ( SAVE_SRC_FILES
     SavePresenter.cpp
     SaveView.cpp
-    ReflAsciiSaver.cpp
-    IReflAsciiSaver.cpp
+    AsciiSaver.cpp
+    IAsciiSaver.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -13,8 +13,8 @@ set ( SAVE_INC_FILES
     ISaveView.h
     SaveView.h
     SavePresenterFactory.h
-    ReflAsciiSaver.h
-    IReflAsciiSaver.h
+    AsciiSaver.h
+    IAsciiSaver.h
 )
 
 set ( SAVE_MOC_FILES

@@ -4,9 +4,9 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_REFLASCIISAVER_H
-#define MANTID_ISISREFLECTOMETRY_REFLASCIISAVER_H
-#include "IReflAsciiSaver.h"
+#ifndef MANTID_ISISREFLECTOMETRY_ASCIISAVER_H
+#define MANTID_ISISREFLECTOMETRY_ASCIISAVER_H
+#include "IAsciiSaver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <string>
@@ -14,7 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class ReflAsciiSaver : public IReflAsciiSaver {
+class AsciiSaver : public IAsciiSaver {
 public:
   static Mantid::API::IAlgorithm_sptr algorithmForFormat(NamedFormat format);
   static std::string extensionForFormat(NamedFormat format);
@@ -42,4 +42,4 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_REFLASCIISAVER_H
+#endif // MANTID_ISISREFLECTOMETRY_ASCIISAVER_H

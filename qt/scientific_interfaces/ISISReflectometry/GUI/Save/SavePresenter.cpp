@@ -29,7 +29,7 @@ using namespace Mantid::API;
  * @param view :: The view we are handling
  */
 SavePresenter::SavePresenter(ISaveView *view,
-                             std::unique_ptr<IReflAsciiSaver> saver)
+                             std::unique_ptr<IAsciiSaver> saver)
     : m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
 
   m_view->subscribe(this);
