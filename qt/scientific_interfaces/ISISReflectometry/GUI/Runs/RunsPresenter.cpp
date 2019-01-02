@@ -66,7 +66,7 @@ RunsPresenter::RunsPresenter(IRunsView *mainView,
                              int defaultInstrumentIndex,
                              IMessageHandler *messageHandler,
                              boost::shared_ptr<IAutoreduction> autoreduction,
-                             boost::shared_ptr<IReflSearcher> searcher)
+                             boost::shared_ptr<ISearcher> searcher)
     : m_autoreduction(autoreduction), m_view(mainView),
       m_progressView(progressableView),
       m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
@@ -225,7 +225,7 @@ bool RunsPresenter::search() {
   if (searchString.empty())
     return false;
 
-  // This is breaking the abstraction provided by IReflSearcher, but provides a
+  // This is breaking the abstraction provided by ISearcher, but provides a
   // nice usability win
   // If we're not logged into a catalog, prompt the user to do so
   if (CatalogManager::Instance().getActiveSessions().empty()) {

@@ -31,7 +31,7 @@ namespace CustomInterfaces {
 // Forward decs
 class IAutoreduction;
 class IMessageHandler;
-class IReflSearcher;
+class ISearcher;
 class ReflSearchModel;
 
 using MantidWidgets::ProgressableView;
@@ -59,8 +59,8 @@ public:
                 int defaultInstrumentIndex, IMessageHandler *messageHandler,
                 boost::shared_ptr<IAutoreduction> autoreduction =
                     boost::shared_ptr<IAutoreduction>(),
-                boost::shared_ptr<IReflSearcher> searcher =
-                    boost::shared_ptr<IReflSearcher>());
+                boost::shared_ptr<ISearcher> searcher =
+                    boost::shared_ptr<ISearcher>());
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -116,7 +116,7 @@ private:
   /// The message reporting implementation
   IMessageHandler *m_messageHandler;
   /// The search implementation
-  boost::shared_ptr<IReflSearcher> m_searcher;
+  boost::shared_ptr<ISearcher> m_searcher;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list

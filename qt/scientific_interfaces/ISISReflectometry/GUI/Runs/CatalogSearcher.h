@@ -7,16 +7,16 @@
 #ifndef MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 #define MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 
-#include "IReflSearcher.h"
+#include "ISearcher.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class CatalogSearcher
 
-CatalogSearcher implements IReflSearcher to provide ICAT search
+CatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class CatalogSearcher : public IReflSearcher {
+class CatalogSearcher : public ISearcher {
 public:
   ~CatalogSearcher() override{};
   Mantid::API::ITableWorkspace_sptr search(const std::string &text) override;

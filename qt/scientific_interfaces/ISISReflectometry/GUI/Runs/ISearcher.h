@@ -14,14 +14,14 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflSearcher
+/** @class ISearcher
 
-IReflSearcher is an interface for search implementations used by
+ISearcher is an interface for search implementations used by
 IRunsPresenter implementations.
 */
-class IReflSearcher {
+class ISearcher {
 public:
-  virtual ~IReflSearcher(){};
+  virtual ~ISearcher(){};
   virtual Mantid::API::ITableWorkspace_sptr search(const std::string &text) = 0;
 };
 } // namespace CustomInterfaces

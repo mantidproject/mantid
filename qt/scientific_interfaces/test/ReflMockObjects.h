@@ -13,7 +13,7 @@
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
 #include "GUI/Runs/IAutoreduction.h"
-#include "GUI/Runs/IReflSearcher.h"
+#include "GUI/Runs/ISearcher.h"
 #include "GUI/Runs/ReflSearchModel.h"
 #include "GUI/Save/IAsciiSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -133,7 +133,7 @@ public:
   virtual ~MockAsciiSaver() = default;
 };
 
-class MockReflSearcher : public IReflSearcher {
+class MockSearcher : public ISearcher {
 public:
   MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
 };

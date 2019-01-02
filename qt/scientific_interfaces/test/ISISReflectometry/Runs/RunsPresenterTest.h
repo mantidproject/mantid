@@ -42,7 +42,7 @@ public:
         m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
         m_runsTableView(), m_progressView(), m_messageHandler(),
         m_autoreduction(new MockAutoreduction),
-        m_searcher(new MockReflSearcher) {
+        m_searcher(new MockSearcher) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -274,8 +274,8 @@ private:
                         IMessageHandler *messageHandler,
                         boost::shared_ptr<IAutoreduction> autoreduction =
                             boost::shared_ptr<IAutoreduction>(),
-                        boost::shared_ptr<IReflSearcher> searcher =
-                            boost::shared_ptr<IReflSearcher>())
+                        boost::shared_ptr<ISearcher> searcher =
+                            boost::shared_ptr<ISearcher>())
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
                         messageHandler, autoreduction, searcher) {}
@@ -430,7 +430,7 @@ private:
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
   boost::shared_ptr<MockAutoreduction> m_autoreduction;
-  boost::shared_ptr<MockReflSearcher> m_searcher;
+  boost::shared_ptr<MockSearcher> m_searcher;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
 };
 

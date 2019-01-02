@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_IREFLSEARCHER_H
-#define MANTID_CUSTOMINTERFACES_IREFLSEARCHER_H
+#ifndef MANTID_CUSTOMINTERFACES_ISEARCHER_H
+#define MANTID_CUSTOMINTERFACES_ISEARCHER_H
 
 #include <string>
 
@@ -13,14 +13,14 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class IReflSearcher
+/** @class ISearcher
 
-IReflSearcher is an interface for search implementations used by IReflPresenter
+ISearcher is an interface for search implementations used by IReflPresenter
 implementations.
 */
-class IReflSearcher {
+class ISearcher {
 public:
-  virtual ~IReflSearcher(){};
+  virtual ~ISearcher(){};
   virtual Mantid::API::ITableWorkspace_sptr search(const std::string &text) = 0;
 };
 } // namespace CustomInterfaces

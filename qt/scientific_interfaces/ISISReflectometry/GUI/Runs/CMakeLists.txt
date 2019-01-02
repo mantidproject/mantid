@@ -15,7 +15,7 @@ set ( RUNS_INC_FILES
     RunsPresenterFactory.h
     RunsView.h
     IAutoreduction.h
-    IReflSearcher.h
+    ISearcher.h
     Autoreduction.h
     CatalogSearcher.h
     ReflSearchModel.h

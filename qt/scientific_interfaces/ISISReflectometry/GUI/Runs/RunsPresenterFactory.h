@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
-#include "../General/IReflSearcher.h"
 #include "../RunsTable/RunsTablePresenterFactory.h"
 #include "Common/DllConfig.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
+#include "ISearcher.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 #include "RunsPresenter.h"
 #include <memory>
@@ -27,7 +27,7 @@ public:
                        int defaultInstrumentIndex,
                        IMessageHandler *messageHandler,
                        boost::shared_ptr<IAutoreduction> autoreduction,
-                       boost::shared_ptr<IReflSearcher> searcher)
+                       boost::shared_ptr<ISearcher> searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
@@ -50,7 +50,7 @@ private:
   int m_defaultInstrumentIndex;
   IMessageHandler *m_messageHandler;
   boost::shared_ptr<IAutoreduction> m_autoreduction;
-  boost::shared_ptr<IReflSearcher> m_searcher;
+  boost::shared_ptr<ISearcher> m_searcher;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
