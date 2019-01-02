@@ -42,13 +42,12 @@ BatchPresenter::BatchPresenter(
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
     std::unique_ptr<ISavePresenter> savePresenter)
-    : /*m_view(view),*/ m_model(std::move(model)),
+    : /*m_view(view),*/ m_jobRunner(std::move(model)),
       m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)), m_isProcessing(false),
-      m_isAutoreducing(false) {
+      m_savePresenter(std::move(savePresenter)) {
 
   view->subscribe(this);
 
@@ -92,7 +91,8 @@ void BatchPresenter::notifyAutoreductionCompleted() {
 }
 
 void BatchPresenter::reductionResumed() {
-  m_isProcessing = true;
+  m_jobRunner.resumeReduction();
+  // Notify child presenters
   m_savePresenter->reductionResumed();
   m_eventPresenter->reductionResumed();
   m_experimentPresenter->reductionResumed();
@@ -101,13 +101,13 @@ void BatchPresenter::reductionResumed() {
 }
 
 void BatchPresenter::reductionPaused() {
-  m_isProcessing = false;
+  m_jobRunner.resumeReduction();
+  // Notify child presenters
   m_savePresenter->reductionPaused();
   m_eventPresenter->reductionPaused();
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
-
   // Also stop autoreduction
   autoreductionPaused();
 }
@@ -123,7 +123,8 @@ void BatchPresenter::reductionCompletedForRow(
 }
 
 void BatchPresenter::autoreductionResumed() {
-  m_isAutoreducing = true;
+  m_jobRunner.resumeAutoreduction();
+  // Notify child presenters
   m_savePresenter->autoreductionResumed();
   m_eventPresenter->autoreductionResumed();
   m_experimentPresenter->autoreductionResumed();
@@ -132,7 +133,8 @@ void BatchPresenter::autoreductionResumed() {
 }
 
 void BatchPresenter::autoreductionPaused() {
-  m_isAutoreducing = false;
+  m_jobRunner.pauseAutoreduction();
+  // Notify child presenters
   m_savePresenter->autoreductionPaused();
   m_eventPresenter->autoreductionPaused();
   m_experimentPresenter->autoreductionPaused();
@@ -170,16 +172,18 @@ bool BatchPresenter::hasPerAngleOptions() const {
 }
 
 /**
-Checks whether or not data is currently being processed in this batch
-* @return : Bool on whether data is being processed
-*/
-bool BatchPresenter::isProcessing() const { return m_isProcessing; }
+   Checks whether or not data is currently being processed in this batch
+   * @return : Bool on whether data is being processed
+   */
+bool BatchPresenter::isProcessing() const { return m_jobRunner.isProcessing(); }
 
 /**
-Checks whether or not autoprocessing is currently running in this batch
-* i.e. whether we are polling for new runs
-* @return : Bool on whether data is being processed
-*/
-bool BatchPresenter::isAutoreducing() const { return m_isAutoreducing; }
+   Checks whether or not autoprocessing is currently running in this batch
+   * i.e. whether we are polling for new runs
+   * @return : Bool on whether data is being processed
+   */
+bool BatchPresenter::isAutoreducing() const {
+  return m_jobRunner.isAutoreducing();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H
 
+#include "BatchJobRunner.h"
 #include "Common/DllConfig.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
@@ -15,7 +16,6 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
-#include "Reduction/Batch.h"
 #include <memory>
 
 namespace MantidQt {
@@ -76,7 +76,7 @@ private:
   void instrumentChanged(const std::string &instName);
   void settingsChanged();
 
-  Batch m_model;
+  BatchJobRunner m_jobRunner;
   // The view is currently unused
   /*IBatchView *m_view;*/
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
@@ -84,8 +84,6 @@ private:
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
-  bool m_isProcessing;
-  bool m_isAutoreducing;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

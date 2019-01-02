@@ -1,6 +1,7 @@
 set ( BATCH_SRC_FILES
     BatchPresenter.cpp
     BatchView.cpp
+    BatchJobRunner.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -11,6 +12,7 @@ set ( BATCH_INC_FILES
     BatchPresenter.h
     BatchPresenterFactory.h
     BatchView.h
+    BatchJobRunner.h
 )
 
 set ( BATCH_MOC_FILES
