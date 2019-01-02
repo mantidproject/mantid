@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
+
 from mantid.kernel import ErrorReporter, UsageService, ConfigService
 from mantid.kernel import Logger
-from ErrorReporter.retrieve_recovery_files import zip_recovery_directory, remove_recovery_file
+from ErrorReporter.retrieve_recovery_files import zip_recovery_directory
 import requests
 
 
@@ -31,13 +33,21 @@ class ErrorReporterPresenter(object):
 
     def share_all_information(self, continue_working, name, email, text_box):
         uptime = UsageService.getUpTime()
-        zip_recovery_file, file_hash = zip_recovery_directory()
-        status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email, file_hash=file_hash
-                                             , text_box=text_box)
-        self.error_log.notice("Sent complete information")
-        if status == 201:
-            self._upload_recovery_file(zip_recovery_file=zip_recovery_file)
-        remove_recovery_file(zip_recovery_file)
+        try:
+            recovery_archive, file_hash = zip_recovery_directory()
+        except Exception as exc:
+            self.error_log.information("Error creating recovery archive: {}. No recovery information will be sent")
+            recovery_archive, file_hash = None, ""
+        status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email, file_hash=file_hash,
+                                             text_box=text_box)
+        self.error_log.notice("Sent full information")
+        if status == 201 and recovery_archive:
+            self._upload_recovery_file(recovery_archive=recovery_archive)
+            try:
+                os.remove(recovery_archive)
+            except OSError as exc:
+                self.error_log.information("Unable to remove zipped recovery information: {}".format(str(exc)))
+
         self._handle_exit(continue_working)
         return status
 
@@ -62,13 +72,13 @@ class ErrorReporterPresenter(object):
         else:
             self.error_log.error("Continue working.")
 
-    def _upload_recovery_file(self, zip_recovery_file):
+    def _upload_recovery_file(self, recovery_archive):
         url = ConfigService['errorreports.rooturl']
         url = '{}/api/recovery'.format(url)
-        files = {'file': open('{}.zip'.format(zip_recovery_file), 'rb')}
+        files = {'file': open('{}'.format(recovery_archive), 'rb')}
         response = requests.post(url, files=files)
         if response.status_code == 201:
-            self.error_log.notice("Uploaded recovery file to server HTTP response {}".format(response.status_code))
+            self.error_log.notice("Uploaded recovery file to server. HTTP response {}".format(response.status_code))
         else:
             self.error_log.error("Failed to send recovery data HTTP response {}".format(response.status_code))
 
