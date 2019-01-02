@@ -24,7 +24,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL EventPresenter
     : public IEventPresenter,
       public EventViewSubscriber {
 public:
-  EventPresenter(IEventView *view);
+  explicit EventPresenter(IEventView *view);
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void reductionPaused() override;
