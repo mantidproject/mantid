@@ -1167,7 +1167,11 @@ int FitPropertyBrowser::workspaceIndex() const {
 
 /// Set workspace index
 void FitPropertyBrowser::setWorkspaceIndex(int i) {
-  m_intManager->setValue(m_workspaceIndex, i);
+  try {
+    m_intManager->setValue(m_workspaceIndex, i);
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    // ignore this error
+  }
 }
 
 /// Get the output name
