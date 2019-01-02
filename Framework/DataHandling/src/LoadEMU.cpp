@@ -876,8 +876,8 @@ void LoadEMU<FD>::loadDopplerParameters(API::LogManager &logm) {
         doppDelay * m_dopplerFreq;
   }
 
-  // problems adding 'bool' to log
-  int32_t calPhase = 1 ? m_calibrateDoppler : 0;
+  // problem adding 'bool' to log
+  int32_t calPhase = (m_calibrateDoppler ? 1 : 0);
   logm.addProperty("CalibratePhase", calPhase);
 }
 
