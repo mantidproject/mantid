@@ -358,7 +358,7 @@ private:
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(m_view, updateMenuEnabledState(false));
+    EXPECT_CALL(m_view, updateMenuEnabledState(true));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
     EXPECT_CALL(m_view, setSearchButtonEnabled(false));
@@ -374,7 +374,7 @@ private:
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(m_view, updateMenuEnabledState(false));
+    EXPECT_CALL(m_view, updateMenuEnabledState(true));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
     EXPECT_CALL(m_view, setSearchButtonEnabled(false));
@@ -390,7 +390,7 @@ private:
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(m_view, updateMenuEnabledState(true));
+    EXPECT_CALL(m_view, updateMenuEnabledState(false));
     EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true));
     EXPECT_CALL(m_view, setSearchButtonEnabled(true));
