@@ -7,7 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
 
-#include "../../ReflMockObjects.h"
+#include "../ReflMockObjects.h"
 #include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/SavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"

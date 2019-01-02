@@ -8,7 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
-#include "../../ReflMockObjects.h"
+#include "../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenterFactory.h"
 #include "../RunsTable/MockRunsTableView.h"
 #include "MantidKernel/ConfigService.h"
@@ -41,8 +41,7 @@ public:
       : m_thetaTolerance(0.01),
         m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
         m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(new MockAutoreduction),
-        m_searcher(new MockSearcher) {
+        m_autoreduction(new MockAutoreduction), m_searcher(new MockSearcher) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -266,16 +265,14 @@ private:
     friend class RunsPresenterTest;
 
   public:
-    RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
-                        RunsTablePresenterFactory makeRunsTablePresenter,
-                        double thetaTolerance,
-                        std::vector<std::string> const &instruments,
-                        int defaultInstrumentIndex,
-                        IMessageHandler *messageHandler,
-                        boost::shared_ptr<IAutoreduction> autoreduction =
-                            boost::shared_ptr<IAutoreduction>(),
-                        boost::shared_ptr<ISearcher> searcher =
-                            boost::shared_ptr<ISearcher>())
+    RunsPresenterFriend(
+        IRunsView *mainView, ProgressableView *progressView,
+        RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
+        std::vector<std::string> const &instruments, int defaultInstrumentIndex,
+        IMessageHandler *messageHandler,
+        boost::shared_ptr<IAutoreduction> autoreduction =
+            boost::shared_ptr<IAutoreduction>(),
+        boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>())
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
                         messageHandler, autoreduction, searcher) {}

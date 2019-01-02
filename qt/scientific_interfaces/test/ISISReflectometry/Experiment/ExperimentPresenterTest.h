@@ -8,7 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
-#include "../../ReflMockObjects.h"
+#include "../ReflMockObjects.h"
 #include "MockExperimentView.h"
 
 #include <cxxtest/TestSuite.h>

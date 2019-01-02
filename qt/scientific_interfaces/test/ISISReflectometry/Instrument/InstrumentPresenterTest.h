@@ -8,7 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_INSTRUMENTPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentPresenter.h"
-#include "../../ReflMockObjects.h"
+#include "../ReflMockObjects.h"
 #include "MockInstrumentView.h"
 
 #include <cxxtest/TestSuite.h>
