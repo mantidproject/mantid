@@ -4,21 +4,21 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_REFLCATALOGSEARCHER_H
-#define MANTID_ISISREFLECTOMETRY_REFLCATALOGSEARCHER_H
+#ifndef MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
+#define MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
 
 #include "IReflSearcher.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class ReflCatalogSearcher
+/** @class CatalogSearcher
 
-ReflCatalogSearcher implements IReflSearcher to provide ICAT search
+CatalogSearcher implements IReflSearcher to provide ICAT search
 functionality.
 */
-class ReflCatalogSearcher : public IReflSearcher {
+class CatalogSearcher : public IReflSearcher {
 public:
-  ~ReflCatalogSearcher() override{};
+  ~CatalogSearcher() override{};
   Mantid::API::ITableWorkspace_sptr search(const std::string &text) override;
 };
 } // namespace CustomInterfaces

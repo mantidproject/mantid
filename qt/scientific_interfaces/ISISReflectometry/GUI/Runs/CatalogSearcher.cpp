@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ReflCatalogSearcher.h"
+#include "CatalogSearcher.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -15,7 +15,7 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ITableWorkspace_sptr ReflCatalogSearcher::search(const std::string &text) {
+ITableWorkspace_sptr CatalogSearcher::search(const std::string &text) {
   auto sessions = CatalogManager::Instance().getActiveSessions();
   if (sessions.empty())
     throw std::runtime_error("You are not logged into any catalogs.");

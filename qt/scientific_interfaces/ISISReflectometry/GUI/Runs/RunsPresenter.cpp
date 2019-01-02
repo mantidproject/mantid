@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
 #include "Autoreduction.h"
+#include "CatalogSearcher.h"
 #include "Common/IMessageHandler.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
@@ -22,7 +23,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "ReflCatalogSearcher.h"
 #include "ReflSearchModel.h"
 
 #include <QStringList>
@@ -83,9 +83,9 @@ RunsPresenter::RunsPresenter(IRunsView *mainView,
   if (!m_autoreduction)
     m_autoreduction.reset(new Autoreduction());
 
-  // If we don't have a searcher yet, use ReflCatalogSearcher
+  // If we don't have a searcher yet, use CatalogSearcher
   if (!m_searcher)
-    m_searcher.reset(new ReflCatalogSearcher());
+    m_searcher.reset(new CatalogSearcher());
 
   updateViewWhenMonitorStopped();
 }
