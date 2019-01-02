@@ -351,7 +351,8 @@ void MDNormalization::exec() {
     }
 
     // bin the data
-    IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", soIndex*0.3, (soIndex+1)*0.3);
+    double fraction=1./static_cast<double>(symmetryOps.size());
+    IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", soIndex*0.3*fraction, (soIndex+1)*0.3*fraction);
     binMD->setPropertyValue("AxisAligned", "0");
     binMD->setProperty("InputWorkspace",m_inputWS);
     binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
@@ -365,7 +366,7 @@ void MDNormalization::exec() {
 
       std::stringstream basisVector;
       std::vector<double> projection(m_inputWS->getNumDims(),0.);
-      if (key.find("QDimension1")!=std::string::npos) {
+      if (value.find("QDimension1")!=std::string::npos) {
           if (!isRLU) {
             projection[0]=1.;
             basisVector<<"Q_sample_x,A^{-1}";
@@ -376,7 +377,7 @@ void MDNormalization::exec() {
             projection[2]=Q1.Z();
             basisVector<<QDimensionName(m_Q1Basis)<<", r.l.u.";
           }
-      } else if (key.find("QDimension2")!=std::string::npos) {
+      } else if (value.find("QDimension2")!=std::string::npos) {
           if (!isRLU) {
             projection[1]=1.;
             basisVector<<"Q_sample_y,A^{-1}";
@@ -387,7 +388,7 @@ void MDNormalization::exec() {
             projection[2]=Q2.Z();
             basisVector<<QDimensionName(m_Q2Basis)<<", r.l.u.";
           }
-      } else if (key.find("QDimension3")!=std::string::npos) {
+      } else if (value.find("QDimension3")!=std::string::npos) {
           if (!isRLU) {
             projection[2]=1.;
             basisVector<<"Q_sample_z,A^{-1}";
@@ -405,13 +406,16 @@ void MDNormalization::exec() {
           }
           value=basisVector.str();
       }
+      g_log.debug()<<"Binning parameter "<<key<<" value: "<<value<<"\n";
       binMD->setPropertyValue(key, value);
       qindex++;
     }
     //execute algorithm
     binMD->executeAsChildAlg();
     outputWS=binMD->getProperty("OutputWorkspace");
-    // TODO: set the temporary workspace to be the output workspace, so it keeps adding different symmetries
+
+    //set the temporary workspace to be the output workspace, so it keeps adding different symmetries
+    tempDataWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
     soIndex+=1;
   }
 
