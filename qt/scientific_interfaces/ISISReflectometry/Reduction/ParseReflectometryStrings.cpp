@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ParseReflectometryStrings.h"
-#include "Common/Parse.h"
 #include "AllInitialized.h"
+#include "Common/Parse.h"
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <set>

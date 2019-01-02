@@ -7,8 +7,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H
 #define MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H
 #include "Common/ValidationResult.h"
-#include "Reduction/PerThetaDefaults.h"
 #include "PerThetaDefaultsTableValidationError.h"
+#include "Reduction/PerThetaDefaults.h"
 #include <array>
 
 namespace MantidQt {

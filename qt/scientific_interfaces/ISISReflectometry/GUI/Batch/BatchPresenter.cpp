@@ -81,9 +81,7 @@ void BatchPresenter::notifyReductionCompletedForRow(
   reductionCompletedForRow(group, workspaceName);
 }
 
-void BatchPresenter::notifyAutoreductionResumed() {
-  autoreductionResumed();
-}
+void BatchPresenter::notifyAutoreductionResumed() { autoreductionResumed(); }
 
 void BatchPresenter::notifyAutoreductionPaused() { autoreductionPaused(); }
 
@@ -150,9 +148,7 @@ void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
   m_instrumentPresenter->instrumentChanged(instrumentName);
 }
 
-void BatchPresenter::settingsChanged() {
-  m_runsPresenter->settingsChanged();
-}
+void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }
 
 /** Returns default values specified for 'Transmission run(s)' for the
  * given angle
@@ -160,8 +156,7 @@ void BatchPresenter::settingsChanged() {
  * @param angle :: the run angle to look up transmission runs for
  * @return :: Values passed for 'Transmission run(s)'
  */
-OptionsQMap
-BatchPresenter::getOptionsForAngle(const double /*angle*/) const {
+OptionsQMap BatchPresenter::getOptionsForAngle(const double /*angle*/) const {
   return OptionsQMap(); // TODO m_settingsPresenter->getOptionsForAngle(angle);
 }
 

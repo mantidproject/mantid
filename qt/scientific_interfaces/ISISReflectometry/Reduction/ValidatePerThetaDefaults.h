@@ -7,8 +7,8 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
 #define MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
-#include "Common/ValidationResult.h"
 #include "Common/DllConfig.h"
+#include "Common/ValidationResult.h"
 #include "ParseReflectometryStrings.h"
 #include "PerThetaDefaults.h"
 #include "TransmissionRunPair.h"

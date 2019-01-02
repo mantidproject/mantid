@@ -16,9 +16,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-BatchView::BatchView(QWidget *parent) : QWidget(parent) {
-  initLayout();
-}
+BatchView::BatchView(QWidget *parent) : QWidget(parent) { initLayout(); }
 
 void BatchView::subscribe(BatchViewSubscriber *notifyee) {
   m_notifyee = notifyee;
@@ -45,19 +43,13 @@ void BatchView::initLayout() {
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
 }
 
-IExperimentView *BatchView::experiment() const {
-  return m_experiment.get();
-}
+IExperimentView *BatchView::experiment() const { return m_experiment.get(); }
 
-IInstrumentView *BatchView::instrument() const {
-  return m_instrument.get();
-}
+IInstrumentView *BatchView::instrument() const { return m_instrument.get(); }
 
 IRunsView *BatchView::runs() const { return m_runs.get(); }
 
-IEventView *BatchView::eventHandling() const {
-  return m_eventHandling.get();
-}
+IEventView *BatchView::eventHandling() const { return m_eventHandling.get(); }
 
 ISaveView *BatchView::save() const { return m_save.get(); }
 

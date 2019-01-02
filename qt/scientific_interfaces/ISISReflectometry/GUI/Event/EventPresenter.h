@@ -7,8 +7,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 
-#include "Common/DllConfig.h"
 #include "../../Reduction/Slicing.h"
+#include "Common/DllConfig.h"
 #include "IEventPresenter.h"
 #include "IEventView.h"
 

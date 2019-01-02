@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 
-#include "IEventView.h"
 #include "Common/QWidgetGroup.h"
+#include "IEventView.h"
 #include "ui_EventWidget.h"
 #include <memory>
 

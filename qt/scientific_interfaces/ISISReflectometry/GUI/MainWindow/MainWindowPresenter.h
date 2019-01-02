@@ -27,7 +27,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowPresenter
 public:
   /// Constructor
   MainWindowPresenter(IMainWindowView *view,
-                          BatchPresenterFactory batchPresenterFactory);
+                      BatchPresenterFactory batchPresenterFactory);
   /// Run a python algorithm
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
   bool isProcessing() const override;

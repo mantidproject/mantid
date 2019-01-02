@@ -29,7 +29,7 @@ std::vector<SearchResult> const &SearchModel::results() const {
 @param instrument : instrument name
 */
 SearchModel::SearchModel(ITableWorkspace_sptr tableWorkspace,
-                             const std::string &instrument) {
+                         const std::string &instrument) {
   if (tableWorkspace)
     addDataFromTable(tableWorkspace, instrument);
 }

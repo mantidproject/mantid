@@ -112,8 +112,7 @@ Runs python code
 * @param pythonCode : [input] The code to run
 * @return : Result of the execution
 */
-std::string
-MainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
+std::string MainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
 
   QString output = runPythonCode(QString::fromStdString(pythonCode), false);
   return output.toStdString();
@@ -133,14 +132,14 @@ void MainWindowView::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindowView::giveUserCritical(const std::string &prompt,
-                                            const std::string &title) {
+                                      const std::string &title) {
   QMessageBox::critical(this, QString::fromStdString(title),
                         QString::fromStdString(prompt), QMessageBox::Ok,
                         QMessageBox::Ok);
 }
 
 void MainWindowView::giveUserInfo(const std::string &prompt,
-                                        const std::string &title) {
+                                  const std::string &title) {
   QMessageBox::information(this, QString::fromStdString(title),
                            QString::fromStdString(prompt), QMessageBox::Ok,
                            QMessageBox::Ok);

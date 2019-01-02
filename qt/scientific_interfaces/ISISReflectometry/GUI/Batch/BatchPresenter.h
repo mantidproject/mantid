@@ -33,11 +33,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
 public:
   /// Constructor
   BatchPresenter(IBatchView *view,
-                     std::unique_ptr<IRunsPresenter> runsPresenter,
-                     std::unique_ptr<IEventPresenter> eventPresenter,
-                     std::unique_ptr<IExperimentPresenter> experimentPresenter,
-                     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-                     std::unique_ptr<ISavePresenter> savePresenter);
+                 std::unique_ptr<IRunsPresenter> runsPresenter,
+                 std::unique_ptr<IEventPresenter> eventPresenter,
+                 std::unique_ptr<IExperimentPresenter> experimentPresenter,
+                 std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
+                 std::unique_ptr<ISavePresenter> savePresenter);
 
   // IBatchPresenter overrides
   void notifyReductionPaused() override;

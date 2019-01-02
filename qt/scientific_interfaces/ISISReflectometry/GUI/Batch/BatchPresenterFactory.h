@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_BATCHPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_BATCHPRESENTERFACTORY_H
+#include "BatchPresenter.h"
 #include "Common/DllConfig.h"
 #include "GUI/Event/EventPresenterFactory.h"
 #include "GUI/Experiment/ExperimentPresenterFactory.h"
@@ -14,7 +15,6 @@
 #include "GUI/Save/SavePresenterFactory.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
-#include "BatchPresenter.h"
 #include <memory>
 
 namespace MantidQt {
