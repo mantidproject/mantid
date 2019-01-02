@@ -24,6 +24,7 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs,
 } // namespace
 
 ReductionJobs::ReductionJobs(std::vector<Group> groups)
+    // cppcheck-suppress passedByValue
     : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
 
 ReductionJobs::ReductionJobs() : m_groupNameSuffix(1) {}

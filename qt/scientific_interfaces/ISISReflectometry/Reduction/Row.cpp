@@ -17,6 +17,7 @@ Row::Row(std::vector<std::string> runNumbers, double theta,
          boost::optional<double> scaleFactor,
          ReductionOptionsMap reductionOptions,
          ReductionWorkspaces reducedWorkspaceNames)
+    // cppcheck-suppress passedByValue
     : m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)),
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_transmissionRuns(std::move(transmissionRuns)),

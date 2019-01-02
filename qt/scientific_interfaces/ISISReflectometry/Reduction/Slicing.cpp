@@ -59,6 +59,7 @@ std::ostream &operator<<(std::ostream &os,
 }
 
 CustomSlicingByList::CustomSlicingByList(std::vector<double> sliceTimes)
+    // cppcheck-suppress passedByValue
     : m_sliceTimes(std::move(sliceTimes)) {}
 
 std::vector<double> const &CustomSlicingByList::sliceTimes() const {
@@ -90,6 +91,7 @@ std::ostream &operator<<(std::ostream &os, InvalidSlicing const &) {
 
 SlicingByEventLog::SlicingByEventLog(std::vector<double> sliceAtValues,
                                      std::string blockValue)
+    // cppcheck-suppress passedByValue
     : m_sliceAtValues(std::move(sliceAtValues)),
       m_blockName(std::move(blockValue)) {}
 

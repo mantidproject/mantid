@@ -19,6 +19,7 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        boost::optional<RangeInLambda> transmissionRunRange,
                        std::map<std::string, std::string> stitchParameters,
                        std::vector<PerThetaDefaults> perThetaDefaults)
+    // cppcheck-suppress passedByValue
     : m_analysisMode(analysisMode), m_reductionType(reductionType),
       m_summationType(summationType), m_includePartialBins(includePartialBins),
       m_debug(debug),

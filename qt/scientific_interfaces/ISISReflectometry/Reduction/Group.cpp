@@ -14,6 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 Group::Group(std::string name, std::vector<boost::optional<Row>> rows)
+    // cppcheck-suppress passedByValue
     : m_name(std::move(name)), m_rows(std::move(rows)) {}
 
 Group::Group(std::string name) : m_name(std::move(name)), m_rows() {}

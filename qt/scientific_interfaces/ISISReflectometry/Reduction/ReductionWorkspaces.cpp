@@ -14,6 +14,7 @@ ReductionWorkspaces::ReductionWorkspaces(
     std::pair<std::string, std::string> transmissionRuns,
     std::string combinedTransmissionRuns, std::string iVsLambda,
     std::string iVsQ, std::string iVsQBinned)
+    // cppcheck-suppress passedByValue
     : m_timeOfFlight(std::move(timeOfFlight)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_combinedTransmissionRuns(combinedTransmissionRuns),
