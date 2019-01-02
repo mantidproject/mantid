@@ -60,7 +60,8 @@ def extract_int_range(to_extract):
 def extract_list(to_extract, separator, converter):
     to_extract = to_extract.strip()
     to_extract = ' '.join(to_extract.split())
-    string_list = [element.replace(" ", "") for element in to_extract.split(separator)]
+    string_list = [element.replace(" ", "") for element in re.split(separator, to_extract)]
+    string_list = [element for element in string_list if element != ""]
     return [converter(element) for element in string_list]
 
 
@@ -75,7 +76,8 @@ def extract_string_list(to_extract, separator=","):
 def extract_float_range_midpoint_and_steps(to_extract, separator):
     to_extract = ' '.join(to_extract.split())
 
-    entries_string = to_extract.split(separator)
+    entries_string = re.split(separator, to_extract)
+    entries_string = [element for element in entries_string if element != ""]
     number_of_entries = len(entries_string)
     if number_of_entries != 5:
         raise RuntimeError("Expected a range defined by 5 numbers,"
@@ -113,7 +115,7 @@ start_string = "^\\s*"
 end_string = "\\s*$"
 space_string = "\\s+"
 rebin_string = "(\\s*[-+]?\\d+(\\.\\d+)?)(\\s*,\\s*[-+]?\\d+(\\.\\d+)?)*"
-
+comma_or_space_separator_string = ",? *"  # Will split the input string if commas OR spaces separate values
 
 # ----------------------------------------------------------------
 # --- Parsers ----------------------------------------------------
@@ -508,7 +510,7 @@ class LimitParser(UserFileComponentParser):
         L/PHI[/NOMIRROR] d1 d2
 
         L/Q/ q1 q2 [dq[/LIN]]  or  L/Q q1 q2 [dq[/LOG]]
-        L/Q q1,dq1,q3,dq2,q2 [/LIN]]  or  L/Q q1,dq1,q3,dq2,q2 [/LOG]]
+        L/Q q1,dq1,q2,dq2,q3 [/LIN]]  or  L/Q q1,dq1,q2,dq2,q3 [/LOG]]
         but apparently also L/Q q1, dq1, q2, dq2, q3, dq3, ... [/LOG | /LIN] is allowed
 
         L/Q/RCut c
@@ -565,8 +567,12 @@ class LimitParser(UserFileComponentParser):
         self._q = "\\s*Q\\s*"
         self._q_simple_pattern = re.compile(start_string + self._q + space_string +
                                             self._simple_range + end_string)
-        self._q_complex_pattern = re.compile(start_string + self._q + space_string + self._complex_range + end_string)
-        self._q_complex_pattern_2 = re.compile(start_string + self._q + space_string + self._complex_range_2 +
+
+        q_complex_range = ",?".join(self._complex_range.split(","))  # allow comma and space separation for q ranges
+        q_complex_range_2 = ",?".join(self._complex_range_2.split(","))
+
+        self._q_complex_pattern = re.compile(start_string + self._q + space_string + q_complex_range + end_string)
+        self._q_complex_pattern_2 = re.compile(start_string + self._q + space_string + q_complex_range_2 +
                                                end_string)
 
         # Qxy limits
@@ -651,7 +657,7 @@ class LimitParser(UserFileComponentParser):
             # We have to make sure that there is an odd number of elements
             range_with_steps_string = re.sub(self._q, "", line)
             range_with_steps_string = re.sub(self._lin_or_log, "", range_with_steps_string)
-            range_with_steps = extract_float_list(range_with_steps_string, ",")
+            range_with_steps = extract_float_list(range_with_steps_string, comma_or_space_separator_string)
             pattern_matches = len(range_with_steps) > 5 and (len(range_with_steps) % 2 == 1)
         return pattern_matches
 
@@ -767,7 +773,8 @@ class LimitParser(UserFileComponentParser):
 
         # Remove the step type
         range_with_steps_string = re.sub(self._lin_or_log, "", complex_range_input)
-        range_with_steps = extract_float_range_midpoint_and_steps(range_with_steps_string, ",")
+        range_with_steps = extract_float_range_midpoint_and_steps(range_with_steps_string,
+                                                                  comma_or_space_separator_string)
 
         # Check if there is a sign on the individual steps, this shows if something had been marked as linear or log.
         # If there is an explicit LOG/LIN command, then this overwrites the sign
@@ -791,7 +798,7 @@ class LimitParser(UserFileComponentParser):
 
         # Remove the step type
         range_with_steps_string = re.sub(self._lin_or_log, "", complex_range_input)
-        range_with_steps = extract_float_list(range_with_steps_string, ",")
+        range_with_steps = extract_float_list(range_with_steps_string, comma_or_space_separator_string)
 
         if step_type is not None:
             prefix = -1.0 if step_type is RangeStepType.Log else 1.0

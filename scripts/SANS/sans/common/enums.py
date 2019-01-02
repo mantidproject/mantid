@@ -73,7 +73,6 @@ def string_convertible(cls):
         if PY3 and isinstance(convert, bytes):
             convert = convert.decode()
         for key, value in list(elements.items()):
-            print(key, value)
             if convert == key or convert == value:
                 return True
         return False

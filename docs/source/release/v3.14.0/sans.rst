@@ -31,6 +31,7 @@ Improved
 * Added a "process all" and "process selected" button to the batch table in place of "process" button.
 * Added a load button to load selected workspaces without processing.
 * Added save_can option to output unsubtracted can and sample workspaces.
+* Can separate items in variable q binning with commas or spaces. E.g. L/Q 0.0, 0.02 0.3 0.05, 0.8
 
 Bug fixes
 #########
