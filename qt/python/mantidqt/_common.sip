@@ -283,7 +283,11 @@ public:
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
+    int workspaceIndex() const;
+    void setWorkspaceIndex(int i);
+    QStringList getWorkspaceNames();
     void fit();
+    void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
 signals:
     void startXChanged(double);
     void endXChanged(double);

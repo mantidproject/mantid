@@ -150,5 +150,32 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
         self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
 
+    def start_emu(self):
+        res1 = Load(r'emu00006473.nxs', OutputWorkspace='ws1')
+        Load(r'emu00006475.nxs', OutputWorkspace='ws2')
+        plot([res1[0]], [3, 5, 7])
+        manager = GlobalFigureManager.get_active()
+        self.w = manager.window
+        trigger_action(find_action_with_text(self.w, 'Fit'))
+        yield 0.1
+        self.fit_browser = manager.fit_browser
+
+    def test_ws_index(self):
+        yield self.start_emu()
+        self.assertEqual(self.fit_browser.getWorkspaceNames(), ['ws1'])
+        self.assertEqual(self.fit_browser.workspaceIndex(), 2)
+        self.fit_browser.setWorkspaceIndex(3)
+        yield self.wait_for_true(lambda: self.fit_browser.workspaceIndex() == 4)
+        self.assertEqual(self.fit_browser.workspaceIndex(), 4)
+        self.fit_browser.setWorkspaceIndex(3)
+        yield self.wait_for_true(lambda: self.fit_browser.workspaceIndex() == 2)
+        self.assertEqual(self.fit_browser.workspaceIndex(), 2)
+        self.fit_browser.setWorkspaceIndex(10)
+        yield self.wait_for_true(lambda: self.fit_browser.workspaceIndex() == 6)
+        self.assertEqual(self.fit_browser.workspaceIndex(), 6)
+        self.fit_browser.setWorkspaceIndex(0)
+        yield self.wait_for_true(lambda: self.fit_browser.workspaceIndex() == 2)
+        self.assertEqual(self.fit_browser.workspaceIndex(), 2)
+
 
 runTests(TestFitPropertyBrowser)

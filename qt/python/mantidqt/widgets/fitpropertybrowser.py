@@ -9,6 +9,7 @@
 #
 from __future__ import (print_function, absolute_import, unicode_literals)
 
+import re
 import numpy as np
 
 from matplotlib.path import Path
@@ -50,6 +51,16 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
+        allowed_spectra = {}
+        pattern = re.compile('(.+?): spec (\d+)')
+        for label in [lin.get_label() for lin in self.get_lines()]:
+            a_match = re.match(pattern, label)
+            name, spec = a_match.group(1), int(a_match.group(2))
+            spec_list = allowed_spectra.get(name, [])
+            spec_list.append(spec)
+            allowed_spectra[name] = spec_list
+        for name, spec_list in allowed_spectra.items():
+            self.addAllowedSpectra(name, spec_list)
         self.tool = FitInteractiveTool(self.canvas)
         self.tool.fit_start_x_moved.connect(self.setStartX)
         self.tool.fit_end_x_moved.connect(self.setEndX)

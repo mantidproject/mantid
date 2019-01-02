@@ -54,6 +54,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <iostream>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -105,13 +106,13 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
       m_fitTree(nullptr), m_currentHandler(nullptr),
       m_defaultFunction("Gaussian"), m_defaultPeak("Gaussian"),
-      m_defaultBackground("LinearBackground"), m_index_(0), m_peakToolOn(false),
+      m_defaultBackground("LinearBackground"), m_peakToolOn(false),
       m_auto_back(false),
       m_autoBgName(QString::fromStdString(
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),
       m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
-      m_shouldBeNormalised(false) {
+      m_shouldBeNormalised(false), m_oldWorkspaceIndex(0) {
   Mantid::API::FrameworkManager::Instance().loadPlugins();
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
@@ -1157,6 +1158,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
       }
     }
   }
+  setWorkspaceIndex(-1);
 }
 
 /// Get workspace index
@@ -1362,20 +1364,41 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
+
     auto const workspace =
         convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
 
     if (workspace) {
-      int const numberOfSpectra = getNumberOfSpectra(workspace);
+      auto const allowedIndices = m_allowedSpectra.empty() ? QList<int>() : m_allowedSpectra[QString::fromStdString(workspaceName())];
+      auto const firstIndex = m_allowedSpectra.empty() ? 0 : allowedIndices.front();
+      auto const lastIndex = m_allowedSpectra.empty() ? getNumberOfSpectra(workspace) - 1 : allowedIndices.back();
       int const currentIndex = workspaceIndex();
-
-      if (currentIndex < 0) {
-        setWorkspaceIndex(0);
-        emit workspaceIndexChanged(0);
-      } else if (currentIndex >= numberOfSpectra) {
-        setWorkspaceIndex(numberOfSpectra - 1);
-        emit workspaceIndexChanged(numberOfSpectra - 1);
+      if (currentIndex == m_oldWorkspaceIndex) {
+        return;
       }
+
+      auto allowedIndex = currentIndex;
+      if (currentIndex < firstIndex) {
+        allowedIndex = firstIndex;
+      } else if (currentIndex > lastIndex) {
+        allowedIndex = lastIndex;
+      } else if (!m_allowedSpectra.empty() && !allowedIndices.contains(currentIndex)) {
+        allowedIndex = m_oldWorkspaceIndex;
+        auto i = allowedIndices.indexOf(m_oldWorkspaceIndex);
+        if (i >= 0) {
+          i = currentIndex > m_oldWorkspaceIndex ? i + 1 : i - 1;
+          if (i >= 0 && i < allowedIndices.size()) {
+            allowedIndex = allowedIndices[i];
+          }
+        }
+      }
+
+      if (allowedIndex != currentIndex) {
+        setWorkspaceIndex(allowedIndex);
+        emit workspaceIndexChanged(allowedIndex);
+      }
+
+      m_oldWorkspaceIndex = currentIndex;
     } else
       setWorkspaceIndex(0);
   } else if (prop->propertyName() == "Workspace Index") {
@@ -1748,12 +1771,15 @@ void FitPropertyBrowser::clearFitResultStatus() {
 /// Get and store available workspace names
 void FitPropertyBrowser::populateWorkspaceNames() {
   m_workspaceNames.clear();
-  // QStringList tmp = m_appWindow->mantidUI->getWorkspaceNames();
+  bool allAreAllowed = m_allowedSpectra.isEmpty();
 
   QStringList tmp;
   auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   for (auto it = sv.begin(); it != sv.end(); ++it) {
-    tmp << QString::fromStdString(*it);
+    auto const &name = QString::fromStdString(*it);
+    if (allAreAllowed || m_allowedSpectra.contains(name)) {
+      tmp << name;
+    }
   }
 
   for (int i = 0; i < tmp.size(); i++) {
@@ -1765,6 +1791,7 @@ void FitPropertyBrowser::populateWorkspaceNames() {
     }
   }
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+  setWorkspaceIndex(-1);
 }
 
 /**
@@ -1796,11 +1823,12 @@ void FitPropertyBrowser::setADSObserveEnabled(bool enabled) {
 void FitPropertyBrowser::addHandle(
     const std::string &wsName,
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
-  if (!isWorkspaceValid(ws))
+  auto const qName = QString::fromStdString(wsName);
+  if (!isWorkspaceValid(ws) || (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName)))
     return;
   QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
-  int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
+  int i = m_workspaceNames.indexOf(qName);
 
   bool initialSignalsBlocked = m_enumManager->signalsBlocked();
 
@@ -1810,7 +1838,7 @@ void FitPropertyBrowser::addHandle(
       m_enumManager->blockSignals(true);
     }
 
-    m_workspaceNames.append(QString(wsName.c_str()));
+    m_workspaceNames.append(qName);
     m_workspaceNames.sort();
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   }
@@ -1821,12 +1849,6 @@ void FitPropertyBrowser::addHandle(
   }
 
   m_enumManager->blockSignals(initialSignalsBlocked);
-  /*
-  if (m_workspaceNames.size() == 1)
-  {
-    setWorkspaceName(QString::fromStdString(wsName));
-  }
-  */
 }
 
 /// workspace was removed
@@ -3310,6 +3332,20 @@ void FitPropertyBrowser::modifyFitMenu(QAction *fitAction, bool enabled) {
 
 int MantidQt::MantidWidgets::FitPropertyBrowser::sizeOfFunctionsGroup() const {
   return m_functionsGroup->children().size();
+}
+
+void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<int> &wsSpectra) {
+  auto const name = wsName.toStdString();
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+  if (ws) {
+    QList<int> indices;
+    for(auto const i : wsSpectra) {
+      indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
+    }
+    m_allowedSpectra.insert(wsName, indices);
+  } else {
+    throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
+  }
 }
 
 } // namespace MantidWidgets

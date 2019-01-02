@@ -208,8 +208,6 @@ public:
   /// Display a tip
   void setTip(const QString &txt);
 
-  /// return groupMember
-  // const std::string groupMember() const {return m_groupMember;};
   /// alter text of Plot Guess
   void setTextPlotGuess(const QString text);
 
@@ -267,6 +265,7 @@ public:
   // Methods intended for testing only
 
   int sizeOfFunctionsGroup() const;
+  void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
 public slots:
   virtual void fit();
   virtual void sequentialFit();
@@ -597,9 +596,6 @@ private:
   /// Default background name
   std::string m_defaultBackground;
 
-  /// The current function index
-  int m_index_;
-
   /// Shows if the PeakPickerTool is on
   bool m_peakToolOn;
 
@@ -615,11 +611,6 @@ private:
   /// The autobackground handler
   PropertyHandler *m_autoBackground;
 
-  /// if isWorkspaceAGroup() is true m_groupMember keeps name of the
-  /// MatrixWorkspace
-  /// fitted with theFunction()
-  // std::string m_groupMember;
-
   /// Log names
   QStringList m_logs;
 
@@ -634,6 +625,14 @@ private:
 
   /// Should the data be normalised before fitting?
   bool m_shouldBeNormalised;
+
+  /// If non-empty it contains references to the spectra
+  /// allowed to be fitted in this browser:
+  ///   keys are workspace names,
+  ///   values are lists of workspace indices
+  QMap<QString, QList<int>> m_allowedSpectra;
+  /// Store workspace index to revert to in case validation fails
+  int m_oldWorkspaceIndex;
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;
