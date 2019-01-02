@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
+#include "../../ReflMockObjects.h"
 #include "MockExperimentView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -15,6 +16,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -383,8 +385,23 @@ public:
     runTestForInvalidPerAngleOptions(optionsTable, 0, 7);
   }
 
+  void testChangingSettingsNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testChangingPerAngleDefaultsNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifyPerAngleDefaultsChanged(0, 0);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
+  NiceMock<MockReflBatchPresenter> m_mainPresenter;
   double m_thetaTolerance{0.01};
 
   Experiment makeModel() {
@@ -405,8 +422,10 @@ private:
   ExperimentPresenter makePresenter() {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter =
         ExperimentPresenter(&m_view, makeModel(), m_thetaTolerance);
+    presenter.acceptMainPresenter(&m_mainPresenter);
     verifyAndClear();
     return presenter;
   }
