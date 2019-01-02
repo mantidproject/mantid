@@ -33,6 +33,12 @@ public:
 
   InstrumentPresenterTest() : m_view() {}
 
+  void testPresenterSubscribesToView() {
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
   void testSetValidWavelengthRange() {
     auto const range = RangeInLambda(1.5, 14);
     runTestForValidWavelengthRange(range, range);
@@ -231,10 +237,8 @@ private:
   }
 
   InstrumentPresenter makePresenter() {
-    EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter = InstrumentPresenter(&m_view, makeModel());
     presenter.acceptMainPresenter(&m_mainPresenter);
-    verifyAndClear();
     return presenter;
   }
 

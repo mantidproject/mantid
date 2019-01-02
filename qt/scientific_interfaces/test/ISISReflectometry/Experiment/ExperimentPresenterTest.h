@@ -40,6 +40,12 @@ public:
 
   ExperimentPresenterTest() : m_view() {}
 
+  void testPresenterSubscribesToView() {
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
   void testAllWidgetsAreEnabledWhenReductionPaused() {
     auto presenter = makePresenter();
 
@@ -422,11 +428,9 @@ private:
   ExperimentPresenter makePresenter() {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter =
         ExperimentPresenter(&m_view, makeModel(), m_thetaTolerance);
     presenter.acceptMainPresenter(&m_mainPresenter);
-    verifyAndClear();
     return presenter;
   }
 

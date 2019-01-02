@@ -21,7 +21,11 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using namespace testing;
+using testing::AtLeast;
+using testing::Mock;
+using testing::NiceMock;
+using testing::Return;
+using testing::_;
 
 //=====================================================================================
 // Functional tests
@@ -43,7 +47,32 @@ public:
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
 
-  void testMakePresenter() { auto presenter = makePresenter(); }
+  void testCreatePresenterSubscribesToView() {
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testCreatePresenterGetsRunsTableView() {
+    EXPECT_CALL(m_view, table()).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testCreatePresenterSetsInstrumentList() {
+    auto const defaultInstrumentIndex = 0;
+    EXPECT_CALL(m_view,
+                setInstrumentList(m_instruments, defaultInstrumentIndex))
+        .Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testCreatePresenterUpdatesView() {
+    expectUpdateViewWhenMonitorStopped();
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
 
   void testSettingsChanged() {
     // TODO
@@ -178,7 +207,9 @@ public:
   void testTransferWithAutoreductionRunning() {
     auto presenter = makePresenter();
     expectGetValidSearchRowSelection(presenter);
-    EXPECT_CALL(*m_autoreduction, running()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(1)
+        .WillOnce(Return(true));
     expectCreateEndlessProgressIndicator();
     presenter.notifyTransfer();
     verifyAndClear();
@@ -187,7 +218,9 @@ public:
   void testTransferWithAutoreductionStopped() {
     auto presenter = makePresenter();
     expectGetValidSearchRowSelection(presenter);
-    EXPECT_CALL(*m_autoreduction, running()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(1)
+        .WillOnce(Return(false));
     expectCreatePercentageProgressIndicator();
     presenter.notifyTransfer();
     verifyAndClear();
@@ -249,16 +282,7 @@ private:
   };
 
   RunsPresenterFriend makePresenter() {
-    auto defaultInstrumentIndex = 0;
-    EXPECT_CALL(m_view, subscribe(_)).Times(1);
-    EXPECT_CALL(m_runsTableView, subscribe(_)).Times(1);
-    EXPECT_CALL(m_view, table()).Times(1).WillOnce(Return(&m_runsTableView));
-    EXPECT_CALL(m_runsTableView, jobs()).Times(1).WillOnce(ReturnRef(m_jobs));
-    EXPECT_CALL(m_view,
-                setInstrumentList(m_instruments, defaultInstrumentIndex))
-        .Times(1);
-    expectUpdateViewWhenMonitorStopped();
-
+    auto const defaultInstrumentIndex = 0;
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView,
         MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance),
@@ -266,7 +290,6 @@ private:
         &m_messageHandler, m_autoreduction, m_searcher);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
-    verifyAndClear();
     return presenter;
   }
 
@@ -401,11 +424,11 @@ private:
 
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
-  MockRunsView m_view;
+  NiceMock<MockRunsView> m_view;
   NiceMock<MockRunsTableView> m_runsTableView;
-  MockReflBatchPresenter m_mainPresenter;
-  MockProgressableView m_progressView;
-  MockMessageHandler m_messageHandler;
+  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockProgressableView> m_progressView;
+  NiceMock<MockMessageHandler> m_messageHandler;
   boost::shared_ptr<MockReflAutoreduction> m_autoreduction;
   boost::shared_ptr<MockReflSearcher> m_searcher;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;

@@ -28,16 +28,10 @@ public:
 
   EventPresenterTest() : m_view() {}
 
-  EventPresenter makePresenter() {
+  void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
-    auto presenter = EventPresenter(&m_view);
-    presenter.acceptMainPresenter(&m_mainPresenter);
+    auto presenter = makePresenter();
     verifyAndClear();
-    return presenter;
-  }
-
-  void verifyAndClear() {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
   }
 
   void testNoEventSlicingByDefault() {
@@ -229,6 +223,16 @@ public:
 private:
   NiceMock<MockEventView> m_view;
   NiceMock<MockReflBatchPresenter> m_mainPresenter;
+
+  EventPresenter makePresenter() {
+    auto presenter = EventPresenter(&m_view);
+    presenter.acceptMainPresenter(&m_mainPresenter);
+    return presenter;
+  }
+
+  void verifyAndClear() {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+  }
 
   void expectChangeSliceType(SliceType oldSliceType, SliceType newSliceType) {
     EXPECT_CALL(m_view, disableSliceType(oldSliceType)).Times(1);

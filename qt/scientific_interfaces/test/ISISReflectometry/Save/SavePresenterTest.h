@@ -28,9 +28,11 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
 using Mantid::DataObjects::Workspace2D_sptr;
+using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
+using testing::_;
 
 class SavePresenterTest : public CxxTest::TestSuite {
 public:
@@ -41,6 +43,12 @@ public:
       : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom),
         m_prefix("testoutput_"), m_includeTitle(true), m_separator(","),
         m_includeQResolution(true) {}
+
+  void testPresenterSubscribesToView() {
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
 
   void testNotifyPopulateWorkspaceList() {
     auto presenter = makePresenter();
@@ -305,11 +313,27 @@ public:
     verifyAndClear();
   }
 
+  void testAutosaveDisabledNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifyAutosaveDisabled();
+    verifyAndClear();
+  }
+
+  void testAutosaveEnabledNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifyAutosaveEnabled();
+    verifyAndClear();
+  }
+
 private:
   SavePresenter makePresenter() {
-    auto asciiSaver = Mantid::Kernel::make_unique<MockReflAsciiSaver>();
+    auto asciiSaver =
+        Mantid::Kernel::make_unique<NiceMock<MockReflAsciiSaver>>();
     m_asciiSaver = asciiSaver.get();
     auto presenter = SavePresenter(&m_view, std::move(asciiSaver));
+    presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
 
@@ -438,8 +462,9 @@ private:
         .Times(1);
   }
 
-  MockSaveView m_view;
-  MockReflAsciiSaver *m_asciiSaver;
+  NiceMock<MockSaveView> m_view;
+  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockReflAsciiSaver> *m_asciiSaver;
   std::string m_savePath;
   // file format options for ascii saver
   NamedFormat m_fileFormat;
