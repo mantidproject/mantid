@@ -47,7 +47,8 @@ BatchPresenter::BatchPresenter(
       m_instrumentPresenter(std::move(instrumentPresenter)),
       m_savePresenter(std::move(savePresenter)), m_isProcessing(false),
       m_isAutoreducing(false) {
-  UNUSED_ARG(view);
+
+  view->subscribe(this);
 
   // Tell the tab presenters that this is going to be the main presenter
   m_savePresenter->acceptMainPresenter(this);

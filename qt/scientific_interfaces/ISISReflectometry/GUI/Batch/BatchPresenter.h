@@ -14,6 +14,7 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchPresenter.h"
+#include "IBatchView.h"
 #include <memory>
 
 namespace MantidQt {
@@ -27,7 +28,8 @@ BatchPresenter is the concrete main window presenter implementing the
 functionality defined by the interface IBatchPresenter.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
-    : public IBatchPresenter {
+    : public IBatchPresenter,
+      public BatchViewSubscriber {
 public:
   /// Constructor
   BatchPresenter(IBatchView *view,

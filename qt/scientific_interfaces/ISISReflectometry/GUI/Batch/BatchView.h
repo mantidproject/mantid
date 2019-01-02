@@ -12,7 +12,6 @@
 #include "GUI/Instrument/InstrumentView.h"
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
-#include "IBatchPresenter.h"
 #include "IBatchView.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "ui_BatchWidget.h"
@@ -27,7 +26,7 @@ class BatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
   explicit BatchView(QWidget *parent = nullptr);
-  void subscribe(IBatchPresenter *notifyee);
+  void subscribe(BatchViewSubscriber *notifyee) override;
 
   IRunsView *runs() const override;
   IEventView *eventHandling() const override;
@@ -44,7 +43,7 @@ private:
   std::unique_ptr<SaveView> createSaveTab();
 
   Ui::BatchWidget m_ui;
-  IBatchPresenter *m_notifyee;
+  BatchViewSubscriber *m_notifyee;
   std::unique_ptr<RunsView> m_runs;
   std::unique_ptr<EventView> m_eventHandling;
   std::unique_ptr<SaveView> m_save;

@@ -10,7 +10,6 @@
 #include "GUI/Save/SaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/make_unique.h"
-#include "BatchPresenter.h"
 
 #include <QMessageBox>
 
@@ -19,6 +18,10 @@ namespace CustomInterfaces {
 
 BatchView::BatchView(QWidget *parent) : QWidget(parent) {
   initLayout();
+}
+
+void BatchView::subscribe(BatchViewSubscriber *notifyee) {
+  m_notifyee = notifyee;
 }
 
 void BatchView::initLayout() {

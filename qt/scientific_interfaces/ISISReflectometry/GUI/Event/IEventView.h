@@ -15,11 +15,6 @@ namespace CustomInterfaces {
 
 enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
 
-/**
-IEventView is the base view class for the Reflectometry "Event Handling"
-tab. It contains no QT specific functionality as that should be handled by a
-subclass.
-*/
 class MANTIDQT_ISISREFLECTOMETRY_DLL EventViewSubscriber {
 public:
   virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;

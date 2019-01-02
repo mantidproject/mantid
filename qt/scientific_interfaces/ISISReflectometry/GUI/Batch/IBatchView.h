@@ -17,15 +17,19 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchViewSubscriber {
+public:
+};
+
 /** @class IBatchView
 
-IBatchView is the interface defining the functions that the main
-window view needs to implement. It is empty and not necessary at the moment, but
-can be used in the future if widgets common to all tabs are added, for instance,
-the help button.
+IBatchView is the base view class for the Reflectometry "Batch"
+tab. It contains no QT specific functionality as that should be handled by a
+subclass.
 */
 class IBatchView {
 public:
+  virtual void subscribe(BatchViewSubscriber *notifyee) = 0;
   virtual IRunsView *runs() const = 0;
   virtual IEventView *eventHandling() const = 0;
   virtual ISaveView *save() const = 0;
