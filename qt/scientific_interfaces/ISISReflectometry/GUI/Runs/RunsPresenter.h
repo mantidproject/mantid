@@ -32,7 +32,7 @@ namespace CustomInterfaces {
 class IAutoreduction;
 class IMessageHandler;
 class ISearcher;
-class ReflSearchModel;
+class SearchModel;
 
 using MantidWidgets::ProgressableView;
 
@@ -99,7 +99,7 @@ protected:
   /// Information about the autoreduction process
   boost::shared_ptr<IAutoreduction> m_autoreduction;
   /// The search model
-  boost::shared_ptr<ReflSearchModel> m_searchModel;
+  boost::shared_ptr<SearchModel> m_searchModel;
   /// The current transfer method
   std::string m_currentTransferMethod;
 

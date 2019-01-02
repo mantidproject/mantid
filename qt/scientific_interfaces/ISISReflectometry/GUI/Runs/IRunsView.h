@@ -29,7 +29,7 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 namespace DataProcessor = MantidWidgets::DataProcessor;
-class ReflSearchModel;
+class SearchModel;
 
 /**
 IRunsView is the base view class for the Reflectometry "Runs"
@@ -65,7 +65,7 @@ public:
   virtual IRunsTableView *table() const = 0;
 
   // Connect the model
-  virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
+  virtual void showSearch(boost::shared_ptr<SearchModel> model) = 0;
 
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,

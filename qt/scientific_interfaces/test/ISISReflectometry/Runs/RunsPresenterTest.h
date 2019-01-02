@@ -343,7 +343,7 @@ private:
         .WillOnce(Return(selectedRows));
     // Set up a mock search model in the presenter to return something
     // sensible for getRowData
-    auto searchModel = boost::make_shared<MockReflSearchModel>(
+    auto searchModel = boost::make_shared<MockSearchModel>(
         "13460", "my title th=0.5", "my location");
     presenter.m_searchModel = searchModel;
   }

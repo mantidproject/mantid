@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
-#define MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
+#ifndef MANTID_ISISREFLECTOMETRY_SEARCHMODEL_H_
+#define MANTID_ISISREFLECTOMETRY_SEARCHMODEL_H_
 
 #include "Common/DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -19,15 +19,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** ReflSearchModel : Provides a QAbstractTableModel for a Mantid
+/** SearchModel : Provides a QAbstractTableModel for a Mantid
 ITableWorkspace of Reflectometry search results.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSearchModel
-    : public QAbstractTableModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL SearchModel : public QAbstractTableModel {
   Q_OBJECT
 public:
-  ReflSearchModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
-                  const std::string &instrument);
+  SearchModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+              const std::string &instrument);
   void addDataFromTable(Mantid::API::ITableWorkspace_sptr tableWorkspace,
                         const std::string &instrument);
   // row and column counts
@@ -59,10 +58,10 @@ private:
   bool runHasError(const SearchResult &run) const;
 };
 
-/// Typedef for a shared pointer to \c ReflSearchModel
-using ReflSearchModel_sptr = boost::shared_ptr<ReflSearchModel>;
+/// Typedef for a shared pointer to \c SearchModel
+using SearchModel_sptr = boost::shared_ptr<SearchModel>;
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_ */
+#endif /* MANTID_ISISREFLECTOMETRY_SEARCHMODEL_H_ */

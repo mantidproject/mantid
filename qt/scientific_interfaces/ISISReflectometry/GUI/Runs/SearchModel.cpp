@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ReflSearchModel.h"
+#include "SearchModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <QColor>
@@ -14,13 +14,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
 
-bool ReflSearchModel::knownFileType(std::string const &filename) const {
+bool SearchModel::knownFileType(std::string const &filename) const {
   boost::regex pattern("raw$", boost::regex::icase);
   boost::smatch match; // Unused.
   return boost::regex_search(filename, match, pattern);
 }
 
-std::vector<SearchResult> const &ReflSearchModel::results() const {
+std::vector<SearchResult> const &SearchModel::results() const {
   return m_runDetails;
 }
 
@@ -28,19 +28,19 @@ std::vector<SearchResult> const &ReflSearchModel::results() const {
 @param tableWorkspace : The table workspace to copy data from
 @param instrument : instrument name
 */
-ReflSearchModel::ReflSearchModel(ITableWorkspace_sptr tableWorkspace,
-                                 const std::string &instrument) {
+SearchModel::SearchModel(ITableWorkspace_sptr tableWorkspace,
+                             const std::string &instrument) {
   if (tableWorkspace)
     addDataFromTable(tableWorkspace, instrument);
 }
 
-void ReflSearchModel::setError(int i, std::string const &error) {
+void SearchModel::setError(int i, std::string const &error) {
   m_runDetails[i].issues = error;
   emit dataChanged(index(i, 0), index(i, 2));
 }
 
-void ReflSearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
-                                       const std::string &instrument) {
+void SearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
+                                   const std::string &instrument) {
 
   // Copy the data from the input table workspace
   std::vector<SearchResult> newRunDetails;
@@ -91,14 +91,14 @@ void ReflSearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
 /**
 @return the row count.
 */
-int ReflSearchModel::rowCount(const QModelIndex &) const {
+int SearchModel::rowCount(const QModelIndex &) const {
   return static_cast<int>(m_runDetails.size());
 }
 
 /**
 @return the number of columns in the model.
 */
-int ReflSearchModel::columnCount(const QModelIndex &) const { return 3; }
+int SearchModel::columnCount(const QModelIndex &) const { return 3; }
 
 /**
 Overrident data method, allows consuming view to extract data for an index and
@@ -106,7 +106,7 @@ role.
 @param index : For which to extract the data
 @param role : Role mode
 */
-QVariant ReflSearchModel::data(const QModelIndex &index, int role) const {
+QVariant SearchModel::data(const QModelIndex &index, int role) const {
 
   const int colNumber = index.column();
   const int rowNumber = index.row();
@@ -153,8 +153,8 @@ Get the heading for a given section, orientation and role.
 @param role : Role mode of table.
 @return HeaderData.
 */
-QVariant ReflSearchModel::headerData(int section, Qt::Orientation orientation,
-                                     int role) const {
+QVariant SearchModel::headerData(int section, Qt::Orientation orientation,
+                                 int role) const {
   if (role != Qt::DisplayRole)
     return QVariant();
 
@@ -177,7 +177,7 @@ QVariant ReflSearchModel::headerData(int section, Qt::Orientation orientation,
 Provide flags on an index by index basis
 @param index: To generate a flag for.
 */
-Qt::ItemFlags ReflSearchModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags SearchModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return nullptr;
   else
@@ -187,7 +187,7 @@ Qt::ItemFlags ReflSearchModel::flags(const QModelIndex &index) const {
 /**
 Clear the model
 */
-void ReflSearchModel::clear() {
+void SearchModel::clear() {
   beginResetModel();
   m_runDetails.clear();
   endResetModel();
@@ -197,11 +197,11 @@ void ReflSearchModel::clear() {
 @param run : the run number
 @return : true if there is at least one error for this run
 */
-bool ReflSearchModel::runHasError(const SearchResult &run) const {
+bool SearchModel::runHasError(const SearchResult &run) const {
   return !(run.issues.empty());
 }
 
-SearchResult const &ReflSearchModel::getRowData(int index) const {
+SearchResult const &SearchModel::getRowData(int index) const {
   return m_runDetails[index];
 }
 

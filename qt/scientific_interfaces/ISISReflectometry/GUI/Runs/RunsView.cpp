@@ -13,7 +13,7 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
-#include "ReflSearchModel.h"
+#include "SearchModel.h"
 #include <QMessageBox>
 
 namespace MantidQt {
@@ -226,7 +226,7 @@ void RunsView::clearProgress() { ui.progressBar->reset(); }
 Set a new model for search results
 @param model : the model to be attached to the search results
 */
-void RunsView::showSearch(ReflSearchModel_sptr model) {
+void RunsView::showSearch(SearchModel_sptr model) {
   m_searchModel = model;
   ui.tableSearchResults->setModel(m_searchModel.get());
   ui.tableSearchResults->resizeColumnsToContents();

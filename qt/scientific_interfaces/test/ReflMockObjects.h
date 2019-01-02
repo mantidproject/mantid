@@ -14,7 +14,7 @@
 #include "GUI/MainWindow/IMainWindowView.h"
 #include "GUI/Runs/IAutoreduction.h"
 #include "GUI/Runs/ISearcher.h"
-#include "GUI/Runs/ReflSearchModel.h"
+#include "GUI/Runs/SearchModel.h"
 #include "GUI/Save/IAsciiSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -35,13 +35,13 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /**** Models ****/
 
-class MockReflSearchModel : public ReflSearchModel {
+class MockSearchModel : public SearchModel {
 public:
-  MockReflSearchModel(std::string const &run, std::string const &description,
-                      std::string const &location)
-      : ReflSearchModel(ITableWorkspace_sptr(), std::string()),
+  MockSearchModel(std::string const &run, std::string const &description,
+                  std::string const &location)
+      : SearchModel(ITableWorkspace_sptr(), std::string()),
         m_result(run, description, location) {}
-  ~MockReflSearchModel() override {}
+  ~MockSearchModel() override {}
   MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
   MOCK_METHOD2(setError, void(int, std::string const &));
 

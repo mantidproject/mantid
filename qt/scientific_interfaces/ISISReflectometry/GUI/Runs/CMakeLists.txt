@@ -3,7 +3,7 @@ set ( RUNS_SRC_FILES
     RunsView.cpp
     CatalogSearcher.cpp
     Autoreduction.cpp
-    ReflSearchModel.cpp
+    SearchModel.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -18,12 +18,12 @@ set ( RUNS_INC_FILES
     ISearcher.h
     Autoreduction.h
     CatalogSearcher.h
-    ReflSearchModel.h
+    SearchModel.h
 )
 
 set ( RUNS_MOC_FILES
     RunsView.h
-    ReflSearchModel.h
+    SearchModel.h
 )
 
 set ( RUNS_UI_FILES

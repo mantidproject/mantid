@@ -23,7 +23,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "ReflSearchModel.h"
+#include "SearchModel.h"
 
 #include <QStringList>
 #include <algorithm>
@@ -283,8 +283,8 @@ void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
     m_searchModel->addDataFromTable(results, m_view->getSearchInstrument());
   } else {
     // Create a new search results list and display it on the view
-    m_searchModel = boost::make_shared<ReflSearchModel>(
-        results, m_view->getSearchInstrument());
+    m_searchModel =
+        boost::make_shared<SearchModel>(results, m_view->getSearchInstrument());
     m_view->showSearch(m_searchModel);
   }
 }
