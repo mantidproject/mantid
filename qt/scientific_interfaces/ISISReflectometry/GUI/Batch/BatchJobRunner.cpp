@@ -80,7 +80,6 @@ void addAlgorithmForRow(Row &row, Batch const &model,
                         BatchAlgorithmRunner &batchAlgoRunner) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryReductionOneAuto");
-  row.observeAll(alg);
 
   auto properties = AlgorithmRuntimeProps();
   // updateEventProperties(properties, model.experiment());
@@ -89,7 +88,7 @@ void addAlgorithmForRow(Row &row, Batch const &model,
   // updateSaveProperties(properties, model.experiment());
   updateRowProperties(properties, row);
 
-  batchAlgoRunner.addAlgorithm(alg, properties);
+  batchAlgoRunner.addAlgorithm(alg, properties, &row);
 }
 
 void addAlgorithmsForGroup(Group &group, Batch const &model,

@@ -12,9 +12,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using Mantid::API::IAlgorithm;
-using Mantid::API::IAlgorithm_sptr;
-
 Row::Row(std::vector<std::string> runNumbers, double theta,
          std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
          boost::optional<double> scaleFactor,
@@ -76,31 +73,5 @@ void Row::setRunning() { m_itemState.setRunning(); }
 void Row::setSuccess() { m_itemState.setSuccess(); }
 
 void Row::setError(std::string const &msg) { m_itemState.setError(msg); }
-
-void Row::progressHandle(const IAlgorithm *alg, double p,
-                         const std::string &msg) {
-  UNUSED_ARG(alg);
-  setProgress(p, msg);
-}
-
-void Row::startingHandle(IAlgorithm_sptr alg) {
-  UNUSED_ARG(alg);
-  setStarting();
-}
-
-void Row::startHandle(const IAlgorithm *alg) {
-  UNUSED_ARG(alg);
-  setRunning();
-}
-
-void Row::finishHandle(const IAlgorithm *alg) {
-  UNUSED_ARG(alg);
-  setSuccess();
-}
-
-void Row::errorHandle(const IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg);
-  setError(what);
-}
 } // namespace CustomInterfaces
 } // namespace MantidQt
