@@ -10,12 +10,13 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import unittest
 
-import matplotlib
-matplotlib.use('AGG')
 from mantid.api import AnalysisDataService as ADS
 from mantidqt.project.plotssaver import PlotsSaver
 from mantidqt.project.plotsloader import PlotsLoader
 from mantid.simpleapi import CreateSampleWorkspace
+
+import matplotlib
+matplotlib.use('AGG')
 
 
 class PlotsSaverTest(unittest.TestCase):
