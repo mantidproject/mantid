@@ -10,15 +10,19 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 
 class DecoderFactory(object):
-    encoder_list = []
+    decoder_list = []
 
     @classmethod
     def find_decoder(cls, tag):
-        for encoder in cls.encoder_list:
-            if tag in encoder.tags:
-                return encoder
+        for decoder in cls.decoder_list:
+            if tag in decoder.tags:
+                return decoder
         return False
 
     @classmethod
-    def register_decoder(cls, encoder):
-        cls.encoder_list.append(encoder)
+    def register_decoder(cls, decoder):
+        for decoder_ in cls.decoder_list:
+            if decoder is decoder_:
+                # It's a duplicate
+                return
+        cls.decoder_list.append(decoder)

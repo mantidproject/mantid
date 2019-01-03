@@ -6,6 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encode(const InstrumentWidget &obj) {
@@ -27,20 +32,79 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj) {
   return map;
 }
 
-QList<QVariant>
+QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeTabs(const InstrumentWidget &obj) {
-  QList<QVariant> tabs();
+  QMap<QString, QVariant> tabs();
 
-  for (const auto &tab : obj.m_tabs) {
-    tabs.append(this->encodeTab(tab))
-  }
+  tabs.insert(QString("maskTab"), QVariant(encodeMaskTab(obj->m_maskTab)));
+  tabs.insert(QString("renderTab"),
+              QVariant(encodeRenderTab(obj->m_renderTab)));
+  tabs.insert(QString("treeTab"), QVariant(encodeTreeTab(obj->m_treeTab)));
+  tabs.insert(QString("pickTab"), QVariant(encodePickTab(obj->m_pickTab)));
 
   return tabs;
 }
 
 QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeRenderTab(const InstrumentWidgetRenderTab *tab) {
+InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
+  auto index = tab->m_instrumentTree->currentIndex();
+  auto model = tab->index.model();
 
+  QMap<QString, QVariant> map();
+
+  if (model) {
+    auto item = model->data(index);
+    auto name = item.value<QString>();
+    map.insert(QString("selectedComponent"), QVariant(name);
+  }
+
+  QList<QString> list();
+  auto names = m_instrumentTree->findExpandedComponents();
+  for (const auto name : names) {
+    list.append(name);
+  }
+  map.insert(QString("expandedItems"), QVariant("list"));
+
+  return map;
+}
+
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeRenderTab(const InstrumentWidgetRenderTab *tab) {
+  QMap<QString, QVariant> map();
+  map.insert(QString("axesView"), QVariant(tab->mAxisCombo->currentIndex()));
+  map.insert(QString("autoScaling", QVariant(tab->m_autoscaling->isChecked()));
+  map.insert(QString("displayAxes", QVariant(tab->m_displayAxes->isChecked()));
+  map.insert(QString("flipView", QVariant(tab->m_flipCheckBox->isChecked()));
+  map.insert(QString("displayDetectorsOnly", QVariant(tab->m_displayDetectorsOnly->isChecked()));
+  map.insert(QString("displayWireframe", QVariant(tab->m_wireframe->isChecked()));
+  map.insert(QString("displayLighting", QVariant(tab->m_lighting->isChecked()));
+  map.insert(QString("useOpenGL", QVariant(tab->m_GLView->isChecked()));
+  map.insert(QString("useUCorrection", QVariant(tab->m_UCorrection->isChecked()));
+
+  const auto surface = tab->getSurface();
+  map.insert(QString("showLabels", QVariant(surface->getShowPeakRowsFlag()));
+  map.insert(QString("showRows", QVariant(surface->getShowPeakRowsFlag()));
+  map.insert(QString("labelPrecision", QVariant(surface->getPeakLabelPrecision()));
+  map.insert(QString("showRelativeIntensity", QVariant(surface->getShowPeakRelativeIntensityFlag()));
+
+  const auto colorMap = encodeColorMap(tab->m_colorBarWidget);
+  map.insert(QString("colorMap"), QVariant(colorMap))
+
+  return map;
+}
+
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeColorMap(ColorBar *bar) {
+  QMap<QString, QVariant> map();
+  map.insert(QString("autoScale"), QVariant(bar->getAutoScale()));
+  map.insert(QString("autoScaleSlice"),
+             QVariant(bar->getAutoScaleForCurrentSlice()));
+  map.insert(QString("scaleType"), QVariant(bar->getScale()));
+  map.insert(QString("power"), QVariant(bar->getExponent()));
+  map.insert(QString("min"), QVariant(bar->m_min));
+  map.insert(QString("max"), QVariant(bar->m_max));
+  map.insert(QString("filename"), QVariant(bar->getFilePath()));
+
+  return map;
 }
 
 // This is the tab labelled draw
@@ -75,9 +139,11 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
       m_instrWidget->getWorkspaceName().toStdString() + "MaskView.xml";
   bool success = saveMaskViewToProject(wsName);
   map.insert(QString("maskWorkspaceSaved"), QVariant(success));
-  if (success){
+  if (success) {
     map.insert(QString("maskWorkspaceName"), QVariant(wsName));
   }
+
+  return map;
 }
 
 QMap<QString, QVariant>
@@ -123,6 +189,8 @@ InstrumentWidgetEncoder::encodeBinMask(const BinMask &obj) {
     spectra.append(spectrum)
   }
   map.insert(QString("spectra"), spectra);
+
+  return map;
 }
 
 QMap<QString, QVariant>

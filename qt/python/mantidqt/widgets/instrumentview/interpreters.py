@@ -10,7 +10,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 
 class InstrumentViewAttributes(object):
-    # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete
+    # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
+    # just add an extra tag to the list e.g. ["InstrumentView", "IView"]
     tags = ["InstrumentView"]
 
 
@@ -18,7 +19,10 @@ class Decoder(InstrumentViewAttributes):
     def __init__(self):
         super(Decoder, self).__init__()
 
-    #def decode(self, obj):
+    def decode(self, obj_dic):
+        if obj_dic is None:
+            return None
+        return
 
     @classmethod
     def has_tag(cls, tag):
@@ -29,7 +33,10 @@ class Encoder(InstrumentViewAttributes):
     def __init__(self):
         super(Encoder, self).__init__()
 
-    #def encode(self, obj):
+    def encode(self, obj):
+        if obj is None:
+            return None
+        return {}
 
     @classmethod
     def has_tag(cls, tag):

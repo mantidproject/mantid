@@ -1201,9 +1201,9 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_renderTab->loadSettings(settings);
 
   // Pick controls
-  InstrumentWidgetPickTab *pickTab = new InstrumentWidgetPickTab(this);
-  mControlsTab->addTab(pickTab, QString("Pick"));
-  pickTab->loadSettings(settings);
+  InstrumentWidgetPickTab *m_pickTab = new InstrumentWidgetPickTab(this);
+  mControlsTab->addTab(m_pickTab, QString("Pick"));
+  m_pickTab->loadSettings(settings);
 
   // Mask controls
   m_maskTab = new InstrumentWidgetMaskTab(this);
@@ -1222,7 +1222,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
 
-  m_tabs << m_renderTab << pickTab << m_maskTab << treeTab;
+  m_tabs << m_renderTab << m_pickTab << m_maskTab << treeTab;
 }
 
 /**

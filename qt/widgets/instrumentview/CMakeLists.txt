@@ -7,6 +7,8 @@ set ( SRC_FILES
   src/GLColor.cpp
   src/GLObject.cpp
   src/InstrumentActor.cpp
+  src/InstrumentEncoder.cpp
+  src/InstrumentDecoder.cpp
   src/InstrumentTreeModel.cpp
   src/InstrumentTreeWidget.cpp
   src/InstrumentWidget.cpp
@@ -88,6 +90,8 @@ set ( INC_FILES
   inc/MantidQtWidgets/InstrumentView/GLObject.h
   inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentEncoder.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentDecoder.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h

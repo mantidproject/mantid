@@ -10,4 +10,13 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import unittest
 
+from mantidqt.project.decoderfactory import DecoderFactory
+from mantidqt.widgets.instrumentview.interpreters import Encoder as InstrumentViewEncoder
+
+
 class DecoderFactoryTest(unittest.TestCase):
+    def setUp(self):
+        DecoderFactory.register_decoder(InstrumentViewEncoder)
+
+    def test_find_encoder_can_find_an_encoder(self):
+        self.assertNotEqual(None, DecoderFactory.find_decoder("InstrumentView"))

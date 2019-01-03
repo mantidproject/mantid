@@ -21,7 +21,9 @@ private:
   QMap<QString, QVariant> encodeActor(const InstrumentWidget &obj);
   
   // Encode all tabs
-  QMap<QString, QVariant> encodeTabs(const InstrumentWidget &obj);
+  QList<QVariant> encodeTabs(const InstrumentWidget &obj);
+
+  // Encode 
 };
 
 } // namespace MantidWidgets
