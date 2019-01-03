@@ -520,8 +520,9 @@ private:
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleProperty>("Thick", 0.1), "");
     std::vector<double> center{1, 0, 0};
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
+    props->declareProperty(Mantid::Kernel::make_unique<DoubleArrayProperty>(
+                               "Center", std::move(center)),
+                           "");
     if (angle != 0.0) {
       props->declareProperty(
           Mantid::Kernel::make_unique<DoubleProperty>("Angle", angle), "");
@@ -543,8 +544,9 @@ private:
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleProperty>("Radius", 5), "");
     std::vector<double> center{0, 0, 1};
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
+    props->declareProperty(Mantid::Kernel::make_unique<DoubleArrayProperty>(
+                               "Center", std::move(center)),
+                           "");
 
     return props;
   }
@@ -566,8 +568,9 @@ private:
     props->declareProperty(
         Mantid::Kernel::make_unique<DoubleProperty>("OuterRadius", 4), "");
     std::vector<double> center{0, 0, 1};
-    props->declareProperty(
-        Mantid::Kernel::make_unique<DoubleArrayProperty>("Center", center), "");
+    props->declareProperty(Mantid::Kernel::make_unique<DoubleArrayProperty>(
+                               "Center", std::move(center)),
+                           "");
 
     return props;
   }

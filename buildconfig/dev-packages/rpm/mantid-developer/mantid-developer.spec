@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.29
+Version:        1.30
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -64,6 +64,7 @@ Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: scipy
+Requires: python2-scikit-image
 Requires: sip-devel
 Requires: tbb
 Requires: tbb-devel
@@ -96,6 +97,7 @@ Requires: python3-QtPy
 %{?fedora:Requires: python3-QtAwesome}
 Requires: python3-numpy
 Requires: python3-scipy
+Requires: python3-scikit-image
 Requires: python3-sphinx
 Requires: python3-sphinx-bootstrap-theme
 Requires: python3-dateutil

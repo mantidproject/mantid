@@ -90,9 +90,9 @@ class SANSILLIntegrationTest(unittest.TestCase):
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_resolution_binning(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', ResolutionBasedBinning=True)
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', DefaultQBinning='ResolutionBased')
         self._check_output(mtd['iq'])
-        self.assertEquals(mtd['iq'].blocksize(), 6)
+        self.assertEquals(mtd['iq'].blocksize(), 12)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_tof(self):

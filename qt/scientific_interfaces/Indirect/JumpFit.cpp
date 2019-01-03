@@ -24,6 +24,18 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+std::vector<std::string> getEISFFunctions() {
+  return {"EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"};
+}
+
+std::vector<std::string> getWidthFunctions() {
+  return {"ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater"};
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -49,8 +61,8 @@ void JumpFit::setupFitTab() {
   setSampleWSSuffices({"_Result"});
   setSampleFBSuffices({"_Result.nxs"});
 
-  addWidthFunctionsToFitTypeComboBox();
-  addEISFFunctionsToFitTypeComboBox();
+  addFunctions(getWidthFunctions());
+  addFunctions(getEISFFunctions());
 
   m_uiForm->cbParameter->setEnabled(false);
 
@@ -61,42 +73,23 @@ void JumpFit::setupFitTab() {
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
   connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateParameterFitTypes()));
-  connect(this, SIGNAL(updateFitTypes()), this,
-          SLOT(updateParameterFitTypes()));
+          SLOT(updateAvailableFitTypes()));
 }
 
-void JumpFit::addEISFFunctionsToFitTypeComboBox() {
-  auto &functionFactory = FunctionFactory::Instance();
-  auto const eisfDiffCylinder =
-      functionFactory.createFunction("EISFDiffCylinder");
-  auto const eisfDiffSphere = functionFactory.createFunction("EISFDiffSphere");
-  auto const eisfDiffSphereAklyl =
-      functionFactory.createFunction("EISFDiffSphereAlkyl");
-  addComboBoxFunctionGroup("EISFDiffCylinder", {eisfDiffCylinder});
-  addComboBoxFunctionGroup("EISFDiffSphere", {eisfDiffSphere});
-  addComboBoxFunctionGroup("EISFDiffSphereAlkyl", {eisfDiffSphereAklyl});
-}
-
-void JumpFit::addWidthFunctionsToFitTypeComboBox() {
-  auto &functionFactory = FunctionFactory::Instance();
-  auto const chudleyElliot = functionFactory.createFunction("ChudleyElliot");
-  auto const hallRoss = functionFactory.createFunction("HallRoss");
-  auto const fickDiffusion = functionFactory.createFunction("FickDiffusion");
-  auto const teixeiraWater = functionFactory.createFunction("TeixeiraWater");
-  addComboBoxFunctionGroup("ChudleyElliot", {chudleyElliot});
-  addComboBoxFunctionGroup("HallRoss", {hallRoss});
-  addComboBoxFunctionGroup("FickDiffusion", {fickDiffusion});
-  addComboBoxFunctionGroup("TeixeiraWater", {teixeiraWater});
-}
-
-void JumpFit::updateParameterFitTypes() {
+void JumpFit::updateAvailableFitTypes() {
   auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
   clearFitTypeComboBox();
-  if (parameter == "EISF")
-    addEISFFunctionsToFitTypeComboBox();
-  else if (parameter == "Width")
-    addWidthFunctionsToFitTypeComboBox();
+  if (parameter == "Width")
+    addFunctions(getWidthFunctions());
+  else if (parameter == "EISF")
+    addFunctions(getEISFFunctions());
+}
+
+void JumpFit::addFunctions(std::vector<std::string> const &functions) {
+  auto &factory = FunctionFactory::Instance();
+  for (auto const &function : functions)
+    addComboBoxFunctionGroup(QString::fromStdString(function),
+                             {factory.createFunction(function)});
 }
 
 void JumpFit::updateModelFitTypeString() {

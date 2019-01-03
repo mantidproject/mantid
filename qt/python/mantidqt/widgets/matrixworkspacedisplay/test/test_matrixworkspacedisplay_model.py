@@ -21,6 +21,10 @@ from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay
 
 
 class MatrixWorkspaceDisplayModelTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Allow the MockWorkspace to work within the model
+        MatrixWorkspaceDisplayModel.ALLOWED_WORKSPACE_TYPES.append(MockWorkspace)
 
     def test_get_name(self):
         ws = MockWorkspace()
@@ -43,9 +47,6 @@ class MatrixWorkspaceDisplayModelTest(unittest.TestCase):
         self.assertEqual(e_model.type, MatrixWorkspaceTableViewModelType.e)
 
     def test_raises_with_unsupported_workspace(self):
-        # ws = MockWorkspace()
-        # expected_name = "TEST_WORKSPACE"
-        # ws.name = Mock(return_value=expected_name)
         self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel([]))
         self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel(1))
         self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel("test_string"))

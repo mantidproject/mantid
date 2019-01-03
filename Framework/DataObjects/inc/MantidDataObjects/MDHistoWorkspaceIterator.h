@@ -140,7 +140,7 @@ protected:
   uint64_t m_max;
 
   /// Implicit function to limit volume searched
-  Mantid::Geometry::MDImplicitFunction *m_function;
+  std::unique_ptr<Mantid::Geometry::MDImplicitFunction> m_function;
 
   /// Number of dimensions
   size_t m_nd;
