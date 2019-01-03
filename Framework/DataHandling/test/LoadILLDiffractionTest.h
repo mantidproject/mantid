@@ -15,6 +15,7 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -32,7 +33,22 @@ public:
   void setUp() override {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+
+    m_oldFacility = ConfigService::Instance().getFacility().name();
     ConfigService::Instance().setFacility("ILL");
+
+    m_oldInstrument = ConfigService::Instance().getInstrument().name();
+    ConfigService::Instance().setString("default.instrument", "");
+  }
+
+  void tearDown() override {
+    if (!m_oldFacility.empty()) {
+      ConfigService::Instance().setFacility(m_oldFacility);
+    }
+    if (!m_oldInstrument.empty()) {
+      ConfigService::Instance().setString("default.instrument",
+                                          m_oldInstrument);
+    }
   }
 
   void test_Init() {
@@ -400,6 +416,8 @@ public:
 
 private:
   const double RAD_2_DEG = 180.0 / M_PI;
+  std::string m_oldFacility;
+  std::string m_oldInstrument;
 };
 
 #endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_ */
