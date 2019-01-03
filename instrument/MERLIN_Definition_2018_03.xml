@@ -4,8 +4,8 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="MERLIN" valid-from   ="2017-09-12 11:00:01"
-               valid-to     ="2018-12-03 17:18:00"
+ name="MERLIN" valid-from   ="2018-12-03 17:18:01"
+               valid-to     ="2100-01-31 23:59:59"
                last-modified="2019-01-03 13:48:00">
 
   <defaults>
@@ -136,10 +136,11 @@
   <type name="monitors">
     <component type="monitor">
       <location r="3.25800" t="180.0" p="0.0" />
-      <location r="1.50400" t="180.0" p="0.0" />
-      <location r="1.50400" t="180.0" p="0.0" />
-      <location r="1.50400" t="180.0" p="0.0" />
-      <location r="1.50400" t="180.0" p="0.0" />
+      <!-- old position was 1.50400-->
+      <location r="1.60900" t="180.0" p="0.0" />
+      <location r="1.60900" t="180.0" p="0.0" />
+      <location r="1.60900" t="180.0" p="0.0" />
+      <location r="1.60900" t="180.0" p="0.0" /> 
       <location r="4.24700" t="0.000" p="0.0" />
       <location r="4.24700" t="0.000" p="0.0" />
       <location r="4.24700" t="0.000" p="0.0" />
