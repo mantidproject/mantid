@@ -45,9 +45,8 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  *before execution (mainly intended for input and inout workspace names)
  */
 void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo,
-                                        AlgorithmRuntimeProps props,
-                                        BatchAlgorithmObserver *observer) {
-  m_algorithms.emplace_back(algo, props, observer);
+                                        AlgorithmRuntimeProps props) {
+  m_algorithms.emplace_back(algo, std::move(props));
 
   g_log.debug() << "Added algorithm \""
                 << m_algorithms.back().algorithm()->name()
@@ -139,24 +138,13 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
                         << m_currentAlgorithm->name() << "\n";
 
     // Start algorithm running
-    algorithm.setRunning();
-    auto result = m_currentAlgorithm->execute();
-
-    if (!result)
-      algorithm.setError(std::string("Algorithm") +
-                         algorithm.algorithm()->name() +
-                         std::string(" execution failed"));
-    else
-      algorithm.setSuccess();
-
-    return result;
+    return m_currentAlgorithm->execute();
   }
   // If a property name was given that does not match a property
   catch (Mantid::Kernel::Exception::NotFoundError &notFoundEx) {
     UNUSED_ARG(notFoundEx);
     g_log.warning(
         "Algorithm property does not exist.\nStopping queue execution.");
-    algorithm.setError(notFoundEx.what());
     return false;
   }
   // If a property was assigned a value of the wrong type
@@ -164,13 +152,11 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
     UNUSED_ARG(invalidArgEx);
     g_log.warning("Algorithm property given value of incorrect type.\nStopping "
                   "queue execution.");
-    algorithm.setError(invalidArgEx.what());
     return false;
   }
   // For anything else that could go wrong
   catch (...) {
     g_log.warning("Unknown error starting next batch algorithm");
-    algorithm.setError("Unknown error starting algorithm");
     return false;
   }
 }

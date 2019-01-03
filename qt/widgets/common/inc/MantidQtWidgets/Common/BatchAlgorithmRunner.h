@@ -22,46 +22,20 @@
 namespace MantidQt {
 namespace API {
 
-class BatchAlgorithmObserver {
-public:
-  virtual void setRunning() = 0;
-  virtual void setSuccess() = 0;
-  virtual void setError(std::string const &msg) = 0;
-};
-
 class ConfiguredAlgorithm {
 public:
   using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
   ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
-                      AlgorithmRuntimeProps properties,
-                      BatchAlgorithmObserver *observer = nullptr)
-      : m_algorithm(algorithm), m_properties(std::move(properties)),
-        m_observer(observer) {}
+                      AlgorithmRuntimeProps properties)
+      : m_algorithm(algorithm), m_properties(std::move(properties)) {}
 
   Mantid::API::IAlgorithm_sptr algorithm() const { return m_algorithm; }
   AlgorithmRuntimeProps properties() const { return m_properties; }
-  BatchAlgorithmObserver *observer() const { return m_observer; }
-
-  void setRunning() {
-    if (m_observer)
-      m_observer->setRunning();
-  }
-
-  void setSuccess() {
-    if (m_observer)
-      m_observer->setSuccess();
-  }
-
-  void setError(std::string const &errorMessage) {
-    if (m_observer)
-      m_observer->setError(errorMessage);
-  }
 
 private:
   Mantid::API::IAlgorithm_sptr m_algorithm;
   AlgorithmRuntimeProps m_properties;
-  BatchAlgorithmObserver *m_observer;
 };
 
 /**
@@ -94,8 +68,7 @@ public:
 
   /// Adds an algorithm to the execution queue
   void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
-                    AlgorithmRuntimeProps props = AlgorithmRuntimeProps(),
-                    BatchAlgorithmObserver *observer = nullptr);
+                    AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
   /// Clears all algorithms from queue
   void clearQueue();
   /// Gets size of queue
