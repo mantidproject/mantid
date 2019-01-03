@@ -102,7 +102,7 @@ Bugfixes
 - Fixed a bug in `SetGoniometer <algm-SetGoniometer>` where it would use the mean log value rather than the time series average value for goniometer angles.
 - `ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``
 - The input validator is fixed in :ref:`MostLikelyMean <algm-MostLikelyMean>` avoiding a segmentation fault.
-- The inputs of the algorithm :ref:`MergeLogs` are improved and a segmentation fault will not happen, if logs are not time series. The merging is now compliant with Mantid wide time series merging for example when adding workspaces.
+- The inputs of the algorithm :ref:`MergeLogs <algm-MergeLogs>` are improved and a segmentation fault will not happen, if logs are not time series. The merging is now compliant with Mantid wide time series merging for example when adding workspaces.
 
 Python
 ------
