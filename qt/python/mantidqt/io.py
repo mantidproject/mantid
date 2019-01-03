@@ -15,7 +15,7 @@ _LAST_SAVE_DIRECTORY = None
 
 
 def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_filter=None, accept_mode=None,
-                       file_mode=None, return_duplicates=False):
+                       file_mode=None):
     """
     Open a dialog asking for a file location and name to and return it
     :param parent: QWidget; The parent QWidget of the created dialog
@@ -24,12 +24,9 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     :param file_filter: String; The filter name and file type e.g. "Python files (*.py)"
     :param accept_mode: enum AcceptMode; Defines the AcceptMode of the dialog, check QFileDialog Class for details
     :param file_mode: enum FileMode; Defines the FileMode of the dialog, check QFileDialog Class for details
-    :param return_duplicates: bool; If the returned value is the same as a previous call and bool is True then return
-    Path
     :return: String; The filename that was selected, it is possible to return a directory so look out for that
     """
     global _LAST_SAVE_DIRECTORY
-    original_last_save = _LAST_SAVE_DIRECTORY
 
     dialog = QFileDialog(parent)
 
@@ -62,10 +59,6 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     dialog.exec_()
 
     filename = _LAST_SAVE_DIRECTORY
-    # If nothing new has been set then return None
-    if filename == original_last_save:
-        if return_duplicates is False:
-            return None
 
     # Make sure that the _LAST_SAVE_DIRECTORY is set
     if _LAST_SAVE_DIRECTORY is not None and not os.path.isdir(_LAST_SAVE_DIRECTORY):
