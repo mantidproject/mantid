@@ -44,8 +44,13 @@ class Project(AnalysisDataServiceObserver):
         if self.last_project_location is None:
             return self.save_as()
         else:
-            # Actually save
-            self._save()
+            # Offer an are you sure? overwriting GUI
+            answer = self._offer_overwriting_gui()
+
+            if answer == QMessageBox.Yes:
+                # Actually save
+                self._save()
+            # Else do nothing
 
     def save_as(self):
         """
@@ -60,9 +65,7 @@ class Project(AnalysisDataServiceObserver):
         overwriting = False
         # If the selected path is a project directory ask if overwrite is required?
         if os.path.exists(os.path.join(path, (os.path.basename(path) + self.project_file_ext))):
-            answer = QMessageBox.question(None, "Overwrite project?",
-                                          "Would you like to overwrite the selected project?",
-                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            answer = self._offer_overwriting_gui()
             if answer == QMessageBox.No:
                 return
             elif answer == QMessageBox.Yes:
@@ -71,10 +74,21 @@ class Project(AnalysisDataServiceObserver):
         if not overwriting and os.path.exists(path) and os.listdir(path) != []:
             QMessageBox.warning(None, "Empty directory or project required!",
                                 "Please choose either an new directory or an already saved project", QMessageBox.Ok)
+            return
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = path
         self._save()
+
+    @staticmethod
+    def _offer_overwriting_gui():
+        """
+        Offers up a overwriting QMessageBox giving the option to overwrite a project, and returns the reply.
+        :return: QMessaageBox.Yes or QMessageBox.No; The value is the value selected by the user.
+        """
+        return QMessageBox.question(None, "Overwrite project?",
+                                    "Would you like to overwrite the selected project?",
+                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
     @staticmethod
     def _save_file_dialog():
