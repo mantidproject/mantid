@@ -16,7 +16,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-BatchView::BatchView(QWidget *parent) : QWidget(parent) { initLayout(); }
+using API::BatchAlgorithmRunner;
+
+BatchView::BatchView(QWidget *parent)
+    : QWidget(parent), m_batchAlgoRunner(this) {
+  initLayout();
+}
 
 void BatchView::subscribe(BatchViewSubscriber *notifyee) {
   m_notifyee = notifyee;
@@ -52,6 +57,20 @@ IRunsView *BatchView::runs() const { return m_runs.get(); }
 IEventView *BatchView::eventHandling() const { return m_eventHandling.get(); }
 
 ISaveView *BatchView::save() const { return m_save.get(); }
+
+BatchAlgorithmRunner &BatchView::batchAlgorithmRunner() {
+  return m_batchAlgoRunner;
+}
+
+void BatchView::executeBatchAlgorithmRunner() {
+  connect(&m_batchAlgoRunner, SIGNAL(batchComplete), this,
+          SLOT(onBatchComplete(bool)));
+  m_batchAlgoRunner.executeBatchAsync();
+}
+
+void BatchView::onBatchComplete(bool error) {
+  m_notifyee->notifyBatchFinished(error);
+}
 
 std::unique_ptr<RunsView> BatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(

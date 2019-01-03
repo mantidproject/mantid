@@ -20,7 +20,7 @@ public:
   static void destroySuite(GroupTest *suite) { delete suite; }
 
   ReductionWorkspaces workspaceNames() const {
-    return ReductionWorkspaces({}, {"", ""}, "", "", "", "");
+    return ReductionWorkspaces({}, "", {"", ""}, "", "", "", "");
   }
 
   void testConstructorSetsGroupName() {

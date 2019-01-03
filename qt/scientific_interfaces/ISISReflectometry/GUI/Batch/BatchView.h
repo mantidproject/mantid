@@ -33,6 +33,11 @@ public:
   ISaveView *save() const override;
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
+  API::BatchAlgorithmRunner &batchAlgorithmRunner() override;
+  void executeBatchAlgorithmRunner() override;
+
+private slots:
+  void onBatchComplete(bool error);
 
 private:
   void initLayout();
@@ -49,6 +54,7 @@ private:
   std::unique_ptr<SaveView> m_save;
   std::unique_ptr<ExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;
+  API::BatchAlgorithmRunner m_batchAlgoRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

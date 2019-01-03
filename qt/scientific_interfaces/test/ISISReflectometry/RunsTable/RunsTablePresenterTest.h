@@ -35,7 +35,7 @@ public:
   Row basicRow() {
     return Row(std::vector<std::string>({"101", "102"}), 1.2, {"A", "B"},
                RangeInQ(), boost::none, {},
-               ReductionWorkspaces({}, {"", ""}, "", "", "", ""));
+               ReductionWorkspaces({}, "", {"", ""}, "", "", "", ""));
   }
 
   ReductionJobs twoEmptyGroupsModel() {

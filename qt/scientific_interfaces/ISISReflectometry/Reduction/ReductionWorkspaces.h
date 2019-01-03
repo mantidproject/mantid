@@ -20,12 +20,14 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces {
 public:
   ReductionWorkspaces(std::vector<std::string> timeOfFlight,
+                      std::string joinedTofWorkspace,
                       std::pair<std::string, std::string> transmissionRuns,
                       std::string combinedTransmissionRuns,
                       std::string iVsLambda, std::string iVsQ,
                       std::string iVsQBinned);
 
   std::vector<std::string> const &timeOfFlight() const;
+  std::string const &joinedTofWorkspace() const;
   std::pair<std::string, std::string> const &transmissionRuns() const;
   std::string const &combinedTransmissionRuns() const;
   std::string const &iVsLambda() const;
@@ -34,6 +36,7 @@ public:
 
 private:
   std::vector<std::string> m_timeOfFlight;
+  std::string m_joinedTofWorkspace;
   std::pair<std::string, std::string> m_transmissionRuns;
   std::string m_combinedTransmissionRuns;
   std::string m_iVsLambda;

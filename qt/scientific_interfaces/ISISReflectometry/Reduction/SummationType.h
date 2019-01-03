@@ -23,6 +23,17 @@ inline SummationType summationTypeFromString(std::string const &summationType) {
   else
     throw std::runtime_error("Unexpected summation type.");
 }
+
+inline std::string summationTypeToString(SummationType summationType) {
+  switch (summationType) {
+  case SummationType::SumInLambda:
+    return "SumInLambda";
+  case SummationType::SumInQ:
+    return "SumInQ";
+  default:
+    throw std::runtime_error("Unexpected summation type.");
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_SUMMATIONTYPE_H_

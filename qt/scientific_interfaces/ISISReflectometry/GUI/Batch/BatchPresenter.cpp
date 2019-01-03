@@ -42,14 +42,15 @@ BatchPresenter::BatchPresenter(
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
     std::unique_ptr<ISavePresenter> savePresenter)
-    : /*m_view(view),*/ m_jobRunner(std::move(model)),
+    : m_view(view),
+      m_jobRunner(std::move(model), m_view->batchAlgorithmRunner()),
       m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
       m_savePresenter(std::move(savePresenter)) {
 
-  view->subscribe(this);
+  m_view->subscribe(this);
 
   // Tell the tab presenters that this is going to be the main presenter
   m_savePresenter->acceptMainPresenter(this);
@@ -90,8 +91,15 @@ void BatchPresenter::notifyAutoreductionCompleted() {
   autoreductionCompleted();
 }
 
+void BatchPresenter::notifyBatchFinished(bool error) {
+  UNUSED_ARG(error);
+  reductionPaused();
+}
+
 void BatchPresenter::reductionResumed() {
   m_jobRunner.resumeReduction();
+  m_view->executeBatchAlgorithmRunner();
+
   // Notify child presenters
   m_savePresenter->reductionResumed();
   m_eventPresenter->reductionResumed();
@@ -101,7 +109,7 @@ void BatchPresenter::reductionResumed() {
 }
 
 void BatchPresenter::reductionPaused() {
-  m_jobRunner.resumeReduction();
+  m_jobRunner.pauseReduction();
   // Notify child presenters
   m_savePresenter->reductionPaused();
   m_eventPresenter->reductionPaused();

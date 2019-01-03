@@ -40,6 +40,9 @@ public:
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                  std::unique_ptr<ISavePresenter> savePresenter);
 
+  // BatchViewSubscriber overrides
+  void notifyBatchFinished(bool error) override;
+
   // IBatchPresenter overrides
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
@@ -76,9 +79,8 @@ private:
   void instrumentChanged(const std::string &instName);
   void settingsChanged();
 
+  IBatchView *m_view;
   BatchJobRunner m_jobRunner;
-  // The view is currently unused
-  /*IBatchView *m_view;*/
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;

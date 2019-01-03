@@ -10,19 +10,25 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 ReductionWorkspaces::ReductionWorkspaces(
-    std::vector<std::string> timeOfFlight,
+    std::vector<std::string> timeOfFlight, std::string joinedTofWorkspace,
     std::pair<std::string, std::string> transmissionRuns,
     std::string combinedTransmissionRuns, std::string iVsLambda,
     std::string iVsQ, std::string iVsQBinned)
     // cppcheck-suppress passedByValue
     : m_timeOfFlight(std::move(timeOfFlight)),
+      m_joinedTofWorkspace(std::move(joinedTofWorkspace)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_combinedTransmissionRuns(combinedTransmissionRuns),
-      m_iVsLambda(std::move(iVsLambda)), m_iVsQ(std::move(iVsQ)),
+      m_iVsLambda(std::move(iVsLambda)),
+      m_iVsQ(std::move(iVsQ)),
       m_iVsQBinned(std::move(iVsQBinned)) {}
 
 std::vector<std::string> const &ReductionWorkspaces::timeOfFlight() const {
   return m_timeOfFlight;
+}
+
+std::string const &ReductionWorkspaces::joinedTofWorkspace() const {
+  return m_joinedTofWorkspace;
 }
 
 std::pair<std::string, std::string> const &
@@ -96,6 +102,7 @@ workspaceNames(std::vector<std::string> const &summedRunNumbers,
       });
 
   auto joinedRuns = boost::algorithm::join(summedRunNumbers, "+");
+  auto joinedTofWorkspace = "TOF_" + joinedRuns;
   auto iVsLambda = "IvsLam_" + joinedRuns;
   auto iVsQ = "IvsQ_" + joinedRuns;
   auto iVsQBinned = "IvsQ_binned_" + joinedRuns;
@@ -104,7 +111,8 @@ workspaceNames(std::vector<std::string> const &summedRunNumbers,
       transmissionWorkspacesCombined(transmissionRuns);
 
   return ReductionWorkspaces(
-      std::move(tofWorkspaces), std::move(transmissionWorkspaces),
+      std::move(tofWorkspaces), std::move(joinedTofWorkspace),
+      std::move(transmissionWorkspaces),
       std::move(combinedTransmissionWorkspace), std::move(iVsLambda),
       std::move(iVsQ), std::move(iVsQBinned));
 }

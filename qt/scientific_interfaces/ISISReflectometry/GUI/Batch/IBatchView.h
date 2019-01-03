@@ -12,6 +12,7 @@
 #include "GUI/Instrument/IInstrumentView.h"
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/Save/ISaveView.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include <string>
 
 namespace MantidQt {
@@ -19,6 +20,7 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchViewSubscriber {
 public:
+  virtual void notifyBatchFinished(bool error) = 0;
 };
 
 /** @class IBatchView
@@ -29,13 +31,15 @@ subclass.
 */
 class IBatchView {
 public:
+  virtual ~IBatchView() = default;
   virtual void subscribe(BatchViewSubscriber *notifyee) = 0;
   virtual IRunsView *runs() const = 0;
   virtual IEventView *eventHandling() const = 0;
   virtual ISaveView *save() const = 0;
   virtual IExperimentView *experiment() const = 0;
   virtual IInstrumentView *instrument() const = 0;
-  virtual ~IBatchView() = default;
+  virtual API::BatchAlgorithmRunner &batchAlgorithmRunner() = 0;
+  virtual void executeBatchAlgorithmRunner() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

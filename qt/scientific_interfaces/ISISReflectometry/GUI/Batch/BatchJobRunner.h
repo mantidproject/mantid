@@ -8,6 +8,8 @@
 #define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNER_H_
 
 #include "Common/DllConfig.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
 namespace MantidQt {
@@ -15,7 +17,7 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner {
 public:
-  BatchJobRunner(Batch batch);
+  BatchJobRunner(Batch batch, API::BatchAlgorithmRunner &batchAlgoRunner);
 
   bool isProcessing() const;
   bool isAutoreducing() const;
@@ -25,10 +27,14 @@ public:
   void resumeAutoreduction();
   void pauseAutoreduction();
 
+private slots:
+  void rowReductionComplete(bool error);
+
 private:
   Batch m_batch;
   bool m_isProcessing;
   bool m_isAutoreducing;
+  API::BatchAlgorithmRunner &m_batchAlgoRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

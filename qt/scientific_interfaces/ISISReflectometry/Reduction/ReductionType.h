@@ -22,6 +22,19 @@ inline ReductionType reductionTypeFromString(std::string const &reductionType) {
   else
     throw std::runtime_error("Unexpected reduction type.");
 }
+
+inline std::string reductionTypeToString(ReductionType reductionType) {
+  switch (reductionType) {
+  case ReductionType::DivergentBeam:
+    return "DivergentBeam";
+  case ReductionType::NonFlatSample:
+    return "NonFlatSample";
+  case ReductionType::Normal:
+    return "Normal";
+  default:
+    throw std::runtime_error("Unexpected reduction type.");
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONTYPE_H_
