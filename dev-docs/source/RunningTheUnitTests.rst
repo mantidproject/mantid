@@ -86,22 +86,27 @@ Starting in your build folder (e.g. Mantid/Code/debug):
    .. code-block:: sh
 
       ctest -j8 -R KernelTest
-      bin/KernelTest
+      ./bin/KernelTest
 
 -  Running a specific test class.
 
    .. code-block:: sh
 
       ctest -R MyTestClassName
-      bin/KernelTest MyTestClassName
+      ./bin/KernelTest MyTestClassName
 
--  Running a specific test.
+-  Running a specific test from a CxxTest test class (not possible via CTest).
 
    .. code-block:: sh
 
-      bin/KernelTest MyTestClassName MySingleTestName``
+      ./bin/KernelTest MyTestClassName MySingleTestName
 
-   -  Not possible with ctest.
+- Running a specific test from a Python ``unittest`` test class (not possible
+  via CTest).
+
+  .. code-block:: sh
+
+     ./bin/mantidpython /path/to/src/Framework/PythonInterface/test/python/plugins/algorithms/MeanTest.py MeanTest.test_mean
 
 Running Unit Tests With Visual Studio and ctest
 ###############################################

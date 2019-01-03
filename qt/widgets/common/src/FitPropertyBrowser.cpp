@@ -787,10 +787,11 @@ void FitPropertyBrowser::createCompositeFunction(
   }
   setWorkspace(m_compositeFunction);
 
-  PropertyHandler *h = new PropertyHandler(
+  auto h = std::make_unique<PropertyHandler>(
       m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
-  m_compositeFunction->setHandler(h);
-  setCurrentFunction(h);
+  m_compositeFunction->setHandler(std::move(h));
+  setCurrentFunction(
+      static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
 
   if (m_auto_back) {
     addAutoBackground();
@@ -2026,10 +2027,10 @@ bool FitPropertyBrowser::isUndoEnabled() const {
          compositeFunction()->nParams() == m_initialParameters.size();
 }
 
-/// Enable/disable the Fit button;
-void FitPropertyBrowser::setFitEnabled(bool yes) {
-  m_fitActionFit->setEnabled(yes);
-  m_fitActionSeqFit->setEnabled(yes);
+/// Enable/disable the Fit buttons;
+void FitPropertyBrowser::setFitEnabled(bool enable) {
+  m_fitActionFit->setEnabled(enable);
+  m_fitActionSeqFit->setEnabled(enable);
 }
 
 /// Returns true if the function is ready for a fit

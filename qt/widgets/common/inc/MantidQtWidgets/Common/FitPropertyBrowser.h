@@ -201,6 +201,9 @@ public:
   /// Returns true if the function is ready for a fit
   bool isFitEnabled() const;
 
+  /// Enable/disable the Fit buttons;
+  virtual void setFitEnabled(bool enable);
+
   /// Display a tip
   void setTip(const QString &txt);
 
@@ -521,8 +524,6 @@ private:
 
   /// disable undo when the function changes
   void disableUndo();
-  /// Enable/disable the Fit button;
-  virtual void setFitEnabled(bool yes);
   /// Create a string property and set some settings
   QtProperty *addStringProperty(const QString &name) const;
   void setStringPropertyValue(QtProperty *prop, const QString &value) const;

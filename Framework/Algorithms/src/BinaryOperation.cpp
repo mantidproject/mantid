@@ -234,14 +234,6 @@ void BinaryOperation::exec() {
     //   (b) it has been, but it's not the correct dimensions
     if ((m_out != m_lhs && m_out != m_rhs) ||
         (m_out == m_rhs && (m_lhs->size() > m_rhs->size()))) {
-      // Make sure to delete anything that might be in the output name.
-      // Removed ahead of 2.0 release to avoid problems detailed in trac #4630.
-      // Hopefully temporary (see #4635).
-      //          if
-      //          (AnalysisDataService::Instance().doesExist(getPropertyValue(outputPropName()
-      //          )))
-      //            AnalysisDataService::Instance().remove(getPropertyValue(outputPropName()
-      //            ));
       m_out = WorkspaceFactory::Instance().create(m_lhs);
     }
   }

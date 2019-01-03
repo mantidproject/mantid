@@ -7,6 +7,7 @@ SANS Changes
 
 New
 ###
+* Added manual saving functionality to the new GUI.
 
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` performs SANS data reduction for ILL instruments D11, D22, D33.
 - :ref:`SANSILLIntegration <algm-SANSILLIntegration>` performs integration of corrected SANS data to produce I(Q), I(Phi,Q) or I(Qx,Qy).
@@ -50,5 +51,15 @@ Removed
 #######
 
 - Obsolete *SetupILLD33Reduction* algorithm was removed.
+
+
+ORNL SANS
+---------
+
+Improvements
+############
+
+- ORNL HFIR SANS instruments have new geometries. The monitors have now a shape associated to them. Detector will move to the right position based on log values.
+
 
 :ref:`Release 3.14.0 <v3.14.0>`

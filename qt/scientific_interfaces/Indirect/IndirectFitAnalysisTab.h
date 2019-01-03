@@ -159,7 +159,6 @@ signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *);
   void customBoolChanged(const QString &key, bool value);
-  void updateFitTypes();
 
 protected slots:
 
@@ -214,7 +213,6 @@ protected slots:
 
 private slots:
   void updatePlotGuess();
-  void emitUpdateFitTypes();
 
 private:
   /// Overidden by child class.
@@ -228,6 +226,8 @@ private:
   void connectFitBrowserAndPlotPresenter();
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
+
+  void enableFitAnalysisButtons(bool enable);
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;

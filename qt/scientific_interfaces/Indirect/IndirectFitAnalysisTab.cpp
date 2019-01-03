@@ -155,8 +155,8 @@ void IndirectFitAnalysisTab::setup() {
 
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
-          SLOT(emitUpdateFitTypes()));
+  connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
+          SLOT(updateAvailableFitTypes()));
 
   connectDataAndSpectrumPresenters();
   connectDataAndPlotPresenters();
@@ -752,8 +752,7 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
-  setRunIsRunning(false);
-  setFitSingleSpectrumIsFitting(false);
+  enableFitAnalysisButtons(true);
   enablePlotResult(error);
   setSaveResultEnabled(!error);
   updateParameterValues();
@@ -969,7 +968,7 @@ void IndirectFitAnalysisTab::singleFit() {
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
   if (validate()) {
-    setFitSingleSpectrumIsFitting(true);
+    enableFitAnalysisButtons(false);
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }
@@ -979,8 +978,10 @@ void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
  * tab.
  */
 void IndirectFitAnalysisTab::executeFit() {
-  if (validate())
+  if (validate()) {
+    enableFitAnalysisButtons(false);
     runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+  }
 }
 
 bool IndirectFitAnalysisTab::validate() {
@@ -991,6 +992,9 @@ bool IndirectFitAnalysisTab::validate() {
   const auto invalidFunction = m_fittingModel->isInvalidFunction();
   if (invalidFunction)
     validator.addErrorMessage(QString::fromStdString(*invalidFunction));
+  if (m_fittingModel->numberOfWorkspaces() == 0)
+    validator.addErrorMessage(
+        QString::fromStdString("No data has been selected for a fit."));
 
   const auto error = validator.generateErrorMessage();
   emit showMessageBox(error);
@@ -1001,8 +1005,14 @@ bool IndirectFitAnalysisTab::validate() {
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void IndirectFitAnalysisTab::run() {
-  setRunIsRunning(true);
+  enableFitAnalysisButtons(false);
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+}
+
+void IndirectFitAnalysisTab::enableFitAnalysisButtons(bool enable) {
+  setRunIsRunning(!enable);
+  setFitSingleSpectrumIsFitting(!enable);
+  m_fitPropertyBrowser->setFitEnabled(enable);
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
@@ -1123,8 +1133,6 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   setPlotResultEnabled(isFit);
   setSaveResultEnabled(isFit);
 }
-
-void IndirectFitAnalysisTab::emitUpdateFitTypes() { emit updateFitTypes(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

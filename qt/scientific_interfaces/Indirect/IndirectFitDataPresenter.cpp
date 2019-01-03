@@ -194,6 +194,8 @@ void IndirectFitDataPresenter::addModelData(const std::string &name) {
     m_model->addWorkspace(name);
   } catch (const std::runtime_error &ex) {
     displayWarning("Unable to load workspace:\n" + std::string(ex.what()));
+  } catch (const std::invalid_argument &ex) {
+    displayWarning("Invalid workspace:\n" + std::string(ex.what()));
   }
 }
 
