@@ -9,6 +9,7 @@
 #define MANTID_CUSTOMINTERFACES_STATE_H_
 #include "Common/DllConfig.h"
 #include <boost/optional.hpp>
+#include <mutex>
 #include <string>
 
 namespace MantidQt {
@@ -19,8 +20,13 @@ enum class State { NOT_STARTED, STARTING, RUNNING, SUCCESS, ERROR, WARNING };
 class MANTIDQT_ISISREFLECTOMETRY_DLL ItemState {
 public:
   ItemState();
+  ItemState(ItemState const &rhs);
 
+  ItemState &operator=(ItemState const &rhs);
+
+  State state() const;
   std::string message() const;
+  double progress() const;
 
   void setProgress(double progress, std::string const &message);
   void setStarting();
@@ -33,6 +39,7 @@ private:
   State m_state;
   boost::optional<std::string> m_message;
   double m_progress;
+  std::mutex m_mutex;
 
   bool requiresMessage() const;
 };
