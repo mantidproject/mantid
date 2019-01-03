@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_GROUP_H_
 #define MANTID_CUSTOMINTERFACES_GROUP_H_
 #include "Common/DllConfig.h"
+#include "MantidAPI/AlgorithmObserver.h"
 #include "Row.h"
 #include <boost/optional.hpp>
 #include <string>
@@ -16,7 +17,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Group {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Group
+    : public Mantid::API::AlgorithmObserver {
 public:
   explicit Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);

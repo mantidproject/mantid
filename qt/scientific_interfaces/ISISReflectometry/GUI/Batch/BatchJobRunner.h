@@ -8,7 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNER_H_
 
 #include "Common/DllConfig.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
@@ -26,6 +26,9 @@ public:
   void pauseReduction();
   void resumeAutoreduction();
   void pauseAutoreduction();
+
+  void progressHandle(const Mantid::API::IAlgorithm *alg, double p,
+                      const std::string &msg);
 
 private slots:
   void rowReductionComplete(bool error);

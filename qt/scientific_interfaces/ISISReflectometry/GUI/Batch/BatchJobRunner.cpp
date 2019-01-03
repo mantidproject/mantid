@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BatchJobRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
+using Mantid::API::IAlgorithm;
 using API::BatchAlgorithmRunner;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
@@ -74,10 +76,11 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
   updateProperty("Debug", boolToString(experiment.debug()), properties);
 }
 
-void addAlgorithmForRow(Row const &row, Batch const &model,
+void addAlgorithmForRow(Row &row, Batch const &model,
                         BatchAlgorithmRunner &batchAlgoRunner) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryReductionOneAuto");
+  row.observeAll(alg);
 
   auto properties = AlgorithmRuntimeProps();
   // updateEventProperties(properties, model.experiment());
@@ -89,7 +92,7 @@ void addAlgorithmForRow(Row const &row, Batch const &model,
   batchAlgoRunner.addAlgorithm(alg, properties);
 }
 
-void addAlgorithmsForGroup(Group const &group, Batch const &model,
+void addAlgorithmsForGroup(Group &group, Batch const &model,
                            BatchAlgorithmRunner &batchAlgoRunner) {
   for (auto row : group.rows()) {
     if (row)

@@ -1,5 +1,6 @@
 set ( REDUCTION_SRC_FILES
     Group.cpp
+    ItemState.cpp
     RangeInQ.cpp
     ReductionWorkspaces.cpp
     Row.cpp
@@ -24,6 +25,7 @@ set ( REDUCTION_SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( REDUCTION_INC_FILES
     Group.h
+    ItemState.h
     RangeInQ.h
     ReductionJobs.h
     ReductionWorkspaces.h
