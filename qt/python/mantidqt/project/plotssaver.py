@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from matplotlib import ticker
-import matplotlib.colors
+import matplotlib.axis
 
 from mantid import logger
 

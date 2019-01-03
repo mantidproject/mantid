@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import copy
 
-from matplotlib import ticker, axis  # noqa
+from matplotlib import ticker, text, axis  # noqa
 import matplotlib.colors
 import matplotlib.axes
 
@@ -75,7 +75,7 @@ class PlotsLoader(object):
             return fig
 
     @staticmethod
-    def plot_func(workspace, axes, creation_arg):
+    def plot_func( workspace, axes, creation_arg):
         plot(workspace=workspace, axes=axes, **creation_arg)
 
     def plot_extra_lines(self, creation_args, ax):
