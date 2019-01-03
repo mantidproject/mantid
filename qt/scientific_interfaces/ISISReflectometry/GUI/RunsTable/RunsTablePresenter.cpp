@@ -37,6 +37,8 @@ ReductionJobs const &RunsTablePresenter::reductionJobs() const {
   return m_model;
 }
 
+ReductionJobs &RunsTablePresenter::reductionJobs() { return m_model; }
+
 void RunsTablePresenter::mergeAdditionalJobs(
     ReductionJobs const &additionalJobs) {
   std::cout << "Before Transfer:" << std::endl;

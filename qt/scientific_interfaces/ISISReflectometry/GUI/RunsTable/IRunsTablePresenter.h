@@ -26,6 +26,7 @@ public:
   virtual ~IRunsTablePresenter() = default;
   virtual void acceptMainPresenter(IRunsPresenter *mainPresenter) = 0;
   virtual ReductionJobs const &reductionJobs() const = 0;
+  virtual ReductionJobs &reductionJobs() = 0;
 
   virtual void mergeAdditionalJobs(ReductionJobs const &jobs) = 0;
 

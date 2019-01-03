@@ -70,6 +70,7 @@ public:
   // IRunsPresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   ReductionJobs const &reductionJobs() const override;
+  ReductionJobs &reductionJobs() override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;

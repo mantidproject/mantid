@@ -45,10 +45,12 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  *before execution (mainly intended for input and inout workspace names)
  */
 void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo,
-                                        AlgorithmRuntimeProps props) {
-  m_algorithms.emplace_back(algo, props);
+                                        AlgorithmRuntimeProps props,
+                                        BatchAlgorithmObserver *observer) {
+  m_algorithms.emplace_back(algo, props, observer);
 
-  g_log.debug() << "Added algorithm \"" << m_algorithms.back().first->name()
+  g_log.debug() << "Added algorithm \""
+                << m_algorithms.back().algorithm()->name()
                 << "\" to batch queue\n";
 }
 
@@ -125,11 +127,11 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
  */
 bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
   try {
-    m_currentAlgorithm = algorithm.first;
+    m_currentAlgorithm = algorithm.algorithm();
 
     // Assign the properties to be set at runtime
-    for (auto it = algorithm.second.begin(); it != algorithm.second.end();
-         ++it) {
+    for (auto it = algorithm.properties().begin();
+         it != algorithm.properties().end(); ++it) {
       m_currentAlgorithm->setProperty(it->first, it->second);
     }
 
@@ -137,13 +139,24 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
                         << m_currentAlgorithm->name() << "\n";
 
     // Start algorithm running
-    return m_currentAlgorithm->execute();
+    algorithm.setRunning();
+    auto result = m_currentAlgorithm->execute();
+
+    if (!result)
+      algorithm.setError(std::string("Algorithm") +
+                         algorithm.algorithm()->name() +
+                         std::string(" execution failed"));
+    else
+      algorithm.setSuccess();
+
+    return result;
   }
   // If a property name was given that does not match a property
   catch (Mantid::Kernel::Exception::NotFoundError &notFoundEx) {
     UNUSED_ARG(notFoundEx);
     g_log.warning(
         "Algorithm property does not exist.\nStopping queue execution.");
+    algorithm.setError(notFoundEx.what());
     return false;
   }
   // If a property was assigned a value of the wrong type
@@ -151,11 +164,13 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
     UNUSED_ARG(invalidArgEx);
     g_log.warning("Algorithm property given value of incorrect type.\nStopping "
                   "queue execution.");
+    algorithm.setError(invalidArgEx.what());
     return false;
   }
   // For anything else that could go wrong
   catch (...) {
     g_log.warning("Unknown error starting next batch algorithm");
+    algorithm.setError("Unknown error starting algorithm");
     return false;
   }
 }

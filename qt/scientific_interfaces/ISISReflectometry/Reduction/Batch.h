@@ -19,17 +19,18 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Batch {
 public:
   Batch(Experiment const &experiment, Instrument const &instrument,
-        ReductionJobs const &reductionJobs, Slicing const &slicing);
+        ReductionJobs &reductionJobs, Slicing const &slicing);
 
   Experiment const &experiment() const;
   Instrument const &instrument() const;
   ReductionJobs const &reductionJobs() const;
+  ReductionJobs &reductionJobs();
   Slicing const &slicing() const;
 
 private:
   Experiment const &m_experiment;
   Instrument const &m_instrument;
-  ReductionJobs const &m_reductionJobs;
+  ReductionJobs &m_reductionJobs;
   Slicing const &m_slicing;
 };
 } // namespace CustomInterfaces

@@ -88,12 +88,13 @@ void addAlgorithmForRow(Row &row, Batch const &model,
   // updateSaveProperties(properties, model.experiment());
   updateRowProperties(properties, row);
 
-  batchAlgoRunner.addAlgorithm(alg, properties);
+  batchAlgoRunner.addAlgorithm(alg, properties, &row);
 }
 
 void addAlgorithmsForGroup(Group &group, Batch const &model,
                            BatchAlgorithmRunner &batchAlgoRunner) {
-  for (auto row : group.rows()) {
+  auto &rows = group.rows();
+  for (auto &row : rows) {
     if (row)
       addAlgorithmForRow(row.get(), model, batchAlgoRunner);
   }
@@ -114,8 +115,8 @@ void BatchJobRunner::resumeReduction() {
 
   m_batchAlgoRunner.clearQueue();
 
-  auto groups = m_batch.reductionJobs().groups();
-  for (auto group : groups)
+  auto &groups = m_batch.reductionJobs().groups();
+  for (auto &group : groups)
     addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner);
 }
 

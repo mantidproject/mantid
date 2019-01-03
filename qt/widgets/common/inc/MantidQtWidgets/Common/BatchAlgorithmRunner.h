@@ -21,10 +21,53 @@
 
 namespace MantidQt {
 namespace API {
+
+class BatchAlgorithmObserver {
+public:
+  virtual void setRunning() = 0;
+  virtual void setSuccess() = 0;
+  virtual void setError(std::string const &msg) = 0;
+};
+
+class ConfiguredAlgorithm {
+public:
+  using AlgorithmRuntimeProps = std::map<std::string, std::string>;
+
+  ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
+                      AlgorithmRuntimeProps properties,
+                      BatchAlgorithmObserver *observer = nullptr)
+      : m_algorithm(algorithm), m_properties(std::move(properties)),
+        m_observer(observer) {}
+
+  Mantid::API::IAlgorithm_sptr algorithm() const { return m_algorithm; }
+  AlgorithmRuntimeProps properties() const { return m_properties; }
+  BatchAlgorithmObserver *observer() const { return m_observer; }
+
+  void setRunning() {
+    if (m_observer)
+      m_observer->setRunning();
+  }
+
+  void setSuccess() {
+    if (m_observer)
+      m_observer->setSuccess();
+  }
+
+  void setError(std::string const &errorMessage) {
+    if (m_observer)
+      m_observer->setError(errorMessage);
+  }
+
+private:
+  Mantid::API::IAlgorithm_sptr m_algorithm;
+  AlgorithmRuntimeProps m_properties;
+  BatchAlgorithmObserver *m_observer;
+};
+
 /**
  * Algorithm runner for execution of a queue of algorithms
 
-  @date 2014-08-10
+ @date 2014-08-10
 */
 
 class BatchNotification : public Poco::Notification {
@@ -45,15 +88,14 @@ class EXPORT_OPT_MANTIDQT_COMMON BatchAlgorithmRunner : public QObject {
 
 public:
   using AlgorithmRuntimeProps = std::map<std::string, std::string>;
-  using ConfiguredAlgorithm =
-      std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps>;
 
   explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;
 
   /// Adds an algorithm to the execution queue
   void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
-                    AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
+                    AlgorithmRuntimeProps props = AlgorithmRuntimeProps(),
+                    BatchAlgorithmObserver *observer = nullptr);
   /// Clears all algorithms from queue
   void clearQueue();
   /// Gets size of queue

@@ -9,6 +9,7 @@
 #define MANTID_CUSTOMINTERFACES_RUN_H_
 #include "Common/DllConfig.h"
 #include "ItemState.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"
@@ -22,7 +23,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Immutability here makes update notification easier.
-class MANTIDQT_ISISREFLECTOMETRY_DLL Row {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Row : public API::BatchAlgorithmObserver {
 public:
   Row(std::vector<std::string> number, double theta,
       std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
@@ -41,9 +42,9 @@ public:
 
   void setProgress(double p, std::string const &msg);
   void setStarting();
-  void setRunning();
-  void setSuccess();
-  void setError(std::string const &msg);
+  void setRunning() override;
+  void setSuccess() override;
+  void setError(std::string const &msg) override;
 
 private:
   std::vector<std::string> m_runNumbers;

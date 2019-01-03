@@ -118,6 +118,10 @@ ReductionJobs const &RunsPresenter::reductionJobs() const {
   return tablePresenter()->reductionJobs();
 }
 
+ReductionJobs &RunsPresenter::reductionJobs() {
+  return tablePresenter()->reductionJobs();
+}
+
 /**
    Used by the view to tell the presenter something has changed
 */

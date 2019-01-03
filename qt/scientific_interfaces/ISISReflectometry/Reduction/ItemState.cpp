@@ -9,7 +9,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ItemState::ItemState() : m_state(State::NOT_STARTED), m_message(boost::none) {}
+ItemState::ItemState()
+    : m_state(State::NOT_STARTED), m_message(boost::none), m_progress(0.0) {}
 
 std::string ItemState::message() const {
   if (m_message)
