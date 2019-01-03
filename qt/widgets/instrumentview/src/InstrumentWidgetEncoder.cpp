@@ -11,6 +11,11 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+#include "MantidQtWidgets/InstrumentView/ColorBar.h"
+#include "MantidQtWidgets/InstrumentView/MaskBinsData.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtWidgets/InstrumentView/Shape2D.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encode(const InstrumentWidget &obj) {
@@ -147,10 +152,24 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
 }
 
 QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {}
+InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {
+  QMap<QString, QVariant> map();
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeInstrumentTab(
-    const InstrumentWidgetTreeTab *tab) {}
+  // Save whether a button is active or not
+  map.insert(QString("zoom"), QVariant(tab->m_zoom->isChecked()));
+  map.insert(QString("edit"), QVariant(tab->m_edit->isChecked()));
+  map.insert(QString("ellipse"), QVariant(tab->m_ellipse->isChecked()));
+  map.insert(QString("rectangle"), QVariant(tab->m_rectangle->isChecked()));
+  map.insert(QString("ringEllipse"), QVariant(tab->m_ring_ellipse->isChecked()));
+  map.insert(QString("ringRectangle"), QVariant(tab->m_ring_rectangle->isChecked()));
+  map.insert(QString("freeDraw"), QVariant(tab->m_free_draw->isChecked()));
+  map.insert(QString("one"), QVariant(tab->m_one->isChecked()));
+  map.insert(QString("tube"), QVariant(tab->m_tube->isChecked()));
+  map.insert(QString("peak"), QVariant(tab->m_peak->isChecked()));
+  map.insert(QString("peakSelect"), QVariant(tab->m_peakSelect->isChecked()));
+
+  return map;
+}
 
 QMap<QString, QVariant> InstrumentWidgetEncoder::encodeActor(
     const std::unique_ptr<InstrumentActor> &obj) {

@@ -76,6 +76,9 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget
       public InstrumentWidgetTypes {
   Q_OBJECT
 
+friend class InstrumentWidgetEncoder;
+friend class InstrumentWidgetDecoder;
+
 public:
   enum SurfaceType {
     FULL3D = 0,

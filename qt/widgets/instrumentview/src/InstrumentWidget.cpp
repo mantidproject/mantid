@@ -1215,14 +1215,14 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_maskTab->loadSettings(settings);
 
   // Instrument tree controls
-  InstrumentWidgetTreeTab *treeTab = new InstrumentWidgetTreeTab(this);
-  mControlsTab->addTab(treeTab, QString("Instrument"));
-  treeTab->loadSettings(settings);
+  InstrumentWidgetTreeTab *m_treeTab = new InstrumentWidgetTreeTab(this);
+  mControlsTab->addTab(m_treeTab, QString("Instrument"));
+  m_treeTab->loadSettings(settings);
 
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
 
-  m_tabs << m_renderTab << m_pickTab << m_maskTab << treeTab;
+  m_tabs << m_renderTab << m_pickTab << m_maskTab << m_treeTab;
 }
 
 /**
