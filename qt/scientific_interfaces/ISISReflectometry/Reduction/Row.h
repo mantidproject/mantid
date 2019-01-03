@@ -9,7 +9,6 @@
 #define MANTID_CUSTOMINTERFACES_RUN_H_
 #include "Common/DllConfig.h"
 #include "ItemState.h"
-#include "MantidAPI/AlgorithmObserver.h"
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"
@@ -23,8 +22,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Immutability here makes update notification easier.
-class MANTIDQT_ISISREFLECTOMETRY_DLL Row
-    : public Mantid::API::AlgorithmObserver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Row {
 public:
   Row(std::vector<std::string> number, double theta,
       std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
@@ -41,16 +39,11 @@ public:
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
-  ItemState const &itemState() const;
-  void setItemState(ItemState itemState);
-
-  void progressHandle(const Mantid::API::IAlgorithm *alg, double p,
-                      const std::string &msg) override;
-  void startingHandle(Mantid::API::IAlgorithm_sptr alg) override;
-  void startHandle(const Mantid::API::IAlgorithm *alg) override;
-  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
-  void errorHandle(const Mantid::API::IAlgorithm *alg,
-                   const std::string &what) override;
+  void setProgress(double p, std::string const &msg);
+  void setStarting();
+  void setRunning();
+  void setSuccess();
+  void setError(std::string const &msg);
 
 private:
   std::vector<std::string> m_runNumbers;

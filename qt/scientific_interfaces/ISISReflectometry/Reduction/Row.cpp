@@ -12,9 +12,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using Mantid::API::IAlgorithm;
-using Mantid::API::IAlgorithm_sptr;
-
 Row::Row(std::vector<std::string> runNumbers, double theta,
          std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
          boost::optional<double> scaleFactor,
@@ -65,34 +62,16 @@ Row mergedRow(Row const &rowA, Row const &rowB) {
   return rowA.withExtraRunNumbers(rowB.runNumbers());
 }
 
-ItemState const &Row::itemState() const { return m_itemState; }
-
-void Row::setItemState(ItemState itemState) { m_itemState = itemState; }
-
-void Row::progressHandle(const IAlgorithm *alg, double p,
-                         const std::string &msg) {
-  UNUSED_ARG(alg);
+void Row::setProgress(double p, std::string const &msg) {
   m_itemState.setProgress(p, msg);
 }
 
-void Row::startingHandle(IAlgorithm_sptr alg) {
-  UNUSED_ARG(alg);
-  m_itemState.setStarting();
-}
+void Row::setStarting() { m_itemState.setStarting(); }
 
-void Row::startHandle(const IAlgorithm *alg) {
-  UNUSED_ARG(alg);
-  m_itemState.setRunning();
-}
+void Row::setRunning() { m_itemState.setRunning(); }
 
-void Row::finishHandle(const IAlgorithm *alg) {
-  UNUSED_ARG(alg);
-  m_itemState.setSuccess();
-}
+void Row::setSuccess() { m_itemState.setSuccess(); }
 
-void Row::errorHandle(const IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg);
-  m_itemState.setError(what);
-}
+void Row::setError(std::string const &msg) { m_itemState.setError(msg); }
 } // namespace CustomInterfaces
 } // namespace MantidQt
