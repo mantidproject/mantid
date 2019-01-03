@@ -33,7 +33,8 @@ class PlotsSaver(object):
             try:
                 plot_list.append(self.get_dict_from_fig(plot_dict[index].canvas.figure))
             except BaseException as e:
-                # Catch all errors in here so it can fail silently-ish
+                # Catch all errors in here so it can fail silently-ish, if this is happening on all plots make sure you
+                # have built your project.
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt
                 logger.warning("A plot was unable to be saved")
