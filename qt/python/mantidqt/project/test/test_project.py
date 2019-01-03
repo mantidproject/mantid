@@ -46,6 +46,7 @@ class ProjectTest(unittest.TestCase):
         working_directory = tempfile.mkdtemp()
         self.project.last_project_location = working_directory
         CreateSampleWorkspace(OutputWorkspace="ws1")
+        self.project._offer_overwriting_gui = mock.MagicMock(return_value=QMessageBox.Yes)
 
         self.project.save()
 
@@ -53,6 +54,7 @@ class ProjectTest(unittest.TestCase):
         file_list = os.listdir(working_directory)
         self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
         self.assertTrue("ws1.nxs" in file_list)
+        self.assertEqual(self.project._offer_overwriting_gui.call_count, 1)
 
     def test_save_as_saves_project_successfully(self):
         working_directory = tempfile.mkdtemp()

@@ -92,7 +92,8 @@ class Project(AnalysisDataServiceObserver):
 
     @staticmethod
     def _save_file_dialog():
-        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.Directory)
+        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.Directory,
+                                  return_duplicates=True)
 
     def _save(self):
         workspaces_to_save = AnalysisDataService.getObjectNames()
@@ -125,7 +126,7 @@ class Project(AnalysisDataServiceObserver):
 
     def _load_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
-                                  file_filter="Project files ( *" + self.project_file_ext + ")")
+                                  file_filter="Project files ( *" + self.project_file_ext + ")", return_duplicates=True)
 
     def offer_save(self, parent):
         """
