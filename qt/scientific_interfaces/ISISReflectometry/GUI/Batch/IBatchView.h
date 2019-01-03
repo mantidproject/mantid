@@ -21,6 +21,8 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchViewSubscriber {
 public:
   virtual void notifyBatchFinished(bool error) = 0;
+  virtual void notifyAlgorithmFinished() = 0;
+  virtual void notifyAlgorithmError(std::string const &message) = 0;
 };
 
 /** @class IBatchView

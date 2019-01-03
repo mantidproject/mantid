@@ -64,15 +64,9 @@ private:
   BatchAlgorithmObserver *m_observer;
 };
 
-/**
- * Algorithm runner for execution of a queue of algorithms
-
- @date 2014-08-10
-*/
-
-class BatchNotification : public Poco::Notification {
+class BatchCompleteNotification : public Poco::Notification {
 public:
-  BatchNotification(bool inProgress, bool error)
+  BatchCompleteNotification(bool inProgress, bool error)
       : Poco::Notification(), m_inProgress(inProgress), m_error(error) {}
 
   bool isInProgress() const { return m_inProgress; }
@@ -82,6 +76,28 @@ private:
   bool m_inProgress;
   bool m_error;
 };
+
+class AlgorithmCompleteNotification : public Poco::Notification {
+public:
+  AlgorithmCompleteNotification() : Poco::Notification() {}
+};
+
+class AlgorithmErrorNotification : public Poco::Notification {
+public:
+  AlgorithmErrorNotification(std::string const &errorMessage)
+      : Poco::Notification(), m_errorMessage(errorMessage) {}
+
+  std::string errorMessage() const { return m_errorMessage; }
+
+private:
+  std::string m_errorMessage;
+};
+
+/**
+ * Algorithm runner for execution of a queue of algorithms
+
+ @date 2014-08-10
+*/
 
 class EXPORT_OPT_MANTIDQT_COMMON BatchAlgorithmRunner : public QObject {
   Q_OBJECT
@@ -112,6 +128,8 @@ public:
 signals:
   /// Emitted when a batch has finished executing
   void batchComplete(bool error);
+  void algorithmComplete();
+  void algorithmError(std::string const &errorMessage);
 
 private:
   /// Implementation of algorithm runner
@@ -120,7 +138,11 @@ private:
   bool executeAlgo(ConfiguredAlgorithm algorithm);
 
   /// Handler for batch completion
-  void handleNotification(const Poco::AutoPtr<BatchNotification> &pNf);
+  void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);
+  void handleAlgorithmComplete(
+      const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf);
+  void
+  handleAlgorithmError(const Poco::AutoPtr<AlgorithmErrorNotification> &pNf);
 
   /// The queue of algorithms to be executed
   std::deque<ConfiguredAlgorithm> m_algorithms;
@@ -134,8 +156,12 @@ private:
   /// Notification center used to handle notifications from active method
   mutable Poco::NotificationCenter m_notificationCenter;
   /// Observer for notifications
-  Poco::NObserver<BatchAlgorithmRunner, BatchNotification>
-      m_notificationObserver;
+  Poco::NObserver<BatchAlgorithmRunner, BatchCompleteNotification>
+      m_batchCompleteObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmCompleteNotification>
+      m_algorithmCompleteObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmErrorNotification>
+      m_algorithmErrorObserver;
 
   /// Active method to run batch runner on separate thread
   Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner,
@@ -143,6 +169,10 @@ private:
       m_executeAsync;
   /// Holds result of async execution
   Poco::ActiveResult<bool> executeAsync();
+
+  void addAllObservers();
+  void removeAllObservers();
+  void reportError(ConfiguredAlgorithm &algorithm, std::string const &message);
 };
 
 } // namespace API

@@ -19,11 +19,26 @@ namespace MantidQt {
 namespace API {
 BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
     : QObject(parent), m_stopOnFailure(true), m_notificationCenter(),
-      m_notificationObserver(*this, &BatchAlgorithmRunner::handleNotification),
+      m_batchCompleteObserver(*this,
+                              &BatchAlgorithmRunner::handleBatchComplete),
+      m_algorithmCompleteObserver(
+          *this, &BatchAlgorithmRunner::handleAlgorithmComplete),
+      m_algorithmErrorObserver(*this,
+                               &BatchAlgorithmRunner::handleAlgorithmError),
       m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl) {}
 
-BatchAlgorithmRunner::~BatchAlgorithmRunner() {
-  m_notificationCenter.removeObserver(m_notificationObserver);
+BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
+
+void BatchAlgorithmRunner::addAllObservers() {
+  m_notificationCenter.addObserver(m_batchCompleteObserver);
+  m_notificationCenter.addObserver(m_algorithmCompleteObserver);
+  m_notificationCenter.addObserver(m_algorithmErrorObserver);
+}
+
+void BatchAlgorithmRunner::removeAllObservers() {
+  m_notificationCenter.removeObserver(m_batchCompleteObserver);
+  m_notificationCenter.removeObserver(m_algorithmCompleteObserver);
+  m_notificationCenter.removeObserver(m_algorithmErrorObserver);
 }
 
 /**
@@ -70,10 +85,10 @@ size_t BatchAlgorithmRunner::queueLength() { return m_algorithms.size(); }
  * @return False if the batch was stopped due to error
  */
 bool BatchAlgorithmRunner::executeBatch() {
-  m_notificationCenter.addObserver(m_notificationObserver);
+  addAllObservers();
   Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
   result.wait();
-  m_notificationCenter.removeObserver(m_notificationObserver);
+  removeAllObservers();
   return result.data();
 }
 
@@ -81,7 +96,7 @@ bool BatchAlgorithmRunner::executeBatch() {
  * Starts executing the queue of algorithms on a separate thread.
  */
 void BatchAlgorithmRunner::executeBatchAsync() {
-  m_notificationCenter.addObserver(m_notificationObserver);
+  addAllObservers();
   Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
 }
 
@@ -113,10 +128,17 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
   m_algorithms.clear();
 
   m_notificationCenter.postNotification(
-      new BatchNotification(false, cancelFlag));
-  m_notificationCenter.removeObserver(m_notificationObserver);
+      new BatchCompleteNotification(false, cancelFlag));
+  m_notificationCenter.removeObserver(m_batchCompleteObserver);
 
   return !cancelFlag;
+}
+
+void BatchAlgorithmRunner::reportError(ConfiguredAlgorithm &algorithm,
+                                       std::string const &message) {
+  algorithm.setError(message);
+  m_notificationCenter.postNotification(
+      new AlgorithmErrorNotification(message));
 }
 
 /**
@@ -142,12 +164,15 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
     algorithm.setRunning();
     auto result = m_currentAlgorithm->execute();
 
-    if (!result)
-      algorithm.setError(std::string("Algorithm") +
-                         algorithm.algorithm()->name() +
-                         std::string(" execution failed"));
-    else
+    if (!result) {
+      reportError(algorithm, std::string("Algorithm") +
+                                 algorithm.algorithm()->name() +
+                                 std::string(" execution failed"));
+    } else {
       algorithm.setSuccess();
+      m_notificationCenter.postNotification(
+          new AlgorithmCompleteNotification());
+    }
 
     return result;
   }
@@ -156,7 +181,7 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
     UNUSED_ARG(notFoundEx);
     g_log.warning(
         "Algorithm property does not exist.\nStopping queue execution.");
-    algorithm.setError(notFoundEx.what());
+    reportError(algorithm, notFoundEx.what());
     return false;
   }
   // If a property was assigned a value of the wrong type
@@ -164,13 +189,13 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
     UNUSED_ARG(invalidArgEx);
     g_log.warning("Algorithm property given value of incorrect type.\nStopping "
                   "queue execution.");
-    algorithm.setError(invalidArgEx.what());
+    reportError(algorithm, invalidArgEx.what());
     return false;
   }
   // For anything else that could go wrong
   catch (...) {
     g_log.warning("Unknown error starting next batch algorithm");
-    algorithm.setError("Unknown error starting algorithm");
+    reportError(algorithm, "Unknown error starting algorithm");
     return false;
   }
 }
@@ -180,8 +205,8 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
  *
  * @param pNf Notification object
  */
-void BatchAlgorithmRunner::handleNotification(
-    const Poco::AutoPtr<BatchNotification> &pNf) {
+void BatchAlgorithmRunner::handleBatchComplete(
+    const Poco::AutoPtr<BatchCompleteNotification> &pNf) {
   bool inProgress = pNf->isInProgress();
   if (!inProgress) {
     // Notify UI elements waiting for algorithm completion
@@ -189,5 +214,18 @@ void BatchAlgorithmRunner::handleNotification(
   }
 }
 
+void BatchAlgorithmRunner::handleAlgorithmComplete(
+    const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf) {
+  UNUSED_ARG(pNf);
+  // Notify UI elements waiting for algorithm completion
+  emit algorithmComplete();
+}
+
+void BatchAlgorithmRunner::handleAlgorithmError(
+    const Poco::AutoPtr<AlgorithmErrorNotification> &pNf) {
+  // Notify UI elements waiting for algorithm completion
+  auto errorMessage = pNf->errorMessage();
+  emit algorithmError(errorMessage);
+}
 } // namespace API
 } // namespace MantidQt

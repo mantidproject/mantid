@@ -65,11 +65,21 @@ BatchAlgorithmRunner &BatchView::batchAlgorithmRunner() {
 void BatchView::executeBatchAlgorithmRunner() {
   connect(&m_batchAlgoRunner, SIGNAL(batchComplete), this,
           SLOT(onBatchComplete(bool)));
+  connect(&m_batchAlgoRunner, SIGNAL(algorithmComplete), this,
+          SLOT(onAlgorithmComplete()));
+  connect(&m_batchAlgoRunner, SIGNAL(algorithmError), this,
+          SLOT(onAlgorithmError(std::string const &)));
   m_batchAlgoRunner.executeBatchAsync();
 }
 
 void BatchView::onBatchComplete(bool error) {
   m_notifyee->notifyBatchFinished(error);
+}
+
+void BatchView::onAlgorithmComplete() { m_notifyee->notifyAlgorithmFinished(); }
+
+void BatchView::onAlgorithmError(std::string const &message) {
+  m_notifyee->notifyAlgorithmError(message);
 }
 
 std::unique_ptr<RunsView> BatchView::createRunsTab() {
