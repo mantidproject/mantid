@@ -8,15 +8,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
-using namespace Mantid::HistogramData;
 using Mantid::Kernel::MandatoryValidator;
 
 namespace Mantid {
@@ -47,11 +43,12 @@ void MergeLogs::init() {
 
 void MergeLogs::exec() {
   MatrixWorkspace_sptr ws = this->getProperty("Workspace");
-  MatrixWorkspace_sptr ws2 =
-      create<MatrixWorkspace>(*ws, 1, BinEdges({1., 2.}));
+  MatrixWorkspace_sptr ws2 = ws->clone();
   const std::string log1name = this->getProperty("LogName1");
   const std::string log2name = this->getProperty("LogName2");
   const std::string mlogname = this->getProperty("MergedLogName");
+  if ((mlogname == log1name) || (mlogname == log2name))
+    throw std::runtime_error("MergedLogName must be a unique name.");
   const bool resetlogvalue = this->getProperty("ResetLogValue");
   try {
     TimeSeriesProperty<double> *log1 =
@@ -74,6 +71,7 @@ void MergeLogs::exec() {
     ws2->mutableRun().addProperty(mlog2);
     // Time Series Logs are combined when adding workspaces
     ws += ws2;
+    ws -= ws2;
   } catch (std::invalid_argument &) {
     throw std::runtime_error(
         "LogName1 and LogName2 must be TimeSeriesProperties.");

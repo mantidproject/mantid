@@ -113,6 +113,7 @@ public:
       log->addValue(time, value);
       t_ns += dt_ns;
     }
+    log->setUnits("TimeOfFligths");
     return log;
   }
 
@@ -127,6 +128,7 @@ public:
       const double logvalue = log->getSingleValue(logtime);
       TSM_ASSERT_DELTA(std::to_string(i), logvalue, value, 1.e-9);
     }
+    TS_ASSERT_EQUALS(log->units(), "TimeOfFligths")
   }
 
   // msize1 < msize2!
