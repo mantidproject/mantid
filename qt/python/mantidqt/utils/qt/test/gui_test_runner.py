@@ -51,27 +51,41 @@ class ScriptRunner(object):
     Generator scripts can yield a positive number. It is treated as the number of seconds
     before the next iteration is called. During the wait time the event loop is running.
     """
-    def __init__(self, script, widget, close_on_finish, script_timer, is_cli=False):
+    def __init__(self, script, widget=None, close_on_finish=True, pause=0, is_cli=False):
         """
         Initialise a runner.
         :param script: The script to run.
         :param widget: The widget to test.
         :param close_on_finish: If true close the widget after the script has finished.
-        :param script_timer: QTimer that schedules this ScriptRunner. It must be stopped after the script finishes.
         :param is_cli: If true the script is to be run from a command line tool. Exceptions are
             treated slightly differently in this case.
         """
+        self.script = script
         self.widget = widget
         self.close_on_finish = close_on_finish
+        self.pause = pause
         self.is_cli = is_cli
         self.error = None
-        ret = run_script(script, widget)
+        self.script_iter = [None]
+        self.pause_timer = QTimer(app)
+        self.pause_timer.setSingleShot(True)
+        self.script_timer = QTimer(app)
+        self.finished = False
+
+    def run(self):
+        ret = run_script(self.script, self.widget)
         if isinstance(ret, Exception):
+            self.finished = True
             raise ret
         self.script_iter = [iter(ret) if inspect.isgenerator(ret) else None]
-        self.pause_timer = QTimer()
-        self.pause_timer.setSingleShot(True)
-        self.script_timer = script_timer
+        if self.pause != 0:
+            self.script_timer.setInterval(self.pause * 1000)
+        # Zero-timeout timer runs script_runner() between Qt events
+        self.script_timer.timeout.connect(self, Qt.QueuedConnection)
+        QMetaObject.invokeMethod(self.script_timer, 'start', Qt.QueuedConnection)
+
+    def is_finished(self):
+        return self.finished
 
     def __call__(self):
         global app
@@ -79,6 +93,7 @@ class ScriptRunner(object):
             try:
                 script_iter = self.script_iter[-1]
                 if script_iter is None:
+                    self.finished = True
                     if self.close_on_finish:
                         app.exit()
                     return
@@ -94,15 +109,19 @@ class ScriptRunner(object):
                         ret = None
                     else:
                         ret = ret()
+                self.finished = True
             except StopIteration:
                 if len(self.script_iter) > 1:
                     self.script_iter.pop()
                 else:
+                    self.finished = True
                     self.script_iter = [None]
                     self.script_timer.stop()
                     if self.close_on_finish:
                         app.closeAllWindows()
             except Exception as e:
+                self.finished = True
+                self.script_iter = [None]
                 traceback.print_exc()
                 if self.close_on_finish:
                     app.exit(1)
@@ -167,13 +186,8 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
     script_runner = None
     if script is not None:
         try:
-            timer = QTimer(app)
-            script_runner = ScriptRunner(script, widget, close_on_finish=close_on_finish, script_timer=timer, is_cli=is_cli)
-            if pause != 0:
-                timer.setInterval(pause * 1000)
-            # Zero-timeout timer runs script_runner() between Qt events
-            timer.timeout.connect(script_runner, Qt.QueuedConnection)
-            QMetaObject.invokeMethod(timer, 'start', Qt.QueuedConnection)
+            script_runner = ScriptRunner(script, widget, close_on_finish=close_on_finish, is_cli=is_cli, pause=pause)
+            script_runner.run()
         except Exception as e:
             if not is_cli:
                 raise e

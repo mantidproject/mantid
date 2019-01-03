@@ -11,7 +11,7 @@ from __future__ import print_function
 import inspect
 from unittest import TestCase
 
-from mantidqt.utils.qt.test.gui_test_runner import open_in_window
+from mantidqt.utils.qt.test.gui_test_runner import open_in_window, ScriptRunner
 from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
 from qtpy.QtCore import Qt, QMetaObject, QTime
 from qtpy.QtTest import QTest
@@ -36,6 +36,7 @@ def drag_mouse(widget, from_pos, to_pos):
     QTest.mouseMove(widget, to_pos)
     yield 0.1
     QTest.mouseRelease(widget, Qt.LeftButton, Qt.NoModifier, to_pos)
+    yield 0.1
 
 
 class GuiTestBase(object):
@@ -72,6 +73,13 @@ class GuiTestBase(object):
         self.call_method = method
         open_in_window(self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause,
                        close_on_finish=close_on_finish)
+
+    def run_test_async(self, method='call', pause=0, close_on_finish=True):
+        self.call_method = method
+        script_runner = ScriptRunner(self._call_test_method, close_on_finish=close_on_finish, pause=pause)
+        script_runner.run()
+        while not script_runner.is_finished():
+            QApplication.processEvents()
 
     def get_child(self, child_class, name):
         children = self.widget.findChildren(child_class, name)
@@ -127,16 +135,6 @@ def is_test_method(value):
     return value.__name__.startswith('test_')
 
 
-class MultiTestRunner(object):
-
-    def __init__(self, methods):
-        self.methods = methods
-
-    def __call__(self, w):
-        for method in self.methods:
-            yield method
-
-
 class GuiWindowTest(TestCase, GuiTestBase):
 
     @classmethod
@@ -161,15 +159,8 @@ class WorkbenchGuiTest(GuiWindowTest):
     @classmethod
     def make_test_wrapper(cls, wrapped_name):
         def wrapper(self):
-            if len(self.test_methods) == 0:
-                self.widget = self.create_widget()
-            self.test_methods.append(getattr(self, wrapped_name))
+            self.run_test_async(method=wrapped_name)
         return wrapper
-
-    @classmethod
-    def tearDownClass(cls):
-        runner = MultiTestRunner(cls.test_methods)
-        open_in_window(cls.widget, runner, close_on_finish=True, attach_debugger=False, in_workbench=True)
 
     def create_widget(self):
         qapp = QApplication.instance()
