@@ -38,7 +38,7 @@ Archive Searching
 SNS / ONCat
 ###########
 
-- SNS file searching has been moved to `ONCAT <https://oncat.ornl.gov/>`_
+- SNS file searching has been moved to `ONCAT <https://oncat.ornl.gov/>`_. Due to auto-updating of the ``Facilities.xml``, this was done by directing ``SNSDataSearch`` and ``ORNLDataSearch`` to both use ONCAT.
 - For HFIR instruments that write out raw files with run numbers, we have enabled functionality that allows for the searching of file locations by making calls to ONCat.  To use this, make sure that the "Search Data Archive" option is checked in your "Manage User Directories" settings.  The ``FileFinder`` and algorithms such as :ref:`Load <algm-Load>`  will then accept inputs such as "``HB2C_143210``".
 
 ISIS / ICat
