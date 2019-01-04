@@ -27,7 +27,8 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     :param file_mode: enum FileMode; Defines the FileMode of the dialog, check QFileDialog Class for details
     :return: String; The filename that was selected, it is possible to return a directory so look out for that
     """
-    global _LAST_SAVE_DIRECTORY, _TEMP_SAVE
+    global _LAST_SAVE_DIRECTORY
+    global _TEMP_SAVE
     dialog = QFileDialog(parent)
 
     # It is the intention to only save the user's last used directory until workbench is restarted similar to other
@@ -76,4 +77,4 @@ def _set_last_save(filename):
     :param filename: String; Value to set _TEMP_SAVE
     """
     global _TEMP_SAVE
-    __TEMP_SAVE = filename
+    _TEMP_SAVE = filename
