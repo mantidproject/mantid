@@ -6,9 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import unittest
-from mantid.api import FileFinder
 import os
+import unittest
+
+from mantid.api import FileFinder
+
 
 class FileFinderTest(unittest.TestCase):
 
@@ -24,4 +26,17 @@ class FileFinderTest(unittest.TestCase):
         # We can't be sure what the full path is in general but it should certainly exist!
         self.assertTrue(os.path.exists(runs[0]))
 
-if __name__ == '__main__': unittest.main()
+    def test_that_find_runs_accepts_a_list_of_strings(self):
+        try:
+            runs = FileFinder.findRuns("CNCS7860", [".nxs", ".txt"])
+        except Exception as e:
+            self.assertFalse(True, "Expected findRuns to accept list of strings as input. {} error was raised "
+                                    "with message {}".format(type(e).__name__, str(e)))
+        else:
+            # Confirm that it works as above
+            self.assertTrue(len(runs) == 1)
+            self.assertTrue(os.path.exists(runs[0]))
+
+
+if __name__ == '__main__':
+    unittest.main()

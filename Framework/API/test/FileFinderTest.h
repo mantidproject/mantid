@@ -333,6 +333,11 @@ public:
         TS_ASSERT_DIFFERS(*it, *(it - 1));
       }
     }
+
+    const std::vector<std::string> incorrect_extension = {".txt"};
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns(
+                         "MUSR15189-15193", incorrect_extension),
+                     Exception::NotFoundError);
   }
 
   void testFindAddFiles() {

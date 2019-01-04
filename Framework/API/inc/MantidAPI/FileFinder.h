@@ -48,12 +48,11 @@ public:
   bool getCaseSensitive() const;
   std::vector<IArchiveSearch_sptr>
   getArchiveSearch(const Kernel::FacilityInfo &facility) const;
-  std::string findRun(const std::string &hintstr,
-                      const std::set<std::string> &exts) const;
   std::string findRun(
       const std::string &hintstr,
       const std::vector<std::string> &exts = std::vector<std::string>()) const;
-  std::vector<std::string> findRuns(const std::string &hintstr) const;
+  std::vector<std::string> findRuns(const std::string &hintstr,
+                                    const std::vector<std::string> &exts = std::vector<std::string>()) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   const Kernel::InstrumentInfo getInstrument(const std::string &hint) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.

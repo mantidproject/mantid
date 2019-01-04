@@ -309,32 +309,6 @@ FileFinderImpl::makeFileName(const std::string &hint,
 }
 
 /**
- * Find the file given a hint. If the name contains a dot(.) then it is assumed
- * that it is already a file stem
- * otherwise calls makeFileName internally.
- * @param hintstr :: The name hint, format: [INSTR]1234[.ext]
- * @param exts :: Optional list of allowed extensions. Only those extensions
- * found in both
- *  facilities extension list and exts will be used in the search. If an
- * extension is given in hint
- *  this argument is ignored.
- * @return The full path to the file or empty string if not found
- */
-std::string FileFinderImpl::findRun(const std::string &hintstr,
-                                    const std::set<std::string> &exts) const {
-  std::string hint = Kernel::Strings::strip(hintstr);
-  g_log.debug() << "set findRun(\'" << hintstr << "\', exts[" << exts.size()
-                << "])\n";
-  if (hint.empty())
-    return "";
-  std::vector<std::string> exts_v;
-  if (!exts.empty())
-    exts_v.assign(exts.begin(), exts.end());
-
-  return this->findRun(hint, exts_v);
-}
-
-/**
  * Determine the extension from a filename.
  *
  * @param filename The filename to get the extension from.
@@ -575,12 +549,13 @@ FileFinderImpl::findRun(const std::string &hintstr,
  * @param hintstr :: Comma separated list of hints to findRun method.
  *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
  *  Only the beginning of a range can contain an instrument name.
+ * @param exts :: Vector of allowed file extensions.
  * @return A vector of full paths or empty vector
  * @throw std::invalid_argument if the argument is malformed
  * @throw Exception::NotFoundError if a file could not be found
  */
 std::vector<std::string>
-FileFinderImpl::findRuns(const std::string &hintstr) const {
+FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::string> &exts) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
@@ -638,7 +613,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
         run = std::to_string(irun);
         while (run.size() < nZero)
           run.insert(0, "0");
-        std::string path = findRun(p1.first + run);
+        std::string path = findRun(p1.first + run, exts);
         if (!path.empty()) {
           res.push_back(path);
         } else {
@@ -646,7 +621,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
         }
       }
     } else {
-      std::string path = findRun(*h);
+      std::string path = findRun(*h, exts);
       if (!path.empty()) {
         res.push_back(path);
       } else {
