@@ -326,119 +326,17 @@ void MDNormalization::exec() {
     g_log.debug()<<so.identifier()<<"\n";
   }
 
+  m_isRLU = getProperty("RLU");
   //get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
-  Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
-        this->getProperty("TemporaryDataWorkspace");
-  Mantid::API::Workspace_sptr outputWS = this->getProperty("OutputWorkspace");
+  auto outputWS = binInputWS(symmetryOps);
 
-  std::map<std::string, std::string> parameters=getBinParameters();
-  bool isRLU = getProperty("RLU");
-
-  double soIndex = 0;
-  std::vector<size_t> qDimensionIndices;
-  for(auto so:symmetryOps){
-    // calculate dimensions for binning
-    V3D Q1,Q2,Q3;
-    Q1=so.transformHKL(V3D(m_Q1Basis[0],m_Q1Basis[1],m_Q1Basis[2]));
-    Q2=so.transformHKL(V3D(m_Q2Basis[0],m_Q2Basis[1],m_Q2Basis[2]));
-    Q3=so.transformHKL(V3D(m_Q3Basis[0],m_Q3Basis[1],m_Q3Basis[2]));
-
-    if (isRLU) {
-      Q1 = m_UB * Q1;
-      Q2 = m_UB * Q2;
-      Q3 = m_UB * Q3;
-    }
-
-    // bin the data
-    double fraction=1./static_cast<double>(symmetryOps.size());
-    IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", soIndex*0.3*fraction, (soIndex+1)*0.3*fraction);
-    binMD->setPropertyValue("AxisAligned", "0");
-    binMD->setProperty("InputWorkspace",m_inputWS);
-    binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
-    binMD->setPropertyValue("NormalizeBasisVectors","0");
-    binMD->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
-    //set binning properties
-    size_t qindex=0;
-    for( auto const& p : parameters ) {
-      auto key=p.first;
-      auto value=p.second;
-
-      std::stringstream basisVector;
-      std::vector<double> projection(m_inputWS->getNumDims(),0.);
-      if (value.find("QDimension1")!=std::string::npos) {
-          if (!isRLU) {
-            projection[0]=1.;
-            basisVector<<"Q_sample_x,A^{-1}";
-          } else {
-            qDimensionIndices.push_back(qindex);
-            projection[0]=Q1.X();
-            projection[1]=Q1.Y();
-            projection[2]=Q1.Z();
-            basisVector<<QDimensionName(m_Q1Basis)<<", r.l.u.";
-          }
-      } else if (value.find("QDimension2")!=std::string::npos) {
-          if (!isRLU) {
-            projection[1]=1.;
-            basisVector<<"Q_sample_y,A^{-1}";
-          } else {
-            qDimensionIndices.push_back(qindex);
-            projection[0]=Q2.X();
-            projection[1]=Q2.Y();
-            projection[2]=Q2.Z();
-            basisVector<<QDimensionName(m_Q2Basis)<<", r.l.u.";
-          }
-      } else if (value.find("QDimension3")!=std::string::npos) {
-          if (!isRLU) {
-            projection[2]=1.;
-            basisVector<<"Q_sample_z,A^{-1}";
-          } else {
-            qDimensionIndices.push_back(qindex);
-            projection[0]=Q3.X();
-            projection[1]=Q3.Y();
-            projection[2]=Q3.Z();
-            basisVector<<QDimensionName(m_Q3Basis)<<", r.l.u.";
-          }
-      }
-      if (!basisVector.str().empty()){
-          for(auto const& proji: projection){
-              basisVector<<","<<proji;
-          }
-          value=basisVector.str();
-      }
-      g_log.debug()<<"Binning parameter "<<key<<" value: "<<value<<"\n";
-      binMD->setPropertyValue(key, value);
-      qindex++;
-    }
-    //execute algorithm
-    binMD->executeAsChildAlg();
-    outputWS=binMD->getProperty("OutputWorkspace");
-
-    //set the temporary workspace to be the output workspace, so it keeps adding different symmetries
-    tempDataWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
-    soIndex+=1;
-  }
-
-  auto outputMDHWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
-  //set MDUnits for Q dimensions
-  if(isRLU){
-    Mantid::Geometry::MDFrameArgument argument(Mantid::Geometry::HKL::HKLName,"r.l.u.");
-    auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
-    Mantid::Geometry::MDFrame_uptr hklFrame =  mdFrameFactory->create(argument);
-    for(size_t i:qDimensionIndices){
-      auto mdHistoDimension =
-              boost::const_pointer_cast<Mantid::Geometry::MDHistoDimension>(
-                  boost::dynamic_pointer_cast<
-                      const Mantid::Geometry::MDHistoDimension>(outputMDHWS->getDimension(i)));
-      mdHistoDimension->setMDFrame(*hklFrame);
-    }
-  }
-
-  outputMDHWS->setDisplayNormalization(Mantid::API::NoNormalization);
-  createNormalizationWS(*outputMDHWS);
+  createNormalizationWS(*outputWS);
   this->setProperty("OutputNormalizationWorkspace",m_normWS);
-  this->setProperty("OutputWorkspace",outputMDHWS);
+  this->setProperty("OutputWorkspace",outputWS);
 }
+
+
 
 std::string MDNormalization::QDimensionName(std::vector<double> projection) {
   std::vector<double>::iterator result;
@@ -478,8 +376,7 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
       originalDimensionNames.push_back(m_inputWS->getDimension(i)->getName());
     }
 
-    bool isRLU = getProperty("RLU");
-    if (isRLU) {
+    if (m_isRLU) {
       m_Q1Basis = getProperty("QDimension1");
       m_Q2Basis = getProperty("QDimension2");
       m_Q3Basis = getProperty("QDimension3");
@@ -553,7 +450,7 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
           //get the extents an number of bins
           coord_t dimMax=dimension->getMaximum();
           coord_t dimMin=dimension->getMinimum();
-          if(isRLU){
+          if(m_isRLU){
              Mantid::Geometry::OrientedLattice ol;
              ol.setUB(m_UB*m_W); //note that this is already multiplied by 2Pi
              if(dimIndex==0) {
@@ -608,6 +505,115 @@ void MDNormalization::createNormalizationWS(const DataObjects::MDHistoWorkspace 
     } else {
       m_accumulate = true;
     }
+}
+
+DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps)
+{
+    Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
+          this->getProperty("TemporaryDataWorkspace");
+    Mantid::API::Workspace_sptr outputWS;
+    std::map<std::string, std::string> parameters=getBinParameters();
+    double soIndex = 0;
+    std::vector<size_t> qDimensionIndices;
+    for(auto so:symmetryOps){
+      // calculate dimensions for binning
+      V3D Q1,Q2,Q3;
+      Q1=so.transformHKL(V3D(m_Q1Basis[0],m_Q1Basis[1],m_Q1Basis[2]));
+      Q2=so.transformHKL(V3D(m_Q2Basis[0],m_Q2Basis[1],m_Q2Basis[2]));
+      Q3=so.transformHKL(V3D(m_Q3Basis[0],m_Q3Basis[1],m_Q3Basis[2]));
+
+      if (m_isRLU) {
+        Q1 = m_UB * Q1;
+        Q2 = m_UB * Q2;
+        Q3 = m_UB * Q3;
+      }
+
+      // bin the data
+      double fraction=1./static_cast<double>(symmetryOps.size());
+      IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", soIndex*0.3*fraction, (soIndex+1)*0.3*fraction);
+      binMD->setPropertyValue("AxisAligned", "0");
+      binMD->setProperty("InputWorkspace",m_inputWS);
+      binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
+      binMD->setPropertyValue("NormalizeBasisVectors","0");
+      binMD->setPropertyValue("OutputWorkspace",getPropertyValue("OutputWorkspace"));
+      //set binning properties
+      size_t qindex=0;
+      for( auto const& p : parameters ) {
+        auto key=p.first;
+        auto value=p.second;
+
+        std::stringstream basisVector;
+        std::vector<double> projection(m_inputWS->getNumDims(),0.);
+        if (value.find("QDimension1")!=std::string::npos) {
+            if (!m_isRLU) {
+              projection[0]=1.;
+              basisVector<<"Q_sample_x,A^{-1}";
+            } else {
+              qDimensionIndices.push_back(qindex);
+              projection[0]=Q1.X();
+              projection[1]=Q1.Y();
+              projection[2]=Q1.Z();
+              basisVector<<QDimensionName(m_Q1Basis)<<", r.l.u.";
+            }
+        } else if (value.find("QDimension2")!=std::string::npos) {
+            if (!m_isRLU) {
+              projection[1]=1.;
+              basisVector<<"Q_sample_y,A^{-1}";
+            } else {
+              qDimensionIndices.push_back(qindex);
+              projection[0]=Q2.X();
+              projection[1]=Q2.Y();
+              projection[2]=Q2.Z();
+              basisVector<<QDimensionName(m_Q2Basis)<<", r.l.u.";
+            }
+        } else if (value.find("QDimension3")!=std::string::npos) {
+            if (!m_isRLU) {
+              projection[2]=1.;
+              basisVector<<"Q_sample_z,A^{-1}";
+            } else {
+              qDimensionIndices.push_back(qindex);
+              projection[0]=Q3.X();
+              projection[1]=Q3.Y();
+              projection[2]=Q3.Z();
+              basisVector<<QDimensionName(m_Q3Basis)<<", r.l.u.";
+            }
+        }
+        if (!basisVector.str().empty()){
+            for(auto const& proji: projection){
+                basisVector<<","<<proji;
+            }
+            value=basisVector.str();
+        }
+        g_log.debug()<<"Binning parameter "<<key<<" value: "<<value<<"\n";
+        binMD->setPropertyValue(key, value);
+        qindex++;
+      }
+      //execute algorithm
+      binMD->executeAsChildAlg();
+      outputWS=binMD->getProperty("OutputWorkspace");
+
+      //set the temporary workspace to be the output workspace, so it keeps adding different symmetries
+      tempDataWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+      soIndex+=1;
+    }
+
+    auto outputMDHWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+    //set MDUnits for Q dimensions
+    if(m_isRLU){
+      Mantid::Geometry::MDFrameArgument argument(Mantid::Geometry::HKL::HKLName,"r.l.u.");
+      auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
+      Mantid::Geometry::MDFrame_uptr hklFrame =  mdFrameFactory->create(argument);
+      for(size_t i:qDimensionIndices){
+        auto mdHistoDimension =
+                boost::const_pointer_cast<Mantid::Geometry::MDHistoDimension>(
+                    boost::dynamic_pointer_cast<
+                        const Mantid::Geometry::MDHistoDimension>(outputMDHWS->getDimension(i)));
+        mdHistoDimension->setMDFrame(*hklFrame);
+      }
+    }
+
+    outputMDHWS->setDisplayNormalization(Mantid::API::NoNormalization);
+    return outputMDHWS;
 }
 } // namespace MDAlgorithms
 } // namespace Mantid

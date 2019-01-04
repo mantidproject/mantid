@@ -10,6 +10,7 @@
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -33,7 +34,10 @@ private:
   std::string QDimensionName(std::vector<double> projection);
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
+  DataObjects::MDHistoWorkspace_sptr binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps);
 
+  /// flag for reciprocal lattice units
+  bool m_isRLU;
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
   /// Input workspace
