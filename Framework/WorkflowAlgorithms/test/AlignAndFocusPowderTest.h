@@ -62,393 +62,393 @@ public:
   }
 
   /* Test AlignAndFocusPowder for HRP38692 raw data */
-  void testHRP38692_useCalfile() { dotestHRP38692(true, false, false, false); }
+  void testHRP38692_useCalfile() { doTestHRP38692(true, false, false, false); }
 
   void testHRP38692_useCalfile_useGroupfile() {
-    dotestHRP38692(true, false, true, false);
+    doTestHRP38692(true, false, true, false);
   }
 
   void testHRP38692_useCalfile_useGroupWorkspace() {
-    dotestHRP38692(true, false, false, true);
+    doTestHRP38692(true, false, false, true);
   }
 
   void testHRP38692_useCalWorkspace_useGroupfile() {
-    dotestHRP38692(false, true, true, false);
+    doTestHRP38692(false, true, true, false);
   }
 
   void testHRP38692_useCalWorkspace_useGroupWorkspace() {
-    dotestHRP38692(false, true, false, true);
+    doTestHRP38692(false, true, false, true);
   }
 
   /* Test AlignAndFocusPowder for Event Workspace*/
   void testEventWksp_preserveEvents() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[80], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[80], 20);
-    TS_ASSERT_DELTA(outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[880], 587);
+    TS_ASSERT_DELTA(m_outWS->x(0)[80], 1609.2800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[80], 20);
+    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
   }
 
   void testEventWksp_preserveEvents_useGroupAll() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = true;
-    useResamplex = true;
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = true;
+    m_useResamplex = true;
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[423], 1634.3791, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[423], 2702);
-    TS_ASSERT_DELTA(outWS->x(0)[970], 14719.8272, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[970], 149165);
+    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3791, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[423], 2702);
+    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.8272, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[970], 149165);
   }
 
   void testEventWksp_doNotPreserveEvents() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = false;
-    useGroupAll = false;
-    useResamplex = true;
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = false;
+    m_useGroupAll = false;
+    m_useResamplex = true;
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[80], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[80], 20);
-    TS_ASSERT_DELTA(outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[880], 587);
+    TS_ASSERT_DELTA(m_outWS->x(0)[80], 1609.2800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[80], 20);
+    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
   }
 
   void testEventWksp_doNotPreserveEvents_useGroupAll() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = false;
-    useGroupAll = true;
-    useResamplex = true;
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = false;
+    m_useGroupAll = true;
+    m_useResamplex = true;
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[423], 1634.3791, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(0)[423], 2419.5680, 0.0001);
-    TS_ASSERT_DELTA(outWS->x(0)[970], 14719.8272, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(0)[970], 148503.3853, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3791, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[423], 2419.5680, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.8272, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[970], 148503.3853, 0.0001);
   }
 
   void testEventWksp_rebin_preserveEvents() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = false;
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = false;
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Test the input
-    TS_ASSERT_DELTA(inWS->x(0)[170], 1628.3764, 0.0001);
-    TS_ASSERT_EQUALS(inWS->y(0)[170], 48);
-    TS_ASSERT_DELTA(inWS->x(0)[391], 14681.7696, 0.0001);
-    TS_ASSERT_EQUALS(inWS->y(0)[391], 2540);
+    TS_ASSERT_DELTA(m_inWS->x(0)[170], 1628.3764, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[170], 48);
+    TS_ASSERT_DELTA(m_inWS->x(0)[391], 14681.7696, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[391], 2540);
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[1693], 1629.3502, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[1693], 6);
-    TS_ASSERT_DELTA(outWS->x(0)[3895], 14718.1436, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[3895], 612);
+    TS_ASSERT_DELTA(m_outWS->x(0)[1693], 1629.3502, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[1693], 6);
+    TS_ASSERT_DELTA(m_outWS->x(0)[3895], 14718.1436, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[3895], 612);
   }
 
   void testEventWksp_preserveEvents_dmin_dmax() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
-    dmin = createArgForNumberHistograms(0.5, inWS);
-    dmax = createArgForNumberHistograms(1.5, inWS);
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_dmin = createArgForNumberHistograms(0.5, m_inWS);
+    m_dmax = createArgForNumberHistograms(1.5, m_inWS);
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    dmin = "0";
-    dmax = "0";
+    m_dmin = "0";
+    m_dmax = "0";
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[116], 3270.3908, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[116], 37);
-    TS_ASSERT_DELTA(outWS->x(0)[732], 6540.7817, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[732], 25);
+    TS_ASSERT_DELTA(m_outWS->x(0)[116], 3270.3908, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[116], 37);
+    TS_ASSERT_DELTA(m_outWS->x(0)[732], 6540.7817, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[732], 25);
   }
 
   void testEventWksp_preserveEvents_tmin_tmax() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
-    tmin = "2000.0";
-    tmax = "10000.0";
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_tmin = "2000.0";
+    m_tmax = "10000.0";
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    tmin = "0";
-    tmax = "0";
+    m_tmin = "0";
+    m_tmax = "0";
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[149], 3270.7563, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[149], 51);
-    TS_ASSERT_DELTA(outWS->x(0)[982], 9814.5378, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[982], 138);
+    TS_ASSERT_DELTA(m_outWS->x(0)[149], 3270.7563, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[149], 51);
+    TS_ASSERT_DELTA(m_outWS->x(0)[982], 9814.5378, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[982], 138);
   }
 
   void testEventWksp_preserveEvents_lambdamin_lambdamax() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
-    lambdamin = "0.5";
-    lambdamax = "3.0";
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_lambdamin = "0.5";
+    m_lambdamax = "3.0";
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    lambdamin = "0";
-    lambdamax = "0";
+    m_lambdamin = "0";
+    m_lambdamax = "0";
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[880], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
+    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
+    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 0);
   }
 
   void testEventWksp_preserveEvents_maskbins() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
-    maskBinTableWS = createMaskBinTable();
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_maskBinTableWS = createMaskBinTable();
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    maskBinTableWS = NULL;
+    m_maskBinTableWS = nullptr;
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[880], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
+    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
+    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 0);
   }
 
   void testEventWksp_preserveEvents_noCompressTolerance() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
-    compressTolerance = "0.0";
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_compressTolerance = "0.0";
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    compressTolerance = "0";
+    m_compressTolerance = "0";
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[880], 587);
+    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
+    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
+    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
   }
 
   void testEventWksp_preserveEvents_highCompressTolerance() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
-    compressTolerance = "5.0";
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_compressTolerance = "5.0";
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    compressTolerance = "0";
+    m_compressTolerance = "0";
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[181], 96);
-    TS_ASSERT_DELTA(outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[581], 427);
-    TS_ASSERT_DELTA(outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[880], 672);
+    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 96);
+    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 427);
+    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 672);
   }
 
   void testEventWksp_preserveEvents_compressWallClockTolerance() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
-    compressWallClockTolerance = "50.0";
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_compressWallClockTolerance = "50.0";
     addPulseTimesForLogs();
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    compressWallClockTolerance = "0";
+    m_compressWallClockTolerance = "0";
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[880], 587);
+    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
+    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
+    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
   }
 
   void testEventWksp_preserveEvents_removePromptPulse() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
-    removePromptPulse = true;
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    m_removePromptPulse = true;
     addFrequencyForLogs();
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    removePromptPulse = false;
+    m_removePromptPulse = false;
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[581], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
+    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 0);
   }
 
   void testEventWksp_preserveEvents_compressStartTime() {
     // Setup the event workspace
-    setUp_EventWorkspace(numBanks, numPixels);
+    setUp_EventWorkspace();
 
-    // Set the inputs for dotestEventWksp
-    preserveEvents = true;
-    useGroupAll = false;
-    useResamplex = true;
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
     // require both inside AlignAndFocusPowder
-    compressStartTime =
+    m_compressStartTime =
         "2010-01-01T00:20:00"; // start time is "2010-01-01T00:00:00"
-    compressWallClockTolerance =
+    m_compressWallClockTolerance =
         "50.0"; // require both inside AlignAndFocusPowder
 
     // Run the main test function
-    dotestEventWksp();
+    doTestEventWksp();
 
     // Reset inputs to default values
-    compressStartTime = "0";
-    compressWallClockTolerance = "0";
+    m_compressStartTime = "0";
+    m_compressWallClockTolerance = "0";
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[181], 72);
-    TS_ASSERT_DELTA(outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(outWS->y(0)[581], 197);
+    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 72);
+    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 197);
   }
 
   /** Setup for testing HRPD NeXus data */
@@ -457,13 +457,13 @@ public:
     LoadNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "HRP38692a.nxs");
-    loader.setPropertyValue("OutputWorkspace", inputWS);
+    loader.setPropertyValue("OutputWorkspace", m_inputWS);
     loader.execute();
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
   }
 
-  void dotestHRP38692(bool useCalfile, bool useCalWksp, bool useGroupfile,
+  void doTestHRP38692(bool useCalfile, bool useCalWksp, bool useGroupfile,
                       bool useGroupWksp) {
 
     setUp_HRP38692();
@@ -471,8 +471,8 @@ public:
     AlignAndFocusPowder align_and_focus;
     align_and_focus.initialize();
 
-    align_and_focus.setPropertyValue("InputWorkspace", inputWS);
-    align_and_focus.setPropertyValue("OutputWorkspace", outputWS);
+    align_and_focus.setPropertyValue("InputWorkspace", m_inputWS);
+    align_and_focus.setPropertyValue("OutputWorkspace", m_outputWS);
     align_and_focus.setProperty("ResampleX", 1000);
     align_and_focus.setProperty("Dspacing", false);
 
@@ -485,11 +485,11 @@ public:
     else if (useCalWksp) {
       loadDiffCal(calfilename, false, true, true);
       align_and_focus.setPropertyValue("GroupingWorkspace",
-                                       loadDiffWSName + "_group");
+                                       m_loadDiffWSName + "_group");
       align_and_focus.setPropertyValue("CalibrationWorkspace",
-                                       loadDiffWSName + "_cal");
+                                       m_loadDiffWSName + "_cal");
       align_and_focus.setPropertyValue("MaskWorkspace",
-                                       loadDiffWSName + "_mask");
+                                       m_loadDiffWSName + "_mask");
     }
 
     if (useGroupfile)
@@ -497,63 +497,63 @@ public:
     else if (useGroupWksp) {
       loadDiffCal(calfilename, true, false, true);
       align_and_focus.setPropertyValue("MaskWorkspace",
-                                       loadDiffWSName + "_mask");
+                                       m_loadDiffWSName + "_mask");
       align_and_focus.setPropertyValue("GroupingWorkspace",
-                                       loadDiffWSName + "_group");
+                                       m_loadDiffWSName + "_group");
     }
 
     TS_ASSERT_THROWS_NOTHING(align_and_focus.execute());
     TS_ASSERT(align_and_focus.isExecuted());
 
-    inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
-    outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    m_inWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
+    m_outWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
 
-    TS_ASSERT_EQUALS(inWS->size(), 263857);
-    TS_ASSERT_EQUALS(inWS->blocksize(), 23987);
+    TS_ASSERT_EQUALS(m_inWS->size(), 263857);
+    TS_ASSERT_EQUALS(m_inWS->blocksize(), 23987);
 
-    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->unitID(), "TOF");
-    TS_ASSERT_EQUALS(outWS->size(), 1000);
-    TS_ASSERT_EQUALS(outWS->blocksize(), outWS->size());
-    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(m_outWS->getAxis(0)->unit()->unitID(), "TOF");
+    TS_ASSERT_EQUALS(m_outWS->size(), 1000);
+    TS_ASSERT_EQUALS(m_outWS->blocksize(), m_outWS->size());
+    TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), 1);
 
     // Maximum of peak near TOF approx. equal to 22,000 (micro-seconds)
-    TS_ASSERT_DELTA(outWS->x(0)[333], 21990.0502, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(0)[333], 770.2515, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[333], 21990.0502, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[333], 770.2515, 0.0001);
 
     // Maximum of peak near TOF approx. equal to 25,800 (micro-seconds)
-    TS_ASSERT_DELTA(outWS->x(0)[398], 25750.3113, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(0)[398], 1522.3778, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[398], 25750.3113, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[398], 1522.3778, 0.0001);
 
     // Maximum of peak near TOF approx. equal to 42,000 (micro-seconds)
-    TS_ASSERT_DELTA(outWS->x(0)[600], 42056.6091, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(0)[600], 7283.29652, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[600], 42056.6091, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[600], 7283.29652, 0.0001);
   }
 
   /* Setup for event data */
 
-  void setUp_EventWorkspace(int numBanks, int numPixels,
-                            int numEvents = 10000) {
-    inputWS = "eventWS";
+  void setUp_EventWorkspace() {
+    m_inputWS = "eventWS";
 
     CreateSampleWorkspace createSampleAlg;
     createSampleAlg.initialize();
     createSampleAlg.setPropertyValue("WorkspaceType", "Event");
     createSampleAlg.setPropertyValue("Function", "Powder Diffraction");
-    createSampleAlg.setProperty("XMin", xmin); // first frame
-    createSampleAlg.setProperty("XMax", xmax);
+    createSampleAlg.setProperty("XMin", m_xmin); // first frame
+    createSampleAlg.setProperty("XMax", m_xmax);
     createSampleAlg.setProperty("BinWidth", 1.0);
-    createSampleAlg.setProperty("NumBanks", numBanks); // detIds = [100,200)
-    createSampleAlg.setProperty("BankPixelWidth", numPixels);
-    createSampleAlg.setProperty("NumEvents", numEvents);
-    createSampleAlg.setPropertyValue("OutputWorkspace", inputWS);
+    createSampleAlg.setProperty("NumBanks", m_numBanks); // detIds = [100,200)
+    createSampleAlg.setProperty("BankPixelWidth", m_numPixels);
+    createSampleAlg.setProperty("NumEvents", m_numEvents);
+    createSampleAlg.setPropertyValue("OutputWorkspace", m_inputWS);
     createSampleAlg.execute();
 
-    for (int i = 1; i <= numBanks; i++) {
+    for (int i = 1; i <= m_numBanks; i++) {
       std::string bank = "bank" + std::to_string(i);
       RotateInstrumentComponent rotateInstr;
       rotateInstr.initialize();
-      rotateInstr.setPropertyValue("Workspace", inputWS);
+      rotateInstr.setPropertyValue("Workspace", m_inputWS);
       rotateInstr.setPropertyValue("ComponentName", bank);
       rotateInstr.setProperty("Y", 1.);
       rotateInstr.setProperty("Angle", 90.);
@@ -561,7 +561,7 @@ public:
 
       MoveInstrumentComponent moveInstr;
       moveInstr.initialize();
-      moveInstr.setPropertyValue("Workspace", inputWS);
+      moveInstr.setPropertyValue("Workspace", m_inputWS);
       moveInstr.setPropertyValue("ComponentName", bank);
       moveInstr.setProperty("X", 5.);
       moveInstr.setProperty("Y", -.1);
@@ -572,122 +572,124 @@ public:
   }
 
   void docheckEventInputWksp() {
-    TS_ASSERT_DELTA(inWS->x(0)[8], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(inWS->y(0)[8], 97);
-    TS_ASSERT_DELTA(inWS->x(0)[18], 3245.8800, 0.0001);
-    TS_ASSERT_EQUALS(inWS->y(0)[18], 237);
-    TS_ASSERT_DELTA(inWS->x(0)[38], 6519.0800, 0.0001);
-    TS_ASSERT_EQUALS(inWS->y(0)[38], 199);
-    TS_ASSERT_DELTA(inWS->x(0)[58], 9792.2800, 0.0001);
-    TS_ASSERT_EQUALS(inWS->y(0)[58], 772);
-    TS_ASSERT_DELTA(inWS->x(0)[88], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(inWS->y(0)[88], 2162);
+    TS_ASSERT_DELTA(m_inWS->x(0)[8], 1609.2800, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[8], 97);
+    TS_ASSERT_DELTA(m_inWS->x(0)[18], 3245.8800, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[18], 237);
+    TS_ASSERT_DELTA(m_inWS->x(0)[38], 6519.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[38], 199);
+    TS_ASSERT_DELTA(m_inWS->x(0)[58], 9792.2800, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[58], 772);
+    TS_ASSERT_DELTA(m_inWS->x(0)[88], 14702.0800, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[88], 2162);
   }
 
-  void dotestEventWksp() {
+  void doTestEventWksp() {
     // Bin events using either ResampleX or Rebin
-    int inputHistoBins = 100;
-    int numHistoBins = 1000;
-    std::string input_params = "-0.01";
-    std::string params = "-0.001";
-    if (useResamplex) {
+    int inputHistoBins{100};
+    int numHistoBins{1000};
+    std::string input_params{"-0.01"};
+    std::string params{"-0.001"};
+    if (m_useResamplex) {
       resamplex(inputHistoBins);
     } else {
       rebin(params);
-      inWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
-      numHistoBins = int(inWS->blocksize());
+      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_inputWS);
+      numHistoBins = int(m_inWS->blocksize());
 
       rebin(input_params);
-      inWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
-      inputHistoBins = int(inWS->blocksize());
+      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_inputWS);
+      inputHistoBins = int(m_inWS->blocksize());
     }
 
     // Initialize AlignAndFocusPowder
     AlignAndFocusPowder align_and_focus;
     align_and_focus.initialize();
-    align_and_focus.setPropertyValue("InputWorkspace", inputWS);
-    align_and_focus.setPropertyValue("OutputWorkspace", outputWS);
+    align_and_focus.setPropertyValue("InputWorkspace", m_inputWS);
+    align_and_focus.setPropertyValue("OutputWorkspace", m_outputWS);
     align_and_focus.setProperty("Dspacing", false);
-    align_and_focus.setProperty("PreserveEvents", preserveEvents);
+    align_and_focus.setProperty("PreserveEvents", m_preserveEvents);
 
     // Use a Mask TableWorkspace created from createMaskBinTable
-    if (maskBinTableWS)
-      align_and_focus.setProperty("MaskBinTable", maskBinTableWS);
+    if (m_maskBinTableWS)
+      align_and_focus.setProperty("MaskBinTable", m_maskBinTableWS);
 
     // Compress tolerance for events
-    if (compressTolerance != "0")
-      align_and_focus.setProperty("CompressTolerance", compressTolerance);
+    if (m_compressTolerance != "0")
+      align_and_focus.setProperty("CompressTolerance", m_compressTolerance);
 
     // Compression for the wall clock time; controls whether all pulses are
     // compressed together
-    if (compressWallClockTolerance != "0")
+    if (m_compressWallClockTolerance != "0")
       align_and_focus.setProperty("CompressWallClockTolerance",
-                                  compressWallClockTolerance);
+                                  m_compressWallClockTolerance);
 
     // Filtering for the start wall clock time; cuts off events before start
     // time
-    if (compressStartTime != "0")
-      align_and_focus.setProperty("CompressStartTime", compressStartTime);
+    if (m_compressStartTime != "0")
+      align_and_focus.setProperty("CompressStartTime", m_compressStartTime);
 
     // Remove prompt pulse; will cutoff last 6 long-TOF peaks (freq is 200 Hz)
-    if (removePromptPulse)
+    if (m_removePromptPulse)
       align_and_focus.setProperty("RemovePromptPulseWidth", 1e4);
 
     // Setup the binning type
-    if (useResamplex) {
+    if (m_useResamplex) {
       align_and_focus.setProperty("ResampleX", numHistoBins);
     } else {
       align_and_focus.setProperty("Params", params);
     }
 
     // Crop each histogram using dSpacing
-    if (dmin != "0") {
+    if (m_dmin != "0") {
       align_and_focus.setProperty("Dspacing", true);
-      align_and_focus.setPropertyValue("DMin", dmin);
+      align_and_focus.setPropertyValue("DMin", m_dmin);
     }
-    if (dmax != "0") {
+    if (m_dmax != "0") {
       align_and_focus.setProperty("Dspacing", true);
-      align_and_focus.setPropertyValue("DMax", dmax);
+      align_and_focus.setPropertyValue("DMax", m_dmax);
     }
 
     // Crop entire workspace by TOF
-    if (tmin != "0")
-      align_and_focus.setPropertyValue("TMin", tmin);
-    if (tmax != "0")
-      align_and_focus.setPropertyValue("TMax", tmax);
+    if (m_tmin != "0")
+      align_and_focus.setPropertyValue("TMin", m_tmin);
+    if (m_tmax != "0")
+      align_and_focus.setPropertyValue("TMax", m_tmax);
 
     // Crop entire workspace by Wavelength
-    if (lambdamin != "0")
-      align_and_focus.setPropertyValue("CropWavelengthMin", lambdamin);
-    if (lambdamax != "0")
-      align_and_focus.setPropertyValue("CropWavelengthMax", lambdamax);
+    if (m_lambdamin != "0")
+      align_and_focus.setPropertyValue("CropWavelengthMin", m_lambdamin);
+    if (m_lambdamax != "0")
+      align_and_focus.setPropertyValue("CropWavelengthMax", m_lambdamax);
 
-    size_t numGroups = numBanks * numPixels * numPixels;
-    if (useGroupAll) {
-      groupAllBanks(inputWS);
+    int numGroups{m_numBanks * m_numPixels * m_numPixels};
+    if (m_useGroupAll) {
+      groupAllBanks(m_inputWS);
       auto group_wksp =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(groupWS);
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              m_groupWS);
       align_and_focus.setProperty("GroupingWorkspace", group_wksp->getName());
-      numGroups = group_wksp->blocksize();
+      numGroups = (int)group_wksp->blocksize();
     }
 
     TS_ASSERT_THROWS_NOTHING(align_and_focus.execute());
     TS_ASSERT(align_and_focus.isExecuted());
 
-    inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
-    outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    m_inWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
+    m_outWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
 
-    TS_ASSERT_EQUALS(inWS->size(),
-                     numBanks * numPixels * numPixels * inputHistoBins);
-    TS_ASSERT_EQUALS(inWS->blocksize(), inputHistoBins);
+    TS_ASSERT_EQUALS(m_inWS->size(),
+                     m_numBanks * m_numPixels * m_numPixels * inputHistoBins);
+    TS_ASSERT_EQUALS(m_inWS->blocksize(), inputHistoBins);
 
-    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->unitID(), "TOF");
-    TS_ASSERT_EQUALS(outWS->size(), numGroups * numHistoBins);
-    TS_ASSERT_EQUALS(outWS->blocksize(), numHistoBins);
-    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), numGroups);
+    TS_ASSERT_EQUALS(m_outWS->getAxis(0)->unit()->unitID(), "TOF");
+    TS_ASSERT_EQUALS(m_outWS->size(), numGroups * numHistoBins);
+    TS_ASSERT_EQUALS(m_outWS->blocksize(), numHistoBins);
+    TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), numGroups);
   }
 
   /* Utility functions */
@@ -699,24 +701,24 @@ public:
     loadDiffAlg.setProperty("MakeGroupingWorkspace", group);
     loadDiffAlg.setProperty("MakeCalWorkspace", cal);
     loadDiffAlg.setProperty("MakeMaskWorkspace", mask);
-    loadDiffAlg.setPropertyValue("WorkspaceName", loadDiffWSName);
+    loadDiffAlg.setPropertyValue("WorkspaceName", m_loadDiffWSName);
     loadDiffAlg.execute();
   }
 
-  void groupAllBanks(std::string inputWS) {
+  void groupAllBanks(std::string m_inputWS) {
     CreateGroupingWorkspace groupAlg;
     groupAlg.initialize();
-    groupAlg.setPropertyValue("InputWorkspace", inputWS);
+    groupAlg.setPropertyValue("InputWorkspace", m_inputWS);
     groupAlg.setPropertyValue("GroupDetectorsBy", "All");
-    groupAlg.setPropertyValue("OutputWorkspace", groupWS);
+    groupAlg.setPropertyValue("OutputWorkspace", m_groupWS);
     groupAlg.execute();
   }
 
   void rebin(std::string params, bool preserveEvents = true) {
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", inputWS);
-    rebin.setPropertyValue("OutputWorkspace", inputWS);
+    rebin.setPropertyValue("InputWorkspace", m_inputWS);
+    rebin.setPropertyValue("OutputWorkspace", m_inputWS);
     rebin.setPropertyValue("Params", params);
     rebin.setProperty("PreserveEvents", preserveEvents);
     rebin.execute();
@@ -726,8 +728,8 @@ public:
   void resamplex(int numHistoBins, bool preserveEvents = true) {
     ResampleX resamplexAlg;
     resamplexAlg.initialize();
-    resamplexAlg.setPropertyValue("InputWorkspace", inputWS);
-    resamplexAlg.setPropertyValue("OutputWorkspace", inputWS);
+    resamplexAlg.setPropertyValue("InputWorkspace", m_inputWS);
+    resamplexAlg.setPropertyValue("OutputWorkspace", m_inputWS);
     resamplexAlg.setProperty("NumberBins", numHistoBins);
     resamplexAlg.setProperty("PreserveEvents", preserveEvents);
     resamplexAlg.execute();
@@ -743,27 +745,27 @@ public:
   }
 
   ITableWorkspace_sptr createMaskBinTable() {
-    maskBinTableWS = WorkspaceFactory::Instance().createTable();
-    maskBinTableWS->addColumn("str", "SpectraList");
-    maskBinTableWS->addColumn("double", "XMin");
-    maskBinTableWS->addColumn("double", "XMax");
-    TableRow row1 = maskBinTableWS->appendRow();
+    m_maskBinTableWS = WorkspaceFactory::Instance().createTable();
+    m_maskBinTableWS->addColumn("str", "SpectraList");
+    m_maskBinTableWS->addColumn("double", "XMin");
+    m_maskBinTableWS->addColumn("double", "XMax");
+    TableRow row1 = m_maskBinTableWS->appendRow();
     row1 << "" << 0.0 << 2000.0;
-    TableRow row2 = maskBinTableWS->appendRow();
-    row2 << "" << 10000.0 << xmax + 1000.0;
-    return maskBinTableWS;
+    TableRow row2 = m_maskBinTableWS->appendRow();
+    row2 << "" << 10000.0 << m_xmax + 1000.0;
+    return m_maskBinTableWS;
   }
 
   void addPulseTimesForLogs() {
     AddTimeSeriesLog logAlg;
     std::string time, minute;
-    std::string prefix = "2010-01-01T00:";
+    std::string prefix{"2010-01-01T00:"};
     for (int i = 0; i < 60; i++) {
       minute =
           std::string(2 - std::to_string(i).length(), '0') + std::to_string(i);
       time = prefix + minute + "00";
       logAlg.initialize();
-      logAlg.setPropertyValue("Workspace", inputWS);
+      logAlg.setPropertyValue("Workspace", m_inputWS);
       logAlg.setPropertyValue("Name", "proton_charge");
       logAlg.setPropertyValue("Time", time);
       logAlg.setPropertyValue("Value", "100");
@@ -779,39 +781,40 @@ public:
     freqAlg.setPropertyValue("LogUnit", "Hz");
     freqAlg.setPropertyValue("LogType", "Number Series");
     freqAlg.setPropertyValue("NumberType", "Double");
-    freqAlg.setPropertyValue("Workspace", inputWS);
+    freqAlg.setPropertyValue("Workspace", m_inputWS);
     freqAlg.execute();
   }
 
 private:
-  std::string inputWS = "nexusWS";
-  std::string outputWS = "align_and_focused";
-  MatrixWorkspace_sptr inWS;
-  MatrixWorkspace_sptr outWS;
-  ITableWorkspace_sptr maskBinTableWS;
+  std::string m_inputWS{"nexusWS"};
+  std::string m_outputWS{"align_and_focused"};
+  MatrixWorkspace_sptr m_inWS;
+  MatrixWorkspace_sptr m_outWS;
+  ITableWorkspace_sptr m_maskBinTableWS;
 
-  std::string loadDiffWSName = "AlignAndFocusPowderTest_diff";
-  std::string groupWS = "AlignAndFocusPowderTest_groupWS";
-  std::string maskBinTableWSName = "AlignAndFocusPowderTest_maskBinTable";
+  std::string m_loadDiffWSName{"AlignAndFocusPowderTest_diff"};
+  std::string m_groupWS{"AlignAndFocusPowderTest_groupWS"};
+  std::string m_maskBinTableWSName{"AlignAndFocusPowderTest_maskBinTable"};
 
-  int numBanks = 1;
-  int numPixels = 12;
-  double xmin = 300.0;
-  double xmax = 16666.0;
+  int m_numEvents{10000};
+  int m_numBanks{1};
+  int m_numPixels{12};
+  double m_xmin{300.0};
+  double m_xmax{16666.0};
 
-  std::string dmin = "0";
-  std::string dmax = "0";
-  std::string tmin = "0";
-  std::string tmax = "0";
-  std::string lambdamin = "0";
-  std::string lambdamax = "0";
-  std::string compressTolerance = "0";
-  std::string compressWallClockTolerance = "0";
-  std::string compressStartTime = "0";
-  bool removePromptPulse = false;
-  bool preserveEvents = true;
-  bool useGroupAll = true;
-  bool useResamplex = true;
+  std::string m_dmin{"0"};
+  std::string m_dmax{"0"};
+  std::string m_tmin{"0"};
+  std::string m_tmax{"0"};
+  std::string m_lambdamin{"0"};
+  std::string m_lambdamax{"0"};
+  std::string m_compressTolerance{"0"};
+  std::string m_compressWallClockTolerance{"0"};
+  std::string m_compressStartTime{"0"};
+  bool m_removePromptPulse{false};
+  bool m_preserveEvents{true};
+  bool m_useGroupAll{true};
+  bool m_useResamplex{true};
 };
 
 #endif /*ALIGNANDFOCUSPOWDERTEST_H_*/
