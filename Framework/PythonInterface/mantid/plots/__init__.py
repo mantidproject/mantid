@@ -302,7 +302,8 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.pcolor(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(),
+                                               plotfunctions.pcolor(self, *args, **kwargs))
         else:
             return Axes.pcolor(self, *args, **kwargs)
 
@@ -327,7 +328,7 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.pcolorfast(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(), plotfunctions.pcolorfast(self, *args, **kwargs))
         else:
             return Axes.pcolorfast(self, *args, **kwargs)
 
@@ -352,7 +353,7 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.pcolormesh(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(), plotfunctions.pcolormesh(self, *args, **kwargs))
         else:
             return Axes.pcolormesh(self, *args, **kwargs)
 
@@ -377,7 +378,7 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.imshow(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(), plotfunctions.imshow(self, *args, **kwargs))
         else:
             return Axes.imshow(self, *args, **kwargs)
 
@@ -402,7 +403,7 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.contour(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(), plotfunctions.contour(self, *args, **kwargs))
         else:
             return Axes.contour(self, *args, **kwargs)
 
@@ -428,7 +429,7 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.contourf(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(), plotfunctions.contourf(self, *args, **kwargs))
         else:
             return Axes.contourf(self, *args, **kwargs)
 
@@ -453,7 +454,7 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.tripcolor(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(), plotfunctions.tripcolor(self, *args, **kwargs))
         else:
             return Axes.tripcolor(self, *args, **kwargs)
 
@@ -478,7 +479,7 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.tricontour(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(), plotfunctions.tricontour(self, *args, **kwargs))
         else:
             return Axes.tricontour(self, *args, **kwargs)
 
@@ -503,7 +504,7 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return plotfunctions.tricontourf(self, *args, **kwargs)
+            return self.track_workspace_artist(args[0].name(), plotfunctions.tricontourf(self, *args, **kwargs))
         else:
             return Axes.tricontourf(self, *args, **kwargs)
 
