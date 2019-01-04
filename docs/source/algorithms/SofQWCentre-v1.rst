@@ -19,7 +19,7 @@ spectrum pertains). For each detector the value of **momentum transfer**
 
 The momentum transfer (:math:`Q`-values) obtained for each detector are 
 calculated for the detector center, so the binning algorithm uses center-point 
-binning. This algorithm does not use the `AngularWidths` optional input 
+binning. This algorithm does not use the `DetectorTwoThetaRanges` optional input 
 property for the :math:`Q` calculation. Use :ref:`algm-SofQWPolygon` and 
 :ref:`algm-SofQWNormalisedPolygon` for more complex and precise (but slower) 
 binning strategies.

@@ -253,7 +253,8 @@ std::pair<double, double> twoThetasFromTable(
   const auto range = std::equal_range(detectorIDs.cbegin(), detectorIDs.cend(),
                                       static_cast<int>(detID));
   if (std::distance(range.first, range.second) > 1) {
-    throw std::invalid_argument("Duplicate detector IDs in 'AngularWidths' table.");
+    throw std::invalid_argument(
+        "Duplicate detector IDs in 'DetectorTwoThetaRanges'.");
   }
   if (range.first == detectorIDs.cend()) {
     throw std::invalid_argument("No 2theta width found for detector ID " +
@@ -334,9 +335,9 @@ void SofQWNormalisedPolygon::exec() {
   m_progress = boost::make_shared<API::Progress>(this, 0.0, 1.0, nreports);
 
   // Index theta cache
-  TableWorkspace_sptr widthTable = getProperty("AngularWidths");
-  if (widthTable) {
-    initAngularCachesTable(*inputWS, *widthTable);
+  TableWorkspace_sptr twoThetaTable = getProperty("DetectorTwoThetaRanges");
+  if (twoThetaTable) {
+    initAngularCachesTable(*inputWS, *twoThetaTable);
   } else {
     std::vector<double> par = inputWS->getInstrument()->getNumberParameter(
         "detector-neighbour-offset");
@@ -577,14 +578,14 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
 }
 
 void SofQWNormalisedPolygon::initAngularCachesTable(
-    const MatrixWorkspace &workspace, const TableWorkspace &widthTable) {
+    const MatrixWorkspace &workspace, const TableWorkspace &angleTable) {
   constexpr double skipDetector{-1.};
   const size_t nhist = workspace.getNumberHistograms();
   m_twoThetaLowers = std::vector<double>(nhist, skipDetector);
   m_twoThetaUppers = std::vector<double>(nhist, skipDetector);
-  const auto &detIDs = widthTable.getColVector<int>("Detector ID");
-  const auto &lowers = widthTable.getColVector<double>("Lower two theta");
-  const auto &uppers = widthTable.getColVector<double>("Upper two theta");
+  const auto &detIDs = angleTable.getColVector<int>("Detector ID");
+  const auto &lowers = angleTable.getColVector<double>("Min two theta");
+  const auto &uppers = angleTable.getColVector<double>("Max two theta");
   const auto &spectrumInfo = workspace.spectrumInfo();
   for (size_t i = 0; i < nhist; ++i) {
     m_progress->report("Reading detector angles");

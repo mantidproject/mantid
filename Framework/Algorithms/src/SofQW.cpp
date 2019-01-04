@@ -110,10 +110,11 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       "used by the :ref:`algm-Rebin` algorithm).");
   alg.declareProperty(
       Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "AngularWidths", "", Direction::Input, PropertyMode::Optional),
-      "A table workspace with a 'Detector ID' column listing detector IDs as "
-      "well as 'Lower two theta' and 'Upper two theta' columns listing "
-      "corresponding min and max 2thetas in radians.");
+          "DetectorTwoThetaRanges", "", Direction::Input,
+          PropertyMode::Optional),
+      "A table workspace containing a 'Detector ID' column as "
+      "well as 'Min two theta' and 'Max two theta' columns listing "
+      "the detector's min and max scattering angles in radians.");
 }
 
 void SofQW::exec() {
