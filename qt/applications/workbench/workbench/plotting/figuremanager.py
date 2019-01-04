@@ -36,7 +36,14 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         self.window = manager.window
         self.canvas = manager.canvas
 
+        self.observeClear(True)
         self.observeDelete(True)
+
+    def clearHandle(self):
+        """
+        Called when the ADS is deleted all of its workspaces
+        """
+        self.window.close()
 
     def deleteHandle(self, name, _):
         """
