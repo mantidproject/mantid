@@ -98,7 +98,10 @@ class ScriptRunner(object):
                         app.exit()
                     return
                 # Run test script until the next 'yield'
-                ret = next(script_iter)
+                try:
+                    ret = next(script_iter)
+                except ValueError:
+                    return
                 while ret is not None:
                     if inspect.isgenerator(ret):
                         self.script_iter.append(ret)

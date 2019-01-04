@@ -74,7 +74,7 @@ class GuiTestBase(object):
         open_in_window(self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause,
                        close_on_finish=close_on_finish)
 
-    def run_test_async(self, method='call', pause=0, close_on_finish=True):
+    def run_test_async(self, method='call', pause=0, close_on_finish=False):
         self.call_method = method
         script_runner = ScriptRunner(self._call_test_method, close_on_finish=close_on_finish, pause=pause)
         script_runner.run()
@@ -130,7 +130,7 @@ class GuiTestBase(object):
 
 
 def is_test_method(value):
-    if not inspect.ismethod(value):
+    if not (inspect.ismethod(value) or inspect.isfunction(value)):
         return False
     return value.__name__.startswith('test_')
 
@@ -154,13 +154,30 @@ class GuiWindowTest(TestCase, GuiTestBase):
             setattr(cls, name, cls.make_test_wrapper(wrapped_name))
 
 
+class MultiTestRunner(object):
+
+    def __init__(self, methods):
+        self.methods = methods
+
+    def __call__(self, w):
+        for method in self.methods:
+            yield method
+
+
 class WorkbenchGuiTest(GuiWindowTest):
 
     @classmethod
     def make_test_wrapper(cls, wrapped_name):
         def wrapper(self):
-            self.run_test_async(method=wrapped_name)
+            if len(self.test_methods) == 0:
+                self.widget = self.create_widget()
+            self.test_methods.append(getattr(self, wrapped_name))
         return wrapper
+
+    @classmethod
+    def tearDownClass(cls):
+        runner = MultiTestRunner(cls.test_methods)
+        open_in_window(cls.widget, runner, close_on_finish=True, attach_debugger=False, in_workbench=True)
 
     def create_widget(self):
         qapp = QApplication.instance()
