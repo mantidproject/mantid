@@ -9,6 +9,7 @@
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 import sys
+from functools import wraps
 
 # 3rdparty imports
 from mantid.api import AnalysisDataServiceObserver
@@ -29,6 +30,22 @@ from workbench.plotting.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 
 
+def _catch_exceptions(func):
+    """
+    Catch all exceptions in method and print a traceback to stderr
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception:
+            sys.stderr.write("Error occurred in handler:\n")
+            import traceback
+            traceback.print_exc()
+
+    return wrapper
+
+
 class FigureManagerADSObserver(AnalysisDataServiceObserver):
 
     def __init__(self, manager):
@@ -38,13 +55,16 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
 
         self.observeClear(True)
         self.observeDelete(True)
+        self.observeReplace(True)
 
+    @_catch_exceptions
     def clearHandle(self):
         """
         Called when the ADS is deleted all of its workspaces
         """
         self.window.close()
 
+    @_catch_exceptions
     def deleteHandle(self, name, _):
         """
         Called when the ADS has deleted a workspace. Checks the
@@ -54,27 +74,41 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         :param name: The name of the workspace
         :param _: Unused callback argument
         """
-        try:
-            # Find the Axes with this workspace reference
-            empty_axes = []
-            for ax in self.canvas.figure.axes:
-                try:
-                    empty_axes.append(ax.remove_workspace_artists(name))
-                except AttributeError:
-                    pass
+        # Find the axes with this workspace reference
+        all_axes = self.canvas.figure.axes
+        if not all_axes:
+            return
+        empty_axes = True
+        for ax in all_axes:
+            try:
+                empty_axes = empty_axes & ax.remove_workspace_artists(name)
+            except AttributeError:
+                pass
+        if empty_axes:
+            self.window.close()
+        else:
+            self.canvas.draw_idle()
 
-            if all(empty_axes):
-                self.window.close()
-            else:
-                self.canvas.draw_idle()
-        except Exception:
-            # If we don't catch all errors here the ADS.remove method
-            # does not complete properly and leaves things in a bad
-            # state
-            sys.stderr.write("Error occurred in deletion handler:\n")
-            import traceback
-            traceback.print_exc()
-
+    @_catch_exceptions
+    def replaceHandle(self, name, workspace):
+        """
+        Called when the ADS has replaced a workspace with one of the same name.
+        If this workspace is attached tho this figure then its data is updated
+        :param name: The name of the workspace
+        :param workspace: A reference to the new workspace
+        """
+        redraw = False
+        for ax in self.canvas.figure.axes:
+            try:
+                redraw_this = ax.replace_workspace_artists(name, workspace)
+                if redraw_this:
+                    ax.relim()
+                    ax.autoscale_view()
+                redraw = redraw | redraw_this
+            except AttributeError:
+                pass
+        if redraw:
+            self.canvas.draw_idle()
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
     """
