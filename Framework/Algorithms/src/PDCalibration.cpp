@@ -237,6 +237,10 @@ void PDCalibration::init() {
                   boost::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
 
+  declareProperty("AllowSinglePeakCalibration", false,
+                  "If True then the DIFC is allowed to be calculated if just "
+                  "one found peak for the detector.");
+
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("TZEROrange"),
       "Range for allowable TZERO from calibration (default is all)");
@@ -274,6 +278,7 @@ void PDCalibration::init() {
   // make group for type of calibration
   std::string calGroup("Calibration Type");
   setPropertyGroup("CalibrationParameters", calGroup);
+  setPropertyGroup("AllowSinglePeakCalibration", calGroup);
   setPropertyGroup("TZEROrange", calGroup);
   setPropertyGroup("DIFArange", calGroup);
 }
@@ -497,6 +502,11 @@ void PDCalibration::exec() {
   const auto windowsInDSpacing =
       dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
 
+  bool singlePeakCalibration = getProperty("AllowSinglePeakCalibration");
+  size_t minimumPeaks = 2;
+  if (singlePeakCalibration)
+    minimumPeaks = 1;
+
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
@@ -586,38 +596,41 @@ void PDCalibration::exec() {
       height_vec_full[peakIndex] = height;
     }
 
-    maskWS->setMasked(peaks.detid, d_vec.size() < 2);
-    if (d_vec.size() < 2) { // not enough peaks were found
+    maskWS->setMasked(peaks.detid, d_vec.size() < minimumPeaks);
+
+    double difc = 0., t0 = 0., difa = 0.;
+    if (d_vec.size() < minimumPeaks) { // not enough peaks were found
       continue;
+    } else if (singlePeakCalibration && d_vec.size() == 1) {
+      difc = tof_vec.front() / d_vec.front();
     } else {
-      double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
-
-      const auto rowIndexOutputPeaks = m_detidToRow[peaks.detid];
-      double chisq = 0.;
-      auto converter =
-          Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
-      for (std::size_t i = 0; i < numPeaks; ++i) {
-        if (std::isnan(tof_vec_full[i]))
-          continue;
-        const double dspacing = converter(tof_vec_full[i]);
-        const double temp = m_peaksInDspacing[i] - dspacing;
-        chisq += (temp * temp);
-        m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            dspacing;
-        m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            WIDTH_TO_FWHM * converter(width_vec_full[i]);
-        m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            height_vec_full[i];
-      }
-      m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
-                                        m_peaksInDspacing.size() + 1) = chisq;
-      m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
-                                        m_peaksInDspacing.size() + 2) =
-          chisq / static_cast<double>(numPeaks - 1);
-
-      setCalibrationValues(peaks.detid, difc, difa, t0);
     }
+
+    const auto rowIndexOutputPeaks = m_detidToRow[peaks.detid];
+    double chisq = 0.;
+    auto converter =
+        Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
+    for (std::size_t i = 0; i < numPeaks; ++i) {
+      if (std::isnan(tof_vec_full[i]))
+        continue;
+      const double dspacing = converter(tof_vec_full[i]);
+      const double temp = m_peaksInDspacing[i] - dspacing;
+      chisq += (temp * temp);
+      m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) = dspacing;
+      m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+          WIDTH_TO_FWHM * converter(width_vec_full[i]);
+      m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+          height_vec_full[i];
+    }
+    m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
+                                      m_peaksInDspacing.size() + 1) = chisq;
+    m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
+                                      m_peaksInDspacing.size() + 2) =
+        chisq / static_cast<double>(numPeaks - 1);
+
+    setCalibrationValues(peaks.detid, difc, difa, t0);
+
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION
@@ -868,30 +881,32 @@ PDCalibration::dSpacingWindows(const std::vector<double> &centres,
 
   const std::size_t numPeaks = centres.size();
 
-  // assumes distance between peaks can be used for window sizes
-  assert(numPeaks >= 2);
-
   vector<double> windows(2 * numPeaks);
   double widthLeft;
   double widthRight;
-  for (std::size_t i = 0; i < centres.size(); ++i) {
-    // calculate left
-    if (i == 0)
-      widthLeft = .5 * (centres[1] - centres[0]);
-    else
-      widthLeft = .5 * (centres[i] - centres[i - 1]);
-    widthLeft = std::min(widthLeft, widthMax);
+  if (numPeaks >= 2) {
+    for (std::size_t i = 0; i < centres.size(); ++i) {
+      // calculate left
+      if (i == 0)
+        widthLeft = .5 * (centres[1] - centres[0]);
+      else
+        widthLeft = .5 * (centres[i] - centres[i - 1]);
+      widthLeft = std::min(widthLeft, widthMax);
 
-    // calculate right
-    if (i + 1 == numPeaks)
-      widthRight = .5 * (centres[numPeaks - 1] - centres[numPeaks - 2]);
-    else
-      widthRight = .5 * (centres[i + 1] - centres[i]);
-    widthRight = std::min(widthRight, widthMax);
+      // calculate right
+      if (i + 1 == numPeaks)
+        widthRight = .5 * (centres[numPeaks - 1] - centres[numPeaks - 2]);
+      else
+        widthRight = .5 * (centres[i + 1] - centres[i]);
+      widthRight = std::min(widthRight, widthMax);
 
-    // set the windows
-    windows[2 * i] = centres[i] - widthLeft;
-    windows[2 * i + 1] = centres[i] + widthRight;
+      // set the windows
+      windows[2 * i] = centres[i] - widthLeft;
+      windows[2 * i + 1] = centres[i] + widthRight;
+    }
+  } else {
+    windows[0] = centres[0] - widthMax;
+    windows[1] = centres[0] + widthMax;
   }
   return windows;
 }
