@@ -42,6 +42,7 @@ public:
 
   // BatchViewSubscriber overrides
   void notifyBatchFinished(bool error) override;
+  void notifyBatchCancelled() override;
   void notifyAlgorithmFinished() override;
   void notifyAlgorithmError(std::string const &message) override;
 

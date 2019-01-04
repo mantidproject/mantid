@@ -97,6 +97,12 @@ void BatchPresenter::notifyBatchFinished(bool error) {
   m_runsPresenter->notifyRowStateChanged();
 }
 
+void BatchPresenter::notifyBatchCancelled() {
+  UNUSED_ARG(error);
+  reductionPaused();
+  m_runsPresenter->notifyRowStateChanged();
+}
+
 void BatchPresenter::notifyAlgorithmFinished() {
   m_runsPresenter->notifyRowStateChanged();
 }

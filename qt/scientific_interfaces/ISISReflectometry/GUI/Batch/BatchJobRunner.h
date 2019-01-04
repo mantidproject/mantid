@@ -15,7 +15,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner
+    : public API::BatchAlgorithmRunnerSubscriber {
 public:
   BatchJobRunner(Batch batch, API::BatchAlgorithmRunner &batchAlgoRunner);
 

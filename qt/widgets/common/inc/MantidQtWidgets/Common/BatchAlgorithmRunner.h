@@ -18,15 +18,16 @@
 #include <Poco/Void.h>
 
 #include <deque>
+#include <mutex>
 
 namespace MantidQt {
 namespace API {
 
 class BatchAlgorithmRunnerSubscriber {
 public:
-  virtual void notifyAlgorithmStarted() = 0;
-  virtual void notifyAlgorithmComplete() = 0;
-  virtual void notifyAlgorithmError(std::string const &msg) = 0;
+  virtual void notifyAlgorithmStarted(){};
+  virtual void notifyAlgorithmComplete(){};
+  virtual void notifyAlgorithmError(std::string const &){};
 };
 
 class ConfiguredAlgorithm {
@@ -60,6 +61,11 @@ public:
 private:
   bool m_inProgress;
   bool m_error;
+};
+
+class BatchCancelledNotification : public Poco::Notification {
+public:
+  BatchCancelledNotification() : Poco::Notification() {}
 };
 
 class AlgorithmCompleteNotification : public Poco::Notification {
@@ -116,6 +122,8 @@ public:
   bool executeBatch();
   /// Starts the batch executing and returns immediately
   void executeBatchAsync();
+  /// Request to cancel processing the batch
+  void cancelBatch();
 
   /// Sets if the execuion should be stopped if an error is detected
   void stopOnFailure(bool stopOnFailure);
@@ -123,6 +131,7 @@ public:
 signals:
   /// Emitted when a batch has finished executing
   void batchComplete(bool error);
+  void batchCancelled();
   void algorithmComplete();
   void algorithmError(std::string const &errorMessage);
 
@@ -132,8 +141,10 @@ private:
   /// Sets up and executes an algorithm
   bool executeAlgo(ConfiguredAlgorithm &algorithm);
 
-  /// Handler for batch completion
+  /// Handlers for notifications
   void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);
+  void
+  handleBatchCancelled(const Poco::AutoPtr<BatchCancelledNotification> &pNf);
   void handleAlgorithmComplete(
       const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf);
   void
@@ -148,11 +159,19 @@ private:
   /// If execution should be stopped on algorithm failure
   bool m_stopOnFailure;
 
+  /// User has requested to cancel processing
+  bool m_cancelRequested;
+  std::mutex m_mutex;
+  void resetState();
+  bool cancelRequested();
+
   /// Notification center used to handle notifications from active method
   mutable Poco::NotificationCenter m_notificationCenter;
   /// Observer for notifications
   Poco::NObserver<BatchAlgorithmRunner, BatchCompleteNotification>
       m_batchCompleteObserver;
+  Poco::NObserver<BatchAlgorithmRunner, BatchCancelledNotification>
+      m_batchCancelledObserver;
   Poco::NObserver<BatchAlgorithmRunner, AlgorithmCompleteNotification>
       m_algorithmCompleteObserver;
   Poco::NObserver<BatchAlgorithmRunner, AlgorithmErrorNotification>

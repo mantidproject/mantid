@@ -18,9 +18,12 @@ Mantid::Kernel::Logger g_log("BatchAlgorithmRunner");
 namespace MantidQt {
 namespace API {
 BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
-    : QObject(parent), m_stopOnFailure(true), m_notificationCenter(),
+    : QObject(parent), m_stopOnFailure(true), m_cancelRequested(false),
+      m_notificationCenter(),
       m_batchCompleteObserver(*this,
                               &BatchAlgorithmRunner::handleBatchComplete),
+      m_batchCancelledObserver(*this,
+                               &BatchAlgorithmRunner::handleBatchCancelled),
       m_algorithmCompleteObserver(
           *this, &BatchAlgorithmRunner::handleAlgorithmComplete),
       m_algorithmErrorObserver(*this,
@@ -31,12 +34,14 @@ BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
 
 void BatchAlgorithmRunner::addAllObservers() {
   m_notificationCenter.addObserver(m_batchCompleteObserver);
+  m_notificationCenter.addObserver(m_batchCancelledObserver);
   m_notificationCenter.addObserver(m_algorithmCompleteObserver);
   m_notificationCenter.addObserver(m_algorithmErrorObserver);
 }
 
 void BatchAlgorithmRunner::removeAllObservers() {
   m_notificationCenter.removeObserver(m_batchCompleteObserver);
+  m_notificationCenter.removeObserver(m_batchCancelledObserver);
   m_notificationCenter.removeObserver(m_algorithmCompleteObserver);
   m_notificationCenter.removeObserver(m_algorithmErrorObserver);
 }
@@ -101,12 +106,39 @@ void BatchAlgorithmRunner::executeBatchAsync() {
 }
 
 /**
+ * Cancel execution of remaining queued items
+ */
+void BatchAlgorithmRunner::cancelBatch() {
+  std::lock_guard<std::mutex> lock(m_mutex);
+  m_cancelRequested = true;
+}
+
+/**
+ * Reset state ready for executing a new batch
+ */
+void BatchAlgorithmRunner::resetState() {
+  std::lock_guard<std::mutex> lock(m_mutex);
+  m_cancelRequested = false;
+}
+
+bool BatchAlgorithmRunner::cancelRequested() {
+  std::lock_guard<std::mutex> lock(m_mutex);
+  return m_cancelRequested;
+}
+
+/**
  * Implementation of sequential algorithm scheduler.
  */
 bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
-  bool cancelFlag = false;
+  resetState();
+  bool errorFlag = false;
 
   for (auto it = m_algorithms.begin(); it != m_algorithms.end(); ++it) {
+    if (cancelRequested()) {
+      g_log.information("Stopping batch algorithm execution: cancelled");
+      break;
+    }
+
     // Try to execute the algorithm
     if (!executeAlgo(*it)) {
       g_log.warning() << "Got error from algorithm \""
@@ -115,7 +147,7 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
       // Stop executing the entire batch if appropriate
       if (m_stopOnFailure) {
         g_log.warning("Stopping batch algorithm because of execution error");
-        cancelFlag = true;
+        errorFlag = true;
         break;
       }
     } else {
@@ -128,10 +160,10 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
   m_algorithms.clear();
 
   m_notificationCenter.postNotification(
-      new BatchCompleteNotification(false, cancelFlag));
+      new BatchCompleteNotification(false, errorFlag));
   m_notificationCenter.removeObserver(m_batchCompleteObserver);
 
-  return !cancelFlag;
+  return !errorFlag;
 }
 
 /**
@@ -207,6 +239,13 @@ void BatchAlgorithmRunner::handleBatchComplete(
     // Notify UI elements
     emit batchComplete(pNf->hasError());
   }
+}
+
+void BatchAlgorithmRunner::handleBatchCancelled(
+    const Poco::AutoPtr<BatchCancelledNotification> &pNf) {
+  UNUSED_ARG(pNf);
+  // Notify UI elements
+  emit batchCancelled();
 }
 
 void BatchAlgorithmRunner::handleAlgorithmComplete(

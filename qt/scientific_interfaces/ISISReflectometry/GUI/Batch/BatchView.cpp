@@ -65,6 +65,8 @@ BatchAlgorithmRunner &BatchView::batchAlgorithmRunner() {
 void BatchView::executeBatchAlgorithmRunner() {
   connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(onBatchComplete(bool)));
+  connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
+          SLOT(onBatchCancelled()));
   connect(&m_batchAlgoRunner, SIGNAL(algorithmComplete()), this,
           SLOT(onAlgorithmComplete()));
   connect(&m_batchAlgoRunner, SIGNAL(algorithmError(std::string const &)), this,
@@ -75,6 +77,8 @@ void BatchView::executeBatchAlgorithmRunner() {
 void BatchView::onBatchComplete(bool error) {
   m_notifyee->notifyBatchFinished(error);
 }
+
+void BatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
 
 void BatchView::onAlgorithmComplete() { m_notifyee->notifyAlgorithmFinished(); }
 

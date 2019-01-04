@@ -38,6 +38,7 @@ public:
 
 private slots:
   void onBatchComplete(bool error);
+  void onBatchCancelled();
   void onAlgorithmComplete();
   void onAlgorithmError(std::string const &errorMessage);
 
