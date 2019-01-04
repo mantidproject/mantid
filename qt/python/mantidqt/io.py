@@ -12,6 +12,7 @@ from qtpy.QtWidgets import QFileDialog
 from qtpy.QtCore import QDir
 
 _LAST_SAVE_DIRECTORY = None
+_TEMP_SAVE = None
 
 
 def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_filter=None, accept_mode=None,
@@ -26,8 +27,7 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     :param file_mode: enum FileMode; Defines the FileMode of the dialog, check QFileDialog Class for details
     :return: String; The filename that was selected, it is possible to return a directory so look out for that
     """
-    global _LAST_SAVE_DIRECTORY
-
+    global _LAST_SAVE_DIRECTORY, _TEMP_SAVE
     dialog = QFileDialog(parent)
 
     # It is the intention to only save the user's last used directory until workbench is restarted similar to other
@@ -58,20 +58,22 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     # Wait for dialog to finish before allowing continuation of code
     dialog.exec_()
 
-    filename = _LAST_SAVE_DIRECTORY
+    filename = _TEMP_SAVE
 
-    # Make sure that the _LAST_SAVE_DIRECTORY is set
-    if _LAST_SAVE_DIRECTORY is not None and not os.path.isdir(_LAST_SAVE_DIRECTORY):
+    # Make sure that the _TEMP_SAVE is set as a directory
+    if _TEMP_SAVE is not None and not os.path.isdir(_TEMP_SAVE):
         # Remove the file for last directory
-        _LAST_SAVE_DIRECTORY = os.path.dirname(os.path.abspath(_LAST_SAVE_DIRECTORY))
+        _TEMP_SAVE = os.path.dirname(os.path.abspath(_TEMP_SAVE))
 
+    _TEMP_SAVE = None
+    _LAST_SAVE_DIRECTORY = filename
     return filename
 
 
 def _set_last_save(filename):
     """
-    Uses the global _LOCAL_SAVE_DIRECTORY to store output from connected signal
-    :param filename: String; Value to set _LAST_SAVE_DIRECTORY
+    Uses the global _TEMP_SAVE to store output from connected signal
+    :param filename: String; Value to set _TEMP_SAVE
     """
-    global _LAST_SAVE_DIRECTORY
-    _LAST_SAVE_DIRECTORY = filename
+    global _TEMP_SAVE
+    __TEMP_SAVE = filename
