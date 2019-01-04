@@ -1,4 +1,5 @@
 from __future__ import print_function
+import unittest
 
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QCursor
@@ -11,6 +12,11 @@ from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.test.workbenchtests import runTests
 
 
+def on_darwin():
+    return sys.platform == 'darwin'
+
+
+@unittest.skipIf(on_darwin(), "Couldn't make it work for a mac")
 class TestFitPropertyBrowser(WorkbenchGuiTest):
 
     def start(self):
