@@ -66,8 +66,8 @@ Givest the output:
    assigned to a specific element within the list, think of them as
    being assigned to the boundaries of the elements, e.g.
 
-.. figure:: /images/pyslice.png
-   :alt: pyslice.png
+.. figure:: /images/Pyslice.png
+   :alt: Pyslice.png
 
 -  The output of a slice operation is then much more obvious as it
    simple slices out the items within the boxes contained by the given
