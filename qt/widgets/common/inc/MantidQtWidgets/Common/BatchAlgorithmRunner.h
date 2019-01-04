@@ -24,9 +24,9 @@ namespace API {
 
 class BatchAlgorithmRunnerSubscriber {
 public:
-  virtual void setRunning() = 0;
-  virtual void setSuccess() = 0;
-  virtual void setError(std::string const &msg) = 0;
+  virtual void notifyAlgorithmStarted() = 0;
+  virtual void notifyAlgorithmComplete() = 0;
+  virtual void notifyAlgorithmError(std::string const &msg) = 0;
 };
 
 class ConfiguredAlgorithm {
@@ -43,19 +43,19 @@ public:
   AlgorithmRuntimeProps properties() const { return m_properties; }
   BatchAlgorithmRunnerSubscriber *notifyee() const { return m_notifyee; }
 
-  void setRunning() {
+  void notifyAlgorithmStarted() {
     if (m_notifyee)
-      m_notifyee->setRunning();
+      m_notifyee->notifyAlgorithmStarted();
   }
 
-  void setSuccess() {
+  void notifyAlgorithmComplete() {
     if (m_notifyee)
-      m_notifyee->setSuccess();
+      m_notifyee->notifyAlgorithmComplete();
   }
 
-  void setError(std::string const &errorMessage) {
+  void notifyAlgorithmError(std::string const &errorMessage) {
     if (m_notifyee)
-      m_notifyee->setError(errorMessage);
+      m_notifyee->notifyAlgorithmError(errorMessage);
   }
 
 private:
@@ -79,17 +79,27 @@ private:
 
 class AlgorithmCompleteNotification : public Poco::Notification {
 public:
-  AlgorithmCompleteNotification() : Poco::Notification() {}
+  AlgorithmCompleteNotification(ConfiguredAlgorithm &algorithm)
+      : Poco::Notification(), m_algorithm(algorithm) {}
+
+  ConfiguredAlgorithm &algorithm() const { return m_algorithm; }
+
+private:
+  ConfiguredAlgorithm &m_algorithm;
 };
 
 class AlgorithmErrorNotification : public Poco::Notification {
 public:
-  AlgorithmErrorNotification(std::string const &errorMessage)
-      : Poco::Notification(), m_errorMessage(errorMessage) {}
+  AlgorithmErrorNotification(ConfiguredAlgorithm &algorithm,
+                             std::string const &errorMessage)
+      : Poco::Notification(), m_algorithm(algorithm),
+        m_errorMessage(errorMessage) {}
 
+  ConfiguredAlgorithm &algorithm() const { return m_algorithm; }
   std::string errorMessage() const { return m_errorMessage; }
 
 private:
+  ConfiguredAlgorithm &m_algorithm;
   std::string m_errorMessage;
 };
 
@@ -111,7 +121,7 @@ public:
   /// Adds an algorithm to the execution queue
   void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
                     AlgorithmRuntimeProps props = AlgorithmRuntimeProps(),
-                    BatchAlgorithmRunnerSubscriber *observer = nullptr);
+                    BatchAlgorithmRunnerSubscriber *notifyee = nullptr);
   /// Clears all algorithms from queue
   void clearQueue();
   /// Gets size of queue
@@ -135,7 +145,7 @@ private:
   /// Implementation of algorithm runner
   bool executeBatchAsyncImpl(const Poco::Void &);
   /// Sets up and executes an algorithm
-  bool executeAlgo(ConfiguredAlgorithm algorithm);
+  bool executeAlgo(ConfiguredAlgorithm &algorithm);
 
   /// Handler for batch completion
   void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);
@@ -172,7 +182,6 @@ private:
 
   void addAllObservers();
   void removeAllObservers();
-  void reportError(ConfiguredAlgorithm &algorithm, std::string const &message);
 };
 
 } // namespace API

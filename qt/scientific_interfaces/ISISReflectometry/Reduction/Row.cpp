@@ -62,6 +62,12 @@ Row mergedRow(Row const &rowA, Row const &rowB) {
   return rowA.withExtraRunNumbers(rowB.runNumbers());
 }
 
+void Row::notifyAlgorithmStarted() { setRunning(); }
+
+void Row::notifyAlgorithmComplete() { setSuccess(); }
+
+void Row::notifyAlgorithmError(std::string const &msg) { setError(msg); }
+
 void Row::setProgress(double p, std::string const &msg) {
   m_itemState.setProgress(p, msg);
 }

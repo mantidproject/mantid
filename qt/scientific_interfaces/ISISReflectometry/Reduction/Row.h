@@ -41,11 +41,9 @@ public:
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
-  void setProgress(double p, std::string const &msg);
-  void setStarting();
-  void setRunning() override;
-  void setSuccess() override;
-  void setError(std::string const &msg) override;
+  void notifyAlgorithmStarted() override;
+  void notifyAlgorithmComplete() override;
+  void notifyAlgorithmError(std::string const &msg) override;
 
 private:
   std::vector<std::string> m_runNumbers;
@@ -56,6 +54,12 @@ private:
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
   ItemState m_itemState;
+
+  void setProgress(double p, std::string const &msg);
+  void setStarting();
+  void setRunning();
+  void setSuccess();
+  void setError(std::string const &msg);
 };
 
 // std::ostream &operator<<(std::ostream &os, Row const &row) {
