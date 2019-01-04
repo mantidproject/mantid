@@ -44,21 +44,6 @@ public:
   AlgorithmRuntimeProps properties() const { return m_properties; }
   BatchAlgorithmRunnerSubscriber *notifyee() const { return m_notifyee; }
 
-  void notifyAlgorithmStarted() {
-    if (m_notifyee)
-      m_notifyee->notifyAlgorithmStarted();
-  }
-
-  void notifyAlgorithmComplete() {
-    if (m_notifyee)
-      m_notifyee->notifyAlgorithmComplete();
-  }
-
-  void notifyAlgorithmError(std::string const &errorMessage) {
-    if (m_notifyee)
-      m_notifyee->notifyAlgorithmError(errorMessage);
-  }
-
 private:
   Mantid::API::IAlgorithm_sptr m_algorithm;
   AlgorithmRuntimeProps m_properties;
@@ -80,27 +65,27 @@ private:
 
 class AlgorithmCompleteNotification : public Poco::Notification {
 public:
-  AlgorithmCompleteNotification(ConfiguredAlgorithm &algorithm)
-      : Poco::Notification(), m_algorithm(algorithm) {}
+  AlgorithmCompleteNotification(BatchAlgorithmRunnerSubscriber *notifyee)
+      : Poco::Notification(), m_notifyee(notifyee) {}
 
-  ConfiguredAlgorithm &algorithm() const { return m_algorithm; }
+  BatchAlgorithmRunnerSubscriber *notifyee() const { return m_notifyee; }
 
 private:
-  ConfiguredAlgorithm &m_algorithm;
+  BatchAlgorithmRunnerSubscriber *m_notifyee;
 };
 
 class AlgorithmErrorNotification : public Poco::Notification {
 public:
-  AlgorithmErrorNotification(ConfiguredAlgorithm &algorithm,
+  AlgorithmErrorNotification(BatchAlgorithmRunnerSubscriber *notifyee,
                              std::string const &errorMessage)
-      : Poco::Notification(), m_algorithm(algorithm),
+      : Poco::Notification(), m_notifyee(notifyee),
         m_errorMessage(errorMessage) {}
 
-  ConfiguredAlgorithm &algorithm() const { return m_algorithm; }
+  BatchAlgorithmRunnerSubscriber *notifyee() const { return m_notifyee; }
   std::string errorMessage() const { return m_errorMessage; }
 
 private:
-  ConfiguredAlgorithm &m_algorithm;
+  BatchAlgorithmRunnerSubscriber *m_notifyee;
   std::string m_errorMessage;
 };
 

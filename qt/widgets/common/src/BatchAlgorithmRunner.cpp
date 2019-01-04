@@ -166,10 +166,10 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm &algorithm) {
       auto message = std::string("Algorithm") + algorithm.algorithm()->name() +
                      std::string(" execution failed");
       m_notificationCenter.postNotification(
-          new AlgorithmErrorNotification(algorithm, message));
+          new AlgorithmErrorNotification(algorithm.notifyee(), message));
     } else {
       m_notificationCenter.postNotification(
-          new AlgorithmCompleteNotification(algorithm));
+          new AlgorithmCompleteNotification(algorithm.notifyee()));
     }
 
     return result;
@@ -179,8 +179,8 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm &algorithm) {
     UNUSED_ARG(notFoundEx);
     g_log.warning(
         "Algorithm property does not exist.\nStopping queue execution.");
-    m_notificationCenter.postNotification(
-        new AlgorithmErrorNotification(algorithm, notFoundEx.what()));
+    m_notificationCenter.postNotification(new AlgorithmErrorNotification(
+        algorithm.notifyee(), notFoundEx.what()));
     return false;
   }
   // If a property was assigned a value of the wrong type
@@ -188,15 +188,15 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm &algorithm) {
     UNUSED_ARG(invalidArgEx);
     g_log.warning("Algorithm property given value of incorrect type.\nStopping "
                   "queue execution.");
-    m_notificationCenter.postNotification(
-        new AlgorithmErrorNotification(algorithm, invalidArgEx.what()));
+    m_notificationCenter.postNotification(new AlgorithmErrorNotification(
+        algorithm.notifyee(), invalidArgEx.what()));
     return false;
   }
   // For anything else that could go wrong
   catch (...) {
     g_log.warning("Unknown error starting next batch algorithm");
     m_notificationCenter.postNotification(new AlgorithmErrorNotification(
-        algorithm, "Unknown error starting algorithm"));
+        algorithm.notifyee(), "Unknown error starting algorithm"));
     return false;
   }
 }
@@ -221,7 +221,8 @@ void BatchAlgorithmRunner::handleBatchComplete(
 void BatchAlgorithmRunner::handleAlgorithmComplete(
     const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf) {
   // Update subscriber
-  pNf->algorithm().notifyAlgorithmComplete();
+  if (pNf->notifyee())
+    pNf->notifyee()->notifyAlgorithmComplete();
   // Notify UI elements
   emit algorithmComplete();
 }
@@ -230,7 +231,8 @@ void BatchAlgorithmRunner::handleAlgorithmError(
     const Poco::AutoPtr<AlgorithmErrorNotification> &pNf) {
   auto errorMessage = pNf->errorMessage();
   // Update subscriber
-  pNf->algorithm().notifyAlgorithmError(errorMessage);
+  if (pNf->notifyee())
+    pNf->notifyee()->notifyAlgorithmError(errorMessage);
   // Notify UI elements
   emit algorithmError(errorMessage);
 }
