@@ -419,6 +419,7 @@ class ScalingAxesImage(mimage.AxesImage):
         self.dx = None
         self.dy = None
         self.unsampled_data = None
+        self.unsampled_extent = extent
         super(ScalingAxesImage, self).__init__(
             ax,
             cmap=cmap,
@@ -463,7 +464,45 @@ class ScalingAxesImage(mimage.AxesImage):
                 self.dx = dx
                 self.dy = dy
                 super(ScalingAxesImage, self).set_data(sampled_data)
-        return super(ScalingAxesImage,self).draw(renderer)
+        return super(ScalingAxesImage, self).draw(renderer)
+
+
+    def _update_extent(self, extent):
+        """
+        extent is data axes (left, right, bottom, top) for making image plots
+        This updates ax.dataLim, and, if autoscaling, sets viewLim
+        to tightly fit the image, regardless of dataLim.  Autoscaling
+        state is not changed, so following this with ax.autoscale_view
+        will redo the autoscaling in accord with dataLim.
+        """
+        self._extent = xmin, xmax, ymin, ymax = extent
+        corners = (xmin, ymin), (xmax, ymax)
+        self.axes.update_datalim(corners)
+        self.sticky_edges.x[:] = [xmin, xmax]
+        self.sticky_edges.y[:] = [ymin, ymax]
+        self.stale = True
+
+
+    def _ylim_changed(self, ax):
+        dims = self.unsampled_data.shape
+        new_xlim = ax.get_xlim()
+        new_ylim = ax.get_ylim()
+        pxmin = int(round(dims[0]/(self.unsampled_extent[1] - self.unsampled_extent[0])*(new_xlim[0] - self.unsampled_extent[0])))
+        pxmax = int(round(dims[0]/(self.unsampled_extent[1] - self.unsampled_extent[0])*(new_xlim[1] - self.unsampled_extent[0])))
+        pymin = int(round(dims[1]/(self.unsampled_extent[3] - self.unsampled_extent[2])*(new_ylim[0] - self.unsampled_extent[2])))
+        pymax = int(round(dims[1]/(self.unsampled_extent[3] - self.unsampled_extent[2])*(new_ylim[1] - self.unsampled_extent[2])))
+        if pymax - pymin != dims[1] and pymax - pymin != dims[0]:
+            value = numpy.amax(self.unsampled_data)
+            for i in range(0, dims[0], 1):
+                for j in range(0, dims[1], 1):
+                    self.unsampled_data[i, j] = value
+        cropped_data = self.unsampled_data[pxmin:pxmax, pymin:pymax]
+        print('check cropped shape: ',pxmin, pxmax, pymin, pymax, cropped_data.shape)
+        print('check axis limits: ',new_xlim, new_ylim)
+        super(ScalingAxesImage, self).set_data(cropped_data)
+        self._update_extent((new_xlim[0],new_xlim[1],new_ylim[0],new_ylim[1]))
+        print('check extent: ',self.get_extent())
+
 
 
 def _imshow(axes, z, cmap=None, norm=None, aspect=None,
@@ -500,6 +539,7 @@ def _imshow(axes, z, cmap=None, norm=None, aspect=None,
     im.set_extent(im.get_extent())
 
     axes.add_image(im)
+    axes.callbacks.connect('ylim_changed', im._ylim_changed)
     return im
 
 
