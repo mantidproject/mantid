@@ -59,10 +59,10 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  * @param props Optional map of property name to property values to be set just
  *before execution (mainly intended for input and inout workspace names)
  */
-void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo,
-                                        AlgorithmRuntimeProps props,
-                                        BatchAlgorithmObserver *observer) {
-  m_algorithms.emplace_back(algo, props, observer);
+void BatchAlgorithmRunner::addAlgorithm(
+    IAlgorithm_sptr algo, AlgorithmRuntimeProps props,
+    BatchAlgorithmRunnerSubscriber *notifyee) {
+  m_algorithms.emplace_back(algo, props, notifyee);
 
   g_log.debug() << "Added algorithm \""
                 << m_algorithms.back().algorithm()->name()

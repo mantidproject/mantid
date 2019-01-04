@@ -23,7 +23,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Immutability here makes update notification easier.
-class MANTIDQT_ISISREFLECTOMETRY_DLL Row : public API::BatchAlgorithmObserver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Row
+    : public API::BatchAlgorithmRunnerSubscriber {
 public:
   Row(std::vector<std::string> number, double theta,
       std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,

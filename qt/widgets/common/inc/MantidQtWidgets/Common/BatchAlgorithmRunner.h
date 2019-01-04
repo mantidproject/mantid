@@ -22,7 +22,7 @@
 namespace MantidQt {
 namespace API {
 
-class BatchAlgorithmObserver {
+class BatchAlgorithmRunnerSubscriber {
 public:
   virtual void setRunning() = 0;
   virtual void setSuccess() = 0;
@@ -35,33 +35,33 @@ public:
 
   ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
                       AlgorithmRuntimeProps properties,
-                      BatchAlgorithmObserver *observer = nullptr)
+                      BatchAlgorithmRunnerSubscriber *notifyee = nullptr)
       : m_algorithm(algorithm), m_properties(std::move(properties)),
-        m_observer(observer) {}
+        m_notifyee(notifyee) {}
 
   Mantid::API::IAlgorithm_sptr algorithm() const { return m_algorithm; }
   AlgorithmRuntimeProps properties() const { return m_properties; }
-  BatchAlgorithmObserver *observer() const { return m_observer; }
+  BatchAlgorithmRunnerSubscriber *notifyee() const { return m_notifyee; }
 
   void setRunning() {
-    if (m_observer)
-      m_observer->setRunning();
+    if (m_notifyee)
+      m_notifyee->setRunning();
   }
 
   void setSuccess() {
-    if (m_observer)
-      m_observer->setSuccess();
+    if (m_notifyee)
+      m_notifyee->setSuccess();
   }
 
   void setError(std::string const &errorMessage) {
-    if (m_observer)
-      m_observer->setError(errorMessage);
+    if (m_notifyee)
+      m_notifyee->setError(errorMessage);
   }
 
 private:
   Mantid::API::IAlgorithm_sptr m_algorithm;
   AlgorithmRuntimeProps m_properties;
-  BatchAlgorithmObserver *m_observer;
+  BatchAlgorithmRunnerSubscriber *m_notifyee;
 };
 
 class BatchCompleteNotification : public Poco::Notification {
@@ -111,7 +111,7 @@ public:
   /// Adds an algorithm to the execution queue
   void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
                     AlgorithmRuntimeProps props = AlgorithmRuntimeProps(),
-                    BatchAlgorithmObserver *observer = nullptr);
+                    BatchAlgorithmRunnerSubscriber *observer = nullptr);
   /// Clears all algorithms from queue
   void clearQueue();
   /// Gets size of queue
