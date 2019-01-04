@@ -67,6 +67,7 @@ public:
   void notifyCopyRowsRequested() override;
   void notifyPasteRowsRequested() override;
   void notifyFilterReset() override;
+  void notifyRowStateChanged() override;
 
 private:
   void
@@ -114,6 +115,26 @@ private:
                  int column, std::string const &oldValue,
                  std::string const &newValue);
   void updateWidgetEnabledState(bool isProcessing);
+
+  void clearStateCellStyling(MantidWidgets::Batch::Cell &cell);
+  void
+  clearStateCellStyling(MantidWidgets::Batch::RowLocation const &itemIndex);
+  void applyRunningStateCellStyling(MantidWidgets::Batch::Cell &cell);
+  void applyCompletedStateCellStyling(MantidWidgets::Batch::Cell &cell);
+  void applyErrorStateCellStyling(MantidWidgets::Batch::Cell &cell,
+                                  std::string const &errorMessage);
+  void applyWarningStateCellStyling(MantidWidgets::Batch::Cell &cell,
+                                    std::string const &errorMessage);
+  void showCellsAsRunningStateInView(
+      MantidWidgets::Batch::RowLocation const &itemIndex);
+  void showCellsAsCompletedStateInView(
+      MantidWidgets::Batch::RowLocation const &itemIndex);
+  void showCellsAsErrorStateInView(
+      MantidWidgets::Batch::RowLocation const &itemIndex,
+      std::string const &errorMessage);
+  void showCellsAsWarningStateInView(
+      MantidWidgets::Batch::RowLocation const &itemIndex,
+      std::string const &errorMessage);
 
   static auto constexpr DEPTH_LIMIT = 2;
 

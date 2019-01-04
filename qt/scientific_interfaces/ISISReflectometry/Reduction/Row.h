@@ -46,6 +46,9 @@ public:
   void notifyAlgorithmError(std::string const &msg) override;
   void notifyBatchComplete(bool error) override;
 
+  State state() const;
+  std::string message() const;
+
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;

@@ -54,7 +54,7 @@ void RunsTablePresenter::mergeAdditionalJobs(
 }
 
 void RunsTablePresenter::removeRowsFromModel(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rows) {
+    std::vector<MantidWidgets::Batch::RowLocation> rows) {
   std::sort(rows.begin(), rows.end());
   for (auto row = rows.crbegin(); row != rows.crend(); ++row) {
     auto const groupIndex = groupOf(*row);
@@ -92,8 +92,7 @@ void RunsTablePresenter::removeGroupsFromView(
     std::vector<int> const &groupIndicesOrderedLowToHigh) {
   for (auto it = groupIndicesOrderedLowToHigh.crbegin();
        it < groupIndicesOrderedLowToHigh.crend(); ++it)
-    m_view->jobs().removeRowAt(
-        MantidQt::MantidWidgets::Batch::RowLocation({*it}));
+    m_view->jobs().removeRowAt(MantidWidgets::Batch::RowLocation({*it}));
 }
 
 void RunsTablePresenter::removeGroupsFromModel(
@@ -174,7 +173,7 @@ void RunsTablePresenter::appendRowsToGroupsInView(
     std::vector<int> const &groupIndices) {
   for (auto const &groupIndex : groupIndices)
     m_view->jobs().appendChildRowOf(
-        MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}));
+        MantidWidgets::Batch::RowLocation({groupIndex}));
 }
 
 void RunsTablePresenter::appendRowsToGroupsInModel(
@@ -201,8 +200,8 @@ void RunsTablePresenter::appendEmptyGroupInModel() {
 }
 
 void RunsTablePresenter::appendEmptyGroupInView() {
-  auto location = m_view->jobs().appendChildRowOf(
-      MantidQt::MantidWidgets::Batch::RowLocation());
+  auto location =
+      m_view->jobs().appendChildRowOf(MantidWidgets::Batch::RowLocation());
   applyGroupStylingToRow(location);
   // TODO: Consider using the other version of appendChildRowOf
 }
@@ -217,7 +216,7 @@ void RunsTablePresenter::insertEmptyRowInModel(int groupIndex, int beforeRow) {
 
 void RunsTablePresenter::insertEmptyGroupInView(int beforeGroup) {
   auto location = m_view->jobs().insertChildRowOf(
-      MantidQt::MantidWidgets::Batch::RowLocation(), beforeGroup);
+      MantidWidgets::Batch::RowLocation(), beforeGroup);
   applyGroupStylingToRow(location);
 }
 
@@ -273,7 +272,7 @@ void RunsTablePresenter::showCellsAsInvalidInView(
 }
 
 void RunsTablePresenter::updateGroupName(
-    MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
+    MantidWidgets::Batch::RowLocation const &itemIndex, int column,
     std::string const &oldValue, std::string const &newValue) {
   assertOrThrow(column == 0,
                 "Changed value of cell which should be uneditable");
@@ -286,7 +285,7 @@ void RunsTablePresenter::updateGroupName(
 }
 
 void RunsTablePresenter::updateRowField(
-    MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int,
+    MantidWidgets::Batch::RowLocation const &itemIndex, int,
     std::string const &, std::string const &) {
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
@@ -298,10 +297,11 @@ void RunsTablePresenter::updateRowField(
   } else {
     showCellsAsInvalidInView(itemIndex, rowValidationResult.assertError());
   }
+  notifyRowStateChanged();
 }
 
 void RunsTablePresenter::notifyCellTextChanged(
-    MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
+    MantidWidgets::Batch::RowLocation const &itemIndex, int column,
     std::string const &oldValue, std::string const &newValue) {
   if (isGroupLocation(itemIndex))
     updateGroupName(itemIndex, column, oldValue, newValue);
@@ -318,7 +318,7 @@ void RunsTablePresenter::applyGroupStylingToRow(
 }
 
 void RunsTablePresenter::notifyRowInserted(
-    MantidQt::MantidWidgets::Batch::RowLocation const &newRowLocation) {
+    MantidWidgets::Batch::RowLocation const &newRowLocation) {
   if (newRowLocation.depth() > DEPTH_LIMIT) {
     m_view->jobs().removeRowAt(newRowLocation);
   } else if (isGroupLocation(newRowLocation)) {
@@ -330,8 +330,7 @@ void RunsTablePresenter::notifyRowInserted(
 }
 
 void RunsTablePresenter::removeRowsAndGroupsFromModel(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation>
-        locationsOfRowsToRemove) {
+    std::vector<MantidWidgets::Batch::RowLocation> locationsOfRowsToRemove) {
   std::sort(locationsOfRowsToRemove.begin(), locationsOfRowsToRemove.end());
   for (auto location = locationsOfRowsToRemove.crbegin();
        location != locationsOfRowsToRemove.crend(); ++location) {
@@ -350,7 +349,7 @@ void RunsTablePresenter::removeAllRowsAndGroupsFromModel() {
 }
 
 void RunsTablePresenter::removeRowsAndGroupsFromView(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+    std::vector<MantidWidgets::Batch::RowLocation> const
         &locationsOfRowsToRemove) {
   m_view->jobs().removeRows(locationsOfRowsToRemove);
 }
@@ -360,7 +359,7 @@ void RunsTablePresenter::removeAllRowsAndGroupsFromView() {
 }
 
 void RunsTablePresenter::notifyRemoveRowsRequested(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+    std::vector<MantidWidgets::Batch::RowLocation> const
         &locationsOfRowsToRemove) {
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
@@ -396,10 +395,131 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
     if (!replacementRoots.empty())
       m_view->jobs().replaceRows(replacementRoots, m_clipboard.get());
     else
-      m_view->jobs().appendSubtreesAt(
-          MantidQt::MantidWidgets::Batch::RowLocation(), m_clipboard.get());
+      m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
+                                      m_clipboard.get());
   } else {
     m_view->invalidSelectionForPaste();
+  }
+}
+
+void RunsTablePresenter::clearStateCellStyling(
+    MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor("white");
+  cell.setToolTip("");
+}
+
+void RunsTablePresenter::applyRunningStateCellStyling(
+    MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor("yellow");
+}
+
+void RunsTablePresenter::applyCompletedStateCellStyling(
+    MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor("green");
+}
+
+void RunsTablePresenter::applyErrorStateCellStyling(
+    MantidWidgets::Batch::Cell &cell, std::string const &errorMessage) {
+  cell.setBackgroundColor("red");
+  cell.setToolTip(errorMessage);
+}
+
+void RunsTablePresenter::applyWarningStateCellStyling(
+    MantidWidgets::Batch::Cell &cell, std::string const &errorMessage) {
+  cell.setBackgroundColor("orange");
+  cell.setToolTip(errorMessage);
+}
+
+void RunsTablePresenter::clearStateCellStyling(
+    MantidWidgets::Batch::RowLocation const &itemIndex) {
+  auto cells = m_view->jobs().cellsAt(itemIndex);
+  for (size_t column = 0; column < cells.size(); ++column) {
+    clearStateCellStyling(cells[column]);
+  }
+  m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
+void RunsTablePresenter::showCellsAsRunningStateInView(
+    MantidWidgets::Batch::RowLocation const &itemIndex) {
+  auto cells = m_view->jobs().cellsAt(itemIndex);
+  for (size_t column = 0; column < cells.size(); ++column) {
+    clearStateCellStyling(cells[column]);
+    applyRunningStateCellStyling(cells[column]);
+  }
+  m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
+void RunsTablePresenter::showCellsAsCompletedStateInView(
+    MantidWidgets::Batch::RowLocation const &itemIndex) {
+  auto cells = m_view->jobs().cellsAt(itemIndex);
+  for (size_t column = 0; column < cells.size(); ++column) {
+    clearStateCellStyling(cells[column]);
+    applyCompletedStateCellStyling(cells[column]);
+  }
+  m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
+void RunsTablePresenter::showCellsAsErrorStateInView(
+    MantidWidgets::Batch::RowLocation const &itemIndex,
+    std::string const &errorMessage) {
+  auto cells = m_view->jobs().cellsAt(itemIndex);
+  for (size_t column = 0; column < cells.size(); ++column) {
+    clearStateCellStyling(cells[column]);
+    applyErrorStateCellStyling(cells[column], errorMessage);
+  }
+  m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
+void RunsTablePresenter::showCellsAsWarningStateInView(
+    MantidWidgets::Batch::RowLocation const &itemIndex,
+    std::string const &errorMessage) {
+  auto cells = m_view->jobs().cellsAt(itemIndex);
+  for (size_t column = 0; column < cells.size(); ++column) {
+    clearStateCellStyling(cells[column]);
+    applyWarningStateCellStyling(cells[column], errorMessage);
+  }
+  m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
+void RunsTablePresenter::notifyRowStateChanged() {
+  int groupIndex = 0;
+  for (auto &group : m_model.groups()) {
+    auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
+    clearStateCellStyling(groupPath);
+
+    int rowIndex = 0;
+    for (auto &row : group.rows()) {
+      if (!row)
+        continue;
+
+      auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+
+      switch (row->state()) {
+      case State::NOT_STARTED:
+      case State::STARTING: // fall through
+        clearStateCellStyling(rowPath);
+        break;
+      case State::RUNNING:
+        showCellsAsRunningStateInView(rowPath);
+        break;
+      case State::SUCCESS:
+        showCellsAsCompletedStateInView(rowPath);
+        break;
+      case State::ERROR:
+        showCellsAsErrorStateInView(rowPath, row->message());
+        break;
+      case State::WARNING:
+        showCellsAsWarningStateInView(rowPath, row->message());
+        break;
+      };
+
+      ++rowIndex;
+    }
+    ++groupIndex;
+  }
+  if (m_model.groups().size() > 1) {
+    auto itemIndex = MantidWidgets::Batch::RowLocation({1});
+    showCellsAsErrorStateInView(itemIndex, "this is a test error message");
   }
 }
 } // namespace CustomInterfaces

@@ -173,6 +173,10 @@ void RunsPresenter::notifyStopMonitor() { stopMonitor(); }
 
 void RunsPresenter::notifyStartMonitorComplete() { startMonitorComplete(); }
 
+void RunsPresenter::notifyRowStateChanged() {
+  tablePresenter()->notifyRowStateChanged();
+}
+
 void RunsPresenter::reductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->reductionResumed();

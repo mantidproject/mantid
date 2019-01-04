@@ -28,6 +28,8 @@ public:
   virtual ReductionJobs const &reductionJobs() const = 0;
   virtual ReductionJobs &reductionJobs() = 0;
 
+  virtual void notifyRowStateChanged() = 0;
+
   virtual void mergeAdditionalJobs(ReductionJobs const &jobs) = 0;
 
   virtual void reductionPaused() = 0;

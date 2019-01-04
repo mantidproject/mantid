@@ -30,6 +30,7 @@ public:
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyReductionPaused() = 0;
+  virtual void notifyRowStateChanged() = 0;
 
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;

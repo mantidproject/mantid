@@ -70,6 +70,10 @@ void Row::notifyAlgorithmError(std::string const &msg) { setError(msg); }
 
 void Row::notifyBatchComplete(bool error) { UNUSED_ARG(error); }
 
+State Row::state() const { return m_itemState.state(); }
+
+std::string Row::message() const { return m_itemState.message(); }
+
 void Row::setProgress(double p, std::string const &msg) {
   m_itemState.setProgress(p, msg);
 }

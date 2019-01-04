@@ -76,6 +76,8 @@ public:
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyReductionResumed() override;
   void notifyReductionPaused() override;
+  void notifyRowStateChanged() override;
+
   void reductionPaused() override;
   void reductionResumed() override;
   void autoreductionResumed() override;

@@ -94,17 +94,16 @@ void BatchPresenter::notifyAutoreductionCompleted() {
 void BatchPresenter::notifyBatchFinished(bool error) {
   UNUSED_ARG(error);
   reductionPaused();
-  // TODO
-  // m_runsPresenter->updateStateFromModel();
+  m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::notifyAlgorithmFinished() {
-  // m_runsPresenter->updateStateFromModel();
+  m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::notifyAlgorithmError(std::string const &message) {
   UNUSED_ARG(message);
-  // m_runsPresenter->updateStateFromModel();
+  m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::reductionResumed() {
