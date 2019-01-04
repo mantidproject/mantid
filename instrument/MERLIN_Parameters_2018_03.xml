@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "MERLIN" valid-from = "2017-09-12T11:00:01">
+<parameter-file instrument = "MERLIN" valid-from = "2018-12-03 17:18:01">
 
 <component-link name = "MERLIN">
 
