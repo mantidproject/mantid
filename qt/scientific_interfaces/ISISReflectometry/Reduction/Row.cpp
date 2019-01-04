@@ -68,6 +68,8 @@ void Row::notifyAlgorithmComplete() { setSuccess(); }
 
 void Row::notifyAlgorithmError(std::string const &msg) { setError(msg); }
 
+void Row::notifyBatchComplete(bool error) { UNUSED_ARG(error); }
+
 void Row::setProgress(double p, std::string const &msg) {
   m_itemState.setProgress(p, msg);
 }

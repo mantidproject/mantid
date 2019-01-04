@@ -29,6 +29,12 @@ BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
 
 BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
 
+/** Subscribe to batch notifications
+ */
+void BatchAlgorithmRunner::subscribe(BatchAlgorithmRunnerSubscriber *notifyee) {
+  m_notifyee = notifyee;
+}
+
 void BatchAlgorithmRunner::addAllObservers() {
   m_notificationCenter.addObserver(m_batchCompleteObserver);
   m_notificationCenter.addObserver(m_algorithmCompleteObserver);
@@ -204,6 +210,9 @@ void BatchAlgorithmRunner::handleBatchComplete(
     const Poco::AutoPtr<BatchCompleteNotification> &pNf) {
   bool inProgress = pNf->isInProgress();
   if (!inProgress) {
+    // Update subscriber
+    if (m_notifyee)
+      m_notifyee->notifyBatchComplete(pNf->hasError());
     // Notify UI elements
     emit batchComplete(pNf->hasError());
   }

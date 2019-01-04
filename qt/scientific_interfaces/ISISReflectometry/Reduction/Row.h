@@ -44,6 +44,7 @@ public:
   void notifyAlgorithmStarted() override;
   void notifyAlgorithmComplete() override;
   void notifyAlgorithmError(std::string const &msg) override;
+  void notifyBatchComplete(bool error) override;
 
 private:
   std::vector<std::string> m_runNumbers;
