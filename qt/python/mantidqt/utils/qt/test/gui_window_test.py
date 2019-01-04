@@ -74,13 +74,6 @@ class GuiTestBase(object):
         open_in_window(self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause,
                        close_on_finish=close_on_finish)
 
-    def run_test_async(self, method='call', pause=0, close_on_finish=False):
-        self.call_method = method
-        script_runner = ScriptRunner(self._call_test_method, close_on_finish=close_on_finish, pause=pause)
-        script_runner.run()
-        while not script_runner.is_finished():
-            QApplication.processEvents()
-
     def get_child(self, child_class, name):
         children = self.widget.findChildren(child_class, name)
         if len(children) == 0:

@@ -14,11 +14,9 @@ import six
 import traceback
 
 from qtpy.QtCore import QTimer, QMetaObject, Qt
-from qtpy.QtWidgets import QApplication, QWidget
+from qtpy.QtWidgets import QWidget
 
-from mantidqt.utils.qt.plugins import setup_library_paths
-
-app = QApplication.instance()
+from mantidqt.utils.qt.test.application import get_application
 
 
 def split_qualified_name(qualified_name):
@@ -60,6 +58,7 @@ class ScriptRunner(object):
         :param is_cli: If true the script is to be run from a command line tool. Exceptions are
             treated slightly differently in this case.
         """
+        app = get_application()
         self.script = script
         self.widget = widget
         self.close_on_finish = close_on_finish
@@ -70,12 +69,10 @@ class ScriptRunner(object):
         self.pause_timer = QTimer(app)
         self.pause_timer.setSingleShot(True)
         self.script_timer = QTimer(app)
-        self.finished = False
 
     def run(self):
         ret = run_script(self.script, self.widget)
         if isinstance(ret, Exception):
-            self.finished = True
             raise ret
         self.script_iter = [iter(ret) if inspect.isgenerator(ret) else None]
         if self.pause != 0:
@@ -84,17 +81,14 @@ class ScriptRunner(object):
         self.script_timer.timeout.connect(self, Qt.QueuedConnection)
         QMetaObject.invokeMethod(self.script_timer, 'start', Qt.QueuedConnection)
 
-    def is_finished(self):
-        return self.finished
-
     def __call__(self):
-        global app
+        app = get_application()
         if not self.pause_timer.isActive():
             try:
                 script_iter = self.script_iter[-1]
                 if script_iter is None:
-                    self.finished = True
                     if self.close_on_finish:
+                        app.closeAllWindows()
                         app.exit()
                     return
                 # Run test script until the next 'yield'
@@ -112,18 +106,16 @@ class ScriptRunner(object):
                         ret = None
                     else:
                         ret = ret()
-                self.finished = True
             except StopIteration:
                 if len(self.script_iter) > 1:
                     self.script_iter.pop()
                 else:
-                    self.finished = True
                     self.script_iter = [None]
                     self.script_timer.stop()
                     if self.close_on_finish:
                         app.closeAllWindows()
+                        app.exit(0)
             except Exception as e:
-                self.finished = True
                 self.script_iter = [None]
                 traceback.print_exc()
                 if self.close_on_finish:
@@ -133,6 +125,7 @@ class ScriptRunner(object):
 
 def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
                    close_on_finish=False, is_cli=False, in_workbench=False):
+
     """
     Displays a widget in a window.
     :param widget_or_name: A widget to display.
@@ -164,12 +157,9 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
         treated slightly differently in this case.
     :param in_workbench: Set to True if the script will be run inside the workbench application.
     """
-    global app
     if attach_debugger:
         raw_input('Please attach the Debugger now if required. Press any key to continue')
-    if app is None:
-        setup_library_paths()
-        app = QApplication([""])
+    app = get_application()
     if widget_or_name is not None:
         widget_name = 'Widget to test'
         if isinstance(widget_or_name, six.string_types):

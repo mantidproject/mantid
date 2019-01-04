@@ -19,7 +19,8 @@ namespace Exception {
 */
 FileError::FileError(const std::string &Desc, const std::string &FName)
     : std::runtime_error(Desc), fileName(FName) {
-  outMessage = std::string(std::runtime_error::what()) + " in " + fileName;
+  outMessage =
+      std::string(std::runtime_error::what()) + " in \"" + fileName + "\"";
 }
 
 /// Copy constructor

@@ -665,7 +665,7 @@ public:
         instLoader.execute(), Kernel::Exception::FileError & e,
         std::string(e.what()),
         "Either the InstrumentName or Filename property of LoadInstrument "
-        "must be specified to load an instrument in ");
+        "must be specified to load an instrument in \"\"");
     TS_ASSERT(!instLoader.isExecuted());
     TS_ASSERT_EQUALS(instLoader.getPropertyValue("Filename"), "");
   }

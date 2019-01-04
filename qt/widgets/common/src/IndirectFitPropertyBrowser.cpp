@@ -949,6 +949,10 @@ void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
   FitPropertyBrowser::setWorkspaceIndex(i);
 }
 
+void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {
+  FitPropertyBrowser::setFitEnabled(enable);
+}
+
 /**
  * Schedules a fit.
  */

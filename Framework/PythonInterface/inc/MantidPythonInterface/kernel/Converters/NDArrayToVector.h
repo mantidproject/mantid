@@ -26,7 +26,7 @@ template <typename DestElementType> struct DLLExport NDArrayToVector {
   /// Constructor
   NDArrayToVector(const NDArray &value);
   /// Create a new vector from the contents of the array
-  const TypedVector operator()();
+  TypedVector operator()();
   /// Fill the container with data from the array
   void copyTo(TypedVector &dest) const;
 
