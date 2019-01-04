@@ -15,14 +15,10 @@ from __future__ import absolute_import
 from unittest import TestCase
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QApplication
 
-from mantidqt.utils.qt.plugins import setup_library_paths
+from .application import get_application
 from .modal_tester import ModalTester
 from .gui_window_test import GuiWindowTest
-
-# Hold on to QAPP reference to avoid garbage collection
-_QAPP = None
 
 
 class GuiTest(TestCase):
@@ -34,10 +30,7 @@ class GuiTest(TestCase):
         """Prepare for test execution.
         Ensure that a (single copy of) QApplication has been created
         """
-        global _QAPP
-        if _QAPP is None:
-            setup_library_paths()
-            _QAPP = QApplication([cls.__name__])
+        get_application(cls.__name__)
 
 
 def select_item_in_tree(tree, item_label):

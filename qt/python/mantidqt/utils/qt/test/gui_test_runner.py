@@ -14,11 +14,9 @@ import six
 import traceback
 
 from qtpy.QtCore import QTimer, QMetaObject, Qt
-from qtpy.QtWidgets import QApplication, QWidget
+from qtpy.QtWidgets import QWidget
 
-from mantidqt.utils.qt.plugins import setup_library_paths
-
-app = QApplication.instance()
+from mantidqt.utils.qt.test.application import get_application
 
 
 def split_qualified_name(qualified_name):
@@ -75,7 +73,6 @@ class ScriptRunner(object):
         self.script_timer = script_timer
 
     def __call__(self):
-        global app
         if not self.pause_timer.isActive():
             try:
                 if self.script_iter is None:
@@ -137,12 +134,9 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
     :param is_cli: If true the script is to be run from a command line tool. Exceptions are
         treated slightly differently in this case.
     """
-    global app
     if attach_debugger:
         raw_input('Please attach the Debugger now if required. Press any key to continue')
-    if app is None:
-        setup_library_paths()
-        app = QApplication([""])
+    app = get_application()
     widget_name = 'Widget to test'
     if isinstance(widget_or_name, six.string_types):
         widget = create_widget(widget_or_name)
