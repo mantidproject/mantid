@@ -27,7 +27,6 @@ public:
   virtual void notifyAlgorithmStarted() = 0;
   virtual void notifyAlgorithmComplete() = 0;
   virtual void notifyAlgorithmError(std::string const &msg) = 0;
-  virtual void notifyBatchComplete(bool error) = 0;
 };
 
 class ConfiguredAlgorithm {
@@ -104,8 +103,6 @@ public:
   explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;
 
-  void subscribe(BatchAlgorithmRunnerSubscriber *notifyee);
-
   /// Adds an algorithm to the execution queue
   void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
                     AlgorithmRuntimeProps props = AlgorithmRuntimeProps(),
@@ -165,8 +162,6 @@ private:
   Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner,
                      Poco::ActiveStarter<BatchAlgorithmRunner>>
       m_executeAsync;
-  /// Subscriber for batch notifications
-  BatchAlgorithmRunnerSubscriber *m_notifyee;
   /// Holds result of async execution
   Poco::ActiveResult<bool> executeAsync();
 

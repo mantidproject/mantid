@@ -68,8 +68,6 @@ void Row::notifyAlgorithmComplete() { setSuccess(); }
 
 void Row::notifyAlgorithmError(std::string const &msg) { setError(msg); }
 
-void Row::notifyBatchComplete(bool error) { UNUSED_ARG(error); }
-
 State Row::state() const { return m_itemState.state(); }
 
 std::string Row::message() const { return m_itemState.message(); }
