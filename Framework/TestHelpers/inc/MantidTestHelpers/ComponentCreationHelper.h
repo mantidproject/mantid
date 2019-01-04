@@ -92,10 +92,6 @@ createCuboid(double x_side_length, double y_side_length = -1.0,
 boost::shared_ptr<Mantid::Geometry::CompAssembly>
 createTestAssemblyOfFourCylinders();
 /**
- * Create an object component that has a defined shape
- */
-Mantid::Geometry::ObjComponent *createSingleObjectComponent();
-/**
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */

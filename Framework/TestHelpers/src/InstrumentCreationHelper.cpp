@@ -8,7 +8,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
@@ -16,6 +15,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+
 namespace InstrumentCreationHelper {
 
 void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
@@ -93,5 +93,77 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
                                       Kernel::V3D(0, 0, -10), instrument.get());
   instrument->add(chop_pos);
   workspace.setInstrument(instrument);
+}
+
+/** Adds a component to an instrument
+ *
+ * @param instrument :: instrument to which the component will be added
+ * @param position :: position of the component
+ * @param name :: name of the component
+ * @return a component pointer
+ */
+ObjComponent *addComponent(Instrument_sptr &instrument, const V3D &position,
+                           const std::string &name) {
+  ObjComponent *component = new ObjComponent(name);
+  component->setPos(position);
+  instrument->add(component);
+  return component;
+}
+
+/** Adds a sample to an instrument
+ *
+ * @param instrument :: instrument to which the sample will be added
+ * @param position :: position of the sample
+ * @param name :: name of the sample
+ */
+void addSample(Instrument_sptr &instrument, const V3D &position,
+               const std::string &name) {
+  auto sample = addComponent(instrument, position, name);
+  instrument->markAsSamplePos(sample);
+}
+
+/** Adds a source to an instrument
+ *
+ * @param instrument :: instrument to which the source will be added
+ * @param position :: position of the source
+ * @param name :: name of the source
+ */
+void addSource(Instrument_sptr &instrument, const V3D &position,
+               const std::string &name) {
+  auto source = addComponent(instrument, position, name);
+  instrument->markAsSource(source);
+}
+
+/** Adds a monitor to an instrument
+ *
+ * @param instrument :: instrument to which the monitor will be added
+ * @param position :: position of the monitor
+ * @param ID :: identification number of the monitor
+ * @param name :: name of the monitor
+ */
+void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
+                const std::string &name) {
+  Detector *monitor = new Detector(name, ID, nullptr);
+  monitor->setPos(position);
+  instrument->add(monitor);
+  instrument->markAsMonitor(monitor);
+}
+
+/** Adds a detector to an instrument
+ *
+ * @param instrument :: instrument to which the detector will be added
+ * @param position :: position of the detector
+ * @param ID :: identification number of the detector
+ * @param name :: name of the detector
+ */
+void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
+                 const std::string &name) {
+  // Where 0.01 is half detector width etc.
+  Detector *detector = new Detector(
+      name, ID, ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03),
+      nullptr);
+  detector->setPos(position);
+  instrument->add(detector);
+  instrument->markAsDetector(detector);
 }
 } // namespace InstrumentCreationHelper

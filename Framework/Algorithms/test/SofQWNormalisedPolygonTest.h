@@ -10,8 +10,12 @@
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -20,6 +24,10 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Kernel;
+using namespace InstrumentCreationHelper;
 using namespace WorkspaceCreationHelper;
 
 class SofQWNormalisedPolygonTest : public CxxTest::TestSuite {
@@ -126,19 +134,56 @@ public:
     MatrixWorkspace_sptr output = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 10)
     TS_ASSERT_EQUALS(output->blocksize(), nbins)
-    auto axis = output->getAxis(1);
-    std::cout << '\n' << axis->getMin() << ' ' << axis->getMax() << '\n';
-    double sum{0.};
     for (size_t i = 0; i < 3; ++i) {
       const auto &Ys = output->y(i);
       for (size_t j = 0; j < nbins; ++j) {
         const auto y = Ys[j];
         if (std::isfinite(y)) {
-          sum += y;
+          TS_ASSERT_DELTA(y, 2., 1e-10);
         }
       }
     }
-    TS_ASSERT_DELTA(sum, 12., 1e-10)
+  }
+
+  void testCuboidDetectors() {
+    constexpr int nhist{2};
+    constexpr int nbins{10};
+    BinEdges inX(nbins + 1, LinearGenerator(-5, 1.23));
+    Counts inY(nbins, 2.0);
+    Histogram inHistogram(inX, inY);
+    MatrixWorkspace_sptr input = create<Workspace2D>(nhist, inHistogram);
+    auto instrument = boost::make_shared<Instrument>("cuboidal_detector_machine");
+    addDetector(instrument, V3D(0.1, 0., 3.), 0, "det0");
+    input->getSpectrum(0).setDetectorID(0);
+    addDetector(instrument, V3D(0.2, 0., 3.), 1, "det1");
+    input->getSpectrum(1).setDetectorID(1);
+    addSource(instrument, V3D(0., 0., -4.), "source");
+    addSample(instrument, V3D(0., 0., 0.), "sample");
+    input->setInstrument(instrument);
+    input->getAxis(0)->setUnit("DeltaE");
+    input->mutableRun().addProperty("Ei", 23.);
+    SofQWNormalisedPolygon alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_for_child"))
+    const std::vector<double> qParams{0., 0.01, 1.};
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr output = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(output->blocksize(), nbins)
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      const auto &Ys = output->y(i);
+      for (size_t j = 0; j < nbins; ++j) {
+        const auto y = Ys[j];
+        if (std::isfinite(y)) {
+          TS_ASSERT_DELTA(y, 2.0, 1e-10)
+        }
+      }
+    }
   }
 
   void testEAndQBinningParams() {
