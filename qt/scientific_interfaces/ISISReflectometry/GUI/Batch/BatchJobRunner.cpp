@@ -104,7 +104,9 @@ void addAlgorithmsForGroup(Group &group, Batch const &model,
 BatchJobRunner::BatchJobRunner(Batch batch,
                                BatchAlgorithmRunner &batchAlgoRunner)
     : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false),
-      m_batchAlgoRunner(batchAlgoRunner) {}
+      m_batchAlgoRunner(batchAlgoRunner) {
+  m_batchAlgoRunner.stopOnFailure(false);
+}
 
 bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 
