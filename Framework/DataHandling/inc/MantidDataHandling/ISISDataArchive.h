@@ -34,6 +34,8 @@ public:
 private:
   /// Queries the archive & returns the path to a single file.
   std::string getPath(const std::string &fName) const;
+  std::string getCorrectExtension(const std::string &path,
+                                  const std::vector<std::string> &exts) const;
 };
 } // namespace DataHandling
 } // namespace Mantid
