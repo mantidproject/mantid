@@ -19,6 +19,8 @@ are *N* workspaces then the weighted mean is computed as:
 
 where *m* is the output workspace. The *x* values are copied from the first input workspace.
 
+The input workspaces must be compatible with respect to size, units, and whether they are distributions or not.
+
 Usage
 -----
 
