@@ -26,6 +26,7 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
@@ -184,6 +185,18 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
              "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
   return self.mutableRun();
 }
+
+/**
+ * This is an anonymous wrapper around the homonym method of MatrixWorkspace.
+ * This takes int as argument since python does not speak unsigned.
+ * @param self
+ * @param i : workspace index [int]
+ * @return bin indices of masked bins at the workspace index given
+ */
+std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
+  return self.maskedBinsIndices(i);
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -244,6 +257,15 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
+      .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
+           (arg("self"), arg("workspaceIndex")),
+           "Returns true if this spectrum contains any masked bins")
+      .def("maskedBinsIndices", &maskedBinsIndices,
+           (arg("self"), arg("workspaceIndex")),
+           "Returns all the masked bins' indices at the workspace index. "
+           ":class:`~mantid.api.MatrixWorkspace.hasMaskedBins` MUST be called "
+           "first to check if any bins are "
+           "masked, otherwise an exception will be thrown")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),

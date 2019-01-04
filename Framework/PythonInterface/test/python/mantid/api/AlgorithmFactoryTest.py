@@ -9,19 +9,35 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 
-from mantid.api import AlgorithmFactory, PythonAlgorithm
+from mantid.api import AlgorithmFactory, FrameworkManagerImpl, PythonAlgorithm
+
 
 class IsAnAlgorithm(PythonAlgorithm):
     def PyInit(self):
         pass
 
+
 class NotAnAlgorithm(object):
     pass
 
+
 class AlgorithmFactoryTest(unittest.TestCase):
+
+    def setUp(self):
+        FrameworkManagerImpl.Instance()
 
     def test_get_algorithm_factory_does_not_return_None(self):
         self.assertTrue(AlgorithmFactory is not None )
+
+    def test_getDescriptors(self):
+
+        descriptors = AlgorithmFactory.getDescriptors(True)
+        self.assertGreater(len(descriptors), 0)
+        d = descriptors[0]
+        self.assertTrue(hasattr(d, 'name'))
+        self.assertTrue(hasattr(d, 'alias'))
+        self.assertTrue(hasattr(d, 'category'))
+        self.assertTrue(hasattr(d, 'version'))
 
     def test_exists_returns_correct_value_for_given_args(self):
         self.assertTrue(AlgorithmFactory.exists('ConvertUnits')) #any version

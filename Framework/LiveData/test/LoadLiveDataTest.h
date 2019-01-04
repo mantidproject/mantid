@@ -61,7 +61,7 @@ public:
          ILiveListener_sptr listener = ILiveListener_sptr(),
          bool makeThrow = false) {
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     LoadLiveData alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

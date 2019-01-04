@@ -11,19 +11,20 @@
 from __future__ import (absolute_import, division, print_function)
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
 from reduction_gui.reduction.sans.data_cat import DataSet,  DataType
+from reduction_gui.reduction.scripter import execute_script
 import re
 import datetime
 
 # Check whether Mantid is available
 try:
     from mantid.api import AnalysisDataService
-    import mantid.simpleapi as api
+    from mantid.simpleapi import LoadEventNexus
     HAS_MANTID = True
 except:
     HAS_MANTID = False
 
 try:
-    import mantidplot
+    import mantidplot  # noqa
     IN_MANTIDPLOT = True
 except:
     IN_MANTIDPLOT = False
@@ -45,11 +46,11 @@ class EQSANSDataSet(DataSet):
         try:
             if IN_MANTIDPLOT:
                 script = "LoadEventNexus(Filename='%s', OutputWorkspace='%s', MetaDataOnly=True)" % (file_path, outputWorkspace)
-                mantidplot.runPythonScript(script, True)
+                execute_script(script)
                 if not AnalysisDataService.doesExist(outputWorkspace):
                     return False
             else:
-                api.LoadEventNexus(Filename=file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
+                LoadEventNexus(Filename=file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
             return True
         except:
             return False

@@ -9,8 +9,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RenameWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -124,9 +126,10 @@ public:
   }
 
   void testGroup() {
+    const std::string groupName = "oldName";
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
     WorkspaceGroup_sptr group(new WorkspaceGroup);
-    ads.add("oldName", group);
+    ads.add(groupName, group);
     MatrixWorkspace_sptr member1 = createWorkspace();
     ads.add("oldName_1", member1);
     group->add("oldName_1");
@@ -137,7 +140,7 @@ public:
     Mantid::Algorithms::RenameWorkspace renamer;
     renamer.initialize();
     TS_ASSERT_THROWS_NOTHING(
-        renamer.setPropertyValue("InputWorkspace", "oldName"))
+        renamer.setPropertyValue("InputWorkspace", groupName))
     TS_ASSERT_THROWS_NOTHING(
         renamer.setPropertyValue("OutputWorkspace", "newName"));
     TS_ASSERT(renamer.execute())
@@ -150,11 +153,23 @@ public:
     TS_ASSERT(resultGroup == group)
     // The output group should have the same workspaces in, with new names of
     // course
+    auto item1 = resultGroup->getItem(0);
+    auto item2 = resultGroup->getItem(1);
     TS_ASSERT_EQUALS(resultGroup->size(), 2)
-    TS_ASSERT_EQUALS(resultGroup->getItem(0), member1)
-    TS_ASSERT_EQUALS(resultGroup->getItem(0)->getName(), "newName_1")
-    TS_ASSERT_EQUALS(resultGroup->getItem(1), member2)
-    TS_ASSERT_EQUALS(resultGroup->getItem(1)->getName(), "newName_2")
+    TS_ASSERT_EQUALS(item1, member1)
+    TS_ASSERT_EQUALS(item1->getName(), "newName_1")
+    TS_ASSERT_EQUALS(item2, member2)
+    TS_ASSERT_EQUALS(item2->getName(), "newName_2")
+    // Test history for the group is passed properly
+    auto item1History = item1->history();
+    TS_ASSERT_EQUALS(item1History.size(), 1)
+    TS_ASSERT_EQUALS(item1History, item2->history())
+    // Test that the history has only got the original group command and not
+    // child commands
+    TS_ASSERT_EQUALS(item1History[0]->name(), "RenameWorkspace")
+    TS_ASSERT_EQUALS(item1History[0]->getPropertyValue("InputWorkspace"),
+                     groupName)
+
     // The old ones should not be in the ADS
     TS_ASSERT_THROWS(ads.retrieve("oldName"),
                      Mantid::Kernel::Exception::NotFoundError)

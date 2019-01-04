@@ -344,19 +344,17 @@ void MergeRuns::execEvent() {
 }
 
 void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
-  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
-  const std::string sampleLogsTimeSeries =
-      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
-  const std::string sampleLogsList =
-      getProperty(SampleLogsBehaviour::LIST_PROP);
-  const std::string sampleLogsWarn =
-      getProperty(SampleLogsBehaviour::WARN_PROP);
-  const std::string sampleLogsWarnTolerances =
-      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
-  const std::string sampleLogsFail =
-      getProperty(SampleLogsBehaviour::FAIL_PROP);
-  const std::string sampleLogsFailTolerances =
-      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
+  SampleLogsBehaviour::SampleLogNames logEntries = {};
+  logEntries.sampleLogsSum = getPropertyValue(SampleLogsBehaviour::SUM_PROP);
+  logEntries.sampleLogsTimeSeries =
+      getPropertyValue(SampleLogsBehaviour::TIME_SERIES_PROP);
+  logEntries.sampleLogsList = getPropertyValue(SampleLogsBehaviour::LIST_PROP);
+  logEntries.sampleLogsWarn = getPropertyValue(SampleLogsBehaviour::WARN_PROP);
+  logEntries.sampleLogsWarnTolerances =
+      getPropertyValue(SampleLogsBehaviour::WARN_TOL_PROP);
+  logEntries.sampleLogsFail = getPropertyValue(SampleLogsBehaviour::FAIL_PROP);
+  logEntries.sampleLogsFailTolerances =
+      getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
 
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
 
@@ -370,10 +368,16 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
   if (rebinParams) {
     outWS = this->rebinInput(outWS, *rebinParams);
   }
-  Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-      *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
-      sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
-      sampleLogsFailTolerances);
+  SampleLogsBehaviour::ParameterName parName = {
+      MergeRunsParameter::SUM_MERGE,
+      MergeRunsParameter::TIME_SERIES_MERGE,
+      MergeRunsParameter::LIST_MERGE,
+      MergeRunsParameter::WARN_MERGE,
+      MergeRunsParameter::WARN_MERGE_TOLERANCES,
+      MergeRunsParameter::FAIL_MERGE,
+      MergeRunsParameter::FAIL_MERGE_TOLERANCES};
+  Algorithms::SampleLogsBehaviour sampleLogsBehaviour =
+      SampleLogsBehaviour(outWS, g_log, logEntries, parName);
 
   auto isScanning = outWS->detectorInfo().isScanning();
 
@@ -393,21 +397,21 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
     // Add the current workspace to the total
     // Update the sample logs
     try {
-      sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
-      sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
+      sampleLogsBehaviour.mergeSampleLogs(*it, outWS);
+      sampleLogsBehaviour.removeSampleLogsFromWorkspace(addee);
       if (isScanning)
         outWS = buildScanningOutputWorkspace(outWS, addee);
       else
         outWS = outWS + addee;
-      sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
-      sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
+      sampleLogsBehaviour.setUpdatedSampleLogs(outWS);
+      sampleLogsBehaviour.readdSampleLogToWorkspace(addee);
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error()
             << "Could not merge run: " << it->get()->getName() << ". Reason: \""
             << e.what()
             << "\". MergeRuns will continue but this run will be skipped.\n";
-        sampleLogsBehaviour.resetSampleLogs(*outWS);
+        sampleLogsBehaviour.resetSampleLogs(outWS);
       } else {
         throw std::invalid_argument(e);
       }
@@ -725,14 +729,17 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
     const DetectorInfo &addeeDetInfo, const DetectorInfo &newOutDetInfo) {
   std::vector<SpectrumDefinition> newAddeeSpecDefs(addeeSpecDefs.size());
 
+  auto addeeScanIntervals = addeeDetInfo.scanIntervals();
+  auto newOutScanIntervals = newOutDetInfo.scanIntervals();
+
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
     for (auto &index : addeeSpecDefs[i]) {
       SpectrumDefinition newSpecDef;
       for (size_t time_index = 0; time_index < newOutDetInfo.scanCount();
            time_index++) {
-        if (addeeDetInfo.scanIntervals()[index.second] ==
-            newOutDetInfo.scanIntervals()[time_index]) {
+        if (addeeScanIntervals[index.second] ==
+            newOutScanIntervals[time_index]) {
           newSpecDef.add(index.first, time_index);
         }
       }

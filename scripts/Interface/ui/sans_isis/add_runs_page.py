@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import absolute_import
+
 from PyQt4 import QtGui
 from PyQt4.QtCore import pyqtSignal
-import ui_add_runs_page
+from . import ui_add_runs_page
 
 
 class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
@@ -29,7 +31,7 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         return str(self.fileNameEdit.text())
 
     def set_out_file_directory(self, out_file_directory):
-        self.outputDirectoryLabel.setText("Output Directory: {}".format(out_file_directory))
+        self.outputDirectoryLabel.setText("Save Directory: {}".format(out_file_directory))
 
     def no_save_directory(self):
         QtGui.QMessageBox.warning(self, "No Save Directory Set!",

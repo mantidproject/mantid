@@ -33,22 +33,20 @@ TimeAtSampleStrategyElastic::TimeAtSampleStrategyElastic(
  */
 Correction
 TimeAtSampleStrategyElastic::calculate(const size_t &workspace_index) const {
-  Correction retvalue(0, 0);
 
   // Calculate TOF ratio
   const double L1s = m_spectrumInfo.l1();
+  double scale;
   if (m_spectrumInfo.isMonitor(workspace_index)) {
     double L1m =
         m_beamDir.scalar_prod(m_spectrumInfo.sourcePosition() -
                               m_spectrumInfo.position(workspace_index));
-    retvalue.factor = std::abs(L1s / L1m);
+    scale = std::abs(L1s / L1m);
   } else {
-    retvalue.factor = L1s / (L1s + m_spectrumInfo.l2(workspace_index));
+    scale = L1s / (L1s + m_spectrumInfo.l2(workspace_index));
   }
 
-  retvalue.offset = 0;
-
-  return retvalue;
+  return Correction(0., scale);
 }
 
 } // namespace Algorithms

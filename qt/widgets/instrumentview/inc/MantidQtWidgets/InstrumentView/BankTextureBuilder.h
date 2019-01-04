@@ -28,6 +28,7 @@ class BankTextureBuilder {
 public:
   BankTextureBuilder(const Mantid::Geometry::ComponentInfo &compInfo,
                      size_t index);
+  ~BankTextureBuilder();
   void buildColorTextures(const std::vector<GLColor> &colors,
                           bool isUsingLayer = false, size_t layer = 0);
   void buildPickTextures(const std::vector<GLColor> &colors,

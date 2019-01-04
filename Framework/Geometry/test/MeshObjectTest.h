@@ -912,8 +912,8 @@ public:
   Test solid angle calculation for a cube.
   */
   {
-    auto geom_obj = createCube(1.0);
-    double satol = 1e-3; // tolerance for solid angle
+    auto geom_obj = createCube(1.0); // Cube centre at 0.5, 0.5, 0.5
+    double satol = 1e-3;             // tolerance for solid angle
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
 
     TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(1.5, 0.5, 0.5)), M_PI * 2.0 / 3.0,

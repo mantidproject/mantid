@@ -11,9 +11,9 @@
 TOFTOF reduction workflow gui.
 """
 from __future__ import (absolute_import, division, print_function)
-from PyQt4.QtCore import *
-from PyQt4.QtGui  import *
-
+from qtpy.QtCore import (Qt)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
+from qtpy.QtWidgets import (QButtonGroup, QCheckBox, QDoubleSpinBox, QFileDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QRadioButton, QSizePolicy, QSpacerItem, QWidget, QVBoxLayout)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from reduction_gui.widgets.data_table_view import DataTableView, DataTableModel
@@ -55,6 +55,7 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_vanRuns = ''
     TIP_vanCmnt = ''
     TIP_vanTemp = 'Temperature (K). Optional.'
+    TIP_vanEcFactor = ''
 
     TIP_ecRuns = ''
     TIP_ecTemp = 'Temperature (K). Optional.'
@@ -97,7 +98,10 @@ class TOFTOFSetupWidget(BaseWidget):
         """
             Pop up a directory dialog box.
         """
-        dirname = str(QFileDialog.getExistingDirectory(self, "Select Directory", default_dir, QFileDialog.DontUseNativeDialog))
+        dirname = QFileDialog.getExistingDirectory(self, "Select Directory", default_dir,
+                                                   QFileDialog.DontUseNativeDialog)
+        if isinstance(dirname, tuple):
+            dirname = dirname[0]
 
         return dirname
 
@@ -175,6 +179,8 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnSaveDir          = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
+        self.vanEcFactor         = setEnabled(tip(QDoubleSpinBox(), self.TIP_vanEcFactor), self.chkSubtractECVan)
+        set_spin(self.vanEcFactor, 0, 1)
         self.chkReplaceNaNs      = setEnabled(tip(QCheckBox(u'Replace special values in S(Q, ω) with 0'), self.TIP_chkReplaceNaNs),
                                               self.binEon)
         self.chkCreateDiff       = setEnabled(tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff), self.binEon)
@@ -268,7 +274,8 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(QLabel('Vanadium runs'), 0, 0)
         grid.addWidget(self.vanRuns,            0, 1, 1, 3)
         grid.addWidget(QLabel('Van. comment'),  1, 0)
-        grid.addWidget(self.vanCmnt,            1, 1, 1, 2)
+        grid.addWidget(self.vanCmnt,            1, 1, 1, 1)
+        grid.addLayout(hbox(QLabel('EC factor'), self.vanEcFactor), 1, 2, 1, 1)
         grid.addLayout(hbox(QLabel('T (K)'), self.vanTemp),         1, 3)
         grid.addWidget(QLabel('Empty can runs'),2, 0)
         grid.addWidget(self.ecRuns,             2, 1, 1, 1)
@@ -356,6 +363,7 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.vanRuns        = line_text(self.vanRuns)
         elem.vanCmnt        = line_text(self.vanCmnt)
         elem.vanTemp        = OptionalFloat(line_text(self.vanTemp))
+        elem.vanEcFactor    = self.vanEcFactor.value()
 
         elem.ecRuns         = line_text(self.ecRuns)
         elem.ecTemp         = OptionalFloat(line_text(self.ecTemp))
@@ -406,13 +414,15 @@ class TOFTOFSetupWidget(BaseWidget):
         self.vanRuns.setText(elem.vanRuns)
         self.vanCmnt.setText(elem.vanCmnt)
         self.vanTemp.setText(str(elem.vanTemp))
+        self.vanEcFactor.setValue(elem.vanEcFactor)
 
         self.ecRuns.setText(elem.ecRuns)
         self.ecTemp.setText(str(elem.ecTemp))
         self.ecFactor.setValue(elem.ecFactor)
 
+        self.runDataModel.beginResetModel()
         self.runDataModel.tableData = elem.dataRuns
-        self.runDataModel.reset()
+        self.runDataModel.endResetModel()
 
         self.binEon.setChecked(elem.binEon)
 

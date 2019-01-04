@@ -12,7 +12,7 @@ import re
 from math import copysign
 
 
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType)
+from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
@@ -249,6 +249,44 @@ class BackParser(UserFileComponentParser):
     @abc.abstractmethod
     def get_type_pattern():
         return "\\s*" + BackParser.get_type() + "\\s*/\\s*"
+
+
+class InstrParser(object):
+    """
+    InstrParser looks to find the instrument.
+    Compared to other parsers, this is a naive implementation
+    which expects a line in the user file to explicitly state the instrument,
+    with no other data.
+    Because of this, we are trying to match exact strings, and so do not use regex.
+    """
+    Type = "INSTR"
+    _INSTRUMENTS = ["LOQ", "LARMOR", "SANS2D", "ZOOM", "NOINSTRUMENT"]
+
+    INSTRUMENTS_DICT = {"LOQ": SANSInstrument.LOQ,
+                        "LARMOR": SANSInstrument.LARMOR,
+                        "SANS2D": SANSInstrument.SANS2D,
+                        "ZOOM": SANSInstrument.ZOOM}
+
+    @staticmethod
+    def parse_line(line):
+        try:
+            ret_val = InstrParser.INSTRUMENTS_DICT[line]
+        except KeyError:
+            raise RuntimeError("InstrParser: Unknown command for INSTR: {0}".format(line))
+        else:
+            # If no exception raised
+            return {DetectorId.instrument: ret_val}
+
+    @staticmethod
+    def get_type():
+        return InstrParser.Type
+
+    @staticmethod
+    def get_type_pattern(line):
+        if line in InstrParser._INSTRUMENTS:
+            return True
+        else:
+            return False
 
 
 class DetParser(UserFileComponentParser):
@@ -2306,6 +2344,10 @@ class UserFileParser(object):
     def _get_correct_parser(self, line):
         line = line.strip()
         line = line.upper()
+
+        if InstrParser.get_type_pattern(line):
+            return InstrParser()
+
         for key in self._parsers:
             parser = self._parsers[key]
             if re.match(parser.get_type_pattern(), line, re.IGNORECASE) is not None:

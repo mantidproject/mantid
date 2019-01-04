@@ -490,5 +490,10 @@ std::ostream &operator<<(std::ostream &os, const WorkspaceHistory &WH) {
   WH.printSelf(os);
   return os;
 }
+
+bool WorkspaceHistory::operator==(const WorkspaceHistory &otherHistory) const {
+  return m_algorithms == otherHistory.m_algorithms;
+}
+
 } // namespace API
 } // namespace Mantid

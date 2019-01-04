@@ -6,12 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from qtpy.QtCore import (Qt)  # noqa
+from qtpy.QtWidgets import (QAction, QApplication, QFileDialog, QFrame, QMenu, QTableWidgetItem)  # noqa
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
-import ui.ui_data_catalog
-
 from reduction_gui.reduction.scripter import BaseScriptElement
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("SANSCatalogWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class Catalog(BaseScriptElement):
@@ -32,10 +37,10 @@ class SANSCatalogWidget(BaseWidget):
 
         self._catalog_cls = catalog_cls
 
-        class DataFrame(QtGui.QFrame, ui.ui_data_catalog.Ui_Frame):
+        class DataFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/data_catalog.ui', baseinstance=self)
 
         self._content = DataFrame(self)
         self.initialize_content()
@@ -50,16 +55,16 @@ class SANSCatalogWidget(BaseWidget):
         self._settings.data_updated.connect(self._data_updated)
 
     def initialize_content(self):
-        self.copyAction = QtGui.QAction("Copy",  self)
+        self.copyAction = QAction("Copy",  self)
         self.copyAction.setShortcut("Ctrl+C")
         self.addAction(self.copyAction)
 
-        self.connect(self.copyAction, QtCore.SIGNAL("triggered()"), self.copyCells)
-        self._content.data_set_table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.connect(self._content.data_set_table, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.tableWidgetContext)
-        self.connect(self._content.refresh_button, QtCore.SIGNAL("clicked()"), self._update_content)
-        self.connect(self._content.browse_button, QtCore.SIGNAL("clicked()"), self._browse_directory)
-        self.connect(self._content.directory_edit, QtCore.SIGNAL("returnPressed()"), self._update_content)
+        self.copyAction.triggered.connect(self.copyCells)
+        self._content.data_set_table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._content.data_set_table.customContextMenuRequested.connect(self.tableWidgetContext)
+        self._content.refresh_button.clicked.connect(self._update_content)
+        self._content.browse_button.clicked.connect(self._browse_directory)
+        self._content.directory_edit.returnPressed.connect(self._update_content)
         self._content.directory_edit.setText(self._settings.catalog_data_path)
         self._content.directory_edit.setToolTip("Use a path of the form: /SNS/<instrument>/IPTS-<number>/data\nE.g.: "
                                                 "/SNS/EQSANS/IPTS-1234/data")
@@ -67,7 +72,7 @@ class SANSCatalogWidget(BaseWidget):
 
     def tableWidgetContext(self, point):
         '''Create a menu for the tableWidget and associated actions'''
-        tw_menu = QtGui.QMenu("Menu", self)
+        tw_menu = QMenu("Menu", self)
         tw_menu.addAction(self.copyAction)
         tw_menu.exec_(self.mapToGlobal(point))
 
@@ -119,7 +124,7 @@ class SANSCatalogWidget(BaseWidget):
                     selected_text += '\t'
             selected_text += '\n'
 
-        QtGui.QApplication.clipboard().setText(selected_text)
+        QApplication.clipboard().setText(selected_text)
 
     def _update_content(self, process_files=True):
         self._settings.catalog_data_path = str(self._content.directory_edit.text())
@@ -131,8 +136,8 @@ class SANSCatalogWidget(BaseWidget):
         self._content.data_set_table.setHorizontalHeaderLabels(headers)
         # Stretch the columns evenly
         h = self._content.data_set_table.horizontalHeader()
-        h.setResizeMode(1)
-        h.setResizeMode(1,0)
+        h.setSectionResizeMode(1)
+        h.setSectionResizeMode(1,0)
 
         if self._catalog_cls is not None:
             dc = self._catalog_cls()
@@ -142,8 +147,8 @@ class SANSCatalogWidget(BaseWidget):
                 self._content.data_set_table.insertRow(row)
                 for i in range(len(data)):
                     if data[i] is not None:
-                        item = QtGui.QTableWidgetItem(str(data[i]))
-                        item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                        item = QTableWidgetItem(str(data[i]))
+                        item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
                         self._content.data_set_table.setItem(row, i, item)
 
             dc.list_data_sets(self._settings.catalog_data_path, call_back=_add_item, process_files=process_files)
@@ -167,21 +172,24 @@ class SANSCatalogWidget(BaseWidget):
         for row, data in enumerate(rows):
             for i in range(len(data)):
                 if data[i] is not None:
-                    item = QtGui.QTableWidgetItem(str(data[i]))
-                    item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                    item = QTableWidgetItem(str(data[i]))
+                    item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
                     self._content.data_set_table.setItem(row, i, item)
 
         self._content.data_set_table.setSortingEnabled(True)
         self._content.data_set_table.resizeColumnsToContents()
 
     def _browse_directory(self):
-        dir = QtGui.QFileDialog.getExistingDirectory(self, "Open Directory",
-                                                     self._settings.data_path)
-        if dir:
-                # Store the location of the loaded file
-            self._settings.data_path = str(dir)
-            self._content.directory_edit.setText(dir)
-            self._update_content()
+        direc = QFileDialog.getExistingDirectory(self, "Open Directory",
+                                                 self._settings.data_path)
+        if not direc:
+            return
+        if isinstance(direc, tuple):
+            direc = direc[0]
+        # Store the location of the loaded file
+        self._settings.data_path = str(direc)
+        self._content.directory_edit.setText(direc)
+        self._update_content()
 
     def set_state(self, state):
         """

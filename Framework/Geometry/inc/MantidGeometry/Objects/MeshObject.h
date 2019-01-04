@@ -50,11 +50,10 @@ class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Constructor
   MeshObject(const std::vector<uint16_t> &faces,
-             const std::vector<Mantid::Kernel::V3D> &vertices,
+             const std::vector<Kernel::V3D> &vertices,
              const Kernel::Material &material);
   /// Constructor
-  MeshObject(std::vector<uint16_t> &&faces,
-             std::vector<Mantid::Kernel::V3D> &&vertices,
+  MeshObject(std::vector<uint16_t> &&faces, std::vector<Kernel::V3D> &&vertices,
              const Kernel::Material &&material);
 
   /// Copy constructor
@@ -142,12 +141,7 @@ private:
   void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
                         std::vector<Kernel::V3D> &intersectionPoints,
                         std::vector<int> &entryExitFlags) const;
-  /// Determine intersection between ray and an one triangle
-  bool rayIntersectsTriangle(const Kernel::V3D &start,
-                             const Kernel::V3D &direction,
-                             const Kernel::V3D &v1, const Kernel::V3D &v2,
-                             const Kernel::V3D &v3, Kernel::V3D &intersection,
-                             int &entryExit) const;
+
   /// Get triangle
   bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2,
                    Kernel::V3D &v3) const;

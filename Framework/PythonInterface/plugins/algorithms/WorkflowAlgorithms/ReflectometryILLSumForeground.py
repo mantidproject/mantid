@@ -8,11 +8,13 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
+                        WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
-                           IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property, StringListValidator)
-from mantid.simpleapi import (AddSampleLog, CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,ReflectometryBeamStatistics,
-                              ReflectometrySumInQ)
+                           IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
+                           StringListValidator)
+from mantid.simpleapi import (AddSampleLog, CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,
+                              ReflectometryBeamStatistics, ReflectometrySumInQ)
 import numpy
 import ReflectometryILL_common as common
 
@@ -81,8 +83,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             if processReflected:
                 ws = self._rebinToDirect(ws)
         else:
-            if processReflected:
-                ws = self._divideByDirect(ws)
+            ws = self._divideByDirect(ws)
             ws = self._sumForegroundInQ(ws)
             self._addSumTypeToLogs(ws, SumType.IN_Q)
         ws = self._applyWavelengthRange(ws)
@@ -134,7 +135,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 direction=Direction.Input,
                 optional=PropertyMode.Optional,
                 validator=inWavelength),
-            doc='Summed direct beam workspace.')
+            doc='Summed direct beam workspace (units wavelength).')
         self.declareProperty(
             IntArrayProperty(
                 Prop.FOREGROUND_INDICES,
@@ -148,21 +149,21 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 direction=Direction.Input,
                 optional=PropertyMode.Optional,
                 validator=inWavelength),
-            doc='The (not summed) direct beam workspace in wavelength.')
+            doc='The (not summed) direct beam workspace (units wavelength).')
         self.declareProperty(
             FloatArrayProperty(
                 Prop.WAVELENGTH_RANGE,
                 values=[0.],
                 validator=nonnegativeFloatArray),
-            doc='The wavelength bounds when summing in Q.')
+            doc='The wavelength bounds.')
 
     def validateInputs(self):
         """Validate the algorithm's input properties."""
         issues = dict()
-        if self.getProperty(Prop.SUM_TYPE).value == SumType.IN_Q:
-            if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+        if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+            if self.getProperty(Prop.SUM_TYPE).value == SumType.IN_Q:
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'Direct foreground workspace is needed for summing in Q.'
-        if not self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+        else:
             directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
             if directWS.getNumberHistograms() != 1:
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
@@ -209,8 +210,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
     def _applyWavelengthRange(self, ws):
         """Cut wavelengths outside the wavelength range from a TOF workspace."""
-        if self.getProperty(Prop.WAVELENGTH_RANGE).isDefault:
-            return ws
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
         rangeProp = {'XMin': wRange[0]}
         if len(wRange) == 2:

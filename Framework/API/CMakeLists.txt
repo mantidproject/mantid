@@ -95,8 +95,8 @@ set ( SRC_FILES
 	src/LogFilterGenerator.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
+	src/MDFrameValidator.cpp
 	src/MDGeometry.cpp
-        src/MDFrameValidator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/ModeratorModel.cpp
@@ -111,7 +111,7 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/NumericAxisValidator.cpp
-        src/OrientedLatticeValidator.cpp
+	src/OrientedLatticeValidator.cpp
 	src/ParallelAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
@@ -144,6 +144,7 @@ set ( SRC_FILES
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
+	src/WorkspaceHasDxValidator.cpp
 	src/WorkspaceHistory.cpp
 	src/WorkspaceNearestNeighbourInfo.cpp
 	src/WorkspaceNearestNeighbours.cpp
@@ -293,8 +294,8 @@ set ( INC_FILES
 	inc/MantidAPI/LogFilterGenerator.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
+	inc/MantidAPI/MDFrameValidator.h
 	inc/MantidAPI/MDGeometry.h
-        inc/MantidAPI/MDFrameValidator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
@@ -339,6 +340,8 @@ set ( INC_FILES
 	inc/MantidAPI/SpectraAxisValidator.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/SpectrumInfo.h
+	inc/MantidAPI/SpectrumInfoItem.h
+	inc/MantidAPI/SpectrumInfoIterator.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
@@ -348,6 +351,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceGroup_fwd.h
+	inc/MantidAPI/WorkspaceHasDxValidator.h
 	inc/MantidAPI/WorkspaceHistory.h
 	inc/MantidAPI/WorkspaceNearestNeighbourInfo.h
 	inc/MantidAPI/WorkspaceNearestNeighbours.h
@@ -356,8 +360,6 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
-	inc/MantidAPI/SpectrumInfoIterator.h
-	inc/MantidAPI/SpectrumInfoItem.h
 )
 
 set ( TEST_FILES
@@ -425,8 +427,8 @@ set ( TEST_FILES
 	LiveListenerTest.h
 	LogFilterGeneratorTest.h
 	LogManagerTest.h
-	MDGeometryTest.h
 	MDFrameValidatorTest.h
+	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	ModeratorModelTest.h
 	MuParserUtilsTest.h
@@ -465,6 +467,7 @@ set ( TEST_FILES
 	VectorParameterTest.h
 	WorkspaceFactoryTest.h
 	WorkspaceGroupTest.h
+	WorkspaceHasDxValidatorTest.h
 	WorkspaceHistoryIOTest.h
 	WorkspaceHistoryTest.h
 	WorkspaceNearestNeighbourInfoTest.h

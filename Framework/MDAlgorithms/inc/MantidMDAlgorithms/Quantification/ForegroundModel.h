@@ -116,7 +116,7 @@ private:
   /// same ion
   std::string m_MagIonName;
   /// Owned pointer to magnetic form factor cache
-  PhysicalConstants::MagneticFormFactorTable *m_formFactorTable;
+  std::unique_ptr<PhysicalConstants::MagneticFormFactorTable> m_formFactorTable;
 };
 
 /// boost::shared_ptr typedef

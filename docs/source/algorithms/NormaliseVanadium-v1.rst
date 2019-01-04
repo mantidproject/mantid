@@ -21,7 +21,7 @@ Usage
 
     
     vanadium = CreateWorkspace(DataX='0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5', DataY='10.574151,10.873,11.07348,11.22903,11.42286,11.47365,11.37375,11.112,10.512181,10.653397', UnitX='wavelength')
-    LoadInstrument(Workspace=vanadium, Filename='IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml', RewriteSpectraMap=True)
+    LoadInstrument(Workspace=vanadium, Filename='unit_testing/MINITOPAZ_Definition.xml', RewriteSpectraMap=True)
     norm_van = NormaliseVanadium(InputWorkspace=vanadium)
     print("Wavelength =  {}  Y =  {:.11f}".format(norm_van.readX(0)[2], norm_van.readY(0)[2]))
     

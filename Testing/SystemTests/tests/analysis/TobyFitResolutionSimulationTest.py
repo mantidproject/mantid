@@ -8,7 +8,7 @@
 """Testing of the VATES quantification using
 the TobyFitResolutionModel
 """
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 from mantid.simpleapi import *
 
 
@@ -24,7 +24,7 @@ def create_cuboid_xml(xlength,ylength,zlength):
     return xml % {"xpt": xlength/2.0,"ypt":ylength/2.0,"zpt":zlength/2.0}
 
 
-class TobyFitResolutionSimulationTest(MantidStressTest):
+class TobyFitResolutionSimulationTest(MantidSystemTest):
 
     _success = False
 

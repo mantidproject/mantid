@@ -41,7 +41,7 @@ set_target_properties ( Catalog PROPERTIES OUTPUT_NAME MantidCatalog
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(Catalog PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+  set_target_properties(Catalog PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
   set_target_properties(Catalog PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
@@ -49,7 +49,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Catalog PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+target_include_directories ( Catalog PUBLIC inc/ )
 
 target_link_libraries ( Catalog LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${OPENSSL_LIBRARIES} ${JSONCPP_LIBRARIES})
 
@@ -60,4 +60,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Catalog ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS Catalog ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

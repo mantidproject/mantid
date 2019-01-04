@@ -7,7 +7,7 @@
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid import config
 from ISISCommandInterface import *
@@ -15,7 +15,7 @@ from SANSBatchMode import *
 import os.path
 
 
-class SANSLOQBatch(stresstesting.MantidStressTest):
+class SANSLOQBatch(systemtesting.MantidSystemTest):
 
     def runTest(self):
     #DataPath("../Data/LOQ/")

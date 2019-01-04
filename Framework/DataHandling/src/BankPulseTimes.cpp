@@ -28,24 +28,43 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
   file.getAttr("offset", startTime);
   Mantid::Types::Core::DateAndTime start(startTime);
   // Load the seconds offsets
-  std::vector<double> seconds;
-  file.getData(seconds);
-  file.closeData();
-  // Now create the pulseTimes
-  numPulses = seconds.size();
-  if (numPulses == 0)
-    throw std::runtime_error("event_time_zero field has no data!");
 
-  // Ensure that we always have a consistency between nPulses and periodNumbers
-  // containers
+  const auto heldTimeZeroType = file.getInfo().type;
+  // Nexus only requires event_time_zero to be a NXNumber, we support two
+  // possilites
+  if (heldTimeZeroType == ::NeXus::FLOAT64) {
+    std::vector<double> seconds;
+    file.getData(seconds);
+    file.closeData();
+    // Now create the pulseTimes
+    numPulses = seconds.size();
+    if (numPulses == 0)
+      throw std::runtime_error("event_time_zero field has no data!");
+
+    pulseTimes = new Mantid::Types::Core::DateAndTime[numPulses];
+    for (size_t i = 0; i < numPulses; i++)
+      pulseTimes[i] = start + seconds[i];
+  } else if (heldTimeZeroType == ::NeXus::UINT64) {
+    std::vector<uint64_t> nanoseconds;
+    file.getData(nanoseconds);
+    file.closeData();
+    // Now create the pulseTimes
+    numPulses = nanoseconds.size();
+    if (numPulses == 0)
+      throw std::runtime_error("event_time_zero field has no data!");
+
+    pulseTimes = new Mantid::Types::Core::DateAndTime[numPulses];
+    for (size_t i = 0; i < numPulses; i++)
+      pulseTimes[i] = start + int64_t(nanoseconds[i]);
+  } else {
+    throw std::invalid_argument("Unsupported type for event_time_zero");
+  }
+  // Ensure that we always have a consistency between nPulses and
+  // periodNumbers containers
   if (numPulses != pNumbers.size()) {
     periodNumbers = std::vector<int>(numPulses, FirstPeriod);
     ;
   }
-
-  pulseTimes = new Mantid::Types::Core::DateAndTime[numPulses];
-  for (size_t i = 0; i < numPulses; i++)
-    pulseTimes[i] = start + seconds[i];
 }
 
 //----------------------------------------------------------------------------------------------

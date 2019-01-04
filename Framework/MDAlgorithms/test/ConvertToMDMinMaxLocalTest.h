@@ -193,9 +193,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     // Check the results
-
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"), "0.12187,9.99");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"), "0.126745,9.99");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"), "0.12187,7.69667");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"), "0.126745,7.69667");
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
@@ -249,6 +248,8 @@ private:
     Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
     ws->mutableSample().setOrientedLattice(&latt);
 
+    // time average value of this is the simple average
+    // of the first three values = 7.69667
     Mantid::Kernel::TimeSeriesProperty<double> *p =
         new Mantid::Kernel::TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 9.99));

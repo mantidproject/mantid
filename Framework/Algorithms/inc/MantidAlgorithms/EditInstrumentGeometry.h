@@ -23,8 +23,8 @@ public:
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "The edit or added information will be attached to a Workspace.  "
-           "Currently it is in an overwrite mode only.";
+    return "Adds a new instrument or edits an existing one; "
+           "currently works in an overwrite mode only.";
   }
 
   /// Algorithm's category for identification overriding a virtual method

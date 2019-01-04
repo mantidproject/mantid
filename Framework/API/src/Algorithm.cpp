@@ -107,11 +107,7 @@ Algorithm::Algorithm()
       m_communicator(Kernel::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
-Algorithm::~Algorithm() {
-  delete m_notificationCenter;
-  delete m_executeAsync;
-  delete m_progressObserver;
-}
+Algorithm::~Algorithm() {}
 
 //=============================================================================================
 //================================== Simple Getters/Setters
@@ -1369,6 +1365,38 @@ bool Algorithm::doCallProcessGroups(
     const float duration = timer.elapsed();
     // Log that execution has completed.
     reportCompleted(duration, true /* this is for group processing*/);
+
+    m_history = boost::make_shared<AlgorithmHistory>(this, startTime, duration,
+                                                     ++g_execCount);
+
+    if (trackingHistory() && m_history) {
+
+      std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
+      findWorkspaceProperties(inputWorkspaces, outputWorkspaces);
+
+      // We need to find the workspaces to add the history to.
+      if (outputWorkspaces.size() == 0 && inputWorkspaces.size() == 0) {
+        outputWorkspaces.insert(outputWorkspaces.end(),
+                                m_groupWorkspaces.begin(),
+                                m_groupWorkspaces.end());
+      } else if (outputWorkspaces.size() == 0) {
+        outputWorkspaces = inputWorkspaces;
+      }
+
+      for (const auto &outputWorkspace : outputWorkspaces) {
+        auto outputGroupWS =
+            boost::dynamic_pointer_cast<WorkspaceGroup>(outputWorkspace);
+        if (outputGroupWS) {
+          // Put history of the call into each child
+          for (auto i = 0; i < outputGroupWS->getNumberOfEntries(); ++i) {
+            outputGroupWS->getItem(i)->history().addHistory(m_history);
+          }
+        } else if (outputWorkspace) {
+          // If it's a valid pointer add history else skip for optionals
+          outputWorkspace->history().addHistory(m_history);
+        }
+      }
+    }
   }
 
   setExecuted(completed);
@@ -1415,10 +1443,11 @@ bool Algorithm::processGroups() {
         this->name(), progress_proportion * static_cast<double>(entry),
         progress_proportion * (1 + static_cast<double>(entry)),
         this->isLogging(), this->version());
-    // Don't make the new algorithm a child so that it's workspaces are stored
-    // correctly
-    alg_sptr->setChild(false);
-
+    // Make a child algorithm and turn off history recording for it, but always
+    // store result in the ADS
+    alg_sptr->setChild(true);
+    alg_sptr->setAlwaysStoreInADS(true);
+    alg_sptr->enableHistoryRecordingForChild(false);
     alg_sptr->setRethrows(true);
 
     IAlgorithm *alg = alg_sptr.get();
@@ -1619,8 +1648,9 @@ private:
  * Asynchronous execution
  */
 Poco::ActiveResult<bool> Algorithm::executeAsync() {
-  m_executeAsync = new Poco::ActiveMethod<bool, Poco::Void, Algorithm>(
-      this, &Algorithm::executeAsyncImpl);
+  m_executeAsync =
+      std::make_unique<Poco::ActiveMethod<bool, Poco::Void, Algorithm>>(
+          this, &Algorithm::executeAsyncImpl);
   return (*m_executeAsync)(Poco::Void());
 }
 
@@ -1639,7 +1669,7 @@ bool Algorithm::executeAsyncImpl(const Poco::Void &) {
  */
 Poco::NotificationCenter &Algorithm::notificationCenter() const {
   if (!m_notificationCenter)
-    m_notificationCenter = new Poco::NotificationCenter;
+    m_notificationCenter = std::make_unique<Poco::NotificationCenter>();
   return *m_notificationCenter;
 }
 
@@ -1659,9 +1689,10 @@ void Algorithm::handleChildProgressNotification(
  */
 const Poco::AbstractObserver &Algorithm::progressObserver() const {
   if (!m_progressObserver)
-    m_progressObserver = new Poco::NObserver<Algorithm, ProgressNotification>(
-        *const_cast<Algorithm *>(this),
-        &Algorithm::handleChildProgressNotification);
+    m_progressObserver =
+        std::make_unique<Poco::NObserver<Algorithm, ProgressNotification>>(
+            *const_cast<Algorithm *>(this),
+            &Algorithm::handleChildProgressNotification);
 
   return *m_progressObserver;
 }

@@ -245,6 +245,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
 
         for fitNumber, peakNumber in enumerate(peaksToFit):#range(peaks_ws.getNumberPeaks()):
+            peakNumber = int(peakNumber)
             peak = peaks_ws_out.getPeak(peakNumber)
             progress.report(' ')
             if peak.getRunNumber() != MDdata.getExperimentInfo(0).getRunNumber():

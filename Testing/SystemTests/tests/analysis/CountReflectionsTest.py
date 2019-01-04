@@ -5,12 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from SortHKLTest import HKLStatisticsTestMixin
 
 
-class CountReflectionsTest(HKLStatisticsTestMixin, stresstesting.MantidStressTest):
+class CountReflectionsTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
     '''
     This systemtest follows the same principle as the one for SortHKL. It loads data,
     computes statistics and checks them against reference data obtained from another

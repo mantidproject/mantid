@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
+import traceback
 import unittest
 
 # 3rdparty imports
@@ -30,7 +31,7 @@ class Receiver(QObject):
     def on_error(self, task_result):
         self.error_cb_called = True
         self.task_exc = task_result.exc_value
-        self.error_stack = task_result.stack
+        self.error_stack = traceback.extract_tb(task_result.stack)
 
 
 class ReceiverWithProgress(Receiver):
@@ -116,11 +117,11 @@ foo()
                         msg="Unexpected exception found. "
                             "NameError expected, found {}".format(recv.task_exc.__class__.__name__))
         # Test the stack has been chopped as expected
-        self.assertEqual(3, len(recv.error_stack))
+        self.assertEqual(5, len(recv.error_stack))
         # check line numbers
-        self.assertEqual(8, recv.error_stack[0][1])
-        self.assertEqual(7, recv.error_stack[1][1])
-        self.assertEqual(5, recv.error_stack[2][1])
+        self.assertEqual(8, recv.error_stack[2][1])
+        self.assertEqual(7, recv.error_stack[3][1])
+        self.assertEqual(5, recv.error_stack[4][1])
 
     # ---------------------------------------------------------------------------
     # Progress tests
@@ -192,7 +193,7 @@ squared = sum*sum
         filename = 'test.py'
         executor, recv = self._run_async_code(code, filename=filename)
         self.assertTrue(recv.error_cb_called)
-        self.assertEqual(filename, recv.error_stack[0][0])
+        self.assertEqual(filename, recv.error_stack[-1][0])
 
     # -------------------------------------------------------------------------
     # Helpers

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/MeshObjectCommon.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Material.h"
@@ -18,12 +19,12 @@ namespace Mantid {
 namespace Geometry {
 
 namespace CoplanarChecks {
-bool sufficientPoints(const std::vector<Mantid::Kernel::V3D> &vertices) {
+bool sufficientPoints(const std::vector<Kernel::V3D> &vertices) {
   return vertices.size() >= 3; // Not a plane with < 3 points
 }
 
 /**
- * Establish the first surface normal. Tries to establish normal fron
+ * Establish the first surface normal. Tries to establish normal from
  * non-colinear points
  * @param vertices : All vertices
  * @return surface normal, or 0,0,0 if not found
@@ -79,8 +80,7 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
  * @param vertices : all vertices to consider
  * @return : normal to surface formed by points
  */
-Kernel::V3D
-validatePointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
+Kernel::V3D validatePointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
   if (!sufficientPoints(vertices))
     throw std::invalid_argument("Insufficient vertices to create a plane");
 
@@ -97,43 +97,27 @@ validatePointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
   return normal;
 }
 } // namespace CoplanarChecks
-
 namespace {
-using Mantid::Kernel::V3D;
-
 /**
- * Find the solid angle of a triangle defined by vectors a,b,c from point
- *"observer"
- *
- * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
- *
- * @param a :: first point of triangle
- * @param b :: second point of triangle
- * @param c :: third point of triangle
- * @param observer :: point from which solid angle is required
- * @return :: solid angle of triangle in Steradians.
- *
- * This duplicates code in CSGOjbect both need a place to be merged.
- * To aid this, this function has been defined as a non-member.
+ * Get a triangle - For iterating over triangles
+ * @param index :: Index of triangle in MeshObject
+ * @param triangles :: indices into vertices 3 consecutive form triangle
+ * @param vertices :: Vertices to lookup
+ * @param vertex1 :: First vertex of triangle
+ * @param vertex2 :: Second vertex of triangle
+ * @param vertex3 :: Third vertex of triangle
+ * @returns true if the specified triangle exists
  */
-double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
-                             const V3D &observer) {
-  const V3D ao = a - observer;
-  const V3D bo = b - observer;
-  const V3D co = c - observer;
-  const double modao = ao.norm();
-  const double modbo = bo.norm();
-  const double modco = co.norm();
-  const double aobo = ao.scalar_prod(bo);
-  const double aoco = ao.scalar_prod(co);
-  const double boco = bo.scalar_prod(co);
-  const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
-  const double denom =
-      modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
-  if (denom != 0.0)
-    return 2.0 * atan2(scalTripProd, denom);
-  else
-    return 0.0; // not certain this is correct
+bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
+                 const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
+                 Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
+  bool triangleExists = index < triangles.size() / 3;
+  if (triangleExists) {
+    vertex1 = vertices[triangles[3 * index]];
+    vertex2 = vertices[triangles[3 * index + 1]];
+    vertex3 = vertices[triangles[3 * index + 2]];
+  }
+  return triangleExists;
 }
 } // namespace
 
@@ -141,56 +125,15 @@ const double MeshObject2D::MinThickness = 0.001;
 const std::string MeshObject2D::Id = "MeshObject2D";
 
 /**
- * @brief isOnTriangle
- * @param point : point to test
- * @param a : first vertex of triangle
- * @param b : second vertex of triangle
- * @param c : thrid vertex of triangle
- * @return True only point if is on triangle
- */
-bool MeshObject2D::isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
-                                const Kernel::V3D &b, const Kernel::V3D &c) {
-
-  // in change of basis, barycentric coordinates p = A + u*v0 + v*v1. v0 and
-  // v1 are basis vectors
-  // rewrite as v0 = u*v0 + v*v1
-  // i) v0.v0 = u*v0.v0 + v*v1.v0
-  // ii) v0.v1 = u*v0.v1 + v*v1.v1
-  // solve for u, v and check u and v >= 0 and u+v <=1
-
-  // TODO see MeshObject::rayIntersectsTriangle and compare!
-
-  auto v0 = c - a;
-  auto v1 = b - a;
-  auto v2 = point - a;
-
-  // Compute dot products
-  auto dot00 = v0.scalar_prod(v0);
-  auto dot01 = v0.scalar_prod(v1);
-  auto dot02 = v0.scalar_prod(v2);
-  auto dot11 = v1.scalar_prod(v1);
-  auto dot12 = v1.scalar_prod(v2);
-
-  // Compute barycentric coordinates
-  auto invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-  auto u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-  auto v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-  // Check if point is in or on triangle
-  return (u >= 0) && (v >= 0) && (u + v <= 1);
-}
-
-/**
  * Estalish if points are coplanar.
  * @param vertices : All vertices to consider
  * @return : Return True only if all coplanar
  */
-bool MeshObject2D::pointsCoplanar(
-    const std::vector<Mantid::Kernel::V3D> &vertices) {
+bool MeshObject2D::pointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
   if (!CoplanarChecks::sufficientPoints(vertices))
     return false;
 
-  Mantid::Kernel::V3D normal = CoplanarChecks::surfaceNormal(vertices);
+  Kernel::V3D normal = CoplanarChecks::surfaceNormal(vertices);
   // Check that a valid normal was found amongst collection of vertices
   if (normal.norm2() == 0) {
     // If all points are colinear. Not a plane.
@@ -239,12 +182,7 @@ void MeshObject2D::initialize() {
   parameters.p0 = v0;
   m_planeParameters = parameters;
 
-  if (m_vertices.size() >
-      std::numeric_limits<typename decltype(m_triangles)::value_type>::max()) {
-    throw std::invalid_argument(
-        "Too many vertices (" + std::to_string(m_vertices.size()) +
-        "). MeshObject cannot have more than 65535 vertices.");
-  }
+  MeshObjectCommon::checkVertexLimit(m_vertices.size());
   m_handler = boost::make_shared<GeometryHandler>(*this);
 }
 bool MeshObject2D::hasValidShape() const {
@@ -270,8 +208,9 @@ bool MeshObject2D::isValid(const Kernel::V3D &point) const {
   static const double tolerance = 1e-9;
   if (distanceToPlane(point) < tolerance) {
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
-      if (isOnTriangle(point, m_vertices[i], m_vertices[i + 1],
-                       m_vertices[i + 2]))
+
+      if (MeshObjectCommon::isOnTriangle(point, m_vertices[i],
+                                         m_vertices[i + 1], m_vertices[i + 2]))
         return true;
     }
   }
@@ -301,14 +240,16 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
              m_planeParameters.p0.scalar_prod(norm)) /
            ut.direction().scalar_prod(norm);
 
-  // Intersects infinite plane
+  // Intersects infinite plane. No point evaluating individual segements if this
+  // fails
   if (t >= 0) {
-    auto pIntersects = ut.startPoint() + ut.direction();
+    Kernel::V3D intersection;
+    int entryExit;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
-      // Need to know that this corresponds to a finite segment
-      if (isOnTriangle(pIntersects, m_vertices[i], m_vertices[i + 1],
-                       m_vertices[i + 2])) {
-        ut.addPoint(-1 /*HACK as exit*/, pIntersects, *this);
+      if (MeshObjectCommon::rayIntersectsTriangle(
+              ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
+              m_vertices[i + 2], intersection, entryExit)) {
+        ut.addPoint(entryExit, intersection, *this);
         ut.buildLink();
         // All vertices on plane. So only one triangle intersection possible
         break;
@@ -335,32 +276,42 @@ int MeshObject2D::getName() const {
   // where this is used.
 }
 
+/**
+ * Solid angle only considers triangle facing sample. Back faces do NOT
+ * contribute.
+ *
+ * This is tantamount to defining an object that is opaque to neutrons. Note
+ * that it is still possible to define a facing surface which is obscured by
+ * another. In that case there would still be a solid angle contribution as
+ * there is no way of detecting the shadowing.
+ *
+ * @param observer
+ * @return
+ */
 double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
-  double solidAngleSum(0), solidAngleNegativeSum(0);
-  for (size_t i = 0; i < m_vertices.size(); i += 3) {
-    auto sa = getTriangleSolidAngle(m_vertices[m_triangles[i]],
-                                    m_vertices[m_triangles[i + 1]],
-                                    m_vertices[m_triangles[i + 2]], observer);
-    if (sa > 0.0) {
+  double solidAngleSum(0);
+  Kernel::V3D vertex1, vertex2, vertex3;
+  for (size_t i = 0;
+       getTriangle(i, m_triangles, m_vertices, vertex1, vertex2, vertex3);
+       ++i) {
+    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2,
+                                                        vertex3, observer);
+    if (sa > 0) {
       solidAngleSum += sa;
-    } else {
-      solidAngleNegativeSum += sa;
     }
   }
-  return 0.5 * (solidAngleSum - solidAngleNegativeSum);
+  return solidAngleSum;
 }
 
 double MeshObject2D::solidAngle(const Kernel::V3D &observer,
                                 const Kernel::V3D &scaleFactor) const {
-  std::vector<V3D> scaledVertices;
+  std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   for (const auto &vertex : m_vertices) {
-    scaledVertices.emplace_back(scaleFactor.X() * vertex.X(),
-                                scaleFactor.Y() * vertex.Y(),
-                                scaleFactor.Z() * vertex.Z());
+    scaledVertices.emplace_back(scaleFactor * vertex);
   }
-  MeshObject2D scaledObject(m_triangles, scaledVertices, m_material);
-  return scaledObject.solidAngle(observer);
+  MeshObject2D meshScaled(m_triangles, scaledVertices, m_material);
+  return meshScaled.solidAngle(observer);
 }
 
 bool MeshObject2D::operator==(const MeshObject2D &other) const {
@@ -386,49 +337,14 @@ double MeshObject2D::volume() const {
  * @returns A reference to a bounding box for this shape.
  */
 const BoundingBox &MeshObject2D::getBoundingBox() const {
-
-  if (m_boundingBox.isNull()) {
-    double minX, maxX, minY, maxY, minZ, maxZ;
-    minX = minY = minZ = std::numeric_limits<double>::max();
-    maxX = maxY = maxZ = std::numeric_limits<double>::min();
-
-    // Loop over all vertices and determine minima and maxima on each axis
-    for (const auto &vertex : m_vertices) {
-      auto vx = vertex.X();
-      auto vy = vertex.Y();
-      auto vz = vertex.Z();
-
-      minX = std::min(minX, vx);
-      maxX = std::max(maxX, vx);
-      minY = std::min(minY, vy);
-      maxY = std::max(maxY, vy);
-      minZ = std::min(minZ, vz);
-      maxZ = std::max(maxZ, vz);
-    }
-    if (minX == maxX)
-      maxX += MinThickness;
-    if (minY == maxY)
-      maxY += MinThickness;
-    if (minZ == maxZ)
-      maxZ += MinThickness;
-
-    // Cache bounding box, so we do not need to repeat calculation
-    m_boundingBox = BoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
-  }
-
-  return m_boundingBox;
+  return MeshObjectCommon::getBoundingBox(m_vertices, m_boundingBox);
 }
 
 void MeshObject2D::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                   double &xmin, double &ymin,
                                   double &zmin) const {
-  auto bb = this->getBoundingBox();
-  xmax = bb.xMax();
-  xmin = bb.xMin();
-  ymax = bb.yMax();
-  ymin = bb.yMin();
-  zmax = bb.zMax();
-  zmin = bb.zMin();
+  return MeshObjectCommon::getBoundingBox(m_vertices, m_boundingBox, xmax, ymax,
+                                          zmax, xmin, ymin, zmin);
 }
 
 /**
@@ -474,28 +390,12 @@ size_t MeshObject2D::numberOfTriangles() const {
 }
 
 std::vector<double> MeshObject2D::getVertices() const {
-  std::vector<double> points;
-  size_t nPoints = m_vertices.size();
-  points.resize(static_cast<std::size_t>(nPoints) * 3);
-  for (size_t i = 0; i < nPoints; ++i) {
-    const auto &pnt = m_vertices[i];
-    points[i * 3] = pnt.X();
-    points[i * 3 + 1] = pnt.Y();
-    points[i * 3 + 2] = pnt.Z();
-  }
-  return points;
+  return MeshObjectCommon::getVertices(m_vertices);
 }
 
 std::vector<uint32_t> MeshObject2D::getTriangles() const {
-  std::vector<uint32_t> faces;
-  size_t nFaceCorners = m_triangles.size();
-  if (nFaceCorners > 0) {
-    faces.resize(static_cast<std::size_t>(nFaceCorners));
-    for (size_t i = 0; i < nFaceCorners; ++i) {
-      faces[i] = static_cast<int>(m_triangles[i]);
-    }
-  }
-  return faces;
+
+  return MeshObjectCommon::getTriangles_uint32(m_triangles);
 }
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,

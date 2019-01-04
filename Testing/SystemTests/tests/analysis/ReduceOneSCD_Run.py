@@ -22,7 +22,7 @@
 from __future__ import (absolute_import, division, print_function)
 import time
 
-import stresstesting
+import systemtesting
 
 import os
 from mantid.api import *
@@ -32,7 +32,7 @@ from mantid import config
 config['Q.convention'] = 'Crystallography'
 
 
-class ReduceOneSCD_Run( stresstesting.MantidStressTest):
+class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
 
     __reduced_ws_name=""
     saved=False

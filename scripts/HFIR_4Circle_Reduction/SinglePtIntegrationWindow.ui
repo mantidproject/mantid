@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="2" column="1">
-     <widget class="SinglePtIntegrationView" name="graphicsView_integration1DView"/>
+     <widget class="QFrame" name="frame_graphicsView_integration1DView"/>
     </item>
     <item row="3" column="1">
      <layout class="QGridLayout" name="gridLayout_3">
@@ -451,7 +451,7 @@
      </layout>
     </item>
     <item row="2" column="0">
-     <widget class="SinglePtIntegrationTable" name="tableView_summary"/>
+     <widget class="QFrame" name="frame_tableView_summary"/>
     </item>
    </layout>
   </widget>

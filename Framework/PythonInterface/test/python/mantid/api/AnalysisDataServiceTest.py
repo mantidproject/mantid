@@ -8,10 +8,16 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService, AnalysisDataServiceImpl, MatrixWorkspace, Workspace
+from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl,
+                        FrameworkManagerImpl, MatrixWorkspace, Workspace)
 from mantid import mtd
 
+
 class AnalysisDataServiceTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
 
     def tearDown(self):
       AnalysisDataService.Instance().clear()

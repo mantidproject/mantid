@@ -80,7 +80,7 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.presenter.update_visibility_icon.assert_called_once_with(42)
 
     def test_notify_unknwon_updates_plot_list_in_presenter(self):
-        self.model.notify(FigureAction.Unknown, -1)
+        self.model.notify(FigureAction.Update, -1)
         self.presenter.update_plot_list.assert_called_once_with()
 
     # ------------------------ Plot Showing ------------------------

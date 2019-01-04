@@ -8,13 +8,17 @@
 from __future__ import (absolute_import, division, print_function)
 import six
 import os
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QFrame, QGroupBox, QMessageBox)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
 import reduction_gui.widgets.util as util
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 from reduction_gui.widgets.base_widget import BaseWidget
-import ui.sans.ui_trans_direct_beam
-import ui.sans.ui_trans_spreader
-import ui.sans.ui_hfir_sample_data
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("DirectBeam").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 if six.PY3:
     unicode = str
@@ -28,10 +32,10 @@ class DirectBeam(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(DirectBeam, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
-        class DirectBeamFrame(QtGui.QGroupBox, ui.sans.ui_trans_direct_beam.Ui_GroupBox):
+        class DirectBeamFrame(QGroupBox):
             def __init__(self, parent=None):
-                QtGui.QGroupBox.__init__(self, parent)
-                self.setupUi(self)
+                QGroupBox.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/trans_direct_beam.ui', baseinstance=self)
 
         self._content = DirectBeamFrame(self)
         self._layout.addWidget(self._content)
@@ -48,16 +52,16 @@ class DirectBeam(BaseWidget):
             widgets loaded through the .ui file.
         """
         # Validators
-        self._content.beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._content.beam_radius_edit))
+        self._content.beam_radius_edit.setValidator(QDoubleValidator(self._content.beam_radius_edit))
 
         # Connections
-        self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), self._sample_browse)
-        self.connect(self._content.direct_browse, QtCore.SIGNAL("clicked()"), self._direct_browse)
+        self._content.sample_browse.clicked.connect(self._sample_browse)
+        self._content.direct_browse.clicked.connect(self._direct_browse)
 
-        self.connect(self._content.sample_plot, QtCore.SIGNAL("clicked()"), self._sample_plot_clicked)
-        self.connect(self._content.direct_plot, QtCore.SIGNAL("clicked()"), self._direct_plot_clicked)
+        self._content.sample_plot.clicked.connect(self._sample_plot_clicked)
+        self._content.direct_plot.clicked.connect(self._direct_plot_clicked)
 
-        if not self._in_mantidplot:
+        if not self._has_instrumentview:
             self._content.sample_plot.hide()
             self._content.direct_plot.hide()
 
@@ -107,10 +111,10 @@ class BeamSpreader(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(BeamSpreader, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
-        class SpreaderFrame(QtGui.QGroupBox, ui.sans.ui_trans_spreader.Ui_GroupBox):
+        class SpreaderFrame(QGroupBox):
             def __init__(self, parent=None):
-                QtGui.QGroupBox.__init__(self, parent)
-                self.setupUi(self)
+                QGroupBox.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/trans_spreader.ui', baseinstance=self)
 
         self._content = SpreaderFrame(self)
         self._layout.addWidget(self._content)
@@ -127,21 +131,21 @@ class BeamSpreader(BaseWidget):
             widgets loaded through the .ui file.
         """
         # Validators
-        self._content.spreader_trans_edit.setValidator(QtGui.QDoubleValidator(self._content.spreader_trans_edit))
-        self._content.spreader_trans_spread_edit.setValidator(QtGui.QDoubleValidator(self._content.spreader_trans_spread_edit))
+        self._content.spreader_trans_edit.setValidator(QDoubleValidator(self._content.spreader_trans_edit))
+        self._content.spreader_trans_spread_edit.setValidator(QDoubleValidator(self._content.spreader_trans_spread_edit))
 
         # Connections
-        self.connect(self._content.sample_scatt_browse, QtCore.SIGNAL("clicked()"), self._sample_scatt_browse)
-        self.connect(self._content.sample_spread_browse, QtCore.SIGNAL("clicked()"), self._sample_spread_browse)
-        self.connect(self._content.direct_scatt_browse, QtCore.SIGNAL("clicked()"), self._direct_scatt_browse)
-        self.connect(self._content.direct_spread_browse, QtCore.SIGNAL("clicked()"), self._direct_spread_browse)
+        self._content.sample_scatt_browse.clicked.connect(self._sample_scatt_browse)
+        self._content.sample_spread_browse.clicked.connect(self._sample_spread_browse)
+        self._content.direct_scatt_browse.clicked.connect(self._direct_scatt_browse)
+        self._content.direct_spread_browse.clicked.connect(self._direct_spread_browse)
 
-        self.connect(self._content.sample_scatt_plot, QtCore.SIGNAL("clicked()"), self._sample_scatt_plot_clicked)
-        self.connect(self._content.sample_spread_plot, QtCore.SIGNAL("clicked()"), self._sample_spread_plot_clicked)
-        self.connect(self._content.direct_scatt_plot, QtCore.SIGNAL("clicked()"), self._direct_scatt_plot_clicked)
-        self.connect(self._content.direct_spread_plot, QtCore.SIGNAL("clicked()"), self._direct_spread_plot_clicked)
+        self._content.sample_scatt_plot.clicked.connect(self._sample_scatt_plot_clicked)
+        self._content.sample_spread_plot.clicked.connect(self._sample_spread_plot_clicked)
+        self._content.direct_scatt_plot.clicked.connect(self._direct_scatt_plot_clicked)
+        self._content.direct_spread_plot.clicked.connect(self._direct_spread_plot_clicked)
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.sample_scatt_plot.hide()
             self._content.sample_spread_plot.hide()
             self._content.direct_scatt_plot.hide()
@@ -220,10 +224,10 @@ class SampleDataWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(SampleDataWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
-        class DataFrame(QtGui.QFrame, ui.sans.ui_hfir_sample_data.Ui_Frame):
+        class DataFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/hfir_sample_data.ui', baseinstance=self)
 
         self._content = DataFrame(self)
         self._layout.addWidget(self._content)
@@ -244,21 +248,21 @@ class SampleDataWidget(BaseWidget):
             widgets loaded through the .ui file.
         """
         # Validators
-        self._content.transmission_edit.setValidator(QtGui.QDoubleValidator(self._content.transmission_edit))
-        self._content.dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.dtransmission_edit))
-        self._content.thickness_edit.setValidator(QtGui.QDoubleValidator(self._content.thickness_edit))
+        self._content.transmission_edit.setValidator(QDoubleValidator(self._content.transmission_edit))
+        self._content.dtransmission_edit.setValidator(QDoubleValidator(self._content.dtransmission_edit))
+        self._content.thickness_edit.setValidator(QDoubleValidator(self._content.thickness_edit))
 
         # Connections
-        self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
-        self.connect(self._content.calculate_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
-        self.connect(self._content.direct_beam_chk, QtCore.SIGNAL("clicked()"), self._direct_beam)
-        self.connect(self._content.beam_spreader_chk, QtCore.SIGNAL("clicked()"), self._beam_spreader)
-        self.connect(self._content.dark_current_button, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
+        self._content.data_file_browse_button.clicked.connect(self._data_file_browse)
+        self._content.calculate_chk.clicked.connect(self._calculate_clicked)
+        self._content.direct_beam_chk.clicked.connect(self._direct_beam)
+        self._content.beam_spreader_chk.clicked.connect(self._beam_spreader)
+        self._content.dark_current_button.clicked.connect(self._dark_current_browse)
 
-        self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot)
-        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
+        self._content.data_file_plot_button.clicked.connect(self._data_file_plot)
+        self._content.dark_current_plot_button.clicked.connect(self._dark_plot_clicked)
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.dark_current_plot_button.hide()
             self._content.data_file_plot_button.hide()
 
@@ -434,7 +438,7 @@ class SampleDataWidget(BaseWidget):
         if len(str(fname).strip())>0:
             dataproxy = self._data_proxy(fname)
             if len(dataproxy.errors)>0:
-                #QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
+                #QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
 
             self._settings.last_data_ws = dataproxy.data_ws
@@ -457,7 +461,7 @@ class SampleDataWidget(BaseWidget):
                 self._content.wavelength_spread_edit.setText(str(dataproxy.wavelength_spread))
             # This will be enabled once the meta data contains the sample thickness - will be turned into check box
             #if dataproxy.sample_thickness is not None:
-            #    self._content.thickness_edit.setText(QtCore.QString(str(dataproxy.sample_thickness)))
+            #    self._content.thickness_edit.setText(str(dataproxy.sample_thickness))
             if dataproxy.beam_diameter is not None:
                 self._settings.emit_key_value("beam_diameter", str(dataproxy.beam_diameter))
 
