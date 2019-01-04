@@ -12,7 +12,6 @@ import sys
 from functools import wraps
 
 # 3rdparty imports
-from mantid.api import AnalysisDataServiceObserver
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
@@ -22,6 +21,8 @@ from qtpy.QtWidgets import QApplication, QLabel
 from six import text_type
 
 # local imports
+from mantid.api import AnalysisDataServiceObserver
+from mantid.plots import MantidAxes
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.figuretype import figure_type, FigureType
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
@@ -80,10 +81,8 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             return
         empty_axes = True
         for ax in all_axes:
-            try:
+            if isinstance(ax, MantidAxes):
                 empty_axes = empty_axes & ax.remove_workspace_artists(name)
-            except AttributeError:
-                pass
         if empty_axes:
             self.window.close()
         else:
@@ -99,13 +98,10 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         """
         redraw = False
         for ax in self.canvas.figure.axes:
-            try:
+            if isinstance(ax, MantidAxes):
                 redraw_this = ax.replace_workspace_artists(name, workspace)
-            except AttributeError:
+            else:
                 continue
-            if redraw_this:
-                ax.relim()
-                ax.autoscale_view()
             redraw = redraw | redraw_this
         if redraw:
             self.canvas.draw_idle()

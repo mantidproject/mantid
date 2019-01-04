@@ -121,7 +121,8 @@ class MantidAxes(Axes):
             if isinstance(artist, Iterable) and not isinstance(artist, Container):
                 artist = artist[0]
             if replace_handler is None:
-                def replace_handler(): pass
+                def replace_handler(_, __):
+                    pass
             artist_info.append((artist, replace_handler))
 
         return artist
@@ -168,13 +169,10 @@ class MantidAxes(Axes):
         except KeyError:
             return False
 
-        # Check before handlers run as they might delete the existing one
-        has_legend = self.legend_
         for artist, handler in artist_info:
             handler(artist, workspace)
-        if has_legend:
+        if self.legend_:
             self.legend()
-
         return True
 
     def is_empty(self):
@@ -213,6 +211,9 @@ class MantidAxes(Axes):
             def _data_update(line2d, workspace):
                 x, y, _ = plotfunctions._plot_impl(self, workspace, kwargs)
                 line2d.set_data(x, y)
+                self.relim()
+                self.autoscale_view()
+
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.plot(self, *args, **kwargs),
                                                _data_update)
@@ -274,6 +275,10 @@ class MantidAxes(Axes):
                 orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
                 for artist_orig, artist_new in zip(orig_flat, new_flat):
                      artist_new.update_from(artist_orig)
+
+                # ax.relim does not support collections...
+                self._update_line_limits(container_new[0])
+                self.autoscale_view()
 
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.errorbar(self, *args, **kwargs),
@@ -378,7 +383,17 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0].name(), plotfunctions.imshow(self, *args, **kwargs))
+
+            def _update_data(artist, workspace):
+                artist.remove()
+                if hasattr(artist, 'colorbar_cid'):
+                    artist.callbacksSM.disconnect(artist.colorbar_cid)
+                im = plotfunctions.imshow(self, workspace, **kwargs)
+                self._update_colorplot_limits(im, artist.colorbar)
+
+            return self.track_workspace_artist(args[0].name(),
+                                               plotfunctions.imshow(self, *args, **kwargs),
+                                               _update_data)
         else:
             return Axes.imshow(self, *args, **kwargs)
 
@@ -507,6 +522,30 @@ class MantidAxes(Axes):
             return self.track_workspace_artist(args[0].name(), plotfunctions.tricontourf(self, *args, **kwargs))
         else:
             return Axes.tricontourf(self, *args, **kwargs)
+
+    # ------------------ Private api --------------------------------------------------------
+
+    def _update_colorplot_limits(self, mappable, colorbar):
+        """
+        For an image or patch plot update current axes to display it correctly
+        :param mappable: A new mappable for this axes
+        :param colorbar: An optional existing colorbar instance
+        """
+        # ax.relim in matplotlib < 2.2 doesn't take into account of images
+        if hasattr(self, '_update_image_limits'):
+            self.relim()
+        else:
+            xmin, xmax, ymin, ymax = mappable.get_extent()
+            self.update_datalim(((xmin, ymin), (xmax, ymax)))
+        self.autoscale_view()
+        # swap the colorbar
+        if colorbar is not None:
+            cb = colorbar
+            cb.mappable = mappable
+            cb.set_clim(mappable.get_clim())
+            mappable.colorbar = cb
+            mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
+            cb.update_normal(mappable)
 
 
 class MantidAxes3D(Axes3D):
