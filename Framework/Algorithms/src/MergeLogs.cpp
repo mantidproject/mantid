@@ -43,7 +43,6 @@ void MergeLogs::init() {
 
 void MergeLogs::exec() {
   MatrixWorkspace_sptr ws = this->getProperty("Workspace");
-  MatrixWorkspace_sptr ws2 = ws->clone();
   const std::string log1name = this->getProperty("LogName1");
   const std::string log2name = this->getProperty("LogName2");
   const std::string mlogname = this->getProperty("MergedLogName");
@@ -67,11 +66,8 @@ void MergeLogs::exec() {
       mlog1->replaceValues(log1->timesAsVector(), logvector1);
       mlog2->replaceValues(log2->timesAsVector(), logvector2);
     }
+    mlog1->merge(mlog2);
     ws->mutableRun().addProperty(mlog1);
-    ws2->mutableRun().addProperty(mlog2);
-    // Time Series Logs are combined when adding workspaces
-    ws += ws2;
-    ws -= ws2;
   } catch (std::invalid_argument &) {
     throw std::runtime_error(
         "LogName1 and LogName2 must be TimeSeriesProperties.");
