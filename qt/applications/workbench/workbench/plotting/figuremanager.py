@@ -101,14 +101,15 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         for ax in self.canvas.figure.axes:
             try:
                 redraw_this = ax.replace_workspace_artists(name, workspace)
-                if redraw_this:
-                    ax.relim()
-                    ax.autoscale_view()
-                redraw = redraw | redraw_this
             except AttributeError:
-                pass
+                continue
+            if redraw_this:
+                ax.relim()
+                ax.autoscale_view()
+            redraw = redraw | redraw_this
         if redraw:
             self.canvas.draw_idle()
+
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
     """

@@ -67,6 +67,11 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
 # ========================================================
 
 def _plot_impl(axes, workspace, kwargs):
+    """
+    Compute data and labels for plot. Used by workspace
+    replacement handlers to recompute data. See plot for
+    argument details
+    """
     x, y, _, _, kwargs = _get_data_for_plot(axes, workspace, kwargs)
     _setLabels1D(axes, workspace)
     return x, y, kwargs
@@ -121,8 +126,6 @@ def plot(axes, workspace, *args, **kwargs):
         kwargs['linestyle'] = 'steps-post'
         return axes.plot(x, y, *args, **kwargs)
 
-    # x, y, dy, dx, kwargs = _get_data_for_plot(axes, workspace, kwargs)
-    # _setLabels1D(axes, workspace)
     x, y, kwargs = _plot_impl(axes, workspace, kwargs)
     return axes.plot(x, y, **kwargs)
 
@@ -154,9 +157,10 @@ def errorbar(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    x, y, dy, dx, kwargs = _get_data_for_plot(axes, workspace, kwargs, with_dy=True, with_dx=True)
+    x, y, dy, dx, kwargs = _get_data_for_plot(axes, workspace, kwargs,
+                                              with_dy=True, with_dx=True)
     _setLabels1D(axes, workspace)
-    return axes.track_workspace_artist(workspace.name(), axes.errorbar(x, y, dy, dx, *args, **kwargs))
+    return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
 
 def scatter(axes, workspace, *args, **kwargs):

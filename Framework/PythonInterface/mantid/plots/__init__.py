@@ -21,6 +21,7 @@ from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
 from matplotlib.axes import Axes
+from matplotlib import cbook
 from matplotlib.container import Container
 from matplotlib.projections import register_projection
 
@@ -105,20 +106,22 @@ class MantidAxes(Axes):
         super(MantidAxes, self).__init__(*args, **kwargs)
         self.tracked_workspaces = dict()
 
-    def track_workspace_artist(self, name, artist, replace_handler):
+    def track_workspace_artist(self, name, artist, replace_handler=None):
         """
         Add the given workspace name to the list of workspaces
         displayed on this Axes instance
         :param name: The name of the workspace
         :param artists: A single artist or list/tuple of length 1 containing the data for the workspace
         :param replace_handler: A function to call when the data is replaced to update
-        the artist
+        the artist (optional)
         :returns: The artists variable as it was passed in.
         """
         if name:
             artist_info = self.tracked_workspaces.setdefault(name, [])
             if isinstance(artist, Iterable) and not isinstance(artist, Container):
                 artist = artist[0]
+            if replace_handler is None:
+                def replace_handler(): pass
             artist_info.append((artist, replace_handler))
 
         return artist
@@ -165,8 +168,13 @@ class MantidAxes(Axes):
         except KeyError:
             return False
 
+        # Check before handlers run as they might delete the existing one
+        has_legend = self.legend_
         for artist, handler in artist_info:
-            handler(artist)
+            handler(artist, workspace)
+        if has_legend:
+            self.legend()
+
         return True
 
     def is_empty(self):
@@ -197,15 +205,17 @@ class MantidAxes(Axes):
             ax.plot(x,y,'bo')                 #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.plot`.
+        For keywords related to workspaces, see :func:`plotfunctions.plot`.
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            def _data_update(line2d):
-                x, y, _ = plotfunctions._plot_impl(self, *args, kwargs)
+            logger.debug('using plotfunctions')
+
+            def _data_update(line2d, workspace):
+                x, y, _ = plotfunctions._plot_impl(self, workspace, kwargs)
                 line2d.set_data(x, y)
             return self.track_workspace_artist(args[0].name(),
-                                               plotfunctions.plot(self, *args, **kwargs), _data_update)
+                                               plotfunctions.plot(self, *args, **kwargs),
+                                               _data_update)
         else:
             return Axes.plot(self, *args, **kwargs)
 
@@ -226,11 +236,10 @@ class MantidAxes(Axes):
             ax.scatter(x,y,'bo')                 #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.scatter`
+        For keywords related to workspaces, see :func:`plotfunctions.scatter`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.scatter(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
         else:
             return Axes.scatter(self, *args, **kwargs)
 
@@ -251,11 +260,24 @@ class MantidAxes(Axes):
             ax.errorbar(x,y,yerr,'bo')            #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.errorbar`
+        For keywords related to workspaces, see :func:`plotfunctions.errorbar`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.errorbar(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+
+            def _data_update(container_orig, workspace):
+                # It is not possible to simply reset the error bars so
+                # we just plot new lines
+                container_orig.remove()
+                self.containers.remove(container_orig)
+                container_new = plotfunctions.errorbar(self, workspace, **kwargs)
+                orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
+                for artist_orig, artist_new in zip(orig_flat, new_flat):
+                     artist_new.update_from(artist_orig)
+
+            return self.track_workspace_artist(args[0].name(),
+                                               plotfunctions.errorbar(self, *args, **kwargs),
+                                               _data_update)
         else:
             return Axes.errorbar(self, *args, **kwargs)
 
@@ -276,11 +298,11 @@ class MantidAxes(Axes):
             ax.pcolor(x,y,C)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolor`
+        For keywords related to workspaces, see :func:`plotfunctions.pcolor`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.pcolor(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.pcolor(self, *args, **kwargs)
         else:
             return Axes.pcolor(self, *args, **kwargs)
 
@@ -301,11 +323,11 @@ class MantidAxes(Axes):
             ax.pcolorfast(x,y,C)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolorfast`
+        For keywords related to workspaces, see :func:`plotfunctions.pcolorfast`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.pcolorfast(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.pcolorfast(self, *args, **kwargs)
         else:
             return Axes.pcolorfast(self, *args, **kwargs)
 
@@ -326,11 +348,11 @@ class MantidAxes(Axes):
             ax.pcolormesh(x,y,C)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolormesh`
+        For keywords related to workspaces, see :func:`plotfunctions.pcolormesh`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.pcolormesh(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.pcolormesh(self, *args, **kwargs)
         else:
             return Axes.pcolormesh(self, *args, **kwargs)
 
@@ -351,11 +373,11 @@ class MantidAxes(Axes):
             ax.imshow(C)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.imshow`
+        For keywords related to workspaces, see :func:`plotfunctions.imshow`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.imshow(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.imshow(self, *args, **kwargs)
         else:
             return Axes.imshow(self, *args, **kwargs)
 
@@ -376,11 +398,11 @@ class MantidAxes(Axes):
             ax.contour(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.contour`
+        For keywords related to workspaces, see :func:`plotfunctions.contour`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.contour(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.contour(self, *args, **kwargs)
         else:
             return Axes.contour(self, *args, **kwargs)
 
@@ -402,11 +424,11 @@ class MantidAxes(Axes):
             ax.contourf(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.contourf`
+        For keywords related to workspaces, see :func:`plotfunctions.contourf`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.contourf(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.contourf(self, *args, **kwargs)
         else:
             return Axes.contourf(self, *args, **kwargs)
 
@@ -427,11 +449,11 @@ class MantidAxes(Axes):
             ax.tripcolor(x,y,C)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tripcolor`
+        For keywords related to workspaces, see :func:`plotfunctions.tripcolor`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.tripcolor(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.tripcolor(self, *args, **kwargs)
         else:
             return Axes.tripcolor(self, *args, **kwargs)
 
@@ -452,11 +474,11 @@ class MantidAxes(Axes):
             ax.tricontour(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tricontour`
+        For keywords related to workspaces, see :func:`plotfunctions.tricontour`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.tricontour(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.tricontour(self, *args, **kwargs)
         else:
             return Axes.tricontour(self, *args, **kwargs)
 
@@ -477,11 +499,11 @@ class MantidAxes(Axes):
             ax.tricontourf(x,y,z)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tricontourf`
+        For keywords related to workspaces, see :func:`plotfunctions.tricontourf`
         """
         if helperfunctions.validate_args(*args):
-            logger.debug('using mantid.plots.plotfunctions')
-            return mantid.plots.plotfunctions.tricontourf(self, *args, **kwargs)
+            logger.debug('using plotfunctions')
+            return plotfunctions.tricontourf(self, *args, **kwargs)
         else:
             return Axes.tricontourf(self, *args, **kwargs)
 
