@@ -8,8 +8,10 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
+import sys
 
 # 3rdparty imports
+from mantid.api import AnalysisDataServiceObserver
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
@@ -25,6 +27,46 @@ from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisE
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from workbench.plotting.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+
+
+class FigureManagerADSObserver(AnalysisDataServiceObserver):
+
+    def __init__(self, manager):
+        super(FigureManagerADSObserver, self).__init__()
+        self.window = manager.window
+        self.canvas = manager.canvas
+
+        self.observeDelete(True)
+
+    def deleteHandle(self, name, _):
+        """
+        Called when the ADS has deleted a workspace. Checks the
+        attached axes for any hold a plot from this workspace. If removing
+        this leaves empty axes then the parent window is triggered for
+        closer
+        :param name: The name of the workspace
+        :param _: Unused callback argument
+        """
+        try:
+            # Find the Axes with this workspace reference
+            empty_axes = []
+            for ax in self.canvas.figure.axes:
+                try:
+                    empty_axes.append(ax.remove_workspace_artists(name))
+                except AttributeError:
+                    pass
+
+            if all(empty_axes):
+                self.window.close()
+            else:
+                self.canvas.draw_idle()
+        except Exception:
+            # If we don't catch all errors here the ADS.remove method
+            # does not complete properly and leaves things in a bad
+            # state
+            sys.stderr.write("Error occurred in deletion handler:\n")
+            import traceback
+            traceback.print_exc()
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -121,6 +163,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # Register canvas observers
         self._cids = []
         self._cids.append(self.canvas.mpl_connect('button_press_event', self.on_button_press))
+        self._ads_observer = FigureManagerADSObserver(self)
 
         self.window.raise_()
 
@@ -137,6 +180,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if self.window._destroying:
             return
         self.window._destroying = True
+        self._ads_observer.observeAll(False)
+        del self._ads_observer
         for id in self._cids:
             self.canvas.mpl_disconnect(id)
         try:

@@ -118,7 +118,7 @@ def plot(axes, workspace, *args, **kwargs):
 
     x, y, dy, dx, kwargs = _get_data_for_plot(axes, kwargs, workspace)
     _setLabels1D(axes, workspace)
-    return axes.plot(x, y, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.plot(x, y, *args, **kwargs))
 
 
 def errorbar(axes, workspace, *args, **kwargs):
@@ -150,7 +150,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     """
     x, y, dy, dx, kwargs = _get_data_for_plot(axes, kwargs, workspace, with_dy=True, with_dx=True)
     _setLabels1D(axes, workspace)
-    return axes.errorbar(x, y, dy, dx, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.errorbar(x, y, dy, dx, *args, **kwargs))
 
 
 def scatter(axes, workspace, *args, **kwargs):
@@ -184,7 +184,7 @@ def scatter(axes, workspace, *args, **kwargs):
         (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
         (x, y, _, _) = get_spectrum(workspace, wkspIndex, distribution)
     _setLabels1D(axes, workspace)
-    return axes.scatter(x, y, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.scatter(x, y, *args, **kwargs))
 
 
 def contour(axes, workspace, *args, **kwargs):
@@ -210,7 +210,7 @@ def contour(axes, workspace, *args, **kwargs):
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
-    return axes.contour(x, y, z, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.contour(x, y, z, *args, **kwargs))
 
 
 def contourf(axes, workspace, *args, **kwargs):
@@ -235,8 +235,9 @@ def contourf(axes, workspace, *args, **kwargs):
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
+
     _setLabels2D(axes, workspace)
-    return axes.contourf(x, y, z, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.contourf(x, y, z, *args, **kwargs))
 
 
 def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
@@ -313,7 +314,7 @@ def pcolor(axes, workspace, *args, **kwargs):
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
-    return axes.pcolor(x, y, z, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.pcolor(x, y, z, *args, **kwargs))
 
 
 def pcolorfast(axes, workspace, *args, **kwargs):
@@ -344,7 +345,7 @@ def pcolorfast(axes, workspace, *args, **kwargs):
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
-    return axes.pcolorfast(x, y, z, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.pcolorfast(x, y, z, *args, **kwargs))
 
 
 def pcolormesh(axes, workspace, *args, **kwargs):
@@ -375,7 +376,7 @@ def pcolormesh(axes, workspace, *args, **kwargs):
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
-    return axes.pcolormesh(x, y, z, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.pcolormesh(x, y, z, *args, **kwargs))
 
 
 def _skimage_version():
@@ -516,7 +517,7 @@ def imshow(axes, workspace, *args, **kwargs):
         raise Exception('Unevenly spaced bins are not supported by imshow')
     if 'extent' not in kwargs:
         kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
-    return _imshow(axes, z, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), _imshow(axes, z, *args, **kwargs))
 
 
 def tripcolor(axes, workspace, *args, **kwargs):
@@ -545,8 +546,7 @@ def tripcolor(axes, workspace, *args, **kwargs):
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
-
-    return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs))
 
 
 def tricontour(axes, workspace, *args, **kwargs):
@@ -585,7 +585,7 @@ def tricontour(axes, workspace, *args, **kwargs):
     x = x[condition]
     y = y[condition]
     z = z[condition]
-    return axes.tricontour(x, y, z, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.tricontour(x, y, z, *args, **kwargs))
 
 
 def tricontourf(axes, workspace, *args, **kwargs):
@@ -624,4 +624,4 @@ def tricontourf(axes, workspace, *args, **kwargs):
     x = x[condition]
     y = y[condition]
     z = z[condition]
-    return axes.tricontourf(x, y, z, *args, **kwargs)
+    return axes.track_workspace_artist(workspace.name(), axes.tricontourf(x, y, z, *args, **kwargs))
