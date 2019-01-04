@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-// Includes
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Multiply.h"
 
 using namespace Mantid::API;
@@ -19,12 +16,13 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Multiply)
 
-void Multiply::performBinaryOperation(const MantidVec &lhsX,
-                                      const MantidVec &lhsY,
-                                      const MantidVec &lhsE,
-                                      const MantidVec &rhsY,
-                                      const MantidVec &rhsE, MantidVec &YOut,
-                                      MantidVec &EOut) {
+void Multiply::performBinaryOperation(const HistogramData::HistogramX &lhsX,
+                                      const HistogramData::HistogramY &lhsY,
+                                      const HistogramData::HistogramE &lhsE,
+                                      const HistogramData::HistogramY &rhsY,
+                                      const HistogramData::HistogramE &rhsE,
+                                      HistogramData::HistogramY &YOut,
+                                      HistogramData::HistogramE &EOut) {
   UNUSED_ARG(lhsX);
   const size_t bins = lhsE.size();
   for (size_t j = 0; j < bins; ++j) {
@@ -45,11 +43,12 @@ void Multiply::performBinaryOperation(const MantidVec &lhsX,
   }
 }
 
-void Multiply::performBinaryOperation(const MantidVec &lhsX,
-                                      const MantidVec &lhsY,
-                                      const MantidVec &lhsE, const double rhsY,
-                                      const double rhsE, MantidVec &YOut,
-                                      MantidVec &EOut) {
+void Multiply::performBinaryOperation(const HistogramData::HistogramX &lhsX,
+                                      const HistogramData::HistogramY &lhsY,
+                                      const HistogramData::HistogramE &lhsE,
+                                      const double rhsY, const double rhsE,
+                                      HistogramData::HistogramY &YOut,
+                                      HistogramData::HistogramE &EOut) {
   UNUSED_ARG(lhsX);
   const size_t bins = lhsE.size();
   for (size_t j = 0; j < bins; ++j) {

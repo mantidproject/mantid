@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Plus.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -22,10 +19,13 @@ DECLARE_ALGORITHM(Plus)
 // ===================================== HISTOGRAM BINARY OPERATIONS
 // ==========================================
 //---------------------------------------------------------------------------------------------
-void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                                  const MantidVec &lhsE, const MantidVec &rhsY,
-                                  const MantidVec &rhsE, MantidVec &YOut,
-                                  MantidVec &EOut) {
+void Plus::performBinaryOperation(const HistogramData::HistogramX &lhsX,
+                                  const HistogramData::HistogramY &lhsY,
+                                  const HistogramData::HistogramE &lhsE,
+                                  const HistogramData::HistogramY &rhsY,
+                                  const HistogramData::HistogramE &rhsE,
+                                  HistogramData::HistogramY &YOut,
+                                  HistogramData::HistogramE &EOut) {
   (void)lhsX; // Avoid compiler warning
   std::transform(lhsY.begin(), lhsY.end(), rhsY.begin(), YOut.begin(),
                  std::plus<double>());
@@ -34,10 +34,12 @@ void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
 }
 
 //---------------------------------------------------------------------------------------------
-void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                                  const MantidVec &lhsE, const double rhsY,
-                                  const double rhsE, MantidVec &YOut,
-                                  MantidVec &EOut) {
+void Plus::performBinaryOperation(const HistogramData::HistogramX &lhsX,
+                                  const HistogramData::HistogramY &lhsY,
+                                  const HistogramData::HistogramE &lhsE,
+                                  const double rhsY, const double rhsE,
+                                  HistogramData::HistogramY &YOut,
+                                  HistogramData::HistogramE &EOut) {
   (void)lhsX; // Avoid compiler warning
   std::transform(lhsY.begin(), lhsY.end(), YOut.begin(),
                  std::bind2nd(std::plus<double>(), rhsY));

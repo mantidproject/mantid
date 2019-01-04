@@ -55,17 +55,18 @@ private:
   // Unhide base class method to avoid Intel compiler warning
   using BinaryOperation::checkSizeCompatibility;
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &, Mantid::MantidVec &,
-                              Mantid::MantidVec &) override {}
-  void performBinaryOperation(const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &, const double,
-                              const double, Mantid::MantidVec &,
-                              Mantid::MantidVec &) override {}
+  void performBinaryOperation(const HistogramData::HistogramX &,
+                              const HistogramData::HistogramY &,
+                              const HistogramData::HistogramE &,
+                              const HistogramData::HistogramY &,
+                              const HistogramData::HistogramE &,
+                              HistogramData::HistogramY &,
+                              HistogramData::HistogramE &) override {}
+  void performBinaryOperation(const HistogramData::HistogramX &,
+                              const HistogramData::HistogramY &,
+                              const HistogramData::HistogramE &, const double,
+                              const double, HistogramData::HistogramY &,
+                              HistogramData::HistogramE &) override {}
 };
 
 namespace {

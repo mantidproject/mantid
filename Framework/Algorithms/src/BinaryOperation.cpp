@@ -456,8 +456,8 @@ void BinaryOperation::doSingleValue() {
   // single value was masked
 
   // Pull out the single value and its error
-  const double rhsY = m_rhs->readY(0)[0];
-  const double rhsE = m_rhs->readE(0)[0];
+  const double rhsY = m_rhs->y(0)[0];
+  const double rhsE = m_rhs->e(0)[0];
 
   // Now loop over the spectra of the left hand side calling the virtual
   // function
@@ -484,10 +484,10 @@ void BinaryOperation::doSingleValue() {
       // function call below
       // where the order of argument evaluation is not guaranteed (if it's L->R
       // there would be a data race)
-      MantidVec &outY = m_out->dataY(i);
-      MantidVec &outE = m_out->dataE(i);
-      performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
-                             rhsY, rhsE, outY, outE);
+      HistogramData::HistogramY &outY = m_out->mutableY(i);
+      HistogramData::HistogramE &outE = m_out->mutableE(i);
+      performBinaryOperation(m_lhs->x(i), m_lhs->y(i), m_lhs->e(i), rhsY, rhsE,
+                             outY, outE);
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
@@ -515,8 +515,8 @@ void BinaryOperation::doSingleColumn() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      const double rhsY = m_rhs->readY(i)[0];
-      const double rhsE = m_rhs->readE(i)[0];
+      const double rhsY = m_rhs->y(i)[0];
+      const double rhsE = m_rhs->e(i)[0];
 
       // m_out->setX(i, m_lhs->refX(i)); //unnecessary - that was copied before.
       if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
@@ -532,8 +532,8 @@ void BinaryOperation::doSingleColumn() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      const double rhsY = m_rhs->readY(i)[0];
-      const double rhsE = m_rhs->readE(i)[0];
+      const double rhsY = m_rhs->y(i)[0];
+      const double rhsE = m_rhs->e(i)[0];
 
       m_out->setX(i, m_lhs->refX(i));
       if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
@@ -542,10 +542,10 @@ void BinaryOperation::doSingleColumn() {
         // function call below
         // where the order of argument evaluation is not guaranteed (if it's
         // L->R there would be a data race)
-        MantidVec &outY = m_out->dataY(i);
-        MantidVec &outE = m_out->dataE(i);
-        performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i),
-                               m_lhs->readE(i), rhsY, rhsE, outY, outE);
+        HistogramData::HistogramY &outY = m_out->mutableY(i);
+        HistogramData::HistogramE &outE = m_out->mutableE(i);
+        performBinaryOperation(m_lhs->x(i), m_lhs->y(i), m_lhs->e(i), rhsY,
+                               rhsE, outY, outE);
       }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
@@ -617,8 +617,8 @@ void BinaryOperation::doSingleSpectrum() {
     //  will be used instead)
 
     // Pull m_out the m_rhs spectrum
-    const MantidVec &rhsY = m_rhs->readY(0);
-    const MantidVec &rhsE = m_rhs->readE(0);
+    const auto &rhsY = m_rhs->y(0);
+    const auto &rhsE = m_rhs->e(0);
 
     // Now loop over the spectra of the left hand side calling the virtual
     // function
@@ -632,10 +632,10 @@ void BinaryOperation::doSingleSpectrum() {
       // function call below
       // where the order of argument evaluation is not guaranteed (if it's L->R
       // there would be a data race)
-      MantidVec &outY = m_out->dataY(i);
-      MantidVec &outE = m_out->dataE(i);
-      performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
-                             rhsY, rhsE, outY, outE);
+      HistogramData::HistogramY &outY = m_out->mutableY(i);
+      HistogramData::HistogramE &outE = m_out->mutableE(i);
+      performBinaryOperation(m_lhs->x(i), m_lhs->y(i), m_lhs->e(i), rhsY, rhsE,
+                             outY, outE);
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
@@ -765,11 +765,10 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       // function call below
       // where the order of argument evaluation is not guaranteed (if it's L->R
       // there would be a data race)
-      MantidVec &outY = m_out->dataY(i);
-      MantidVec &outE = m_out->dataE(i);
-      performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
-                             m_rhs->readY(rhs_wi), m_rhs->readE(rhs_wi), outY,
-                             outE);
+      HistogramData::HistogramY &outY = m_out->mutableY(i);
+      HistogramData::HistogramE &outE = m_out->mutableE(i);
+      performBinaryOperation(m_lhs->x(i), m_lhs->y(i), m_lhs->e(i),
+                             m_rhs->y(rhs_wi), m_rhs->e(rhs_wi), outY, outE);
 
       // Free up memory on the RHS if that is possible
       if (m_ClearRHSWorkspace)
@@ -832,9 +831,9 @@ void BinaryOperation::performEventBinaryOperation(
  * with another (histogrammed) spectrum as the right-hand operand.
  *
  *  @param lhs :: Reference to the EventList that will be modified in place.
- *  @param rhsX :: The vector of rhs X bin boundaries
- *  @param rhsY :: The vector of rhs data values
- *  @param rhsE :: The vector of rhs error values
+ *  @param rhsX :: Rhs X bin boundaries
+ *  @param rhsY :: Rhs data values
+ *  @param rhsE :: Rhs error values
  */
 void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
                                                   const MantidVec &rhsX,

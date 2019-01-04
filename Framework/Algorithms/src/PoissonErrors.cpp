@@ -37,12 +37,13 @@ std::string PoissonErrors::checkSizeCompatibility(
   }
 }
 
-void PoissonErrors::performBinaryOperation(const MantidVec &lhsX,
-                                           const MantidVec &lhsY,
-                                           const MantidVec &lhsE,
-                                           const MantidVec &rhsY,
-                                           const MantidVec &rhsE,
-                                           MantidVec &YOut, MantidVec &EOut) {
+void PoissonErrors::performBinaryOperation(
+    const HistogramData::HistogramX &lhsX,
+    const HistogramData::HistogramY &lhsY,
+    const HistogramData::HistogramE &lhsE,
+    const HistogramData::HistogramY &rhsY,
+    const HistogramData::HistogramE &rhsE, HistogramData::HistogramY &YOut,
+    HistogramData::HistogramE &EOut) {
   (void)lhsX; // Avoid compiler warning
   // Just copy over the lhs data
   YOut = lhsY;
@@ -56,11 +57,11 @@ void PoissonErrors::performBinaryOperation(const MantidVec &lhsX,
   }
 }
 
-void PoissonErrors::performBinaryOperation(const MantidVec &lhsX,
-                                           const MantidVec &lhsY,
-                                           const MantidVec &lhsE,
-                                           const double rhsY, const double rhsE,
-                                           MantidVec &YOut, MantidVec &EOut) {
+void PoissonErrors::performBinaryOperation(
+    const HistogramData::HistogramX &lhsX,
+    const HistogramData::HistogramY &lhsY,
+    const HistogramData::HistogramE &lhsE, const double rhsY, const double rhsE,
+    HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   (void)lhsE;
   (void)lhsX; // Avoid compiler warning
 

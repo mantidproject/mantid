@@ -32,12 +32,13 @@ void Divide::exec() {
   BinaryOperation::exec();
 }
 
-void Divide::performBinaryOperation(const MantidVec &lhsX,
-                                    const MantidVec &lhsY,
-                                    const MantidVec &lhsE,
-                                    const MantidVec &rhsY,
-                                    const MantidVec &rhsE, MantidVec &YOut,
-                                    MantidVec &EOut) {
+void Divide::performBinaryOperation(const HistogramData::HistogramX &lhsX,
+                                    const HistogramData::HistogramY &lhsY,
+                                    const HistogramData::HistogramE &lhsE,
+                                    const HistogramData::HistogramY &rhsY,
+                                    const HistogramData::HistogramE &rhsE,
+                                    HistogramData::HistogramY &YOut,
+                                    HistogramData::HistogramE &EOut) {
   (void)lhsX; // Avoid compiler warning
 
   const int bins = static_cast<int>(lhsE.size());
@@ -64,11 +65,12 @@ void Divide::performBinaryOperation(const MantidVec &lhsX,
   }
 }
 
-void Divide::performBinaryOperation(const MantidVec &lhsX,
-                                    const MantidVec &lhsY,
-                                    const MantidVec &lhsE, const double rhsY,
-                                    const double rhsE, MantidVec &YOut,
-                                    MantidVec &EOut) {
+void Divide::performBinaryOperation(const HistogramData::HistogramX &lhsX,
+                                    const HistogramData::HistogramY &lhsY,
+                                    const HistogramData::HistogramE &lhsE,
+                                    const double rhsY, const double rhsE,
+                                    HistogramData::HistogramY &YOut,
+                                    HistogramData::HistogramE &EOut) {
   (void)lhsX; // Avoid compiler warning
 
   if (rhsY == 0 && m_warnOnZeroDivide)

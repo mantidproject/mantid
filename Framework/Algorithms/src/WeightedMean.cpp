@@ -49,12 +49,13 @@ std::string WeightedMean::checkSizeCompatibility(
   }
 }
 
-void WeightedMean::performBinaryOperation(const MantidVec &lhsX,
-                                          const MantidVec &lhsY,
-                                          const MantidVec &lhsE,
-                                          const MantidVec &rhsY,
-                                          const MantidVec &rhsE,
-                                          MantidVec &YOut, MantidVec &EOut) {
+void WeightedMean::performBinaryOperation(const HistogramData::HistogramX &lhsX,
+                                          const HistogramData::HistogramY &lhsY,
+                                          const HistogramData::HistogramE &lhsE,
+                                          const HistogramData::HistogramY &rhsY,
+                                          const HistogramData::HistogramE &rhsE,
+                                          HistogramData::HistogramY &YOut,
+                                          HistogramData::HistogramE &EOut) {
   (void)lhsX; // Avoid compiler warning
   const size_t bins = lhsY.size();
   for (size_t j = 0; j < bins; ++j) {
@@ -78,11 +79,12 @@ void WeightedMean::performBinaryOperation(const MantidVec &lhsX,
   }
 }
 
-void WeightedMean::performBinaryOperation(const MantidVec &lhsX,
-                                          const MantidVec &lhsY,
-                                          const MantidVec &lhsE,
+void WeightedMean::performBinaryOperation(const HistogramData::HistogramX &lhsX,
+                                          const HistogramData::HistogramY &lhsY,
+                                          const HistogramData::HistogramE &lhsE,
                                           const double rhsY, const double rhsE,
-                                          MantidVec &YOut, MantidVec &EOut) {
+                                          HistogramData::HistogramY &YOut,
+                                          HistogramData::HistogramE &EOut) {
   UNUSED_ARG(lhsX);
   assert(lhsX.size() == 1);
   // If we get here we've got two single column workspaces so it's easy.
