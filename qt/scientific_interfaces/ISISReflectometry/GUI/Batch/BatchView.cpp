@@ -63,11 +63,11 @@ BatchAlgorithmRunner &BatchView::batchAlgorithmRunner() {
 }
 
 void BatchView::executeBatchAlgorithmRunner() {
-  connect(&m_batchAlgoRunner, SIGNAL(batchComplete), this,
+  connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(onBatchComplete(bool)));
-  connect(&m_batchAlgoRunner, SIGNAL(algorithmComplete), this,
+  connect(&m_batchAlgoRunner, SIGNAL(algorithmComplete()), this,
           SLOT(onAlgorithmComplete()));
-  connect(&m_batchAlgoRunner, SIGNAL(algorithmError), this,
+  connect(&m_batchAlgoRunner, SIGNAL(algorithmError(std::string const &)), this,
           SLOT(onAlgorithmError(std::string const &)));
   m_batchAlgoRunner.executeBatchAsync();
 }
