@@ -38,7 +38,7 @@ Archive Searching
 SNS / ONCat
 ###########
 
-- SNS file searching has been moved to `ONCAT <https://oncat.ornl.gov/>`_
+- SNS file searching has been moved to `ONCAT <https://oncat.ornl.gov/>`_. Due to auto-updating of the ``Facilities.xml``, this was done by directing ``SNSDataSearch`` and ``ORNLDataSearch`` to both use ONCAT.
 - For HFIR instruments that write out raw files with run numbers, we have enabled functionality that allows for the searching of file locations by making calls to ONCat.  To use this, make sure that the "Search Data Archive" option is checked in your "Manage User Directories" settings.  The ``FileFinder`` and algorithms such as :ref:`Load <algm-Load>`  will then accept inputs such as "``HB2C_143210``".
 
 ISIS / ICat
@@ -85,6 +85,7 @@ Improvements
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` can now save and load a ``MaskWorkspace``.
 - :ref:`FitPeaks <algm-FitPeaks>` can output parameters' uncertainty (fitting error) in an optional workspace.
 - The documentation in :ref:`EventFiltering` and :ref:`FilterEvents <algm-FilterEvents>` have been extensively rewritten to aid in understanding what the code does.
+- All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``).
 
 Bugfixes
 ########
