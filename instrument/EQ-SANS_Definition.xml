@@ -36,7 +36,11 @@
     </component>
   </type>
   <component type="detector1" idlist="detector1">
-    <location/>
+    <location name="detector1">
+       <parameter name="z">
+         <logfile eq="0.0+0.001*value" id="detectorZ"/>
+       </parameter>
+    </location>
   </component>
   <type name="detector1">
     <component type="bank1_tube1">
