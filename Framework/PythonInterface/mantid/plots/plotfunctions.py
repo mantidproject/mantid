@@ -15,6 +15,7 @@ import mantid.kernel
 import mantid.api
 from mantid.plots.helperfunctions import *
 import matplotlib
+import matplotlib.collections as mcoll
 import matplotlib.colors
 import matplotlib.dates as mdates
 import matplotlib.image as mimage
@@ -636,3 +637,28 @@ def tricontourf(axes, workspace, *args, **kwargs):
     y = y[condition]
     z = z[condition]
     return axes.tricontourf(x, y, z, *args, **kwargs)
+
+
+def update_colorplot_datalimits(axes, mappable):
+    """
+    For an colorplot (imshow, pcolor*) plots update the data limits on the axes
+    to circumvent bugs in matplotlib
+    :param mappable: A new mappable for this axes
+    """
+    # ax.relim in matplotlib < 2.2 doesn't take into account of images
+    # and it doesn't support collections at all as of verison 3 so we'll take
+    # over
+    if isinstance(mappable, mimage.AxesImage):
+        xmin, xmax, ymin, ymax = mappable.get_extent()
+    elif isinstance(mappable, mcoll.QuadMesh):
+        # coordinates are vertices of the grid
+        coords = mappable._coordinates
+        xmin, ymin = coords[0][0]
+        xmax, ymax = coords[-1][-1]
+    elif isinstance(mappable, mcoll.PolyCollection):
+        xmin, ymin = mappable._paths[0].get_extents().min
+        xmax, ymax = mappable._paths[-1].get_extents().max
+    else:
+        raise ValueError("Unknown mappable type '{}'".format(type(mappable)))
+    axes.update_datalim(((xmin, ymin), (xmax, ymax)))
+    axes.autoscale()

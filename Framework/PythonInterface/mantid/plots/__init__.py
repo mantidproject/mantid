@@ -20,8 +20,8 @@ from collections import Iterable
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
-from matplotlib.axes import Axes
 from matplotlib import cbook
+from matplotlib.axes import Axes
 from matplotlib.container import Container
 from matplotlib.projections import register_projection
 
@@ -122,7 +122,7 @@ class MantidAxes(Axes):
                 artist = artist[0]
             if replace_handler is None:
                 def replace_handler(_, __):
-                    pass
+                    logger.warning("Updating data on this plot type is not supported")
             artist_info.append((artist, replace_handler))
 
         return artist
@@ -212,7 +212,7 @@ class MantidAxes(Axes):
                 x, y, _ = plotfunctions._plot_impl(self, workspace, kwargs)
                 line2d.set_data(x, y)
                 self.relim()
-                self.autoscale_view()
+                self.autoscale()
 
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.plot(self, *args, **kwargs),
@@ -278,7 +278,7 @@ class MantidAxes(Axes):
 
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
-                self.autoscale_view()
+                self.autoscale()
 
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.errorbar(self, *args, **kwargs),
@@ -307,8 +307,13 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
+
+            def _update_data(artist, workspace):
+                self._update_colorplot_data(plotfunctions.pcolor,
+                                            artist, workspace, **kwargs)
             return self.track_workspace_artist(args[0].name(),
-                                               plotfunctions.pcolor(self, *args, **kwargs))
+                                               plotfunctions.pcolor(self, *args, **kwargs),
+                                               _update_data)
         else:
             return Axes.pcolor(self, *args, **kwargs)
 
@@ -333,7 +338,14 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0].name(), plotfunctions.pcolorfast(self, *args, **kwargs))
+
+            def _update_data(artist, workspace):
+                self._update_colorplot_data(plotfunctions.pcolorfast,
+                                            artist, workspace, **kwargs)
+
+            return self.track_workspace_artist(args[0].name(),
+                                               plotfunctions.pcolorfast(self, *args, **kwargs),
+                                               _update_data)
         else:
             return Axes.pcolorfast(self, *args, **kwargs)
 
@@ -358,7 +370,23 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0].name(), plotfunctions.pcolormesh(self, *args, **kwargs))
+
+            def _update_data(artist, workspace):
+                self._update_colorplot_data(plotfunctions.pcolormesh,
+                                            artist, workspace, **kwargs)
+
+            # def _update_data(artist, workspace):
+            #     artist.remove()
+            #     if hasattr(artist, 'colorbar_cid'):
+            #         artist.callbacksSM.disconnect(artist.colorbar_cid)
+            #     mesh = plotfunctions.pcolormesh(self, workspace, **kwargs)
+            #     plotfunctions.update_colorplot_datalimits(self, mesh)
+            #     if artist.colorbar is not None:
+            #         self._attach_colorbar(mesh, artist.colorbar)
+
+            return self.track_workspace_artist(args[0].name(),
+                                               plotfunctions.pcolormesh(self, *args, **kwargs),
+                                               _update_data)
         else:
             return Axes.pcolormesh(self, *args, **kwargs)
 
@@ -385,17 +413,23 @@ class MantidAxes(Axes):
             logger.debug('using plotfunctions')
 
             def _update_data(artist, workspace):
-                artist.remove()
-                if hasattr(artist, 'colorbar_cid'):
-                    artist.callbacksSM.disconnect(artist.colorbar_cid)
-                im = plotfunctions.imshow(self, workspace, **kwargs)
-                self._update_colorplot_limits(im, artist.colorbar)
+                self._update_colorplot_data(plotfunctions.imshow,
+                                            artist, workspace, **kwargs)
 
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.imshow(self, *args, **kwargs),
                                                _update_data)
         else:
             return Axes.imshow(self, *args, **kwargs)
+
+    def _update_colorplot_data(self, colorfunc, artist, workspace, **kwargs):
+        artist.remove()
+        if hasattr(artist, 'colorbar_cid'):
+            artist.callbacksSM.disconnect(artist.colorbar_cid)
+        im = colorfunc(self, workspace, **kwargs)
+        plotfunctions.update_colorplot_datalimits(self, im)
+        if artist.colorbar is not None:
+            self._attach_colorbar(im, artist.colorbar)
 
     def contour(self, *args, **kwargs):
         """
@@ -525,27 +559,18 @@ class MantidAxes(Axes):
 
     # ------------------ Private api --------------------------------------------------------
 
-    def _update_colorplot_limits(self, mappable, colorbar):
+    def _attach_colorbar(self, mappable, colorbar):
         """
-        For an image or patch plot update current axes to display it correctly
-        :param mappable: A new mappable for this axes
-        :param colorbar: An optional existing colorbar instance
+        Attach the given colorbar to the mappable and update the clim values
+        :param mappable: An instance of a mappable
+        :param colorbar: An instance of a colorbar
         """
-        # ax.relim in matplotlib < 2.2 doesn't take into account of images
-        if hasattr(self, '_update_image_limits'):
-            self.relim()
-        else:
-            xmin, xmax, ymin, ymax = mappable.get_extent()
-            self.update_datalim(((xmin, ymin), (xmax, ymax)))
-        self.autoscale_view()
-        # swap the colorbar
-        if colorbar is not None:
-            cb = colorbar
-            cb.mappable = mappable
-            cb.set_clim(mappable.get_clim())
-            mappable.colorbar = cb
-            mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
-            cb.update_normal(mappable)
+        cb = colorbar
+        cb.mappable = mappable
+        cb.set_clim(mappable.get_clim())
+        mappable.colorbar = cb
+        mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
+        cb.update_normal(mappable)
 
 
 class MantidAxes3D(Axes3D):
