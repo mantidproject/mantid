@@ -95,13 +95,9 @@ void MaxMin::exec() {
 
   // Create the 1D workspace for the output
   MatrixWorkspace_sptr outputWorkspace;
-  if (localworkspace->id() == "EventWorkspace") {
-    outputWorkspace = create<DataObjects::Workspace2D>(
-        *localworkspace, MaxSpec - MinSpec + 1, BinEdges(2));
-  } else {
-    outputWorkspace = create<HistoWorkspace>(
-        *localworkspace, MaxSpec - MinSpec + 1, BinEdges(2));
-  }
+
+  outputWorkspace = create<HistoWorkspace>(*localworkspace,
+                                           MaxSpec - MinSpec + 1, BinEdges(2));
 
   Progress progress(this, 0.0, 1.0, (MaxSpec - MinSpec + 1));
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))

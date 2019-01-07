@@ -384,7 +384,7 @@ void GetAllEi::exec() {
   std::sort(peaks.begin(), peaks.end());
 
   // finalize output
-  API::MatrixWorkspace_sptr result_ws = create<Workspace2D>(1, Points(nPeaks));
+  auto result_ws = create<Workspace2D>(1, Points(nPeaks));
 
   HistogramX peaks_positions(peaks.size());
   std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(),
@@ -399,7 +399,7 @@ void GetAllEi::exec() {
 
   result_ws->setPoints(0, peaks_positions);
 
-  setProperty("OutputWorkspace", result_ws);
+  setProperty("OutputWorkspace", std::move(result_ws));
 }
 /**Auxiliary method to print guess chopper energies in debug mode
  *

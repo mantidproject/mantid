@@ -115,11 +115,8 @@ void FFT::exec() {
     addPositiveOnly = true;
   }
 
-  if (m_inWS->id() == "EventWorkspace") {
-    m_outWS = create<Workspace2D>(*m_inWS, nOut, Points(nPoints));
-  } else {
-    m_outWS = create<HistoWorkspace>(*m_inWS, nOut, Points(nPoints));
-  }
+  m_outWS = create<HistoWorkspace>(*m_inWS, nOut, Points(nPoints));
+
   for (int i = 0; i < nOut; ++i)
     m_outWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
 
