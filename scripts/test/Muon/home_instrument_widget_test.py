@@ -15,7 +15,6 @@ import unittest
 from PyQt4 import QtGui
 from Muon.GUI.Common.observer_pattern import Observer
 
-
 if sys.version_info.major < 2:
     from unittest import mock
 else:
@@ -68,7 +67,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.view.set_instrument('CHRONUS')
 
-        observer.update.assert_called_once_with(self.presenter.instrumentNotifier,'CHRONUS')
+        observer.update.assert_called_once_with(self.presenter.instrumentNotifier, 'CHRONUS')
 
     def test_that_changeing_time_zero_updates_model(self):
         time_zero = 1.23456
@@ -134,7 +133,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.model._data.loaded_data['Rebin'], '1,5,8,150')
 
-    #TODO Need to add validation to rebin input strings once I've worked out what they should be
+    # TODO Need to add validation to rebin input strings once I've worked out what they should be
 
     def test_that_on_dead_time_unselected_deadtime_model_set_to_none(self):
         self.view.deadtime_selector.setCurrentIndex(1)
@@ -148,12 +147,99 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.deadtime_label_3.text(), "No loaded dead time")
 
-    # def test_that_on_deadtime_data_selected_updates_with_loaded_data(self):
-    #     self.presenter._model.get_dead_time_table_from_data = mock.MagicMock(return_value={'dead-time' : 'fake deadtime table'})
-    #
-    #     self.view.deadtime_selector.setCurrentIndex(1)
-    #
-    #     self.assertEqual(self.view.deadtime_label_3.text(), self.presenter.dead_time_from_data_text(['fake deadtime table']))
+    def test_that_on_deadtime_data_selected_updates_with_loaded_data(self):
+        dead_time_data = mock.MagicMock()
+        dead_time_data.toDict.return_value = {'dead-time': [0.001, 0.002, 0.003]}
+        self.presenter._model.get_dead_time_table_from_data = mock.MagicMock(return_value=dead_time_data)
+
+        self.view.deadtime_selector.setCurrentIndex(1)
+
+        self.assertEqual(self.view.deadtime_label_3.text(), 'From 0.001 to 0.003 (ave. 0.002)')
+
+    @mock.patch(
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.get_table_workspace_names_from_ADS')
+    def test_that_selecting_from_table_workspace_deadtime_option_enables_table_workspace_combo_box(self,
+                                                                                                   get_table_names_mock):
+        get_table_names_mock.return_value = ['table_1', 'table_2', 'table_3']
+        self.assertTrue(self.view.deadtime_file_selector.isHidden())
+
+        self.view.deadtime_selector.setCurrentIndex(2)
+
+        self.assertEqual(self.view.deadtime_label_3.text(), "From 0.000 to 0.000 (ave. 0.000)")
+        self.assertFalse(self.view.deadtime_file_selector.isHidden())
+        self.assertEqual(self.view.deadtime_file_selector.count(), 4)
+        self.assertEqual(self.view.deadtime_file_selector.itemText(0), 'None')
+        self.assertEqual(self.view.deadtime_file_selector.itemText(1), 'table_1')
+        self.assertEqual(self.view.deadtime_file_selector.itemText(2), 'table_2')
+        self.assertEqual(self.view.deadtime_file_selector.itemText(3), 'table_3')
+
+    def test_that_returning_to_None_options_hides_table_workspace_selector(self):
+        self.view.deadtime_selector.setCurrentIndex(2)
+        self.view.deadtime_selector.setCurrentIndex(0)
+
+        self.assertEqual(self.view.deadtime_label_3.text(), "From 0.000 to 0.000 (ave. 0.000)")
+        self.assertTrue(self.view.deadtime_file_selector.isHidden())
+
+    def test_browse_button_displayed_when_from_other_file_selected(self):
+        self.assertTrue(self.view.deadtime_browse_button.isHidden())
+
+        self.view.deadtime_selector.setCurrentIndex(3)
+
+        self.assertFalse(self.view.deadtime_browse_button.isHidden())
+
+    @mock.patch(
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
+    def test_browse_clicked_displays_warning_popup_if_file_does_not_contain_table(self, load_deadtime_mock):
+        self.view.show_file_browser_and_return_selection = mock.MagicMock()
+        load_deadtime_mock.return_value = ''
+        self.view.deadtime_selector.setCurrentIndex(3)
+
+        self.view.deadtime_browse_button.clicked.emit(True)
+
+        self.view.show_file_browser_and_return_selection.assert_called_once_with('Files (*.nxs)', [''],
+                                                                                 multiple_files=False)
+        self.view.warning_popup.assert_called_once_with("File does not appear to contain dead time data.")
+
+    @mock.patch(
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
+    def test_browse_clicked_does_nothing_if_no_file_selected(self, load_deadtime_mock):
+        self.view.show_file_browser_and_return_selection = mock.MagicMock(return_value=[''])
+        self.view.deadtime_selector.setCurrentIndex(3)
+
+        self.view.deadtime_browse_button.clicked.emit(True)
+
+        load_deadtime_mock.assert_not_called()
+        self.view.warning_popup.assert_not_called()
+
+    @mock.patch(
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
+    def test_browse_clicked_fails_if_table_not_loaded_into_ADS(self, load_deadtime_mock):
+        self.view.show_file_browser_and_return_selection = mock.MagicMock(return_value=['filename'])
+        load_deadtime_mock.return_value = 'dead_time_table_name'
+        self.view.deadtime_selector.setCurrentIndex(3)
+
+        self.view.deadtime_browse_button.clicked.emit(True)
+
+        self.assertEqual(self.view.deadtime_selector.currentIndex(), 2)
+        self.view.warning_popup.assert_called_once_with("Dead time table cannot be loaded")
+
+    @mock.patch(
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.load_dead_time_from_filename')
+    @mock.patch(
+        'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.get_table_workspace_names_from_ADS')
+    def test_browse_clicked_suceeds_if_table_in_ADS(self, get_table_workspace_mock, load_deadtime_mock):
+        self.view.show_file_browser_and_return_selection = mock.MagicMock(return_value=['filename'])
+        get_table_workspace_mock.return_value = ['table_1', 'dead_time_table_name']
+        load_deadtime_mock.return_value = 'dead_time_table_name'
+        handle_table_changed_mock = mock.MagicMock()
+        self.view.on_dead_time_file_option_changed(handle_table_changed_mock)
+
+        self.view.deadtime_browse_button.clicked.emit(True)
+
+        self.assertEqual(self.view.deadtime_selector.currentIndex(), 2)
+        self.view.warning_popup.assert_not_called()
+        self.assertEqual(self.view.deadtime_file_selector.currentText(), 'dead_time_table_name')
+        self.assertEqual(handle_table_changed_mock.call_count, 3)
 
 
 if __name__ == '__main__':

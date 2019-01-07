@@ -48,6 +48,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self.handle_loaded_first_good_data_checkState_change()
         self.handle_loaded_time_zero_checkState_change()
         self._view.set_instrument(self._model._data.instrument)
+        self._view.on_dead_time_combo_changed(self._view.deadtime_selector.currentIndex())
 
     def clear_view(self):
         self._view.set_time_zero(0.0)
@@ -133,6 +134,10 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         """
         filename = self._view.show_file_browser_and_return_selection(
             filter_for_extensions(['nxs']), [''], multiple_files=False)[0]
+
+        if filename == '':
+            return
+
         name = load_utils.load_dead_time_from_filename(filename)
         if name == "":
             self._view.warning_popup("File does not appear to contain dead time data.")
