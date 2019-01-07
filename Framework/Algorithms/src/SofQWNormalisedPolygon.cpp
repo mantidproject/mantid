@@ -521,21 +521,6 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
                     << " degrees\n";
     }
   }
-  // TODO remove this debug output table from production release.
-  auto table = WorkspaceFactory::Instance().createTable("TableWorkspace");
-  table->addColumn("double", "Two theta");
-  table->getColumn(0)->setPlotType(1);
-  table->addColumn("double", "Lower two theta");
-  table->getColumn(1)->setPlotType(2);
-  table->addColumn("double", "Upper two theta");
-  table->getColumn(2)->setPlotType(2);
-  table->setRowCount(m_twoThetaLowers.size());
-  for (size_t i = 0; i < m_twoThetaLowers.size(); ++i) {
-    table->Double(i, 0) = spectrumInfo.twoTheta(i);
-    table->Double(i, 1) = m_twoThetaLowers[i] - spectrumInfo.twoTheta(i);
-    table->Double(i, 2) = m_twoThetaUppers[i] - spectrumInfo.twoTheta(i);
-  }
-  AnalysisDataService::Instance().addOrReplace("out_width_table", table);
 }
 
 /**
