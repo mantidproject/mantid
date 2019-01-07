@@ -57,7 +57,7 @@ void IdentifyNoisyDetectors::exec() {
 
   // Create the output workspace a single value for each spectra.
   MatrixWorkspace_sptr outputWs;
-  outputWs = create<MatrixWorkspace>(*inputWS, nHist, Points(1));
+  outputWs = create<MatrixWorkspace>(*inputWS, Points(1));
 
   MatrixWorkspace_sptr stdDevWs;
   stdDevWs = create<MatrixWorkspace>(*outputWs);

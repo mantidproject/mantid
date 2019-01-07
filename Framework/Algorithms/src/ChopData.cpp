@@ -135,7 +135,7 @@ void ChopData::exec() {
     size_t nbins = indexHigh - indexLow;
 
     MatrixWorkspace_sptr workspace =
-        create<MatrixWorkspace>(*inputWS, nHist, BinEdges(nbins + 1));
+        create<MatrixWorkspace>(*inputWS, BinEdges(nbins + 1));
 
     // Copy over X, Y and E data
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *workspace))

@@ -428,7 +428,7 @@ void ConjoinXRuns::exec() {
   // now get the size of the output
   size_t numSpec = first->getNumberHistograms();
 
-  m_outWS = create<MatrixWorkspace>(*first, numSpec, Points(outBlockSize));
+  m_outWS = create<MatrixWorkspace>(*first, Points(outBlockSize));
 
   // copy over the merged sample logs from the temp
   m_outWS->mutableRun() = temp->run();

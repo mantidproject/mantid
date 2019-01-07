@@ -735,7 +735,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     MantidVec::difference_type bins = X0.cend() - start;
     MantidVec::difference_type first = start - X0.cbegin();
 
-    result = create<MatrixWorkspace>(*workspace, numSpec, BinEdges(bins));
+    result = create<MatrixWorkspace>(*workspace, BinEdges(bins));
 
     for (size_t i = 0; i < numSpec; ++i) {
       auto &X = workspace->x(i);

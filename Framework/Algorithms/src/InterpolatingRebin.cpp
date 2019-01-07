@@ -79,7 +79,7 @@ void InterpolatingRebin::exec() {
   const int nHists = static_cast<int>(inputW->getNumberHistograms());
   // make output Workspace the same type as the input but with the new axes
   MatrixWorkspace_sptr outputW =
-      create<MatrixWorkspace>(*inputW, nHists, BinEdges(ntcnew));
+      create<MatrixWorkspace>(*inputW, BinEdges(ntcnew));
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
     outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));

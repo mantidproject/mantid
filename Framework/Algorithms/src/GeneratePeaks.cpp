@@ -706,12 +706,11 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
           << "Using input worksapce to generate output workspace!\n";
 
     HistogramBuilder builder;
-    builder.setX(std::move(inputWS->x(0).size()));
-    builder.setY(std::move(inputWS->y(0).size()));
+    builder.setX(inputWS->x(0).size());
+    builder.setY(inputWS->y(0).size());
 
     builder.setDistribution(inputWS->isDistribution());
-    outputWS = create<MatrixWorkspace>(*inputWS, inputWS->getNumberHistograms(),
-                                       builder.build());
+    outputWS = create<MatrixWorkspace>(*inputWS, builder.build());
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
     for (const auto &iws : m_spectraSet) {
