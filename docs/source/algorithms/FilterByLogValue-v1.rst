@@ -38,6 +38,11 @@ will be included also. If a log has a single point in time, then that
 log value is assumed to be constant for all time and if it falls within
 the range, then all events will be kept.
 
+.. warning::
+
+   :ref:`FilterByLogValue <algm-FilterByLogValue>` is not suitable for
+   fast log filtering.
+
 PulseFilter (e.g. for Veto Pulses)
 ##################################
 
@@ -63,7 +68,7 @@ rejected. For example, this call will filter out veto pulses:
 .. testsetup:: VetoPulseTime
 
    ws=CreateSampleWorkspace("Event")
-   AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:00:00", Value=1) 
+   AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:00:00", Value=1)
    AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:10:00", Value=0)
    AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:20:00", Value=1)
    AddTimeSeriesLog(ws, Name="veto_pulse_time", Time="2010-01-01T00:30:00", Value=0)
@@ -77,20 +82,20 @@ rejected. For example, this call will filter out veto pulses:
 Comparing with other event filtering algorithms
 ###############################################
 
-Wiki page :ref:`EventFiltering` has a detailed
-introduction on event filtering in MantidPlot.
+The :ref:`EventFiltering` page has a detailed introduction on event
+filtering in mantid.
 
 
 Usage
 -----
 
-**Example - Filtering by a simple time series Log**  
+**Example - Filtering by a simple time series Log**
 
 .. testcode:: FilterByLogValue
 
    ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
 
-   AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100) 
+   AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:20:00", Value=100)
    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:30:00", Value=100)

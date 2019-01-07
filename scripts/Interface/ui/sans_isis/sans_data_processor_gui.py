@@ -48,6 +48,7 @@ from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.work_handler import WorkHandler
+from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
@@ -166,6 +167,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_save_other(self):
+            pass
+
+        @abstractmethod
         def on_compatibility_unchecked(self):
             pass
 
@@ -211,6 +216,7 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
         self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
+        self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
 
         # Attach validators
         self._attach_validators()
@@ -498,6 +504,9 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_insert_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_insert_row())
+
+    def _on_save_other_button_pressed(self):
+        self._call_settings_listeners(lambda listener: listener.on_save_other())
 
     def _on_compatibility_unchecked(self):
         self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
@@ -2050,3 +2059,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.data_processor_table.hideColumn(15)
         self.data_processor_table.hideColumn(16)
         self.data_processor_table.hideColumn(17)
+
+    def closeEvent(self, event):
+        for child in self.children():
+            if isinstance(child, SANSSaveOtherDialog):
+                child.done(0)
+        super(QtGui.QMainWindow, self).closeEvent(event)

@@ -729,14 +729,17 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
     const DetectorInfo &addeeDetInfo, const DetectorInfo &newOutDetInfo) {
   std::vector<SpectrumDefinition> newAddeeSpecDefs(addeeSpecDefs.size());
 
+  auto addeeScanIntervals = addeeDetInfo.scanIntervals();
+  auto newOutScanIntervals = newOutDetInfo.scanIntervals();
+
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
     for (auto &index : addeeSpecDefs[i]) {
       SpectrumDefinition newSpecDef;
       for (size_t time_index = 0; time_index < newOutDetInfo.scanCount();
            time_index++) {
-        if (addeeDetInfo.scanIntervals()[index.second] ==
-            newOutDetInfo.scanIntervals()[time_index]) {
+        if (addeeScanIntervals[index.second] ==
+            newOutScanIntervals[time_index]) {
           newSpecDef.add(index.first, time_index);
         }
       }

@@ -69,6 +69,12 @@ endif ()
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
 
+    mantidqt/project/test/test_project.py
+    mantidqt/project/test/test_projectloader.py
+    mantidqt/project/test/test_projectsaver.py
+    mantidqt/project/test/test_workspaceloader.py
+    mantidqt/project/test/test_workspacesaver.py
+
     mantidqt/utils/test/test_async.py
     mantidqt/utils/test/test_modal_tester.py
     mantidqt/utils/test/test_qt_utils.py
@@ -84,6 +90,7 @@ endif ()
 
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
+    mantidqt/widgets/test/test_fitpropertybrowser.py
 
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py

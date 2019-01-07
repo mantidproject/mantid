@@ -28,14 +28,13 @@ void SmoothData::init() {
       make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                        Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
-  std::vector<int> npts0;
-  npts0.push_back(3);
+  std::vector<int> npts0{3};
   auto min = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("NPoints", npts0, min,
-                                              Direction::Input),
+      Kernel::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0),
+                                              std::move(min), Direction::Input),
       "The number of points to average over (minimum 3). If an even number is\n"
       "given, it will be incremented by 1 to make it odd (default value 3)");
   declareProperty(

@@ -25,8 +25,9 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
-    : WorkspaceTreeWidget(new MantidTreeModel(), parent),
+WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
+                                                     QWidget *parent)
+    : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent),
       m_plotSpectrum(new QAction("spectrum...", this)),
       m_overplotSpectrum(new QAction("overplot spectrum...", this)),
       m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)),
@@ -56,6 +57,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
   connect(m_showInstrument, SIGNAL(triggered()), this,
           SLOT(onShowInstrumentClicked()));
   connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
+  connect(m_tree, SIGNAL(itemSelectionChanged()), this,
+          SIGNAL(treeSelectionChanged()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}

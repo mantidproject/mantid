@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import numpy
+from skimage.transform import resize
 import mantid.kernel
 import mantid.api
 from mantid.plots.helperfunctions import *
@@ -374,9 +375,73 @@ def pcolormesh(axes, workspace, *args, **kwargs):
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
-
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
+
+def _skimage_version():
+    import skimage
+    from distutils.version import LooseVersion
+    return LooseVersion(skimage.__version__) >= LooseVersion('1.4.0')
+
+
+class ScalingAxesImage(mimage.AxesImage):
+    def __init__(self, ax,
+                 cmap=None,
+                 norm=None,
+                 interpolation=None,
+                 origin=None,
+                 extent=None,
+                 filternorm=1,
+                 filterrad=4.0,
+                 resample=False,
+                 **kwargs):
+        self.dx = None
+        self.dy = None
+        self.unsampled_data = None
+        super(mimage.AxesImage, self).__init__(
+            ax,
+            cmap=cmap,
+            norm=norm,
+            interpolation=interpolation,
+            origin=origin,
+            extent=extent,
+            filternorm=filternorm,
+            filterrad=filterrad,
+            resample=resample,
+            **kwargs)
+
+    def set_data(self, A):
+        dims = A.shape
+        max_dims = (3840,2160) # 4K resolution
+        if dims[0] > max_dims[0] or dims[1] > max_dims[1]:
+            new_dims = numpy.minimum(dims, max_dims)
+            if(_skimage_version()):
+                self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
+            else:
+                self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan)
+        else:
+            self.unsampled_data = A
+        super(mimage.AxesImage, self).set_data(A)
+
+    def draw(self, renderer):
+        ax = self.axes
+        # might not be calculated before first call
+        we = ax.get_window_extent()
+        dx = round(we.x1 - we.x0)
+        dy = round(we.y1 - we.y0)
+        #decide if we should downsample
+        dims = self.unsampled_data.shape
+        if dx != self.dx or dy != self.dy:
+            if dims[0] > dx or dims[1] > dy:
+                new_dims = numpy.minimum(dims,[dx,dy])
+                if(_skimage_version()):
+                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
+                else:
+                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan)
+                self.dx = dx
+                self.dy = dy
+                super(mimage.AxesImage, self).set_data(sampled_data)
+        return super(ScalingAxesImage,self).draw(renderer)
 
 def _imshow(axes, z, cmap=None, norm=None, aspect=None,
             interpolation=None, alpha=None, vmin=None, vmax=None,
@@ -393,10 +458,9 @@ def _imshow(axes, z, cmap=None, norm=None, aspect=None,
     if aspect is None:
         aspect = matplotlib.rcParams['image.aspect']
     axes.set_aspect(aspect)
-    im = mimage.AxesImage(axes, cmap, norm, interpolation, origin, extent,
+    im = ScalingAxesImage(axes, cmap, norm, interpolation, origin, extent,
                           filternorm=filternorm, filterrad=filterrad,
                           resample=resample, **kwargs)
-
     im.set_data(z)
     im.set_alpha(alpha)
     if im.get_clip_path() is None:

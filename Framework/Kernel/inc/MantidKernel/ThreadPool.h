@@ -54,19 +54,19 @@ protected:
   size_t m_numThreads;
 
   /// The ThreadScheduler instance taking care of task scheduling
-  ThreadScheduler *m_scheduler;
+  std::unique_ptr<ThreadScheduler> m_scheduler;
 
   /// Vector with all the threads that are started
-  std::vector<Poco::Thread *> m_threads;
+  std::vector<std::unique_ptr<Poco::Thread>> m_threads;
 
   /// Vector of the POCO-required classes to actually run in a thread.
-  std::vector<ThreadPoolRunnable *> m_runnables;
+  std::vector<std::unique_ptr<ThreadPoolRunnable>> m_runnables;
 
   /// Have the threads started?
   bool m_started;
 
   /// Progress reporter
-  ProgressBase *m_prog;
+  std::unique_ptr<ProgressBase> m_prog;
 
 private:
   // prohibit default copy constructor as it does not work
