@@ -110,7 +110,7 @@ class MantidAxes(Axes):
         """
         Add the given workspace name to the list of workspaces
         displayed on this Axes instance
-        :param name: The name of the workspace
+        :param name: The name of the workspace. If empty then no tracking takes place
         :param artists: A single artist or list/tuple of length 1 containing the data for the workspace
         :param replace_handler: A function to call when the data is replaced to update
         the artist (optional)
@@ -123,7 +123,7 @@ class MantidAxes(Axes):
             if replace_handler is None:
                 def replace_handler(_, __):
                     logger.warning("Updating data on this plot type is not supported")
-            artist_info.append((artist, replace_handler))
+            artist_info.append([artist, replace_handler])
 
         return artist
 
@@ -174,6 +174,22 @@ class MantidAxes(Axes):
         if self.legend_:
             self.legend()
         return True
+
+    def _replace_tracking_info(self, name, artist_orig, artist_replaced):
+        """
+        Replace a tracked artist for the given workspace by a new one.
+        :param name: The name of the workspace
+        :param artist_orig: A reference to the original artist
+        :param artist_replaced: A reference to the new artist
+        :raises: A KeyError if the named workspace has not been tracked already
+        """
+        artist_info = self.tracked_workspaces[name]
+        artist_orig_idx = None
+        for index, (artist, _) in enumerate(artist_info):
+            if artist is artist_orig:
+                artist_orig_idx = index
+        if artist_orig_idx is not None:
+            artist_info[artist_orig_idx][0] = artist_replaced
 
     def is_empty(self):
         """
@@ -279,6 +295,7 @@ class MantidAxes(Axes):
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
                 self.autoscale()
+                self._replace_tracking_info(workspace.name(), container_orig, container_new)
 
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.errorbar(self, *args, **kwargs),
@@ -309,8 +326,8 @@ class MantidAxes(Axes):
             logger.debug('using plotfunctions')
 
             def _update_data(artist, workspace):
-                self._update_colorplot_data(plotfunctions.pcolor,
-                                            artist, workspace, **kwargs)
+                self._redraw_colorplot(plotfunctions.pcolor,
+                                       artist, workspace, **kwargs)
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.pcolor(self, *args, **kwargs),
                                                _update_data)
@@ -340,8 +357,8 @@ class MantidAxes(Axes):
             logger.debug('using plotfunctions')
 
             def _update_data(artist, workspace):
-                self._update_colorplot_data(plotfunctions.pcolorfast,
-                                            artist, workspace, **kwargs)
+                self._redraw_colorplot(plotfunctions.pcolorfast,
+                                       artist, workspace, **kwargs)
 
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.pcolorfast(self, *args, **kwargs),
@@ -372,18 +389,8 @@ class MantidAxes(Axes):
             logger.debug('using plotfunctions')
 
             def _update_data(artist, workspace):
-                self._update_colorplot_data(plotfunctions.pcolormesh,
-                                            artist, workspace, **kwargs)
-
-            # def _update_data(artist, workspace):
-            #     artist.remove()
-            #     if hasattr(artist, 'colorbar_cid'):
-            #         artist.callbacksSM.disconnect(artist.colorbar_cid)
-            #     mesh = plotfunctions.pcolormesh(self, workspace, **kwargs)
-            #     plotfunctions.update_colorplot_datalimits(self, mesh)
-            #     if artist.colorbar is not None:
-            #         self._attach_colorbar(mesh, artist.colorbar)
-
+                self._redraw_colorplot(plotfunctions.pcolormesh,
+                                       artist, workspace, **kwargs)
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.pcolormesh(self, *args, **kwargs),
                                                _update_data)
@@ -413,8 +420,8 @@ class MantidAxes(Axes):
             logger.debug('using plotfunctions')
 
             def _update_data(artist, workspace):
-                self._update_colorplot_data(plotfunctions.imshow,
-                                            artist, workspace, **kwargs)
+                self._redraw_colorplot(plotfunctions.imshow,
+                                       artist, workspace, **kwargs)
 
             return self.track_workspace_artist(args[0].name(),
                                                plotfunctions.imshow(self, *args, **kwargs),
@@ -422,14 +429,22 @@ class MantidAxes(Axes):
         else:
             return Axes.imshow(self, *args, **kwargs)
 
-    def _update_colorplot_data(self, colorfunc, artist, workspace, **kwargs):
-        artist.remove()
-        if hasattr(artist, 'colorbar_cid'):
-            artist.callbacksSM.disconnect(artist.colorbar_cid)
+    def _redraw_colorplot(self, colorfunc, artist_orig, workspace, **kwargs):
+        """
+        Redraw a pcolor* or imshow type plot bsaed on a new workspace
+        :param colorfunc: The Axes function to use to draw the new artist
+        :param artist_orig: A reference to the existing Artist object
+        :param workspace: A reference to the workspace object
+        :param kwargs: Any kwargs passed to the original call
+        """
+        artist_orig.remove()
+        if hasattr(artist_orig, 'colorbar_cid'):
+            artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
         im = colorfunc(self, workspace, **kwargs)
         plotfunctions.update_colorplot_datalimits(self, im)
-        if artist.colorbar is not None:
-            self._attach_colorbar(im, artist.colorbar)
+        if artist_orig.colorbar is not None:
+            self._attach_colorbar(im, artist_orig.colorbar)
+        self._replace_tracking_info(workspace.name(), artist_orig, im)
 
     def contour(self, *args, **kwargs):
         """
