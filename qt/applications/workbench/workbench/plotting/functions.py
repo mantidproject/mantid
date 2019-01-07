@@ -236,7 +236,7 @@ def pcolormesh(workspaces, fig=None):
             ws = workspaces[subplot_idx]
             ax.set_title(ws.name())
             if use_imshow(ws):
-                pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto')
+                pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
             else:
                 pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
             for lbl in ax.get_xticklabels():
