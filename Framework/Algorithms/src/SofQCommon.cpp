@@ -184,11 +184,6 @@ SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
       continue;
     }
     const auto twoTheta = spectrumInfo.twoTheta(i);
-    if (!(twoTheta > 0.)) {
-      throw std::invalid_argument("Could not compute Q binning range: a "
-                                  "detector at zero scattering angle would "
-                                  "result in an infinite Q range.");
-    }
     minTwoTheta = std::min(minTwoTheta, twoTheta);
     maxTwoTheta = std::max(maxTwoTheta, twoTheta);
   }
@@ -227,11 +222,6 @@ SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
       continue;
     }
     const auto twoTheta = detectorInfo.twoTheta(i);
-    if (!(twoTheta > 0.)) {
-      throw std::invalid_argument("Cannot compute Q binning range: a detector "
-                                  "at zero scattering angle would result in an "
-                                  "infinite Q range.");
-    }
     const auto &det = detectorInfo.detector(i);
     const auto Q1 = indirectQ(minE, twoTheta, &det);
     const auto Q2 = indirectQ(maxE, twoTheta, &det);
