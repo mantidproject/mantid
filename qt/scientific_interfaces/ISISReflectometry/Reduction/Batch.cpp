@@ -22,5 +22,7 @@ RunsTable const &Batch::runsTable() const { return m_runsTable; }
 RunsTable &Batch::runsTable() { return m_runsTable; }
 
 Slicing const &Batch::slicing() const { return m_slicing; }
+
+bool Batch::hasSelection() const { return m_runsTable.hasSelection(); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -9,9 +9,9 @@
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/Group.h"
+#include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 #include "RegexRowFilter.h"
-#include "RowLocation.h"
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>

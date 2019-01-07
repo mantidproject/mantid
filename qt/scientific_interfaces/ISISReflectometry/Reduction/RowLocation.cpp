@@ -59,5 +59,14 @@ bool isRowLocation(MantidWidgets::Batch::RowLocation const &location) {
 int rowOf(MantidQt::MantidWidgets::Batch::RowLocation const &rowLocation) {
   return rowLocation.path()[1];
 }
+
+bool containsPath(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations,
+    MantidQt::MantidWidgets::Batch::RowPath const &path) {
+  return std::any_of(
+      locations.cbegin(), locations.cend(),
+      [&path](MantidQt::MantidWidgets::Batch::RowLocation const &location)
+          -> bool { return location.path() == path; });
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

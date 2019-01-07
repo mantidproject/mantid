@@ -27,12 +27,19 @@ public:
   RunsTable &runsTable();
   Slicing const &slicing() const;
 
+  bool hasSelection() const;
+  template <typename T> bool isSelected(T const &item) const;
+
 private:
   Experiment const &m_experiment;
   Instrument const &m_instrument;
   RunsTable &m_runsTable;
   Slicing const &m_slicing;
 };
+
+template <typename T> bool Batch::isSelected(T const &item) const {
+  return m_runsTable.isSelected(item);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_BATCH_H_

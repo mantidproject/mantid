@@ -2,7 +2,6 @@ set ( RUNS_TABLE_SRC_FILES
     RunsTablePresenter.cpp
     RunsTablePresenterFactory.cpp
     RegexRowFilter.cpp
-    RowLocation.cpp
     RunsTableView.cpp
     IRunsTableView.h
     RunsTableView.h
@@ -15,7 +14,6 @@ set ( RUNS_TABLE_INC_FILES
     IRunsTableView.h
     RunsTableView.h
     RegexRowFilter.h
-    RowLocation.h
     RunsTablePresenter.h
     RunsTablePresenterFactory.h
 )

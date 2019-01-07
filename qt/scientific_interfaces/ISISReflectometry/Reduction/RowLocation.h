@@ -24,6 +24,9 @@ bool isGroupLocation(
 int groupOf(MantidQt::MantidWidgets::Batch::RowLocation const &groupLocation);
 bool isRowLocation(MantidWidgets::Batch::RowLocation const &location);
 int rowOf(MantidQt::MantidWidgets::Batch::RowLocation const &rowLocation);
+bool containsPath(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations,
+    MantidQt::MantidWidgets::Batch::RowPath const &path);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_ROWLOCATION_H

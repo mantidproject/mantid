@@ -163,5 +163,48 @@ void prettyPrintModel(ReductionJobs const & /*jobs*/) {
 Group const &ReductionJobs::operator[](int index) const {
   return m_groups[index];
 }
+
+MantidWidgets::Batch::RowPath ReductionJobs::getPath(Group const &group) const {
+  // Find this group in the groups list
+  auto groupIter = std::find_if(m_groups.cbegin(), m_groups.cend(),
+                                [&group](Group const &currentGroup) -> bool {
+                                  return &currentGroup == &group;
+                                });
+  // Calling this function with a group that's not in the list is an error
+  if (groupIter == m_groups.cend()) {
+    throw std::runtime_error(
+        std::string(
+            "Internal error: could not find table location for group ") +
+        group.name());
+  }
+  // Found the group so return its index as the path
+  auto const groupIndex = static_cast<int>(groupIter - m_groups.cbegin());
+  return {groupIndex};
+}
+
+MantidWidgets::Batch::RowPath ReductionJobs::getPath(Row const &row) const {
+  auto groupIndex = 0;
+  for (auto const &group : m_groups) {
+    // See if the row is in this group
+    auto const &rows = group.rows();
+    auto rowIter =
+        std::find_if(rows.cbegin(), rows.cend(),
+                     [&row](boost::optional<Row> const &currentRow) -> bool {
+                       return currentRow && &currentRow.get() == &row;
+                     });
+    if (rowIter == rows.cend()) {
+      // Try the next group
+      ++groupIndex;
+      continue;
+    }
+
+    // Found the row, so return its group and row indices as the path
+    auto const rowIndex = static_cast<int>(rowIter - rows.cbegin());
+    return {groupIndex, rowIndex};
+  }
+
+  throw std::runtime_error(
+      "Internal error: could not find table location for row");
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

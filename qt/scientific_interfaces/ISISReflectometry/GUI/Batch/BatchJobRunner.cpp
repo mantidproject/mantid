@@ -93,10 +93,11 @@ void addAlgorithmForRow(Row &row, Batch const &model,
 
 void addAlgorithmsForGroup(Group &group, Batch const &model,
                            BatchAlgorithmRunner &batchAlgoRunner,
-                           bool reprocessFailed) {
+                           bool reprocessFailed, bool processAll) {
   auto &rows = group.rows();
   for (auto &row : rows) {
-    if (row && row->requiresProcessing(reprocessFailed))
+    if (row && row->requiresProcessing(reprocessFailed) &&
+        (processAll || model.isSelected(row.get())))
       addAlgorithmForRow(row.get(), model, batchAlgoRunner);
   }
 }
@@ -116,6 +117,7 @@ bool BatchJobRunner::isAutoreducing() const { return m_isAutoreducing; }
 void BatchJobRunner::resumeReduction() {
   m_isProcessing = true;
   m_reprocessFailed = false;
+  m_processAll = !m_batch.hasSelection();
   setUpBatchAlgorithmRunner();
 }
 
@@ -125,6 +127,7 @@ void BatchJobRunner::resumeAutoreduction() {
   m_isAutoreducing = true;
   m_isProcessing = true;
   m_reprocessFailed = true;
+  m_processAll = true;
   setUpBatchAlgorithmRunner();
 }
 
@@ -139,7 +142,8 @@ void BatchJobRunner::setUpBatchAlgorithmRunner() {
 
   auto &groups = m_batch.runsTable().reductionJobs().groups();
   for (auto &group : groups)
-    addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner, m_reprocessFailed);
+    addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner, m_reprocessFailed,
+                          m_processAll);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

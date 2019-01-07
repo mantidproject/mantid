@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTable.h"
+#include "RowLocation.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -26,6 +27,10 @@ ReductionJobs &RunsTable::reductionJobs() { return m_reductionJobs; }
 
 std::vector<RowLocation> const &RunsTable::selectedRowLocations() const {
   return m_selectedRowLocations;
+}
+
+bool RunsTable::hasSelection() const {
+  return m_selectedRowLocations.size() > 0;
 }
 
 void RunsTable::setSelectedRowLocations(std::vector<RowLocation> selected) {

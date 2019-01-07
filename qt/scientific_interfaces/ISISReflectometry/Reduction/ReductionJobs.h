@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #include "Common/DllConfig.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include <boost/optional.hpp>
 
 #include "Group.h"
@@ -30,6 +31,9 @@ public:
   std::vector<Group> const &groups() const;
   Group const &operator[](int index) const;
   std::string nextEmptyGroupName();
+
+  MantidWidgets::Batch::RowPath getPath(Group const &group) const;
+  MantidWidgets::Batch::RowPath getPath(Row const &row) const;
 
 private:
   std::vector<Group> m_groups;

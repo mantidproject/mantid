@@ -38,6 +38,7 @@ private:
   bool m_isProcessing;
   bool m_isAutoreducing;
   bool m_reprocessFailed;
+  bool m_processAll;
   API::BatchAlgorithmRunner &m_batchAlgoRunner;
 
   void setUpBatchAlgorithmRunner();

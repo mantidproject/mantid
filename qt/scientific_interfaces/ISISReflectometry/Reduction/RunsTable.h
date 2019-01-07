@@ -10,6 +10,7 @@
 
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "ReductionJobs.h"
+#include "RowLocation.h"
 #include <string>
 #include <vector>
 
@@ -27,8 +28,10 @@ public:
   std::vector<MantidWidgets::Batch::RowLocation> const &
   selectedRowLocations() const;
 
+  bool hasSelection() const;
   void setSelectedRowLocations(
       std::vector<MantidWidgets::Batch::RowLocation> selected);
+  template <typename T> bool isSelected(T const &item);
 
 private:
   std::vector<std::string> m_instruments;
@@ -36,6 +39,11 @@ private:
   ReductionJobs m_reductionJobs;
   std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
 };
+
+template <typename T> bool RunsTable::isSelected(T const &item) {
+  auto const path = m_reductionJobs.getPath(item);
+  return containsPath(m_selectedRowLocations, path);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RUNSTABLE_H_

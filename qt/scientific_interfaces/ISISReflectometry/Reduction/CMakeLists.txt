@@ -4,6 +4,7 @@ set ( REDUCTION_SRC_FILES
     RangeInQ.cpp
     ReductionWorkspaces.cpp
     Row.cpp
+    RowLocation.cpp
     ReductionJobs.cpp
     ValidateRow.cpp
     Slicing.cpp
@@ -31,6 +32,7 @@ set ( REDUCTION_INC_FILES
     ReductionJobs.h
     ReductionWorkspaces.h
     Row.h
+    RowLocation.h
     Slicing.h
     ValidateRow.h
     ParseReflectometryStrings.h
