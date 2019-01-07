@@ -62,7 +62,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
           m_masterFinished = true;
         });
         for(size_t i = 1; i < m_numWorkers; ++i)
-          workers.emplace_back(&EventsDistributor::waitAndLounchSlave, this, i);
+          workers.emplace_back(&EventsDistributor::waitAndLounchSlave, this);
         for(auto& worker: workers)
           worker.join();
       }
@@ -84,7 +84,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
       }
     }
 
-    void waitAndLounchSlave(size_t id) {
+    void waitAndLounchSlave() {
       while(true) {
         auto pTsk = popTask();
         if(pTsk)
