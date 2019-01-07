@@ -122,7 +122,7 @@ class MantidAxes(Axes):
                 artist = artist[0]
             if replace_handler is None:
                 def replace_handler(_, __):
-                    logger.warning("Updating data on this plot type is not supported")
+                    logger.warning("Updating data on this plot type is not yet supported")
             artist_info.append([artist, replace_handler])
 
         return artist
@@ -324,13 +324,8 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-
-            def _update_data(artist, workspace):
-                self._redraw_colorplot(plotfunctions.pcolor,
-                                       artist, workspace, **kwargs)
             return self.track_workspace_artist(args[0].name(),
-                                               plotfunctions.pcolor(self, *args, **kwargs),
-                                               _update_data)
+                                               plotfunctions.pcolor(self, *args, **kwargs))
         else:
             return Axes.pcolor(self, *args, **kwargs)
 
@@ -355,14 +350,8 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-
-            def _update_data(artist, workspace):
-                self._redraw_colorplot(plotfunctions.pcolorfast,
-                                       artist, workspace, **kwargs)
-
             return self.track_workspace_artist(args[0].name(),
-                                               plotfunctions.pcolorfast(self, *args, **kwargs),
-                                               _update_data)
+                                               plotfunctions.pcolorfast(self, *args, **kwargs))
         else:
             return Axes.pcolorfast(self, *args, **kwargs)
 
@@ -387,13 +376,8 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-
-            def _update_data(artist, workspace):
-                self._redraw_colorplot(plotfunctions.pcolormesh,
-                                       artist, workspace, **kwargs)
             return self.track_workspace_artist(args[0].name(),
-                                               plotfunctions.pcolormesh(self, *args, **kwargs),
-                                               _update_data)
+                                               plotfunctions.pcolormesh(self, *args, **kwargs))
         else:
             return Axes.pcolormesh(self, *args, **kwargs)
 
