@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLE_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLE_H_
 
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "ReductionJobs.h"
 #include <string>
 #include <vector>
@@ -23,11 +24,17 @@ public:
   double thetaTolerance() const;
   ReductionJobs const &reductionJobs() const;
   ReductionJobs &reductionJobs();
+  std::vector<MantidWidgets::Batch::RowLocation> const &
+  selectedRowLocations() const;
+
+  void setSelectedRowLocations(
+      std::vector<MantidWidgets::Batch::RowLocation> selected);
 
 private:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
   ReductionJobs m_reductionJobs;
+  std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

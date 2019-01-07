@@ -25,6 +25,7 @@ public:
   virtual void notifyCellTextChanged(RowLocation const &itemIndex, int column,
                                      std::string const &oldValue,
                                      std::string const &newValue) = 0;
+  virtual void notifySelectionChanged() = 0;
   virtual void notifyRowInserted(RowLocation const &newRowLocation) = 0;
   virtual void notifyRemoveRowsRequested(
       std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;

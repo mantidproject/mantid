@@ -24,6 +24,10 @@ void JobTreeViewSignalAdapter::notifyCellTextChanged(
   emit cellTextChanged(itemIndex, column, oldValue, newValue);
 }
 
+void JobTreeViewSignalAdapter::notifySelectionChanged() {
+  emit selectionChanged();
+}
+
 void JobTreeViewSignalAdapter::notifyRowInserted(
     RowLocation const &newRowLocation) {
   emit rowInserted(newRowLocation);

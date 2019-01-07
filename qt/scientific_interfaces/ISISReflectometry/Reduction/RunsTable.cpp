@@ -9,10 +9,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+using MantidWidgets::Batch::RowLocation;
+
 RunsTable::RunsTable(std::vector<std::string> instruments,
                      double thetaTolerance, ReductionJobs reductionJobs)
     : m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance),
-      m_reductionJobs(std::move(reductionJobs)) {}
+      m_reductionJobs(std::move(reductionJobs)), m_selectedRowLocations() {}
 
 double RunsTable::thetaTolerance() const { return m_thetaTolerance; }
 
@@ -22,5 +24,12 @@ ReductionJobs const &RunsTable::reductionJobs() const {
 
 ReductionJobs &RunsTable::reductionJobs() { return m_reductionJobs; }
 
+std::vector<RowLocation> const &RunsTable::selectedRowLocations() const {
+  return m_selectedRowLocations;
+}
+
+void RunsTable::setSelectedRowLocations(std::vector<RowLocation> selected) {
+  m_selectedRowLocations = std::move(selected);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

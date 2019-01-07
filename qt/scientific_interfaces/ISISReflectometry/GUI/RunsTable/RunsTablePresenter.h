@@ -57,6 +57,7 @@ public:
   void notifyCellTextChanged(
       MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
       std::string const &oldValue, std::string const &newValue) override;
+  void notifySelectionChanged() override;
   void notifyRowInserted(MantidQt::MantidWidgets::Batch::RowLocation const
                              &newRowLocation) override;
   void notifyRemoveRowsRequested(

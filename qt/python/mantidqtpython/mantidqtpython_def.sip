@@ -1625,6 +1625,7 @@ public:
                                      int column,
                                      const std::string& oldValue,
                                      const std::string& newValue) = 0;
+  virtual void notifySelectionChanged() = 0;
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex) = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
@@ -1743,6 +1744,7 @@ public:
                                      int column,
                                      const std::string &oldValue,
                                      const std::string &newValue);
+  virtual void notifySelectionChanged();
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
@@ -1755,6 +1757,7 @@ signals:
                        int column,
                        std::string oldValue,
                        std::string newValue);
+  void selectionChanged();
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   void filterReset();
   void removeRowsRequested(

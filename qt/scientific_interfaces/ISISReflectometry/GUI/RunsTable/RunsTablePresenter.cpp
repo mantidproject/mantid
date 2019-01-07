@@ -320,6 +320,10 @@ void RunsTablePresenter::notifyCellTextChanged(
     updateRowField(itemIndex, column, oldValue, newValue);
 }
 
+void RunsTablePresenter::notifySelectionChanged() {
+  m_model.setSelectedRowLocations(m_view->jobs().selectedRowLocations());
+}
+
 void RunsTablePresenter::applyGroupStylingToRow(
     MantidWidgets::Batch::RowLocation const &location) {
   auto cells = m_view->jobs().cellsAt(location);
