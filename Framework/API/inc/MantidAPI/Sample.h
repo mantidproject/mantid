@@ -127,7 +127,7 @@ private:
   /// An owned pointer to the SampleEnvironment object
   boost::shared_ptr<Geometry::SampleEnvironment> m_environment;
   /// Pointer to the OrientedLattice of the sample, NULL if not set.
-  Geometry::OrientedLattice *m_lattice;
+  std::unique_ptr<Geometry::OrientedLattice> m_lattice;
 
   /// CrystalStructure of the sample
   std::unique_ptr<Geometry::CrystalStructure> m_crystalStructure;

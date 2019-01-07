@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
@@ -24,7 +30,7 @@ def get_instrument_directory(instrument):
             instrument_directory = "NDW1030"
         return instrument_directory
     else:
-        return None
+        raise RuntimeError('Instrument {} not in list of allowed instruments'.format(instrument))
 
 
 def check_file_exists(filename):
@@ -41,7 +47,7 @@ def get_current_run_filename(instrument):
     if instrument_directory is None:
         return ""
 
-    autosave_file_name = _instrument_data_directory(instrument) + FILE_SEP + "autosave.run"
+    autosave_file_name = _instrument_data_directory(instrument_directory) + FILE_SEP + "autosave.run"
     autosave_points_to = ""
     if not check_file_exists(autosave_file_name):
         raise ValueError("Cannot find file : " + autosave_file_name)
@@ -51,10 +57,10 @@ def get_current_run_filename(instrument):
                 autosave_points_to = line
     if autosave_points_to == "":
         # Default to auto_A (replicates MuonAnalysis 1.0 behaviour)
-        current_run_filename = FILE_SEP + FILE_SEP + instrument_directory + FILE_SEP + "data" \
+        current_run_filename = _instrument_data_directory(instrument_directory) \
                                + FILE_SEP + instrument_directory + "auto_A.tmp"
     else:
-        current_run_filename = FILE_SEP + FILE_SEP + instrument_directory + FILE_SEP + "data" \
+        current_run_filename = _instrument_data_directory(instrument_directory) \
                                + FILE_SEP + autosave_points_to
     return current_run_filename
 
@@ -63,14 +69,15 @@ def format_run_for_file(run):
     return "{0:08d}".format(run)
 
 
-def _instrument_data_directory(instrument):
+def _instrument_data_directory(instrument_directory):
     """The directory which stores the data for a particular instrument"""
-    return FILE_SEP + FILE_SEP + get_instrument_directory(instrument) + FILE_SEP + "data"
+    return FILE_SEP + FILE_SEP + instrument_directory + FILE_SEP + "data"
 
 
 def file_path_for_instrument_and_run(instrument, run):
     """Returns the path to the data file for a given instrument/run"""
-    base_dir = _instrument_data_directory(instrument)
+    instrument_directory = get_instrument_directory(instrument)
+    base_dir = _instrument_data_directory(instrument_directory)
     file_name = instrument + format_run_for_file(run) + ".nxs"
     return base_dir.lower() + FILE_SEP + file_name
 

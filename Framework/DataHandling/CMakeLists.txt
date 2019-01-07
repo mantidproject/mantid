@@ -142,8 +142,7 @@
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
-	src/SNSDataArchive.cpp
-    	src/SaveANSTOAscii.cpp
+	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveBankScatteringAngles.cpp
@@ -165,7 +164,7 @@
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
-    	src/SaveMask.cpp
+  src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
@@ -178,7 +177,7 @@
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
-    	src/SaveReflectometryAscii.cpp
+  src/SaveReflectometryAscii.cpp
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSESANS.cpp
@@ -337,7 +336,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/RotateSource.h
-	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
@@ -373,7 +371,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
-    	inc/MantidDataHandling/SaveReflectometryAscii.h
+  inc/MantidDataHandling/SaveReflectometryAscii.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSESANS.h
@@ -522,7 +520,6 @@ set ( TEST_FILES
 	RenameLogTest.h
 	RotateInstrumentComponentTest.h
 	RotateSourceTest.h
-	SNSDataArchiveTest.h
 	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h
 	SaveAsciiTest.h
@@ -556,7 +553,7 @@ set ( TEST_FILES
 	SavePHXTest.h
 	SaveParameterFileTest.h
 	SaveRKHTest.h
-    	SaveReflectometryAsciiTest.h
+  SaveReflectometryAsciiTest.h
 	SaveReflCustomAsciiTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSESANSTest.h
