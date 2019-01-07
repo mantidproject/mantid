@@ -50,7 +50,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
       const API::BoxController_sptr &bc;
     };
   public:
-    EventsDistributor(const uint16_t& numWorkers, const size_t& threshold) :
+    EventsDistributor(const int& numWorkers, const size_t& threshold) :
     m_numWorkers(numWorkers), m_eventsThreshold(threshold), m_masterFinished{false} {};
     void distribute(Task& tsk) {
       if(m_numWorkers == 1)
@@ -61,7 +61,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
           distributeEvents(tsk, MASTER);
           m_masterFinished = true;
         });
-        for(size_t i = 1; i < m_numWorkers; ++i)
+        for(auto i = 1; i < m_numWorkers; ++i)
           workers.emplace_back(&EventsDistributor::waitAndLounchSlave, this);
         for(auto& worker: workers)
           worker.join();
@@ -94,7 +94,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
       }
     }
   private:
-    const uint16_t m_numWorkers;
+    const int m_numWorkers;
 
     const size_t m_eventsThreshold;
     std::queue<Task> m_tasks;
@@ -160,7 +160,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
 
 
   template<size_t ND, template <size_t> class MDEventType>
-  static DataObjects::MDBoxBase<MDEventType<ND>, ND>*
+  DataObjects::MDBoxBase<MDEventType<ND>, ND>*
   buildStructureFromSortedEvents(const API::BoxController_sptr &bc,
                                  std::vector<MDEventType<ND>> &mdEvents,
                                  const MDSpaceBounds<ND>& space,
@@ -291,7 +291,11 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
             std::numeric_limits<IntT>::max());
     typename DistributorType::Task tsk{root, mdEvents.begin(), mdEvents.end(),
         mortonMin, mortonMax, space, bc->getMaxDepth() + 1, 1, bc};
-    DistributorType distributor(12, mdEvents.size() / 100); //TODO define the threshold
+    int nThreads = (this->m_NumThreads == 0); // 1 thread if 0
+    if(!nThreads)
+      nThreads = this->m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS :
+          static_cast<uint16_t>(this->m_NumThreads);
+    DistributorType distributor(nThreads, mdEvents.size() / nThreads/ 10);
     distributor.distribute(tsk);
     return root;
   }
@@ -396,8 +400,6 @@ void ConvToMDEventsWSIndexing::EventsDistributor<ND, MDEventType, EventIterator>
   using BoxBase = DataObjects::MDBoxBase<MDEvent, ND>;
   using Box = DataObjects::MDBox<MDEvent, ND>;
   using GridBox = DataObjects::MDGridBox<MDEvent, ND>;
-
-
 
 
   const size_t childBoxCount = tsk.bc->getNumSplit();
