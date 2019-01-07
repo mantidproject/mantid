@@ -56,7 +56,7 @@ void CorrectToFile::exec() {
   MatrixWorkspace_sptr rkhInput = loadInFile(getProperty("Filename"));
   // Only create the output workspace if it's not the same as the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  outputWS = create<Workspace2D>(*toCorrect);
+  outputWS = create<HistoWorkspace>(*toCorrect);
   const std::string operation = getProperty("WorkspaceOperation");
 
   if (getPropertyValue("FirstColumnValue") == "SpectrumNumber") {
