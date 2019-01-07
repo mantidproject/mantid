@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/core/NDArray.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
@@ -29,12 +30,6 @@
 
 #include <cstring>
 #include <vector>
-
-#if PY_MAJOR_VERSION >= 3
-#define FROM_CSTRING PyUnicode_FromString
-#else
-#define FROM_CSTRING PyString_FromString
-#endif
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
