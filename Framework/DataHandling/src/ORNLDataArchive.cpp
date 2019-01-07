@@ -48,6 +48,7 @@ namespace Mantid {
 namespace DataHandling {
 
 DECLARE_ARCHIVESEARCH(ORNLDataArchive, ORNLDataSearch)
+DECLARE_ARCHIVESEARCH(ORNLDataArchive, SNSDataSearch)
 
 /**
  * ****************

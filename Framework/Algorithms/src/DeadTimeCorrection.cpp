@@ -84,6 +84,12 @@ void DeadTimeCorrection::exec() {
     integrator->setPropertyValue("OutputWorkspace", "unused");
     integrator->executeAsChildAlg();
     integrated = integrator->getProperty("OutputWorkspace");
+    // after integration we end up with one bin
+    // however the bin edges might vary, which does not matter, we just need to
+    // group the counts, hence we need to do this before we can group the pixels
+    for (size_t index = 1; index < integrated->getNumberHistograms(); ++index) {
+      integrated->setSharedX(index, integrated->sharedX(0));
+    }
   }
   const std::string groupingPattern = getProperty("GroupingPattern");
   MatrixWorkspace_sptr grouped = integrated;

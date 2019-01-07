@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -1346,7 +1347,7 @@ public:
   void test_flood_correction() {
     auto inputWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto flood = createFloodWorkspace();
+    auto flood = createFloodWorkspace(inputWS->getInstrument());
 
     // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
@@ -1377,7 +1378,7 @@ public:
       auto &y = transWS->mutableY(i);
       y.assign(y.size(), 10.0 * double(i + 1));
     }
-    auto flood = createFloodWorkspace();
+    auto flood = createFloodWorkspace(inputWS->getInstrument());
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1409,7 +1410,7 @@ public:
     group->addWorkspace(inputWS1);
     group->addWorkspace(inputWS2);
     AnalysisDataService::Instance().addOrReplace("input", group);
-    auto flood = createFloodWorkspace();
+    auto flood = createFloodWorkspace(inputWS1->getInstrument());
 
     // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
@@ -1438,11 +1439,13 @@ public:
   }
 
   void test_flood_correction_polarization_correction() {
-
     std::string const name = "input";
     prepareInputGroup(name, "Fredrikze");
     applyPolarizationEfficiencies(name);
-    auto flood = createFloodWorkspace(257);
+    auto const inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name +
+                                                                    "_1");
+    auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1470,6 +1473,7 @@ public:
     TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 0.003);
     auto out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 0.003);
+
     AnalysisDataService::Instance().clear();
   }
 
@@ -1477,7 +1481,10 @@ public:
 
     std::string const name = "input";
     prepareInputGroup(name, "Flood");
-    auto flood = createFloodWorkspace(257);
+    auto const inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name +
+                                                                    "_1");
+    auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1511,7 +1518,6 @@ public:
 
     std::string const name = "input";
     prepareInputGroup(name, "No_Flood");
-    auto flood = createFloodWorkspace(257);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1534,7 +1540,10 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createFloodWorkspace(size_t n = 4) {
+  MatrixWorkspace_sptr
+  createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
+                       size_t n = 4) {
+    size_t detid = 1;
     auto flood = create2DWorkspace(int(n), 1);
     if (n == 4) {
       flood->mutableY(0)[0] = 0.7;
@@ -1545,7 +1554,13 @@ private:
       for (size_t i = 0; i < n; ++i) {
         flood->mutableY(i)[0] = double(i) * 0.01;
       }
+      detid = 1000;
     }
+    flood->setInstrument(instrument);
+    for (size_t i = 0; i < flood->getNumberHistograms(); ++i) {
+      flood->getSpectrum(i).setDetectorID(Mantid::detid_t(i + detid));
+    }
+    flood->getAxis(0)->setUnit("TOF");
     return flood;
   }
 };

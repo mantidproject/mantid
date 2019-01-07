@@ -107,11 +107,7 @@ Algorithm::Algorithm()
       m_communicator(Kernel::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
-Algorithm::~Algorithm() {
-  delete m_notificationCenter;
-  delete m_executeAsync;
-  delete m_progressObserver;
-}
+Algorithm::~Algorithm() {}
 
 //=============================================================================================
 //================================== Simple Getters/Setters
@@ -573,6 +569,7 @@ bool Algorithm::execute() {
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
+      setExecuted(false);
       if (!isChild()) {
         m_running = true;
       }
@@ -1652,8 +1649,9 @@ private:
  * Asynchronous execution
  */
 Poco::ActiveResult<bool> Algorithm::executeAsync() {
-  m_executeAsync = new Poco::ActiveMethod<bool, Poco::Void, Algorithm>(
-      this, &Algorithm::executeAsyncImpl);
+  m_executeAsync =
+      std::make_unique<Poco::ActiveMethod<bool, Poco::Void, Algorithm>>(
+          this, &Algorithm::executeAsyncImpl);
   return (*m_executeAsync)(Poco::Void());
 }
 
@@ -1672,7 +1670,7 @@ bool Algorithm::executeAsyncImpl(const Poco::Void &) {
  */
 Poco::NotificationCenter &Algorithm::notificationCenter() const {
   if (!m_notificationCenter)
-    m_notificationCenter = new Poco::NotificationCenter;
+    m_notificationCenter = std::make_unique<Poco::NotificationCenter>();
   return *m_notificationCenter;
 }
 
@@ -1692,9 +1690,10 @@ void Algorithm::handleChildProgressNotification(
  */
 const Poco::AbstractObserver &Algorithm::progressObserver() const {
   if (!m_progressObserver)
-    m_progressObserver = new Poco::NObserver<Algorithm, ProgressNotification>(
-        *const_cast<Algorithm *>(this),
-        &Algorithm::handleChildProgressNotification);
+    m_progressObserver =
+        std::make_unique<Poco::NObserver<Algorithm, ProgressNotification>>(
+            *const_cast<Algorithm *>(this),
+            &Algorithm::handleChildProgressNotification);
 
   return *m_progressObserver;
 }
