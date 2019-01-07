@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
-from simple import logger
-import simple.simpleapi as simple
+from mantid import logger
+import mantid.simpleapi as simple
 import os
 import numpy as np
 
