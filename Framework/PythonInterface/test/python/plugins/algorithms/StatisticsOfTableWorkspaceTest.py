@@ -34,14 +34,13 @@ class StatisticsOfTableWorkspaceTest(unittest.TestCase):
         self.assertEqual(stats.rowCount(), 5)
         self.assertEqual(stats.columnCount(), 3)
 
-        stat_col = stats.column('statistic')
+        stat_col = stats.column('Statistic')
 
-        self.assertAlmostEqual(stats.column('a')[stat_col.index('standard_deviation')], 1.11803400517)
-        self.assertAlmostEqual(stats.column('a')[stat_col.index('minimum')], 1.0)
-        self.assertAlmostEqual(stats.column('a')[stat_col.index('median')], 2.5)
-        self.assertAlmostEqual(stats.column('a')[stat_col.index('maximum')], 4.0)
-        self.assertAlmostEqual(stats.column('a')[stat_col.index('mean')], 2.5)
-
+        self.assertAlmostEqual(stats.column('a')[stat_col.index('StandardDev')], 1.11803400517)
+        self.assertAlmostEqual(stats.column('a')[stat_col.index('Minimum')], 1.0)
+        self.assertAlmostEqual(stats.column('a')[stat_col.index('Median')], 2.5)
+        self.assertAlmostEqual(stats.column('a')[stat_col.index('Maximum')], 4.0)
+        self.assertAlmostEqual(stats.column('a')[stat_col.index('Mean')], 2.5)
 
     def test_invalid_types(self):
         """
