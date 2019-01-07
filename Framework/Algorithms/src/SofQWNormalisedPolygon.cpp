@@ -257,11 +257,28 @@ std::pair<double, double> twoThetasFromTable(
         "Duplicate detector IDs in 'DetectorTwoThetaRanges'.");
   }
   if (range.first == detectorIDs.cend()) {
-    throw std::invalid_argument("No 2theta width found for detector ID " +
+    throw std::invalid_argument("No min/max 2thetas found for detector ID " +
                                 std::to_string(detID));
   }
   const auto index = std::distance(detectorIDs.cbegin(), range.first);
-  return std::make_pair(lowers[index], uppers[index]);
+  const auto minmax = std::make_pair(lowers[index], uppers[index]);
+  if (minmax.first <= 0) {
+    throw std::invalid_argument("Non-positive min 2theta for detector ID " +
+                                std::to_string(detID));
+  }
+  if (minmax.first > M_PI) {
+    throw std::invalid_argument("Min 2theta greater than pi for detector ID " +
+                                std::to_string(detID));
+  }
+  if (minmax.second > M_PI) {
+    throw std::invalid_argument("Max 2theta greater than pi for detector ID" +
+                                std::to_string(detID));
+  }
+  if (minmax.first >= minmax.second) {
+    throw std::invalid_argument("Min 2theta larger than max for detector ID " +
+                                std::to_string(detID));
+  }
+  return minmax;
 }
 } // namespace
 
