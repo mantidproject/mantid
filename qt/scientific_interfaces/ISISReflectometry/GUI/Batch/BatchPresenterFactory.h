@@ -44,9 +44,9 @@ public:
         m_instrumentPresenterFactory.make(view->instrument());
     auto savePresenter = m_savePresenterFactory.make(view->save());
 
-    auto model = Batch(
-        experimentPresenter->experiment(), instrumentPresenter->instrument(),
-        runsPresenter->reductionJobs(), eventPresenter->slicing());
+    auto model = Batch(experimentPresenter->experiment(),
+                       instrumentPresenter->instrument(),
+                       runsPresenter->runsTable(), eventPresenter->slicing());
 
     return std::make_unique<BatchPresenter>(
         view, std::move(model), std::move(runsPresenter),

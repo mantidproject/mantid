@@ -10,7 +10,7 @@
 #include "Common/DllConfig.h"
 #include "Experiment.h"
 #include "Instrument.h"
-#include "ReductionJobs.h"
+#include "RunsTable.h"
 #include "Slicing.h"
 
 namespace MantidQt {
@@ -19,18 +19,18 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Batch {
 public:
   Batch(Experiment const &experiment, Instrument const &instrument,
-        ReductionJobs &reductionJobs, Slicing const &slicing);
+        RunsTable &runsTable, Slicing const &slicing);
 
   Experiment const &experiment() const;
   Instrument const &instrument() const;
-  ReductionJobs const &reductionJobs() const;
-  ReductionJobs &reductionJobs();
+  RunsTable const &runsTable() const;
+  RunsTable &runsTable();
   Slicing const &slicing() const;
 
 private:
   Experiment const &m_experiment;
   Instrument const &m_instrument;
-  ReductionJobs &m_reductionJobs;
+  RunsTable &m_runsTable;
   Slicing const &m_slicing;
 };
 } // namespace CustomInterfaces

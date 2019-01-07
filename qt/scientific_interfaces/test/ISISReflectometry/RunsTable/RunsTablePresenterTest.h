@@ -88,7 +88,7 @@ public:
   }
 
   ReductionJobs const &jobsFromPresenter(RunsTablePresenter &presenter) {
-    return presenter.reductionJobs();
+    return presenter.runsTable().reductionJobs();
   }
 
   template <typename... Args>

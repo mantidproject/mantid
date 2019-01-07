@@ -137,7 +137,7 @@ void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
 void BatchJobRunner::setUpBatchAlgorithmRunner() {
   m_batchAlgoRunner.clearQueue();
 
-  auto &groups = m_batch.reductionJobs().groups();
+  auto &groups = m_batch.runsTable().reductionJobs().groups();
   for (auto &group : groups)
     addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner, m_reprocessFailed);
 }

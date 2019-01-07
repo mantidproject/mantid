@@ -14,6 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class IRunsPresenter;
+class RunsTable;
 class ReductionJobs;
 
 /** @class IRunsTablePresenter
@@ -25,8 +26,8 @@ class IRunsTablePresenter {
 public:
   virtual ~IRunsTablePresenter() = default;
   virtual void acceptMainPresenter(IRunsPresenter *mainPresenter) = 0;
-  virtual ReductionJobs const &reductionJobs() const = 0;
-  virtual ReductionJobs &reductionJobs() = 0;
+  virtual RunsTable const &runsTable() const = 0;
+  virtual RunsTable &runsTable() = 0;
 
   virtual void notifyRowStateChanged() = 0;
 

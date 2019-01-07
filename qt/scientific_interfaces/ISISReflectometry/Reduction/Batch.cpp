@@ -9,17 +9,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 Batch::Batch(Experiment const &experiment, Instrument const &instrument,
-             ReductionJobs &reductionJobs, Slicing const &slicing)
+             RunsTable &runsTable, Slicing const &slicing)
     : m_experiment(experiment), m_instrument(instrument),
-      m_reductionJobs(reductionJobs), m_slicing(slicing) {}
+      m_runsTable(runsTable), m_slicing(slicing) {}
 
 Experiment const &Batch::experiment() const { return m_experiment; }
 
 Instrument const &Batch::instrument() const { return m_instrument; }
 
-ReductionJobs const &Batch::reductionJobs() const { return m_reductionJobs; }
+RunsTable const &Batch::runsTable() const { return m_runsTable; }
 
-ReductionJobs &Batch::reductionJobs() { return m_reductionJobs; }
+RunsTable &Batch::runsTable() { return m_runsTable; }
 
 Slicing const &Batch::slicing() const { return m_slicing; }
 } // namespace CustomInterfaces

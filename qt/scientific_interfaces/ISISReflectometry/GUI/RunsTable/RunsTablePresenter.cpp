@@ -33,27 +33,23 @@ void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
-ReductionJobs const &RunsTablePresenter::reductionJobs() const {
-  return m_model.reductionJobs();
-}
+RunsTable const &RunsTablePresenter::runsTable() const { return m_model; }
 
-ReductionJobs &RunsTablePresenter::reductionJobs() {
-  return m_model.reductionJobs();
-}
+RunsTable &RunsTablePresenter::runsTable() { return m_model; }
 
 void RunsTablePresenter::mergeAdditionalJobs(
     ReductionJobs const &additionalJobs) {
   std::cout << "Before Transfer:" << std::endl;
-  prettyPrintModel(reductionJobs());
+  prettyPrintModel(m_model.reductionJobs());
 
   std::cout << "Transfering:" << std::endl;
   prettyPrintModel(additionalJobs);
 
-  mergeJobsInto(reductionJobs(), additionalJobs, m_model.thetaTolerance(),
-                m_jobViewUpdater);
+  mergeJobsInto(m_model.reductionJobs(), additionalJobs,
+                m_model.thetaTolerance(), m_jobViewUpdater);
 
   std::cout << "After Transfer:" << std::endl;
-  prettyPrintModel(reductionJobs());
+  prettyPrintModel(m_model.reductionJobs());
 }
 
 void RunsTablePresenter::removeRowsFromModel(
@@ -62,7 +58,7 @@ void RunsTablePresenter::removeRowsFromModel(
   for (auto row = rows.crbegin(); row != rows.crend(); ++row) {
     auto const groupIndex = groupOf(*row);
     auto const rowIndex = rowOf(*row);
-    removeRow(reductionJobs(), groupIndex, rowIndex);
+    removeRow(m_model.reductionJobs(), groupIndex, rowIndex);
   }
 }
 
@@ -102,7 +98,7 @@ void RunsTablePresenter::removeGroupsFromModel(
     std::vector<int> const &groupIndicesOrderedLowToHigh) {
   for (auto it = groupIndicesOrderedLowToHigh.crbegin();
        it < groupIndicesOrderedLowToHigh.crend(); ++it)
-    removeGroup(reductionJobs(), *it);
+    removeGroup(m_model.reductionJobs(), *it);
 }
 
 void RunsTablePresenter::notifyReductionResumed() {
@@ -126,8 +122,8 @@ void RunsTablePresenter::notifyInsertRowRequested() {
 
 void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
   try {
-    auto regexFilter =
-        filterFromRegexString(filterString, m_view->jobs(), reductionJobs());
+    auto regexFilter = filterFromRegexString(filterString, m_view->jobs(),
+                                             m_model.reductionJobs());
     m_view->jobs().filterRowsBy(std::move(regexFilter));
   } catch (boost::regex_error &) {
   }
@@ -193,7 +189,7 @@ void RunsTablePresenter::appendRowsToGroupsInView(
 void RunsTablePresenter::appendRowsToGroupsInModel(
     std::vector<int> const &groupIndices) {
   for (auto const &groupIndex : groupIndices)
-    appendEmptyRow(reductionJobs(), groupIndex);
+    appendEmptyRow(m_model.reductionJobs(), groupIndex);
 }
 
 void RunsTablePresenter::notifyInsertGroupRequested() {
@@ -210,7 +206,7 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
 }
 
 void RunsTablePresenter::appendEmptyGroupInModel() {
-  appendEmptyGroup(reductionJobs());
+  appendEmptyGroup(m_model.reductionJobs());
 }
 
 void RunsTablePresenter::appendEmptyGroupInView() {
@@ -221,11 +217,11 @@ void RunsTablePresenter::appendEmptyGroupInView() {
 }
 
 void RunsTablePresenter::insertEmptyGroupInModel(int beforeGroup) {
-  insertEmptyGroup(reductionJobs(), beforeGroup);
+  insertEmptyGroup(m_model.reductionJobs(), beforeGroup);
 }
 
 void RunsTablePresenter::insertEmptyRowInModel(int groupIndex, int beforeRow) {
-  insertEmptyRow(reductionJobs(), groupIndex, beforeRow);
+  insertEmptyRow(m_model.reductionJobs(), groupIndex, beforeRow);
 }
 
 void RunsTablePresenter::insertEmptyGroupInView(int beforeGroup) {
@@ -291,7 +287,7 @@ void RunsTablePresenter::updateGroupName(
   assertOrThrow(column == 0,
                 "Changed value of cell which should be uneditable");
   auto const groupIndex = groupOf(itemIndex);
-  if (!setGroupName(reductionJobs(), groupIndex, newValue)) {
+  if (!setGroupName(m_model.reductionJobs(), groupIndex, newValue)) {
     auto cell = m_view->jobs().cellAt(itemIndex, column);
     cell.setContentText(oldValue);
     m_view->jobs().setCellAt(itemIndex, column, cell);
@@ -304,8 +300,8 @@ void RunsTablePresenter::updateRowField(
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
   auto rowValidationResult =
-      validateRow(reductionJobs(), cellTextFromViewAt(itemIndex));
-  updateRow(reductionJobs(), groupIndex, rowIndex,
+      validateRow(m_model.reductionJobs(), cellTextFromViewAt(itemIndex));
+  updateRow(m_model.reductionJobs(), groupIndex, rowIndex,
             rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
@@ -352,15 +348,15 @@ void RunsTablePresenter::removeRowsAndGroupsFromModel(
     auto const groupIndex = groupOf(*location);
     if (isRowLocation(*location)) {
       auto const rowIndex = rowOf(*location);
-      removeRow(reductionJobs(), groupIndex, rowIndex);
+      removeRow(m_model.reductionJobs(), groupIndex, rowIndex);
     } else if (isGroupLocation(*location)) {
-      removeGroup(reductionJobs(), groupIndex);
+      removeGroup(m_model.reductionJobs(), groupIndex);
     }
   }
 }
 
 void RunsTablePresenter::removeAllRowsAndGroupsFromModel() {
-  removeAllRowsAndGroups(reductionJobs());
+  removeAllRowsAndGroups(m_model.reductionJobs());
 }
 
 void RunsTablePresenter::removeRowsAndGroupsFromView(
@@ -498,7 +494,7 @@ void RunsTablePresenter::showCellsAsWarningStateInView(
 
 void RunsTablePresenter::notifyRowStateChanged() {
   int groupIndex = 0;
-  for (auto &group : reductionJobs().groups()) {
+  for (auto &group : m_model.reductionJobs().groups()) {
     auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
     clearStateCellStyling(groupPath);
 
@@ -532,7 +528,7 @@ void RunsTablePresenter::notifyRowStateChanged() {
     }
     ++groupIndex;
   }
-  if (reductionJobs().groups().size() > 1) {
+  if (m_model.reductionJobs().groups().size() > 1) {
     auto itemIndex = MantidWidgets::Batch::RowLocation({1});
     showCellsAsErrorStateInView(itemIndex, "this is a test error message");
   }

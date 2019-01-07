@@ -15,7 +15,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class RunsTable {
+class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTable {
 public:
   RunsTable(std::vector<std::string> instruments, double thetaTolerance,
             ReductionJobs ReductionJobs);
