@@ -13,9 +13,14 @@ class EncoderFactory(object):
     encoder_list = []
 
     @classmethod
-    def find_encoder(cls, tag):
+    def find_encoder(cls, obj):
+        """
+        This assumes that obj is of a class that has an encode else it returns None
+        :param obj: The object for encoding
+        :return: Encoder or None; Returns the Encoder of the
+        """
         for encoder in cls.encoder_list:
-            if encoder().has_tag(tag):
+            if encoder().has_tag(obj.__class__.__name__):
                 return encoder
         return None
 

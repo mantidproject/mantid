@@ -21,6 +21,7 @@ class InstrumentTreeWidget;
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTreeTab
     : public InstrumentWidgetTab {
   Q_OBJECT
+friend class InstrumentWidgetEncoder;
 public:
   explicit InstrumentWidgetTreeTab(InstrumentWidget *instrWidget);
   void initSurface() override;

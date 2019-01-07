@@ -6,46 +6,63 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h"
+#include "MantidQtWidgets/InstrumentView/ColorBar.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
-#include "MantidQtWidgets/InstrumentView/ColorBar.h"
 #include "MantidQtWidgets/InstrumentView/MaskBinsData.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/Shape2D.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/XIntegrationControl.h"
+
+#include <QCheckBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QComboBox>
+#include <QAction>
+
+namespace MantidQt {
+namespace MantidWidgets {
+
+InstrumentWidgetEncoder::InstrumentWidgetEncoder() : m_projectPath("") {}
 
 QMap<QString, QVariant>
-InstrumentWidgetEncoder::encode(const InstrumentWidget &obj) {
-  QMap<QString, QVariant> map();
+InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
+                                const QString &projectPath) {
+  QMap<QString, QVariant> map;
+  m_projectPath = projectPath.toStdString();
 
-  map.insert(QString("workspaceName"), obj.getWorkspaceNameStdString());
-  map.insert(QString("surfaceType"), obj.getSurfaceType());
-  map.insert(QString("surface"), this->encodeSurface(obj.getSurface()));
-  map.insert(QString("currentTab"), obj.getCurrentTab());
+  map.insert(QString("workspaceName"), QVariant(obj.getWorkspaceName()));
+  map.insert(QString("surfaceType"), QVariant(obj.getSurfaceType()));
+  map.insert(QString("surface"),
+             QVariant(this->encodeSurface(obj.getSurface())));
+  map.insert(QString("currentTab"), QVariant(obj.getCurrentTab()));
 
-  QList energyTransferList();
-  energyTransferList.append(obj.m_xIntegration->getMinimum());
-  energyTransferList.append(obj.m_xIntegration->getMaximum());
-  map.insert(QString("energyTransfer"), energyTransferList);
+  QList<QVariant> energyTransferList;
+  energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
+  energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
+  map.insert(QString("energyTransfer"), QVariant(energyTransferList));
 
-  map.insert(QString("actor"), this->encodeActor(obj.m_instrumentActor));
-  map.insert(QString("tabs"), this->encodeTabs(obj));
+  map.insert(QString("actor"),
+             QVariant(this->encodeActor(obj.m_instrumentActor)));
+  map.insert(QString("tabs"), QVariant(this->encodeTabs(obj)));
 
   return map;
 }
 
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeTabs(const InstrumentWidget &obj) {
-  QMap<QString, QVariant> tabs();
+  QMap<QString, QVariant> tabs;
 
-  tabs.insert(QString("maskTab"), QVariant(encodeMaskTab(obj->m_maskTab)));
-  tabs.insert(QString("renderTab"),
-              QVariant(encodeRenderTab(obj->m_renderTab)));
-  tabs.insert(QString("treeTab"), QVariant(encodeTreeTab(obj->m_treeTab)));
-  tabs.insert(QString("pickTab"), QVariant(encodePickTab(obj->m_pickTab)));
+  tabs.insert(QString("maskTab"), QVariant(encodeMaskTab(obj.m_maskTab)));
+  tabs.insert(QString("renderTab"), QVariant(encodeRenderTab(obj.m_renderTab)));
+  tabs.insert(QString("treeTab"), QVariant(encodeTreeTab(obj.m_treeTab)));
+  tabs.insert(QString("pickTab"), QVariant(encodePickTab(obj.m_pickTab)));
 
   return tabs;
 }
@@ -53,18 +70,18 @@ InstrumentWidgetEncoder::encodeTabs(const InstrumentWidget &obj) {
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
   auto index = tab->m_instrumentTree->currentIndex();
-  auto model = tab->index.model();
+  auto model = index.model();
 
-  QMap<QString, QVariant> map();
+  QMap<QString, QVariant> map;
 
   if (model) {
     auto item = model->data(index);
-    auto name = item.value<QString>();
-    map.insert(QString("selectedComponent"), QVariant(name);
+    QString name = item.value<QString>();
+    map.insert(QString("selectedComponent"), QVariant(name));
   }
 
-  QList<QString> list();
-  auto names = m_instrumentTree->findExpandedComponents();
+  QList<QString> list;
+  const auto names = tab->m_instrumentTree->findExpandedComponents();
   for (const auto name : names) {
     list.append(name);
   }
@@ -75,39 +92,43 @@ InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
 
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeRenderTab(const InstrumentWidgetRenderTab *tab) {
-  QMap<QString, QVariant> map();
+  QMap<QString, QVariant> map;
   map.insert(QString("axesView"), QVariant(tab->mAxisCombo->currentIndex()));
-  map.insert(QString("autoScaling", QVariant(tab->m_autoscaling->isChecked()));
-  map.insert(QString("displayAxes", QVariant(tab->m_displayAxes->isChecked()));
-  map.insert(QString("flipView", QVariant(tab->m_flipCheckBox->isChecked()));
-  map.insert(QString("displayDetectorsOnly", QVariant(tab->m_displayDetectorsOnly->isChecked()));
-  map.insert(QString("displayWireframe", QVariant(tab->m_wireframe->isChecked()));
-  map.insert(QString("displayLighting", QVariant(tab->m_lighting->isChecked()));
-  map.insert(QString("useOpenGL", QVariant(tab->m_GLView->isChecked()));
-  map.insert(QString("useUCorrection", QVariant(tab->m_UCorrection->isChecked()));
+  map.insert(QString("autoScaling"), QVariant(tab->m_autoscaling->isChecked()));
+  map.insert(QString("displayAxes"), QVariant(tab->m_displayAxes->isChecked()));
+  map.insert(QString("flipView"), QVariant(tab->m_flipCheckBox->isChecked()));
+  map.insert(QString("displayDetectorsOnly"),
+             QVariant(tab->m_displayDetectorsOnly->isChecked()));
+  map.insert(QString("displayWireframe"),
+             QVariant(tab->m_wireframe->isChecked()));
+  map.insert(QString("displayLighting"),
+             QVariant(tab->m_lighting->isChecked()));
+  map.insert(QString("useOpenGL"), QVariant(tab->m_GLView->isChecked()));
+  map.insert(QString("useUCorrection"),
+             QVariant(tab->m_UCorrection->isChecked()));
 
   const auto surface = tab->getSurface();
-  map.insert(QString("showLabels", QVariant(surface->getShowPeakRowsFlag()));
-  map.insert(QString("showRows", QVariant(surface->getShowPeakRowsFlag()));
-  map.insert(QString("labelPrecision", QVariant(surface->getPeakLabelPrecision()));
-  map.insert(QString("showRelativeIntensity", QVariant(surface->getShowPeakRelativeIntensityFlag()));
+  map.insert(QString("showLabels"), QVariant(surface->getShowPeakRowsFlag()));
+  map.insert(QString("showRows"), QVariant(surface->getShowPeakRowsFlag()));
+  map.insert(QString("labelPrecision"),
+             QVariant(surface->getPeakLabelPrecision()));
+  map.insert(QString("showRelativeIntensity"),
+             QVariant(surface->getShowPeakRelativeIntensityFlag()));
 
-  const auto colorMap = encodeColorMap(tab->m_colorBarWidget);
-  map.insert(QString("colorMap"), QVariant(colorMap))
+  const auto colorBar = encodeColorBar(tab->m_colorBarWidget);
+  map.insert(QString("colorBar"), QVariant(colorBar));
 
   return map;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeColorMap(ColorBar *bar) {
-  QMap<QString, QVariant> map();
-  map.insert(QString("autoScale"), QVariant(bar->getAutoScale()));
-  map.insert(QString("autoScaleSlice"),
-             QVariant(bar->getAutoScaleForCurrentSlice()));
-  map.insert(QString("scaleType"), QVariant(bar->getScale()));
-  map.insert(QString("power"), QVariant(bar->getExponent()));
-  map.insert(QString("min"), QVariant(bar->m_min));
-  map.insert(QString("max"), QVariant(bar->m_max));
-  map.insert(QString("filename"), QVariant(bar->getFilePath()));
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeColorBar(
+    MantidQt::MantidWidgets::ColorBar *bar) {
+  QMap<QString, QVariant> map;
+  
+  map.insert(QString("scaleType"), QVariant(bar->getScaleType()));
+  map.insert(QString("power"), QVariant(bar->getNthPower()));
+  map.insert(QString("min"), QVariant(bar->getMinValue()));
+  map.insert(QString("max"), QVariant(bar->getMaxValue()));
 
   return map;
 }
@@ -115,34 +136,33 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encodeColorMap(ColorBar *bar) {
 // This is the tab labelled draw
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
-  QMap<QString, QVariant> map();
-  QMap<QString, QVariant> activeTools();
-  QMap<QString, QVariant> activeType();
+  QMap<QString, QVariant> map;
+  QMap<QString, QVariant> activeTools;
+  QMap<QString, QVariant> activeType;
 
-  activeTools.insert(QString("moveButton"), QVariant(tab.m_move->isChecked()));
+  activeTools.insert(QString("moveButton"), QVariant(tab->m_move->isChecked()));
   activeTools.insert(QString("pointerButton"),
-                     QVariant(tab.m_pointer->isChecked()));
+                     QVariant(tab->m_pointer->isChecked()));
   activeTools.insert(QString("ellipseButton"),
-                     QVariant(tab.m_ellipse->isChecked()));
+                     QVariant(tab->m_ellipse->isChecked()));
   activeTools.insert(QString("ringEllipseButton"),
-                     QVariant(tab.m_ring_ellipse->isChecked()));
+                     QVariant(tab->m_ring_ellipse->isChecked()));
   activeTools.insert(QString("ringRectangleButton"),
-                     QVariant(tab.m_ring_rectangle->isChecked()));
+                     QVariant(tab->m_ring_rectangle->isChecked()));
   activeTools.insert(QString("freeDrawButton"),
-                     QVariant(tab.m_free_draw->isChecked()));
+                     QVariant(tab->m_free_draw->isChecked()));
   map.insert(QString("activeTools"), QVariant(activeTools));
 
   activeType.insert(QString("maskingOn"),
-                    QVariant(tab.m_masking_on->isChecked()));
+                    QVariant(tab->m_masking_on->isChecked()));
   activeType.insert(QString("groupingOn"),
-                    QVariant(tab.m_grouping_on->isChecked()));
-  activeType.insert(QString("roiOn"), QVariant(tab.m_roi_on));
+                    QVariant(tab->m_grouping_on->isChecked()));
+  activeType.insert(QString("roiOn"), QVariant(tab->m_roi_on->isChecked()));
   map.insert(QString("activeType"), QVariant(activeType));
 
   // Save the masks applied to view but not saved to a workspace
-  auto wsName =
-      m_instrWidget->getWorkspaceName().toStdString() + "MaskView.xml";
-  bool success = saveMaskViewToProject(wsName);
+  auto wsName = tab->m_instrWidget->getWorkspaceName() + "MaskView.xml";
+  bool success = tab->saveMaskViewToProject(wsName.toStdString(), m_projectPath);
   map.insert(QString("maskWorkspaceSaved"), QVariant(success));
   if (success) {
     map.insert(QString("maskWorkspaceName"), QVariant(wsName));
@@ -153,15 +173,17 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
 
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {
-  QMap<QString, QVariant> map();
+  QMap<QString, QVariant> map;
 
   // Save whether a button is active or not
   map.insert(QString("zoom"), QVariant(tab->m_zoom->isChecked()));
   map.insert(QString("edit"), QVariant(tab->m_edit->isChecked()));
   map.insert(QString("ellipse"), QVariant(tab->m_ellipse->isChecked()));
   map.insert(QString("rectangle"), QVariant(tab->m_rectangle->isChecked()));
-  map.insert(QString("ringEllipse"), QVariant(tab->m_ring_ellipse->isChecked()));
-  map.insert(QString("ringRectangle"), QVariant(tab->m_ring_rectangle->isChecked()));
+  map.insert(QString("ringEllipse"),
+             QVariant(tab->m_ring_ellipse->isChecked()));
+  map.insert(QString("ringRectangle"),
+             QVariant(tab->m_ring_rectangle->isChecked()));
   map.insert(QString("freeDraw"), QVariant(tab->m_free_draw->isChecked()));
   map.insert(QString("one"), QVariant(tab->m_one->isChecked()));
   map.insert(QString("tube"), QVariant(tab->m_tube->isChecked()));
@@ -173,22 +195,21 @@ InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {
 
 QMap<QString, QVariant> InstrumentWidgetEncoder::encodeActor(
     const std::unique_ptr<InstrumentActor> &obj) {
-  QMap<QString, QVariant> map();
+  QMap<QString, QVariant> map;
 
-  const std::string currentColorMap = getCurrentColorMap().toStdString();
-
-  map.insert(QString("fileName"), QString(currentColorMap));
-  map.insert(QString("binMasks"), this->encodeMaskBinsData(m_maskBinsData));
+  map.insert(QString("fileName"), QVariant(obj->getCurrentColorMap()));
+  map.insert(QString("binMasks"),
+             QVariant(this->encodeMaskBinsData(obj->m_maskBinsData)));
 
   return map;
 }
 
 QList<QVariant>
 InstrumentWidgetEncoder::encodeMaskBinsData(const MaskBinsData &obj) {
-  QList<QVariant> list();
+  QList<QVariant> list;
 
   for (const auto &binMask : obj.m_masks) {
-    list.append(this->encodeBinMask(binMask))
+    list.append(QVariant(this->encodeBinMask(binMask)));
   }
 
   return list;
@@ -196,80 +217,85 @@ InstrumentWidgetEncoder::encodeMaskBinsData(const MaskBinsData &obj) {
 
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeBinMask(const BinMask &obj) {
-  QMap<QString, QVariant> map();
+  QMap<QString, QVariant> map;
 
-  QList<double> range;
-  range.append(obj.start);
-  range.append(obj.end);
-  map.insert(QString("range"), range);
+  QList<QVariant> range;
+  // Convert Doubles to QString 
+  range.append(QVariant(QString("%1").arg(obj.start)));
+  range.append(QVariant(QString("%1").arg(obj.end)));
+  map.insert(QString("range"), QVariant(range));
 
-  QList<size_t> spectra;
+  QList<QVariant> spectra;
   for (const auto &spectrum : obj.spectra) {
-    spectra.append(spectrum)
+    spectra.append(QVariant(quint64(spectrum)));
   }
-  map.insert(QString("spectra"), spectra);
+  map.insert(QString("spectra"), QVariant(spectra));
 
   return map;
 }
 
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
-  QMap<QString, QVariant> map();
+  QMap<QString, QVariant> map;
 
-  map.insert(QString("backgroundColor"), obj.m_backgroundColor);
-  map.insert(QString("shapes"), this->encodeMaskShapes(obj.m_maskShapes));
-  map.insert(QString("alignmentInfo"), this->encodeAlignmentInfo(obj));
+  map.insert(QString("backgroundColor"), QVariant(obj->m_backgroundColor));
+  map.insert(QString("shapes"),
+             QVariant(this->encodeMaskShapes(obj->m_maskShapes)));
+  map.insert(QString("alignmentInfo"),
+             QVariant(this->encodeAlignmentInfo(obj)));
 
   return map;
 }
 
 QList<QVariant>
 InstrumentWidgetEncoder::encodeMaskShapes(const Shape2DCollection &obj) {
-  QList<QVariant> list();
+  QList<QVariant> list;
 
   for (const auto &shape : obj.m_shapes) {
-    list.append(this->encodeShape(shape));
+    list.append(QVariant(this->encodeShape(shape)));
   }
 
   return list;
 }
 
 QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeShape(const Shape2D &obj) {
-  QMap<QString, QVariant> map();
+InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
+  QMap<QString, QVariant> map;
 
-  map.insert(QString("properties"), this->encodeShapeProperties(obj));
-  map.insert(QString("color"), obj.getColor());
-  map.insert(QString("fillColor"), obj.getFillColor());
+  map.insert(QString("properties"), QVariant(this->encodeShapeProperties(obj)));
+  map.insert(QString("color"), QVariant(obj->getColor()));
+  map.insert(QString("fillColor"), QVariant(obj->getFillColor()));
 
   return map;
 }
 
 QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeShapeProperties(const Shape2D &obj) {
-  QMap<QString, QVariant> map();
+InstrumentWidgetEncoder::encodeShapeProperties(const Shape2D *obj) {
+  QMap<QString, QVariant> map;
 
-  map.insert(QString("scalable"), QVariant(obj.m_scalable));
-  map.insert(QString("editing"), QVariant(obj.m_editing));
-  map.insert(QString("selected"), QVariant(obj.m_selected));
-  map.insert(QString("visible"), QVariant(obj.m_visible));
+  map.insert(QString("scalable"), QVariant(obj->m_scalable));
+  map.insert(QString("editing"), QVariant(obj->m_editing));
+  map.insert(QString("selected"), QVariant(obj->m_selected));
+  map.insert(QString("visible"), QVariant(obj->m_visible));
 
   return map;
 }
 
 QMap<QString, QVariant> InstrumentWidgetEncoder::encodeAlignmentInfo(
     const ProjectionSurface_sptr &obj) {
-  QMap<QString, QVariant> map();
+  QMap<QString, QVariant> map;
 
-  for (const auto &item : obj.m_selectedAlignmentPlane) {
+  for (const auto &item : obj->m_selectedAlignmentPlane) {
     const auto qLab = item.first;
-    QList qLabList();
-    qLabList.append(qLab.x());
-    qLabList.append(qLab.Y());
-    qLabList.append(qLab.Z());
-    map.insert(QString("qLab"), qLabList);
-    map.insert(QString("marker"), item.second);
+    QList<QVariant> qLabList;
+    qLabList.append(QVariant(qLab.X()));
+    qLabList.append(QVariant(qLab.Y()));
+    qLabList.append(QVariant(qLab.Z()));
+    map.insert(QString("qLab"), QVariant(qLabList));
+    map.insert(QString("marker"), QVariant(item.second));
   }
 
   return map;
 }
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -142,6 +142,7 @@ private: // members
   bool m_usingLayerStore;
 
   friend class InstrumentWidget;
+  friend class InstrumentWidgetEncoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -59,6 +59,7 @@ plugins.setup_library_paths()
 
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
+from workbench.windows.windowfinder import find_all_windows_that_have_an_encoder # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -213,7 +214,7 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project object
-        self.project = Project(GlobalFigureManager)
+        self.project = Project(GlobalFigureManager, find_all_windows_that_have_an_encoder)
 
         # uses default configuration as necessary
         self.readSettings(CONF)

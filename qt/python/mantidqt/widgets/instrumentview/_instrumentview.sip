@@ -25,3 +25,12 @@ public:
   bool overlay(const QString & ws_name);
 };
 
+class InstrumentWidgetEncoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h"
+%End
+public:
+  InstrumentWidgetEncoder();
+  QMap<QString, QVariant> encode(const InstrumentWidget &obj,
+                                 const QString &projectPath) /ReleaseGIL/;
+};

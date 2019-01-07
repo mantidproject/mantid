@@ -187,6 +187,8 @@ private:
   /// Instantiate specifc shapes from a type string
   static Shape2D *loadShape2DFromType(const std::string &type,
                                       const std::string &lines);
+
+  friend class InstrumentWidgetEncoder;
 };
 
 /**

@@ -6,14 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#
-from __future__ import (absolute_import, unicode_literals)
-
-# 3rd party imports
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 # local imports
 from mantidqt.utils.qt import import_qt
 
 # Import widget from C++ wrappers
-InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
-                             'InstrumentWidget')
+InstrumentWidgetEncoder = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
+                                    'InstrumentWidgetEncoder')

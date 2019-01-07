@@ -18,7 +18,12 @@ from mantidqt.project.projectsaver import ProjectSaver
 
 
 class Project(AnalysisDataServiceObserver):
-    def __init__(self, globalfiguremanager_instance):
+    def __init__(self, globalfiguremanager_instance, interface_populating_function):
+        """
+        :param globalfiguremanager_instance: The global figure manager instance used in this project.
+        :param interface_populating_function: The interface populating function which returns a list of lists of windows
+         and encoders
+        """
         super(Project, self).__init__()
         # Has the project been saved, to Access this call .saved
         self.__saved = True
@@ -32,6 +37,8 @@ class Project(AnalysisDataServiceObserver):
 
         self.plot_gfm = globalfiguremanager_instance
         self.plot_gfm.add_observer(self)
+
+        self.interface_populating_function = interface_populating_function
 
     def __get_saved(self):
         return self.__saved
@@ -68,9 +75,10 @@ class Project(AnalysisDataServiceObserver):
     def _save(self):
         workspaces_to_save = AnalysisDataService.getObjectNames()
         plots_to_save = self.plot_gfm.figs
+        interfaces_to_save = self.interface_populating_function()
         project_saver = ProjectSaver(self.project_file_ext)
         project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                   plots_to_save=plots_to_save)
+                                   plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
         self.__saved = True
 
     def _file_dialog(self, accept_mode, file_mode, file_filter=None):

@@ -121,7 +121,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "This instrument appears to contain no detectors",
                          "OK");
   }
@@ -322,7 +322,7 @@ void InstrumentActor::applyMaskWorkspace() {
       // after-replace notification
       // and updates this instrument actor.
     } catch (...) {
-      QMessageBox::warning(nullptr, "MantidPlot - Warning",
+      QMessageBox::warning(nullptr, "Mantid - Warning",
                            "An error accured when applying the mask.", "OK");
     }
   }
@@ -795,7 +795,7 @@ void InstrumentActor::initMaskHelper() const {
     m_maskWorkspace = extractCurrentMask();
   } catch (...) {
     // don't know what to do here yet ...
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "An error occurred when extracting the mask.", "OK");
   }
 }

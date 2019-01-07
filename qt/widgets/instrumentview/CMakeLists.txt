@@ -7,11 +7,11 @@ set ( SRC_FILES
   src/GLColor.cpp
   src/GLObject.cpp
   src/InstrumentActor.cpp
-  src/InstrumentEncoder.cpp
-  src/InstrumentDecoder.cpp
   src/InstrumentTreeModel.cpp
   src/InstrumentTreeWidget.cpp
   src/InstrumentWidget.cpp
+  src/InstrumentWidgetEncoder.cpp
+  src/InstrumentWidgetDecoder.cpp
   src/InstrumentWidgetMaskTab.cpp
   src/InstrumentWidgetPickTab.cpp
   src/InstrumentWidgetRenderTab.cpp
@@ -90,11 +90,11 @@ set ( INC_FILES
   inc/MantidQtWidgets/InstrumentView/GLObject.h
   inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
-  inc/MantidQtWidgets/InstrumentView/InstrumentEncoder.h
-  inc/MantidQtWidgets/InstrumentView/InstrumentDecoder.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h
   inc/MantidQtWidgets/InstrumentView/InstrumentRenderer.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h

@@ -1552,7 +1552,7 @@ void DetectorPlotController::savePlotToWorkspace() {
         actor.sumDetectors(dets, x, y);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       } else {
-        QMessageBox::warning(nullptr, "MantidPlot - Warning",
+        QMessageBox::warning(nullptr, "Mantid - Warning",
                              "Cannot save the stored curves.\nOnly the current "
                              "curve will be saved.");
       }

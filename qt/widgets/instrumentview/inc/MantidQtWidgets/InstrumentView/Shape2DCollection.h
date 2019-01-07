@@ -159,6 +159,7 @@ protected:
   QList<Shape2D *>
       m_selectedShapes; ///< A list of selected shapes (can be moved or deleted)
   bool m_overridingCursor;
+  friend class InstrumentWidgetEncoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

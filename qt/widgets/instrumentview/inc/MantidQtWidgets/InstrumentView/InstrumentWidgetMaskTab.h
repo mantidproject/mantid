@@ -139,7 +139,7 @@ protected:
 
 private:
   /// Save masks applied to the view but not to the workspace
-  bool saveMaskViewToProject(const std::string &name) const;
+  bool saveMaskViewToProject(const std::string &name, const std::string &projectPath = "") const;
   /// Load masks applied to the view but not to the workspace
   void loadMaskViewFromProject(const std::string &name);
   /// Run the LoadMask algorithm to get a MaskWorkspace
@@ -207,6 +207,8 @@ protected:
   QMap<QtProperty *, QString> m_doublePropertyMap;
   QMap<QString, QtProperty *> m_pointPropertyMap;
   QMap<QtProperty *, QString> m_pointComponentsMap;
+
+  friend class InstrumentWidgetEncoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

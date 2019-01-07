@@ -51,6 +51,8 @@ class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
 class InstrumentWidgetMaskTab;
+class InstrumentWidgetPickTab;
+class InstrumentWidgetTreeTab;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
