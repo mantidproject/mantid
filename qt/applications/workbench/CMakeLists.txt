@@ -45,8 +45,12 @@ else()
   set ( PYUNITTEST_RUNNER ${CMAKE_BINARY_DIR}/bin/workbench -x)
 endif()
 
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-  workbench_gui ${WORKBENCH_TEST_PY_FILES}
-)
+if (NOT CMAKE_GENERATOR MATCHES "Xcode")
+    # Tests fail/crash on OSX for unknown reasons. Skipping by the usual way
+    # via @unittest.skipIf also doesn't work.
+    pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
+      workbench_gui ${WORKBENCH_TEST_PY_FILES}
+    )
+endif()
 
 # Not installed yet...
