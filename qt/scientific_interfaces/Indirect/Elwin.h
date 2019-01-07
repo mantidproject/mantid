@@ -29,6 +29,7 @@ private slots:
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
   void unGroupInput(bool error);
+  void updateAvailablePlotSpectra();
   void runClicked();
   void saveClicked();
   void plotClicked();
@@ -43,14 +44,21 @@ private:
                             const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
 
-  void plotResult(QString const &workspaceName);
+  QString getOutputBasename();
 
-  void setRunEnabled(bool enabled);
-  void setPlotResultEnabled(bool enabled);
-  void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
+  void updatePlotSpectrumOptions();
+  void updateAvailablePlotWorkspaces();
+  QString getPlotWorkspaceName() const;
+  void setPlotSpectrumValue(int value);
+  void setPlotSpectrumMinMax(int minimum, int maximum);
+  int getPlotSpectrumIndex() const;
+
+  void setRunIsRunning(const bool &running);
+  void setPlotResultIsPlotting(const bool &plotting);
+  void setButtonsEnabled(const bool &enabled);
+  void setRunEnabled(const bool &enabled);
+  void setPlotResultEnabled(const bool &enabled);
+  void setSaveResultEnabled(const bool &enabled);
 
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;

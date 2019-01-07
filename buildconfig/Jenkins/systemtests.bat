@@ -67,6 +67,12 @@ if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 set USERPROPS_RELEASE=C:\MantidInstall\bin\Mantid.user.properties
 set USERPROPS_NIGHTLY=C:\MantidNightlyInstall\bin\Mantid.user.properties
 del /Q %USERPROPS_RELEASE% %USERPROPS_NIGHTLY%
+:: Remove user settings
+set CONFIGDIR=%APPDATA%\mantidproject
+rmdir /S /Q %CONFIGDIR%
+:: Create the directory to avoid any race conditions
+mkdir %CONFIGDIR%\mantid
+
 :: Turn off any auto updating on startup
 echo UpdateInstrumentDefinitions.OnStartup = 0 > %USERPROPS_RELEASE%
 echo usagereports.enabled = 0 >> %USERPROPS_RELEASE%
@@ -75,9 +81,6 @@ echo CheckMantidVersion.OnStartup = 0 >> %USERPROPS_RELEASE%
 echo UpdateInstrumentDefinitions.OnStartup = 0 > %USERPROPS_NIGHTLY%
 echo usagereports.enabled = 0 >> %USERPROPS_NIGHTLY%
 echo CheckMantidVersion.OnStartup = 0 >> %USERPROPS_NIGHTLY%
-:: Remove user instrument directory
-rmdir /S /Q %APPDATA%\mantidproject\mantid\instrument
-
 
 :: Run
 set PKGDIR=%WORKSPACE%\build
