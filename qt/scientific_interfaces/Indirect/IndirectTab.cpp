@@ -264,19 +264,19 @@ void IndirectTab::plotMultipleSpectra(
  * @param spectraIndex Index of spectrum from each workspace to plot
  */
 void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               int spectraIndex) {
-  if (workspaceNames.isEmpty())
-    return;
+                               int spectraIndex, bool errorBars) {
+  if (!workspaceNames.isEmpty()) {
+    const QString errors = errorBars ? "True" : "False";
 
-  QString pyInput = "from mantidplot import plotSpectrum\n";
+    QString pyInput = "from mantidplot import plotSpectrum\n";
+    pyInput += "plotSpectrum(['";
+    pyInput += workspaceNames.join("','");
+    pyInput += "'], ";
+    pyInput += QString::number(spectraIndex);
+    pyInput += ", error_bars=" + errors + ")\n";
 
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], ";
-  pyInput += QString::number(spectraIndex);
-  pyInput += ")\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
+    m_pythonRunner.runPythonCode(pyInput);
+  }
 }
 
 /**
@@ -285,14 +285,15 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
  *
  * @param workspaceName Names of workspace to plot
  * @param spectraIndex Workspace Index of spectrum to plot
+ * @param errorBars Is true if you want to plot the error bars
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int spectraIndex) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, spectraIndex);
+void IndirectTab::plotSpectrum(const QString &workspaceName, int spectraIndex,
+                               bool errorBars) {
+  if (!workspaceName.isEmpty()) {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotSpectrum(workspaceNames, spectraIndex, errorBars);
+  }
 }
 
 /**
