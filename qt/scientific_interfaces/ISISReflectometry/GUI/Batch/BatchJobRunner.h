@@ -24,9 +24,9 @@ public:
   bool isAutoreducing() const;
 
   void resumeReduction();
-  void pauseReduction();
+  void reductionPaused();
   void resumeAutoreduction();
-  void pauseAutoreduction();
+  void autoreductionPaused();
 
   void progressHandle(const Mantid::API::IAlgorithm *alg, double p,
                       const std::string &msg);

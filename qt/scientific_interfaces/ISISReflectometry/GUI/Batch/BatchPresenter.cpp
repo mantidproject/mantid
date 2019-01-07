@@ -69,9 +69,9 @@ void BatchPresenter::notifyInstrumentChanged(
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
-void BatchPresenter::notifyReductionResumed() { reductionResumed(); }
+void BatchPresenter::notifyReductionResumed() { resumeReduction(); }
 
-void BatchPresenter::notifyReductionPaused() { reductionPaused(); }
+void BatchPresenter::notifyReductionPaused() { pauseReduction(); }
 
 void BatchPresenter::notifyReductionCompletedForGroup(
     GroupData const &group, std::string const &workspaceName) {
@@ -83,9 +83,9 @@ void BatchPresenter::notifyReductionCompletedForRow(
   reductionCompletedForRow(group, workspaceName);
 }
 
-void BatchPresenter::notifyAutoreductionResumed() { autoreductionResumed(); }
+void BatchPresenter::notifyAutoreductionResumed() { resumeAutoreduction(); }
 
-void BatchPresenter::notifyAutoreductionPaused() { autoreductionPaused(); }
+void BatchPresenter::notifyAutoreductionPaused() { pauseAutoreduction(); }
 
 void BatchPresenter::notifyAutoreductionCompleted() {
   autoreductionCompleted();
@@ -98,7 +98,6 @@ void BatchPresenter::notifyBatchFinished(bool error) {
 }
 
 void BatchPresenter::notifyBatchCancelled() {
-  UNUSED_ARG(error);
   reductionPaused();
   m_runsPresenter->notifyRowStateChanged();
 }
@@ -112,10 +111,13 @@ void BatchPresenter::notifyAlgorithmError(std::string const &message) {
   m_runsPresenter->notifyRowStateChanged();
 }
 
-void BatchPresenter::reductionResumed() {
+void BatchPresenter::resumeReduction() {
   m_jobRunner.resumeReduction();
   m_view->executeBatchAlgorithmRunner();
+  reductionResumed();
+}
 
+void BatchPresenter::reductionResumed() {
   // Notify child presenters
   m_savePresenter->reductionResumed();
   m_eventPresenter->reductionResumed();
@@ -124,15 +126,20 @@ void BatchPresenter::reductionResumed() {
   m_runsPresenter->reductionResumed();
 }
 
+void BatchPresenter::pauseReduction() {
+  m_view->batchAlgorithmRunner().cancelBatch();
+}
+
 void BatchPresenter::reductionPaused() {
-  m_jobRunner.pauseReduction();
+  // Update the model
+  m_jobRunner.reductionPaused();
   // Notify child presenters
   m_savePresenter->reductionPaused();
   m_eventPresenter->reductionPaused();
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
-  // Also stop autoreduction
+  // Autoreduction will also have stopped
   autoreductionPaused();
 }
 
@@ -146,8 +153,13 @@ void BatchPresenter::reductionCompletedForRow(
   m_savePresenter->reductionCompletedForRow(group, workspaceName);
 }
 
-void BatchPresenter::autoreductionResumed() {
+void BatchPresenter::resumeAutoreduction() {
   m_jobRunner.resumeAutoreduction();
+  m_view->executeBatchAlgorithmRunner();
+  autoreductionResumed();
+}
+
+void BatchPresenter::autoreductionResumed() {
   // Notify child presenters
   m_savePresenter->autoreductionResumed();
   m_eventPresenter->autoreductionResumed();
@@ -156,8 +168,14 @@ void BatchPresenter::autoreductionResumed() {
   m_runsPresenter->autoreductionResumed();
 }
 
+void BatchPresenter::pauseAutoreduction() {
+  // Update the model
+  m_jobRunner.autoreductionPaused();
+  // Stop processing
+  pauseReduction();
+}
+
 void BatchPresenter::autoreductionPaused() {
-  m_jobRunner.pauseAutoreduction();
   // Notify child presenters
   m_savePresenter->autoreductionPaused();
   m_eventPresenter->autoreductionPaused();

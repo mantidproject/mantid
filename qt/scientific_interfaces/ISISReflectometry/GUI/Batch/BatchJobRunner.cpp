@@ -122,10 +122,13 @@ void BatchJobRunner::resumeReduction() {
     addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner);
 }
 
-void BatchJobRunner::pauseReduction() { m_isProcessing = false; }
+void BatchJobRunner::reductionPaused() { m_isProcessing = false; }
 
-void BatchJobRunner::resumeAutoreduction() { m_isAutoreducing = true; }
+void BatchJobRunner::resumeAutoreduction() {
+  m_isAutoreducing = true;
+  resumeReduction();
+}
 
-void BatchJobRunner::pauseAutoreduction() { m_isAutoreducing = false; }
+void BatchJobRunner::autoreductionPaused() { m_isAutoreducing = false; }
 } // namespace CustomInterfaces
 } // namespace MantidQt

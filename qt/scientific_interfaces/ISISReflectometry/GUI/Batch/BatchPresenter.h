@@ -68,7 +68,9 @@ public:
   bool isAutoreducing() const override;
 
 private:
+  void resumeReduction();
   void reductionResumed();
+  void pauseReduction();
   void reductionPaused();
   void reductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
@@ -76,7 +78,9 @@ private:
   void
   reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
                            std::string const &workspaceName);
+  void resumeAutoreduction();
   void autoreductionResumed();
+  void pauseAutoreduction();
   void autoreductionPaused();
   void autoreductionCompleted();
   void instrumentChanged(const std::string &instName);
