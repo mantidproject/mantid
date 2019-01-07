@@ -104,16 +104,16 @@ class TableWorkspaceDisplayView(QTableWidget):
     def custom_context_menu(self, position):
         menu_main = QMenu()
         plot = QMenu("Plot...", menu_main)
-        plot_line = QAction(self.GRAPH_ICON, "Line", plot)
+        plot_line = QAction("Line", plot)
         plot_line.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR))
 
-        plot_line_with_yerr = QAction(self.GRAPH_ICON, "Line with Y Errors", plot)
+        plot_line_with_yerr = QAction("Line with Y Errors", plot)
         plot_line_with_yerr.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR_WITH_ERR))
 
-        plot_scatter = QAction(self.GRAPH_ICON, "Scatter", plot)
+        plot_scatter = QAction("Scatter", plot)
         plot_scatter.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER))
 
-        plot_line_and_points = QAction(self.GRAPH_ICON, "Line + Symbol", plot)
+        plot_line_and_points = QAction("Line + Symbol", plot)
         plot_line_and_points.triggered.connect(partial(self.presenter.action_plot, PlotType.LINE_AND_SYMBOL))
 
         plot.addAction(plot_line)
@@ -125,28 +125,28 @@ class TableWorkspaceDisplayView(QTableWidget):
         copy_bin_values = QAction(self.COPY_ICON, "Copy", menu_main)
         copy_bin_values.triggered.connect(self.presenter.action_copy_bin_values)
 
-        set_as_x = QAction(self.TBD, "Set as X", menu_main)
+        set_as_x = QAction("Set as X", menu_main)
         set_as_x.triggered.connect(self.presenter.action_set_as_x)
 
-        set_as_y = QAction(self.TBD, "Set as Y", menu_main)
+        set_as_y = QAction("Set as Y", menu_main)
         set_as_y.triggered.connect(self.presenter.action_set_as_y)
 
-        set_as_none = QAction(self.TBD, "Set as None", menu_main)
+        set_as_none = QAction("Set as None", menu_main)
         set_as_none.triggered.connect(self.presenter.action_set_as_none)
 
-        statistics_on_columns = QAction(self.STATISTICS_ON_ROW, "Statistics on Columns", menu_main)
+        statistics_on_columns = QAction("Statistics on Columns", menu_main)
         statistics_on_columns.triggered.connect(self.presenter.action_statistics_on_columns)
 
-        hide_selected = QAction(self.TBD, "Hide Selected", menu_main)
+        hide_selected = QAction("Hide Selected", menu_main)
         hide_selected.triggered.connect(self.presenter.action_hide_selected)
 
-        show_all_columns = QAction(self.TBD, "Show All Columns", menu_main)
+        show_all_columns = QAction("Show All Columns", menu_main)
         show_all_columns.triggered.connect(self.presenter.action_show_all_columns)
 
-        sort_ascending = QAction(self.TBD, "Sort Ascending", menu_main)
+        sort_ascending = QAction("Sort Ascending", menu_main)
         sort_ascending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.AscendingOrder))
 
-        sort_descending = QAction(self.TBD, "Sort Descending", menu_main)
+        sort_descending = QAction("Sort Descending", menu_main)
         sort_descending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.DescendingOrder))
 
         menu_main.addAction(copy_bin_values)
@@ -161,7 +161,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         if num_y_cols > 0:
             menu_set_as_y_err = QMenu("Set error for Y...")
             for col in range(num_y_cols):
-                set_as_y_err = QAction(self.TBD, "Y{}".format(col), menu_main)
+                set_as_y_err = QAction("Y{}".format(col), menu_main)
                 # the column index of the column relative to the whole table, this is necessary
                 # so that later the data of the column marked as error can be retrieved
                 real_column_index = marked_y_cols[col]

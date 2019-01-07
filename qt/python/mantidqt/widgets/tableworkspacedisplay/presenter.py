@@ -14,7 +14,7 @@ from functools import partial
 from qtpy.QtCore import Qt
 
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
-from mantidqt.widgets.common.table_copying import copy_cells, show_mouse_toast, show_no_selection_to_copy_toast
+from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
@@ -76,9 +76,9 @@ class TableWorkspaceDisplay(object):
             self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), item.is_v3d)
             item.update()
         except ValueError:
-            show_mouse_toast("Error: Trying to set invalid data for the column.")
+            self.view.show_warning("Error: Trying to set invalid data for the column.")
         except Exception as x:
-            show_mouse_toast("Unknown error occurred: {}".format(x))
+            self.view.show_warning("Unknown error occurred: {}".format(x))
         finally:
             item.reset()
 
@@ -155,7 +155,7 @@ class TableWorkspaceDisplay(object):
 
         if max_selected and message_if_over_max and num_selected_columns > max_selected:
             # if over the maximum allowed selection
-            show_mouse_toast(message_if_over_max)
+            self.view.show_warning(message_if_over_max)
             raise ValueError("Too many selected")
         elif num_selected_columns == 0:
             # if no columns are selected
@@ -218,7 +218,7 @@ class TableWorkspaceDisplay(object):
         try:
             err_column = ErrorColumn(selected_column, error_for_column, label_index)
         except ValueError as e:
-            show_mouse_toast(e.message)
+            self.view.show_warning(e.message)
             return
 
         self.model.marked_columns.add_y_err(err_column)
@@ -247,7 +247,7 @@ class TableWorkspaceDisplay(object):
         # if there is more than 1 column marked as X in the selection
         # -> show toast to the user and do nothing
         if num_x_cols > 1:
-            show_mouse_toast(self.TOO_MANY_SELECTED_FOR_X)
+            self.view.show_warning(self.TOO_MANY_SELECTED_FOR_X)
             return
         elif num_x_cols == 1:
             # Only 1 X column present in the current selection model
@@ -258,7 +258,7 @@ class TableWorkspaceDisplay(object):
             # -> Use the first column marked as X (if present)
             if len(self.model.marked_columns.as_x) == 0:
                 # If no columns are marked as X show user message and exit
-                show_mouse_toast(self.NO_COLUMN_MARKED_AS_X)
+                self.view.show_warning(self.NO_COLUMN_MARKED_AS_X)
                 return
             selected_x = self.model.marked_columns.as_x[0]
 
@@ -270,7 +270,7 @@ class TableWorkspaceDisplay(object):
             pass
 
         if len(selected_columns) == 0:
-            show_mouse_toast("Cannot plot column against itself.")
+            self.view.show_warning("Cannot plot column against itself.")
             return
 
         self._do_plot(selected_columns, selected_x, plot_type)
@@ -279,7 +279,7 @@ class TableWorkspaceDisplay(object):
         if plot_type == PlotType.LINEAR_WITH_ERR:
             yerr = self.model.marked_columns.find_yerr(selected_columns)
             if len(yerr) != len(selected_columns):
-                show_mouse_toast("There is no associated YErr for each selected Y column.")
+                self.view.show_warning("There is no associated YErr for each selected Y column.")
                 return
         x = self.model.get_column(selected_x)
 
