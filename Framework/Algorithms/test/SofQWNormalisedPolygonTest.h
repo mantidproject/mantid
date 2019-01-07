@@ -7,9 +7,9 @@
 #ifndef MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
 #define MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
 
-#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -109,7 +109,8 @@ public:
     constexpr int nbins{10};
     constexpr bool includeMonitors{false};
     constexpr bool startYNegative{true};
-    auto input = create2DWorkspaceWithFullInstrument(nhist, nbins, includeMonitors, startYNegative);
+    auto input = create2DWorkspaceWithFullInstrument(
+        nhist, nbins, includeMonitors, startYNegative);
     auto &componentInfo = input->mutableComponentInfo();
     for (size_t i = 0; i < nhist; ++i) {
       const std::string name = "pixel-" + std::to_string(i) + ")";
@@ -125,7 +126,8 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "unused_for_child"))
     const std::vector<double> qParams{0., 0.1, 1.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
@@ -134,15 +136,18 @@ public:
     MatrixWorkspace_sptr output = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 10)
     TS_ASSERT_EQUALS(output->blocksize(), nbins)
+    bool atLeastOneBinChecked{false};
     for (size_t i = 0; i < 3; ++i) {
       const auto &Ys = output->y(i);
       for (size_t j = 0; j < nbins; ++j) {
         const auto y = Ys[j];
         if (std::isfinite(y)) {
           TS_ASSERT_DELTA(y, 2., 1e-10);
+          atLeastOneBinChecked = true;
         }
       }
     }
+    TS_ASSERT(atLeastOneBinChecked)
   }
 
   void testCuboidDetectors() {
@@ -152,7 +157,8 @@ public:
     Counts inY(nbins, 2.0);
     Histogram inHistogram(inX, inY);
     MatrixWorkspace_sptr input = create<Workspace2D>(nhist, inHistogram);
-    auto instrument = boost::make_shared<Instrument>("cuboidal_detector_machine");
+    auto instrument =
+        boost::make_shared<Instrument>("cuboidal_detector_machine");
     addDetector(instrument, V3D(0.1, 0., 3.), 0, "det0");
     input->getSpectrum(0).setDetectorID(0);
     addDetector(instrument, V3D(0.2, 0., 3.), 1, "det1");
@@ -167,7 +173,8 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "unused_for_child"))
     const std::vector<double> qParams{0., 0.01, 1.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
@@ -175,15 +182,18 @@ public:
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr output = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(output->blocksize(), nbins)
+    bool atLeastOneBinChecked{false};
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       const auto &Ys = output->y(i);
       for (size_t j = 0; j < nbins; ++j) {
         const auto y = Ys[j];
         if (std::isfinite(y)) {
           TS_ASSERT_DELTA(y, 2.0, 1e-10)
+          atLeastOneBinChecked = true;
         }
       }
     }
+    TS_ASSERT(atLeastOneBinChecked)
   }
 
   void testEAndQBinningParams() {
@@ -295,6 +305,68 @@ public:
       const auto delta = axis->getValue(i + 1) - axis->getValue(i);
       TS_ASSERT_DELTA(delta, dQ, 1e-12);
     }
+  }
+
+  void testDetectorTwoThetaRanges() {
+    constexpr int nhist{2};
+    constexpr int nbins{10};
+    BinEdges inX(nbins + 1, LinearGenerator(-5, 1.23));
+    Counts inY(nbins, 2.0);
+    Histogram inHistogram(inX, inY);
+    MatrixWorkspace_sptr input = create<Workspace2D>(nhist, inHistogram);
+    auto instrument =
+        boost::make_shared<Instrument>("cuboidal_detector_machine");
+    addDetector(instrument, V3D(0.1, 0., 3.), 0, "det0");
+    input->getSpectrum(0).setDetectorID(0);
+    addDetector(instrument, V3D(0.2, 0., 3.), 1, "det1");
+    input->getSpectrum(1).setDetectorID(1);
+    addSource(instrument, V3D(0., 0., -4.), "source");
+    addSample(instrument, V3D(0., 0., 0.), "sample");
+    input->setInstrument(instrument);
+    input->getAxis(0)->setUnit("DeltaE");
+    input->mutableRun().addProperty("Ei", 23.);
+    auto twoThetaRanges = boost::make_shared<TableWorkspace>();
+    twoThetaRanges->addColumn("double", "Max two theta");
+    twoThetaRanges->addColumn("int", "Detector ID");
+    twoThetaRanges->addColumn("double", "Min two theta");
+    twoThetaRanges->setRowCount(nhist);
+    auto column = twoThetaRanges->getColumn("Detector ID");
+    column->cell<int>(0) = 0;
+    column->cell<int>(1) = 1;
+    column = twoThetaRanges->getColumn("Min two theta");
+    column->cell<double>(0) = M_PI / 10.;
+    column->cell<double>(1) = M_PI / 5.;
+    column = twoThetaRanges->getColumn("Max two theta");
+    column->cell<double>(0) = M_PI / 10. + M_PI / 50.;
+    column->cell<double>(1) = M_PI / 5. + M_PI / 30.;
+    SofQWNormalisedPolygon alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "unused_for_child"))
+    const std::vector<double> qParams{0., 0.5, 6.};
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorTwoThetaRanges", twoThetaRanges))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr output = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(output->blocksize(), nbins)
+    bool atLeastOneBinAsserted{false};
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      const auto &Ys = output->y(i);
+      for (size_t j = 0; j < nbins; ++j) {
+        const auto y = Ys[j];
+        if (std::isfinite(y)) {
+          TS_ASSERT_DELTA(y, 2.0, 1e-10)
+          atLeastOneBinAsserted = true;
+        }
+      }
+    }
+    TS_ASSERT(atLeastOneBinAsserted)
   }
 };
 
