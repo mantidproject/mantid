@@ -105,6 +105,7 @@ Bugfixes
 - Fixed a bug in `AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for using the passed on CompressTolerance and CompressWallClockTolerance in the child `CompressEvents <algm-CompressEvents>` algorithm instead of just in the child `AlignAndFocusPowder <algm-AlignAndFocusPowder>` algorithm.
 - `ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``
 - The input validator is fixed in :ref:`MostLikelyMean <algm-MostLikelyMean>` avoiding a segmentation fault.
+- Fixed a bug in `AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to `DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for `AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
 
 Python
 ------
