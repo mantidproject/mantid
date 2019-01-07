@@ -17,6 +17,7 @@ from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # third-party library imports
 from mantid.api import AnalysisDataService
+from mantid.kernel import logger
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
@@ -135,7 +136,8 @@ class WorkspaceWidget(PluginWidget):
                     presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self)
                     presenter.view.show()
                 except ValueError as x:
-                    raise x
+                    logger.error(
+                        "Could not open workspace: {0} with either MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])
