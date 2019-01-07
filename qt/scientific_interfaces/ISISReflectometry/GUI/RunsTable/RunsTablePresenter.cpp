@@ -24,8 +24,8 @@ namespace CustomInterfaces {
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
     double thetaTolerance, ReductionJobs jobs)
-    : m_view(view), m_instruments(instruments), m_model(std::move(jobs)),
-      m_thetaTolerance(thetaTolerance), m_jobViewUpdater(m_view->jobs()) {
+    : m_view(view), m_model(instruments, thetaTolerance, jobs),
+      m_jobViewUpdater(m_view->jobs()) {
   m_view->subscribe(this);
 }
 
@@ -34,10 +34,12 @@ void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
 }
 
 ReductionJobs const &RunsTablePresenter::reductionJobs() const {
-  return m_model;
+  return m_model.reductionJobs();
 }
 
-ReductionJobs &RunsTablePresenter::reductionJobs() { return m_model; }
+ReductionJobs &RunsTablePresenter::reductionJobs() {
+  return m_model.reductionJobs();
+}
 
 void RunsTablePresenter::mergeAdditionalJobs(
     ReductionJobs const &additionalJobs) {
@@ -47,7 +49,7 @@ void RunsTablePresenter::mergeAdditionalJobs(
   std::cout << "Transfering:" << std::endl;
   prettyPrintModel(additionalJobs);
 
-  mergeJobsInto(reductionJobs(), additionalJobs, m_thetaTolerance,
+  mergeJobsInto(reductionJobs(), additionalJobs, m_model.thetaTolerance(),
                 m_jobViewUpdater);
 
   std::cout << "After Transfer:" << std::endl;

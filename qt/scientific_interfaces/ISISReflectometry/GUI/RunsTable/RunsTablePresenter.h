@@ -13,8 +13,7 @@
 #include "IRunsTableView.h"
 #include "JobsViewUpdater.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
-#include "Reduction/Group.h"
-#include "Reduction/ReductionJobs.h"
+#include "Reduction/RunsTable.h"
 #include <memory>
 
 namespace MantidQt {
@@ -142,11 +141,9 @@ private:
   static auto constexpr DEPTH_LIMIT = 2;
 
   IRunsTableView *m_view;
-  std::vector<std::string> m_instruments;
+  RunsTable m_model;
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
       m_clipboard;
-  ReductionJobs m_model;
-  double m_thetaTolerance;
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
 };

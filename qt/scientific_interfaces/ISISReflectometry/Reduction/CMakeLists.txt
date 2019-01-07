@@ -17,6 +17,7 @@ set ( REDUCTION_SRC_FILES
     MonitorCorrections.cpp
     PolarizationCorrections.cpp
     RangeInLambda.cpp
+    RunsTable.cpp
     PerThetaDefaults.cpp
     ValidatePerThetaDefaults.cpp
 )
@@ -46,6 +47,7 @@ set ( REDUCTION_INC_FILES
     PolarizationCorrections.h
     RangeInLambda.h
     ReductionType.h
+    RunsTable.h
     PerThetaDefaults.h
     SummationType.h
 )
