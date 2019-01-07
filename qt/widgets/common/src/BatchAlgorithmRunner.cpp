@@ -33,6 +33,7 @@ BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
 BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
 
 void BatchAlgorithmRunner::addAllObservers() {
+  removeAllObservers();
   m_notificationCenter.addObserver(m_batchCompleteObserver);
   m_notificationCenter.addObserver(m_batchCancelledObserver);
   m_notificationCenter.addObserver(m_algorithmCompleteObserver);
@@ -101,6 +102,9 @@ bool BatchAlgorithmRunner::executeBatch() {
  * Starts executing the queue of algorithms on a separate thread.
  */
 void BatchAlgorithmRunner::executeBatchAsync() {
+  // A previous async process may have left observers running so
+  // make sure we don't add duplicates
+  removeAllObservers();
   addAllObservers();
   Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
 }
