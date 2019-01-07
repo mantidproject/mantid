@@ -16,26 +16,22 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Multiply)
 
-void Multiply::performBinaryOperation(const HistogramData::HistogramX &lhsX,
-                                      const HistogramData::HistogramY &lhsY,
-                                      const HistogramData::HistogramE &lhsE,
-                                      const HistogramData::HistogramY &rhsY,
-                                      const HistogramData::HistogramE &rhsE,
+void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                      const HistogramData::Histogram &rhs,
                                       HistogramData::HistogramY &YOut,
                                       HistogramData::HistogramE &EOut) {
-  UNUSED_ARG(lhsX);
-  const size_t bins = lhsE.size();
+  const size_t bins = lhs.e().size();
   for (size_t j = 0; j < bins; ++j) {
     // Get references to the input Y's
-    const double leftY = lhsY[j];
-    const double rightY = rhsY[j];
+    const double leftY = lhs.y()[j];
+    const double rightY = rhs.y()[j];
 
     // error multiplying two uncorrelated numbers, re-arrange so that you don't
     // get infinity if leftY or rightY == 0
     // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
     // (Sc)2 = (Sa c/a)2 + (Sb c/b)2
     //       = (Sa b)2 + (Sb a)2
-    EOut[j] = sqrt(pow(lhsE[j] * rightY, 2) + pow(rhsE[j] * leftY, 2));
+    EOut[j] = sqrt(pow(lhs.e()[j] * rightY, 2) + pow(rhs.e()[j] * leftY, 2));
 
     // Copy the result last in case one of the input workspaces is also any
     // output
@@ -43,20 +39,17 @@ void Multiply::performBinaryOperation(const HistogramData::HistogramX &lhsX,
   }
 }
 
-void Multiply::performBinaryOperation(const HistogramData::HistogramX &lhsX,
-                                      const HistogramData::HistogramY &lhsY,
-                                      const HistogramData::HistogramE &lhsE,
+void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs,
                                       const double rhsY, const double rhsE,
                                       HistogramData::HistogramY &YOut,
                                       HistogramData::HistogramE &EOut) {
-  UNUSED_ARG(lhsX);
-  const size_t bins = lhsE.size();
+  const size_t bins = lhs.e().size();
   for (size_t j = 0; j < bins; ++j) {
     // Get reference to input Y
-    const double leftY = lhsY[j];
+    const double leftY = lhs.y()[j];
 
     // see comment in the function above for the error formula
-    EOut[j] = sqrt(pow(lhsE[j] * rhsY, 2) + pow(rhsE * leftY, 2));
+    EOut[j] = sqrt(pow(lhs.e()[j] * rhsY, 2) + pow(rhsE * leftY, 2));
 
     // Copy the result last in case one of the input workspaces is also any
     // output

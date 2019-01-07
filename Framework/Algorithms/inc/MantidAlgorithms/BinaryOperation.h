@@ -103,36 +103,25 @@ protected:
   /** Carries out the binary operation on a single spectrum, with another
    *spectrum as the right-hand operand.
    *
-   *  @param lhsX :: The X values, made available if required.
-   *  @param lhsY :: Lhs data values
-   *  @param lhsE :: Lhs error values
-   *  @param rhsY :: Rhs data values
-   *  @param rhsE :: Rhs error values
+   *  @param lhs :: Lhs histogram data
+   *  @param rhs :: Rhs histogram data
    *  @param YOut :: Data values resulting from the operation
    *  @param EOut :: Drror values resulting from the operation
    */
-  virtual void performBinaryOperation(const HistogramData::HistogramX &lhsX,
-                                      const HistogramData::HistogramY &lhsY,
-                                      const HistogramData::HistogramE &lhsE,
-                                      const HistogramData::HistogramY &rhsY,
-                                      const HistogramData::HistogramE &rhsE,
+  virtual void performBinaryOperation(const HistogramData::Histogram &lhs,
+                                      const HistogramData::Histogram &rhs,
                                       HistogramData::HistogramY &YOut,
                                       HistogramData::HistogramE &EOut) = 0;
 
   /** Carries out the binary operation when the right hand operand is a single
    *number.
    *
-   *  @param lhsX :: The X values, made available if required.
-   *  @param lhsY :: Lhs data values
-   *  @param lhsE :: Lhs error values
-   *  @param rhsY :: The rhs data value
-   *  @param rhsE :: The rhs error value
+   *  @param lhs :: Lhs histogram data
+   *  @param rhs :: Rhs histogram data
    *  @param YOut :: Data values resulting from the operation
    *  @param EOut :: Error values resulting from the operation
    */
-  virtual void performBinaryOperation(const HistogramData::HistogramX &lhsX,
-                                      const HistogramData::HistogramY &lhsY,
-                                      const HistogramData::HistogramE &lhsE,
+  virtual void performBinaryOperation(const HistogramData::Histogram &lhs,
                                       const double rhsY, const double rhsE,
                                       HistogramData::HistogramY &YOut,
                                       HistogramData::HistogramE &EOut) = 0;

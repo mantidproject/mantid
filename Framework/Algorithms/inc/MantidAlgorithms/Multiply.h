@@ -45,16 +45,11 @@ public:
 
 private:
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const HistogramData::HistogramX &lhsX,
-                              const HistogramData::HistogramY &lhsY,
-                              const HistogramData::HistogramE &lhsE,
-                              const HistogramData::HistogramY &rhsY,
-                              const HistogramData::HistogramE &rhsE,
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const HistogramData::Histogram &rhs,
                               HistogramData::HistogramY &YOut,
                               HistogramData::HistogramE &EOut) override;
-  void performBinaryOperation(const HistogramData::HistogramX &lhsX,
-                              const HistogramData::HistogramY &lhsY,
-                              const HistogramData::HistogramE &lhsE,
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
                               const double rhsY, const double rhsE,
                               HistogramData::HistogramY &YOut,
                               HistogramData::HistogramE &EOut) override;

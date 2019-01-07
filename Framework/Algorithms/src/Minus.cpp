@@ -17,35 +17,28 @@ DECLARE_ALGORITHM(Minus)
 
 const std::string Minus::alias() const { return "Subtract"; }
 
-void Minus::performBinaryOperation(const HistogramData::HistogramX &lhsX,
-                                   const HistogramData::HistogramY &lhsY,
-                                   const HistogramData::HistogramE &lhsE,
-                                   const HistogramData::HistogramY &rhsY,
-                                   const HistogramData::HistogramE &rhsE,
+void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                   const HistogramData::Histogram &rhs,
                                    HistogramData::HistogramY &YOut,
                                    HistogramData::HistogramE &EOut) {
-  (void)lhsX; // Avoid compiler warning
-  std::transform(lhsY.begin(), lhsY.end(), rhsY.begin(), YOut.begin(),
+  std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(),
                  std::minus<double>());
-  std::transform(lhsE.begin(), lhsE.end(), rhsE.begin(), EOut.begin(),
+  std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(),
                  VectorHelper::SumGaussError<double>());
 }
 
-void Minus::performBinaryOperation(const HistogramData::HistogramX &lhsX,
-                                   const HistogramData::HistogramY &lhsY,
-                                   const HistogramData::HistogramE &lhsE,
+void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
                                    const double rhsY, const double rhsE,
                                    HistogramData::HistogramY &YOut,
                                    HistogramData::HistogramE &EOut) {
-  (void)lhsX; // Avoid compiler warning
-  std::transform(lhsY.begin(), lhsY.end(), YOut.begin(),
+  std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
                  std::bind2nd(std::minus<double>(), rhsY));
   // Only do E if non-zero, otherwise just copy
   if (rhsE != 0)
-    std::transform(lhsE.begin(), lhsE.end(), EOut.begin(),
+    std::transform(lhs.e().begin(), lhs.e().end(), EOut.begin(),
                    std::bind2nd(VectorHelper::SumGaussError<double>(), rhsE));
   else
-    EOut = lhsE;
+    EOut = lhs.e();
 }
 
 // ===================================== EVENT LIST BINARY OPERATIONS
