@@ -69,7 +69,8 @@ private:
   void initAngularCachesNonPSD(const API::MatrixWorkspace &workspace);
   /// Get angles and calculate angular widths.
   void initAngularCachesPSD(const API::MatrixWorkspace &workspace);
-  void initAngularCachesTable(const API::MatrixWorkspace &workspace, const DataObjects::TableWorkspace &widthTable);
+  void initAngularCachesTable(const API::MatrixWorkspace &workspace,
+                              const DataObjects::TableWorkspace &widthTable);
 
   SofQCommon m_EmodeProperties;
   /// Output Q axis

@@ -233,7 +233,6 @@ create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
 void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
               const double lower = -0.5, const double upper = 0.5);
 
-
 /// Create a test workspace with a fully defined instrument.
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
     int nhist, int nbins, bool includeMonitors = false,

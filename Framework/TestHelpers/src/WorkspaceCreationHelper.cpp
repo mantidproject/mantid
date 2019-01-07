@@ -579,10 +579,14 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 
   InstrumentCreationHelper::addSource(instrument, sourcePos, "source");
   InstrumentCreationHelper::addMonitor(instrument, monitorPos, 1, "Monitor");
-  InstrumentCreationHelper::addSample(instrument, samplePos, "some-surface-holder");
-  InstrumentCreationHelper::addDetector(instrument, detectorPos, 2, "point-detector");
-  auto slit1 = InstrumentCreationHelper::addComponent(instrument, slit1Pos, "slit1");
-  auto slit2 = InstrumentCreationHelper::addComponent(instrument, slit2Pos, "slit2");
+  InstrumentCreationHelper::addSample(instrument, samplePos,
+                                      "some-surface-holder");
+  InstrumentCreationHelper::addDetector(instrument, detectorPos, 2,
+                                        "point-detector");
+  auto slit1 =
+      InstrumentCreationHelper::addComponent(instrument, slit1Pos, "slit1");
+  auto slit2 =
+      InstrumentCreationHelper::addComponent(instrument, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, 2, nBins, deltaX);
   workspace->setInstrument(instrument);
@@ -627,7 +631,8 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
       "0,0,0"));
 
   InstrumentCreationHelper::addSource(instrument, sourcePos, "source");
-  InstrumentCreationHelper::addSample(instrument, samplePos, "some-surface-holder");
+  InstrumentCreationHelper::addSample(instrument, samplePos,
+                                      "some-surface-holder");
   InstrumentCreationHelper::addMonitor(instrument, monitorPos, 1, "Monitor");
 
   const int nDet = nSpectra - 1;
@@ -635,10 +640,13 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
   for (int i = 0; i < nDet; ++i) {
     const double y = minY + i * detSize;
     const V3D pos{detectorCenterPos.X(), y, detectorCenterPos.Z()};
-    InstrumentCreationHelper::addDetector(instrument, pos, i + 2, "point-detector");
+    InstrumentCreationHelper::addDetector(instrument, pos, i + 2,
+                                          "point-detector");
   }
-  auto slit1 = InstrumentCreationHelper::addComponent(instrument, slit1Pos, "slit1");
-  auto slit2 = InstrumentCreationHelper::addComponent(instrument, slit2Pos, "slit2");
+  auto slit1 =
+      InstrumentCreationHelper::addComponent(instrument, slit1Pos, "slit1");
+  auto slit2 =
+      InstrumentCreationHelper::addComponent(instrument, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
@@ -664,7 +672,8 @@ void createInstrumentForWorkspaceWithDistances(
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
-    InstrumentCreationHelper::addDetector(instrument, detectorPositions[i], i, buffer.str());
+    InstrumentCreationHelper::addDetector(instrument, detectorPositions[i], i,
+                                          buffer.str());
 
     // Link it to the workspace
     workspace->getSpectrum(i).addDetectorID(i);
