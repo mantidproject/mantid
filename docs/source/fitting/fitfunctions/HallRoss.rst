@@ -15,7 +15,7 @@ associated long range diffusive motions of molecules.
 
 The Hall-Ross Jump diffusion model [1]_ has the form:
 
-.. math:: Gamma(Q) = (1-exp(-l*Q^2))/tau
+.. math:: Gamma(Q) = \frac{\hbar}{\tau} \cdot (1-exp(-l*Q^2))
 
 .. attributes::
 

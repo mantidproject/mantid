@@ -18,7 +18,7 @@ from scipy import constants
 
 
 class TeixeiraWater(IFunction1D):
-    
+
     planck_constant = constants.Planck / constants.e * 1E15  # meV*psec
     hbar = planck_constant / (2 * np.pi)  # meV * ps  = ueV * ns
 
@@ -29,16 +29,16 @@ class TeixeiraWater(IFunction1D):
         # Active fitting parameters
         self.declareParameter("Tau", 1.0, 'Residence time')
         self.declareParameter("L", 1.5, 'Jump length')
-       
+
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
-        length = self.getParameterValue("L")    
+        length = self.getParameterValue("L")
         xvals = np.array(xvals)
 
         with np.errstate(divide='ignore'):
             hwhm = self.hbar * xvals * xvals * length / (tau * (1 + xvals * xvals * length))
         return hwhm
-    
+
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
