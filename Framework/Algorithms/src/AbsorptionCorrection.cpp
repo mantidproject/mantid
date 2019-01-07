@@ -138,6 +138,11 @@ void AbsorptionCorrection::exec() {
 
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
+  if (m_L1s.empty()) {
+    throw std::runtime_error(
+        "Failed to define any initial scattering gauge volume for geometry");
+  }
+
   // If sample not at origin, shift cached positions.
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const V3D samplePos = spectrumInfo.samplePosition();
