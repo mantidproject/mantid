@@ -108,9 +108,9 @@ public:
   /**Get constant access to shared pointer containing workspace porperties */
   API::LogManager_const_sptr getLogs() const override { return m_LogManager; }
 
-  /** get access to column vecotor for index i.
+  /** get access to column vector for index i.
    *
-   *  The operation is unsafe with regards to the operaitons resizing obtained
+   *  The operation is unsafe with regards to the operations resizing obtained
    *vector.
    *   This will destroy all table ws internal coherency. DO NOT ABUSE!
    *  e.g.: resise/reserve are unsafe
@@ -124,7 +124,7 @@ public:
                                "to proper TableCol type");
     }
   }
-  /** get constant access to column vecotor for index i. */
+  /** get constant access to column vector for index i. */
   template <class T> const std::vector<T> &getColVector(size_t index) const {
     auto pTableCol = dynamic_cast<TableColumn<T> *>(m_columns[index].get());
     if (pTableCol)
@@ -136,7 +136,7 @@ public:
   }
   /** get access to the column vector for column with given name .
    *
-   *  The operation is unsafe with regards to the operaitons resizing obtained
+   *  The operation is unsafe with regards to the operations resizing obtained
    *vector.
    *  This will destroy all table ws internal coherency. DO NOT ABUSE!
    *  e.g.: resise/reserve are unsafe
