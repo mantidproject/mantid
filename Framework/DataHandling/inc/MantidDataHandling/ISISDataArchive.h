@@ -30,12 +30,13 @@ public:
   std::string
   getArchivePath(const std::set<std::string> &filenames,
                  const std::vector<std::string> &exts) const override;
+  /// Public and virtual for testing purposes
+  virtual std::string getCorrectExtension(const std::string &path,
+                                  const std::vector<std::string> &exts) const;
 
 private:
   /// Queries the archive & returns the path to a single file.
   std::string getPath(const std::string &fName) const;
-  std::string getCorrectExtension(const std::string &path,
-                                  const std::vector<std::string> &exts) const;
 };
 } // namespace DataHandling
 } // namespace Mantid
