@@ -26,11 +26,12 @@ const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
 
 class MockgetCorrectExtension : public ISISDataArchive {
 public:
-    std::string getCorrectExtension(const std::string &path,
-                                  const std::vector<std::string> &exts) const override {
-      (void)exts;
-      return path;
-    }
+  std::string
+  getCorrectExtension(const std::string &path,
+                      const std::vector<std::string> &exts) const override {
+    (void)exts;
+    return path;
+  }
 };
 
 class ISISDataArchiveTest : public CxxTest::TestSuite {
@@ -51,7 +52,7 @@ public:
     if (path.empty()) {
       TS_FAIL("Returned path was empty.");
     } else {
-    TS_ASSERT_EQUALS(path.substr(path.size() - 18, 10), "cycle_98_0");
+      TS_ASSERT_EQUALS(path.substr(path.size() - 18, 10), "cycle_98_0");
     }
   }
 
@@ -62,19 +63,23 @@ public:
    */
   void xtestgetCorrectExtension() {
     std::string path;
-    if (strcmp(URL_PREFIX,"http://data.isis.rl.ac.uk/where.py/windir?name=")==0) {
-      path = "\\isis.cclrc.ac.uk\\inst$\\ndxhrpd\\instrument\\data\\cycle_98_0\\HRP00273";
+    if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
+        0) {
+      path = "\\isis.cclrc.ac.uk\\inst$\\ndxhrpd\\instrument\\data\\cycle_98_"
+             "0\\HRP00273";
     } else {
       path = "/archive/ndxhrpd/Instrument/data/cycle_98_0/HRP00273";
     }
     ISISDataArchive arch;
 
     const std::vector<std::string> correct_exts = {".RAW"};
-    const std::string rawExtension = arch.getCorrectExtension(path, correct_exts);
+    const std::string rawExtension =
+        arch.getCorrectExtension(path, correct_exts);
     TS_ASSERT_EQUALS(rawExtension, path + ".RAW");
 
     const std::vector<std::string> incorrect_exts = {".so", ".txt"};
-    const std::string emptyString = arch.getCorrectExtension(path, incorrect_exts);
+    const std::string emptyString =
+        arch.getCorrectExtension(path, incorrect_exts);
     TS_ASSERT_EQUALS(emptyString, "");
   }
 
