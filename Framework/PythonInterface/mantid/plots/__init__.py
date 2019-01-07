@@ -225,7 +225,7 @@ class MantidAxes(Axes):
             logger.debug('using plotfunctions')
 
             def _data_update(line2d, workspace):
-                x, y, _ = plotfunctions._plot_impl(self, workspace, kwargs)
+                x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
                 line2d.set_data(x, y)
                 self.relim()
                 self.autoscale()

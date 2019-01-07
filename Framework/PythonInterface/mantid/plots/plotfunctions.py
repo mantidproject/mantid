@@ -67,15 +67,25 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
 # Plot functions
 # ========================================================
 
-def _plot_impl(axes, workspace, kwargs):
+def _plot_impl(axes, workspace, args, kwargs):
     """
     Compute data and labels for plot. Used by workspace
     replacement handlers to recompute data. See plot for
     argument details
     """
-    x, y, _, _, kwargs = _get_data_for_plot(axes, workspace, kwargs)
-    _setLabels1D(axes, workspace)
-    return x, y, kwargs
+    if 'LogName' in kwargs:
+        (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
+        axes.set_ylabel('{0} ({1})'.format(LogName, units))
+        axes.set_xlabel('Time (s)')
+        if FullTime:
+            axes.xaxis_date()
+            axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
+            axes.set_xlabel('Time')
+        kwargs['linestyle'] = 'steps-post'
+    else:
+        x, y, _, _, kwargs = _get_data_for_plot(axes, workspace, kwargs)
+        _setLabels1D(axes, workspace)
+    return x, y, args, kwargs
 
 
 def plot(axes, workspace, *args, **kwargs):
@@ -116,18 +126,7 @@ def plot(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    if 'LogName' in kwargs:
-        (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
-        axes.set_ylabel('{0} ({1})'.format(LogName, units))
-        axes.set_xlabel('Time (s)')
-        if FullTime:
-            axes.xaxis_date()
-            axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
-            axes.set_xlabel('Time')
-        kwargs['linestyle'] = 'steps-post'
-        return axes.plot(x, y, *args, **kwargs)
-
-    x, y, kwargs = _plot_impl(axes, workspace, kwargs)
+    x, y, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
     return axes.plot(x, y, **kwargs)
 
 
