@@ -102,7 +102,8 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
  * @param name :: name of the component
  * @return a component pointer
  */
-ObjComponent *addComponent(Instrument_sptr &instrument, const V3D &position,
+ObjComponent *addComponent(Mantid::Geometry::Instrument_sptr &instrument,
+                           const Mantid::Kernel::V3D &position,
                            const std::string &name) {
   ObjComponent *component = new ObjComponent(name);
   component->setPos(position);
@@ -116,8 +117,8 @@ ObjComponent *addComponent(Instrument_sptr &instrument, const V3D &position,
  * @param position :: position of the sample
  * @param name :: name of the sample
  */
-void addSample(Instrument_sptr &instrument, const V3D &position,
-               const std::string &name) {
+void addSample(Mantid::Geometry::Instrument_sptr &instrument,
+               const Mantid::Kernel::V3D &position, const std::string &name) {
   auto sample = addComponent(instrument, position, name);
   instrument->markAsSamplePos(sample);
 }
@@ -128,8 +129,8 @@ void addSample(Instrument_sptr &instrument, const V3D &position,
  * @param position :: position of the source
  * @param name :: name of the source
  */
-void addSource(Instrument_sptr &instrument, const V3D &position,
-               const std::string &name) {
+void addSource(Mantid::Geometry::Instrument_sptr &instrument,
+               const Mantid::Kernel::V3D &position, const std::string &name) {
   auto source = addComponent(instrument, position, name);
   instrument->markAsSource(source);
 }
@@ -141,7 +142,8 @@ void addSource(Instrument_sptr &instrument, const V3D &position,
  * @param ID :: identification number of the monitor
  * @param name :: name of the monitor
  */
-void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
+void addMonitor(Mantid::Geometry::Instrument_sptr &instrument,
+                const Mantid::Kernel::V3D &position, const int ID,
                 const std::string &name) {
   Detector *monitor = new Detector(name, ID, nullptr);
   monitor->setPos(position);
@@ -156,7 +158,8 @@ void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
  * @param ID :: identification number of the detector
  * @param name :: name of the detector
  */
-void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
+void addDetector(Mantid::Geometry::Instrument_sptr &instrument,
+                 const Mantid::Kernel::V3D &position, const int ID,
                  const std::string &name) {
   // Where 0.01 is half detector width etc.
   Detector *detector = new Detector(
