@@ -304,9 +304,11 @@ def add_mantid_concept_links(post_processed_rst):
                 'Workspace', 'Workspace2D', 'WorkspaceGroup']
     post_processed_rst = add_local_links(post_processed_rst, concepts, "")
     algorithms = mantid.AlgorithmFactory.getRegisteredAlgorithms(False).keys()
-    post_processed_rst = add_local_links(post_processed_rst, algorithms, "algm-")
+    if len(algorithms) > 0:
+        post_processed_rst = add_local_links(post_processed_rst, algorithms, "algm-")
     fitfunctions = mantid.FunctionFactory.getFunctionNames()
-    post_processed_rst = add_local_links(post_processed_rst, fitfunctions,"func-")
+    if len(fitfunctions) > 0:
+        post_processed_rst = add_local_links(post_processed_rst, fitfunctions,"func-")
 
     return post_processed_rst
 
