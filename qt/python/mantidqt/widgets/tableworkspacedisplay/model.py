@@ -10,16 +10,10 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
-import six
 
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
 from mantid.kernel import V3D
 from mantidqt.widgets.tableworkspacedisplay.marked_columns import MarkedColumns
-
-if six.PY2:
-    from functools32 import lru_cache
-else:
-    from functools import lru_cache
 
 
 class TableWorkspaceDisplayModel:
@@ -125,7 +119,6 @@ class TableWorkspaceDisplayModel:
     def get_column_header(self, index):
         return self.get_column_headers()[index]
 
-    @lru_cache(maxsize=1)
     def is_peaks_workspace(self):
         return isinstance(self.ws, PeaksWorkspace)
 
