@@ -42,15 +42,16 @@ ReductionJobs &RunsTablePresenter::reductionJobs() { return m_model; }
 void RunsTablePresenter::mergeAdditionalJobs(
     ReductionJobs const &additionalJobs) {
   std::cout << "Before Transfer:" << std::endl;
-  prettyPrintModel(m_model);
+  prettyPrintModel(reductionJobs());
 
   std::cout << "Transfering:" << std::endl;
   prettyPrintModel(additionalJobs);
 
-  mergeJobsInto(m_model, additionalJobs, m_thetaTolerance, m_jobViewUpdater);
+  mergeJobsInto(reductionJobs(), additionalJobs, m_thetaTolerance,
+                m_jobViewUpdater);
 
   std::cout << "After Transfer:" << std::endl;
-  prettyPrintModel(m_model);
+  prettyPrintModel(reductionJobs());
 }
 
 void RunsTablePresenter::removeRowsFromModel(
@@ -59,7 +60,7 @@ void RunsTablePresenter::removeRowsFromModel(
   for (auto row = rows.crbegin(); row != rows.crend(); ++row) {
     auto const groupIndex = groupOf(*row);
     auto const rowIndex = rowOf(*row);
-    removeRow(m_model, groupIndex, rowIndex);
+    removeRow(reductionJobs(), groupIndex, rowIndex);
   }
 }
 
@@ -99,7 +100,7 @@ void RunsTablePresenter::removeGroupsFromModel(
     std::vector<int> const &groupIndicesOrderedLowToHigh) {
   for (auto it = groupIndicesOrderedLowToHigh.crbegin();
        it < groupIndicesOrderedLowToHigh.crend(); ++it)
-    removeGroup(m_model, *it);
+    removeGroup(reductionJobs(), *it);
 }
 
 void RunsTablePresenter::notifyReductionResumed() {
@@ -124,7 +125,7 @@ void RunsTablePresenter::notifyInsertRowRequested() {
 void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
   try {
     auto regexFilter =
-        filterFromRegexString(filterString, m_view->jobs(), m_model);
+        filterFromRegexString(filterString, m_view->jobs(), reductionJobs());
     m_view->jobs().filterRowsBy(std::move(regexFilter));
   } catch (boost::regex_error &) {
   }
@@ -190,7 +191,7 @@ void RunsTablePresenter::appendRowsToGroupsInView(
 void RunsTablePresenter::appendRowsToGroupsInModel(
     std::vector<int> const &groupIndices) {
   for (auto const &groupIndex : groupIndices)
-    appendEmptyRow(m_model, groupIndex);
+    appendEmptyRow(reductionJobs(), groupIndex);
 }
 
 void RunsTablePresenter::notifyInsertGroupRequested() {
@@ -207,7 +208,7 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
 }
 
 void RunsTablePresenter::appendEmptyGroupInModel() {
-  appendEmptyGroup(m_model);
+  appendEmptyGroup(reductionJobs());
 }
 
 void RunsTablePresenter::appendEmptyGroupInView() {
@@ -218,11 +219,11 @@ void RunsTablePresenter::appendEmptyGroupInView() {
 }
 
 void RunsTablePresenter::insertEmptyGroupInModel(int beforeGroup) {
-  insertEmptyGroup(m_model, beforeGroup);
+  insertEmptyGroup(reductionJobs(), beforeGroup);
 }
 
 void RunsTablePresenter::insertEmptyRowInModel(int groupIndex, int beforeRow) {
-  insertEmptyRow(m_model, groupIndex, beforeRow);
+  insertEmptyRow(reductionJobs(), groupIndex, beforeRow);
 }
 
 void RunsTablePresenter::insertEmptyGroupInView(int beforeGroup) {
@@ -288,7 +289,7 @@ void RunsTablePresenter::updateGroupName(
   assertOrThrow(column == 0,
                 "Changed value of cell which should be uneditable");
   auto const groupIndex = groupOf(itemIndex);
-  if (!setGroupName(m_model, groupIndex, newValue)) {
+  if (!setGroupName(reductionJobs(), groupIndex, newValue)) {
     auto cell = m_view->jobs().cellAt(itemIndex, column);
     cell.setContentText(oldValue);
     m_view->jobs().setCellAt(itemIndex, column, cell);
@@ -301,8 +302,9 @@ void RunsTablePresenter::updateRowField(
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
   auto rowValidationResult =
-      validateRow(m_model, cellTextFromViewAt(itemIndex));
-  updateRow(m_model, groupIndex, rowIndex, rowValidationResult.validElseNone());
+      validateRow(reductionJobs(), cellTextFromViewAt(itemIndex));
+  updateRow(reductionJobs(), groupIndex, rowIndex,
+            rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
   } else {
@@ -348,15 +350,15 @@ void RunsTablePresenter::removeRowsAndGroupsFromModel(
     auto const groupIndex = groupOf(*location);
     if (isRowLocation(*location)) {
       auto const rowIndex = rowOf(*location);
-      removeRow(m_model, groupIndex, rowIndex);
+      removeRow(reductionJobs(), groupIndex, rowIndex);
     } else if (isGroupLocation(*location)) {
-      removeGroup(m_model, groupIndex);
+      removeGroup(reductionJobs(), groupIndex);
     }
   }
 }
 
 void RunsTablePresenter::removeAllRowsAndGroupsFromModel() {
-  removeAllRowsAndGroups(m_model);
+  removeAllRowsAndGroups(reductionJobs());
 }
 
 void RunsTablePresenter::removeRowsAndGroupsFromView(
@@ -494,7 +496,7 @@ void RunsTablePresenter::showCellsAsWarningStateInView(
 
 void RunsTablePresenter::notifyRowStateChanged() {
   int groupIndex = 0;
-  for (auto &group : m_model.groups()) {
+  for (auto &group : reductionJobs().groups()) {
     auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
     clearStateCellStyling(groupPath);
 
@@ -528,7 +530,7 @@ void RunsTablePresenter::notifyRowStateChanged() {
     }
     ++groupIndex;
   }
-  if (m_model.groups().size() > 1) {
+  if (reductionJobs().groups().size() > 1) {
     auto itemIndex = MantidWidgets::Batch::RowLocation({1});
     showCellsAsErrorStateInView(itemIndex, "this is a test error message");
   }
