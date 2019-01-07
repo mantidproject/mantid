@@ -29,6 +29,7 @@ import subprocess
 import sys
 import tempfile
 import urllib2
+sys.path.append('/Applications/MantidPlot.app/Contents/MacOS')
 
 import mantid
 
@@ -48,6 +49,8 @@ def parse_arguments(argv):
                         help='Provide a reference link')
     parser.add_argument('--index_url', default='http://www.mantidproject.org/',
                         help='The url of the main wiki landing page')
+    parser.add_argument('--page_handle',
+                        help='The page handle to add at the top of the rst pages')
     return parser.parse_args(argv)
 
 # ------------------------------------------------------------------------------
@@ -171,10 +174,21 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
     as described in the module documentation
     """
     post_processed_rst = pandoc_rst#fix_underscores_in_ref_links(pandoc_rst)
+    post_processed_rst = add_page_handle(post_processed_rst, 
+                                         post_process_args["page_handle"])
     post_processed_rst, image_names = fix_image_links(post_processed_rst, wiki_markup,
                                                       post_process_args["rel_img_dir"])
     download_images_from_wiki(wiki_url, image_names, post_process_args["img_dir"])
     return add_mantid_concept_links(post_processed_rst)
+
+# ------------------------------------------------------------------------------
+
+
+def add_page_handle(pandoc_rst, page_handle):
+    """Add a handle on the top line of the page - this is the page name of the wiki page
+    and should match references written by default in the conversion"""
+    pandoc_rst = ".. _" + page_handle + ": \n \n " + pandoc_rst
+    return pandoc_rst
 
 # ------------------------------------------------------------------------------
 
@@ -360,7 +374,13 @@ def main(argv):
             img_dir = os.path.normpath(os.path.join(output_dir, rel_img_dir))
         else:
             rel_img_dir, img_dir = None, None
-        post_process_args = {"rel_img_dir": rel_img_dir, "img_dir": img_dir}
+        if not args.page_handle:
+            page_handle = args.pagename
+        else:
+            page_handle = args.page_handle
+
+        post_process_args = {"rel_img_dir": rel_img_dir, "img_dir": img_dir, "page_handle":
+                page_handle}
         display_debug("Post processing arguments: '{}'".format(post_process_args))
         rst_text = to_rst(wiki_url, post_process_args)
         if args.output_file:
