@@ -72,6 +72,23 @@ State Row::state() const { return m_itemState.state(); }
 
 std::string Row::message() const { return m_itemState.message(); }
 
+bool Row::requiresProcessing(bool reprocessFailed) const {
+  switch (state()) {
+  case State::NOT_STARTED:
+    return true;
+  case State::STARTING:
+  case State::RUNNING: // fall through
+  case State::SUCCESS: // fall through
+  case State::WARNING: // fall through
+    return false;
+  case State::ERROR:
+    return reprocessFailed;
+    // Don't include default so that the compiler warns if a value is not
+    // handled
+  }
+  return false;
+}
+
 void Row::setProgress(double p, std::string const &msg) {
   m_itemState.setProgress(p, msg);
 }

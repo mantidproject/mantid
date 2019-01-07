@@ -28,8 +28,7 @@ public:
   void resumeAutoreduction();
   void autoreductionPaused();
 
-  void progressHandle(const Mantid::API::IAlgorithm *alg, double p,
-                      const std::string &msg);
+  void setReprocessFailedItems(bool reprocessFailed);
 
 private slots:
   void rowReductionComplete(bool error);
@@ -38,7 +37,10 @@ private:
   Batch m_batch;
   bool m_isProcessing;
   bool m_isAutoreducing;
+  bool m_reprocessFailed;
   API::BatchAlgorithmRunner &m_batchAlgoRunner;
+
+  void setUpBatchAlgorithmRunner();
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

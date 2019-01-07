@@ -92,10 +92,11 @@ void addAlgorithmForRow(Row &row, Batch const &model,
 }
 
 void addAlgorithmsForGroup(Group &group, Batch const &model,
-                           BatchAlgorithmRunner &batchAlgoRunner) {
+                           BatchAlgorithmRunner &batchAlgoRunner,
+                           bool reprocessFailed) {
   auto &rows = group.rows();
   for (auto &row : rows) {
-    if (row)
+    if (row && row->requiresProcessing(reprocessFailed))
       addAlgorithmForRow(row.get(), model, batchAlgoRunner);
   }
 }
@@ -104,7 +105,7 @@ void addAlgorithmsForGroup(Group &group, Batch const &model,
 BatchJobRunner::BatchJobRunner(Batch batch,
                                BatchAlgorithmRunner &batchAlgoRunner)
     : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false),
-      m_batchAlgoRunner(batchAlgoRunner) {
+      m_reprocessFailed(false), m_batchAlgoRunner(batchAlgoRunner) {
   m_batchAlgoRunner.stopOnFailure(false);
 }
 
@@ -114,21 +115,31 @@ bool BatchJobRunner::isAutoreducing() const { return m_isAutoreducing; }
 
 void BatchJobRunner::resumeReduction() {
   m_isProcessing = true;
-
-  m_batchAlgoRunner.clearQueue();
-
-  auto &groups = m_batch.reductionJobs().groups();
-  for (auto &group : groups)
-    addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner);
+  m_reprocessFailed = false;
+  setUpBatchAlgorithmRunner();
 }
 
 void BatchJobRunner::reductionPaused() { m_isProcessing = false; }
 
 void BatchJobRunner::resumeAutoreduction() {
   m_isAutoreducing = true;
-  resumeReduction();
+  m_isProcessing = true;
+  m_reprocessFailed = true;
+  setUpBatchAlgorithmRunner();
 }
 
 void BatchJobRunner::autoreductionPaused() { m_isAutoreducing = false; }
+
+void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
+  m_reprocessFailed = reprocessFailed;
+}
+
+void BatchJobRunner::setUpBatchAlgorithmRunner() {
+  m_batchAlgoRunner.clearQueue();
+
+  auto &groups = m_batch.reductionJobs().groups();
+  for (auto &group : groups)
+    addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner, m_reprocessFailed);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

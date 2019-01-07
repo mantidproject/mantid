@@ -47,6 +47,7 @@ public:
 
   State state() const;
   std::string message() const;
+  bool requiresProcessing(bool reprocessFailed) const;
 
 private:
   std::vector<std::string> m_runNumbers;
