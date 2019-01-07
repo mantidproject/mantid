@@ -26,8 +26,15 @@
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
+
 #include <cstring>
 #include <vector>
+
+#if PY_MAJOR_VERSION >= 3
+#define FROM_CSTRING PyUnicode_FromString
+#else
+#define FROM_CSTRING PyString_FromString
+#endif
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
@@ -309,7 +316,7 @@ PyObject *columnTypes(ITableWorkspace &self) {
   for (int col = 0; col < numCols; col++) {
     Mantid::API::Column_const_sptr column = self.getColumn(col);
     const std::type_info &typeID = column->get_type_info();
-    if (PyList_SetItem(list, col, PyString_FromString(typeID.name()))) {
+    if (PyList_SetItem(list, col, FROM_CSTRING(typeID.name()))) {
       throw std::runtime_error("Error while building list");
     }
   }
