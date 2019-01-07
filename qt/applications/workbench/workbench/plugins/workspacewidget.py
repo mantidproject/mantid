@@ -135,7 +135,7 @@ class WorkspaceWidget(PluginWidget):
                     TableWorkspaceDisplay.supports(ws)
                     presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self)
                     presenter.view.show()
-                except ValueError as x:
+                except ValueError:
                     logger.error(
                         "Could not open workspace: {0} with either MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
 
