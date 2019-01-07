@@ -98,9 +98,9 @@ endif ()
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_tableviewmodel.py
 
-    mantidqt/widgets/tableworkspacedisplay/test/test_error_column.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_marked_columns.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_workbench_table_widget_item.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_workbench_table_widget_item.py
 
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py

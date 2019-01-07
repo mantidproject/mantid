@@ -106,7 +106,7 @@ class WorkbenchTableWidgetItemTest(unittest.TestCase):
         w.setData(Qt.DisplayRole, 4444)
         w.update()
         self.assertEqual(4444, w.display_data)
- 
+
 
 if __name__ == '__main__':
     unittest.main()
