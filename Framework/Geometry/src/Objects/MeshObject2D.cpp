@@ -59,10 +59,9 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
   const auto nz = normal[2];
   const auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
   const auto denom = normal.norm();
-  const static double tolerance =
-      1e-9; // Fixed Tolerance. Too expensive to calculate
-            // based on machine uncertaintly for each
-            // vertex.
+  const static double tolerance = 1e-9; // Fixed Tolerance. Too expensive to
+                                        // calculate based on machine
+                                        // uncertaintly for each vertex.
 
   for (const auto &vertex : vertices) {
     auto d = (nx * vertex.X() + ny * vertex.Y() + nz * vertex.Z() - k) / denom;
@@ -207,10 +206,11 @@ bool MeshObject2D::isValid(const Kernel::V3D &point) const {
 
   static const double tolerance = 1e-9;
   if (distanceToPlane(point) < tolerance) {
-    for (size_t i = 0; i < m_vertices.size(); i += 3) {
+    for (size_t i = 0; i < m_triangles.size(); i += 3) {
 
-      if (MeshObjectCommon::isOnTriangle(point, m_vertices[i],
-                                         m_vertices[i + 1], m_vertices[i + 2]))
+      if (MeshObjectCommon::isOnTriangle(point, m_vertices[m_triangles[i]],
+                                         m_vertices[m_triangles[i + 1]],
+                                         m_vertices[m_triangles[i + 2]]))
         return true;
     }
   }
