@@ -287,8 +287,13 @@ private:
     // located at N_pixel / 2 + 0.5
     // X = (16-192.0/2.0+0.5)*5.15/1000.0 = -0.409425
     // Y = (95-192.0/2.0+0.5)*5.15/1000.0 = -0.002575
-    mover.setPropertyValue("X", "0.409425");
+    // mover.setPropertyValue("X", "0.409425");
+    // mover.setPropertyValue("Y", "0.002575");
+
+    mover.setPropertyValue("X", "0.009425");
     mover.setPropertyValue("Y", "0.002575");
+    mover.setPropertyValue("Z", "-0.8114");
+
     mover.execute();
   }
 

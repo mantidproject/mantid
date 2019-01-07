@@ -236,7 +236,7 @@ void ConvertToReflectometryQ::init() {
 
   std::vector<double> extents{-50, +50, -50, +50};
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Extents", extents),
+      Kernel::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
       "A comma separated list of min, max for each dimension. "
       "Takes four values in the form dim_0_min, dim_0_max, "
       "dim_1_min, dim_1_max,\n"

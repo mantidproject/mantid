@@ -227,6 +227,8 @@ private:
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
 
+  void enableFitAnalysisButtons(bool enable);
+
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;

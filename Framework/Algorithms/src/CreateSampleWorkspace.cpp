@@ -50,10 +50,6 @@ DECLARE_ALGORITHM(CreateSampleWorkspace)
  */
 CreateSampleWorkspace::CreateSampleWorkspace() : m_randGen(nullptr) {}
 
-/** Destructor
- */
-CreateSampleWorkspace::~CreateSampleWorkspace() { delete m_randGen; }
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateSampleWorkspace::name() const {
   return "CreateSampleWorkspace";
@@ -225,7 +221,7 @@ void CreateSampleWorkspace::exec() {
     if (isRandom) {
       seedValue = static_cast<int>(std::time(nullptr));
     }
-    m_randGen = new Kernel::MersenneTwister(seedValue);
+    m_randGen = std::make_unique<Kernel::MersenneTwister>(seedValue);
   }
 
   int numPixels = numBanks * bankPixelWidth * bankPixelWidth;

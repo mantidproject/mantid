@@ -77,5 +77,11 @@ void export_AnalysisDataService() {
       .def("retrieveWorkspaces", retrieveWorkspaces,
            AdsRetrieveWorkspacesOverloads(
                "Retrieve a list of workspaces by name",
-               (arg("self"), arg("names"), arg("unrollGroups") = false)));
+               (arg("self"), arg("names"), arg("unrollGroups") = false)))
+      .def("addToGroup", &AnalysisDataServiceImpl::addToGroup,
+           (arg("groupName"), arg("wsName")),
+           "Add a workspace in the ADS to a group in the ADS")
+      .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup,
+           (arg("groupName"), arg("wsName")),
+           "Remove a workspace from a group in the ADS");
 }
