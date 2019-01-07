@@ -11,6 +11,7 @@ from __future__ import absolute_import, print_function
 
 import inspect
 import six
+import sys
 import traceback
 
 from qtpy.QtCore import QTimer, QMetaObject, Qt
@@ -117,6 +118,7 @@ class ScriptRunner(object):
                         app.exit(0)
             except Exception as e:
                 self.script_iter = [None]
+                print('', file=sys.stderr)
                 traceback.print_exc()
                 if self.close_on_finish:
                     app.exit(1)

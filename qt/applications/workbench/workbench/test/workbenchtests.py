@@ -14,38 +14,58 @@ Public methods:
 """
 from __future__ import (absolute_import, division, print_function)
 import sys
-import os
-import unittest
-from qtpy.QtCore import QCoreApplication
+from qtpy.QtCore import QTime
 from workbench.plotting.qappthreadcall import QAppThreadCall
+from mantidqt.utils.qt.test.gui_test_runner import open_in_window
 
 
-def runTests(classname):
-    """ Run the test suite in the class.
-    Uses the XML runner if the MANTID_SOURCE environment variable was set.
-    """
-    # Custom code to create and run this single test suite
-    suite = QAppThreadCall(unittest.TestSuite)()
-    QAppThreadCall(suite.addTest)(unittest.makeSuite(classname))
-    # Get the XML runner if the environment variable was set
-    src = os.getenv('MANTID_SOURCE')
-    if src is None:
-        runner = QAppThreadCall(unittest.TextTestRunner)()
-    else:
-        sys.path.append(os.path.join(src, "Testing", "Tools", "unittest-xml-reporting", "src"))
-        import xmlrunner
-        runner = QAppThreadCall(xmlrunner.XMLTestRunner)(output='Testing')
+class MultiTestRunner(object):
 
-    # Run using either runner
-    res = QAppThreadCall(runner.run)(suite)
+    dots_per_line = 70
 
-    # Process some events that ensure MantidPlot closes properly.
-    QCoreApplication.processEvents()
-    QCoreApplication.processEvents()
-    QCoreApplication.processEvents()
+    def __init__(self, methods):
+        self.methods = methods
 
-    # Close Mantid and set exit code
-    if not res.wasSuccessful():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    def __call__(self, w):
+        time = QTime()
+        time.start()
+        count = 0
+        for method in self.methods:
+            yield method
+            count += 1
+            end = '\n' if count % self.dots_per_line == 0 else ''
+            print('.', end=end, file=sys.stderr)
+        print('', file=sys.stderr)
+        print('-'*self.dots_per_line, file=sys.stderr)
+        print('Ran {num} tests in {time}s'.format(num=len(self.methods), time=time.elapsed()*0.001), file=sys.stderr)
+
+
+class RunTests(object):
+
+    def __init__(self, test_method=None, close_on_finish=True, pause=0):
+        self.test_method = test_method
+        self.close_on_finish = close_on_finish
+        self.pause = pause
+
+    def __call__(self, classname):
+        def dummy(self):
+            pass
+
+        def test():
+            classname.runTest = dummy
+            test_case = classname()
+            if self.test_method is None or self.test_method == 'all':
+                test_methods = [t[0] for t in test_case.get_all_tests()]
+            else:
+                test_methods = self.test_method if isinstance(self.test_method, list) else [self.test_method]
+            runner = MultiTestRunner([getattr(test_case, name) for name in test_methods])
+            try:
+                return open_in_window(test_case.create_widget, runner, pause=self.pause,
+                                      close_on_finish=self.close_on_finish, attach_debugger=False)
+            except:
+                return 1
+        res = QAppThreadCall(test)()
+        sys.exit(res)
+
+
+runTests = RunTests()

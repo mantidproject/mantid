@@ -45,12 +45,8 @@ else()
   set ( PYUNITTEST_RUNNER ${CMAKE_BINARY_DIR}/bin/workbench -x)
 endif()
 
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    # Tests fail/crash on OSX for unknown reasons. Skipping by the usual way
-    # via @unittest.skipIf also doesn't work.
-    pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-      workbench_gui ${WORKBENCH_TEST_PY_FILES}
-    )
-endif()
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
+  workbench_gui ${WORKBENCH_TEST_PY_FILES}
+)
 
 # Not installed yet...

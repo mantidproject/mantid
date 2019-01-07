@@ -131,6 +131,10 @@ def is_test_method(value):
 class GuiWindowTest(TestCase, GuiTestBase):
 
     @classmethod
+    def get_all_tests(cls):
+        return inspect.getmembers(cls, is_test_method)
+
+    @classmethod
     def make_test_wrapper(cls, wrapped_name):
         def wrapper(self):
             self.run_test(method=wrapped_name)
@@ -140,7 +144,7 @@ class GuiWindowTest(TestCase, GuiTestBase):
     def setUpClass(cls):
         cls.test_methods = []
         cls.widget = None
-        for test in inspect.getmembers(cls, is_test_method):
+        for test in cls.get_all_tests():
             name = test[0]
             wrapped_name = '_' + name
             setattr(cls, wrapped_name, test[1])
