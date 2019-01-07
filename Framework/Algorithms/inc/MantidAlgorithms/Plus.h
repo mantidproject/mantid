@@ -21,8 +21,8 @@ the init() & exec() methods.
 
 Required Properties:
 <UL>
-<LI> InputWorkspace1 - The name of the workspace </LI>
-<LI> InputWorkspace2 - The name of the workspace </LI>
+<LI> LHSWorkspace - The name of the workspace </LI>
+<LI> RHSWorkspace - The name of the workspace </LI>
 <LI> OutputWorkspace - The name of the workspace in which to store the added
 data </LI>
 </UL>
