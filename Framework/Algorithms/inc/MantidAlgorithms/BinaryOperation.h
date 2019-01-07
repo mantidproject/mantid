@@ -117,7 +117,8 @@ protected:
    *number.
    *
    *  @param lhs :: Lhs histogram data
-   *  @param rhs :: Rhs histogram data
+   *  @param rhsY :: The rhs data value
+   *  @param rhsE :: The lhs data value
    *  @param YOut :: Data values resulting from the operation
    *  @param EOut :: Error values resulting from the operation
    */
