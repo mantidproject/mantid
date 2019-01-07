@@ -99,6 +99,8 @@ void BatchPresenter::notifyBatchFinished(bool error) {
 
 void BatchPresenter::notifyBatchCancelled() {
   reductionPaused();
+  // We also stop autoreduction if the user has cancelled
+  autoreductionPaused();
   m_runsPresenter->notifyRowStateChanged();
 }
 
@@ -139,8 +141,6 @@ void BatchPresenter::reductionPaused() {
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
-  // Autoreduction will also have stopped
-  autoreductionPaused();
 }
 
 void BatchPresenter::reductionCompletedForGroup(
@@ -171,8 +171,9 @@ void BatchPresenter::autoreductionResumed() {
 void BatchPresenter::pauseAutoreduction() {
   // Update the model
   m_jobRunner.autoreductionPaused();
-  // Stop processing
+  // Stop all processing
   pauseReduction();
+  autoreductionPaused();
 }
 
 void BatchPresenter::autoreductionPaused() {

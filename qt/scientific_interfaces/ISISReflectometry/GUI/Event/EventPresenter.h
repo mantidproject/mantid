@@ -51,6 +51,9 @@ private:
   void setCustomSlicingFromView();
   void setLogValueSlicingFromView();
   void setSlicingFromView();
+  void updateWidgetEnabledState() const;
+  bool isProcessing() const;
+  bool isAutoreducing() const;
   /// The view we are managing
   IEventView *m_view;
   SliceType m_sliceType;

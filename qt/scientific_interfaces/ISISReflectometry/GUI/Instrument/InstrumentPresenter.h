@@ -51,6 +51,9 @@ private:
   DetectorCorrectionType detectorCorrectionTypeFromView();
   DetectorCorrections detectorCorrectionsFromView();
   void updateModelFromView();
+  void updateWidgetEnabledState() const;
+  bool isProcessing() const;
+  bool isAutoreducing() const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

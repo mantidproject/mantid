@@ -63,19 +63,26 @@ void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
   m_mainPresenter->notifySettingsChanged();
 }
 
-void EventPresenter::reductionPaused() {
-  m_view->enableSliceType(m_sliceType);
-  m_view->enableSliceTypeSelection();
+/** Tells the view to update the enabled/disabled state of all relevant
+ * widgets based on whether processing is in progress or not.
+ */
+void EventPresenter::updateWidgetEnabledState() const {
+  if (isProcessing() || isAutoreducing()) {
+    m_view->disableSliceType(m_sliceType);
+    m_view->disableSliceTypeSelection();
+  } else {
+    m_view->enableSliceType(m_sliceType);
+    m_view->enableSliceTypeSelection();
+  }
 }
 
-void EventPresenter::reductionResumed() {
-  m_view->disableSliceType(m_sliceType);
-  m_view->disableSliceTypeSelection();
-}
+void EventPresenter::reductionPaused() { updateWidgetEnabledState(); }
 
-void EventPresenter::autoreductionPaused() { reductionPaused(); }
+void EventPresenter::reductionResumed() { updateWidgetEnabledState(); }
 
-void EventPresenter::autoreductionResumed() { reductionResumed(); }
+void EventPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+
+void EventPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
 void EventPresenter::setUniformSlicingByTimeFromView() {
   m_slicing = UniformSlicingByTime(m_view->uniformSliceLength());
@@ -130,6 +137,14 @@ void EventPresenter::setSlicingFromView() {
   default:
     throw std::runtime_error("Unrecognized slice type.");
   }
+}
+
+bool EventPresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
+}
+
+bool EventPresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

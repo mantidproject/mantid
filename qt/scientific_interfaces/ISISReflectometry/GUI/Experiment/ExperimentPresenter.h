@@ -76,6 +76,10 @@ private:
   void
   showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
 
+  void updateWidgetEnabledState() const;
+  bool isProcessing() const;
+  bool isAutoreducing() const;
+
   IExperimentView *m_view;
   Experiment m_model;
   double m_thetaTolerance;

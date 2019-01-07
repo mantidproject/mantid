@@ -80,6 +80,9 @@ private:
   void enableAutosave();
   void disableAutosave();
   bool shouldAutosave() const;
+  void updateWidgetEnabledState() const;
+  bool isProcessing() const;
+  bool isAutoreducing() const;
 
   /// The view
   ISaveView *m_view;

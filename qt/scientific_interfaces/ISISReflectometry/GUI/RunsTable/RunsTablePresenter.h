@@ -114,7 +114,7 @@ private:
   updateRowField(MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex,
                  int column, std::string const &oldValue,
                  std::string const &newValue);
-  void updateWidgetEnabledState(bool isProcessing);
+  void updateWidgetEnabledState();
 
   void clearStateCellStyling(MantidWidgets::Batch::Cell &cell);
   void
@@ -135,6 +135,9 @@ private:
   void showCellsAsWarningStateInView(
       MantidWidgets::Batch::RowLocation const &itemIndex,
       std::string const &errorMessage);
+
+  bool isProcessing() const;
+  bool isAutoreducing() const;
 
   static auto constexpr DEPTH_LIMIT = 2;
 

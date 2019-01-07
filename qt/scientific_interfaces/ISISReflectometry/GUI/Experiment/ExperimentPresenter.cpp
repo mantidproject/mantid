@@ -66,13 +66,31 @@ void ExperimentPresenter::notifyPerAngleDefaultsChanged(int, int column) {
   m_mainPresenter->notifySettingsChanged();
 }
 
-void ExperimentPresenter::reductionPaused() { m_view->enableAll(); }
+bool ExperimentPresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
+}
 
-void ExperimentPresenter::reductionResumed() { m_view->disableAll(); }
+bool ExperimentPresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
+}
 
-void ExperimentPresenter::autoreductionPaused() { reductionPaused(); }
+/** Tells the view to update the enabled/disabled state of all relevant
+ * widgets based on whether processing is in progress or not.
+ */
+void ExperimentPresenter::updateWidgetEnabledState() const {
+  if (isProcessing() || isAutoreducing())
+    m_view->disableAll();
+  else
+    m_view->enableAll();
+}
 
-void ExperimentPresenter::autoreductionResumed() { reductionResumed(); }
+void ExperimentPresenter::reductionPaused() { updateWidgetEnabledState(); }
+
+void ExperimentPresenter::reductionResumed() { updateWidgetEnabledState(); }
+
+void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+
+void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const correctionType = polarizationCorrectionTypeFromString(

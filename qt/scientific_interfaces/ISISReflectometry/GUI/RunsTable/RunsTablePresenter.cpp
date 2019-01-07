@@ -138,24 +138,35 @@ void RunsTablePresenter::notifyInstrumentChanged() {
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
 
-void RunsTablePresenter::updateWidgetEnabledState(bool isProcessing) {
-  m_view->setJobsTableEnabled(!isProcessing);
-  m_view->setInstrumentSelectorEnabled(!isProcessing);
-  m_view->setProcessButtonEnabled(!isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::Process, !isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::Pause, isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::InsertRow, !isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::InsertGroup, !isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::DeleteRow, !isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::DeleteGroup, !isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::Copy, !isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::Paste, !isProcessing);
-  m_view->setActionEnabled(IRunsTableView::Action::Cut, !isProcessing);
+void RunsTablePresenter::updateWidgetEnabledState() {
+  auto const processing = isProcessing();
+  auto const autoreducing = isAutoreducing();
+
+  m_view->setJobsTableEnabled(!processing && !autoreducing);
+  m_view->setInstrumentSelectorEnabled(!processing && !autoreducing);
+  m_view->setProcessButtonEnabled(!processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Process,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Pause, processing);
+  m_view->setActionEnabled(IRunsTableView::Action::InsertRow,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::InsertGroup,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::DeleteRow,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::DeleteGroup,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Copy,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Paste,
+                           !processing && !autoreducing);
+  m_view->setActionEnabled(IRunsTableView::Action::Cut,
+                           !processing && !autoreducing);
 }
 
-void RunsTablePresenter::reductionResumed() { updateWidgetEnabledState(true); }
+void RunsTablePresenter::reductionResumed() { updateWidgetEnabledState(); }
 
-void RunsTablePresenter::reductionPaused() { updateWidgetEnabledState(false); }
+void RunsTablePresenter::reductionPaused() { updateWidgetEnabledState(); }
 
 void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
 
@@ -521,6 +532,14 @@ void RunsTablePresenter::notifyRowStateChanged() {
     auto itemIndex = MantidWidgets::Batch::RowLocation({1});
     showCellsAsErrorStateInView(itemIndex, "this is a test error message");
   }
+}
+
+bool RunsTablePresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
+}
+
+bool RunsTablePresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

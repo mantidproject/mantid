@@ -61,21 +61,38 @@ void SavePresenter::notifyAutosaveEnabled() {
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 
+bool SavePresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
+}
+
+bool SavePresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
+}
+
+/** Tells the view to update the enabled/disabled state of all relevant
+ * widgets based on whether processing is in progress or not.
+ */
+void SavePresenter::updateWidgetEnabledState() const {
+  if (isProcessing() || isAutoreducing()) {
+    m_view->disableAutosaveControls();
+    if (shouldAutosave())
+      m_view->disableFileFormatAndLocationControls();
+  } else {
+    m_view->enableAutosaveControls();
+    m_view->enableFileFormatAndLocationControls();
+  }
+}
+
 void SavePresenter::reductionPaused() {
   populateWorkspaceList();
-  m_view->enableAutosaveControls();
-  m_view->enableFileFormatAndLocationControls();
+  updateWidgetEnabledState();
 }
 
-void SavePresenter::reductionResumed() {
-  m_view->disableAutosaveControls();
-  if (shouldAutosave())
-    m_view->disableFileFormatAndLocationControls();
-}
+void SavePresenter::reductionResumed() { updateWidgetEnabledState(); }
 
-void SavePresenter::autoreductionPaused() { reductionPaused(); }
+void SavePresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
-void SavePresenter::autoreductionResumed() { reductionResumed(); }
+void SavePresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
 void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
