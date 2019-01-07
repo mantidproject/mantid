@@ -4,8 +4,20 @@ set ( PY_FILES
   plotfunctions.py
   plotfunctions3D.py
   utility.py
+
+
 )
 
+# ctest targets
+set ( TEST_FILES
+  test/__init__.py
+  test/test_plotfunctions.py
+  test/test_helperfunctions.py
+)
+
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
+  PythonPlotsModule ${TEST_FILES}
+)
 
 #############################################################################################
 # Copy over the pure Python files for the module
