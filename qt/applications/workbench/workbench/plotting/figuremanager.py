@@ -20,6 +20,7 @@ from six import text_type
 
 # local imports
 from workbench.plotting.figurewindow import FigureWindow
+from workbench.plotting.figuretype import figure_type, FigureType
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from workbench.plotting.qappthreadcall import QAppThreadCall
@@ -170,6 +171,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
+        if figure_type(self.canvas.figure) != FigureType.Line:
+            action = self.toolbar._actions['toggle_fit']
+            action.setEnabled(False)
+            action.setVisible(False)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler

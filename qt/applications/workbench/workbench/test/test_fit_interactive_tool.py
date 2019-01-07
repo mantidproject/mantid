@@ -7,7 +7,7 @@ from qtpy.QtGui import QCursor
 from mantid.simpleapi import *
 from mantidqt.utils.qt.test.gui_window_test import *
 
-from workbench.plotting.functions import plot
+from workbench.plotting.functions import plot, pcolormesh
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.test.workbenchtests import runTests
 
@@ -182,6 +182,17 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.setWorkspaceIndex(0)
         yield self.wait_for_true(lambda: self.fit_browser.workspaceIndex() == 2)
         self.assertEqual(self.fit_browser.workspaceIndex(), 2)
+
+    def test_hidden_fit_for_images(self):
+        if 'ws1' in mtd:
+            ws1 = mtd['ws1']
+        else:
+            ws1 = Load(r'emu00006473.nxs', OutputWorkspace='ws1')[0]
+        pcolormesh([ws1])
+        manager = GlobalFigureManager.get_active()
+        action = manager.toolbar._actions['toggle_fit']
+        self.assertFalse(action.isVisible())
+        self.assertFalse(action.isEnabled())
 
 
 runTests(TestFitPropertyBrowser)
