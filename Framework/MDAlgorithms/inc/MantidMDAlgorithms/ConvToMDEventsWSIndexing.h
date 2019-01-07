@@ -8,6 +8,9 @@
 #define MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXING_H_
 
 #include  "MantidMDAlgorithms/ConvToMDEventsWS.h"
+#include <queue>
+#include <mutex>
+#include <thread>
 
 namespace Mantid {
 // Forward declarations
@@ -26,6 +29,77 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   enum MD_BOX_TYPE {
     GRID,
     LEAF,
+  };
+
+  template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
+  class EventsDistributor {
+  public:
+    enum WORKER_TYPE {
+      MASTER,
+      SLAVE
+    };
+    struct Task {
+      DataObjects::MDBoxBase<MDEventType<ND>, ND>* root;
+      const EventIterator begin;
+      const EventIterator end;
+      const typename MDEventType<ND>::MortonT lowerBound;
+      const typename MDEventType<ND>::MortonT upperBound;
+      const MDSpaceBounds<ND>& space;
+      size_t maxDepth;
+      unsigned level;
+      const API::BoxController_sptr &bc;
+    };
+  public:
+    EventsDistributor(const uint16_t& numWorkers, const size_t& threshold) :
+    m_numWorkers(numWorkers), m_eventsThreshold(threshold), m_masterFinished{false} {};
+    void distribute(Task& tsk) {
+      if(m_numWorkers == 1)
+        distributeEvents(tsk, SLAVE);
+      else {
+        std::vector<std::thread> workers;
+        workers.emplace_back([this, &tsk]() {
+          distributeEvents(tsk, MASTER);
+          m_masterFinished = true;
+        });
+        for(size_t i = 1; i < m_numWorkers; ++i)
+          workers.emplace_back(&EventsDistributor::waitAndLounchSlave, this, i);
+        for(auto& worker: workers)
+          worker.join();
+      }
+    }
+  private:
+    void distributeEvents(Task& tsk, const WORKER_TYPE& wtp);
+    void pushTask(Task&& tsk) {
+      std::lock_guard<std::mutex> g(m_mutex);
+      m_tasks.emplace(tsk);
+    }
+    std::unique_ptr<Task> popTask() {
+      std::lock_guard<std::mutex> g(m_mutex);
+      if(m_tasks.empty())
+        return std::unique_ptr<Task>(nullptr);
+      else {
+        std::unique_ptr<Task> task{new Task(m_tasks.front())};
+        m_tasks.pop();
+        return task;
+      }
+    }
+
+    void waitAndLounchSlave(size_t id) {
+      while(true) {
+        auto pTsk = popTask();
+        if(pTsk)
+          distributeEvents(*pTsk.get(), SLAVE);
+        else
+          if(m_masterFinished) break;
+      }
+    }
+  private:
+    const uint16_t m_numWorkers;
+
+    const size_t m_eventsThreshold;
+    std::queue<Task> m_tasks;
+    std::mutex m_mutex;
+    std::atomic<bool> m_masterFinished;
   };
 
   template <size_t ND>
@@ -106,17 +180,6 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
     }
   };
 
-
-  template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
-  static void distributeEvents(DataObjects::MDBoxBase<MDEventType<ND>, ND>* root,
-                                                  const EventIterator begin,
-                                                  const EventIterator end,
-                                                  const typename MDEventType<ND>::MortonT lower,
-                                                  const typename MDEventType<ND>::MortonT upper,
-                                                  const MDSpaceBounds<ND>& space,
-                                                  size_t maxDepth,
-                                                  unsigned level,
-                                                  const API::BoxController_sptr &bc);
 };
 
 /*-------------------------------definitions-------------------------------------*/
@@ -214,6 +277,7 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
   using MDEvent = MDEventType<ND>;
   using IntT = typename MDEvent::IntT;
   using MortonT = typename MDEvent::MortonT;
+  using DistributorType = EventsDistributor<ND, MDEventType, typename std::vector<MDEventType<ND>>::iterator>;
   if(mdEvents.size() <= bc->getSplitThreshold()) {
     bc->incBoxesCounter(0);
     return new DataObjects::MDBox<MDEvent, ND>(bc.get(), 0, extents, mdEvents.begin(), mdEvents.end());
@@ -225,8 +289,10 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
     auto mortonMax =
         md_structure_ws::calculateDefaultBound<ND, IntT, MortonT>(
             std::numeric_limits<IntT>::max());
-    distributeEvents(root, mdEvents.begin(), mdEvents.end(),
-        mortonMin, mortonMax, space, bc->getMaxDepth() + 1, 1, bc);
+    typename DistributorType::Task tsk{root, mdEvents.begin(), mdEvents.end(),
+        mortonMin, mortonMax, space, bc->getMaxDepth() + 1, 1, bc};
+    DistributorType distributor(12, mdEvents.size() / 100); //TODO define the threshold
+    distributor.distribute(tsk);
     return root;
   }
 }
@@ -322,37 +388,32 @@ ConvToMDEventsWSIndexing::MD_EVENT_TYPE ConvToMDEventsWSIndexing::mdEventType() 
 }
 
 
-
 template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
-void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventType<ND>, ND>* root,
-                                                const EventIterator begin,
-                                                const EventIterator end,
-                                                const typename MDEventType<ND>::MortonT lowerBound,
-                                                const typename MDEventType<ND>::MortonT upperBound,
-                                                const MDSpaceBounds<ND>& space,
-                                                size_t maxDepth,
-                                                unsigned level,
-                                                const API::BoxController_sptr &bc) {
+void ConvToMDEventsWSIndexing::EventsDistributor<ND, MDEventType, EventIterator>::
+    distributeEvents(Task& tsk, const WORKER_TYPE& wtp) {
   using MDEvent = MDEventType<ND>;
   using MortonT = typename MDEvent::MortonT;
   using BoxBase = DataObjects::MDBoxBase<MDEvent, ND>;
   using Box = DataObjects::MDBox<MDEvent, ND>;
   using GridBox = DataObjects::MDGridBox<MDEvent, ND>;
 
-  const size_t childBoxCount = bc->getNumSplit();
-  const size_t splitThreshold = bc->getSplitThreshold();
 
-  if (maxDepth-- == 1 || std::distance(begin, end) <= static_cast<int>(splitThreshold)) {
+
+
+  const size_t childBoxCount = tsk.bc->getNumSplit();
+  const size_t splitThreshold = tsk.bc->getSplitThreshold();
+
+  if (tsk.maxDepth-- == 1 || std::distance(tsk.begin, tsk.end) <= static_cast<int>(splitThreshold)) {
     return;
   }
 
 /* Determine the "width" of this box in Morton number */
-  const MortonT thisBoxWidth = upperBound - lowerBound;
+  const MortonT thisBoxWidth = tsk.upperBound - tsk.lowerBound;
 
   /* Determine the "width" of the child boxes in Morton number */
   const MortonT childBoxWidth = thisBoxWidth / childBoxCount;
 
-  auto eventIt = begin;
+  auto eventIt = tsk.begin;
 
   struct RecursionHelper {
     std::pair<EventIterator, EventIterator> eventRange;
@@ -367,7 +428,7 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
     /* Lower child box bound is parent box lower bound plus for each previous
      * child box; box width plus offset by one (such that lower bound of box
      * i+1 is one grater than upper bound of box i) */
-    const auto boxLower = lowerBound + ((childBoxWidth + 1) * i);
+    const auto boxLower = tsk.lowerBound + ((childBoxWidth + 1) * i);
 
     /* Upper child box bound is lower plus child box width */
     const auto boxUpper = childBoxWidth + boxLower;
@@ -375,7 +436,7 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
     const auto boxEventStart = eventIt;
 
     if (md_structure_ws::morton_contains<MortonT>(boxLower, boxUpper,eventIt->getIndex()))
-      eventIt = std::upper_bound(boxEventStart, end, boxUpper,
+      eventIt = std::upper_bound(boxEventStart, tsk.end, boxUpper,
           [](const MortonT& m, const typename std::iterator_traits<EventIterator>::value_type& event){
             return m < event.getIndex();
           });
@@ -384,21 +445,21 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
     /* As we are adding as we iterate over Morton numbers and parent events
      * child boxes are inserted in the correct sorted order. */
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
-    auto minCoord = MDEvent::indexToCoordinates(boxLower, space);
-    auto maxCoord = MDEvent::indexToCoordinates(boxUpper, space);
+    auto minCoord = MDEvent::indexToCoordinates(boxLower, tsk.space);
+    auto maxCoord = MDEvent::indexToCoordinates(boxUpper, tsk.space);
     for(unsigned ax = 0; ax < ND; ++ax) {
       extents[ax].setExtents(minCoord[ax], maxCoord[ax]);
     }
 
     BoxBase* newBox;
-    if(std::distance(boxEventStart, eventIt) <= static_cast<int>(splitThreshold) || maxDepth == 1) {
+    if(std::distance(boxEventStart, eventIt) <= static_cast<int>(splitThreshold) || tsk.maxDepth == 1) {
       for(auto it = boxEventStart; it < eventIt; ++it)
-        it->retrieveCoordinates(space);
-      bc->incBoxesCounter(level);
-      newBox = new Box(bc.get(), level, extents, boxEventStart, eventIt);
+        it->retrieveCoordinates(tsk.space);
+      tsk.bc->incBoxesCounter(tsk.level);
+      newBox = new Box(tsk.bc.get(), tsk.level, extents, boxEventStart, eventIt);
     } else {
-      bc->incGridBoxesCounter(level);
-      newBox = new GridBox(bc.get(), level, extents, boxEventStart, eventIt);
+      tsk.bc->incGridBoxesCounter(tsk.level);
+      newBox = new GridBox(tsk.bc.get(), tsk.level, extents, boxEventStart, eventIt);
     }
 
     children.emplace_back(RecursionHelper{{boxEventStart, eventIt}, {boxLower, boxUpper}, newBox});
@@ -418,19 +479,17 @@ void ConvToMDEventsWSIndexing::distributeEvents(DataObjects::MDBoxBase<MDEventTy
   boxes.reserve(childBoxCount);
   for(auto& ch: children)
     boxes.emplace_back(ch.box);
-  root->setChildren(boxes, 0, boxes.size());
+  tsk.root->setChildren(boxes, 0, boxes.size());
 
-  /* Distribute events within child boxes */
-  /* See https://en.wikibooks.org/wiki/OpenMP/Tasks */
-  /* The parallel pragma enables execution of the following block by all worker
-   * threads. */
-  ++level;
-#pragma omp parallel for
-  for (size_t i = 0; i < children.size(); i++) {
-    auto& ch = children[i];
-    distributeEvents(ch.box, ch.eventRange.first, ch.eventRange.second,
-                     ch.mortonBounds.first, ch.mortonBounds.second,
-                     space, maxDepth, level, bc);
+  ++tsk.level;
+  for (auto& ch: children) {
+    Task task {ch.box, ch.eventRange.first, ch.eventRange.second,
+                              ch.mortonBounds.first, ch.mortonBounds.second,
+                              tsk.space, tsk.maxDepth, tsk.level, tsk.bc};
+    if(wtp == MASTER && (size_t)std::distance(task.begin, task.end) < m_eventsThreshold)
+      pushTask(std::move(task));
+    else
+      distributeEvents(task, wtp);
   }
 }
 
