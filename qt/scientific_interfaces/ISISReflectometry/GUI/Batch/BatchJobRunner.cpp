@@ -116,7 +116,10 @@ bool BatchJobRunner::isAutoreducing() const { return m_isAutoreducing; }
 
 void BatchJobRunner::resumeReduction() {
   m_isProcessing = true;
-  m_reprocessFailed = false;
+  // If the user has manually selected failed rows, reprocess them; otherwise
+  // skip them
+  m_reprocessFailed = m_batch.hasSelection();
+  // If there are no selected rows, process everything
   m_processAll = !m_batch.hasSelection();
   setUpBatchAlgorithmRunner();
 }
