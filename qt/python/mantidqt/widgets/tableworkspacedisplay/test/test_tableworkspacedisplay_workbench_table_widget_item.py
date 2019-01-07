@@ -71,9 +71,8 @@ class WorkbenchTableWidgetItemTest(unittest.TestCase):
     def test_initialise_editable_with_float(self):
         mock_data = 42.00
         w = WorkbenchTableWidgetItem(mock_data, True)
-        self.assertEqual(str(mock_data), w.data(Qt.DisplayRole))
-        # the original data of the float is stored as a string too
-        self.assertEqual(str(mock_data), w.display_data)
+        self.assertEqual(mock_data, w.data(Qt.DisplayRole))
+        self.assertEqual(mock_data, w.display_data)
 
     def test_lt(self):
         """

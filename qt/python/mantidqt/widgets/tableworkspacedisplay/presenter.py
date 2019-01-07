@@ -73,10 +73,10 @@ class TableWorkspaceDisplay(object):
         :return:
         """
         try:
-            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole))
+            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), item.is_v3d)
             item.update()
         except ValueError:
-            show_mouse_toast("Error: Trying to set non-numeric data into a numeric column.")
+            show_mouse_toast("Error: Trying to set invalid data for the column.")
         except Exception as x:
             show_mouse_toast("Unknown error occurred: {}".format(x))
         finally:

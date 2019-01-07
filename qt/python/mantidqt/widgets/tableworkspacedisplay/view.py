@@ -9,15 +9,31 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
+import sys
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import Qt
+from qtpy.QtCore import QVariant, Qt
 from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import (QAction, QHeaderView, QMenu, QMessageBox, QTableWidget)
+from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox,
+                            QStyledItemDelegate, QTableWidget)
 
 import mantidqt.icons
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
+
+
+class PreciseDoubleFactory(QItemEditorFactory):
+    def __init__(self):
+        QItemEditorFactory.__init__(self)
+
+    def createEditor(self, user_type, parent):
+        widget = super(PreciseDoubleFactory, self).createEditor(user_type, parent)
+        if user_type == QVariant.Double:
+            widget.setFrame(True)
+            widget.setDecimals(16)
+            widget.setRange(sys.float_info.min, sys.float_info.max)
+
+        return widget
 
 
 class TableWorkspaceDisplayView(QTableWidget):
@@ -30,6 +46,10 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.STATISTICS_ON_ROW = mantidqt.icons.get_icon('fa.fighter-jet')
         self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
         self.TBD = mantidqt.icons.get_icon('fa.question')
+
+        item_delegate = QStyledItemDelegate(self)
+        item_delegate.setItemEditorFactory(PreciseDoubleFactory())
+        self.setItemDelegate(item_delegate)
 
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)

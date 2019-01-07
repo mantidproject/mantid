@@ -19,7 +19,7 @@ class WorkbenchTableWidgetItem(QTableWidgetItem):
 
         QTableWidgetItem.__init__(self)
 
-        if isinstance(data, V3D) or isinstance(data, float):
+        if isinstance(data, V3D):
             data = str(data)
 
         self.display_data = data
