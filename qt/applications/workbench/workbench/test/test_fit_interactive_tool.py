@@ -32,6 +32,13 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield 0.1
         self.fit_browser = manager.fit_browser
 
+    def start_draw_calls_count(self):
+        self.draw_count = 0
+
+        def increment(ev):
+            self.draw_count += 1
+        self.fit_browser.canvas.mpl_connect('draw_event', increment)
+
     def move_marker(self, canvas, marker, pos, dx, try_other_way_if_failed):
         tr = self.fit_browser.tool.ax.get_xaxis_transform()
         x0 = tr.transform((0, 0))[0]
@@ -57,19 +64,28 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
 
     def test_fit_on_off(self):
         yield self.start()
+        self.start_draw_calls_count()
         self.assertTrue(self.fit_browser.isVisible())
         trigger_action(self.fit_action)
         yield self.wait_for_true(lambda: not self.fit_browser.isVisible())
         self.assertFalse(self.fit_browser.isVisible())
+        self.assertEqual(self.draw_count, 1)
 
-    def test_undock(self):
+    def test_dock_undock(self):
         yield self.start()
+        self.start_draw_calls_count()
         self.fit_browser.setFloating(True)
         yield self.wait_for_true(lambda: not self.fit_browser.isFloating())
         trigger_action(self.fit_action)
         yield self.wait_for_true(lambda: not self.fit_browser.isVisible())
         self.assertFalse(self.fit_browser.isVisible())
         self.assertTrue(self.fit_browser.tool is None)
+        self.assertEqual(self.draw_count, 2)
+        trigger_action(self.fit_action)
+        yield self.wait_for_true(self.fit_browser.isVisible)
+        self.assertTrue(self.fit_browser.isVisible())
+        self.assertFalse(self.fit_browser.tool is None)
+        self.assertEqual(self.draw_count, 3)
 
     def test_fit_range(self):
         yield self.start()

@@ -62,6 +62,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.tool.fit_end_x_moved.connect(self.setEndX)
         self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
         super(FitPropertyBrowser, self).show()
+        self.canvas.draw()
 
     def hide(self):
         if self.tool is not None:
