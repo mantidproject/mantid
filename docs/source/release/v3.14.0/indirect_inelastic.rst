@@ -48,6 +48,7 @@ Improvements
 - Fit and Fit Sequential in the Fit combobox above the FitPropertyBrowser are now disabled while fitting is taking place.
 - The option to choose which workspace index to Plot Spectrum for and from which output workspace is now given in Elwin.
 - ConvFit now allows the loading of Dave ASCII files which end with '_sqw.dave'.
+- The results of a fit in MSDFit, IqtFit, ConvFit and F(Q)Fit are now plotted with error bars.
 
 
 Bugfixes
