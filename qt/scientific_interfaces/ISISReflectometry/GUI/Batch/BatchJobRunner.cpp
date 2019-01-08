@@ -11,8 +11,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using Mantid::API::IAlgorithm;
 using API::BatchAlgorithmRunner;
+using Mantid::API::IAlgorithm;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
 namespace { // unnamed
@@ -101,7 +101,7 @@ void addAlgorithmsForGroup(Group &group, Batch const &model,
       addAlgorithmForRow(row.get(), model, batchAlgoRunner);
   }
 }
-} // namespace unnamed
+} // namespace
 
 BatchJobRunner::BatchJobRunner(Batch batch,
                                BatchAlgorithmRunner &batchAlgoRunner)

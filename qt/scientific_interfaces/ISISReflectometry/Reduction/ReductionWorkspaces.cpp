@@ -14,8 +14,9 @@ ReductionWorkspaces::ReductionWorkspaces(
     std::vector<std::string> timeOfFlight,
     // cppcheck-suppress passedByValue
     std::string joinedTofWorkspace
-    // cppcheck-suppress passedByValue
-    std::pair<std::string, std::string> transmissionRuns,
+        // cppcheck-suppress passedByValue
+        std::pair<std::string, std::string>
+            transmissionRuns,
     // cppcheck-suppress passedByValue
     std::string combinedTransmissionRuns,
     // cppcheck-suppress passedByValue
@@ -28,8 +29,7 @@ ReductionWorkspaces::ReductionWorkspaces(
       m_joinedTofWorkspace(std::move(joinedTofWorkspace)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_combinedTransmissionRuns(combinedTransmissionRuns),
-      m_iVsLambda(std::move(iVsLambda)),
-      m_iVsQ(std::move(iVsQ)),
+      m_iVsLambda(std::move(iVsLambda)), m_iVsQ(std::move(iVsQ)),
       m_iVsQBinned(std::move(iVsQBinned)) {}
 
 std::vector<std::string> const &ReductionWorkspaces::timeOfFlight() const {

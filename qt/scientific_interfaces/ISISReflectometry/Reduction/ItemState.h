@@ -43,6 +43,6 @@ private:
 
   bool requiresMessage() const;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACE_STATE_H_
