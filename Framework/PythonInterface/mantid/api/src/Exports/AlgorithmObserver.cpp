@@ -9,7 +9,6 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;

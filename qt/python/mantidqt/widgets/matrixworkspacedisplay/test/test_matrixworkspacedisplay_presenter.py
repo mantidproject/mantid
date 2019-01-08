@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mock import Mock
+from mock import Mock, patch
 
 from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
@@ -37,7 +37,9 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(3, view.set_context_menu_actions.call_count)
         self.assertEqual(1, view.set_model.call_count)
 
-    def test_action_copy_spectrum_values(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    def test_action_copy_spectrum_values(self, mock_copy, mock_show_mouse_toast):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
         presenter = MatrixWorkspaceDisplay(ws, view=view)
@@ -56,10 +58,12 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
-        view.copy_to_clipboard.assert_called_once_with(expected_string)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+        mock_copy.assert_called_once_with(expected_string)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    def test_action_copy_spectrum_values_no_selection(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    def test_action_copy_spectrum_values_no_selection(self, mock_copy, mock_show_mouse_toast):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
         presenter = MatrixWorkspaceDisplay(ws, view=view)
@@ -74,9 +78,12 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         # the action should never look for rows if there is no selection
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        self.assertNotCalled(mock_copy)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-    def test_action_copy_bin_values(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    def test_action_copy_bin_values(self, mock_copy, mock_show_mouse_toast):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
         presenter = MatrixWorkspaceDisplay(ws, view=view)
@@ -95,11 +102,13 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         presenter.action_copy_bin_values(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
-        view.copy_to_clipboard.assert_called_once_with(expected_string)
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+        mock_copy.assert_called_once_with(expected_string)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    def test_action_copy_bin_values_no_selection(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    def test_action_copy_bin_values_no_selection(self, mock_copy, mock_show_mouse_toast):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
         presenter = MatrixWorkspaceDisplay(ws, view=view)
@@ -114,9 +123,12 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         # the action should never look for rows if there is no selection
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        self.assertNotCalled(mock_copy)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-    def test_action_copy_cell(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    def test_action_copy_cell(self, mock_copy, mock_show_mouse_toast):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
         presenter = MatrixWorkspaceDisplay(ws, view=view)
@@ -129,11 +141,13 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         presenter.action_copy_cells(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
-        self.assertEqual(1, view.copy_to_clipboard.call_count)
+        self.assertEqual(1, mock_copy.call_count)
         self.assertEqual(9, mock_index.sibling.call_count)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    def test_action_copy_cell_no_selection(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    def test_action_copy_cell_no_selection(self, mock_copy, mock_show_mouse_toast):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
         presenter = MatrixWorkspaceDisplay(ws, view=view)
@@ -144,9 +158,9 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-        self.assertNotCalled(view.copy_to_clipboard)
+        self.assertNotCalled(mock_copy)
 
     def common_setup_action_plot(self, table_has_selection=True):
         mock_ws = MockWorkspace()
@@ -230,7 +244,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
         self.assertNotCalled(mock_plot)
 
-    def test_action_plot_spectrum_no_selection(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    def test_action_plot_spectrum_no_selection(self, mock_show_mouse_toast):
         mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot(table_has_selection=False)
 
         mock_table.mock_selection_model.selectedRows = Mock()
@@ -238,7 +253,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         presenter.action_plot_spectrum(mock_table)
 
-        mock_view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
 
@@ -284,13 +299,14 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
         self.assertNotCalled(mock_plot)
 
-    def test_action_plot_bin_no_selection(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    def test_action_plot_bin_no_selection(self, mock_show_mouse_toast):
         mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot(table_has_selection=False)
         self.setup_mock_selection(mock_table, num_selected_rows=None, num_selected_cols=None)
 
         presenter.action_plot_bin(mock_table)
 
-        mock_view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
 
