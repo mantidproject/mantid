@@ -12,9 +12,9 @@ from __future__ import (absolute_import, division, print_function)
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QPoint, Qt
-from qtpy.QtGui import QCursor, QFont, QFontMetrics, QKeySequence
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView, QToolTip)
+from qtpy.QtCore import Qt
+from qtpy.QtGui import QKeySequence
+from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
 
 import mantidqt.icons
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
@@ -143,26 +143,6 @@ class MatrixWorkspaceDisplayView(QTabWidget):
             "The model for the table with {0} values has a wrong model type: {1}".format(expected_model_type.upper(),
                                                                                          model.model_type)
         table.setModel(model)
-
-    @staticmethod
-    def copy_to_clipboard(data):
-        """
-        Uses the QGuiApplication to copy to the system clipboard.
-
-        :type data: str
-        :param data: The data that will be copied to the clipboard
-        :return:
-        """
-        cb = QtGui.QGuiApplication.clipboard()
-        cb.setText(data, mode=cb.Clipboard)
-
-    def show_mouse_toast(self, message):
-        # Creates a text with empty space to get the height of the rendered text - this is used
-        # to provide the same offset for the tooltip, scaled relative to the current resolution and zoom.
-        font_metrics = QFontMetrics(QFont(" "))
-        # The height itself is divided by 2 just to reduce the offset so that the tooltip is
-        # reasonably position relative to the cursor
-        QToolTip.showText(QCursor.pos() + QPoint(font_metrics.height() / 2, 0), message)
 
     def ask_confirmation(self, message, title="Mantid Workbench"):
         """
