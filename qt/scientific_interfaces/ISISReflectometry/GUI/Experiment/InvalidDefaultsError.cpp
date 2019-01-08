@@ -9,8 +9,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-InvalidDefaultsError::InvalidDefaultsError(int row,
-                                           std::vector<int> invalidColumns)
+InvalidDefaultsError::InvalidDefaultsError( // cppcheck-suppress passedByValue
+    int row, std::vector<int> invalidColumns)
     : m_invalidColumns(std::move(invalidColumns)), m_row(row) {}
 
 std::vector<int> const &InvalidDefaultsError::invalidColumns() const {

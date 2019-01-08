@@ -20,14 +20,12 @@ namespace CustomInterfaces {
 
 class RunsPresenterFactory {
 public:
-  RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory,
-                       double thetaTolerance,
-                       // cppcheck-suppress passedByValue
-                       std::vector<std::string> instruments,
-                       int defaultInstrumentIndex,
-                       IMessageHandler *messageHandler,
-                       boost::shared_ptr<IAutoreduction> autoreduction,
-                       boost::shared_ptr<ISearcher> searcher)
+  RunsPresenterFactory( // cppcheck-suppress passedByValue
+      RunsTablePresenterFactory runsTablePresenterFactory,
+      double thetaTolerance, std::vector<std::string> instruments,
+      int defaultInstrumentIndex, IMessageHandler *messageHandler,
+      boost::shared_ptr<IAutoreduction> autoreduction,
+      boost::shared_ptr<ISearcher> searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),

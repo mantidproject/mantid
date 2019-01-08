@@ -11,10 +11,10 @@ namespace CustomInterfaces {
 
 PerThetaDefaults::PerThetaDefaults(
     boost::optional<double> theta,
+    // cppcheck-suppress passedByValue
     std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
     boost::optional<double> scaleFactor,
     boost::optional<ProcessingInstructions> processingInstructions)
-    // cppcheck-suppress passedByValue
     : m_theta(std::move(theta)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),

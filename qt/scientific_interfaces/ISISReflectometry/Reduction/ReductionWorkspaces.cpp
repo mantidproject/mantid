@@ -10,11 +10,18 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 ReductionWorkspaces::ReductionWorkspaces(
-    std::vector<std::string> timeOfFlight,
-    std::pair<std::string, std::string> transmissionRuns,
-    std::string combinedTransmissionRuns, std::string iVsLambda,
-    std::string iVsQ, std::string iVsQBinned)
     // cppcheck-suppress passedByValue
+    std::vector<std::string> timeOfFlight,
+    // cppcheck-suppress passedByValue
+    std::pair<std::string, std::string> transmissionRuns,
+    // cppcheck-suppress passedByValue
+    std::string combinedTransmissionRuns,
+    // cppcheck-suppress passedByValue
+    std::string iVsLambda,
+    // cppcheck-suppress passedByValue
+    std::string iVsQ,
+    // cppcheck-suppress passedByValue
+    std::string iVsQBinned)
     : m_timeOfFlight(std::move(timeOfFlight)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_combinedTransmissionRuns(combinedTransmissionRuns),
