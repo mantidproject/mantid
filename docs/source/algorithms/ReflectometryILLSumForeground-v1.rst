@@ -61,7 +61,6 @@ Usage
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
-       OutputBeamPositionWorkspace='direct_beam_pos',  # For reflected angle calibration.
        **settings
    )
    # We need the summed direct beam for the reflectivity
@@ -70,7 +69,6 @@ Usage
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectBeamPositionWorkspace='direct_beam_pos',
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
@@ -110,7 +108,6 @@ Output:
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
-       OutputBeamPositionWorkspace='direct_beam_pos',  # For reflected angle calibration.
        **settings
    )
    # We need the summed direct beam for the reflectivity
@@ -119,7 +116,6 @@ Output:
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectBeamPositionWorkspace='direct_beam_pos',
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
