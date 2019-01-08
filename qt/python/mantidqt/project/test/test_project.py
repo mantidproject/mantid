@@ -27,7 +27,6 @@ else:
     import mock
 
 
-
 class FakeGlobalFigureManager(object):
     def add_observer(self, *unused):
         pass

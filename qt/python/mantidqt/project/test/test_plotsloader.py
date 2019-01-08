@@ -27,7 +27,6 @@ else:
     import mock
 
 
-
 def pass_func():
     pass
 
