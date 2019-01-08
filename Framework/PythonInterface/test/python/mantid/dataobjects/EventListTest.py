@@ -69,7 +69,7 @@ class EventListTest(unittest.TestCase):
         evl.maskCondition(mask)
 
         self.assertEquals(evl.getNumberEvents(), 10)
-        self.assertEquals(el.getTofMax(), float(9.0))
+        self.assertEquals(evl.getTofMax(), float(9.0))
 
 if __name__ == '__main__':
     unittest.main()
