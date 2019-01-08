@@ -323,8 +323,7 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
         mortonMin, mortonMax, space, bc->getMaxDepth() + 1, 1, bc};
     int nThreads = (this->m_NumThreads == 0); // 1 thread if 0
     if(!nThreads)
-      nThreads = this->m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS :
-          static_cast<uint16_t>(this->m_NumThreads);
+      nThreads = this->m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : this->m_NumThreads;
     DistributorType distributor(nThreads, mdEvents.size() / nThreads/ 10);
     distributor.distribute(tsk);
     return root;
