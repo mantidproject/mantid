@@ -87,6 +87,18 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertFalse(self.fit_browser.tool is None)
         self.assertEqual(self.draw_count, 3)
 
+    def test_resize(self):
+        yield self.start()
+        self.start_draw_calls_count()
+        width = (self.fit_browser.width() + self.w.width()) / 2
+        self.w.resize(width, 400)
+        yield
+        self.assertEqual(self.draw_count, 1)
+        width = self.fit_browser.width() - 10
+        self.w.resize(width, 400)
+        yield
+        self.assertEqual(self.draw_count, 1)
+
     def test_fit_range(self):
         yield self.start()
         start_x = self.fit_browser.startX()
@@ -226,6 +238,14 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         action = manager.toolbar._actions['toggle_fit']
         self.assertFalse(action.isVisible())
         self.assertFalse(action.isEnabled())
+
+    def test_add_peak(self):
+        yield self.start()
+        self.start_draw_calls_count()
+        self.fit_browser.loadFunction('name=LinearBackground')
+        print(self.fit_browser.defaultPeakType())
+        self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
+        self.assertEqual(self.draw_count, 1)
 
 
 runTests(TestFitPropertyBrowser)

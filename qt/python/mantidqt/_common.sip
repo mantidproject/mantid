@@ -288,6 +288,11 @@ public:
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+    SIP_PYOBJECT defaultPeakType() const;
+%MethodCode
+    auto f = sipCpp->defaultPeakType();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
 signals:
     void startXChanged(double);
     void endXChanged(double);
