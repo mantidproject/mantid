@@ -246,7 +246,7 @@ void LoadSampleEnvironment::exec() {
   sample.setEnvironment(std::move(environment));
 
   auto translatedVertices = environmentMesh->getVertices();
-  if (g_log.is(7)) {
+  if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     int i = 0;
     for (double vertex : translatedVertices) {
       i++;
