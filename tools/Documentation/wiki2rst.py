@@ -49,8 +49,12 @@ def parse_arguments(argv):
                         help='Provide a reference link')
     parser.add_argument('--index_url', default='http://www.mantidproject.org/',
                         help='The url of the main wiki landing page')
+    parser.add_argument('--add_handle', action='store_true', dest='add_page_handle',
+                        help='Should we add a heading to this page?', default=False)
     parser.add_argument('--page_handle',
                         help='The page handle to add at the top of the rst pages')
+    parser.add_argument('--add_heading', action='store_true', dest='add_heading',
+                        help='Should we add a heading to this page?', default=False)
     return parser.parse_args(argv)
 
 # ------------------------------------------------------------------------------
@@ -174,8 +178,13 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
     as described in the module documentation
     """
     post_processed_rst = pandoc_rst#fix_underscores_in_ref_links(pandoc_rst)
-    post_processed_rst = add_page_handle(post_processed_rst, 
-                                         post_process_args["page_handle"])
+    if post_process_args["add_heading"]:
+        post_processed_rst = add_page_heading(post_processed_rst, 
+                                              post_process_args["page_handle"])
+    if post_process_args["add_page_handle"]:
+        post_processed_rst = add_page_handle(post_processed_rst, 
+                                             post_process_args["page_handle"])
+    post_processed_rst = fix_internal_links(post_processed_rst)
     post_processed_rst, image_names = fix_image_links(post_processed_rst, wiki_markup,
                                                       post_process_args["rel_img_dir"])
     download_images_from_wiki(wiki_url, image_names, post_process_args["img_dir"])
@@ -184,10 +193,33 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
 # ------------------------------------------------------------------------------
 
 
+def add_page_heading(pandoc_rst, page_handle):
+    """Add a heading at the top of the page - this is the page name of the wiki page"""
+    page_heading = re.sub("_", " ", page_handle)
+    heading_markup = "=" * len(page_heading)
+    pandoc_rst = heading_markup + "\n" + page_heading + "\n" + \
+                 heading_markup + "\n \n" + pandoc_rst
+    return pandoc_rst
+
+# ------------------------------------------------------------------------------
+
+
 def add_page_handle(pandoc_rst, page_handle):
     """Add a handle on the top line of the page - this is the page name of the wiki page
     and should match references written by default in the conversion"""
-    pandoc_rst = ".. _" + page_handle + ": \n \n " + pandoc_rst
+    pandoc_rst = ".. _:" + page_handle + ": \n \n" + pandoc_rst
+    return pandoc_rst
+
+# ------------------------------------------------------------------------------
+
+
+def fix_internal_links(pandoc_rst):
+    """Change the pandoc default internal link format to Sphinx-ready :ref: style"""
+    link_strings = re.findall("`[a-zA-Z ]+?<[a-zA-Z _-]+?>`__+", pandoc_rst, re.DOTALL)
+    print("Converting links: ", link_strings)
+    for string in link_strings:
+        ref_text = ":ref:" + string[:-2] 
+        pandoc_rst = re.sub(string, ref_text, pandoc_rst)
     return pandoc_rst
 
 # ------------------------------------------------------------------------------
@@ -380,7 +412,8 @@ def main(argv):
             page_handle = args.page_handle
 
         post_process_args = {"rel_img_dir": rel_img_dir, "img_dir": img_dir, "page_handle":
-                page_handle}
+                page_handle, "add_page_handle": args.add_page_handle, 
+                "add_heading": args.add_heading}
         display_debug("Post processing arguments: '{}'".format(post_process_args))
         rst_text = to_rst(wiki_url, post_process_args)
         if args.output_file:
