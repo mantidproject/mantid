@@ -17,14 +17,6 @@
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
-namespace {
-#ifdef _WIN32
-const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/windir?name=";
-#else
-const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
-#endif
-}
-
 class MockOutRequests : public ISISDataArchive {
 public:
   MockOutRequests()
@@ -42,6 +34,13 @@ public:
 protected:
   /**
    * Mocked out sendRequest.
+   * sendRequest in ISISDataArchive makes a call to a web service
+   * which returns an ostringstream object containing a string
+   * of the directory containing the file.
+   * (if the file doesn't exist, it returns the newest directory)
+   * This mock returns an ostringstream object containing
+   * m_sendRequestReturnVal
+   * @param fName :: file name without extension. Irrelevant to this mock
    */
   std::ostringstream sendRequest(const std::string &fName) const override {
     (void)fName;
@@ -52,14 +51,14 @@ protected:
 
   /**
    * Mocked out fileExists.
-   * Mocks search for files with extensions.
+   * Mock searchs for files with extensions.
    * This is a simplistic version. Will return m_mockFileExists
    * for any `path`.
    * Except for hard-coded case of path ending in .txt
    * This exception is to test that
    * `getCorrectExtension` will loop until it finds
    * the first acceptable extension.
-   * @param :: path to file, including extension
+   * @param path :: path to file, including extension
    */
   bool fileExists(const std::string &path) const override {
     if (path.substr(path.size() - 4, 4) == ".txt") {
@@ -116,12 +115,12 @@ public:
     const std::string actualPath = arch.getArchivePath(filenames, exts);
 
     std::string expectedPath = "/archive/default/path";
-    if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
-        0) {
-      expectedPath += "\\";
-    } else {
-      expectedPath += "/";
-    }
+#ifdef _WIN32
+    expectedPath += "\\";
+#else
+    expectedPath += "/";
+#endif
+
     TS_ASSERT_EQUALS(actualPath, expectedPath + "hrpd273.RAW");
   }
 
@@ -149,13 +148,13 @@ public:
    */
   void xtestgetCorrectExtensionWithCorrectExtensionWithWebCall() {
     std::string path;
-    if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
-        0) {
-      path = "\\isis.cclrc.ac.uk\\inst$\\ndxhrpd\\instrument\\data\\cycle_98_"
-             "0\\HRP00273";
-    } else {
-      path = "/archive/ndxhrpd/Instrument/data/cycle_98_0/HRP00273";
-    }
+#ifdef _WIN32
+    path = "\\isis.cclrc.ac.uk\\inst$\\ndxhrpd\\instrument\\data\\cycle_98_"
+           "0\\HRP00273";
+#else
+    path = "/archive/ndxhrpd/Instrument/data/cycle_98_0/HRP00273";
+#endif
+
     ISISDataArchive arch;
 
     const std::vector<std::string> correct_exts = {".RAW"};
@@ -166,13 +165,13 @@ public:
 
   void xtestgetCorrectExtensionWithInCorrectExtensionsWithWebCall() {
     std::string path;
-    if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
-        0) {
-      path = "\\isis.cclrc.ac.uk\\inst$\\ndxhrpd\\instrument\\data\\cycle_98_"
-             "0\\HRP00273";
-    } else {
-      path = "/archive/ndxhrpd/Instrument/data/cycle_98_0/HRP00273";
-    }
+#ifdef _WIN32
+    path = "\\isis.cclrc.ac.uk\\inst$\\ndxhrpd\\instrument\\data\\cycle_98_"
+           "0\\HRP00273";
+#else
+    path = "/archive/ndxhrpd/Instrument/data/cycle_98_0/HRP00273";
+#endif
+
     ISISDataArchive arch;
 
     const std::vector<std::string> incorrect_exts = {".so", ".txt"};
