@@ -139,6 +139,7 @@ class MainWindow(QMainWindow):
 
         # -- instance attributes --
         self.setWindowTitle("Mantid Workbench")
+        self.setObjectName("Mantid Workbench")
 
         # widgets
         self.messagedisplay = None

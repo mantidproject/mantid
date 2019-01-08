@@ -92,6 +92,7 @@ endif ()
 
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
+    mantidqt/widgets/test/test_fitpropertybrowser.py
 
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
@@ -99,6 +100,13 @@ endif ()
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_tableviewmodel.py
+
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
   )
 
   # Tests
