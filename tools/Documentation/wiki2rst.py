@@ -29,7 +29,6 @@ import subprocess
 import sys
 import tempfile
 import urllib2
-sys.path.append('/Applications/MantidPlot.app/Contents/MacOS')
 
 import mantid
 
