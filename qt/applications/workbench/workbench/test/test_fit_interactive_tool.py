@@ -27,7 +27,8 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         plot([ws], [1])
         manager = GlobalFigureManager.get_active()
         self.w = manager.window
-        trigger_action(find_action_with_text(self.w, 'Fit'))
+        self.fit_action = find_action_with_text(self.w, 'Fit')
+        trigger_action(self.fit_action)
         yield 0.1
         self.fit_browser = manager.fit_browser
 
@@ -53,6 +54,22 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
     def move_end_x(self, canvas, pos, dx, try_other_way_if_failed=True):
         return self.move_marker(canvas, self.fit_browser.tool.fit_end_x, pos, dx,
                                 try_other_way_if_failed=try_other_way_if_failed)
+
+    def test_fit_on_off(self):
+        yield self.start()
+        self.assertTrue(self.fit_browser.isVisible())
+        trigger_action(self.fit_action)
+        yield self.wait_for_true(lambda: not self.fit_browser.isVisible())
+        self.assertFalse(self.fit_browser.isVisible())
+
+    def test_undock(self):
+        yield self.start()
+        self.fit_browser.setFloating(True)
+        yield self.wait_for_true(lambda: not self.fit_browser.isFloating())
+        trigger_action(self.fit_action)
+        yield self.wait_for_true(lambda: not self.fit_browser.isVisible())
+        self.assertFalse(self.fit_browser.isVisible())
+        self.assertTrue(self.fit_browser.tool is None)
 
     def test_fit_range(self):
         yield self.start()

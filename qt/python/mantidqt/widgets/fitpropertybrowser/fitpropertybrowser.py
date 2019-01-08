@@ -68,6 +68,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.tool.fit_start_x_moved.disconnect()
             self.tool.fit_end_x_moved.disconnect()
             self.tool.disconnect()
+            self.tool = None
+            self.canvas.draw()
         super(FitPropertyBrowser, self).hide()
 
     def move_start_x(self, xd):
