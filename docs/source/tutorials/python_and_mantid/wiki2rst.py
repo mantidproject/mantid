@@ -174,6 +174,8 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
     as described in the module documentation
     """
     post_processed_rst = pandoc_rst#fix_underscores_in_ref_links(pandoc_rst)
+    post_processed_rst = add_page_heading(post_processed_rst, 
+                                         post_process_args["page_handle"])
     post_processed_rst = add_page_handle(post_processed_rst, 
                                          post_process_args["page_handle"])
     post_processed_rst = fix_internal_links(post_processed_rst)
@@ -185,10 +187,21 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
 # ------------------------------------------------------------------------------
 
 
+def add_page_heading(pandoc_rst, page_handle):
+    """Add a heading at the top of the page - this is the page name of the wiki page"""
+    page_heading = re.sub("_", " ", page_handle)
+    heading_markup = "=" * len(page_heading)
+    pandoc_rst = heading_markup + "\n" + page_heading + "\n" + \
+                 heading_markup + "\n \n" + pandoc_rst
+    return pandoc_rst
+
+# ------------------------------------------------------------------------------
+
+
 def add_page_handle(pandoc_rst, page_handle):
     """Add a handle on the top line of the page - this is the page name of the wiki page
     and should match references written by default in the conversion"""
-    pandoc_rst = ".. _:" + page_handle + ": \n \n " + pandoc_rst
+    pandoc_rst = ".. _:" + page_handle + ": \n \n" + pandoc_rst
     return pandoc_rst
 
 # ------------------------------------------------------------------------------
@@ -196,9 +209,10 @@ def add_page_handle(pandoc_rst, page_handle):
 
 def fix_internal_links(pandoc_rst):
     """Change the pandoc default internal link format to Sphinx-ready :ref: style"""
-    link_strings = re.findall(r"`.*?`__", pandoc_rst, re.DOTALL)
+    link_strings = re.findall("`[a-zA-Z :]+?<[a-zA-Z :_-]+?>`__+", pandoc_rst, re.DOTALL)
+    print("Converting links: ", link_strings)
     for string in link_strings:
-        ref_text = ":ref:" + string[:-2]
+        ref_text = ":ref:" + string[:-2] 
         pandoc_rst = re.sub(string, ref_text, pandoc_rst)
     return pandoc_rst
 
