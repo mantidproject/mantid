@@ -246,12 +246,14 @@ void LoadSampleEnvironment::exec() {
   sample.setEnvironment(std::move(environment));
 
   auto translatedVertices = environmentMesh->getVertices();
-  int i = 0;
-  for (double vertex : translatedVertices) {
-    i++;
-    g_log.information(std::to_string(vertex));
-    if (i % 3 == 0) {
-      g_log.information("\n");
+  if (g_log.is(7)) {
+    int i = 0;
+    for (double vertex : translatedVertices) {
+      i++;
+      g_log.debug(std::to_string(vertex));
+      if (i % 3 == 0) {
+        g_log.debug("\n");
+      }
     }
   }
   // get the material name and number density for debug
