@@ -53,7 +53,7 @@ protected slots:
   void setModelFromMultipleData();
   void showAddWorkspaceDialog();
 
-  virtual void cancelDialog();
+  virtual void closeDialog();
 
 signals:
   void singleSampleLoaded();

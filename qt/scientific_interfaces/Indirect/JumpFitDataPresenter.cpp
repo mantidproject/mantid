@@ -196,10 +196,10 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
     m_jumpModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex);
 }
 
-void JumpFitDataPresenter::cancelDialog() {
+void JumpFitDataPresenter::closeDialog() {
   if (m_jumpModel->numberOfWorkspaces() > m_dataIndex)
     m_jumpModel->removeWorkspace(m_dataIndex);
-  IndirectFitDataPresenter::cancelDialog();
+  IndirectFitDataPresenter::closeDialog();
 }
 
 std::unique_ptr<IAddWorkspaceDialog>

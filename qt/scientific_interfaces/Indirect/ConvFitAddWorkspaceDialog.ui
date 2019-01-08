@@ -126,19 +126,16 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="ckKeepOpen">
+       <widget class="QPushButton" name="pbAdd">
         <property name="text">
-         <string>Keep open</string>
+         <string>Add</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDialogButtonBox" name="buttonBox">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       <widget class="QPushButton" name="pbClose">
+        <property name="text">
+         <string>Close</string>
         </property>
        </widget>
       </item>
@@ -157,40 +154,40 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
+   <sender>pbAdd</sender>
+   <signal>clicked()</signal>
    <receiver>ConvFitAddWorkspaceDialog</receiver>
-   <slot>cancelDialog()</slot>
+   <slot>addData()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>348</x>
-     <y>159</y>
+     <x>276</x>
+     <y>160</y>
     </hint>
     <hint type="destinationlabel">
-     <x>352</x>
-     <y>217</y>
+     <x>269</x>
+     <y>319</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
+   <sender>pbClose</sender>
+   <signal>clicked()</signal>
    <receiver>ConvFitAddWorkspaceDialog</receiver>
-   <slot>addDialogData()</slot>
+   <slot>closeDialog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>265</x>
-     <y>157</y>
+     <x>340</x>
+     <y>171</y>
     </hint>
     <hint type="destinationlabel">
-     <x>261</x>
-     <y>220</y>
+     <x>335</x>
+     <y>251</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
-  <slot>cancelDialog()</slot>
-  <slot>addDialogData()</slot>
+  <slot>addData()</slot>
+  <slot>closeDialog()</slot>
  </slots>
 </ui>

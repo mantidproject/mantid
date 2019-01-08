@@ -22,11 +22,9 @@ public:
   virtual void setWSSuffices(const QStringList &suffices) = 0;
   virtual void setFBSuffices(const QStringList &suffices) = 0;
 
-  virtual bool isKeepOpenChecked() const = 0;
-
 signals:
-  void addDialogData();
-  void cancelDialog();
+  void addData();
+  void closeDialog();
 };
 
 } // namespace IDA

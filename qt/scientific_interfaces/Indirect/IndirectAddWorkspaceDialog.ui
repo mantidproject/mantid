@@ -106,19 +106,16 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="ckKeepOpen">
+       <widget class="QPushButton" name="pbAdd">
         <property name="text">
-         <string>Keep open</string>
+         <string>Add</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDialogButtonBox" name="buttonBox">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       <widget class="QPushButton" name="pbClose">
+        <property name="text">
+         <string>Close</string>
         </property>
        </widget>
       </item>
@@ -137,40 +134,40 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
+   <sender>pbAdd</sender>
+   <signal>clicked()</signal>
    <receiver>IndirectAddWorkspaceDialog</receiver>
-   <slot>cancelDialog()</slot>
+   <slot>addData()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>336</x>
-     <y>160</y>
+     <x>283</x>
+     <y>157</y>
     </hint>
     <hint type="destinationlabel">
-     <x>338</x>
-     <y>200</y>
+     <x>248</x>
+     <y>294</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
+   <sender>pbClose</sender>
+   <signal>clicked()</signal>
    <receiver>IndirectAddWorkspaceDialog</receiver>
-   <slot>addDialogData()</slot>
+   <slot>closeDialog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>157</y>
+     <x>358</x>
+     <y>160</y>
     </hint>
     <hint type="destinationlabel">
-     <x>272</x>
-     <y>205</y>
+     <x>354</x>
+     <y>227</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
-  <slot>cancelDialog()</slot>
-  <slot>addDialogData()</slot>
+  <slot>addData()</slot>
+  <slot>closeDialog()</slot>
  </slots>
 </ui>

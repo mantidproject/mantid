@@ -151,10 +151,9 @@ void IndirectFitDataPresenter::showAddWorkspaceDialog() {
   m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
   m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
   m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(addDialogData()), this,
-          SLOT(addData()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(cancelDialog()), this,
-          SLOT(cancelDialog()));
+  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
+  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this,
+          SLOT(closeDialog()));
 }
 
 std::unique_ptr<IAddWorkspaceDialog>
@@ -164,15 +163,13 @@ IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
 
 void IndirectFitDataPresenter::addData() {
   addData(m_addWorkspaceDialog.get());
-  if (!m_addWorkspaceDialog->isKeepOpenChecked())
-    m_addWorkspaceDialog->close();
 }
 
-void IndirectFitDataPresenter::cancelDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addDialogData()), this,
+void IndirectFitDataPresenter::closeDialog() {
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this,
              SLOT(addData()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(cancelDialog()), this,
-             SLOT(cancelDialog()));
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this,
+             SLOT(closeDialog()));
   m_addWorkspaceDialog->close();
 }
 

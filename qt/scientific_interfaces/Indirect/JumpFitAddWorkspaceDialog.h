@@ -31,8 +31,6 @@ public:
   void enableParameterSelection();
   void disableParameterSelection();
 
-  bool isKeepOpenChecked() const override;
-
 public slots:
   void emitWorkspaceChanged(const QString &name);
   void emitParameterTypeChanged(const QString &index);

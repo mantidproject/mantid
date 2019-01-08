@@ -28,8 +28,6 @@ public:
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
 
-  bool isKeepOpenChecked() const override;
-
 private slots:
   void selectAllSpectra(int state);
   void workspaceChanged(const QString &workspaceName);
