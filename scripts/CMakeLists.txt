@@ -100,6 +100,7 @@ set ( TEST_PY_FILES
       test/DirectReductionHelpersTest.py
       test/ErrorReportPresenterTest.py
       test/IndirectCommonTests.py
+      test/InelasticDirectDetpackmapTest.py
       test/ISISDirecInelasticConfigTest.py
       test/PyChopTest.py
       test/pythonTSVTest.py

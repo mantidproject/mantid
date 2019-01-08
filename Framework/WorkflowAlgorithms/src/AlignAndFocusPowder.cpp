@@ -271,8 +271,12 @@ void AlignAndFocusPowder::exec() {
   m_inputW = getProperty("InputWorkspace");
   m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   m_instName = m_inputW->getInstrument()->getName();
-  m_instName =
-      Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
+  try {
+    m_instName =
+        Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
+  } catch (Exception::NotFoundError &) {
+    ; // not noteworthy
+  }
   std::string calFilename = getPropertyValue("CalFileName");
   std::string groupFilename = getPropertyValue("GroupFilename");
   m_calibrationWS = getProperty("CalibrationWorkspace");
@@ -379,7 +383,7 @@ void AlignAndFocusPowder::exec() {
   } else {
     // workspace2D
     if (m_outputW != m_inputW) {
-      m_outputW = WorkspaceFactory::Instance().create(m_inputW);
+      m_outputW = m_inputW->clone();
     }
   }
 
@@ -720,7 +724,6 @@ void AlignAndFocusPowder::exec() {
     API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
     compressAlg->setProperty("InputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
-    compressAlg->setProperty("OutputWorkspace", m_outputEW);
     compressAlg->setProperty("Tolerance", tolerance);
     if (!isEmpty(wallClockTolerance)) {
       compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
@@ -774,6 +777,13 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
   if (!m_groupWS) {
     g_log.information() << "not focussing data\n";
     return ws;
+  }
+
+  if (m_maskWS) {
+    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
+    maskAlg->setProperty("Workspace", m_groupWS);
+    maskAlg->setProperty("MaskedWorkspace", m_maskWS);
+    maskAlg->executeAsChildAlg();
   }
 
   g_log.information() << "running DiffractionFocussing started at "

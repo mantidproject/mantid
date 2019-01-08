@@ -118,10 +118,10 @@ void OptimizeCrystalPlacement::init() {
   declareProperty("MaxAngularChange", 5.0,
                   "Max offset in degrees from current settings(def=5)");
 
-  declareProperty("MaxIndexingError", .25,
+  declareProperty("MaxIndexingError", 0.15,
                   "Use only peaks whose fractional "
                   "hkl values are below this "
-                  "tolerance(def=.25)");
+                  "tolerance(def=0.15)");
 
   declareProperty("MaxHKLPeaks2Use", -1.0,
                   "If less than 0 all peaks are used, "
@@ -449,8 +449,9 @@ void OptimizeCrystalPlacement::exec() {
   UBinv.Invert();
   UBinv /= (2 * M_PI);
   for (int i = 0; i < outPeaks->getNumberPeaks(); ++i) {
-    outPeaks->getPeak(i).setSamplePos(newSampPos);
-    int RunNum = outPeaks->getPeak(i).getRunNumber();
+    auto peak = outPeaks->getPeak(i);
+    peak.setSamplePos(peak.getSamplePos() + newSampPos);
+    int RunNum = peak.getRunNumber();
     std::string RunNumStr = std::to_string(RunNum);
     Matrix<double> GonMatrix;
     if (RunNum == prevRunNum ||
@@ -472,12 +473,12 @@ void OptimizeCrystalPlacement::exec() {
       GonMatrix = GonTilt * uniGonio.getR();
       MapRunNum2GonMat[RunNum] = GonMatrix;
     } else {
-      GonMatrix = GonTilt * outPeaks->getPeak(i).getGoniometerMatrix();
+      GonMatrix = GonTilt * peak.getGoniometerMatrix();
       MapRunNum2GonMat[RunNum] = GonMatrix;
     }
 
-    outPeaks->getPeak(i).setGoniometerMatrix(GonMatrix);
-    V3D hkl = UBinv * outPeaks->getPeak(i).getQSampleFrame();
+    peak.setGoniometerMatrix(GonMatrix);
+    V3D hkl = UBinv * peak.getQSampleFrame();
     if (Geometry::IndexingUtils::ValidIndex(hkl, HKLintOffsetMax))
       nIndexed++;
 

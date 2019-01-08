@@ -398,7 +398,7 @@ class ScalingAxesImage(mimage.AxesImage):
         self.dx = None
         self.dy = None
         self.unsampled_data = None
-        super(mimage.AxesImage, self).__init__(
+        super(ScalingAxesImage, self).__init__(
             ax,
             cmap=cmap,
             norm=norm,
@@ -421,7 +421,7 @@ class ScalingAxesImage(mimage.AxesImage):
                 self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan)
         else:
             self.unsampled_data = A
-        super(mimage.AxesImage, self).set_data(A)
+        super(ScalingAxesImage, self).set_data(A)
 
     def draw(self, renderer):
         ax = self.axes
@@ -440,7 +440,7 @@ class ScalingAxesImage(mimage.AxesImage):
                     sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan)
                 self.dx = dx
                 self.dy = dy
-                super(mimage.AxesImage, self).set_data(sampled_data)
+                super(ScalingAxesImage, self).set_data(sampled_data)
         return super(ScalingAxesImage,self).draw(renderer)
 
 def _imshow(axes, z, cmap=None, norm=None, aspect=None,
