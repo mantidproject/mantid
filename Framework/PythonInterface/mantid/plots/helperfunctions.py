@@ -136,6 +136,7 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     if workspace.getNumberHistograms() == 1:
         spectrum_number = None
         workspace_index = 0
+        return workspace_index, spectrum_number, kwargs
 
     # error check input parameters
     if (spectrum_number is not None) and (workspace_index is not None):
