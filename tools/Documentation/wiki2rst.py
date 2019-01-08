@@ -206,7 +206,7 @@ def add_page_heading(pandoc_rst, page_handle):
 def add_page_handle(pandoc_rst, page_handle):
     """Add a handle on the top line of the page - this is the page name of the wiki page
     and should match references written by default in the conversion"""
-    pandoc_rst = ".. _:" + page_handle + ": \n \n" + pandoc_rst
+    pandoc_rst = ".. _" + page_handle + ":: \n \n" + pandoc_rst
     return pandoc_rst
 
 # ------------------------------------------------------------------------------
