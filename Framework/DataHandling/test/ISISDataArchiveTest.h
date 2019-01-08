@@ -29,35 +29,20 @@ class MockOutRequests : public ISISDataArchive {
 public:
   MockOutRequests()
       : m_sendRequestReturnVal("/archive/default/path"),
-        m_acceptableExts(".RAW") {}
+        m_mockFileExists(true) {}
 
   void setSendRequestReturnVal(std::string &return_val) {
     m_sendRequestReturnVal = return_val;
   }
 
-  void setAcceptableExts(std::string &exts) { m_acceptableExts = exts; }
-
-  /** This mocks getCorrectExtension, which searches data archive for
-   * complete file path
-   * m_acceptableExts is a string containing acceptable extensions
-   * e.g. ".RAW,.txt"
-   * this mocked method will return the path + ext if ext is in
-   * m_acceptableExts, otherwise return empty string.
-   * This is a bit simpler than the actual method, as in practice
-   * e.g. hrpd273 would be changed to HRP000273
-   */
-  std::string
-  getCorrectExtension(const std::string &path,
-                      const std::vector<std::string> &exts) const override {
-    for (const auto &ext : exts) {
-      if (m_acceptableExts.find(ext) != std::string::npos) {
-        return path + ext;
-      }
-    }
-    return "";
+  void setFileExists(const bool doesFileExist) {
+    m_mockFileExists = doesFileExist;
   }
 
 protected:
+  /**
+   * Mocked out sendRequest.
+   */
   std::ostringstream sendRequest(const std::string &fName) const override {
     (void)fName;
     std::ostringstream os;
@@ -65,33 +50,62 @@ protected:
     return os;
   }
 
+  /**
+   * Mocked out fileExists.
+   * Mocks search for files with extensions.
+   * This is a simplistic version. Will return m_mockFileExists
+   * for any `path`.
+   * Except for hard-coded case of path ending in .txt
+   * This exception is to test that
+   * `getCorrectExtension` will loop until it finds
+   * the first acceptable extension.
+   * @param :: path to file, including extension
+   */
+  bool fileExists(const std::string &path) const override {
+    if (path.substr(path.size() - 4, 4) == ".txt") {
+      return false;
+    }
+    return m_mockFileExists;
+  }
+
 private:
   // Mimics the directory tree returned by sendRequest
   // e.g. /archive/ndxloq/Instrument/data/cycle_98_0
   std::string m_sendRequestReturnVal;
 
-  // A string of allowed extensions. Used to mock getCorrectExtension
-  std::string m_acceptableExts;
+  // Used in mocking fileExists.
+  bool m_mockFileExists;
 };
 
 class ISISDataArchiveTest : public CxxTest::TestSuite {
 public:
-  void testFilenameLoopWithCorrectExtensions() {
-    std::vector<std::string> exts = {".txt", ".RAW"};
-    std::set<std::string> filenames = {"hrpd273"};
+  void testGetCorrectExtensionsWithCorrectExtensions() {
+    std::vector<std::string> exts = {".RAW"};
+    std::string filename = "/archive/default/path/hrpd273";
 
     MockOutRequests arch;
-    const std::string actualPath = arch.getArchivePath(filenames, exts);
+    const std::string actualPath = arch.getCorrectExtension(filename, exts);
     TS_ASSERT_EQUALS(actualPath, "/archive/default/path/hrpd273.RAW");
   }
 
-  void testFilenameLoopWithInCorrectExtensions() {
-    std::vector<std::string> exts = {".log", ".txt"};
-    std::set<std::string> filenames = {"hrpd273", "hrpd280"};
+  void testGetCorrectExtensionsWithInCorrectExtensions() {
+    std::vector<std::string> exts = {".RAW"};
+    std::string filename = "hrpd273";
 
     MockOutRequests arch;
-    const std::string actualPath = arch.getArchivePath(filenames, exts);
+    arch.setFileExists(false);
+
+    const std::string actualPath = arch.getCorrectExtension(filename, exts);
     TS_ASSERT_EQUALS(actualPath, "");
+  }
+
+  void testGetCorrectExtensionsLoopsUntilFindsFirstCorrectExtension() {
+    std::vector<std::string> exts = {".txt", ".RAW"};
+    std::string filename = "/archive/default/path/hrpd273";
+
+    MockOutRequests arch;
+    const std::string actualPath = arch.getCorrectExtension(filename, exts);
+    TS_ASSERT_EQUALS(actualPath, "/archive/default/path/hrpd273.RAW");
   }
 
   void testFilenameLoopIgnoresEmptyFilenames() {
@@ -100,7 +114,25 @@ public:
 
     MockOutRequests arch;
     const std::string actualPath = arch.getArchivePath(filenames, exts);
-    TS_ASSERT_EQUALS(actualPath, "/archive/default/path/hrpd273.RAW");
+
+    std::string expectedPath = "/archive/default/path";
+    if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
+        0) {
+      expectedPath += "\\";
+    } else {
+      expectedPath += "/";
+    }
+    TS_ASSERT_EQUALS(actualPath, expectedPath + "hrpd273.RAW");
+  }
+
+  void testGetArchivePathReturnsEmptyStringIfNoFileFound() {
+    std::vector<std::string> exts = {".RAW", ".log"};
+    std::set<std::string> filenames = {"hrpd280", "hrpd273"};
+
+    MockOutRequests arch;
+    arch.setFileExists(false);
+    const std::string actualPath = arch.getArchivePath(filenames, exts);
+    TS_ASSERT_EQUALS(actualPath, "");
   }
 
   void testFactory() {
@@ -115,7 +147,7 @@ public:
    * This tests the file extensions loop.
    * To run, this tests requires that the ISIS archive is on your local machine.
    */
-  void xtestgetCorrectExtensionWithCorrectExtension() {
+  void xtestgetCorrectExtensionWithCorrectExtensionWithWebCall() {
     std::string path;
     if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
         0) {
@@ -132,7 +164,7 @@ public:
     TS_ASSERT_EQUALS(actualResult, path + ".RAW");
   }
 
-  void xtestgetCorrectExtensionWithInCorrectExtensions() {
+  void xtestgetCorrectExtensionWithInCorrectExtensionsWithWebCall() {
     std::string path;
     if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
         0) {

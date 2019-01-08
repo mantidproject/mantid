@@ -41,6 +41,7 @@ public:
 protected:
   /// Queries the archive & returns the path to a single file.
   virtual std::ostringstream sendRequest(const std::string &fName) const;
+  virtual bool fileExists(const std::string &path) const;
 };
 } // namespace DataHandling
 } // namespace Mantid

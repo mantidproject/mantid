@@ -114,13 +114,26 @@ std::string ISISDataArchive::getCorrectExtension(
     const std::string &path, const std::vector<std::string> &exts) const {
   for (const auto &ext : exts) {
     std::string temp_path = path + ext;
-    try {
-      if (Poco::File(temp_path).exists())
-        return temp_path;
-    } catch (Poco::Exception &) {
-    }
+    if (fileExists(temp_path))
+      return temp_path;
   }
   return "";
+}
+
+/**
+ * Checks if the given file path exists or not.
+ * This code is in a separate function so it
+ * can be mocked out in testing.
+ * @param path :: The path to the file (including extension)
+ * @return A bool. Whether or not the file exists.
+ */
+bool ISISDataArchive::fileExists(const std::string &path) const {
+  try {
+    if (Poco::File(path).exists())
+      return true;
+  } catch (Poco::Exception &) {
+  }
+  return false;
 }
 
 } // namespace DataHandling
