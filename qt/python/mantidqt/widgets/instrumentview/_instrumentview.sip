@@ -34,3 +34,13 @@ public:
   QMap<QString, QVariant> encode(const InstrumentWidget &obj,
                                  const QString &projectPath) /ReleaseGIL/;
 };
+
+class InstrumentWidgetDecoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h"
+%End
+public:
+  InstrumentWidgetDecoder();
+  void decoder(const QMap<QString, QVariant> &map, 
+               const QString &projectPath) /ReleaseGIL/;
+};

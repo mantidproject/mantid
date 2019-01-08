@@ -20,11 +20,11 @@
 #include "MantidQtWidgets/InstrumentView/Shape2D.h"
 #include "MantidQtWidgets/InstrumentView/XIntegrationControl.h"
 
+#include <QAction>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QPushButton>
 #include <QRadioButton>
-#include <QComboBox>
-#include <QAction>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -38,9 +38,9 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
   m_projectPath = projectPath.toStdString();
 
   map.insert(QString("workspaceName"), QVariant(obj.getWorkspaceName()));
+
   map.insert(QString("surfaceType"), QVariant(obj.getSurfaceType()));
-  map.insert(QString("surface"),
-             QVariant(this->encodeSurface(obj.getSurface())));
+
   map.insert(QString("currentTab"), QVariant(obj.getCurrentTab()));
 
   QList<QVariant> energyTransferList;
@@ -48,6 +48,8 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
   energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
   map.insert(QString("energyTransfer"), QVariant(energyTransferList));
 
+  map.insert(QString("surface"),
+             QVariant(this->encodeSurface(obj.getSurface())));
   map.insert(QString("actor"),
              QVariant(this->encodeActor(obj.m_instrumentActor)));
   map.insert(QString("tabs"), QVariant(this->encodeTabs(obj)));
@@ -124,7 +126,7 @@ InstrumentWidgetEncoder::encodeRenderTab(const InstrumentWidgetRenderTab *tab) {
 QMap<QString, QVariant> InstrumentWidgetEncoder::encodeColorBar(
     MantidQt::MantidWidgets::ColorBar *bar) {
   QMap<QString, QVariant> map;
-  
+
   map.insert(QString("scaleType"), QVariant(bar->getScaleType()));
   map.insert(QString("power"), QVariant(bar->getNthPower()));
   map.insert(QString("min"), QVariant(bar->getMinValue()));
@@ -162,7 +164,8 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
 
   // Save the masks applied to view but not saved to a workspace
   auto wsName = tab->m_instrWidget->getWorkspaceName() + "MaskView.xml";
-  bool success = tab->saveMaskViewToProject(wsName.toStdString(), m_projectPath);
+  bool success =
+      tab->saveMaskViewToProject(wsName.toStdString(), m_projectPath);
   map.insert(QString("maskWorkspaceSaved"), QVariant(success));
   if (success) {
     map.insert(QString("maskWorkspaceName"), QVariant(wsName));
@@ -220,7 +223,7 @@ InstrumentWidgetEncoder::encodeBinMask(const BinMask &obj) {
   QMap<QString, QVariant> map;
 
   QList<QVariant> range;
-  // Convert Doubles to QString 
+  // Convert Doubles to QString
   range.append(QVariant(QString("%1").arg(obj.start)));
   range.append(QVariant(QString("%1").arg(obj.end)));
   map.insert(QString("range"), QVariant(range));
@@ -281,21 +284,25 @@ InstrumentWidgetEncoder::encodeShapeProperties(const Shape2D *obj) {
   return map;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeAlignmentInfo(
+QList<QVariant> list InstrumentWidgetEncoder::encodeAlignmentInfo(
     const ProjectionSurface_sptr &obj) {
-  QMap<QString, QVariant> map;
+  QList<QVariant> list;
 
   for (const auto &item : obj->m_selectedAlignmentPlane) {
     const auto qLab = item.first;
-    QList<QVariant> qLabList;
-    qLabList.append(QVariant(qLab.X()));
-    qLabList.append(QVariant(qLab.Y()));
-    qLabList.append(QVariant(qLab.Z()));
-    map.insert(QString("qLab"), QVariant(qLabList));
-    map.insert(QString("marker"), QVariant(item.second));
+    QMap<QString, QVariant> qLabMap;
+    qLabMap.insert(QString("x"), QVariant(qLab.X()));
+    qLabMap.insert(QString("y"), QVariant(qLab.Y()));
+    qLabMap.insert(QString("z"), QVariant(qLab.Z()));
+
+    QList<QVariant> itemList;
+    itemList.append(QVariant(qLabMap));     // qLabMap
+    itemList.append(QVariant(item.second)); // marker
+
+    list.append(itemList);
   }
 
-  return map;
+  return list;
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

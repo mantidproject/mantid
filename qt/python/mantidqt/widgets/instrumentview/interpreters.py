@@ -10,8 +10,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from mantidqt.widgets.instrumentview.interpreterimports import InstrumentWidgetEncoder
 
-from qtpy.QtGui import QColor
-
 
 class InstrumentViewAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so

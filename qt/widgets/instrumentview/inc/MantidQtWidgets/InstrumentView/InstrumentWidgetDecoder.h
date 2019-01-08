@@ -7,4 +7,25 @@
 #ifndef INSTRUMENTWIDGETDECODER_H_
 #define INSTRUMENTWIDGETDECODER_H_
 
+#include <QMap>
+#include <QList>
+
+namespace MantidQt {
+namespace MantidWidgets {
+
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetDecoder {
+  Q_OBJECT
+public:
+  InstrumentWidgetDecoder();
+  void decoder(const QMap<QString, QVariant> &map, const InstrumentWidget &obj,
+               const QString &projectPath);
+
+private:
+  QString m_projectPath;
+  QString m_workspaceName;
+};
+
+} // namespace MantidWidgets
+} // namespace MantidQt
+
 #endif /*INSTRUMENTWIDGETDECODER_H_*/
