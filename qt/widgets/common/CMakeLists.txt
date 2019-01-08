@@ -14,6 +14,7 @@ set ( QT5_SRC_FILES
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitPropertyBrowser.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser.cpp
   src/GenericDialog.cpp
@@ -35,18 +36,22 @@ set ( QT5_SRC_FILES
   src/MantidWSIndexDialog.cpp
   src/Message.cpp
   src/MessageDisplay.cpp
+  src/MultifitSetupDialog.cpp
   src/MWRunFiles.cpp
   src/OptionsPropertyWidget.cpp
   src/pixmaps.cpp
   src/PluginLibraries.cpp
   src/ProcessingAlgoWidget.cpp
+  src/PropertyHandler.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
   src/RenameParDialog.cpp
   src/ScriptEditor.cpp
+  src/SequentialFitDialog.cpp
   src/SelectFunctionDialog.cpp
+  src/SelectWorkspacesDialog.cpp
   src/TextPropertyWidget.cpp
   src/UserFunctionDialog.cpp
   src/UserSubWindow.cpp
@@ -91,6 +96,7 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
+  inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/InputController.h
@@ -104,15 +110,19 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/MantidWidget.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
+  inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/MWRunFiles.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
+  inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/ScriptEditor.h
+  inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/SelectFunctionDialog.h
+  inc/MantidQtWidgets/Common/SelectWorkspacesDialog.h
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
@@ -157,8 +167,10 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/InterfaceFactory.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
+  inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/pixmaps.h
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+  inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
@@ -172,9 +184,11 @@ set ( QT5_INC_FILES
 set ( QT5_UI_FILES
   inc/MantidQtWidgets/Common/DataSelector.ui
   inc/MantidQtWidgets/Common/ManageUserDirectories.ui
+  inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
   inc/MantidQtWidgets/Common/MWRunFiles.ui
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
   inc/MantidQtWidgets/Common/RenameParDialog.ui
+  inc/MantidQtWidgets/Common/SequentialFitDialog.ui
   inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
   inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )

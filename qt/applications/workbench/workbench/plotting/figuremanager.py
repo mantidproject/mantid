@@ -20,9 +20,11 @@ from six import text_type
 
 # local imports
 from workbench.plotting.figurewindow import FigureWindow
+from workbench.plotting.figuretype import figure_type, FigureType
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from workbench.plotting.qappthreadcall import QAppThreadCall
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -87,6 +89,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
+            self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
             tbs_height = self.toolbar.sizeHint().height()
         else:
             tbs_height = 0
@@ -99,7 +102,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
+        self.fit_browser = FitPropertyBrowser(canvas)
+        self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
+        self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
+        self.fit_browser.hide()
 
         if matplotlib.is_interactive():
             self.window.show()
@@ -164,6 +171,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
+        if figure_type(self.canvas.figure) != FigureType.Line:
+            action = self.toolbar._actions['toggle_fit']
+            action.setEnabled(False)
+            action.setVisible(False)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -186,6 +197,21 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for ax in axes:
             ax.grid()
         canvas.draw_idle()
+
+    def fit_toggle(self):
+        """
+        Toggle fit browser and tool on/off
+        """
+        if self.fit_browser.isVisible():
+            self.fit_browser.hide()
+        else:
+            self.fit_browser.show()
+
+    def handle_fit_browser_close(self):
+        """
+        Respond to a signal that user closed self.fit_browser by clicking the [x] button.
+        """
+        self.toolbar.trigger_fit_toggle_action()
 
     def hold(self):
         """
