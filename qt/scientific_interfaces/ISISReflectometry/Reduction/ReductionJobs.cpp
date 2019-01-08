@@ -23,8 +23,8 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs,
 } // unnamed
 } // namespace
 
-ReductionJobs::ReductionJobs(std::vector<Group> groups)
-    // cppcheck-suppress passedByValue
+ReductionJobs::ReductionJobs( // cppcheck-suppress passedByValue
+    std::vector<Group> groups)
     : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
 
 ReductionJobs::ReductionJobs() : m_groupNameSuffix(1) {}

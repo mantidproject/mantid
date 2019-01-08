@@ -14,11 +14,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/**
-ISaveView is the base view class for the Reflectometry "Save ASCII"
-tab. It contains no QT specific functionality as that should be handled by a
-subclass.
-*/
 class MANTIDQT_ISISREFLECTOMETRY_DLL SaveViewSubscriber {
 public:
   virtual void notifyPopulateWorkspaceList() = 0;

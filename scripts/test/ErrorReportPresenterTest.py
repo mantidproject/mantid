@@ -26,10 +26,6 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.zip_recovery_mock = zip_recovery_patcher.start()
         self.zip_recovery_mock.return_value = ('zipped_file', 'file_hash')
 
-        file_removal_patcher = mock.patch('ErrorReporter.error_report_presenter.remove_recovery_file')
-        self.addCleanup(file_removal_patcher.stop)
-        self.file_removal_mock = file_removal_patcher.start()
-
         self.view = mock.MagicMock()
         self.exit_code = 255
         self.error_report_presenter = ErrorReporterPresenter(self.view, self.exit_code)
@@ -97,7 +93,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
         self.error_report_presenter._upload_recovery_file = mock.MagicMock()
         self.error_report_presenter._handle_exit = mock.MagicMock()
-        
+
         self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
 
         self.error_report_presenter._send_report_to_server.called_once_with(share_identifiable=True, name=name, email=email,

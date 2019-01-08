@@ -58,8 +58,8 @@ std::ostream &operator<<(std::ostream &os,
   return (os << slicing.numberOfSlices() << " even slices");
 }
 
-CustomSlicingByList::CustomSlicingByList(std::vector<double> sliceTimes)
-    // cppcheck-suppress passedByValue
+CustomSlicingByList::CustomSlicingByList( // cppcheck-suppress passedByValue
+    std::vector<double> sliceTimes)
     : m_sliceTimes(std::move(sliceTimes)) {}
 
 std::vector<double> const &CustomSlicingByList::sliceTimes() const {
@@ -89,9 +89,8 @@ std::ostream &operator<<(std::ostream &os, InvalidSlicing const &) {
   return (os << "invalid slices");
 }
 
-SlicingByEventLog::SlicingByEventLog(std::vector<double> sliceAtValues,
-                                     std::string blockValue)
-    // cppcheck-suppress passedByValue
+SlicingByEventLog::SlicingByEventLog( // cppcheck-suppress passedByValue
+    std::vector<double> sliceAtValues, std::string blockValue)
     : m_sliceAtValues(std::move(sliceAtValues)),
       m_blockName(std::move(blockValue)) {}
 
