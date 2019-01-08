@@ -337,7 +337,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(outWS.getRun().getProperty('peak_position').value, 202.177340754)
+        self.assertEquals(outWS.getRun().getProperty('peak_position').value, 202.1773407538167)
         self.assertEquals(outWS.getRun().getProperty('foreground.centre_workspace_index').value, 202)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
