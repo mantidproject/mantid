@@ -203,12 +203,13 @@ if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
+add_custom_target ( AllTests )
+add_dependencies( AllTests FrameworkTests )
 if ( ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH )
   add_custom_target ( GUITests )
   add_dependencies ( check GUITests )
   # Collect all tests together
-  add_custom_target ( AllTests )
-  add_dependencies ( AllTests FrameworkTests GUITests )
+  add_dependencies ( AllTests GUITests )
   add_subdirectory ( qt )
 endif()
 
@@ -414,7 +415,7 @@ if ( ENABLE_CPACK )
                                            "python-six,"
                                            "python-matplotlib,"
                                            "python-scipy,"
-                                           "python-skimage"
+                                           "python-skimage,"
                                            "python-pycifrw (>= 4.2.1),"
                                            "python-yaml,"
                                            "python-qtawesome,"
