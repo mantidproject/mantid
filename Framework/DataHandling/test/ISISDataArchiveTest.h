@@ -9,6 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <sstream>
 
 #include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidDataHandling/ISISDataArchive.h"
@@ -24,44 +25,97 @@ const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
 #endif
 }
 
-class MockgetCorrectExtension : public ISISDataArchive {
+class MockOutRequests : public ISISDataArchive {
 public:
+  MockOutRequests()
+      : m_sendRequestReturnVal("/archive/default/path"),
+        m_acceptableExts(".RAW") {}
+
+  void setSendRequestReturnVal(std::string &return_val) {
+    m_sendRequestReturnVal = return_val;
+  }
+
+  void setAcceptableExts(std::string &exts) { m_acceptableExts = exts; }
+
+  /** This mocks getCorrectExtension, which searches data archive for
+   * complete file path
+   * m_acceptableExts is a string containing acceptable extensions
+   * e.g. ".RAW,.txt"
+   * this mocked method will return the path + ext if ext is in
+   * m_acceptableExts, otherwise return empty string.
+   * This is a bit simpler than the actual method, as in practice
+   * e.g. hrpd273 would be changed to HRP000273
+   */
   std::string
   getCorrectExtension(const std::string &path,
                       const std::vector<std::string> &exts) const override {
-    (void)exts;
-    return path;
+    for (const auto &ext : exts) {
+      if (m_acceptableExts.find(ext) != std::string::npos) {
+        return path + ext;
+      }
+    }
+    return "";
   }
+
+protected:
+  std::ostringstream sendRequest(const std::string &fName) const override {
+    (void)fName;
+    std::ostringstream os;
+    os << m_sendRequestReturnVal;
+    return os;
+  }
+
+private:
+  // Mimics the directory tree returned by sendRequest
+  // e.g. /archive/ndxloq/Instrument/data/cycle_98_0
+  std::string m_sendRequestReturnVal;
+
+  // A string of allowed extensions. Used to mock getCorrectExtension
+  std::string m_acceptableExts;
 };
 
 class ISISDataArchiveTest : public CxxTest::TestSuite {
 public:
-  /**
-   * Un-'x' this test name to test locally.
-   * This tests the filename loop part of `getArchivePath`
-   * i.e. for each of the filenames in the set, it makes a call to the archive
-   * and `getCorrectExtension` is mocked out.
-   */
-  void xtestFilenameLoop() {
-    MockgetCorrectExtension arch;
+  void testFilenameLoopWithCorrectExtensions() {
+    std::vector<std::string> exts = {".txt", ".RAW"};
+    std::set<std::string> filenames = {"hrpd273"};
 
-    std::set<std::string> filename;
-    filename.insert("hrpd273");
-    const std::vector<std::string> extension = std::vector<std::string>(1, "");
-    const std::string path = arch.getArchivePath(filename, extension);
-    if (path.empty()) {
-      TS_FAIL("Returned path was empty.");
-    } else {
-      TS_ASSERT_EQUALS(path.substr(path.size() - 18, 10), "cycle_98_0");
-    }
+    MockOutRequests arch;
+    const std::string actualPath = arch.getArchivePath(filenames, exts);
+    TS_ASSERT_EQUALS(actualPath, "/archive/default/path/hrpd273.RAW");
   }
 
+  void testFilenameLoopWithInCorrectExtensions() {
+    std::vector<std::string> exts = {".log", ".txt"};
+    std::set<std::string> filenames = {"hrpd273", "hrpd280"};
+
+    MockOutRequests arch;
+    const std::string actualPath = arch.getArchivePath(filenames, exts);
+    TS_ASSERT_EQUALS(actualPath, "");
+  }
+
+  void testFilenameLoopIgnoresEmptyFilenames() {
+    std::vector<std::string> exts = {".RAW"};
+    std::set<std::string> filenames = {"", "", "", "hrpd273"};
+
+    MockOutRequests arch;
+    const std::string actualPath = arch.getArchivePath(filenames, exts);
+    TS_ASSERT_EQUALS(actualPath, "/archive/default/path/hrpd273.RAW");
+  }
+
+  void testFactory() {
+    boost::shared_ptr<IArchiveSearch> arch =
+        ArchiveSearchFactory::Instance().create("ISISDataSearch");
+    TS_ASSERT(arch);
+  }
+
+  /*****UN 'x' THE FOLLOWING TESTS WHEN TESTING LOCALLY*****/
   /**
    * Un-'x' this test name to test locally.
    * This tests the file extensions loop.
    * To run, this tests requires that the ISIS archive is on your local machine.
    */
-  void xtestgetCorrectExtension() {
+  void xtestgetCorrectExtensionWithCorrectExtension() {
     std::string path;
     if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
         0) {
@@ -73,20 +127,26 @@ public:
     ISISDataArchive arch;
 
     const std::vector<std::string> correct_exts = {".RAW"};
-    const std::string rawExtension =
+    const std::string actualResult =
         arch.getCorrectExtension(path, correct_exts);
-    TS_ASSERT_EQUALS(rawExtension, path + ".RAW");
-
-    const std::vector<std::string> incorrect_exts = {".so", ".txt"};
-    const std::string emptyString =
-        arch.getCorrectExtension(path, incorrect_exts);
-    TS_ASSERT_EQUALS(emptyString, "");
+    TS_ASSERT_EQUALS(actualResult, path + ".RAW");
   }
 
-  void testFactory() {
-    boost::shared_ptr<IArchiveSearch> arch =
-        ArchiveSearchFactory::Instance().create("ISISDataSearch");
-    TS_ASSERT(arch);
+  void xtestgetCorrectExtensionWithInCorrectExtensions() {
+    std::string path;
+    if (strcmp(URL_PREFIX, "http://data.isis.rl.ac.uk/where.py/windir?name=") ==
+        0) {
+      path = "\\isis.cclrc.ac.uk\\inst$\\ndxhrpd\\instrument\\data\\cycle_98_"
+             "0\\HRP00273";
+    } else {
+      path = "/archive/ndxhrpd/Instrument/data/cycle_98_0/HRP00273";
+    }
+    ISISDataArchive arch;
+
+    const std::vector<std::string> incorrect_exts = {".so", ".txt"};
+    const std::string actualResult =
+        arch.getCorrectExtension(path, incorrect_exts);
+    TS_ASSERT_EQUALS(actualResult, "");
   }
 };
 

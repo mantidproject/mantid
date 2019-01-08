@@ -13,6 +13,7 @@
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidKernel/System.h"
 
+#include <sstream>
 #include <string>
 
 namespace Mantid {
@@ -30,14 +31,16 @@ public:
   std::string
   getArchivePath(const std::set<std::string> &filenames,
                  const std::vector<std::string> &exts) const override;
+
   /// Public and virtual for testing purposes
   virtual std::string
   getCorrectExtension(const std::string &path,
                       const std::vector<std::string> &exts) const;
-
-private:
-  /// Queries the archive & returns the path to a single file.
   std::string getPath(const std::string &fName) const;
+
+protected:
+  /// Queries the archive & returns the path to a single file.
+  virtual std::ostringstream sendRequest(const std::string &fName) const;
 };
 } // namespace DataHandling
 } // namespace Mantid
