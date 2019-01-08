@@ -536,7 +536,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                               OutputWorkspace=self._charTable)
         # export the characterizations table
         charTable = results[0]
-        self.declareProperty(ITableWorkspaceProperty("CharacterizationsTable", self._charTable, Direction.Output))
+        if not self.existsProperty("CharacterizationsTable"):
+            self.declareProperty(ITableWorkspaceProperty("CharacterizationsTable", self._charTable, Direction.Output))
         self.setProperty("CharacterizationsTable", charTable)
 
         # get the focus positions from the properties
@@ -972,7 +973,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 self.log().warning(str(e))
 
             propertyName = "OutputWorkspace%s" % str(output_wksp_list[split_index])
-            self.declareProperty(WorkspaceProperty(propertyName, str(output_wksp_list[split_index]), Direction.Output))
+            if not self.existsProperty(propertyName):
+                self.declareProperty(WorkspaceProperty(propertyName, str(output_wksp_list[split_index]), Direction.Output))
             self.setProperty(propertyName, output_wksp_list[split_index])
             self._save(output_wksp_list[split_index], self._info, False, True)
             self.log().information("Done focussing data of %d." % (split_index))
