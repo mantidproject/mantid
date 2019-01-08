@@ -50,18 +50,18 @@ def plot_decorator(func):
             # Fill out kwargs with the values of args
             for index, arg in enumerate(args):
                 if index is 0:
-                    kwargs["workspaces"] = arg.name()
+                    kwargs["workspaces"] = args[0].name()
                 if index is 1:
-                    kwargs["spectrum_nums"] = arg
+                    kwargs["spectrum_nums"] = args[1]
                 if index is 2:
-                    kwargs["wksp_indices"] = arg
+                    kwargs["wksp_indices"] = args[2]
                 if index is 3:
-                    kwargs["errors"] = arg
+                    kwargs["errors"] = args[3]
                 if index is 4:
-                    kwargs["overplot"] = arg
+                    kwargs["overplot"] = arg[4]
                 # ignore 5 as no need to save the fig object
                 if index is 6:
-                    kwargs["plot_kwargs"] = arg
+                    kwargs["plot_kwargs"] = arg[6]
             if hasattr(self, "creation_args"):
                 self.creation_args.append(kwargs)
             else:
