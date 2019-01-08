@@ -331,7 +331,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _inputWS(self):
         """Return a raw input workspace."""
-        beamPos = 0.
         inputFiles = self.getPropertyValue(Prop.RUN)
         inputFiles = inputFiles.replace(',', '+')
         if inputFiles:
@@ -461,7 +460,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
         return normalisedWS
-
 
     def _subtractFlatBkg(self, ws):
         """Return a workspace where a flat background has been subtracted from ws."""
