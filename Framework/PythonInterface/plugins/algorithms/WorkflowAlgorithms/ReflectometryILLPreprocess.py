@@ -26,7 +26,6 @@ class Prop:
     BEAM_POS_WS = 'BeamPositionWorkspace'
     BKG_METHOD = 'FlatBackground'
     CLEANUP = 'Cleanup'
-    DIRECT_BEAM_POS_WS = 'DirectBeamPositionWorkspace'
     FLUX_NORM_METHOD = 'FluxNormalisation'
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     HIGH_BKG_OFFSET = 'HighAngleBkgOffset'
@@ -34,7 +33,6 @@ class Prop:
     INPUT_WS = 'InputWorkspace'
     LOW_BKG_OFFSET = 'LowAngleBkgOffset'
     LOW_BKG_WIDTH = 'LowAngleBkgWidth'
-    OUTPUT_BEAM_POS_WS = 'OutputBeamPositionWorkspace'
     OUTPUT_WS = 'OutputWorkspace'
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
@@ -169,11 +167,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=common.WSCleanup.ON,
                              validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
                              doc='Enable or disable intermediate workspace cleanup.')
-        self.declareProperty(ITableWorkspaceProperty(Prop.DIRECT_BEAM_POS_WS,
-                                                     defaultValue='',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='A beam position table from a direct beam measurement.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.WATER_REFERENCE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -212,11 +205,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=5,
                              validator=nonnegativeInt,
                              doc='Width of flat background region towards larger detector angles from the foreground centre, in pixels.')
-        self.declareProperty(ITableWorkspaceProperty(Prop.OUTPUT_BEAM_POS_WS,
-                                                     defaultValue='',
-                                                     direction=Direction.Output,
-                                                     optional=PropertyMode.Optional),
-                             doc='Output the beam position table.')
         self.declareProperty(Prop.START_WS_INDEX,
                              validator=wsIndexRange,
                              defaultValue=0,
@@ -351,8 +339,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             loadOption = {'XUnit': 'TimeOfFlight'}
             if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
                 loadOption['BeamCentre'] = self.getProperty(Prop.BEAM_CENTRE).value
-            if not self.getProperty(Prop.DIRECT_BEAM_POS_WS).isDefault:
-                loadOption['DirectBeamPosition'] = self.getPropertyValue(Prop.DIRECT_BEAM_POS_WS)
             if not self.getProperty(Prop.BEAM_ANGLE).isDefault:
                 loadOption['BraggAngle'] = str(self.getProperty(Prop.BEAM_ANGLE).value)
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
@@ -476,10 +462,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         return normalisedWS
 
-    def _outputBeamPosition(self, ws):
-        """Set ws as OUTPUT_BEAM_POS_WS, if desired."""
-        if not self.getProperty(Prop.OUTPUT_BEAM_POS_WS).isDefault:
-            self.setProperty(Prop.OUTPUT_BEAM_POS_WS, ws)
 
     def _subtractFlatBkg(self, ws):
         """Return a workspace where a flat background has been subtracted from ws."""
@@ -524,7 +506,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if self.getProperty(Prop.WATER_REFERENCE).isDefault:
             return ws
         waterWS = self.getProperty(Prop.WATER_REFERENCE).value
-        # input validation for InputWorkspace compatibility, but runs?
         if waterWS.getNumberHistograms() != ws.getNumberHistograms():
             self.log().error('Water workspace and run do not have the same number of histograms.')
         rebinnedWaterWSName = self._names.withSuffix('water_rebinned')
