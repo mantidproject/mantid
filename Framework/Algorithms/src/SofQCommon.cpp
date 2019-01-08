@@ -226,9 +226,10 @@ SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
     const auto Q1 = indirectQ(minE, twoTheta, &det);
     const auto Q2 = indirectQ(maxE, twoTheta, &det);
     if (!std::isfinite(Q1) || !std::isfinite(Q2)) {
-      throw std::invalid_argument("Cannot compute Q binning range: non-finite "
-                                  "Q found for detector ID " +
-                                  detectorInfo.detectorIDs()[i]);
+      throw std::invalid_argument(
+          "Cannot compute Q binning range: non-finite "
+          "Q found for detector ID " +
+          std::to_string(detectorInfo.detectorIDs()[i]));
     }
     const auto minmaxQ = std::minmax(Q1, Q2);
     minQ = std::min(minQ, minmaxQ.first);

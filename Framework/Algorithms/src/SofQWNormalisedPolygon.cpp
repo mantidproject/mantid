@@ -77,10 +77,9 @@ cuboidTwoThetaRange(const Mantid::Geometry::DetectorInfo &detInfo,
   const auto up = leftFrontTop - leftFrontBottom;
   const auto right = rightFrontBottom - leftFrontBottom;
   const std::array<Mantid::Kernel::V3D, 8> capRing{
-      leftFrontBottom,     leftFrontBottom + back * 0.5,
-      leftBackBottom,      leftBackBottom + up * 0.5,
-      leftBackBottom + up, leftFrontTop + back * 0.5,
-      leftFrontTop,        leftFrontBottom + up * 0.5};
+      {leftFrontBottom, leftFrontBottom + back * 0.5, leftBackBottom,
+       leftBackBottom + up * 0.5, leftBackBottom + up,
+       leftFrontTop + back * 0.5, leftFrontTop, leftFrontBottom + up * 0.5}};
   double minTwoTheta{std::numeric_limits<double>::max()};
   double maxTwoTheta{std::numeric_limits<double>::lowest()};
   for (int width = 0; width < 2; ++width) {
@@ -134,9 +133,9 @@ std::pair<double, double> cylinderTwoThetaRange(
   const auto basisY = longAxisDir.X() * std::sqrt(inverseXYSumSq);
   const Mantid::Kernel::V3D basis1{basisX, basisY, 0.};
   const Mantid::Kernel::V3D basis2 = longAxisDir.cross_prod(basis1);
-  const std::array<double, 8> angles{0.,          0.25 * M_PI, 0.5 * M_PI,
-                                     0.75 * M_PI, M_PI,        1.25 * M_PI,
-                                     1.5 * M_PI,  1.75 * M_PI};
+  const std::array<double, 8> angles{{0., 0.25 * M_PI, 0.5 * M_PI, 0.75 * M_PI,
+                                      M_PI, 1.25 * M_PI, 1.5 * M_PI,
+                                      1.75 * M_PI}};
   double minTwoTheta{std::numeric_limits<double>::max()};
   double maxTwoTheta{std::numeric_limits<double>::lowest()};
   for (size_t i = 0; i < angles.size(); ++i) {
@@ -190,16 +189,13 @@ std::pair<double, double> generalTwoThetaRange(
     const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir) {
   double minTwoTheta{std::numeric_limits<double>::max()};
   double maxTwoTheta{std::numeric_limits<double>::lowest()};
-  const std::array<Mantid::Kernel::V3D, 6> dirs{Mantid::Kernel::V3D{1., 0., 0.},
-                                                {0., 1., 0.},
-                                                {0., 0., 1.},
-                                                {
-                                                    -1.,
-                                                    0.,
-                                                    0.,
-                                                },
-                                                {0., -1., 0.},
-                                                {0., 0., -1.}};
+  const std::array<Mantid::Kernel::V3D, 6> dirs{
+      {Mantid::Kernel::V3D{1., 0., 0.},
+       {0., 1., 0.},
+       {0., 0., 1.},
+       {-1., 0., 0.},
+       {0., -1., 0.},
+       {0., 0., -1.}}};
   for (const auto &dir : dirs) {
     const auto current =
         twoThetaFromBoundingBox(detInfo, detIndex, samplePos, beamDir, dir);
