@@ -317,12 +317,13 @@ boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
     else
       ++wsIndex;
   }
- wsIndex = 1;
- for (auto it = functionsToDisplay.begin(); it != iend; ++it) {
+  wsIndex = 1;
+  for (auto it = functionsToDisplay.begin(); it != iend; ++it) {
     if (wsIndex > 2) {
       std::string name = (*it)->name();
       ++functionCount[name];
-      std::string number = (count[name] ==1) ? "" : std::to_string(functionCount[name]);
+      std::string number =
+          (count[name] == 1) ? "" : std::to_string(functionCount[name]);
       textAxis->setLabel(wsIndex, name + number);
     }
     addFunctionValuesToWS(*it, ws, wsIndex, domain, values);
