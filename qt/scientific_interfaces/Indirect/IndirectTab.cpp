@@ -264,7 +264,7 @@ void IndirectTab::plotMultipleSpectra(
  * @param spectraIndex Index of spectrum from each workspace to plot
  */
 void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               int spectraIndex, bool errorBars) {
+                               const int &spectraIndex, const bool &errorBars) {
   if (!workspaceNames.isEmpty()) {
     const QString errors = errorBars ? "True" : "False";
 
@@ -287,8 +287,8 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
  * @param spectraIndex Workspace Index of spectrum to plot
  * @param errorBars Is true if you want to plot the error bars
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int spectraIndex,
-                               bool errorBars) {
+void IndirectTab::plotSpectrum(const QString &workspaceName,
+                               const int &spectraIndex, const bool &errorBars) {
   if (!workspaceName.isEmpty()) {
     QStringList workspaceNames;
     workspaceNames << workspaceName;
