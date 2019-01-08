@@ -25,7 +25,7 @@ else:
     import mock
 
 
-class HomeTabInstrumentPresenterTest(unittest.TestCase):
+class HomeTabGroupingPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
