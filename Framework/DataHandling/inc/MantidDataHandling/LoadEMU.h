@@ -80,14 +80,14 @@ protected:
   void loadDopplerParameters(API::LogManager &logm);
 
   // calibrate doppler phase
-  void calibrateDopplerPhase(std::vector<size_t> &eventCounts,
-                             std::vector<EventVector_pt> &eventVectors);
+  void calibrateDopplerPhase(const std::vector<size_t> &eventCounts,
+                             const std::vector<EventVector_pt> &eventVectors);
   void dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors,
                         double &minTOF, double &maxTOF);
 
   // prepare event storage
   void prepareEventStorage(ANSTO::ProgressTracker &prog,
-                           std::vector<size_t> &eventCounts,
+                           const std::vector<size_t> &eventCounts,
                            std::vector<EventVector_pt> &eventVectors);
 
   // set up the detector masks

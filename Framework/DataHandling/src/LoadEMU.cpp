@@ -30,7 +30,6 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -273,7 +272,8 @@ public:
 };
 
 // calculate mean of a subset of the vector
-double maskedMean(std::vector<double> &vec, std::vector<bool> &mask) {
+double maskedMean(const std::vector<double> &vec,
+                  const std::vector<bool> &mask) {
   if (vec.size() == 0 || vec.size() != mask.size())
     throw std::runtime_error("masked mean of empty or mismatched vectors");
   double sum = 0.0;
@@ -290,7 +290,8 @@ double maskedMean(std::vector<double> &vec, std::vector<bool> &mask) {
 }
 
 // calculate stdev fro a subset of the vector
-double maskedStdev(std::vector<double> &vec, std::vector<bool> &mask) {
+double maskedStdev(const std::vector<double> &vec,
+                   const std::vector<bool> &mask) {
 
   auto avg = maskedMean(vec, mask);
   size_t count = 0;
@@ -823,7 +824,7 @@ void LoadEMU<FD>::setupDetectorMasks(std::vector<bool> &roi) {
 /// \p eventCounts have been determined.
 template <typename FD>
 void LoadEMU<FD>::prepareEventStorage(
-    ANSTO::ProgressTracker &progTracker, std::vector<size_t> &eventCounts,
+    ANSTO::ProgressTracker &progTracker, const std::vector<size_t> &eventCounts,
     std::vector<EventVector_pt> &eventVectors) {
 
   size_t numberHistograms = eventCounts.size();
@@ -885,8 +886,8 @@ void LoadEMU<FD>::loadDopplerParameters(API::LogManager &logm) {
 /// the \p eventCounts and \p eventVectors.
 template <typename FD>
 void LoadEMU<FD>::calibrateDopplerPhase(
-    std::vector<size_t> &eventCounts,
-    std::vector<EventVector_pt> &eventVectors) {
+    const std::vector<size_t> &eventCounts,
+    const std::vector<EventVector_pt> &eventVectors) {
 
   // get the doppler parameters
   auto instr = m_localWorkspace->getInstrument();
