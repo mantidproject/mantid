@@ -81,19 +81,9 @@ public:
     // Spectra-detector mapping
     constexpr size_t nspectra(6);
     using IDSet = std::set<int>;
-    std::vector<IDSet> expectedIDs(nspectra);
-    IDSet s1 = {};
-    expectedIDs[0] = s1;
-    IDSet s2 = {13};
-    expectedIDs[1] = s2;
-    IDSet s3 = {23};
-    expectedIDs[2] = s3;
-    IDSet s4 = {23, 33};
-    expectedIDs[3] = s4;
-    IDSet s5 = {33, 43};
-    expectedIDs[4] = s5;
-    IDSet s6 = {43};
-    expectedIDs[5] = s6;
+    const std::vector<IDSet> expectedIDs{{IDSet{}, IDSet{13}, IDSet{23},
+                                          IDSet{23, 33}, IDSet{33, 43},
+                                          IDSet{43}}};
 
     for (size_t i = 0; i < nspectra; ++i) {
       const auto &spectrum = result->getSpectrum(i);
@@ -153,9 +143,9 @@ public:
   void testCuboidDetectors() {
     constexpr int nhist{2};
     constexpr int nbins{10};
-    BinEdges inX(nbins + 1, LinearGenerator(-5, 1.23));
-    Counts inY(nbins, 2.0);
-    Histogram inHistogram(inX, inY);
+    const BinEdges inX(nbins + 1, LinearGenerator(-5, 1.23));
+    const Counts inY(nbins, 2.0);
+    const Histogram inHistogram(inX, inY);
     MatrixWorkspace_sptr input = create<Workspace2D>(nhist, inHistogram);
     auto instrument =
         boost::make_shared<Instrument>("cuboidal_detector_machine");
@@ -310,9 +300,9 @@ public:
   void testDetectorTwoThetaRanges() {
     constexpr int nhist{2};
     constexpr int nbins{10};
-    BinEdges inX(nbins + 1, LinearGenerator(-5, 1.23));
-    Counts inY(nbins, 2.0);
-    Histogram inHistogram(inX, inY);
+    const BinEdges inX(nbins + 1, LinearGenerator(-5, 1.23));
+    const Counts inY(nbins, 2.0);
+    const Histogram inHistogram(inX, inY);
     MatrixWorkspace_sptr input = create<Workspace2D>(nhist, inHistogram);
     auto instrument =
         boost::make_shared<Instrument>("cuboidal_detector_machine");
@@ -382,10 +372,63 @@ public:
     delete suite;
   }
 
-  void testExec() {
-    auto result =
-        SofQWTest::runSQW<Mantid::Algorithms::SofQWNormalisedPolygon>();
+  void setUp() override {
+    constexpr int nhist{10000};
+    constexpr int nbins{1000};
+    const BinEdges inX(nbins + 1, LinearGenerator(-25., 30. / nbins));
+    const Counts inY(nbins, 2.0);
+    const Histogram inHistogram(inX, inY);
+    m_largeWS = create<Workspace2D>(nhist, inHistogram);
+    auto instrument = boost::make_shared<Instrument>("cuboidal_machine");
+    constexpr double l2{4.};
+    constexpr double twoThetaZero{M_PI / 20.};
+    constexpr size_t rows{100};
+    constexpr size_t columns{100};
+    constexpr double twoThetaDelta{2. * M_PI / 3. / columns};
+    constexpr double bankHeight{1.};
+    constexpr double heightDelta{bankHeight / static_cast<double>(rows)};
+    for (size_t hIndex = 0; hIndex < columns; ++hIndex) {
+      const auto angle =
+          twoThetaZero + static_cast<double>(hIndex) * twoThetaDelta;
+      const auto x = l2 * std::sin(angle);
+      const auto z = l2 * std::cos(angle);
+      for (size_t vIndex = 0; vIndex < rows; ++vIndex) {
+        const auto y =
+            -bankHeight / 2. + static_cast<double>(vIndex) * heightDelta;
+        const auto index = hIndex * rows + vIndex;
+        const auto detID = static_cast<int>(index);
+        addDetector(instrument, V3D(x, y, z), detID,
+                    "det-" + std::to_string(vIndex) + ":" +
+                        std::to_string(hIndex));
+        m_largeWS->getSpectrum(index).setDetectorID(detID);
+      }
+    }
+    addSource(instrument, V3D(0., 0., -4.), "source");
+    addSample(instrument, V3D(0., 0., 0.), "sample");
+    m_largeWS->setInstrument(instrument);
+    m_largeWS->getAxis(0)->setUnit("DeltaE");
+    m_largeWS->mutableRun().addProperty("Ei", 5.3);
   }
+
+  void tearDown() override {}
+
+  void testExec() {
+    SofQWNormalisedPolygon alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_largeWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "unused_for_child"))
+    const std::vector<double> qParams{0.01};
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+  }
+
+private:
+  MatrixWorkspace_sptr m_largeWS;
 };
 
 #endif /* MANTID_ALGORITHMS_SOFQW2TEST_H_ */
