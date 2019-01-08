@@ -19,6 +19,14 @@ class Progress;
 }
 namespace MDAlgorithms {
 
+/**
+ * This class creates the MDWorkspace from the collection of
+ * ToF events: converts to the MD events with proper Nd
+ * coordinate and than assigns the groups of them to the
+ * spatial tree-like box structure. The difference with
+ * the ConvToMDEventsWS is in using the spatial index (Morton
+ * numbers) for speeding up the procedure.
+ */
 class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   enum MD_EVENT_TYPE {
     LEAN,
@@ -26,11 +34,16 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
     NONE
   };
 
-  enum MD_BOX_TYPE {
-    GRID,
-    LEAF,
-  };
-
+  /**
+   * Class to create the box structure of MDWorkspace. The algorithm:
+   * The MASTER thread starting to build tree structure recursively,
+   * if it finds the subtask to distribute N events N < threshold, the
+   * it delegates this independent subtask to other tread, syncronisation
+   * is implemented with queue and mutex.
+   * @tparam ND :: number of Dimensions
+   * @tparam MDEventType :: Type of created MDEvent [MDLeanEvent, MDEvent]
+   * @tparam EventIterator :: Iterator of sorted collection storing the converted events
+   */
   template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
   class EventsDistributor {
   public:
@@ -38,6 +51,10 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
       MASTER,
       SLAVE
     };
+    /**
+     * Structure to store the subtask of creating subtree from the
+     * range of events
+     */
     struct Task {
       DataObjects::MDBoxBase<MDEventType<ND>, ND>* root;
       const EventIterator begin;
@@ -52,6 +69,10 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   public:
     EventsDistributor(const int& numWorkers, const size_t& threshold) :
     m_numWorkers(numWorkers), m_eventsThreshold(threshold), m_masterFinished{false} {};
+    /**
+     * Top level function to build tree structure
+     * @param tsk :: top level task to start building the box structure
+     */
     void distribute(Task& tsk) {
       if(m_numWorkers == 1)
         distributeEvents(tsk, SLAVE);
@@ -60,9 +81,10 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
         workers.emplace_back([this, &tsk]() {
           distributeEvents(tsk, MASTER);
           m_masterFinished = true;
+          waitAndLaunchSlave();
         });
         for(auto i = 1; i < m_numWorkers; ++i)
-          workers.emplace_back(&EventsDistributor::waitAndLounchSlave, this);
+          workers.emplace_back(&EventsDistributor::waitAndLaunchSlave, this);
         for(auto& worker: workers)
           worker.join();
       }
@@ -84,7 +106,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
       }
     }
 
-    void waitAndLounchSlave() {
+    void waitAndLaunchSlave() {
       while(true) {
         auto pTsk = popTask();
         if(pTsk)
@@ -102,11 +124,14 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
     std::atomic<bool> m_masterFinished;
   };
 
+  //Interface function
+  void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) override;
+
+private:
   template <size_t ND>
   MD_EVENT_TYPE mdEventType();
 
-  void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) override;
-
+  // Wrapper to have the proper functions, for Nd in range 2 to maxDim
   template <size_t maxDim>
   void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) {
     auto ndim = m_OutWSWrapper->nDimensions();
@@ -122,9 +147,11 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
       appendEventsFromInputWS<maxDim - 1>(pProgress, bc);
   }
 
+  // Wrapper for ToF events of different types, number of dims, MD event type
   template<typename EventType, size_t ND, template <size_t> class MDEventType>
   void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc);
 
+  // Specialization for ToF events of different types
   template<size_t ND, template <size_t> class MDEventType>
   void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
     switch (m_EventWS->getSpectrum(0).getEventType()) {
@@ -142,6 +169,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
     }
   }
 
+  // Specilization for MD event types
   template <size_t ND>
   void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
     switch(mdEventType<ND>()) {
@@ -195,15 +223,16 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
   std::vector<MDEventType<ND>> mdEvents;
   mdEvents.reserve(numEvents);
 
+  const auto& pws{m_OutWSWrapper->pWorkspace()};
+  std::array<std::pair<coord_t, coord_t >, ND> bounds;
+  for(size_t ax = 0; ax < ND; ++ ax) {
+    bounds[ax] = std::make_pair(
+        pws->getDimension(ax)->getMinimum(),
+        pws->getDimension(ax)->getMaximum());
+  }
+
 #pragma omp parallel for
   for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra; ++workspaceIndex) {
-    const auto& pws{m_OutWSWrapper->pWorkspace()};
-    std::array<std::pair<coord_t, coord_t >, ND> bounds;
-    for(size_t ax = 0; ax < ND; ++ ax) {
-      bounds[ax] = std::make_pair(
-          pws->getDimension(ax)->getMinimum(),
-          pws->getDimension(ax)->getMaximum());
-    }
     const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
 
     size_t numEvents = el.getNumberEvents();
@@ -278,6 +307,7 @@ ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(const API::BoxControlle
   using IntT = typename MDEvent::IntT;
   using MortonT = typename MDEvent::MortonT;
   using DistributorType = EventsDistributor<ND, MDEventType, typename std::vector<MDEventType<ND>>::iterator>;
+
   if(mdEvents.size() <= bc->getSplitThreshold()) {
     bc->incBoxesCounter(0);
     return new DataObjects::MDBox<MDEvent, ND>(bc.get(), 0, extents, mdEvents.begin(), mdEvents.end());
