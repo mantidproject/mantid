@@ -107,10 +107,11 @@ def slitSizeLogEntry(instrumentName, slitNumber):
     entry = 'VirtualSlitAxis.s{}w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S{}H_actual_height'
     return entry.format(slitNumber + 1)
 
-def inWavelength(number, l1, l2, theta):
+
+def inTOF(value, l1, l2, theta):
     """Return the number (tof) converted to wavelength"""
-    value = UnitConversion.run('TimeOfFlight', 'Wavelength', number, l1, l2, theta, DeltaEModeType.Elastic, 0.)
-    return value
+    return UnitConversion.run('Wavelength', 'TOF', value, l1, l2, theta, DeltaEModeType.Elastic, 0.)
+
 
 def instrumentName(ws):
     """Return the instrument's name validating it is either D17 or FIGARO."""

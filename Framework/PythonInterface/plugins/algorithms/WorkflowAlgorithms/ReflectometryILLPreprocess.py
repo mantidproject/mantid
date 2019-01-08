@@ -378,10 +378,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         theta = ws.spectrumInfo().twoTheta(mindex) / 2.
         if not self.getProperty(Prop.XMIN).isDefault:
             xmin = self.getProperty(Prop.XMIN).value
-            args['RangeLower'] = common.inWavelength(xmin, l1, l2, theta)
+            args['RangeLower'] = common.inTOF(xmin, l1, l2, theta)
         if not self.getProperty(Prop.XMAX).isDefault:
             xmax = self.getProperty(Prop.XMAX).value
-            args['RangeUpper'] = common.inWavelength(xmax, l1, l2, theta)
+            args['RangeUpper'] = common.inTOF(xmax, l1, l2, theta)
         if not self.getProperty(Prop.START_WS_INDEX).isDefault:
             args['StartWorkspaceIndex'] = self.getProperty(Prop.START_WS_INDEX).value
         if not self.getProperty(Prop.END_WS_INDEX).isDefault:

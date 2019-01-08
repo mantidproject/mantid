@@ -329,5 +329,21 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEquals(outWS.getRun().getProperty('foreground.centre_workspace_index').value, 202)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
+    def testUnitConversion(self):
+        args = {
+            'Run': 'ILL/D17/317369',
+            'OutputWorkspace': 'outWS',
+            'RangeLower': 2.,
+            'RangeUpper': 20,
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getRun().getProperty('peak_position').value, 202.177525455)
+        self.assertEquals(outWS.getRun().getProperty('foreground.centre_workspace_index').value, 202)
+        self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+
 if __name__ == "__main__":
     unittest.main()
