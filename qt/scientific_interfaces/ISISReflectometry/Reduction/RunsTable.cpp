@@ -12,8 +12,10 @@ namespace CustomInterfaces {
 
 using MantidWidgets::Batch::RowLocation;
 
-RunsTable::RunsTable(std::vector<std::string> instruments,
-                     double thetaTolerance, ReductionJobs reductionJobs)
+RunsTable::RunsTable( // cppcheck-suppress passedByValue
+    std::vector<std::string> instruments, double thetaTolerance,
+    // cppcheck-suppress passedByValue
+    ReductionJobs reductionJobs)
     : m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance),
       m_reductionJobs(std::move(reductionJobs)), m_selectedRowLocations() {}
 

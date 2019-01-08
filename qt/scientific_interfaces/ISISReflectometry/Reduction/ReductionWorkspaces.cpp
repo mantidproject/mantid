@@ -13,10 +13,9 @@ ReductionWorkspaces::ReductionWorkspaces(
     // cppcheck-suppress passedByValue
     std::vector<std::string> timeOfFlight,
     // cppcheck-suppress passedByValue
-    std::string joinedTofWorkspace
-        // cppcheck-suppress passedByValue
-        std::pair<std::string, std::string>
-            transmissionRuns,
+    std::string joinedTofWorkspace,
+    // cppcheck-suppress passedByValue
+    std::pair<std::string, std::string> transmissionRuns,
     // cppcheck-suppress passedByValue
     std::string combinedTransmissionRuns,
     // cppcheck-suppress passedByValue
