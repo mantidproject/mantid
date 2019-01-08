@@ -112,3 +112,4 @@ Output:
 .. categories::
 
 .. sourcelink::
+   :filename: AnyShapeAbsorption

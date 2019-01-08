@@ -133,7 +133,7 @@ NDArrayToVector<DestElementType>::NDArrayToVector(const NDArray &value)
  * @return A vector of the DestElementType created from the numpy array
  */
 template <typename DestElementType>
-const typename NDArrayToVector<DestElementType>::TypedVector
+typename NDArrayToVector<DestElementType>::TypedVector
 NDArrayToVector<DestElementType>::operator()() {
   std::vector<DestElementType> cvector(
       PyArray_SIZE((PyArrayObject *)m_arr.ptr()));

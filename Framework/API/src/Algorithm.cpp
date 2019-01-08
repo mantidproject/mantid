@@ -569,6 +569,7 @@ bool Algorithm::execute() {
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
+      setExecuted(false);
       if (!isChild()) {
         m_running = true;
       }
