@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
 	src/AnalysisDataService.cpp
+	src/AnalysisDataServiceObserver.cpp
 	src/ArchiveSearchFactory.cpp
 	src/Axis.cpp
 	src/BinEdgeAxis.cpp
@@ -175,6 +176,7 @@ set ( INC_FILES
 	inc/MantidAPI/AlgorithmProperty.h
 	inc/MantidAPI/AlgorithmProxy.h
 	inc/MantidAPI/AnalysisDataService.h
+	inc/MantidAPI/AnalysisDataServiceObserver.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
 	inc/MantidAPI/BinEdgeAxis.h
@@ -374,6 +376,7 @@ set ( TEST_FILES
 	AlgorithmProxyTest.h
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
+	AnalysisDataServiceObserverTest.h
 	AsynchronousTest.h
 	BinEdgeAxisTest.h
 	BoxControllerTest.h

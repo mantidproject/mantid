@@ -36,44 +36,50 @@ Correction
 TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
 
   // A constant among all spectra
-  double twomev_d_mass =
+  constexpr double TWO_MEV_OVER_MASS =
       2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
 
-  // Get the parameter map
-  const ParameterMap &pmap = m_ws->constInstrumentParameters();
-
-  double shift;
   const IDetector *det = &m_spectrumInfo.detector(workspace_index);
-  if (!m_spectrumInfo.isMonitor(workspace_index)) {
-    // Get E_fix
-    double efix = 0.;
-    try {
-      Parameter_sptr par = pmap.getRecursive(det, "Efixed");
-      if (par) {
-        efix = par->value<double>();
-      }
-    } catch (std::runtime_error &) {
-      // Throws if a DetectorGroup, use single provided value
-      std::stringstream errmsg;
-      errmsg << "Inelastic instrument detector " << det->getID()
-             << " of spectrum " << workspace_index << " does not have EFixed ";
-      throw std::runtime_error(errmsg.str());
-    }
-
-    double l2 = m_spectrumInfo.l2(workspace_index);
-    shift = -1. * l2 / sqrt(efix * twomev_d_mass);
-
-  } else {
-    std::stringstream errormsg;
-    errormsg << "Workspace index " << workspace_index << " is a monitor. ";
-    throw std::invalid_argument(errormsg.str());
+  if (m_spectrumInfo.isMonitor(workspace_index)) {
+    // use the same math as TimeAtSampleStrategyElastic
+    const double L1s = m_spectrumInfo.l1();
+    const auto &beamDir =
+        m_ws->getInstrument()->getReferenceFrame()->vecPointingAlongBeam();
+    const double L1m =
+        beamDir.scalar_prod(m_spectrumInfo.sourcePosition() -
+                            m_spectrumInfo.position(workspace_index));
+    const double scale = std::abs(L1s / L1m);
+    return Correction(0., scale);
   }
 
-  Correction retvalue(0, 0);
-  retvalue.factor = 1.0;
-  retvalue.offset = shift;
+  // Get E_fix
+  double efix{0.};
+  try {
+    // Get the parameter map
+    const ParameterMap &pmap = m_ws->constInstrumentParameters();
+    Parameter_sptr par = pmap.getRecursive(det, "Efixed");
+    if (par) {
+      efix = par->value<double>();
+    }
+  } catch (std::runtime_error &) {
+    // Throws if a DetectorGroup, use single provided value
+    std::stringstream errmsg;
+    errmsg << "Inelastic instrument detector " << det->getID()
+           << " of spectrum " << workspace_index << " does not have EFixed ";
+    throw std::runtime_error(errmsg.str());
+  }
+  if (efix <= 0.) {
+    std::stringstream errmsg;
+    errmsg << "Inelastic instrument detector " << det->getID()
+           << " of spectrum " << workspace_index << " does not have EFixed ";
+    throw std::runtime_error(errmsg.str());
+  }
 
-  return retvalue;
+  const double l2 = m_spectrumInfo.l2(workspace_index);
+  const double shift = -1. * l2 / sqrt(efix * TWO_MEV_OVER_MASS);
+
+  // 1.0 * tof + shift
+  return Correction(shift, 1.0);
 }
 
 } // namespace Algorithms
