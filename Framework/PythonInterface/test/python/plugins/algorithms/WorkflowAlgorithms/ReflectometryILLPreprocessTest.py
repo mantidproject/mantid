@@ -30,6 +30,18 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
+    def testDefaultRunFIGARO(self):
+        args = {
+            'Run': 'ILL/Figaro/000002.nxs',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+
     def testFlatBackgroundSubtraction(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
         self.create_sample_workspace(inWSName)
