@@ -15,7 +15,6 @@
 #include "MantidAlgorithms/Plus.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
@@ -94,19 +93,19 @@ public:
     if (DO_PLUS)
     {
       a += 5;
-      TS_ASSERT_EQUALS(a->readY(0)[0],7);
+      TS_ASSERT_EQUALS(a->y(0)[0],7);
       TS_ASSERT_EQUALS(a,b);
       a += c;
-      TS_ASSERT_EQUALS(a->readY(0)[0],9);
+      TS_ASSERT_EQUALS(a->y(0)[0],9);
       TS_ASSERT_EQUALS(a,b);
     }
     else
     {
       a -= 5;
-      TS_ASSERT_EQUALS(a->readY(0)[0],-3);
+      TS_ASSERT_EQUALS(a->y(0)[0],-3);
       TS_ASSERT_EQUALS(a,b);
       a -= c;
-      TS_ASSERT_EQUALS(a->readY(0)[0],-5);
+      TS_ASSERT_EQUALS(a->y(0)[0],-5);
       TS_ASSERT_EQUALS(a,b);
     }
   }
@@ -269,7 +268,7 @@ public:
       MatrixWorkspace_sptr work_out3 = value-work_in2;
       // checkData won't work on this one, do a few checks here
       TS_ASSERT_EQUALS( work_out3->size(), work_in2->size() );
-      TS_ASSERT_EQUALS( work_out3->readX(1), work_in2->readX(1) );
+      TS_ASSERT_EQUALS( work_out3->x(1), work_in2->x(1) );
       TS_ASSERT_EQUALS( work_out3->y(2)[6], 3.0 );
       TS_ASSERT_EQUALS( work_out3->e(3)[4], 4.0 );
     }
@@ -619,7 +618,7 @@ public:
     else
       mess << "2D";
     mess << "(" << ws->getNumberHistograms() << " spectra," << ws->blocksize() << " bins,";
-    mess << "Y[0][0] = " << ws->readY(0)[0] << ")";
+    mess << "Y[0][0] = " << ws->y(0)[0] << ")";
     return mess.str();
   }
 
@@ -725,7 +724,7 @@ public:
         TSM_ASSERT( message, ews_out);
         // The # of events is equal to the sum of the original amount
         TSM_ASSERT_EQUALS( message, ews_out->getNumberEvents(), numEvents1 + numEvents2 );
-        std::cout << ews_out->readY(0)[0] << " after adding (Y\n";
+        std::cout << ews_out->y(0)[0] << " after adding (Y\n";
       }
       else
       {
@@ -889,16 +888,16 @@ public:
     const size_t work_in1_blksize = work_in1->blocksize();
     const size_t work_in2_blksize = work_in2->blocksize();
 
-    const double sig1 = work_in1->readY(i/work_in1_blksize)[i%work_in1_blksize];
-    const double sig2 = work_in2->readY(ws2Index/work_in2_blksize)[ws2Index%work_in2_blksize];
-    const double sig3 = work_out1->readY(i/work_in1_blksize)[i%work_in1_blksize];
+    const double sig1 = work_in1->y(i/work_in1_blksize)[i%work_in1_blksize];
+    const double sig2 = work_in2->y(ws2Index/work_in2_blksize)[ws2Index%work_in2_blksize];
+    const double sig3 = work_out1->y(i/work_in1_blksize)[i%work_in1_blksize];
 
-    TS_ASSERT_DELTA(work_in1->readX(i/work_in1_blksize)[i%work_in1_blksize],
-        work_out1->readX(i/work_in1_blksize)[i%work_in1_blksize], 0.0001);
+    TS_ASSERT_DELTA(work_in1->x(i/work_in1_blksize)[i%work_in1_blksize],
+        work_out1->x(i/work_in1_blksize)[i%work_in1_blksize], 0.0001);
 
-    const double err1 = work_in1->readE(i/work_in1_blksize)[i%work_in1_blksize];
-    const double err2 = work_in2->readE(ws2Index/work_in2_blksize)[ws2Index%work_in2_blksize];
-    const double err3 = work_out1->readE(i/work_in1_blksize)[i%work_in1_blksize];
+    const double err1 = work_in1->e(i/work_in1_blksize)[i%work_in1_blksize];
+    const double err2 = work_in2->e(ws2Index/work_in2_blksize)[ws2Index%work_in2_blksize];
+    const double err3 = work_out1->e(i/work_in1_blksize)[i%work_in1_blksize];
 
     double expectValue;
     //Compute the expectation

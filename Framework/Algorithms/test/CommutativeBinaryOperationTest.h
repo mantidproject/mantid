@@ -47,25 +47,20 @@ private:
   // Unhide base class method to avoid Intel compiler warning
   using BinaryOperation::checkSizeCompatibility;
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const MantidVec &rhsY,
-                              const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override {
-    UNUSED_ARG(lhsX);
-    UNUSED_ARG(lhsY);
-    UNUSED_ARG(lhsE);
-    UNUSED_ARG(rhsY);
-    UNUSED_ARG(rhsE);
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const HistogramData::Histogram &rhs,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override {
+    UNUSED_ARG(lhs);
+    UNUSED_ARG(rhs);
     UNUSED_ARG(YOut);
     UNUSED_ARG(EOut);
   }
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const double rhsY,
-                              const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override {
-    UNUSED_ARG(lhsX);
-    UNUSED_ARG(lhsY);
-    UNUSED_ARG(lhsE);
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const double rhsY, const double rhsE,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override {
+    UNUSED_ARG(lhs);
     UNUSED_ARG(rhsY);
     UNUSED_ARG(rhsE);
     UNUSED_ARG(YOut);
