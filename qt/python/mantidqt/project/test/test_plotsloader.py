@@ -8,16 +8,19 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import sys
-import unittest
-import matplotlib.pyplot as plt
-import matplotlib.figure
-import matplotlib.text
+import matplotlib
+matplotlib.use('AGG')
 
-from mantidqt.project.plotsloader import PlotsLoader
-import mantid.plots.plotfunctions
-from mantid.api import AnalysisDataService as ADS
-from mantid.dataobjects import Workspace2D
+import sys  # noqa
+import unittest  # noqa
+import matplotlib.pyplot as plt  # noqa
+import matplotlib.figure  # noqa
+import matplotlib.text  # noqa
+
+from mantidqt.project.plotsloader import PlotsLoader  # noqa
+import mantid.plots.plotfunctions  # noqa
+from mantid.api import AnalysisDataService as ADS  # noqa
+from mantid.dataobjects import Workspace2D  # noqa
 
 if sys.version_info.major >= 3:
     # Python 3 and above
