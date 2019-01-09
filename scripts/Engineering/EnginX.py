@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import Engineering.EngineeringCalibration as Cal
-# import Engineering.EngineeringFocus as Focus
+import Engineering.EngineeringFocus as Focus
 
 import os
 
@@ -31,17 +31,8 @@ class EnginX:
         van_curves_file, van_int_file = self._get_van_names()
         Cal.create_vanadium_workspaces(van_file, van_curves_file, van_int_file)
 
-    def _get_van_names(self):
-        van_file = _gen_filename(self.van_run)
-        van_out = os.path.join(self.calibration_directory, van_file)
-        van_int_file = van_out + "_precalculated_vanadium_run_integration.nxs"
-        van_curves_file = van_out + "_precalculated_vanadium_run_bank_curves.nxs"
-        return van_curves_file, van_int_file
-
     def create_calibration(self, **kwargs):
-        self.calibration_directory
-        self.van_run
-        van_curves_file, van_int_file = self.get_van_names()
+        van_curves_file, van_int_file = self._get_van_names()
         if "ceria_run" in kwargs:
             ceria_run = kwargs.get("ceria_run")
         else:
@@ -55,6 +46,27 @@ class EnginX:
                                                     van_curves_file, van_int_file, ceria_run)
         else:
             Cal.create_calibration_files(van_curves_file, van_int_file, ceria_run)
+
+    def focus(self, **kwargs):
+        if "run_number" in kwargs:
+            run_no = kwargs.get("run_number")
+        else:
+            return
+        van_curves_file, van_int_file = self._get_van_names()
+        if "cropped" in kwargs:
+            if kwargs.get("cropped") == "banks":
+                Focus.focus_cropped(False, kwargs.get("bank"), van_curves_file, van_int_file, run_no)
+            elif kwargs.get("cropped") == "spectra":
+                Focus.focus_cropped(True, kwargs.get("spectra"), van_curves_file, van_int_file, run_no)
+        else:
+            Focus.focus_whole(van_curves_file, van_int_file, run_no)
+
+    def _get_van_names(self):
+        van_file = _gen_filename(self.van_run)
+        van_out = os.path.join(self.calibration_directory, van_file)
+        van_int_file = van_out + "_precalculated_vanadium_run_integration.nxs"
+        van_curves_file = van_out + "_precalculated_vanadium_run_bank_curves.nxs"
+        return van_curves_file, van_int_file
 
 
 def _gen_filename(run_number):
