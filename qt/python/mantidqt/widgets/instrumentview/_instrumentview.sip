@@ -41,6 +41,7 @@ class InstrumentWidgetDecoder {
 %End
 public:
   InstrumentWidgetDecoder();
-  void decoder(const QMap<QString, QVariant> &map, 
-               const QString &projectPath) /ReleaseGIL/;
+  void decode(const QMap<QString, QVariant> &map,
+              InstrumentWidget &obj,
+              const QString &projectPath) /ReleaseGIL/;
 };

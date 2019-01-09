@@ -209,6 +209,7 @@ protected:
   QMap<QtProperty *, QString> m_pointComponentsMap;
 
   friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

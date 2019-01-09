@@ -387,6 +387,7 @@ private:
   mutable bool m_redrawPicking;
 
   friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 using ProjectionSurface_sptr = boost::shared_ptr<ProjectionSurface>;

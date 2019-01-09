@@ -25,7 +25,8 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetEncoder {
 public:
   InstrumentWidgetEncoder();
 
-  QMap<QString, QVariant> encode(const InstrumentWidget &obj, const QString &projectPath);
+  QMap<QString, QVariant> encode(const InstrumentWidget &obj,
+                                 const QString &projectPath);
 
 private:
   /// Encode Actor
@@ -52,11 +53,16 @@ private:
   QList<QVariant> encodeMaskBinsData(const MaskBinsData &obj);
   QMap<QString, QVariant> encodeBinMask(const BinMask &obj);
   QMap<QString, QVariant> encodeSurface(const ProjectionSurface_sptr &obj);
-  QMap<QString, QVariant> encodeShape(const Shape2D *obj);
-  QList<QVariant> encodeMaskShapes(const Shape2DCollection &obj);
+
+  QMap<QString, QVariant> encodeShape(Shape2D *obj);
+  QMap<QString, QVariant> encodeEllipse(Shape2DEllipse *obj);
+  QMap<QString, QVariant> encodeRectangle(Shape2DRectangle *obj);
+  QMap<QString, QVariant> encodeRing(Shape2DRing *obj);
+  QMap<QString, QVariant> encodeFree(Shape2DFree *obj);
+
+  QList<QVariant> encodeMaskShapes(Shape2DCollection &obj);
   QMap<QString, QVariant> encodeShapeProperties(const Shape2D *obj);
-  QMap<QString, QVariant>
-  encodeAlignmentInfo(const ProjectionSurface_sptr &obj);
+  QList<QVariant> encodeAlignmentInfo(const ProjectionSurface_sptr &obj);
 
   std::string m_projectPath;
 };

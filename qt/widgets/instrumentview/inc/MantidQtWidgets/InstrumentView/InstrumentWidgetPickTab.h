@@ -181,6 +181,7 @@ private:
   int m_plotTypeCache;
 
   friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 /**

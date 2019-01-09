@@ -6,14 +6,39 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h"
+
+#include "MantidQtWidgets/InstrumentView/ColorBar.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+#include "MantidQtWidgets/InstrumentView/MaskBinsData.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtWidgets/InstrumentView/Shape2D.h"
+#include "MantidQtWidgets/InstrumentView/Shape2DCollection.h"
+
+#include <QAction>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QList>
+#include <QMap>
+#include <QObject>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QString>
+
+namespace MantidQt {
+namespace MantidWidgets {
 
 InstrumentWidgetDecoder::InstrumentWidgetDecoder()
     : m_projectPath(""), m_workspaceName("") {}
 
-void InstrumentWidgetDecoder::decoder(const QMap<QString, QVariant> &map,
-                                      InstrumentWidget &obj,
-                                      const QString &projectPath) {
+void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map,
+                                     InstrumentWidget &obj,
+                                     const QString &projectPath) {
   m_projectPath = projectPath;
 
   m_workspaceName = map[QString("workspaceName")].toString();
@@ -25,42 +50,93 @@ void InstrumentWidgetDecoder::decoder(const QMap<QString, QVariant> &map,
   obj.selectTab(currentTab);
 
   const auto energyTransferList = map[QString("energyTransfer")].toList();
-  const auto min = energyTransferList[0];
-  const auto max = energyTransferList[1];
+  const auto min = energyTransferList[0].toDouble();
+  const auto max = energyTransferList[1].toDouble();
   obj.setBinRange(min, max);
 
-  this->decodeSurface(map[QString("surface")], obj.getSurface());
-  this->decodeActor(map[QString("actor")], obj.m_instrumentActor);
-  this->decodeTabs(map[QString("tabs")], obj);
+  this->decodeSurface(map[QString("surface")].toMap(), obj.getSurface());
+  this->decodeActor(map[QString("actor")].toMap(), obj.m_instrumentActor);
+  this->decodeTabs(map[QString("tabs")].toMap(), obj);
 }
 
 void InstrumentWidgetDecoder::decodeTabs(const QMap<QString, QVariant> &map,
                                          InstrumentWidget &obj) {
-  this->decodeMaskTab(map[QString("maskTab")], obj.m_maskTab);
-  this->decodeRenderTab(map[QString("renderTab")], obj.m_renderTab);
-  this->decodeTreeTab(map[QString("treeTab")], obj.m_treeTab);
-  this->decodePickTab(map[QString("pickTab")], obj.m_pickTab);
+  this->decodeMaskTab(map[QString("maskTab")].toMap(), obj.m_maskTab);
+  this->decodeRenderTab(map[QString("renderTab")].toMap(), obj.m_renderTab);
+  this->decodeTreeTab(map[QString("treeTab")].toMap(), obj.m_treeTab);
+  this->decodePickTab(map[QString("pickTab")].toMap(), obj.m_pickTab);
 }
 
 void InstrumentWidgetDecoder::decodeMaskTab(const QMap<QString, QVariant> &map,
-                                            InstrumentWidgetMaskTab *obj) {}
+                                            InstrumentWidgetMaskTab *obj) {
+  const auto activeTools = map[QString("activeTools")].toMap();
+  const auto activeType = map[QString("activeType")].toMap();
+
+  // Decode the active tools
+  obj->m_move->setChecked(activeTools["moveButton"].toBool());
+  obj->m_pointer->setChecked(activeTools["pointerButton"].toBool());
+  obj->m_ellipse->setChecked(activeTools["ellipseButton"].toBool());
+  obj->m_ring_ellipse->setChecked(activeTools["ringEllipseButton"].toBool());
+  obj->m_ring_rectangle->setChecked(
+      activeTools["ringRectangleButton"].toBool());
+  obj->m_free_draw->setChecked(activeTools["freeFrawButton"].toBool());
+
+  // Decode the active type
+  obj->m_masking_on->setChecked(activeType["maskingOn"].toBool());
+  obj->m_grouping_on->setChecked(activeType["groupingOn"].toBool());
+  obj->m_roi_on->setChecked(activeType["roiOn"].toBool());
+
+  // Load the masks applied to view but not saved to a workspace (But also
+  // including those saved to the workspace)
+  const auto success = map["maskWorkspaceSaved"].toBool();
+  if (success) {
+    const auto wsName = map["maskWorkspaceName"].toString().toStdString();
+    obj->loadMaskViewFromProject(wsName);
+  }
+}
 
 void InstrumentWidgetDecoder::decodeRenderTab(
-    const QMap<QString, QVariant> &map, InstrumentWidgetRenderTab *obj) {}
+    const QMap<QString, QVariant> &map, InstrumentWidgetRenderTab *obj) {
+  // Load buttons/settings
+  obj->mAxisCombo->setCurrentIndex(map[QString("axesView")].toInt());
+  obj->m_autoscaling->setChecked(map[QString("autoScaling")].toBool());
+  obj->m_displayAxes->setChecked(map[QString("displayAxis")].toBool());
+  obj->m_flipCheckBox->setChecked(map[QString("flipView")].toBool());
+  obj->m_displayDetectorsOnly->setChecked(
+      map[QString("displayDetectorsOnly")].toBool());
+  obj->m_wireframe->setChecked(map[QString("displayWireframe")].toBool());
+  obj->m_lighting->setChecked(map[QString("displayLighting")].toBool());
+  obj->m_GLView->setChecked(map[QString("useOpenGL")].toBool());
+  obj->m_UCorrection->setChecked(map[QString("useUCorrection")].toBool());
 
-void InstrumentWidgetDecoder::decodeColorBar(const QMap<QString, QVariant> &map, ColorBar *bar){
+  // Load the surface
+  auto surface = obj->getSurface();
+  surface->setShowPeakLabelsFlag(map[QString("showLabels")].toBool());
+  surface->setShowPeakRowsFlag(map[QString("showRows")].toBool());
+  surface->setPeakLabelPrecision(map[QString("labelPrecision")].toBool());
+  surface->setShowPeakRelativeIntensityFlag(
+      map[QString("showRelativeIntensity")].toBool());
 
+  // Load color bar
+  this->decodeColorBar(map[QString("colormap")].toMap(), obj->m_colorBarWidget);
+}
+
+void InstrumentWidgetDecoder::decodeColorBar(const QMap<QString, QVariant> &map,
+                                             ColorBar *bar) {
+  bar->setScaleType(map[QString("scaleType")].toInt());
+  bar->setNthPower(map[QString("power")].toDouble());
+  bar->setMinValue(map[QString("min")].toDouble());
+  bar->setMaxValue(map[QString("max")].toDouble());
 }
 
 void InstrumentWidgetDecoder::decodeTreeTab(const QMap<QString, QVariant> &map,
                                             InstrumentWidgetTreeTab *obj) {
-  obj->selectComponentByName(
-      map[QString("selectedComponent")].toString().toStdString());
+  obj->selectComponentByName(map[QString("selectedComponent")].toString());
 
   auto names = map[QString("expandedItems")].toList();
   for (auto &name : names) {
     auto index = obj->m_instrumentTree->findComponentByName(name.toString());
-    m_instrumentTree->setExpanded(index, true);
+    obj->m_instrumentTree->setExpanded(index, true);
   }
 }
 
@@ -80,67 +156,66 @@ void InstrumentWidgetDecoder::decodePickTab(const QMap<QString, QVariant> &map,
 }
 
 void InstrumentWidgetDecoder::decodeActor(
-    const QMap<QString, QVariant> &map,
-    const std::unique_ptr<InstrumentActor> &obj) {
-  obj->loadColormap(map[QString("fileName")].getString());
+    const QMap<QString, QVariant> &map, std::unique_ptr<InstrumentActor> &obj) {
+  obj->loadColorMap(map[QString("fileName")].toString());
 
-  this->decodeBinMasks(map[QString("binMasks")], obj->m_maskBinsData);
+  this->decodeBinMasks(map[QString("binMasks")].toList(), obj->m_maskBinsData);
 }
 
 void InstrumentWidgetDecoder::decodeBinMasks(const QList<QVariant> &list,
                                              MaskBinsData &obj) {
   for (const auto &item : list) {
-    const auto range = item[QString("range")];
-    double start = range[0] double end = range[1]
+    const auto itemMap = item.toMap();
+    const auto range = itemMap[QString("range")].toList();
+    double start = range[0].toDouble();
+    double end = range[1].toDouble();
 
-        const auto spectraList = item["spectra"];
+    const auto spectraList = itemMap["spectra"].toList();
     std::vector<size_t> spectra;
     for (const auto &spec : spectraList) {
-      spectra.push_back(spec).value<size_t>());
+      spectra.emplace_back(spec.value<size_t>());
     }
     obj.addXRange(start, end, spectra);
   }
 }
 
-void InstrumentWidgetDecoder::decodeSurface(const QMap<QString, QVariant> &map,
-                                            ProjectionSurface_sptr &obj) {
-  QMap<QString, QVariant> color = map[QString("backgroundColor")];
+void InstrumentWidgetDecoder::decodeSurface(
+    const QMap<QString, QVariant> &map,
+    boost::shared_ptr<ProjectionSurface> obj) {
+  QMap<QString, QVariant> color = map[QString("backgroundColor")].toMap();
   QColor qColor(color[QString("red")].toInt(), color[QString("green")].toInt(),
-                color[QString("blue").toInt()],
-                color[QString("alpha").toInt()]);
+                color[QString("blue")].toInt(),
+                color[QString("alpha")].toInt());
 
   obj->m_backgroundColor = qColor;
 
-  this->decodeMaskShapes(map[QString("shapes")], obj->m_maskShapes);
-  this->decodeAlignmentInfo(map, obj);
+  this->decodeMaskShapes(map[QString("shapes")].toList(), obj->m_maskShapes);
+  this->decodeAlignmentInfo(map[QString("alignmentInfo")].toList(), obj);
 }
 
 void InstrumentWidgetDecoder::decodeMaskShapes(const QList<QVariant> &list,
-                                               const Shape2DCollection &obj) {
-  connect(this, SIGNAL(this->shapeCreated()), obj, SLOT(shapeCreated()));
+                                               Shape2DCollection &obj) {
+  connect(this, SIGNAL(this->shapeCreated()), &obj, SLOT(obj->shapeCreated()));
   for (const auto &shape : list) {
-    Shape2D *shape = this->decodeShape(QMap<QString, QList> shape);
-    m_shapes.push_back(shape);
+    Shape2D *created_shape = this->decodeShape(shape.toMap());
+    obj.m_shapes.push_back(created_shape);
     emit shapeCreated();
   }
 }
 
-Shape2D *shape
+Shape2D *
 InstrumentWidgetDecoder::decodeShape(const QMap<QString, QVariant> &map) {
-  if (!map[QString("type")]) {
-    return nullptr;
-  }
   const auto type = map[QString("type")].toString().toStdString();
 
   Shape2D *shape = nullptr;
   if (type == "ellipse") {
-    shape = this->decodeEllipse(map);
+    shape = this->decodeEllipse(map[QString("subShapeMap")].toMap());
   } else if (type == "rectangle") {
-    shape = this->decodeRectangle(map);
+    shape = this->decodeRectangle(map[QString("subShapeMap")].toMap());
   } else if (type == "ring") {
-    shape = this->decodeRing(map);
+    shape = this->decodeRing(map[QString("subShapeMap")].toMap());
   } else if (type == "free") {
-    shape = this->decodeFree(map);
+    shape = this->decodeFree(map[QString("subShapeMap")].toMap());
   } else {
     throw std::runtime_error("InstrumentView - Could not decode shape");
   }
@@ -150,23 +225,23 @@ InstrumentWidgetDecoder::decodeShape(const QMap<QString, QVariant> &map) {
   shape->setSelected(map[QString("selected")].toBool());
   shape->setVisible(map[QString("visible")].toBool());
 
-  QMap<QString, QVariant> color = map[QString("color")];
-  QColor qColor(color[QString("red")].toInt(), color[QString("green")].toInt(),
-                color[QString("blue").toInt()],
-                color[QString("alpha").toInt()]);
+  QMap<QString, QVariant> color1 = map[QString("color")].toMap();
+  QColor qColor(
+      color1[QString("red")].toInt(), color1[QString("green")].toInt(),
+      color1[QString("blue")].toInt(), color1[QString("alpha")].toInt());
 
   shape->setColor(qColor);
 
-  QMap<QString, QVariant> color = map[QString("fillColor")];
+  QMap<QString, QVariant> color2 = map[QString("fillColor")].toMap();
   QColor qFillColor(
-      color[QString("red")].toInt(), color[QString("green")].toInt(),
-      color[QString("blue").toInt()], color[QString("alpha").toInt()]);
+      color2[QString("red")].toInt(), color2[QString("green")].toInt(),
+      color2[QString("blue")].toInt(), color2[QString("alpha")].toInt());
   shape->setFillColor(qFillColor);
 
   return shape;
 }
 
-Shape2D *shape
+Shape2D *
 InstrumentWidgetDecoder::decodeEllipse(const QMap<QString, QVariant> &map) {
   const auto radius1 = map[QString("radius1")].toDouble();
   const auto radius2 = map[QString("radius2")].toDouble();
@@ -176,7 +251,7 @@ InstrumentWidgetDecoder::decodeEllipse(const QMap<QString, QVariant> &map) {
   return new Shape2DEllipse(QPointF(x, y), radius1, radius2);
 }
 
-Shape2D *shape
+Shape2D *
 InstrumentWidgetDecoder::decodeRectangle(const QMap<QString, QVariant> &map) {
   const auto x0 = map[QString("x0")].toDouble();
   const auto y0 = map[QString("y0")].toDouble();
@@ -188,22 +263,23 @@ InstrumentWidgetDecoder::decodeRectangle(const QMap<QString, QVariant> &map) {
   return new Shape2DRectangle(point1, point2);
 }
 
-Shape2D *shape
+Shape2D *
 InstrumentWidgetDecoder::decodeRing(const QMap<QString, QVariant> &map) {
   const auto xWidth = map[QString("xWidth")].toDouble();
   const auto yWidth = map[QString("yWidth")].toDouble();
 
-  auto baseShape = this->decodeShape(map[QString("shape")]);
+  const auto baseShape = this->decodeShape(map[QString("shape")].toMap());
   return new Shape2DRing(baseShape, xWidth, yWidth);
 }
 
-Shape2D *shape
+Shape2D *
 InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map) {
   QPolygonF polygon;
 
   for (const auto param : map[QString("paramaters")].toList()) {
-    double x = param[0];
-    double y = param[1];
+    const auto paramList = param.toList();
+    const double x = paramList[0].toDouble();
+    const double y = paramList[1].toDouble();
 
     polygon << QPointF(x, y);
   }
@@ -211,13 +287,14 @@ InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map) {
   return new Shape2DFree(polygon);
 }
 
-void InstrumentWidgetDecoder::decodeAlignmentInfo(const QList<QVariant> &list,
-                                                  const InstrumentWidget &obj) {
+void InstrumentWidgetDecoder::decodeAlignmentInfo(
+    const QList<QVariant> &list, boost::shared_ptr<ProjectionSurface> &obj) {
 
   std::vector<std::pair<Mantid::Kernel::V3D, QPointF>> alignmentPlane;
   for (const auto &item : list) {
-    const auto qLabMap = item[0];
-    const auto marker = item[1];
+    const auto itemList = item.toList();
+    const auto qLabMap = itemList[0].toMap();
+    const auto marker = itemList[1].toPointF();
     Mantid::Kernel::V3D qValue(qLabMap[QString("x")].toDouble(),
                                qLabMap[QString("y")].toDouble(),
                                qLabMap[QString("z")].toDouble());
@@ -226,3 +303,5 @@ void InstrumentWidgetDecoder::decodeAlignmentInfo(const QList<QVariant> &list,
   }
   obj->m_selectedAlignmentPlane = alignmentPlane;
 }
+} // namespace MantidWidgets
+} // namespace MantidQt

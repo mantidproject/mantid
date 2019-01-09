@@ -189,6 +189,7 @@ private:
                                       const std::string &lines);
 
   friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 /**
@@ -324,6 +325,8 @@ private:
   RectF getPolygonBoundingRect() const;
   QPolygonF m_polygon;    ///< Implements the shape.
   QPainterPath m_outline; ///< Object to draw the shape's border.
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

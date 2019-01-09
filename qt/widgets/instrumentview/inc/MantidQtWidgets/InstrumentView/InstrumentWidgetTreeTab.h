@@ -21,7 +21,6 @@ class InstrumentTreeWidget;
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTreeTab
     : public InstrumentWidgetTab {
   Q_OBJECT
-friend class InstrumentWidgetEncoder;
 public:
   explicit InstrumentWidgetTreeTab(InstrumentWidget *instrWidget);
   void initSurface() override;
@@ -36,6 +35,8 @@ private:
   void showEvent(QShowEvent *) override;
   /// Widget to display instrument tree
   InstrumentTreeWidget *m_instrumentTree;
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

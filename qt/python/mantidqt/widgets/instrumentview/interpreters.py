@@ -8,7 +8,9 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from mantidqt.widgets.instrumentview.interpreterimports import InstrumentWidgetEncoder
+from mantidqt.widgets.instrumentview.interpreterimports import InstrumentWidgetEncoder, InstrumentWidgetDecoder
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from mantid.api import AnalysisDataService as ADS
 
 
 class InstrumentViewAttributes(object):
@@ -20,11 +22,18 @@ class InstrumentViewAttributes(object):
 class Decoder(InstrumentViewAttributes):
     def __init__(self):
         super(Decoder, self).__init__()
+        self.widget_decoder = InstrumentWidgetDecoder()
 
-    def decode(self, obj_dic):
-        if obj_dic is None:
+    def decode(self, obj_dic, project_path=None):
+        if obj_dic is None or project_path is None:
             return None
-        return
+        # Make the widget
+        ws = ADS.retrieve(obj_dic["workspaceName"])
+        instrument_view_presenter = InstrumentViewPresenter(ws)
+        instrument_widget = instrument_view_presenter.view.layout().itemAt(0).widget()
+
+        #  Then decode
+        self.widget_decoder.decode(obj_dic, instrument_widget, project_path)
 
     @classmethod
     def has_tag(cls, tag):

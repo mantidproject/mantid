@@ -45,6 +45,7 @@ public:
 private:
   QList<BinMask> m_masks;
   friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 } // namespace MantidWidgets

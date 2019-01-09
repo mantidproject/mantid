@@ -285,6 +285,7 @@ private:
   std::unique_ptr<InstrumentRenderer> m_renderer;
 
   friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 } // namespace MantidWidgets

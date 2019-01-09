@@ -251,7 +251,7 @@ InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
 }
 
 QList<QVariant>
-InstrumentWidgetEncoder::encodeMaskShapes(const Shape2DCollection &obj) {
+InstrumentWidgetEncoder::encodeMaskShapes(Shape2DCollection &obj) {
   QList<QVariant> list;
 
   for (const auto &shape : obj.m_shapes) {
@@ -261,14 +261,104 @@ InstrumentWidgetEncoder::encodeMaskShapes(const Shape2DCollection &obj) {
   return list;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeShape(Shape2D *obj) {
   QMap<QString, QVariant> map;
 
   map.insert(QString("properties"), QVariant(this->encodeShapeProperties(obj)));
   map.insert(QString("color"), QVariant(obj->getColor()));
   map.insert(QString("fillColor"), QVariant(obj->getFillColor()));
 
+  QMap<QString, QVariant> subShapeMap;
+  auto ellipse = dynamic_cast<Shape2DEllipse *>(obj);
+  auto rectangle = dynamic_cast<Shape2DRectangle *>(obj);
+  auto ring = dynamic_cast<Shape2DRing *>(obj);
+  auto free_ = dynamic_cast<Shape2DFree *>(obj);
+
+  if (ellipse == nullptr) {
+    subShapeMap = this->encodeEllipse(ellipse);
+
+    map.insert(QString("type"), QVariant(QString("ellipse")));
+  } else if (rectangle == nullptr) {
+    subShapeMap = this->encodeRectangle(rectangle);
+
+    map.insert(QString("type"), QVariant(QString("rectangle")));
+  } else if (ring == nullptr) {
+    subShapeMap = this->encodeRing(ring);
+
+    map.insert(QString("type"), QVariant(QString("ring")));
+  } else if (free_ == nullptr) {
+    subShapeMap = this->encodeFree(free_);
+
+    map.insert(QString("type"), QVariant(QString("free")));
+  } else {
+    throw std::runtime_error("InstrumentView - Could not decode shape");
+  }
+
+  map.insert(QString("subShapeMap"), QVariant(subShapeMap));
+
+  return map;
+}
+
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeEllipse(Shape2DEllipse *obj) {
+  const double radius1 = obj->getDouble("radius1");
+  const double radius2 = obj->getDouble("radius2");
+  const auto centre = obj->getPoint("centre");
+
+  QMap<QString, QVariant> map;
+
+  map.insert(QString("radius1"), QVariant(radius1));
+  map.insert(QString("radius2"), QVariant(radius2));
+  map.insert(QString("x"), QVariant(centre.x()));
+  map.insert(QString("y"), QVariant(centre.y()));
+
+  return map;
+}
+
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeRectangle(Shape2DRectangle *obj) {
+  const auto x0 = obj->m_boundingRect.x0();
+  const auto x1 = obj->m_boundingRect.x1();
+  const auto y0 = obj->m_boundingRect.y0();
+  const auto y1 = obj->m_boundingRect.y1();
+
+  QMap<QString, QVariant> map;
+
+  map.insert(QString("x0"), QVariant(x0));
+  map.insert(QString("y0"), QVariant(y0));
+  map.insert(QString("x1"), QVariant(x1));
+  map.insert(QString("y1"), QVariant(y1));
+
+  return map;
+}
+
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeRing(Shape2DRing *obj) {
+  const auto xWidth = obj->getDouble("xwidth");
+  const auto yWidth = obj->getDouble("ywidth");
+  auto baseShape = obj->getOuterShape()->clone();
+
+  QMap<QString, QVariant> map;
+  map.insert(QString("xWidth"), QVariant(xWidth));
+  map.insert(QString("yWidth"), QVariant(yWidth));
+  map.insert(QString("shape"), QVariant(this->encodeShape(baseShape)));
+
+  return map;
+}
+
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeFree(Shape2DFree *obj) {
+  const auto polygon = obj->m_polygon;
+
+  QList<QVariant> parameters;
+
+  for (const auto &point : polygon) {
+    QList<QVariant> list;
+    list.append(QVariant(point.x()));
+    list.append(QVariant(point.y()));
+    parameters.append(list);
+  }
+
+  QMap<QString, QVariant> map;
+  map.insert(QString("paramaters"), QVariant(parameters));
   return map;
 }
 
@@ -284,7 +374,7 @@ InstrumentWidgetEncoder::encodeShapeProperties(const Shape2D *obj) {
   return map;
 }
 
-QList<QVariant> list InstrumentWidgetEncoder::encodeAlignmentInfo(
+QList<QVariant> InstrumentWidgetEncoder::encodeAlignmentInfo(
     const ProjectionSurface_sptr &obj) {
   QList<QVariant> list;
 

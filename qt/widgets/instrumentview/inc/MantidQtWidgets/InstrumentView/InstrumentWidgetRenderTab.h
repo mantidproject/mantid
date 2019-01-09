@@ -143,6 +143,7 @@ private: // members
 
   friend class InstrumentWidget;
   friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
