@@ -423,12 +423,8 @@ template <size_t ND>
 void swap(MDLeanEvent<ND>& first, MDLeanEvent<ND>& second) {
   std::swap(first.signal, second.signal);
   std::swap(first.errorSquared, second.errorSquared);
-  if(sizeof(first.center) > sizeof(first.index))
-    for(unsigned i = 0; i < ND; ++i) {
-      std::swap(first.center[i], second.center[i]);
-    }
-  else
-    std::swap(first.index, second.index);
+  //Index always of the same size as center
+  std::swap(first.index, second.index);
 }
 
 } // namespace DataObjects
