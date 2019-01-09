@@ -17,6 +17,27 @@ class subPlotContext(object):
         self._lines = {}
         self._specNum = {}
         self._errors = False
+        self._vLines = {}
+        self._labelObjects = []
+        self._labels = {}
+
+    def addVLine(self,xvalue, label):
+        self._vLines[label.text] = self._subplot.axvline(xvalue, 0, 1)
+        self._labelObjects.append(label)
+        self.annotate(label)
+
+    def annotate(self,label):
+        x_range = self._subplot.get_xlim()
+        y_range = self._subplot.get_ylim()
+        if label.in_x_range(x_range):
+            self._labels[label.text] = self._subplot.annotate(label.text,xy =(label.get_xval(x_range), label.get_yval(y_range)),xycoords ="axes fraction",rotation=label.rotation)
+
+    def redraw_annotations(self):
+        for key in self._labels.keys():
+            self._labels[key].remove()
+            del self._labels[key]
+        for label in self._labelObjects:
+            self.annotate(label)
 
     def addLine(self, ws, specNum=1):
         # make plot/get label
@@ -68,6 +89,7 @@ class subPlotContext(object):
     def change_auto(self, state):
         for label in self._lines.keys():
             self._subplot.autoscale(enable=state, axis="y")
+            self.redraw_annotations()
 
     @property
     def lines(self):

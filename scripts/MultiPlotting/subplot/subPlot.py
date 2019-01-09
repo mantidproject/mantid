@@ -43,6 +43,12 @@ class subPlot(QtWidgets.QWidget):
         for subplot in self.plotObjects.keys():
             self.emit_subplot_range(subplot)
 
+    # adds a line to a subplot
+    def add_vline(self,subplotName,xvalue,label):
+       if subplotName not in self._context.subplots.keys():
+          raise ValueError("Unkown subplot selected "+subplotName)
+       self._context.add_vline(subplotName,xvalue, label)
+
     # plot a workspace, if a new subplot create it.
     def plot(self, subplotName, workspace, specNum=1):
         new = False
@@ -72,16 +78,19 @@ class subPlot(QtWidgets.QWidget):
 
     def emit_subplot_range(self, subplotName):
         self.quickEditSignal.emit(subplotName)
+        self._context.subplots[subplotName].redraw_annotations()
 
     def set_plot_x_range(self, subplotNames, range):
         for subplotName in subplotNames:
             # make a set method in context and set it there
             self.plotObjects[subplotName].set_xlim(range)
+            self._context.subplots[subplotName].redraw_annotations()
             self.canvas.draw()
 
     def set_plot_y_range(self, subplotNames, range):
         for subplotName in subplotNames:
             self.plotObjects[subplotName].set_ylim(range)
+            self._context.subplots[subplotName].redraw_annotations()
             self.canvas.draw()
 
     def connect_quick_edit_signal(self, slot):

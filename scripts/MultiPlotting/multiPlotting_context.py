@@ -33,6 +33,9 @@ class PlottingContext(object):
         except:
             print("cannot plot workspace")
 
+    def add_vline(self, subplotName, xvalue, label=None):
+        self.subplots[subplotName].addVLine(xvalue,label)
+
     def get_xBounds(self):
         return self.context[xBounds]
 

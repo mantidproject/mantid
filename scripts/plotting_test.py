@@ -14,6 +14,7 @@ from Muon.GUI.Common import message_box
 
 from MultiPlotting.multiPlotting_widget import MultiPlotWidget
 from MultiPlotting.multiPlotting_context import *
+from MultiPlotting.label import Label
 
 import mantid.simpleapi as mantid
 
@@ -30,6 +31,10 @@ class plotTestGui(QtGui.QMainWindow):
         self.test.add_subplot("moo", 223)
         self.test.add_subplot("baa", 224)
         self.test.plot("test", ws, specNum=26)
+        self.test.plot("test", ws, specNum=21)
+        self.test.plot("test", ws, specNum=22)
+        dummy = Label("dummy", 10.1, False, 0.9, True,rotation=-90)
+        self.test.add_vline("test",10,dummy)
         self.test.plot("bob", ws, specNum=1)
         self.test.plot("moo", ws, specNum=42)
         self.test.plot("baa", ws, specNum=2)
