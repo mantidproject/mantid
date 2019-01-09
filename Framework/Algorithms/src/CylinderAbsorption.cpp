@@ -88,7 +88,7 @@ std::string CylinderAbsorption::sampleXML() {
   xmlShapeStream << "<cylinder id=\"detector-shape\"> "
                  << "<centre-of-bottom-base x=\"" << samplePos.X() << "\" y=\""
                  << cylinderBase << "\" z=\"" << samplePos.Z() << "\" /> "
-                 << R"(<axis x="0" y="1" z="0" /> )"
+                 << "(<axis x=\"0\" y=\"1\" z=\"0\" /> )"
                  << "<radius val=\"" << m_cylRadius << "\" /> "
                  << "<height val=\"" << m_cylHeight << "\" /> "
                  << "</cylinder>";
