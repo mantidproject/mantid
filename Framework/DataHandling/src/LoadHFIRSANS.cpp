@@ -603,9 +603,8 @@ void LoadHFIRSANS::moveDetector() {
   setDetectorDistance();
   double translationDistance =
       boost::lexical_cast<double>(m_metadata["Motor_Positions/detector_trans"]);
-  translationDistance /= 1000.0;
   g_log.debug() << "Detector Translation = " << translationDistance
-                << " meters." << '\n';
+                << " mm." << '\n';
   addRunTimeSeriesProperty<double>("detector-translation", translationDistance);
 }
 
