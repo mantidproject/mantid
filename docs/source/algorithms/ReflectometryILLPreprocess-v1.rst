@@ -13,6 +13,7 @@ This algorithm is the first step in the ILL reflectometry reduction workflow. It
 
 #. loads data from disk
 #. merges the numors
+#. determines the peak position and moves the detector correspondingly
 #. normalizes to a (water) reference (optional)
 #. normalizes to slit sizes (optional)
 #. normalizes to experiment time or monitor counts (optional)
@@ -23,6 +24,13 @@ The algorithm can be thought as an 'advanced loader', and should be used to load
 
 The *OutputWorkspace* can be further fed to :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>`.
 
+The algorithm adds the following sample log entries to the *OutputWorkspace*:
+
+* peak_position : the peak position used to define the :math:`\theta` angles (detector positions)
+* foreground.centre_workspace_index
+* foreground.last_workspace_index
+* foreground.first_workspace_index
+
 The workflow diagram below gives an overview of the algorithm:
 
 .. diagram:: ReflectometryILLPreprocess-v1_wkflw.dot
@@ -30,7 +38,11 @@ The workflow diagram below gives an overview of the algorithm:
 Detector angles
 ###############
 
-The properties *BeamCentre*, *BraggAngle* and *DirectBeamPositionWorkspace* affect the pixel :math:`\theta` angles. They map directly to the corresponding properties of :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`. The *BeamCentre* property can be further used in determining the foreground pixels as discussed below.
+A fitting of the present peak position takes place in order to determine the detector angles.
+For preventing fitting of the present peak position, the property *BeamCentre* allows to provide a peak position.
+A use case is to enter a direct peak position, which can be obtained from the direct beam workspaces sample logs, when the *Run* is a reflected beam.
+
+Alternatively, the properties *BraggAngle* and *DirectBeamPositionWorkspace* affect the pixel :math:`\theta` angles. They map directly to the corresponding properties of :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`.
 
 Foreground and backgrounds
 ##########################

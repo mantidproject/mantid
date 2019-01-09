@@ -26,7 +26,6 @@ class Prop:
     BEAM_POS_WS = 'BeamPositionWorkspace'
     BKG_METHOD = 'FlatBackground'
     CLEANUP = 'Cleanup'
-    DIRECT_BEAM_POS_WS = 'DirectBeamPositionWorkspace'
     FLUX_NORM_METHOD = 'FluxNormalisation'
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     HIGH_BKG_OFFSET = 'HighAngleBkgOffset'
@@ -168,11 +167,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=common.WSCleanup.ON,
                              validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
                              doc='Enable or disable intermediate workspace cleanup.')
-        self.declareProperty(ITableWorkspaceProperty(Prop.DIRECT_BEAM_POS_WS,
-                                                     defaultValue='',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='A beam position table from a direct beam measurement.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.WATER_REFERENCE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -342,12 +336,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
             loadOption = {'XUnit': 'TimeOfFlight'}
-            if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
-                loadOption['BeamCentre'] = self.getProperty(Prop.BEAM_CENTRE).value
-            if not self.getProperty(Prop.DIRECT_BEAM_POS_WS).isDefault:
-                loadOption['DirectBeamPosition'] = self.getPropertyValue(Prop.DIRECT_BEAM_POS_WS)
-            if not self.getProperty(Prop.BEAM_ANGLE).isDefault:
-                loadOption['BraggAngle'] = str(self.getProperty(Prop.BEAM_ANGLE).value)
+            #if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
+            loadOption['BeamCentre'] = 0.0
+            #if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
+            #    loadOption['BeamPositionWorkspace'] = self.getPropertyValue(Prop.BEAM_POS_WS)
+            #if not self.getProperty(Prop.BEAM_ANGLE).isDefault:
+            #    loadOption['BraggAngle'] = str(self.getProperty(Prop.BEAM_ANGLE).value)
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
             ws = LoadAndMerge(Filename=inputFiles,
                               LoaderName='LoadILLReflectometry',
@@ -361,37 +355,37 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _peakFitting(self, ws):
         """Return the raw input workspace with sample log information."""
-        peakWSName = self._names.withSuffix('peak')
-        args = {'InputWorkspace': ws, 'OutputWorkspace': peakWSName, 'EnableLogging': self._subalgLogging}
         # Convert to wavelength
         l1 = ws.spectrumInfo().l1()
         hists = ws.getNumberHistograms()
         mindex = int(hists / 2)
         l2 = ws.spectrumInfo().l2(mindex)
         theta = ws.spectrumInfo().twoTheta(mindex) / 2.
-        if not self.getProperty(Prop.XMIN).isDefault:
-            xmin = self.getProperty(Prop.XMIN).value
-            args['RangeLower'] = common.inTOF(xmin, l1, l2, theta)
-        if not self.getProperty(Prop.XMAX).isDefault:
-            xmax = self.getProperty(Prop.XMAX).value
-            args['RangeUpper'] = common.inTOF(xmax, l1, l2, theta)
-        if not self.getProperty(Prop.START_WS_INDEX).isDefault:
-            args['StartWorkspaceIndex'] = self.getProperty(Prop.START_WS_INDEX).value
-        if not self.getProperty(Prop.END_WS_INDEX).isDefault:
-            args['EndWorkspaceIndex'] = self.getPropertyValue(Prop.END_WS_INDEX).value
-        # Fit peak position
-        FindReflectometryLines(**args)
-        beamPos = mtd[peakWSName].readY(0)[0]
-        if self.getProperty(Prop.RUN).isDefault:
-            if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
-                tableWithBeamPos = self.getProperty(Prop.BEAM_POS_WS).value
-                beamPos = tableWithBeamPos.cell('PeakCentre', 0)
-        if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
+        if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
+            tableWithBeamPos = self.getProperty(Prop.BEAM_POS_WS).value
+            beamPos = tableWithBeamPos.cell('PeakCentre', 0)
+        elif not self.getProperty(Prop.BEAM_CENTRE).isDefault:
             beamPos = self.getProperty(Prop.BEAM_CENTRE).value
+        else:
+            # Fit peak position
+            peakWSName = self._names.withSuffix('peak')
+            args = {'InputWorkspace': ws, 'OutputWorkspace': peakWSName, 'EnableLogging': self._subalgLogging}
+            if not self.getProperty(Prop.XMIN).isDefault:
+                xmin = self.getProperty(Prop.XMIN).value
+                args['RangeLower'] = common.inTOF(xmin, l1, l2, theta)
+            if not self.getProperty(Prop.XMAX).isDefault:
+                xmax = self.getProperty(Prop.XMAX).value
+                args['RangeUpper'] = common.inTOF(xmax, l1, l2, theta)
+            if not self.getProperty(Prop.START_WS_INDEX).isDefault:
+                args['StartWorkspaceIndex'] = self.getProperty(Prop.START_WS_INDEX).value
+            if not self.getProperty(Prop.END_WS_INDEX).isDefault:
+                args['EndWorkspaceIndex'] = self.getPropertyValue(Prop.END_WS_INDEX).value
+            FindReflectometryLines(**args)
+            beamPos = mtd[peakWSName].readY(0)[0]
         # Add the fractional workspace index of the beam position to the sample logs of ws.
         logargs = {'Workspace': ws, 'LogType': 'Number', 'EnableLogging': self._subalgLogging}
         logargs['LogName'] = 'peak_position'
-        logargs['LogText'] = str(beamPos)
+        logargs['LogText'] = format(beamPos, '.13f')
         logargs['NumberType'] = 'Double'
         AddSampleLog(**logargs)
         # Add foreground start and end workspace indices to the sample logs of ws.

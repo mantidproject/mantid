@@ -30,6 +30,8 @@ Usage
 
 .. testcode:: AnalyzerlessEx
 
+   from directtools import SampleLogs
+
    # Use same foreground and background settings for direct and reflected
    # beams.
    # Python dictionaries can be passed to algorithms as 'keyword arguments'.

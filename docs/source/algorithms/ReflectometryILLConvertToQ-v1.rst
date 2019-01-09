@@ -26,6 +26,8 @@ Usage
 
 .. testcode:: NonpolarizedEx
 
+   from directtools import SampleLogs
+
    # Use same foreground and background settings for direct and reflected
    # beams.
    # Python dictionaries can be passed to algorithms as 'keyword arguments'.
@@ -42,6 +44,9 @@ Usage
        Run='ILL/D17/317369.nxs',
        **settings
    )
+   # For reflected angle calibration:
+   directLogs = SampleLogs(direct)
+   peakX = directLogs.peak_position
    directFgd = ReflectometryILLSumForeground(
        Inputworkspace=direct,
        WavelengthRange=[2, 15])
@@ -49,6 +54,7 @@ Usage
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
+       BeamCentre=peakX,
        **settings
    )
    
@@ -89,6 +95,8 @@ Output:
 **Example - polarized reduction**
 
 .. testcode:: PolarizedEx
+
+   from directtools import SampleLogs
 
    # Use same foreground and background settings for direct and reflected
    # beams.

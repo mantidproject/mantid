@@ -47,6 +47,8 @@ Usage
 
 .. testcode:: ReflectivityExLambda
 
+   from directtools import SampleLogs
+
    # Use same foreground and background settings for direct and reflected
    # beams.
    # Python dictionaries can be passed to algorithms as 'keyword arguments'.
@@ -65,10 +67,15 @@ Usage
    )
    # We need the summed direct beam for the reflectivity
    directFgd = ReflectometryILLSumForeground(direct)
-   
+
+   # For reflected angle calibration:
+   directLogs = SampleLogs(direct)
+   peakX = directLogs.peak_position
+
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
+       BeamCentre=peakX,
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
@@ -93,6 +100,8 @@ Output:
 **Example - Sum in momentum transfer**
 
 .. testcode:: ReflectivityExQ
+
+   from directtools import SampleLogs
 
    # Use same foreground and background settings for direct and reflected
    # beams.
