@@ -15,6 +15,26 @@ MatrixWorkspace_sptr createInstrumentWorkspace(int const &xLength,
       xLength, yLength - 1, false, false, true, "testInst");
 }
 
+MatrixWorkspace_sptr
+createWorkspaceWithTextAxis(int const &numberOfSpectra,
+                            std::vector<std::string> const &labels) {
+  if (static_cast<std::size_t>(numberOfSpectra) == labels.size()) {
+    auto workspace = createWorkspace(numberOfSpectra);
+    workspace->replaceAxis(1, getTextAxis(numberOfSpectra, labels));
+    return workspace;
+  } else
+    throw std::runtime_error(
+        "The number of spectra is not equal to the number of labels");
+}
+
+TextAxis *getTextAxis(int const &numberOfSpectra,
+                      std::vector<std::string> const &labels) {
+  auto axis = new TextAxis(numberOfSpectra);
+  for (auto index = 0; index < numberOfSpectra; ++index)
+    axis->setLabel(index, labels[index]);
+  return axis;
+}
+
 MatrixWorkspace_sptr setWorkspaceEFixed(MatrixWorkspace_sptr workspace,
                                         int const &xLength) {
   for (int i = 0; i < xLength; ++i)
