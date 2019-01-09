@@ -398,9 +398,9 @@ FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
   return archs;
 }
 
-std::string
-FileFinderImpl::findRun(const std::string &hintstr,
-                        const std::vector<std::string> &exts) const {
+std::string FileFinderImpl::findRun(const std::string &hintstr,
+                                    const std::vector<std::string> &exts,
+                                    const bool overwriteExts) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size()
                 << "])\n";
@@ -482,19 +482,17 @@ FileFinderImpl::findRun(const std::string &hintstr,
 
   // Merge the extensions & throw out duplicates
   // On Windows throw out ones that only vary in case
-  // std::vector<std::string> uniqueExts;
-  // uniqueExts.reserve(1 + exts.size() + extensions.size());
-  std::set<std::string> uniqueExtsSet;
-  if (!extension.empty())
-    uniqueExtsSet.insert(extension);
-
-  getUniqueExtensions(exts, uniqueExtsSet);
-  getUniqueExtensions(extensions, uniqueExtsSet);
-
   std::vector<std::string> uniqueExts;
-  for (const auto &it : uniqueExtsSet) {
-    uniqueExts.push_back(it);
+  uniqueExts.reserve(1 + exts.size() + extensions.size());
+  if (!extension.empty())
+    uniqueExts.push_back(extension);
+
+  // If provided exts are empty, or overwriteExts is false,
+  // we want to include facility exts as well
+  if (exts.empty() || !overwriteExts) {
+    getUniqueExtensions(extensions, uniqueExts);
   }
+  getUniqueExtensions(exts, uniqueExts);
 
   // determine which archive search facilities to use
   std::vector<IArchiveSearch_sptr> archs = getArchiveSearch(facility);
@@ -517,25 +515,22 @@ FileFinderImpl::findRun(const std::string &hintstr,
  * create a set of all extensions.
  * If not in an extension-is-case-sensitive environment, only add the
  * lower case OR upper case version of the extension
- * @param exts :: a vector of extensions to add
- * @param uniqueExts :: a set of currently included extensions
+ * @param extensionsToAdd :: a vector of extensions to add
+ * @param uniqueExts :: a vector of currently included extensions
  */
 void FileFinderImpl::getUniqueExtensions(
-    const std::vector<std::string> &exts,
-    std::set<std::string> &uniqueExts) const {
-  for (const auto &cit : exts) {
-    if (!getCaseSensitive()) // prune case variations - this is a hack, see
-                             // findRun
-    {
-      std::string transformed(cit);
+    const std::vector<std::string> &extensionsToAdd,
+    std::vector<std::string> &uniqueExts) const {
+  const bool isCaseSensitive = getCaseSensitive();
+  for (const auto &cit : extensionsToAdd) {
+    std::string transformed(cit);
+    if (!isCaseSensitive) {
       std::transform(cit.begin(), cit.end(), transformed.begin(), tolower);
-      auto searchItr = uniqueExts.find(cit);
-      if (searchItr != uniqueExts.end())
-        continue;
-      std::transform(cit.begin(), cit.end(), transformed.begin(), toupper);
-      uniqueExts.insert(cit);
-    } else {
-      uniqueExts.insert(cit);
+    }
+    const auto searchItr =
+        std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
+    if (searchItr == uniqueExts.end()) {
+      uniqueExts.push_back(transformed);
     }
   }
 }
@@ -548,12 +543,17 @@ void FileFinderImpl::getUniqueExtensions(
  * @param exts :: Vector of allowed file extensions. Optional.
  *                If provided, this provides the only extensions searched for.
  *                If not provided, facility extensions used.
+ * @param overwriteExts :: Optional bool. If it's true (and exts is not empty),
+                           search the for the file using exts only.
+                           If it's false, use exts AND facility extensions.
  * @return A vector of full paths or empty vector
  * @throw std::invalid_argument if the argument is malformed
  * @throw Exception::NotFoundError if a file could not be found
  */
 std::vector<std::string>
-FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::string> &exts) const {
+FileFinderImpl::findRuns(const std::string &hintstr,
+                         const std::vector<std::string> &exts,
+                         const bool overwriteExts) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
@@ -611,7 +611,7 @@ FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::stri
         run = std::to_string(irun);
         while (run.size() < nZero)
           run.insert(0, "0");
-        std::string path = findRun(p1.first + run, exts);
+        std::string path = findRun(p1.first + run, exts, overwriteExts);
         if (!path.empty()) {
           res.push_back(path);
         } else {
@@ -619,7 +619,7 @@ FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::stri
         }
       }
     } else {
-      std::string path = findRun(*h, exts);
+      std::string path = findRun(*h, exts, overwriteExts);
       if (!path.empty()) {
         res.push_back(path);
       } else {

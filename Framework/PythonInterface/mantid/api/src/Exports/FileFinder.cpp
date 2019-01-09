@@ -33,11 +33,14 @@ GNU_DIAG_ON("unused-local-typedef")
  * @param self :: A reference to the calling object
  * @param hintstr :: A string containing the run number and possibly instrument
  * to search for
- * @param exts_list :: A python list containing strings of file extensions to search
+ * @param exts_list :: A python list containing strings of file extensions to
+ * search
+ * @param overwriteExts :: bool. If true, use exts_list only. If false, use
+ * combination of exts_list and facility_exts.
  */
 std::vector<std::string> runFinderProxy(FileFinderImpl &self,
-                                        std::string hintstr,
-                                        list exts_list) {
+                                        std::string hintstr, list exts_list,
+                                        const bool overwriteExts) {
   // Convert python list to c++ vector
   std::vector<std::string> exts;
   for (int i = 0; i < len(exts_list); ++i)
@@ -49,7 +52,7 @@ std::vector<std::string> runFinderProxy(FileFinderImpl &self,
   //   ReleaseGlobalInterpreter does this for us
   Mantid::PythonInterface::ReleaseGlobalInterpreterLock
       releaseGlobalInterpreterLock;
-  return self.findRuns(hintstr, exts);
+  return self.findRuns(hintstr, exts, overwriteExts);
 }
 
 void export_FileFinder() {
@@ -60,12 +63,17 @@ void export_FileFinder() {
                "Return a full path to the given file if it can be found within "
                "datasearch.directories paths. Directories can be ignored with "
                "ignoreDirs=True. An empty string is returned otherwise."))
-      .def("findRuns", &runFinderProxy, (arg("self"), arg("hintstr"), arg("exts_list")=list()),
+      .def("findRuns", &runFinderProxy,
+           (arg("self"), arg("hintstr"), arg("exts_list") = list(),
+            arg("overwriteExts") = false),
            "Find a list of files file given a hint. "
            "The hint can be a comma separated list of run numbers and can also "
            "include ranges of runs, e.g. 123-135 or equivalently 123-35"
            "If no instrument prefix is given then the current default is used."
-           "exts_list is an optional list containing strings of file extensions to search.")
+           "exts_list is an optional list containing strings of file "
+           "extensions to search."
+           "overwriteExts is an optional bool. If it's true then don't use "
+           "facility exts.")
       .def("getCaseSensitive", &FileFinderImpl::getCaseSensitive, (arg("self")),
            "Option to get if file finder should be case sensitive.")
       .def("setCaseSensitive", &FileFinderImpl::setCaseSensitive,

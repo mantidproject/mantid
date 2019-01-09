@@ -333,18 +333,84 @@ public:
         TS_ASSERT_DIFFERS(*it, *(it - 1));
       }
     }
-    std::cout << "\n Failing test \n";
-    // This file is .nxs
-    const std::vector<std::string> incorrect_extension = {".txt"};
-    files =
-        FileFinder::Instance().findRuns("MUSR15189-15193", incorrect_extension);
-    for (auto it = files.begin(); it != files.end(); ++it) {
-      std::cout << *it;
+  }
+
+  void testThatGetUniqueExtensionsPreservesOrder() {
+    auto &fileFinder = FileFinder::Instance();
+    fileFinder.setCaseSensitive(false);
+
+    const std::vector<std::string> extensions1 = {".RAW", ".b", ".txt"};
+    const std::vector<std::string> extensions2 = {".a", ".raw", ".txt"};
+
+    std::vector<std::string> uniqueExts = {".log"};
+    const std::vector<std::string> expectedExts1 = {".log", ".raw", ".b",
+                                                    ".txt"};
+    const std::vector<std::string> expectedExts2 = {".log", ".raw", ".b",
+                                                    ".txt", ".a"};
+
+    fileFinder.getUniqueExtensions(extensions1, uniqueExts);
+    TS_ASSERT_EQUALS(uniqueExts.size(), expectedExts1.size());
+
+    fileFinder.getUniqueExtensions(extensions2, uniqueExts);
+    TS_ASSERT_EQUALS(uniqueExts.size(),
+                     expectedExts2.size()); // Contain same number of elements
+    auto itVec = expectedExts2.begin();
+    auto itSet = uniqueExts.begin();
+    for (; itVec != expectedExts2.end(); ++itVec, ++itSet) {
+      // Elements are in the same order
+      TS_ASSERT_EQUALS(*itVec, *itSet);
     }
-    /*TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns(
-                         "MUSR15189-15193", incorrect_extension),
-                     Exception::NotFoundError); */
-    std::cout << "\n end of test \n";
+  }
+
+  void testThatGetUniqueExtensionsPreservesOrderWithCaseSensitivity() {
+    auto &fileFinder = FileFinder::Instance();
+    fileFinder.setCaseSensitive(true);
+
+    const std::vector<std::string> extensions1 = {".RAW", ".b", ".txt"};
+    const std::vector<std::string> extensions2 = {".a", ".raw", ".txt"};
+
+    std::vector<std::string> uniqueExts = {".log"};
+    const std::vector<std::string> expectedExts1 = {".log", ".RAW", ".b",
+                                                    ".txt"};
+    const std::vector<std::string> expectedExts2 = {".log", ".RAW", ".b",
+                                                    ".txt", ".a",   ".raw"};
+
+    fileFinder.getUniqueExtensions(extensions1, uniqueExts);
+    TS_ASSERT_EQUALS(uniqueExts.size(), expectedExts1.size());
+
+    fileFinder.getUniqueExtensions(extensions2, uniqueExts);
+    TS_ASSERT_EQUALS(uniqueExts.size(),
+                     expectedExts2.size()); // Contain same number of elements
+    auto itVec = expectedExts2.begin();
+    auto itSet = uniqueExts.begin();
+    for (; itVec != expectedExts2.end(); ++itVec, ++itSet) {
+      // Elements are in the same order
+      TS_ASSERT_EQUALS(*itVec, *itSet);
+    }
+  }
+
+  void testFindRunWithOverwriteExtensionsAndIncorrectExtensions() {
+    std::string path;
+
+    // This file is .nxs or .RAW
+    const std::vector<std::string> incorrect_extension = {".txt"};
+    path =
+        FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true);
+    TS_ASSERT_EQUALS(path, "");
+  }
+
+  void testFindRunWithOverwriteExtensionsAndOneCorrectExtension() {
+    std::string path;
+
+    // This file is .nxs or .RAW
+    // returns a .nxs if no extensions passed in
+    const std::vector<std::string> extensions = {".a", ".txt", ".RAW"};
+    path = FileFinder::Instance().findRun("MUSR15189", extensions, true);
+    std::string actualExtension = "";
+    if (!path.empty()) {
+      actualExtension = path.substr(path.size() - 4, 4);
+    }
+    TS_ASSERT_EQUALS(actualExtension, ".RAW");
   }
 
   void testFindAddFiles() {

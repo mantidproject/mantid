@@ -48,16 +48,21 @@ public:
   bool getCaseSensitive() const;
   std::vector<IArchiveSearch_sptr>
   getArchiveSearch(const Kernel::FacilityInfo &facility) const;
-  std::string findRun(
-      const std::string &hintstr,
-      const std::vector<std::string> &exts = std::vector<std::string>()) const;
-  std::vector<std::string> findRuns(const std::string &hintstr,
-                                    const std::vector<std::string> &exts = std::vector<std::string>()) const;
+  std::string
+  findRun(const std::string &hintstr,
+          const std::vector<std::string> &exts = std::vector<std::string>(),
+          const bool overwriteExts = false) const;
+  std::vector<std::string>
+  findRuns(const std::string &hintstr,
+           const std::vector<std::string> &exts = std::vector<std::string>(),
+           const bool overwriteExts = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   const Kernel::InstrumentInfo getInstrument(const std::string &hint) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string getExtension(const std::string &filename,
                            const std::vector<std::string> &exts) const;
+  void getUniqueExtensions(const std::vector<std::string> &extensionsToAdd,
+                           std::vector<std::string> &uniqueExts) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
@@ -77,8 +82,6 @@ private:
                              const std::set<std::string> &filenames,
                              const std::vector<std::string> &exts) const;
   std::string toUpper(const std::string &src) const;
-  void getUniqueExtensions(const std::vector<std::string> &exts,
-                           std::set<std::string> &uniqueExts) const;
   /// glob option - set to case sensitive or insensitive
   int m_globOption;
 };

@@ -26,12 +26,14 @@ class FileFinderTest(unittest.TestCase):
         # We can't be sure what the full path is in general but it should certainly exist!
         self.assertTrue(os.path.exists(runs[0]))
 
-    def test_that_find_runs_accepts_a_list_of_strings(self):
+    def test_that_find_runs_accepts_a_list_of_string_and_a_bool(self):
         try:
-            runs = FileFinder.findRuns("CNCS7860", [".nxs", ".txt"])
+            runs = FileFinder.findRuns("CNCS7860", overwriteExts=True)
+            FileFinder.findRuns("CNCS7860", [".nxs", ".txt"], overwriteExts=True)
         except Exception as e:
-            self.assertFalse(True, "Expected findRuns to accept list of strings as input. {} error was raised "
-                                    "with message {}".format(type(e).__name__, str(e)))
+            if type(e).__name__ == "ArgumentError":
+                self.assertFalse(True, "Expected findRuns to accept a list of strings and a bool as input."
+                                       " {} error was raised with message {}".format(type(e).__name__, str(e)))
         else:
             # Confirm that it works as above
             self.assertTrue(len(runs) == 1)
