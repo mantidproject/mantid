@@ -9,15 +9,14 @@ from __future__ import absolute_import, print_function
 
 class Label(object):
 
-    def __init__(self, text, xval,xrel, yval, yrel,rotation =0, protected = False):
+    def __init__(self, text, xvalue,xrelative, yvalue, yrelative,rotation =0, protected = False):
         self._text = text
-        self._xval = xval
-        self._xrel = xrel
-        self._yval = yval
-        self._yrel = yrel
+        self._xvalue = xvalue
+        self._xrelative = xrelative
+        self._yvalue = yvalue
+        self._yrelative = yrelative
         self._rotation = rotation
         self._protected = protected
-        # add rotation of text and if it is to be protected
 
     @property
     def text(self):
@@ -32,19 +31,19 @@ class Label(object):
         return self._protected
 
     def get_xval(self, x_range):
-        if self._xrel:
-           return self._xval
+        if self._xrelative:
+           return self._xvalue
         else:
-           return self.relative(self._xval,x_range)
+           return self.relative(self._xvalue,x_range)
 
     def get_yval(self, y_range):
-        if self._yrel:
-           return self._yval
+        if self._yrelative:
+           return self._yvalue
         else:
-           return self.relative(self._yval,y_range)
+           return self.relative(self._yvalue,y_range)
 
     def in_x_range(self,x_range):
-        if self._xval < x_range[0] or self._xval > x_range[1]:
+        if self._xvalue < x_range[0] or self._xvalue > x_range[1]:
             return False
         return True
 

@@ -45,8 +45,15 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def plot(self, subplotName, ws, specNum=1):
         self.plots.plot(subplotName, ws, specNum=specNum)
 
-    def add_vline(self,subplotName, xvalue, label= None ):
-        self.plots.add_vline(subplotName,xvalue, label)
+    def add_vline_and_annotate(self,subplotName, xvalue, label ):
+        self.add_annotate(subplotName, label)
+        self.add_vline(subplotName, xvalue, label.text)
+
+    def add_annotate(self,subplotName,label):
+        self.plots.add_annotate(subplotName,label)
+
+    def add_vline(self,subplotName, xvalue,name):
+        self.plots.add_vline(subplotName, xvalue, name)
 
     # gets inital values for quickEdit
     def set_all_values(self):

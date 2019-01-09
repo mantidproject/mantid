@@ -6,6 +6,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
 from MultiPlotting.navigation_toolbar import myToolbar
+from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
+from MultiPlotting.edit_windows.select_subplot import SelectSubplot
 
 # use this to manage lines and workspaces directly
 
@@ -21,6 +23,8 @@ class subPlot(QtWidgets.QWidget):
         self.figure = Figure()
         self.figure.set_facecolor("none")
         self.canvas = FigureCanvas(self.figure)
+        self._rm_window = None
+        self._selector_window = None
         # update quick edit from tool bar
         self.canvas.mpl_connect("draw_event", self.draw_event_callback)
 
@@ -29,6 +33,7 @@ class subPlot(QtWidgets.QWidget):
         self.toolbar = myToolbar(self.canvas, self)
         self.toolbar.update()
         grid.addWidget(self.toolbar, 0, 0)
+        self.toolbar.setRmConnection(self._rm)
         # add plot
         self.plotObjects = {}
         grid.addWidget(self.canvas, 1, 0)
@@ -43,11 +48,17 @@ class subPlot(QtWidgets.QWidget):
         for subplot in self.plotObjects.keys():
             self.emit_subplot_range(subplot)
 
-    # adds a line to a subplot
-    def add_vline(self,subplotName,xvalue,label):
+    def add_annotate(self,subplotName,label):
        if subplotName not in self._context.subplots.keys():
-          raise ValueError("Unkown subplot selected "+subplotName)
-       self._context.add_vline(subplotName,xvalue, label)
+          print("Unknown subplot selected "+subplotName)
+          return
+       self._context.add_annotate(subplotName, label)
+
+    def add_vline(self, subplotName, xvalue, name):
+       if subplotName not in self._context.subplots.keys():
+          print("Unknown subplot selected "+subplotName)
+          return
+       self._context.add_vline(subplotName, xvalue, name)
 
     # plot a workspace, if a new subplot create it.
     def plot(self, subplotName, workspace, specNum=1):
@@ -103,3 +114,81 @@ class subPlot(QtWidgets.QWidget):
         for subplotName in subplotNames:
             self._context.subplots[subplotName].change_auto(state)
             self.canvas.draw()
+
+    def _rm(self):
+        names = self._context.subplots.keys()
+        # if the remove window is not visable
+        if self._rm_window is not None:
+            self._raise_rm_window()
+        # if the selector is not visable
+        elif self._selector_window is not None:
+            self._raise_selector_window()
+        # if only one subplot just skip selector
+        elif len(names) == 1:
+            self._get_rm_window(names[0])
+        # if no selector and no remove window -> let user pick which subplot to
+        # change
+        else:
+            self._selector_window = self._createSelectWindow(names)
+            self._selector_window.subplotSelectorSignal.connect(self._get_rm_window)
+            self._selector_window.closeEventSignal.connect(
+                self._close_selector_window)
+            self._selector_window.setMinimumSize(300, 100)
+            self._selector_window.show()
+
+    def _createSelectWindow(self, names):
+        return SelectSubplot(names)
+
+    def _raise_rm_window(self):
+        self._rm_window.raise_()
+
+    def _raise_selector_window(self):
+        self._selector_window.raise_()
+
+    def _close_selector_window(self):
+        if self._selector_window is not None:
+            self._selector_window.close
+            self._selector_window = None
+
+    def _create_rm_window(self, subplotName):
+        line_names = self._context.subplots[subplotName].lines.keys()
+        vline_names = self._context.subplots[subplotName].vlines
+        return RemovePlotWindow(lines=line_names,vlines=vline_names, subplot=subplotName, parent=self)
+
+    def _get_rm_window(self, subplotName):
+        # always close selector after making a selection
+        self._close_selector_window()
+        # create the remove window
+        self._rm_window = self._create_rm_window(subplotName=subplotName)
+        self._rm_window.applyRemoveSignal.connect(self._applyRm)
+        self._rm_window.closeEventSignal.connect(self._close_rm_window)
+        self._rm_window.setMinimumSize(200, 200)
+        self._rm_window.show()
+
+    def _applyRm(self, names):
+        remove_subplot = True
+        # remove the lines from the subplot
+        for name in names:
+            if self._rm_window.getState(name):
+                self._context.subplots[self._rm_window.subplot].removeLine(name)
+            else:
+                remove_subplot = False
+        # if all of the lines have been removed -> delete subplot
+        if remove_subplot:
+            # add a signal to this method - so we can catch it
+            # close plot window once auto grid done
+            self._remove_subplot(self._rm_window.subplot)
+        self.canvas.draw()
+        # if no subplots then close plotting window
+        if len(self._context.subplots.keys()) == 0:
+            self._close_rm_window()
+            # close plot window once auto grid done
+        else:
+            self._close_rm_window()
+
+    def _close_rm_window(self):
+        self._rm_window.close
+        self._rm_window = None
+
+    def _remove_subplot(self,subplotName):
+        return # need to do once auto grid complete

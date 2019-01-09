@@ -33,8 +33,20 @@ class plotTestGui(QtGui.QMainWindow):
         self.test.plot("test", ws, specNum=26)
         self.test.plot("test", ws, specNum=21)
         self.test.plot("test", ws, specNum=22)
+        # defines position of label
         dummy = Label("dummy", 10.1, False, 0.9, True,rotation=-90)
-        self.test.add_vline("test",10,dummy)
+        dummy2 = Label("protected", 5.1, False, 0.9, True,rotation=-90,protected=True)
+        dummy3 = Label("just annotate", 14.1, False, 0.9, True)
+        # defines position of line
+
+        # need to add methods to add just a label
+		# need to add_vline with a name and if protected but no annotation
+		
+        self.test.add_vline_and_annotate("test",10,dummy)
+        self.test.add_vline_and_annotate("test",5,dummy2)
+        self.test.add_annotate("bob",dummy3)
+        self.test.add_vline("bob",1.2, "just a line")
+
         self.test.plot("bob", ws, specNum=1)
         self.test.plot("moo", ws, specNum=42)
         self.test.plot("baa", ws, specNum=2)
