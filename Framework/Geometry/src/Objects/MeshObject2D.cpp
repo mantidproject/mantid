@@ -108,7 +108,7 @@ namespace {
  * @param vertex3 :: Third vertex of triangle
  * @returns true if the specified triangle exists
  */
-bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
+bool getTriangle(const size_t index, const std::vector<uint32_t> &triangles,
                  const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
                  Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
   bool triangleExists = index < triangles.size() / 3;
@@ -146,7 +146,7 @@ bool MeshObject2D::pointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
 /**
  * Constructor
  */
-MeshObject2D::MeshObject2D(const std::vector<uint16_t> &faces,
+MeshObject2D::MeshObject2D(const std::vector<uint32_t> &faces,
                            const std::vector<Kernel::V3D> &vertices,
                            const Kernel::Material &material)
     : m_triangles(faces), m_vertices(vertices), m_material(material) {
@@ -156,7 +156,7 @@ MeshObject2D::MeshObject2D(const std::vector<uint16_t> &faces,
 /**
  * Move constructor
  */
-MeshObject2D::MeshObject2D(std::vector<uint16_t> &&faces,
+MeshObject2D::MeshObject2D(std::vector<uint32_t> &&faces,
                            std::vector<Kernel::V3D> &&vertices,
                            const Kernel::Material &&material)
     : m_triangles(std::move(faces)), m_vertices(std::move(vertices)),
@@ -393,10 +393,7 @@ std::vector<double> MeshObject2D::getVertices() const {
   return MeshObjectCommon::getVertices(m_vertices);
 }
 
-std::vector<uint32_t> MeshObject2D::getTriangles() const {
-
-  return MeshObjectCommon::getTriangles_uint32(m_triangles);
-}
+std::vector<uint32_t> MeshObject2D::getTriangles() const { return m_triangles; }
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
                                  std::vector<Kernel::V3D> &, double &,
