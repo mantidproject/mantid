@@ -28,14 +28,18 @@ const static std::string DETECTOR_WORKSPACE("DetectorWorkspace");
 const static std::string INCIDENT_ENERGY("IncidentEnergy");
 /// Name of the monitor workspace index property
 const static std::string MONITOR("MonitorIndex");
+/// Name of the monitor epp table property
+const static std::string MONITOR_EPP_TABLE("MonitorEPPTable");
 /// Name of the monitor workspace property
 const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
 /// Name of the neutron pulse interval property
 const static std::string PULSE_INTERVAL("PulseInterval");
+/// Name of the maximum energy property
 const static std::string MAX_ENERGY("MaximumEnergy");
 } // namespace Prop
 
-std::vector<size_t> toWorkspaceIndices(const Mantid::Indexing::SpectrumIndexSet &indices) {
+std::vector<size_t>
+toWorkspaceIndices(const Mantid::Indexing::SpectrumIndexSet &indices) {
   std::vector<size_t> wsIndices;
   wsIndices.reserve(indices.size());
   for (size_t i = 0; i < indices.size(); ++i) {
@@ -91,7 +95,8 @@ void GetEiMonDet3::init() {
   mustBePositive->setLower(0);
 
   declareWorkspaceInputProperties<API::MatrixWorkspace,
-                                  API::IndexType::SpectrumNum | API::IndexType::WorkspaceIndex>(
+                                  API::IndexType::SpectrumNum |
+                                      API::IndexType::WorkspaceIndex>(
       Prop::DETECTOR_WORKSPACE, "A workspace containing the detector spectra.",
       tofWorkspace);
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
@@ -100,14 +105,25 @@ void GetEiMonDet3::init() {
                       tofWorkspace),
                   "A Workspace containing the monitor spectrum. If empty, " +
                       Prop::DETECTOR_WORKSPACE + " will be used.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          Prop::MONITOR_EPP_TABLE, "", Kernel::Direction::Input,
+          API::PropertyMode::Optional),
+      "An EPP table corresponding to " + Prop::MONITOR_WORKSPACE);
+  setPropertySettings(Prop::MONITOR_EPP_TABLE,
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          Prop::MONITOR_WORKSPACE, Kernel::IS_NOT_DEFAULT));
   declareProperty(Prop::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Usable monitor's workspace index.");
   declareProperty(Prop::PULSE_INTERVAL, EMPTY_DBL(),
                   "Interval between neutron pulses, in microseconds. Taken "
                   "from the sample logs, if not specified.");
-  declareProperty(Prop::MAX_ENERGY, EMPTY_DBL(), mustBePositive, "Multiple pulse intervals will be added to the flight time the until final energy is less than this value.");
+  declareProperty(Prop::MAX_ENERGY, EMPTY_DBL(), mustBePositive,
+                  "Multiple pulse intervals will be added to the flight time "
+                  "the until final energy is less than this value.");
   declareProperty(Prop::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive,
-                  "Calculated incident energy, in meV.", Kernel::Direction::Output);
+                  "Calculated incident energy, in meV.",
+                  Kernel::Direction::Output);
 }
 
 /** Executes the algorithm.
@@ -137,24 +153,33 @@ void GetEiMonDet3::exec() {
   double detectorEPP;
   try {
     detectorEPP = peakPosition(detectorSumWs);
-  } catch(std::runtime_error &e) {
-    throw std::runtime_error(std::string("Failed to find detector peak for incident energy: ") + e.what());
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        std::string("Failed to find detector peak for incident energy: ") +
+        e.what());
   }
   progress(0.5);
   const std::vector<size_t> monWsIndices = {static_cast<size_t>(monitorIndex)};
   auto monitorSumWs = groupSpectra(monitorWs, monWsIndices);
   double monitorEPP;
   try {
-    monitorEPP = peakPosition(monitorSumWs);
-  } catch (std::runtime_error &e){
-    throw std::runtime_error(std::string("Failed to find monitor peak for incident energy: ") + e.what());
+    if (isDefault(Prop::MONITOR_EPP_TABLE)) {
+      monitorEPP = peakPosition(monitorSumWs);
+    } else {
+      monitorEPP = monitorPeakPosition(monWsIndices.front());
+    }
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        std::string("Failed to find monitor peak for incident energy: ") +
+        e.what());
   }
   progress(0.7);
   // SpectrumInfo returns a negative l2 for monitor.
   const auto monitorToSampleDistance = -monitorSumWs->spectrumInfo().l2(0);
   const double minTOF = minimumTOF(*detectorWs, sampleToDetectorDistance);
 
-  double timeOfFlight = computeTOF(*detectorWs, detectorEPP, monitorEPP, minTOF);
+  double timeOfFlight =
+      computeTOF(*detectorWs, detectorEPP, monitorEPP, minTOF);
   const double flightLength =
       sampleToDetectorDistance + monitorToSampleDistance;
   const double velocity = flightLength / timeOfFlight * 1e6;
@@ -166,14 +191,14 @@ void GetEiMonDet3::exec() {
   setProperty(Prop::INCIDENT_ENERGY, energy);
 }
 
-
 /** Calculates the time of flight from the monitor to the detectors.
  *  @param detectorWs Detector workspace
  *  @param detectorEPP The position of the detectors' elastic peak
  *  @param monitorEPP The position of the monitor's elastic peak
  *  @return The time of flight between the monitor and the detectors
  */
-double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs, const double detectorEPP,
+double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs,
+                                const double detectorEPP,
                                 const double monitorEPP, const double minTOF) {
   double timeOfFlight = detectorEPP - monitorEPP;
   // Check if the obtained time-of-flight makes any sense.
@@ -197,8 +222,9 @@ double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs, const do
   return timeOfFlight;
 }
 
-
-API::MatrixWorkspace_sptr GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws, const std::vector<size_t> &wsIndices) {
+API::MatrixWorkspace_sptr
+GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws,
+                           const std::vector<size_t> &wsIndices) {
   auto group = createChildAlgorithm("GroupDetectors");
   group->setProperty("InputWorkspace", ws);
   group->setProperty("OutputWorkspace", "unused");
@@ -207,12 +233,23 @@ API::MatrixWorkspace_sptr GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &
   return group->getProperty("OutputWorkspace");
 }
 
-double GetEiMonDet3::minimumTOF(const API::MatrixWorkspace &ws, const double sampleToDetectorDistance) {
+double GetEiMonDet3::minimumTOF(const API::MatrixWorkspace &ws,
+                                const double sampleToDetectorDistance) {
   const double minEnergy = getProperty(Prop::MAX_ENERGY);
   const auto &spectrumInfo = ws.spectrumInfo();
-  return Kernel::UnitConversion::run("Energy", "TOF", minEnergy, spectrumInfo.l1(),
-                                                    sampleToDetectorDistance, 0., Kernel::DeltaEMode::Direct, 0.);
+  return Kernel::UnitConversion::run(
+      "Energy", "TOF", minEnergy, spectrumInfo.l1(), sampleToDetectorDistance,
+      0., Kernel::DeltaEMode::Direct, 0.);
+}
 
+double GetEiMonDet3::monitorPeakPosition(const size_t monitorIndex) {
+  API::ITableWorkspace_sptr monitorEPPWs = getProperty(Prop::MONITOR_EPP_TABLE);
+  const auto &status =
+      monitorEPPWs->getRef<std::string>("FitStatus", monitorIndex);
+  if (status != "success" && status != "narrowPeak") {
+    throw std::runtime_error("Monitor EPP fit status shows a failure.");
+  }
+  return monitorEPPWs->getRef<double>("PeakCentre", monitorIndex);
 }
 
 double GetEiMonDet3::peakPosition(API::MatrixWorkspace_sptr &ws) {
