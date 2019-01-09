@@ -17,37 +17,30 @@
 #include "MantidKernel/VectorHelper.h"
 
 namespace {
-/** A private namespace to store string constants dealing with
- *  tables returned by the FindEPP algorithm.
- */
-namespace EPPTableLiterals {
-/// Title of the fit status column in EPP tables
-const static std::string FIT_STATUS_COLUMN("FitStatus");
-/// Title of the peak centre column in EPP tables
-const static std::string PEAK_CENTRE_COLUMN("PeakCentre");
-/// Tag for successfully fitted rows in EPP tables
-const static std::string FIT_STATUS_SUCCESS("success");
-} // namespace EPPTableLiterals
-
 /** A private namespace holding the property names of
  *  GetEiMonDet algorithm, version 2.
  */
 namespace Prop {
-/// Name of the detector epp table property
-const static std::string DETECTOR_EPP_TABLE("DetectorEPPTable");
 /// Name of the detector workspace property
 const static std::string DETECTOR_WORKSPACE("DetectorWorkspace");
 /// Name of the incident energy output property
 const static std::string INCIDENT_ENERGY("IncidentEnergy");
 /// Name of the monitor workspace index property
 const static std::string MONITOR("MonitorIndex");
-/// Name of the monitor epp table property
-const static std::string MONITOR_EPP_TABLE("MonitorEPPTable");
 /// Name of the monitor workspace property
 const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
 /// Name of the neutron pulse interval property
 const static std::string PULSE_INTERVAL("PulseInterval");
 } // namespace Prop
+
+std::vector<int> toWorkspaceIndices(const Mantid::Indexing::SpectrumIndexSet &indices) {
+  std::vector<int> wsIndices;
+  wsIndices.reserve(indices.size());
+  for (size_t i = 0; i < indices.size(); ++i) {
+    wsIndices.emplace_back(indices[i]);
+  }
+  return wsIndices;
+}
 } // namespace
 
 namespace Mantid {
@@ -96,28 +89,15 @@ void GetEiMonDet3::init() {
   mustBePositive->setLower(0);
 
   declareWorkspaceInputProperties<API::MatrixWorkspace,
-                                  API::IndexType::SpectrumNum |
-                                      API::IndexType::WorkspaceIndex>(
+                                  API::IndexType::WorkspaceIndex>(
       Prop::DETECTOR_WORKSPACE, "A workspace containing the detector spectra.",
       tofWorkspace);
-  declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          Prop::DETECTOR_EPP_TABLE, "", Kernel::Direction::Input),
-      "An EPP table corresponding to " + Prop::DETECTOR_WORKSPACE + ".");
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       Prop::MONITOR_WORKSPACE.c_str(), "",
                       Kernel::Direction::Input, API::PropertyMode::Optional,
                       tofWorkspace),
                   "A Workspace containing the monitor spectrum. If empty, " +
                       Prop::DETECTOR_WORKSPACE + " will be used.");
-  declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          Prop::MONITOR_EPP_TABLE.c_str(), "", Kernel::Direction::Input,
-          API::PropertyMode::Optional),
-      "An EPP table corresponding to " + Prop::MONITOR_WORKSPACE);
-  setPropertySettings(Prop::MONITOR_EPP_TABLE,
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
-                          Prop::MONITOR_WORKSPACE, Kernel::IS_NOT_DEFAULT));
   declareProperty(Prop::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Usable monitor's workspace index.");
   declareProperty(Prop::PULSE_INTERVAL, EMPTY_DBL(),
@@ -131,36 +111,44 @@ void GetEiMonDet3::init() {
  *
  */
 void GetEiMonDet3::exec() {
-  progress(0);
+  progress(0.);
+  API::MatrixWorkspace_sptr detectorWs;
   Indexing::SpectrumIndexSet detectorIndices;
-  std::tie(m_detectorWs, detectorIndices) =
+  std::tie(detectorWs, detectorIndices) =
       getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::DETECTOR_WORKSPACE);
 
-  m_detectorEPPTable = getProperty(Prop::DETECTOR_EPP_TABLE);
-  m_monitorWs = getProperty(Prop::MONITOR_WORKSPACE);
+  API::MatrixWorkspace_sptr monitorWs = getProperty(Prop::MONITOR_WORKSPACE);
   const int monitorIndex = getProperty(Prop::MONITOR);
-  if (!m_monitorWs) {
-    m_monitorWs = m_detectorWs;
+  if (!monitorWs) {
+    monitorWs = detectorWs;
     if (std::find(detectorIndices.begin(), detectorIndices.end(),
                   monitorIndex) != detectorIndices.end()) {
       throw std::runtime_error(
           "MonitorIndex is also listed in DetectorWorkspaceIndexSet.");
     }
   }
-  m_monitorEPPTable = getProperty(Prop::MONITOR_EPP_TABLE);
-  if (!m_monitorEPPTable) {
-    m_monitorEPPTable = m_detectorEPPTable;
-  }
-
-  double sampleToDetectorDistance;
+  const auto detWsIndices = toWorkspaceIndices(detectorIndices);
+  auto detectorSumWs = groupSpectra(detectorWs, detWsIndices);
+  progress(0.3);
+  const auto sampleToDetectorDistance = detectorSumWs->spectrumInfo().l2(0);
   double detectorEPP;
-  averageDetectorDistanceAndTOF(detectorIndices, sampleToDetectorDistance,
-                                detectorEPP);
-  progress(0.9);
-  double monitorToSampleDistance;
+  try {
+    detectorEPP = peakPosition(detectorWs);
+  } catch(std::runtime_error &e) {
+    throw std::runtime_error(std::string("Failed to find detector peak: ") + e.what());
+  }
+  progress(0.5);
+  const std::vector<int> monWsIndices = {monitorIndex};
+  auto monitorSumWs = groupSpectra(monitorWs, monWsIndices);
   double monitorEPP;
-  monitorDistanceAndTOF(monitorIndex, monitorToSampleDistance, monitorEPP);
-  double timeOfFlight = computeTOF(detectorEPP, monitorEPP);
+  try {
+    monitorEPP = peakPosition(monitorWs);
+  } catch (std::runtime_error &e){
+    throw std::runtime_error(std::string("Failed to find monitor peak: ") + e.what());
+  }
+  progress(0.7);
+  const auto monitorToSampleDistance = monitorSumWs->spectrumInfo().l2(0);
+  double timeOfFlight = computeTOF(*detectorWs, detectorEPP, monitorEPP);
   const double flightLength =
       sampleToDetectorDistance + monitorToSampleDistance;
   const double velocity = flightLength / timeOfFlight * 1e6;
@@ -169,70 +157,17 @@ void GetEiMonDet3::exec() {
   progress(1.0);
   g_log.notice() << "Final time-of-flight:" << timeOfFlight << " which gives "
                  << energy << " as " << Prop::INCIDENT_ENERGY << ".\n";
-
   setProperty(Prop::INCIDENT_ENERGY, energy);
 }
 
-/** Calculates the average distance between the sample and given
- *  detectors.
- *  @param detectorIndices A vector containing workspace indices
- *         to the detectors
- *  @param sampleToDetectorDistance An output parameter for the
- *         average distance between the sample and the detectors
- *  @param detectorEPP An output parameter for the average position
- *         of the detectors' elastic peak
- */
-void GetEiMonDet3::averageDetectorDistanceAndTOF(
-    const Indexing::SpectrumIndexSet &detectorIndices,
-    double &sampleToDetectorDistance, double &detectorEPP) {
-  auto peakPositionColumn =
-      m_detectorEPPTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
-  auto fitStatusColumn =
-      m_detectorEPPTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
-  if (!peakPositionColumn || !fitStatusColumn) {
-    throw std::runtime_error("The workspace specified by " +
-                             Prop::DETECTOR_EPP_TABLE +
-                             " doesn't seem to contain the expected table");
-  }
-  double distanceSum = 0;
-  double eppSum = 0;
-  size_t n = 0;
-  auto &spectrumInfo = m_detectorWs->spectrumInfo();
-  for (int i = 0; i < static_cast<int>(detectorIndices.size()); ++i) {
-    const size_t index = detectorIndices[i];
-    if (fitStatusColumn->cell<std::string>(index) ==
-        EPPTableLiterals::FIT_STATUS_SUCCESS) {
-      if (spectrumInfo.isMasked(index) || spectrumInfo.isMonitor(index)) {
-        continue;
-      }
-      const double d = spectrumInfo.l2(index);
-      distanceSum += d;
-      const double epp = (*peakPositionColumn)[index];
-      eppSum += epp;
-      ++n;
-    } else {
-      g_log.debug()
-          << "Excluding detector with unsuccessful fit at workspace index "
-          << index << ".\n";
-    }
-  }
-  if (n == 0) {
-    throw std::runtime_error("No successful detector fits found in " +
-                             Prop::DETECTOR_EPP_TABLE);
-  }
-  sampleToDetectorDistance = distanceSum / static_cast<double>(n);
-  g_log.information() << "Average sample-to-detector distance: "
-                      << sampleToDetectorDistance << ".\n";
-  detectorEPP = eppSum / static_cast<double>(n);
-  g_log.information() << "Average detector EPP: " << detectorEPP << ".\n";
-}
 
 /** Calculates the time of flight from the monitor to the detectors.
+ *  @param detectorWs Detector workspace
  *  @param detectorEPP The position of the detectors' elastic peak
  *  @param monitorEPP The position of the monitor's elastic peak
  *  @return The time of flight between the monitor and the detectors
  */
-double GetEiMonDet3::computeTOF(const double detectorEPP,
+double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs, const double detectorEPP,
                                 const double monitorEPP) {
   using namespace PhysicalConstants;
   double timeOfFlight = detectorEPP - monitorEPP;
@@ -240,8 +175,8 @@ double GetEiMonDet3::computeTOF(const double detectorEPP,
   if (timeOfFlight <= 0.) {
     double pulseInterval = getProperty(Prop::PULSE_INTERVAL);
     if (pulseInterval == EMPTY_DBL()) {
-      if (m_detectorWs->run().hasProperty(SampleLogs::PULSE_INTERVAL)) {
-        pulseInterval = m_detectorWs->run().getPropertyAsSingleValue(
+      if (detectorWs.run().hasProperty(SampleLogs::PULSE_INTERVAL)) {
+        pulseInterval = detectorWs.run().getPropertyAsSingleValue(
             SampleLogs::PULSE_INTERVAL);
         pulseInterval *= 1e6; // To microseconds.
       } else {
@@ -257,51 +192,27 @@ double GetEiMonDet3::computeTOF(const double detectorEPP,
   return timeOfFlight;
 }
 
-/** Obtains the distance between the monitor and the sample.
- *  @param monitorIndex Workspace index specifying the monitor spectra
- *  @param monitorToSampleDistance Output parameter for the monitor to
- *         sample distance
- *  @param monitorEPP Output parameter for the monitors elastic peak
- *         position
- */
-void GetEiMonDet3::monitorDistanceAndTOF(const size_t monitorIndex,
-                                         double &monitorToSampleDistance,
-                                         double &monitorEPP) const {
-  // Monitor-to-sample distance.
-  const auto peakPositionColumn =
-      m_monitorEPPTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
-  const auto fitStatusColumn =
-      m_monitorEPPTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
-  if (!peakPositionColumn || !fitStatusColumn) {
-    throw std::runtime_error("The workspace specified by " +
-                             Prop::DETECTOR_EPP_TABLE +
-                             " doesn't seem to contain the expected table");
-  }
-  if (monitorIndex >= peakPositionColumn->size()) {
-    throw std::runtime_error("Invalid " + Prop::MONITOR);
-  }
-  if (fitStatusColumn->cell<std::string>(monitorIndex) !=
-      EPPTableLiterals::FIT_STATUS_SUCCESS) {
-    throw std::runtime_error("No successful monitor fit found in " +
-                             Prop::MONITOR_EPP_TABLE);
-  }
-  auto &spectrumInfo = m_monitorWs->spectrumInfo();
-  if (spectrumInfo.isMasked(monitorIndex)) {
-    throw std::runtime_error("Monitor spectrum is masked");
-  }
-  if (!spectrumInfo.isMonitor(monitorIndex)) {
-    g_log.warning() << "The monitor spectrum is not actually marked "
-                    << "as monitor.\n";
-  }
-  const auto sample = m_detectorWs->getInstrument()->getSample();
-  monitorToSampleDistance =
-      spectrumInfo.position(monitorIndex).distance(sample->getPos());
-  g_log.information() << "Monitor-to-sample distance: "
-                      << monitorToSampleDistance << ".\n";
 
-  // Monitor peak position.
-  monitorEPP = (*peakPositionColumn)[monitorIndex];
-  g_log.information() << "Monitor EPP: " << monitorEPP << ".\n";
+API::MatrixWorkspace_sptr GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws, const std::vector<int> &wsIndices) {
+  auto group = createChildAlgorithm("GroupDetectors");
+  group->setProperty("InputWorkspace", ws);
+  group->setProperty("OutputWorkspace", "unused");
+  group->setProperty("WorkspaceIndexList", wsIndices);
+  group->execute();
+  return group->getProperty("OutputWorkspace");
+}
+
+double GetEiMonDet3::peakPosition(API::MatrixWorkspace_sptr &ws) {
+  auto findEPP = createChildAlgorithm("FindEPP");
+  findEPP->setProperty("InputWorkspace", ws);
+  findEPP->setProperty("OutputWorkspace", "unused");
+  findEPP->execute();
+  API::ITableWorkspace_sptr eppTable = findEPP->getProperty("OutputWorkspace");
+  const auto &status = eppTable->getRef<std::string>("FitStatus", 0);
+  if (status != "success" || status != "narrowPeak") {
+    throw std::runtime_error("Could not fit a Gaussian to the data.");
+  }
+  return eppTable->getRef<double>("PeakCentre", 0);
 }
 
 } // namespace Algorithms
