@@ -21,8 +21,8 @@ def do_fit_no_background(k_is_free):
     function_str = \
         "composite=ComptonScatteringCountRate,NumDeriv=1,IntensityConstraints=\"Matrix(1|3)0|-1|3\";"\
         "name=GramCharlierComptonProfile,Mass=1.007940,HermiteCoeffs=1 0 1;"\
-        "name=GaussianComptonProfile1,Mass=27.000000;"\
-        "name=GaussianComptonProfile2,Mass=91.000000"
+        "name=GaussianComptonProfile,Mass=27.000000;"\
+        "name=GaussianComptonProfile,Mass=91.000000"
     # Run fit
     _do_fit(function_str, k_is_free)
 
@@ -34,8 +34,8 @@ def do_fit_with_quadratic_background():
     function_str = \
         "composite=ComptonScatteringCountRate,NumDeriv=1,IntensityConstraints=\"Matrix(1|3)0|-1|3\";"\
         "name=GramCharlierComptonProfile,Mass=1.007940,HermiteCoeffs=1 0 1;"\
-        "name=GaussianComptonProfile1,Mass=27.000000;"\
-        "name=GaussianComptonProfile2,Mass=91.000000;name=Polynomial,n=2,A0=0,A1=0,A2=0"
+        "name=GaussianComptonProfile,Mass=27.000000;"\
+        "name=GaussianComptonProfile,Mass=91.000000;name=Polynomial,n=2,A0=0,A1=0,A2=0"
     # Run fit
     _do_fit(function_str, k_is_free=False)
 
