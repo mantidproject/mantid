@@ -123,19 +123,19 @@ class MarkedColumnsTest(unittest.TestCase):
         -> The new YErr must replace the old one
         """
         mc = MarkedColumns()
-        ec = ErrorColumn(column=2, error_for_column=4, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=4, label_index=0)
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(2, mc.as_y_err[0].column)
-        self.assertEqual(4, mc.as_y_err[0].error_for_column)
+        self.assertEqual(4, mc.as_y_err[0].related_y_column)
 
         # different source column but contains error for the same column
         # adding this one should replace the first one
-        ec2 = ErrorColumn(column=2, error_for_column=5, label_index=0)
+        ec2 = ErrorColumn(column=2, related_y_column=5, label_index=0)
         mc.add_y_err(ec2)
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(2, mc.as_y_err[0].column)
-        self.assertEqual(5, mc.as_y_err[0].error_for_column)
+        self.assertEqual(5, mc.as_y_err[0].related_y_column)
 
     def test_add_y_err_duplicate_column_different_reference_col(self):
         """
@@ -143,19 +143,19 @@ class MarkedColumnsTest(unittest.TestCase):
         -> The new YErr must replace the old one
         """
         mc = MarkedColumns()
-        ec = ErrorColumn(column=2, error_for_column=4, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=4, label_index=0)
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(2, mc.as_y_err[0].column)
-        self.assertEqual(4, mc.as_y_err[0].error_for_column)
+        self.assertEqual(4, mc.as_y_err[0].related_y_column)
 
         # different source column but contains error for the same column
         # adding this one should replace the first one
-        ec2 = ErrorColumn(column=3, error_for_column=4, label_index=0)
+        ec2 = ErrorColumn(column=3, related_y_column=4, label_index=0)
         mc.add_y_err(ec2)
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(3, mc.as_y_err[0].column)
-        self.assertEqual(4, mc.as_y_err[0].error_for_column)
+        self.assertEqual(4, mc.as_y_err[0].related_y_column)
 
     def test_changing_y_to_x_removes_associated_yerr_columns(self):
         """
@@ -164,7 +164,7 @@ class MarkedColumnsTest(unittest.TestCase):
         """
         mc = MarkedColumns()
         mc.add_y(4)
-        ec = ErrorColumn(column=2, error_for_column=4, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=4, label_index=0)
         mc.add_y_err(ec)
 
         # check that we have both a Y col and an associated YErr
@@ -184,7 +184,7 @@ class MarkedColumnsTest(unittest.TestCase):
         """
         mc = MarkedColumns()
         mc.add_y(4)
-        ec = ErrorColumn(column=2, error_for_column=4, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=4, label_index=0)
         mc.add_y_err(ec)
 
         # check that we have both a Y col and an associated YErr
@@ -201,7 +201,7 @@ class MarkedColumnsTest(unittest.TestCase):
         mc = MarkedColumns()
         mc.add_y(4)
         mc.add_x(3)
-        ec = ErrorColumn(column=2, error_for_column=6, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=6, label_index=0)
         mc.add_y_err(ec)
 
         self.assertEqual(1, len(mc.as_x))

@@ -12,6 +12,7 @@ from __future__ import absolute_import, division, print_function
 from functools import partial
 
 from qtpy.QtCore import Qt
+from mantid.kernel import logger
 
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
 from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
@@ -29,6 +30,9 @@ class TableWorkspaceDisplay(object):
     TOO_MANY_SELECTED_FOR_PLOT = "Too many columns are selected to plot. Please select only 1."
     NUM_SELECTED_FOR_CONFIRMATION = 10
     NO_COLUMN_MARKED_AS_X = "No columns marked as X."
+    ITEM_CHANGED_INVALID_DATA_MESSAGE = "Error: Trying to set invalid data for the column."
+    ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
+    TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
 
     def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None):
         """
@@ -76,9 +80,9 @@ class TableWorkspaceDisplay(object):
             self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), item.is_v3d)
             item.update()
         except ValueError:
-            self.view.show_warning("Error: Trying to set invalid data for the column.")
+            self.view.show_warning(self.ITEM_CHANGED_INVALID_DATA_MESSAGE)
         except Exception as x:
-            self.view.show_warning("Unknown error occurred: {}".format(x))
+            self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
         finally:
             item.reset()
 
@@ -202,23 +206,23 @@ class TableWorkspaceDisplay(object):
     def action_set_as_y(self):
         self._action_set_as(self.model.marked_columns.add_y)
 
-    def action_set_as_y_err(self, error_for_column, label_index):
+    def action_set_as_y_err(self, related_y_column, label_index):
         """
 
-        :param error_for_column: The real index of the column for which the error is being marked
+        :param related_y_column: The real index of the column for which the error is being marked
         :param label_index: The index present in the label of the column for which the error is being marked
                             This will be the number in <ColumnName>[Y10] -> the 10
         """
         try:
-            selected_columns = self._get_selected_columns(1, "Too many selected to set as Y Error")
+            selected_columns = self._get_selected_columns(1, self.TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE)
         except ValueError:
             return
 
         selected_column = selected_columns[0]
         try:
-            err_column = ErrorColumn(selected_column, error_for_column, label_index)
+            err_column = ErrorColumn(selected_column, related_y_column, label_index)
         except ValueError as e:
-            self.view.show_warning(e.message)
+            self.view.show_warning(str(e))
             return
 
         self.model.marked_columns.add_y_err(err_column)
@@ -227,7 +231,7 @@ class TableWorkspaceDisplay(object):
     def action_set_as_none(self):
         self._action_set_as(self.model.marked_columns.remove)
 
-    def action_sort_ascending(self, order):
+    def action_sort(self, order):
         try:
             selected_columns = self._get_selected_columns(1, self.TOO_MANY_SELECTED_TO_SORT)
         except ValueError:
@@ -300,10 +304,10 @@ class TableWorkspaceDisplay(object):
             try:
                 plot_func(x, y, label='Column {}'.format(column_label), **kwargs)
             except ValueError as e:
-                #     TODO log error?
-                self.view.show_warning(
-                    "One or more of the columns being plotted contain invalid data for MatPlotLib."
-                    "\n\nError message:\n{}".format(e), "Invalid data - Mantid Workbench")
+                error_message = "One or more of the columns being plotted contain invalid data for MatPlotLib.\
+                \n\nError message:\n{}".format(e)
+                logger.error(error_message)
+                self.view.show_warning(error_message, "Invalid data - Mantid Workbench")
                 return
 
             ax.set_ylabel(column_label)
@@ -322,6 +326,3 @@ class TableWorkspaceDisplay(object):
         else:
             raise ValueError("Plot Type: {} not currently supported!".format(type))
         return plot_func
-
-    def get_columns_marked_as_y(self):
-        return self.model.marked_columns.as_y[:]
