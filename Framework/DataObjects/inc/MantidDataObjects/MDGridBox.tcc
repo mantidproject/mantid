@@ -420,7 +420,31 @@ TMDE(void MDGridBox)::refreshCache(Kernel::ThreadScheduler *ts) {
     throw std::runtime_error("Not implemented");
   }
 }
+//-----------------------------------------------------------------------------------------------
+/**
+ * Calculates caches for grid box recursively,
+ * considering leafs have computed values.
+ */
+TMDE(void MDGridBox)::calculateGridCaches() {
+  // Clear your total
+  nPoints = 0;
+  this->m_signal = 0;
+  this->m_errorSquared = 0;
+  this->m_totalWeight = 0;
 
+
+  for (MDBoxBase<MDE, nd> *ibox : m_Children) {
+
+    // does nothing for MDBox
+    ibox->calculateGridCaches();
+
+    // Add up what's in there
+    nPoints += ibox->getNPoints();
+    this->m_signal += ibox->getSignal();
+    this->m_errorSquared += ibox->getErrorSquared();
+    this->m_totalWeight += ibox->getTotalWeight();
+  }
+}
 //-----------------------------------------------------------------------------------------------
 /** Allocate and return a vector with a copy of all events contained
  */

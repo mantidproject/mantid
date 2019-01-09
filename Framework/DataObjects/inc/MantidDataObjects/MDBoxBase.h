@@ -340,6 +340,8 @@ public:
     m_inverseVolume = invVolume;
   }
 
+  virtual void calculateGridCaches() {}
+
 protected:
   /**
    * Calculates caches if the events are known

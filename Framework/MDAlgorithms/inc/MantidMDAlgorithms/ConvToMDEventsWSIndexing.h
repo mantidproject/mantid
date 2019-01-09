@@ -387,6 +387,12 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
 
   end = std::chrono::high_resolution_clock::now();
   std::cerr <<  "Build native boxes: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
+  start = std::chrono::high_resolution_clock::now();
+
+  root->calculateGridCaches();
+
+  end = std::chrono::high_resolution_clock::now();
+  std::cerr <<  "Calculate caches: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "\n";
 }
 
 
@@ -490,7 +496,7 @@ void ConvToMDEventsWSIndexing::EventsDistributor<ND, MDEventType, EventIterator>
       newBox = new Box(tsk.bc.get(), tsk.level, extents, boxEventStart, eventIt);
     } else {
       tsk.bc->incGridBoxesCounter(tsk.level);
-      newBox = new GridBox(tsk.bc.get(), tsk.level, extents, boxEventStart, eventIt);
+      newBox = new GridBox(tsk.bc.get(), tsk.level, extents);
     }
 
     children.emplace_back(RecursionHelper{{boxEventStart, eventIt}, {boxLower, boxUpper}, newBox});

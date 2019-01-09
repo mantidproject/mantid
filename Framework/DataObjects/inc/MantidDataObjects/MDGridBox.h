@@ -186,6 +186,8 @@ public:
 
   void refreshCache(Kernel::ThreadScheduler *ts = nullptr) override;
 
+  void calculateGridCaches() override final;
+
   bool getIsMasked() const override;
   /// Setter for masking the box
   void mask() override;
