@@ -10,12 +10,12 @@
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/VectorHelper.h"
-
 #include <boost/iterator/counting_iterator.hpp>
 #include <numeric>
 #include <sstream>
@@ -148,7 +148,7 @@ void CrossCorrelate::exec() {
     throw std::runtime_error("Range is not valid");
 
   MatrixWorkspace_sptr out =
-      create<MatrixWorkspace>(*inputWS, nspecs, Points(npoints));
+      create<HistoWorkspace>(*inputWS, nspecs, Points(npoints));
 
   // Calculate the mean value of the reference spectrum and associated error
   // squared
