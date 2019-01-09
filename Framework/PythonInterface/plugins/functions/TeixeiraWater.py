@@ -2,7 +2,7 @@
 #
 # Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institute Laue - Langevin
+#     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 '''
