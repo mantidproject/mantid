@@ -482,50 +482,18 @@ FileFinderImpl::findRun(const std::string &hintstr,
 
   // Merge the extensions & throw out duplicates
   // On Windows throw out ones that only vary in case
-  std::vector<std::string> uniqueExts;
-  uniqueExts.reserve(1 + exts.size() + extensions.size());
+  // std::vector<std::string> uniqueExts;
+  // uniqueExts.reserve(1 + exts.size() + extensions.size());
+  std::set<std::string> uniqueExtsSet;
   if (!extension.empty())
-    uniqueExts.push_back(extension);
+    uniqueExtsSet.insert(extension);
 
-  auto cend = exts.end();
-  for (auto cit = exts.begin(); cit != cend; ++cit) {
-    if (getCaseSensitive()) // prune case variations - this is a hack, see above
-    {
-      std::string transformed(*cit);
-      std::transform(cit->begin(), cit->end(), transformed.begin(), tolower);
-      auto searchItr =
-          std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-      if (searchItr != uniqueExts.end())
-        continue;
-      std::transform(cit->begin(), cit->end(), transformed.begin(), toupper);
-      searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-      if (searchItr == uniqueExts.end())
-        uniqueExts.push_back(*cit);
-    } else {
-      auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), *cit);
-      if (searchItr == uniqueExts.end())
-        uniqueExts.push_back(*cit);
-    }
-  }
-  cend = extensions.end();
-  for (auto cit = extensions.begin(); cit != cend; ++cit) {
-    if (getCaseSensitive()) // prune case variations - this is a hack, see above
-    {
-      std::string transformed(*cit);
-      std::transform(cit->begin(), cit->end(), transformed.begin(), tolower);
-      auto searchItr =
-          std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-      if (searchItr != uniqueExts.end())
-        continue;
-      std::transform(cit->begin(), cit->end(), transformed.begin(), toupper);
-      searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-      if (searchItr == uniqueExts.end())
-        uniqueExts.push_back(*cit);
-    } else {
-      auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), *cit);
-      if (searchItr == uniqueExts.end())
-        uniqueExts.push_back(*cit);
-    }
+  getUniqueExtensions(exts, uniqueExtsSet);
+  getUniqueExtensions(extensions, uniqueExtsSet);
+
+  std::vector<std::string> uniqueExts;
+  for (const auto &it : uniqueExtsSet) {
+    uniqueExts.push_back(it);
   }
 
   // determine which archive search facilities to use
@@ -544,12 +512,34 @@ FileFinderImpl::findRun(const std::string &hintstr,
   return "";
 }
 
+void FileFinderImpl::getUniqueExtensions(
+    const std::vector<std::string> &exts,
+    std::set<std::string> &uniqueExts) const {
+  for (const auto &cit : exts) {
+    if (!getCaseSensitive()) // prune case variations - this is a hack, see
+                             // findRun
+    {
+      std::string transformed(cit);
+      std::transform(cit.begin(), cit.end(), transformed.begin(), tolower);
+      auto searchItr = uniqueExts.find(cit);
+      if (searchItr != uniqueExts.end())
+        continue;
+      std::transform(cit.begin(), cit.end(), transformed.begin(), toupper);
+      uniqueExts.insert(cit);
+    } else {
+      uniqueExts.insert(cit);
+    }
+  }
+}
+
 /**
  * Find a list of files file given a hint. Calls findRun internally.
  * @param hintstr :: Comma separated list of hints to findRun method.
  *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
  *  Only the beginning of a range can contain an instrument name.
- * @param exts :: Vector of allowed file extensions.
+ * @param exts :: Vector of allowed file extensions. Optional.
+ *                If provided, this provides the only extensions searched for.
+ *                If not provided, facility extensions used.
  * @return A vector of full paths or empty vector
  * @throw std::invalid_argument if the argument is malformed
  * @throw Exception::NotFoundError if a file could not be found

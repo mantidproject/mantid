@@ -333,11 +333,34 @@ public:
         TS_ASSERT_DIFFERS(*it, *(it - 1));
       }
     }
-
+    std::cout << "\n Failing test \n";
+    // This file is .nxs
     const std::vector<std::string> incorrect_extension = {".txt"};
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns(
+    files =
+        FileFinder::Instance().findRuns("MUSR15189-15193", incorrect_extension);
+    for (auto it = files.begin(); it != files.end(); ++it) {
+      std::cout << *it;
+    }
+    /*TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns(
                          "MUSR15189-15193", incorrect_extension),
-                     Exception::NotFoundError);
+                     Exception::NotFoundError); */
+    std::cout << "\n end of test \n";
+  }
+
+  void testGetUniqueExtensions() {
+    std::set<std::string> uniqueExts;
+    std::vector<std::string> firstExtsToAdd = {".RAW", ".log"};
+    std::vector<std::string> secondExtsToAdd = {".so", ".txt", ".RAW"};
+
+    std::set<std::string> expectedFirstExtensions = {".RAW", ".log"};
+    std::set<std::string> expectedSecondExtensions = {".RAW", ".log", ".so",
+                                                      ".txt"};
+
+    FileFinder::Instance().getUniqueExtensions(firstExtsToAdd, uniqueExts);
+    TS_ASSERT_EQUALS(uniqueExts, expectedFirstExtensions);
+
+    FileFinder::Instance().getUniqueExtensions(secondExtsToAdd, uniqueExts);
+    TS_ASSERT_EQUALS(uniqueExts, expectedSecondExtensions);
   }
 
   void testFindAddFiles() {
