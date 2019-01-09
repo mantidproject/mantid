@@ -81,6 +81,7 @@ set ( INC_FILES
 	DensityOfStates.h
 	Elwin.h
 	IAddWorkspaceDialog.h
+	IIndirectFitDataView.h
 	IIndirectFitPlotView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
@@ -148,6 +149,7 @@ set ( MOC_FILES
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
+    IIndirectFitDataView.h
     IIndirectFitPlotView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
