@@ -43,7 +43,7 @@ Usage
        **settings
    )
    directFgd = ReflectometryILLSumForeground(
-       Inputworkspace=direct.OutputWorkspace,
+       Inputworkspace=direct,
        WavelengthRange=[2, 15])
    
    # Reflected beam
@@ -55,7 +55,7 @@ Usage
    reflectivityLambda = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectBeamWorkspace=direct,
        WavelengthRange=[2, 15],
    )
    reflectivityQ = ReflectometryILLConvertToQ(
@@ -107,7 +107,7 @@ Output:
        **settings
    )
    directFgd = ReflectometryILLSumForeground(
-       InputWorkspace=direct.OutputWorkspace,
+       InputWorkspace=direct,
        WavelengthRange=[2, 15]
    )
    ReflectometryILLPolarizationCor(
@@ -125,7 +125,7 @@ Output:
    reflectivity11 = ReflectometryILLSumForeground(
        InputWorkspace=reflected11,
        DirectForegroundWorkspace='pol_corrected_direct_++',
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectBeamWorkspace=direct,
        WavelengthRange=[2, 15]
    )
    # Reload the reflected be. We will fake the '--' flipper settings
@@ -137,7 +137,7 @@ Output:
    reflectivity00 = ReflectometryILLSumForeground(
        InputWorkspace=reflected00,
        DirectForegroundWorkspace='pol_corrected_direct_++',
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectBeamWorkspace=direct,
        WavelengthRange=[2, 15]
    )
    # Overwrite sample logs

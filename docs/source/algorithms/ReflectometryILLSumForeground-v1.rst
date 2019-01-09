@@ -64,7 +64,7 @@ Usage
        **settings
    )
    # We need the summed direct beam for the reflectivity
-   directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
+   directFgd = ReflectometryILLSumForeground(direct)
    
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
@@ -74,7 +74,7 @@ Usage
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectBeamWorkspace=direct,
        WavelengthRange=[2, 15],
    )
    
@@ -111,7 +111,7 @@ Output:
        **settings
    )
    # We need the summed direct beam for the reflectivity
-   directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
+   directFgd = ReflectometryILLSumForeground(direct)
    
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
@@ -121,7 +121,7 @@ Output:
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectBeamWorkspace=direct,
        SummationType='SumInQ',
        WavelengthRange=[0., 14.]
    )
