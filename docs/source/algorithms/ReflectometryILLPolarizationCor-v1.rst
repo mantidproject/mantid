@@ -46,11 +46,17 @@ Usage
        Run='ILL/D17/317369.nxs',
        **settings
    )
+
+   # For reflected angle calibration:
+   directLogs = SampleLogs(direct)
+   peakX = directLogs.peak_position
+
    directFgd = ReflectometryILLSumForeground(direct)
    
    # Reflected beam. Flippers set to '++'
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
+       BeamCentre=peakX,
        **settings
    )
    

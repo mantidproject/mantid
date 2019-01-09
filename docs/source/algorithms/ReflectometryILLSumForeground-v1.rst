@@ -110,12 +110,18 @@ Output:
        Run='ILL/D17/317369.nxs',
        **settings
    )
+
+   # For reflected angle calibration:
+   directLogs = SampleLogs(direct)
+   peakX = directLogs.peak_position
+
    # We need the summed direct beam for the reflectivity
    directFgd = ReflectometryILLSumForeground(direct)
    
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
+       BeamCentre=peakX,
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(

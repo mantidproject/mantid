@@ -106,6 +106,9 @@ Output:
        Run='ILL/D17/317369.nxs',
        **settings
    )
+   # For reflected angle calibration:
+   directLogs = SampleLogs(direct)
+   peakX = directLogs.peak_position
    directFgd = ReflectometryILLSumForeground(
        InputWorkspace=direct,
        WavelengthRange=[2, 15]
@@ -119,6 +122,7 @@ Output:
    # Reflected beam. Flippers set to '++'
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
+       BeamCentre=peakX,
        **settings
    )
 
@@ -128,9 +132,10 @@ Output:
        DirectBeamWorkspace=direct,
        WavelengthRange=[2, 15]
    )
-   # Reload the reflected be. We will fake the '--' flipper settings
+   # Reload the reflected beam. We will fake the '--' flipper settings
    reflected00 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
+       BeamCentre=peakX,
        **settings
    )
 
