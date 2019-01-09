@@ -8,6 +8,7 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
+import sys
 
 import numpy
 from skimage.transform import resize
@@ -19,6 +20,10 @@ import matplotlib.collections as mcoll
 import matplotlib.colors
 import matplotlib.dates as mdates
 import matplotlib.image as mimage
+
+
+# Used for initializing searches of max, min values
+_LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 
 # ================================================
 # Private 2D Helper functions
@@ -263,7 +268,7 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
     :param pcolortype: this keyword allows the plotting to be one of pcolormesh or
         pcolorfast if there is "mesh" or "fast" in the value of the keyword, or
         pcolor by default
-    Note: the return is the pcolor, pcolormesh, or pcolorfast of the last spectrum
+    :return: A list of the pcolor pieces created
     '''
     (x, y, z) = get_uneven_data(workspace, distribution)
     mini = numpy.min([numpy.min(i) for i in z])
@@ -289,11 +294,12 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
     else:
         pcolor = axes.pcolor
 
+    pieces = []
     for xi, yi, zi in zip(x, y, z):
         XX, YY = numpy.meshgrid(xi, yi, indexing='ij')
-        cm = pcolor(XX, YY, zi.reshape(-1, 1), **kwargs)
+        pieces.append(pcolor(XX, YY, zi.reshape(-1, 1), **kwargs))
 
-    return cm
+    return pieces
 
 
 def pcolor(axes, workspace, *args, **kwargs):
@@ -638,26 +644,31 @@ def tricontourf(axes, workspace, *args, **kwargs):
     return axes.tricontourf(x, y, z, *args, **kwargs)
 
 
-def update_colorplot_datalimits(axes, mappable):
+def update_colorplot_datalimits(axes, mappables):
     """
     For an colorplot (imshow, pcolor*) plots update the data limits on the axes
     to circumvent bugs in matplotlib
-    :param mappable: A new mappable for this axes
+    :param mappables: An iterable of mappable for this axes
     """
     # ax.relim in matplotlib < 2.2 doesn't take into account of images
     # and it doesn't support collections at all as of verison 3 so we'll take
     # over
-    if isinstance(mappable, mimage.AxesImage):
-        xmin, xmax, ymin, ymax = mappable.get_extent()
-    elif isinstance(mappable, mcoll.QuadMesh):
-        # coordinates are vertices of the grid
-        coords = mappable._coordinates
-        xmin, ymin = coords[0][0]
-        xmax, ymax = coords[-1][-1]
-    elif isinstance(mappable, mcoll.PolyCollection):
-        xmin, ymin = mappable._paths[0].get_extents().min
-        xmax, ymax = mappable._paths[-1].get_extents().max
-    else:
-        raise ValueError("Unknown mappable type '{}'".format(type(mappable)))
-    axes.update_datalim(((xmin, ymin), (xmax, ymax)))
+    xmin_all, xmax_all, ymin_all, ymax_all = _LARGEST, _SMALLEST, _LARGEST, _SMALLEST
+    for mappable in mappables:
+        if isinstance(mappable, mimage.AxesImage):
+            xmin, xmax, ymin, ymax = mappable.get_extent()
+        elif isinstance(mappable, mcoll.QuadMesh):
+            # coordinates are vertices of the grid
+            coords = mappable._coordinates
+            xmin, ymin = coords[0][0]
+            xmax, ymax = coords[-1][-1]
+        elif isinstance(mappable, mcoll.PolyCollection):
+            xmin, ymin = mappable._paths[0].get_extents().min
+            xmax, ymax = mappable._paths[-1].get_extents().max
+        else:
+            raise ValueError("Unknown mappable type '{}'".format(type(mappable)))
+        xmin_all, xmax_all = min(xmin_all, xmin), max(xmax_all, xmax)
+        ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
+
+    axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
     axes.autoscale()
