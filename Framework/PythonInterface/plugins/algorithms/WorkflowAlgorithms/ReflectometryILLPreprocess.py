@@ -337,7 +337,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _inputWS(self):
         """Return a raw input workspace."""
-        beamPos = 0.
         inputFiles = self.getPropertyValue(Prop.RUN)
         inputFiles = inputFiles.replace(',', '+')
         if inputFiles:
