@@ -40,12 +40,15 @@ class EnginX:
         if "cropped" in kwargs:
             if kwargs.get("cropped") == "banks":
                 Cal.create_calibration_cropped_file(False, kwargs.get("bank"), kwargs.get("crop_name"),
-                                                    van_curves_file, van_int_file, ceria_run)
+                                                    van_curves_file, van_int_file, ceria_run, self.calibration_directory
+                                                    , self.van_run)
             elif kwargs.get("cropped") == "spectra":
                 Cal.create_calibration_cropped_file(True, kwargs.get("spectra"), kwargs.get("crop_name"),
-                                                    van_curves_file, van_int_file, ceria_run)
+                                                    van_curves_file, van_int_file, ceria_run, self.calibration_directory
+                                                    , self.van_run)
         else:
-            Cal.create_calibration_files(van_curves_file, van_int_file, ceria_run)
+            Cal.create_calibration_files(van_curves_file, van_int_file, ceria_run, self.calibration_directory,
+                                         self.van_run)
 
     def focus(self, **kwargs):
         if "run_number" in kwargs:
