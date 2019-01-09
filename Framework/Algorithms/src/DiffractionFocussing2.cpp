@@ -12,11 +12,10 @@
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidIndexing/Group.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -170,8 +169,8 @@ void DiffractionFocussing2::exec() {
   if (nPoints <= 0) {
     throw std::runtime_error("No points found in the data range.");
   }
-  API::MatrixWorkspace_sptr out = DataObjects::create<HistoWorkspace>(
-      *m_matrixInputW, m_validGroups.size(), BinEdges(nPoints + 1));
+  API::MatrixWorkspace_sptr out = API::WorkspaceFactory::Instance().create(
+      m_matrixInputW, m_validGroups.size(), nPoints + 1, nPoints);
   // Caching containers that are either only read from or unused. Initialize
   // them once.
   // Helgrind will show a race-condition but the data is completely unused so it
