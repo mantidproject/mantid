@@ -2170,6 +2170,14 @@ const std::vector<uint32_t> &CSGObject::getTriangleFaces() const {
   return m_handler->getTriangleFaces();
 }
 
+detail::ShapeInfo::GeometryShape CSGObject::shape() const {
+  if (m_handler != nullptr && m_handler->hasShapeInfo()) {
+    return m_handler->shapeInfo().shape();
+  } else {
+    return detail::ShapeInfo::GeometryShape::NOSHAPE;
+  }
+}
+
 /**
  * get info on standard shapes
  */
