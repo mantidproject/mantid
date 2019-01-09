@@ -31,6 +31,11 @@ class line(object):
     def remove(self):
         return
 
+class label(object):
+    def __init__(self,name,protected):
+        self.text = name
+        self.protected = protected
+
 def errors():
     return tuple([line(),[line()],[line()]])
 
@@ -105,6 +110,12 @@ class SubPlotContextTest(unittest.TestCase):
         self.context.change_auto(True)
         self.assertEquals(self.context._subplot.autoscale.call_count,3)
 
+
+    def test_vlines(self):
+        self.context._labelObjects = {"one":label("one",True) ,"two":label("two",False) , "three":label("three",False) }
+        self.context._vLines = {"two": mock.MagicMock(), "four":mock.MagicMock() }
+        result = self.context.vlines
+        self.assertEquals(["three","two","four"], result)
 
 if __name__ == "__main__":
     unittest.main()
