@@ -20,6 +20,7 @@ namespace MDAlgorithms {
 */
 class MANTID_MDALGORITHMS_DLL MDNormalization : public API::Algorithm {
 public:
+  MDNormalization();
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -35,21 +36,31 @@ private:
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   DataObjects::MDHistoWorkspace_sptr binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps);
+  std::vector<coord_t>
+  getValuesFromOtherDimensions(bool &skipNormalization,
+                               uint16_t expInfoIndex = 0) const;
 
-  /// flag for reciprocal lattice units
-  bool m_isRLU;
+
+
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
   /// Input workspace
   API::IMDEventWorkspace_sptr m_inputWS;
+  /// flag for reciprocal lattice units
+  bool m_isRLU;
   /// The projection vectors
   std::vector<double> m_Q1Basis{1., 0., 0.}, m_Q2Basis{0., 1., 0.},m_Q3Basis{0., 0., 1.};
   // UB matrix
   Mantid::Kernel::DblMatrix m_UB;
   // W matrix
   Mantid::Kernel::DblMatrix m_W;
+  // matrix for transforming from intersections to positions in the normalization workspace
+  Mantid::Kernel::DblMatrix m_transformation;
 
+  size_t m_numExptInfos;
+  bool m_diffraction;
   bool m_accumulate;
+  bool m_dEIntegrated;
 };
 
 } // namespace MDAlgorithms

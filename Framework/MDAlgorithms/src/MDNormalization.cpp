@@ -43,6 +43,13 @@ static bool abs_compare(int a, int b) {
 DECLARE_ALGORITHM(MDNormalization)
 
 //----------------------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+MDNormalization::MDNormalization()
+    :m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3,3), m_W(3,3,true), m_transformation(),
+      m_numExptInfos(0), m_diffraction(true), m_accumulate(false), m_dEIntegrated(false) {}
+
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNormalization::name() const { return "MDNormalization"; }
@@ -329,11 +336,40 @@ void MDNormalization::exec() {
   m_isRLU = getProperty("RLU");
   //get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
+  if ((m_inputWS->getNumDims() >3) && (m_inputWS->getDimension(3)->getMDFrame().name()=="DeltaE")) {
+    m_diffraction = false;
+  }
   auto outputWS = binInputWS(symmetryOps);
 
   createNormalizationWS(*outputWS);
   this->setProperty("OutputNormalizationWorkspace",m_normWS);
   this->setProperty("OutputWorkspace",outputWS);
+
+  m_numExptInfos = outputWS->getNumExperimentInfo();
+  // loop over all experiment infos
+  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
+       expInfoIndex++) {
+    // Check for other dimensions if we could measure anything in the original
+    // data
+    bool skipNormalization = false;
+    const std::vector<coord_t> otherValues =
+        getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
+    g_log.warning()<<skipNormalization<<"\n";
+   /*
+    const auto affineTrans =
+        findIntergratedDimensions(otherValues, skipNormalization);
+    cacheDimensionXValues();
+
+    if (!skipNormalization) {
+      calculateNormalization(otherValues, affineTrans, expInfoIndex);
+    } else {
+      g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
+                    "Not applying normalization.");
+    }
+    */
+    // if more than one experiment info, keep accumulating
+    m_accumulate = true;
+  }
 }
 
 
@@ -390,15 +426,11 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
     m_W.Transpose();
 
     // Find maximum Q
-    bool diffraction=true;
-    if ((m_inputWS->getNumDims() >3) && (m_inputWS->getDimension(3)->getMDFrame().name()=="DeltaE")) {
-      diffraction = false;
-    }
     auto &exptInfo0 = *(m_inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
     auto upperLimitsVector = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
                 exptInfo0.getLog("MDNorm_high"))))();
     double maxQ;
-    if(diffraction){
+    if(m_diffraction){
       maxQ=2.*(*std::max_element(upperLimitsVector.begin(),upperLimitsVector.end()));
     } else {
       double Ei;
@@ -425,6 +457,7 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
       maxQ=ki+std::max(kfmin,kfmax);
     }
     size_t basisVectorIndex=0;
+    std::vector<double> transformation;
     for(std::size_t i=0;i<6;i++) {
       std::string propName = "Dimension"+Strings::toString(i)+"Name";
       std::string binningName = "Dimension"+Strings::toString(i)+"Binning";
@@ -442,8 +475,10 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
           for (size_t j=0;j<originalDimensionNames.size();j++){
               if(j==static_cast<size_t>(dimIndex)){
                 propertyValue<<",1";
+                transformation.push_back(1.);
               } else {
                 propertyValue<<",0";
+                transformation.push_back(0.);
               }
           }
           parameters.emplace(property,propertyValue.str());
@@ -490,6 +525,7 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
     }
     parameters.emplace("OutputExtents",extents.str());
     parameters.emplace("OutputBins",bins.str());
+    m_transformation = DblMatrix(transformation,static_cast<size_t>((transformation.size())/m_inputWS->getNumDims()), m_inputWS->getNumDims());
     return parameters;
 }
 
@@ -615,5 +651,44 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(std::vector<Geome
     outputMDHWS->setDisplayNormalization(Mantid::API::NoNormalization);
     return outputMDHWS;
 }
+
+std::vector<coord_t> MDNormalization::getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex) const
+{
+    const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
+
+    std::vector<coord_t> otherDimValues;
+    for (size_t i = 3; i < m_inputWS->getNumDims(); i++) {
+      const auto dimension = m_inputWS->getDimension(i);
+      coord_t inputDimMin = static_cast<float>(dimension->getMinimum());
+      coord_t inputDimMax = static_cast<float>(dimension->getMaximum());
+      coord_t outputDimMin(0),outputDimMax(0);
+      bool isIntegrated=true;
+
+      for(size_t j=0; j<m_transformation.numRows(); j++) {
+          if(m_transformation[j][i]==1){
+              isIntegrated = false;
+              outputDimMin=m_normWS->getDimension(j)->getMinimum();
+              outputDimMax=m_normWS->getDimension(j)->getMaximum();
+          }
+      }
+      if(dimension->getName()=="DeltaE") {
+          if((inputDimMax<outputDimMin) || (inputDimMin>outputDimMax)){
+              skipNormalization=true;
+          }
+      } else {
+        coord_t value = static_cast<coord_t>(currentRun.getLogAsSingleValue(
+                        dimension->getName(), Mantid::Kernel::Math::TimeAveragedMean));
+        otherDimValues.push_back(value);
+        if (value < inputDimMin || value > inputDimMax) {
+            skipNormalization = true;
+        }
+        if ((!isIntegrated) && (value < outputDimMin || value > outputDimMax)) {
+            skipNormalization = true;
+        }
+      }
+    }
+    return otherDimValues;
+}
+
 } // namespace MDAlgorithms
 } // namespace Mantid
