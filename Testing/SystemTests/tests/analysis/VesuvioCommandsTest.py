@@ -58,9 +58,9 @@ def _create_test_flags(background, multivariate=False):
     else:
         mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
                  'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
-    mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
-    mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
-    mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
+    mass2 = {'value': 16.0, 'function': 'Gaussian1', 'width': 10}
+    mass3 = {'value': 27.0, 'function': 'Gaussian2', 'width': 13}
+    mass4 = {'value': 133.0, 'function': 'Gaussian3', 'width': 30}
     flags['masses'] = [mass1, mass2, mass3, mass4]
     flags['intensity_constraints'] = [0, 1, 0, -4]
     if background:
