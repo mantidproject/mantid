@@ -65,25 +65,40 @@ def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
     return eppWS
 
 
-def _calibratedIncidentEnergy(detWorkspace, monWorkspace, eiCalibrationMon, wsNames, log, algorithmLogging):
+def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCalibrationMon, wsNames, log, algorithmLogging):
     """Return the calibrated incident energy."""
     instrument = detWorkspace.getInstrument().getName()
     eiWorkspace = None
     if instrument in ['IN4', 'IN6']:
-        eiCalibrationDets = '0-299' if instrument == 'IN4' else '0-336'
+        if instrument == 'IN4':
+            run = detWorkspace.run()
+            fermiChopperSpeed = run.getProperty('FC.setpoint_rotation_speed').value
+            backgroundChopperSpeed = run.getProperty('BC1.setpoint_rotation_speed').value
+            if abs(fermiChopperSpeed / 4. - backgroundChopperSpeed) > 10.:
+                log.warning('Fermi speed not four times the background chopper speed. Omitting incident energy calibration.')
+                return None
+            eiCalibrationDets = '0-299'
+            maximumEnergy = 1000.
+        else:
+            # IN6
+            eiCalibrationDets = '0-336'
+            maximumEnergy = 10.
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorWorkspaceIndexType='WorkspaceIndex',
                              DetectorWorkspaceIndexSet=eiCalibrationDets,
                              MonitorWorkspace=monWorkspace,
+                             MonitorEPPTable=monEPPWorkspace,
                              MonitorIndex=eiCalibrationMon,
+                             MaximumEnergy=maximumEnergy,
                              EnableLogging=algorithmLogging)
         eiWSName = wsNames.withSuffix('incident_energy')
         eiWorkspace = CreateSingleValuedWorkspace(OutputWorkspace=eiWSName,
                                                   DataValue=energy,
                                                   EnableLogging=algorithmLogging)
+        return eiWorkspace
     else:
         log.error('Instrument ' + instrument + ' not supported for incident energy calibration')
-    return eiWorkspace
+        return None
 
 
 def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
@@ -295,7 +310,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         monWS = self._flatBkgMon(monWS, wsNames, wsCleanup, subalgLogging)
         monEPPWS = self._createEPPWSMon(monWS, wsNames, wsCleanup, subalgLogging)
         mainWS = self._normalize(mainWS, monWS, monEPPWS, wsNames, wsCleanup, subalgLogging)
-        wsCleanup.cleanup(monEPPWS)
 
         # Time-independent background.
         progress.report('Calculating backgrounds')
@@ -303,8 +317,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         # Calibrate incident energy, if requested.
         progress.report('Calibrating incident energy')
-        mainWS, monWS = self._calibrateEi(mainWS, monWS, wsNames, wsCleanup, report, subalgLogging)
-        wsCleanup.cleanup(monWS)
+        mainWS, monWS = self._calibrateEi(mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging)
+        wsCleanup.cleanup(monWS, monEPPWS)
 
         progress.report('Correcting TOF')
         mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, report, subalgLogging)
@@ -520,13 +534,13 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 'List of runs is given without summing. Consider giving summed runs (+) or summed ranges (-).'
         return issues
 
-    def _calibrateEi(self, mainWS, monWS, wsNames, wsCleanup, report, subalgLogging):
+    def _calibrateEi(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply incident energy calibration."""
         eiCalibrationWS = None
         if self._eiCalibrationEnabled(mainWS, report):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 monIndex = self._monitorIndex(monWS)
-                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, monWS, monIndex, wsNames,
+                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, monWS, monEPPWS, monIndex, wsNames,
                                                             self.log(), subalgLogging)
             else:
                 eiCalibrationWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
