@@ -58,8 +58,6 @@ public:
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string getExtension(const std::string &filename,
                            const std::vector<std::string> &exts) const;
-  void getUniqueExtensions(const std::vector<std::string> &exts,
-                           std::set<std::string> &uniqueExts) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
@@ -79,6 +77,8 @@ private:
                              const std::set<std::string> &filenames,
                              const std::vector<std::string> &exts) const;
   std::string toUpper(const std::string &src) const;
+  void getUniqueExtensions(const std::vector<std::string> &exts,
+                           std::set<std::string> &uniqueExts) const;
   /// glob option - set to case sensitive or insensitive
   int m_globOption;
 };

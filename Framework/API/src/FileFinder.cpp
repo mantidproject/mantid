@@ -512,6 +512,14 @@ FileFinderImpl::findRun(const std::string &hintstr,
   return "";
 }
 
+/**
+ * Given a set of already determined extensions and new extensions,
+ * create a set of all extensions.
+ * If not in an extension-is-case-sensitive environment, only add the
+ * lower case OR upper case version of the extension
+ * @param exts :: a vector of extensions to add
+ * @param uniqueExts :: a set of currently included extensions
+ */
 void FileFinderImpl::getUniqueExtensions(
     const std::vector<std::string> &exts,
     std::set<std::string> &uniqueExts) const {

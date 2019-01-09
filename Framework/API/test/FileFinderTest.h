@@ -347,22 +347,6 @@ public:
     std::cout << "\n end of test \n";
   }
 
-  void testGetUniqueExtensions() {
-    std::set<std::string> uniqueExts;
-    std::vector<std::string> firstExtsToAdd = {".RAW", ".log"};
-    std::vector<std::string> secondExtsToAdd = {".so", ".txt", ".RAW"};
-
-    std::set<std::string> expectedFirstExtensions = {".RAW", ".log"};
-    std::set<std::string> expectedSecondExtensions = {".RAW", ".log", ".so",
-                                                      ".txt"};
-
-    FileFinder::Instance().getUniqueExtensions(firstExtsToAdd, uniqueExts);
-    TS_ASSERT_EQUALS(uniqueExts, expectedFirstExtensions);
-
-    FileFinder::Instance().getUniqueExtensions(secondExtsToAdd, uniqueExts);
-    TS_ASSERT_EQUALS(uniqueExts, expectedSecondExtensions);
-  }
-
   void testFindAddFiles() {
     // create a test file to find
     Poco::File file("LOQ00111-add.raw");
