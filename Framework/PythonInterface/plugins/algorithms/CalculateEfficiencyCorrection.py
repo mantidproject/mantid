@@ -34,7 +34,8 @@ class CalculateEfficiencyCorrection(DataProcessorAlgorithm):
                 or vanadium measurements.'
 
     def seeAlso(self):
-        return [ "He3TubeEfficiency", "DetectorEfficiencyCor", "DetectorEfficiencyCorUser", "CalculateEfficiency", "ComputeCalibrationCoefVan" ]
+        return [ "He3TubeEfficiency", "DetectorEfficiencyCor", "DetectorEfficiencyCorUser",
+                 "CalculateEfficiency", "ComputeCalibrationCoefVan" ]
 
     def PyInit(self):
         self.declareProperty(
@@ -65,7 +66,7 @@ class CalculateEfficiencyCorrection(DataProcessorAlgorithm):
             validator=FloatBoundedValidator(0.0, 1.0),
             doc="Directly input the efficiency, :math:`\\epsilon`, measured at \
                  MeasuredEfficiencyWavelength, :math:`\\lambda_{\\epsilon}`, to determine \
-                 :math:`\\rho * T = - ln(1-\epsilon) \\frac{\\lambda_{ref}}{\\lambda_{\epsilon} \\sigma_{a}(\\lambda_{ref})}` term, \
+                 :math:`\\rho * T = - ln(1-\\epsilon) \\frac{\\lambda_{ref}}{\\lambda_{\\epsilon} \\sigma_{a}(\\lambda_{ref})}` term, \
                  where :math:`\\lambda_{ref} =` 1.7982. Default=0.0")
 
         self.declareProperty(
