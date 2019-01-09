@@ -65,8 +65,7 @@ def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
     return eppWS
 
 
-def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEPPWorkspace,
-                              eiCalibrationMon, wsNames, log, algorithmLogging):
+def _calibratedIncidentEnergy(detWorkspace, monWorkspace, eiCalibrationMon, wsNames, log, algorithmLogging):
     """Return the calibrated incident energy."""
     instrument = detWorkspace.getInstrument().getName()
     eiWorkspace = None
@@ -75,9 +74,7 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEP
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorWorkspaceIndexType='WorkspaceIndex',
                              DetectorWorkspaceIndexSet=eiCalibrationDets,
-                             DetectorEPPTable=detEPPWorkspace,
                              MonitorWorkspace=monWorkspace,
-                             MonitorEppTable=monEPPWorkspace,
                              MonitorIndex=eiCalibrationMon,
                              EnableLogging=algorithmLogging)
         eiWSName = wsNames.withSuffix('incident_energy')
@@ -298,6 +295,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         monWS = self._flatBkgMon(monWS, wsNames, wsCleanup, subalgLogging)
         monEPPWS = self._createEPPWSMon(monWS, wsNames, wsCleanup, subalgLogging)
         mainWS = self._normalize(mainWS, monWS, monEPPWS, wsNames, wsCleanup, subalgLogging)
+        wsCleanup.cleanup(monEPPWS)
 
         # Time-independent background.
         progress.report('Calculating backgrounds')
@@ -305,8 +303,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         # Calibrate incident energy, if requested.
         progress.report('Calibrating incident energy')
-        mainWS, monWS = self._calibrateEi(mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging)
-        wsCleanup.cleanup(monWS, monEPPWS)
+        mainWS, monWS = self._calibrateEi(mainWS, monWS, wsNames, wsCleanup, report, subalgLogging)
+        wsCleanup.cleanup(monWS)
 
         progress.report('Correcting TOF')
         mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, report, subalgLogging)
@@ -522,16 +520,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 'List of runs is given without summing. Consider giving summed runs (+) or summed ranges (-).'
         return issues
 
-    def _calibrateEi(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
+    def _calibrateEi(self, mainWS, monWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply incident energy calibration."""
         eiCalibrationWS = None
         if self._eiCalibrationEnabled(mainWS, report):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
-                detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
                 monIndex = self._monitorIndex(monWS)
-                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, monIndex, wsNames,
+                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, monWS, monIndex, wsNames,
                                                             self.log(), subalgLogging)
-                wsCleanup.cleanup(detEPPWS)
             else:
                 eiCalibrationWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
                 wsCleanup.protect(eiCalibrationWS)
