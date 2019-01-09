@@ -5,8 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+import Engineering.EnggUtils as Utils
 import mantid.simpleapi as simple
-
+import os
 
 def create_vanadium_workspaces(vanadium_run, curve_van, int_van):
     van_name = "eng_vanadium_ws"
@@ -19,9 +20,9 @@ def create_vanadium_workspaces(vanadium_run, curve_van, int_van):
     simple.DeleteWorkspace(van_name)
 
 
-def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, curve_van, int_van, ceria_run):
+def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, curve_van, int_van, ceria_run, cal_dir,van_run):
     van_curves_ws, van_integrated_ws = load_van_files(curve_van, int_van)
-    ceria_ws = simple.Load(Filename="ENGINX"+ceria_run, OutputWorkspace="eng_calib")
+    ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
     if use_spectrum_number:
         if crop_name is None:
             param_tbl_name = "cropped"
@@ -31,6 +32,7 @@ def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, cu
                              VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=str(spec_nos),
                              FittedPeaks=param_tbl_name,
                              OutputParametersTableName=param_tbl_name)
+        save_calibration(ceria_run, van_run, "bank", ".prm", cal_dir, [param_tbl_name])
     else:
         if spec_nos == "North":
             param_tbl_name = "engg_calibration_bank_1"
@@ -41,18 +43,23 @@ def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, cu
         simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
                              VanCurvesWorkspace=van_curves_ws, Bank=str(bank), FittedPeaks=param_tbl_name,
                              OutputParametersTableName=param_tbl_name)
+        save_calibration(ceria_run, van_run, "bank", ".prm", cal_dir, [spec_nos])
 
 
-def create_calibration_files(curve_van, int_van, ceria_run):
+
+def create_calibration_files(curve_van, int_van, ceria_run, cal_dir, van_run):
     van_curves_ws, van_integrated_ws = load_van_files(curve_van, int_van)
-    ceria_ws = simple.Load(Filename="ENGINX"+ceria_run, OutputWorkspace="eng_calib")
+    ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
     banks = 3
+    bank = {1: "North",
+            2: "South"}
     for i in range(1, banks):
         param_tbl_name = "engg_calibration_bank_{}".format(i)
         print(param_tbl_name)
         simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
                              VanCurvesWorkspace=van_curves_ws, Bank=str(i), FittedPeaks=param_tbl_name,
                              OutputParametersTableName=param_tbl_name)
+    save_calibration(ceria_run, van_run, "bank", bank.get(i), ".prm", cal_dir, ["North, South"])
 
 
 def load_van_files(curves_van, ints_van):
@@ -60,3 +67,12 @@ def load_van_files(curves_van, ints_van):
     van_integrated_ws = simple.Load(ints_van, OutputWorkspace="int_van")
     return van_curves_ws, van_integrated_ws
 
+
+def save_calibration(ceria_run, van_run, type, ext, cal_dir, bank_names):
+    GSAS_iparm_fname = os.path.join(cal_dir,"ENGINX_"+van_run+"_"+ceria_run+"_"+type"_"+bank+ext)
+    Difcs = []
+    Zeros = []
+    template_file = None
+    Utils.write_ENGINX_GSAS_iparam_file(output_file=GSAS_iparm_fname, bank_names=bank_names, difc=Difcs, tzero=Zeros,
+                                        ceria_run=ceria_run, vanadium_run=van_run,
+                                        template_file=template_file)
