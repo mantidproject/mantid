@@ -29,6 +29,7 @@ import subprocess
 import sys
 import tempfile
 import urllib2
+sys.path.append('/Applications/MantidPlot.app/Contents/MacOS')
 
 import mantid
 
@@ -177,6 +178,10 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
     as described in the module documentation
     """
     post_processed_rst = pandoc_rst#fix_underscores_in_ref_links(pandoc_rst)
+    post_processed_rst, image_names = fix_image_links(post_processed_rst, wiki_markup,
+                                                      post_process_args["rel_img_dir"])
+    download_images_from_wiki(wiki_url, image_names, post_process_args["img_dir"])
+    post_processed_rst = add_mantid_concept_links(post_processed_rst)
     if post_process_args["add_heading"]:
         post_processed_rst = add_page_heading(post_processed_rst, 
                                               post_process_args["page_handle"])
@@ -184,17 +189,15 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
         post_processed_rst = add_page_handle(post_processed_rst, 
                                              post_process_args["page_handle"])
     post_processed_rst = fix_internal_links(post_processed_rst)
-    post_processed_rst, image_names = fix_image_links(post_processed_rst, wiki_markup,
-                                                      post_process_args["rel_img_dir"])
-    download_images_from_wiki(wiki_url, image_names, post_process_args["img_dir"])
-    return add_mantid_concept_links(post_processed_rst)
+    return post_processed_rst
 
 # ------------------------------------------------------------------------------
 
 
 def add_page_heading(pandoc_rst, page_handle):
     """Add a heading at the top of the page - this is the page name of the wiki page"""
-    page_heading = re.sub("_", " ", page_handle)
+    _heading = re.findall('[A-Za-z][^A-Z  _]*', page_handle)
+    page_heading = ' '.join(word for word in _heading)
     heading_markup = "=" * len(page_heading)
     pandoc_rst = heading_markup + "\n" + page_heading + "\n" + \
                  heading_markup + "\n \n" + pandoc_rst
