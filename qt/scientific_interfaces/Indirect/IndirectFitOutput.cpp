@@ -136,13 +136,6 @@ std::vector<std::string> getAxisLabels(MatrixWorkspace_sptr workspace,
   return std::vector<std::string>();
 }
 
-std::string cutFirstOf(const std::string &str, const std::string &delimiter) {
-  const auto cutIndex = str.find(delimiter);
-  if (cutIndex != std::string::npos)
-    return str.substr(delimiter.size() + cutIndex, str.size() - cutIndex);
-  return str;
-}
-
 std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   const auto cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
@@ -157,8 +150,8 @@ bool containsMultipleData(const std::string &name) {
 std::string constructResultName(const std::string &name,
                                 IndirectFitData const *fitData) {
   if (containsMultipleData(name)) {
-    const auto nameEnd = cutFirstOf(cutLastOf(name, "s_"), "Multi");
-    return fitData->getBasename() + "_" + nameEnd;
+    const auto formatString = cutLastOf(name, "_Results") + "_%1%_s%2%_Result";
+    return fitData->displayName(formatString, "_to_");
   } else
     return cutLastOf(name, "s_1");
 }
