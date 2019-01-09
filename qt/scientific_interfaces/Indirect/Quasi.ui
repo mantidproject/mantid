@@ -426,6 +426,11 @@
              </property>
              <item>
               <property name="text">
+               <string>All</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
                <string>Amplitude</string>
               </property>
              </item>
@@ -436,17 +441,7 @@
              </item>
              <item>
               <property name="text">
-               <string>Fit</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
                <string>Prob</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>All</string>
               </property>
              </item>
             </widget>

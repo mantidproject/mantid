@@ -266,12 +266,21 @@ void Stretch::plotWorkspaces() {
   // Check Sigma and Beta workspaces exist
   if (sigma.right(5).compare("Sigma") == 0 &&
       beta.right(4).compare("Beta") == 0) {
+    QString pyInput = "from mantidplot import plot2D\n";
 
     std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
-    if (plotType == "All" || plotType == "Beta")
-      plotSpectrum(beta);
-    if (plotType == "All" || plotType == "Sigma")
-      plotSpectrum(sigma);
+    if (plotType == "All" || plotType == "Beta") {
+      pyInput += "importMatrixWorkspace('";
+      pyInput += beta;
+      pyInput += "').plotGraph2D()\n";
+    }
+    if (plotType == "All" || plotType == "Sigma") {
+      pyInput += "importMatrixWorkspace('";
+      pyInput += sigma;
+      pyInput += "').plotGraph2D()\n";
+    }
+
+    m_pythonRunner.runPythonCode(pyInput);
   } else {
     g_log.error(
         "Beta and Sigma workspace were not found and could not be plotted.");
@@ -283,9 +292,11 @@ void Stretch::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
   auto const workspaceName = m_uiForm.cbPlotContour->currentText();
-  if (checkADSForPlotSaveWorkspace(workspaceName.toStdString(), true))
-    plot2D(workspaceName);
-
+  if (checkADSForPlotSaveWorkspace(workspaceName.toStdString(), true)) {
+    QString pyInput = "from mantidplot import plot2D\nimportMatrixWorkspace('" +
+                      workspaceName + "').plotGraph2D()\n";
+    m_pythonRunner.runPythonCode(pyInput);
+  }
   setPlotContourIsPlotting(false);
 }
 
@@ -425,7 +436,7 @@ void Stretch::setPlotResultIsPlotting(bool plotting) {
 }
 
 void Stretch::setPlotContourIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Contour");
+  m_uiForm.pbPlotContour->setText(plotting ? "Plotting..." : "Plot Contour");
   setButtonsEnabled(!plotting);
 }
 

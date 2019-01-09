@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/PoissonErrors.h"
 
 using namespace Mantid::API;
@@ -37,39 +34,33 @@ std::string PoissonErrors::checkSizeCompatibility(
   }
 }
 
-void PoissonErrors::performBinaryOperation(const MantidVec &lhsX,
-                                           const MantidVec &lhsY,
-                                           const MantidVec &lhsE,
-                                           const MantidVec &rhsY,
-                                           const MantidVec &rhsE,
-                                           MantidVec &YOut, MantidVec &EOut) {
-  (void)lhsX; // Avoid compiler warning
+void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                           const HistogramData::Histogram &rhs,
+                                           HistogramData::HistogramY &YOut,
+                                           HistogramData::HistogramE &EOut) {
   // Just copy over the lhs data
-  YOut = lhsY;
+  YOut = lhs.y();
   // Now make the fractional error the same as it was on the rhs
-  const int bins = static_cast<int>(lhsE.size());
+  const int bins = static_cast<int>(lhs.e().size());
   for (int j = 0; j < bins; ++j) {
-    if (rhsY[j] != 0.0)
-      EOut[j] = rhsE[j] / rhsY[j] * lhsY[j];
+    if (rhs.y()[j] != 0.0)
+      EOut[j] = rhs.e()[j] / rhs.y()[j] * lhs.y()[j];
     else
       EOut[j] = 0.0;
   }
 }
 
-void PoissonErrors::performBinaryOperation(const MantidVec &lhsX,
-                                           const MantidVec &lhsY,
-                                           const MantidVec &lhsE,
+void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs,
                                            const double rhsY, const double rhsE,
-                                           MantidVec &YOut, MantidVec &EOut) {
-  (void)lhsE;
-  (void)lhsX; // Avoid compiler warning
+                                           HistogramData::HistogramY &YOut,
+                                           HistogramData::HistogramE &EOut) {
 
-  assert(lhsX.size() == 1);
+  assert(lhs.x().size() == 1);
   // If we get here we've got two single column workspaces so it's easy.
-  YOut[0] = lhsY[0];
+  YOut[0] = lhs.y()[0];
 
   if (rhsY != 0.0)
-    EOut[0] = rhsE / rhsY * lhsY[0];
+    EOut[0] = rhsE / rhsY * lhs.y()[0];
   else
     EOut[0] = 0.0;
 }

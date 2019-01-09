@@ -138,6 +138,11 @@ void AbsorptionCorrection::exec() {
 
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
+  if (m_L1s.empty()) {
+    throw std::runtime_error(
+        "Failed to define any initial scattering gauge volume for geometry");
+  }
+
   // If sample not at origin, shift cached positions.
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const V3D samplePos = spectrumInfo.samplePosition();
@@ -247,9 +252,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
       sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, sigma_s, 0.0,
-                        sigma_s, sigma_atten);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
 
     auto shape = boost::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(

@@ -70,6 +70,7 @@ class DiagnosticsPagePresenter(object):
         self._view.user_file_name = user_file
 
     def on_horizontal_clicked(self):
+        self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
@@ -82,6 +83,7 @@ class DiagnosticsPagePresenter(object):
                                    detector, state)
 
     def on_vertical_clicked(self):
+        self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
@@ -94,6 +96,7 @@ class DiagnosticsPagePresenter(object):
                                    detector, state)
 
     def on_time_clicked(self):
+        self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
         state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
@@ -106,7 +109,7 @@ class DiagnosticsPagePresenter(object):
                                    detector, state)
 
     def on_processing_finished_integral(self, result):
-        pass
+        self._view.enable_integrals()
 
     def on_processing_error_integral(self, error):
-        pass
+        self._view.enable_integrals()

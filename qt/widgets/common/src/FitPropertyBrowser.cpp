@@ -62,7 +62,22 @@ namespace MantidWidgets {
 
 namespace {
 Mantid::Kernel::Logger g_log("FitPropertyBrowser");
+
+using namespace Mantid::API;
+
+Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieve(workspaceName);
 }
+
+MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+}
+
+int getNumberOfSpectra(MatrixWorkspace_sptr workspace) {
+  return static_cast<int>(workspace->getNumberHistograms());
+}
+
+} // namespace
 
 /**
  * Constructor
@@ -90,13 +105,13 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
       m_fitTree(nullptr), m_currentHandler(nullptr),
       m_defaultFunction("Gaussian"), m_defaultPeak("Gaussian"),
-      m_defaultBackground("LinearBackground"), m_index_(0), m_peakToolOn(false),
+      m_defaultBackground("LinearBackground"), m_peakToolOn(false),
       m_auto_back(false),
       m_autoBgName(QString::fromStdString(
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),
       m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
-      m_shouldBeNormalised(false) {
+      m_shouldBeNormalised(false), m_oldWorkspaceIndex(0) {
   Mantid::API::FrameworkManager::Instance().loadPlugins();
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
@@ -160,8 +175,10 @@ void FitPropertyBrowser::init() {
   /* Create function group */
   QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
 
-  connect(this, SIGNAL(xRangeChanged(double, double)), m_mantidui,
-          SLOT(x_range_from_picker(double, double)));
+  if (m_mantidui) {
+    connect(this, SIGNAL(xRangeChanged(double, double)), m_mantidui,
+            SLOT(x_range_from_picker(double, double)));
+  }
   /* Create input - output properties */
   QtProperty *settingsGroup = m_groupManager->addProperty("Settings");
   m_startX = addDoubleProperty("StartX");
@@ -340,6 +357,7 @@ void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
  */
 void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QPushButton *btnFit = createFitMenuButton(w);
+  btnFit->setObjectName("button_Fit");
   // to be able to change windows title from tread
   connect(this, SIGNAL(changeWindowTitle(const QString &)), this,
           SLOT(setWindowTitle(const QString &)));
@@ -372,17 +390,22 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
           SLOT(vectorSizeChanged(QtProperty *)));
 
   QVBoxLayout *layout = new QVBoxLayout(w);
+  layout->setObjectName("vlayout");
   QGridLayout *buttonsLayout = new QGridLayout();
 
   QPushButton *btnDisplay = new QPushButton("Display");
+  btnDisplay->setObjectName("button_Display");
   QMenu *displayMenu = new QMenu(this);
+  displayMenu->setObjectName("menu_Display");
   m_displayActionPlotGuess = new QAction("Plot Guess", this);
   m_displayActionPlotGuess->setEnabled(false);
   m_displayActionQuality = new QAction("Quality", this);
+  m_displayActionQuality->setObjectName("action_Quality");
   m_displayActionQuality->setCheckable(true);
   m_displayActionQuality->setChecked(true);
   m_displayActionClearAll = new QAction("Clear fit curves", this);
   QSignalMapper *displayMapper = new QSignalMapper(this);
+  displayMapper->setObjectName("mapper_Display");
 
   displayMapper->setMapping(m_displayActionPlotGuess, "PlotGuess");
   displayMapper->setMapping(m_displayActionQuality, "Quality");
@@ -401,12 +424,17 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   btnDisplay->setMenu(displayMenu);
 
   QPushButton *btnSetup = new QPushButton("Setup");
+  btnSetup->setObjectName("button_Setup");
   QMenu *setupMenu = new QMenu(this);
+  setupMenu->setObjectName("menu_Setup");
 
   m_setupActionCustomSetup = new QAction("Custom Setup", this);
   QAction *setupActionManageSetup = new QAction("Manage Setup", this);
+  setupActionManageSetup->setObjectName("action_ManageSetup");
   QAction *setupActionFindPeaks = new QAction("Find Peaks", this);
+  setupActionFindPeaks->setObjectName("action_FindPeaks");
   QAction *setupActionClearFit = new QAction("Clear Model", this);
+  setupActionClearFit->setObjectName("action_ClearModel");
 
   QMenu *setupSubMenuCustom = new QMenu(this);
   m_setupActionCustomSetup->setMenu(setupSubMenuCustom);
@@ -417,7 +445,9 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QAction *setupActionSave = new QAction("Save Setup", this);
   m_setupActionRemove = new QAction("Remove Setup", this);
   QAction *setupActionCopyToClipboard = new QAction("Copy To Clipboard", this);
+  setupActionCopyToClipboard->setObjectName("action_CopyToClipboard");
   QAction *setupActionLoadFromString = new QAction("Load From String", this);
+  setupActionLoadFromString->setObjectName("action_LoadFromString");
   QSignalMapper *setupManageMapper = new QSignalMapper(this);
   setupManageMapper->setMapping(setupActionSave, "SaveSetup");
   setupManageMapper->setMapping(setupActionCopyToClipboard, "CopyToClipboard");
@@ -470,6 +500,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
   layout->addWidget(m_browser);
+  m_browser->setObjectName("tree_browser");
 
   setWidget(w);
 
@@ -772,10 +803,11 @@ void FitPropertyBrowser::createCompositeFunction(
   }
   setWorkspace(m_compositeFunction);
 
-  PropertyHandler *h = new PropertyHandler(
+  auto h = std::make_unique<PropertyHandler>(
       m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
-  m_compositeFunction->setHandler(h);
-  setCurrentFunction(h);
+  m_compositeFunction->setHandler(std::move(h));
+  setCurrentFunction(
+      static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
 
   if (m_auto_back) {
     addAutoBackground();
@@ -1126,6 +1158,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
       }
     }
   }
+  setWorkspaceIndex(-1);
 }
 
 /// Get workspace index
@@ -1135,7 +1168,11 @@ int FitPropertyBrowser::workspaceIndex() const {
 
 /// Set workspace index
 void FitPropertyBrowser::setWorkspaceIndex(int i) {
-  m_intManager->setValue(m_workspaceIndex, i);
+  try {
+    m_intManager->setValue(m_workspaceIndex, i);
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    // ignore this error
+  }
 }
 
 /// Get the output name
@@ -1331,22 +1368,50 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                workspaceName()));
-    if (!ws) {
+
+    auto const workspace =
+        convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
+
+    if (workspace) {
+      auto const allowedIndices =
+          m_allowedSpectra.empty()
+              ? QList<int>()
+              : m_allowedSpectra[QString::fromStdString(workspaceName())];
+      auto const firstIndex =
+          m_allowedSpectra.empty() ? 0 : allowedIndices.front();
+      auto const lastIndex = m_allowedSpectra.empty()
+                                 ? getNumberOfSpectra(workspace) - 1
+                                 : allowedIndices.back();
+      int const currentIndex = workspaceIndex();
+      if (currentIndex == m_oldWorkspaceIndex) {
+        return;
+      }
+
+      auto allowedIndex = currentIndex;
+      if (currentIndex < firstIndex) {
+        allowedIndex = firstIndex;
+      } else if (currentIndex > lastIndex) {
+        allowedIndex = lastIndex;
+      } else if (!m_allowedSpectra.empty() &&
+                 !allowedIndices.contains(currentIndex)) {
+        allowedIndex = m_oldWorkspaceIndex;
+        auto i = allowedIndices.indexOf(m_oldWorkspaceIndex);
+        if (i >= 0) {
+          i = currentIndex > m_oldWorkspaceIndex ? i + 1 : i - 1;
+          if (i >= 0 && i < allowedIndices.size()) {
+            allowedIndex = allowedIndices[i];
+          }
+        }
+      }
+
+      if (allowedIndex != currentIndex) {
+        setWorkspaceIndex(allowedIndex);
+        emit workspaceIndexChanged(allowedIndex);
+      }
+
+      m_oldWorkspaceIndex = currentIndex;
+    } else
       setWorkspaceIndex(0);
-      return;
-    }
-    int n = static_cast<int>(ws->getNumberHistograms());
-    int wi = workspaceIndex();
-    if (wi < 0) {
-      setWorkspaceIndex(0);
-    } else if (wi >= n) {
-      setWorkspaceIndex(n - 1);
-    }
-    emit workspaceIndexChanged(wi);
   } else if (prop->propertyName() == "Workspace Index") {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
@@ -1717,12 +1782,15 @@ void FitPropertyBrowser::clearFitResultStatus() {
 /// Get and store available workspace names
 void FitPropertyBrowser::populateWorkspaceNames() {
   m_workspaceNames.clear();
-  // QStringList tmp = m_appWindow->mantidUI->getWorkspaceNames();
+  bool allAreAllowed = m_allowedSpectra.isEmpty();
 
   QStringList tmp;
   auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   for (auto it = sv.begin(); it != sv.end(); ++it) {
-    tmp << QString::fromStdString(*it);
+    auto const &name = QString::fromStdString(*it);
+    if (allAreAllowed || m_allowedSpectra.contains(name)) {
+      tmp << name;
+    }
   }
 
   for (int i = 0; i < tmp.size(); i++) {
@@ -1734,6 +1802,7 @@ void FitPropertyBrowser::populateWorkspaceNames() {
     }
   }
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+  setWorkspaceIndex(-1);
 }
 
 /**
@@ -1765,11 +1834,13 @@ void FitPropertyBrowser::setADSObserveEnabled(bool enabled) {
 void FitPropertyBrowser::addHandle(
     const std::string &wsName,
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
-  if (!isWorkspaceValid(ws))
+  auto const qName = QString::fromStdString(wsName);
+  if (!isWorkspaceValid(ws) ||
+      (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName)))
     return;
   QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
-  int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
+  int i = m_workspaceNames.indexOf(qName);
 
   bool initialSignalsBlocked = m_enumManager->signalsBlocked();
 
@@ -1779,7 +1850,7 @@ void FitPropertyBrowser::addHandle(
       m_enumManager->blockSignals(true);
     }
 
-    m_workspaceNames.append(QString(wsName.c_str()));
+    m_workspaceNames.append(qName);
     m_workspaceNames.sort();
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   }
@@ -1790,12 +1861,6 @@ void FitPropertyBrowser::addHandle(
   }
 
   m_enumManager->blockSignals(initialSignalsBlocked);
-  /*
-  if (m_workspaceNames.size() == 1)
-  {
-    setWorkspaceName(QString::fromStdString(wsName));
-  }
-  */
 }
 
 /// workspace was removed
@@ -1865,6 +1930,11 @@ double FitPropertyBrowser::endX() const {
 /// Set the end X
 void FitPropertyBrowser::setEndX(double value) {
   m_doubleManager->setValue(m_endX, value);
+}
+
+void FitPropertyBrowser::setXRange(double start, double end) {
+  m_doubleManager->setValue(m_startX, start);
+  m_doubleManager->setValue(m_endX, end);
 }
 
 ///
@@ -2011,10 +2081,10 @@ bool FitPropertyBrowser::isUndoEnabled() const {
          compositeFunction()->nParams() == m_initialParameters.size();
 }
 
-/// Enable/disable the Fit button;
-void FitPropertyBrowser::setFitEnabled(bool yes) {
-  m_fitActionFit->setEnabled(yes);
-  m_fitActionSeqFit->setEnabled(yes);
+/// Enable/disable the Fit buttons;
+void FitPropertyBrowser::setFitEnabled(bool enable) {
+  m_fitActionFit->setEnabled(enable);
+  m_fitActionSeqFit->setEnabled(enable);
 }
 
 /// Returns true if the function is ready for a fit
@@ -3271,5 +3341,25 @@ void FitPropertyBrowser::modifyFitMenu(QAction *fitAction, bool enabled) {
     m_fitMenu->removeAction(fitAction);
   }
 }
+
+int MantidQt::MantidWidgets::FitPropertyBrowser::sizeOfFunctionsGroup() const {
+  return m_functionsGroup->children().size();
+}
+
+void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
+                                           const QList<int> &wsSpectra) {
+  auto const name = wsName.toStdString();
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+  if (ws) {
+    QList<int> indices;
+    for (auto const i : wsSpectra) {
+      indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
+    }
+    m_allowedSpectra.insert(wsName, indices);
+  } else {
+    throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
+  }
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

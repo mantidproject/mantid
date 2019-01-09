@@ -7,7 +7,7 @@
 import sys
 
 from  Muon.GUI.Common import mock_widget
-from  Muon.GUI.Common import load_utils
+from  Muon.GUI.Common.utilities import load_utils
 from  Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
 from  Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
 from  Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view

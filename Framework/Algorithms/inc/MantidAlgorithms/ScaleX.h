@@ -35,8 +35,7 @@ class DLLExport ScaleX : public API::Algorithm {
 public:
   /// Default constructor
   ScaleX();
-  /// Destructor
-  ~ScaleX() override;
+
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ScaleX"; }
   /// Summary of algorithms purpose
@@ -70,7 +69,7 @@ private:
                         const size_t index);
 
   /// The progress reporting object
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 
   /// Scaling factor
   double m_algFactor;

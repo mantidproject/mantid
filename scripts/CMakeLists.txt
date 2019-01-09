@@ -49,7 +49,7 @@ foreach ( _dir ${_pth_dirs} )
   list ( APPEND _pth_list_install "${_scripts_rel_path}/${_dir}" )
 endforeach()
 list ( APPEND _pth_list_dev ${MSLICE_DEV} )
-list ( APPEND _pth_list_install "${_scripts_rel_path}/Externalinterfaces" )
+list ( APPEND _pth_list_install "${_scripts_rel_path}/ExternalInterfaces" )
 
 # development copy
 set ( _scripts_pth_src "${CMAKE_CURRENT_BINARY_DIR}/mantid-scripts.pth.src" )
@@ -98,8 +98,9 @@ set ( TEST_PY_FILES
       test/DirectEnergyConversionTest.py
       test/DirectPropertyManagerTest.py
       test/DirectReductionHelpersTest.py
-      test/ErrorReporterPresenterTest.py
+      test/ErrorReportPresenterTest.py
       test/IndirectCommonTests.py
+      test/InelasticDirectDetpackmapTest.py
       test/ISISDirecInelasticConfigTest.py
       test/PyChopTest.py
       test/pythonTSVTest.py

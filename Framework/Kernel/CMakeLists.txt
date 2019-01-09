@@ -25,7 +25,6 @@ set ( SRC_FILES
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
 	src/DllOpen.cpp
-	src/EmptyValues.cpp
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
 	src/EqualBinsChecker.cpp
@@ -608,7 +607,7 @@ configure_file ( ../Properties/Mantid.properties.template
 if(MSVC)
   file(GENERATE
      OUTPUT
-     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
      INPUT
      ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
   )

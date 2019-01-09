@@ -88,13 +88,13 @@ void MuonGroupingCounts::init() {
                   "alphanumeric character.",
                   Direction::Input);
   declareProperty(make_unique<ArrayProperty<int>>(
-                      "Grouping", defaultGrouping,
+                      "Grouping", std::move(defaultGrouping),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
                   "IDs or hyphenated ranges of IDs.");
 
   declareProperty(make_unique<ArrayProperty<int>>(
-                      "SummedPeriods", defaultGrouping,
+                      "SummedPeriods", std::vector<int>(1, 1),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "A list of periods to sum in multiperiod data.");
   declareProperty(

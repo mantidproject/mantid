@@ -14,14 +14,14 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IndirectFittingModel *model,
-                                                   IndirectFitDataView *view)
+                                                   IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
           model, view,
           Mantid::Kernel::make_unique<IndirectDataTablePresenter>(
               model, view->getDataTable())) {}
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(
-    IndirectFittingModel *model, IndirectFitDataView *view,
+    IndirectFittingModel *model, IIndirectFitDataView *view,
     std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
     : m_model(model), m_view(view),
       m_tablePresenter(std::move(tablePresenter)) {
@@ -65,7 +65,7 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
                                       std::size_t)));
 }
 
-IndirectFitDataView const *IndirectFitDataPresenter::getView() const {
+IIndirectFitDataView const *IndirectFitDataPresenter::getView() const {
   return m_view;
 }
 
@@ -194,6 +194,8 @@ void IndirectFitDataPresenter::addModelData(const std::string &name) {
     m_model->addWorkspace(name);
   } catch (const std::runtime_error &ex) {
     displayWarning("Unable to load workspace:\n" + std::string(ex.what()));
+  } catch (const std::invalid_argument &ex) {
+    displayWarning("Invalid workspace:\n" + std::string(ex.what()));
   }
 }
 
