@@ -22,32 +22,18 @@ namespace Algorithms {
 */
 class DLLExport GetEiMonDet3 final : public API::Algorithm {
 public:
-  /// Returns algorithm's name for identification
-
   const std::string name() const override;
-
-  /// Returns a summary of algorithm's purpose
   const std::string summary() const override;
-  /// Returns algorithm's version for identification
   int version() const override;
-
   const std::vector<std::string> seeAlso() const override;
-
-  /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;
 
 private:
-  /// Initializes the algorithm
   void init() override;
-
-  /// Executes the algorithm
   void exec() override;
-  /// Calculates the average sample-to-detector distance and TOF
-
-  /// Calculates the total TOF from monitor to detectors
-  double computeTOF(const API::MatrixWorkspace &detectorWs, const double detectorEPP, const double monitorEPP);
-
-  API::MatrixWorkspace_sptr groupSpectra(API::MatrixWorkspace_sptr &ws, const std::vector<int> &wsIndices);
+  double computeTOF(const API::MatrixWorkspace &detectorWs, const double detectorEPP, const double monitorEPP, const double minTOF);
+  API::MatrixWorkspace_sptr groupSpectra(API::MatrixWorkspace_sptr &ws, const std::vector<size_t> &wsIndices);
+  double minimumTOF(const API::MatrixWorkspace &ws, const double sampleToDetectorDistance);
   double peakPosition(API::MatrixWorkspace_sptr &ws);
 };
 

@@ -14,6 +14,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/VectorHelper.h"
 
 namespace {
@@ -31,10 +32,11 @@ const static std::string MONITOR("MonitorIndex");
 const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
 /// Name of the neutron pulse interval property
 const static std::string PULSE_INTERVAL("PulseInterval");
+const static std::string MAX_ENERGY("MaximumEnergy");
 } // namespace Prop
 
-std::vector<int> toWorkspaceIndices(const Mantid::Indexing::SpectrumIndexSet &indices) {
-  std::vector<int> wsIndices;
+std::vector<size_t> toWorkspaceIndices(const Mantid::Indexing::SpectrumIndexSet &indices) {
+  std::vector<size_t> wsIndices;
   wsIndices.reserve(indices.size());
   for (size_t i = 0; i < indices.size(); ++i) {
     wsIndices.emplace_back(indices[i]);
@@ -89,7 +91,7 @@ void GetEiMonDet3::init() {
   mustBePositive->setLower(0);
 
   declareWorkspaceInputProperties<API::MatrixWorkspace,
-                                  API::IndexType::WorkspaceIndex>(
+                                  API::IndexType::SpectrumNum | API::IndexType::WorkspaceIndex>(
       Prop::DETECTOR_WORKSPACE, "A workspace containing the detector spectra.",
       tofWorkspace);
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
@@ -103,8 +105,9 @@ void GetEiMonDet3::init() {
   declareProperty(Prop::PULSE_INTERVAL, EMPTY_DBL(),
                   "Interval between neutron pulses, in microseconds. Taken "
                   "from the sample logs, if not specified.");
+  declareProperty(Prop::MAX_ENERGY, EMPTY_DBL(), mustBePositive, "Multiple pulse intervals will be added to the flight time the until final energy is less than this value.");
   declareProperty(Prop::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive,
-                  "Calculated incident energy.", Kernel::Direction::Output);
+                  "Calculated incident energy, in meV.", Kernel::Direction::Output);
 }
 
 /** Executes the algorithm.
@@ -133,22 +136,25 @@ void GetEiMonDet3::exec() {
   const auto sampleToDetectorDistance = detectorSumWs->spectrumInfo().l2(0);
   double detectorEPP;
   try {
-    detectorEPP = peakPosition(detectorWs);
+    detectorEPP = peakPosition(detectorSumWs);
   } catch(std::runtime_error &e) {
-    throw std::runtime_error(std::string("Failed to find detector peak: ") + e.what());
+    throw std::runtime_error(std::string("Failed to find detector peak for incident energy: ") + e.what());
   }
   progress(0.5);
-  const std::vector<int> monWsIndices = {monitorIndex};
+  const std::vector<size_t> monWsIndices = {static_cast<size_t>(monitorIndex)};
   auto monitorSumWs = groupSpectra(monitorWs, monWsIndices);
   double monitorEPP;
   try {
-    monitorEPP = peakPosition(monitorWs);
+    monitorEPP = peakPosition(monitorSumWs);
   } catch (std::runtime_error &e){
-    throw std::runtime_error(std::string("Failed to find monitor peak: ") + e.what());
+    throw std::runtime_error(std::string("Failed to find monitor peak for incident energy: ") + e.what());
   }
   progress(0.7);
-  const auto monitorToSampleDistance = monitorSumWs->spectrumInfo().l2(0);
-  double timeOfFlight = computeTOF(*detectorWs, detectorEPP, monitorEPP);
+  // SpectrumInfo returns a negative l2 for monitor.
+  const auto monitorToSampleDistance = -monitorSumWs->spectrumInfo().l2(0);
+  const double minTOF = minimumTOF(*detectorWs, sampleToDetectorDistance);
+
+  double timeOfFlight = computeTOF(*detectorWs, detectorEPP, monitorEPP, minTOF);
   const double flightLength =
       sampleToDetectorDistance + monitorToSampleDistance;
   const double velocity = flightLength / timeOfFlight * 1e6;
@@ -168,11 +174,10 @@ void GetEiMonDet3::exec() {
  *  @return The time of flight between the monitor and the detectors
  */
 double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs, const double detectorEPP,
-                                const double monitorEPP) {
-  using namespace PhysicalConstants;
+                                const double monitorEPP, const double minTOF) {
   double timeOfFlight = detectorEPP - monitorEPP;
   // Check if the obtained time-of-flight makes any sense.
-  if (timeOfFlight <= 0.) {
+  while (timeOfFlight <= minTOF) {
     double pulseInterval = getProperty(Prop::PULSE_INTERVAL);
     if (pulseInterval == EMPTY_DBL()) {
       if (detectorWs.run().hasProperty(SampleLogs::PULSE_INTERVAL)) {
@@ -193,13 +198,21 @@ double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs, const do
 }
 
 
-API::MatrixWorkspace_sptr GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws, const std::vector<int> &wsIndices) {
+API::MatrixWorkspace_sptr GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws, const std::vector<size_t> &wsIndices) {
   auto group = createChildAlgorithm("GroupDetectors");
   group->setProperty("InputWorkspace", ws);
   group->setProperty("OutputWorkspace", "unused");
   group->setProperty("WorkspaceIndexList", wsIndices);
   group->execute();
   return group->getProperty("OutputWorkspace");
+}
+
+double GetEiMonDet3::minimumTOF(const API::MatrixWorkspace &ws, const double sampleToDetectorDistance) {
+  const double minEnergy = getProperty(Prop::MAX_ENERGY);
+  const auto &spectrumInfo = ws.spectrumInfo();
+  return Kernel::UnitConversion::run("Energy", "TOF", minEnergy, spectrumInfo.l1(),
+                                                    sampleToDetectorDistance, 0., Kernel::DeltaEMode::Direct, 0.);
+
 }
 
 double GetEiMonDet3::peakPosition(API::MatrixWorkspace_sptr &ws) {
@@ -209,7 +222,7 @@ double GetEiMonDet3::peakPosition(API::MatrixWorkspace_sptr &ws) {
   findEPP->execute();
   API::ITableWorkspace_sptr eppTable = findEPP->getProperty("OutputWorkspace");
   const auto &status = eppTable->getRef<std::string>("FitStatus", 0);
-  if (status != "success" || status != "narrowPeak") {
+  if (status != "success" && status != "narrowPeak") {
     throw std::runtime_error("Could not fit a Gaussian to the data.");
   }
   return eppTable->getRef<double>("PeakCentre", 0);
