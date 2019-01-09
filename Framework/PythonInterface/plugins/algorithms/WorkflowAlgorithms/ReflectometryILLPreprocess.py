@@ -26,6 +26,7 @@ class Prop:
     BEAM_POS_WS = 'BeamPositionWorkspace'
     BKG_METHOD = 'FlatBackground'
     CLEANUP = 'Cleanup'
+    DIRECT_BEAM_POS_WS = 'DirectBeamPositionWorkspace'
     FLUX_NORM_METHOD = 'FluxNormalisation'
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     HIGH_BKG_OFFSET = 'HighAngleBkgOffset'
@@ -167,6 +168,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=common.WSCleanup.ON,
                              validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
                              doc='Enable or disable intermediate workspace cleanup.')
+        self.declareProperty(ITableWorkspaceProperty(Prop.DIRECT_BEAM_POS_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='A beam position table from a direct beam measurement.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.WATER_REFERENCE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -331,6 +337,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _inputWS(self):
         """Return a raw input workspace."""
+        beamPos = 0.
         inputFiles = self.getPropertyValue(Prop.RUN)
         inputFiles = inputFiles.replace(',', '+')
         if inputFiles:
@@ -338,6 +345,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             loadOption = {'XUnit': 'TimeOfFlight'}
             if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
                 loadOption['BeamCentre'] = self.getProperty(Prop.BEAM_CENTRE).value
+            if not self.getProperty(Prop.DIRECT_BEAM_POS_WS).isDefault:
+                loadOption['DirectBeamPosition'] = self.getPropertyValue(Prop.DIRECT_BEAM_POS_WS)
             if not self.getProperty(Prop.BEAM_ANGLE).isDefault:
                 loadOption['BraggAngle'] = str(self.getProperty(Prop.BEAM_ANGLE).value)
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
