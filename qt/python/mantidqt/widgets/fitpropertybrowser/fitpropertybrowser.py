@@ -40,7 +40,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.fit_result_lines = []
         self.startXChanged.connect(self.move_start_x)
         self.endXChanged.connect(self.move_end_x)
-        self.fittingDone.connect(self.fitting_done)
+        self.algorithmFinished.connect(self.fitting_done)
 
     def closeEvent(self, event):
         self.closing.emit()
@@ -91,7 +91,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def fitting_done(self, name):
         from workbench.plotting.functions import plot
-        name += '_Workspace'
         ws = mtd[name]
         self.clear_fit_result_lines()
         plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)

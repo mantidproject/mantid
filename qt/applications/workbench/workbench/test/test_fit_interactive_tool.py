@@ -19,11 +19,11 @@ def on_darwin():
 @unittest.skipIf(on_darwin(), "Couldn't make it work for a mac")
 class TestFitPropertyBrowser(WorkbenchGuiTest):
 
-    def start(self):
-        if 'ws' not in mtd:
-            ws = Load(r'irs26176_graphite002_conv_1LFixF_s0_to_9_Result.nxs', OutputWorkspace='ws')
+    def start(self, ws_name='ws'):
+        if ws_name not in mtd:
+            ws = Load(r'irs26176_graphite002_conv_1LFixF_s0_to_9_Result.nxs', OutputWorkspace=ws_name)
         else:
-            ws = mtd['ws']
+            ws = mtd[ws_name]
         plot([ws], [1])
         manager = GlobalFigureManager.get_active()
         self.w = manager.window
@@ -246,6 +246,34 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         print(self.fit_browser.defaultPeakType())
         self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
         self.assertEqual(self.draw_count, 1)
+
+    def test_fit_names_with_underscores(self):
+        """
+        Test that fit browser doesn't crash if the workspace name contains underscores
+        """
+        yield self.start(ws_name='ws_1')
+        self.fit_browser.loadFunction('name=LinearBackground')
+        self.fit_browser.fit()
+        yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
+        self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
+
+    def test_fit_names_ending_with_Raw(self):
+        """
+        Test that fit browser doesn't crash if the workspace name ends on _Raw
+        """
+        yield self.start(ws_name='ws_Raw')
+        self.fit_browser.loadFunction('name=LinearBackground')
+        self.fit_browser.fit()
+        yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
+        self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
+
+    def test_fit_output_name_non_default(self):
+        yield self.start(ws_name='ws')
+        self.fit_browser.setOutputName('out')
+        self.fit_browser.loadFunction('name=LinearBackground')
+        self.fit_browser.fit()
+        yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
+        self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
 
 
 runTests(TestFitPropertyBrowser)
