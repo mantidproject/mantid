@@ -160,7 +160,7 @@ Workspace2D_sptr create1DWorkspaceFib(int size, bool isHisto) {
   return retVal;
 }
 
-Workspace2D_sptr create2DWorkspace(int nhist, int numBoundaries) {
+Workspace2D_sptr create2DWorkspace(size_t nhist, size_t numBoundaries) {
   return create2DWorkspaceBinned(nhist, numBoundaries);
 }
 
@@ -315,16 +315,12 @@ WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist, int nBins,
 /** Create a 2D workspace with this many histograms and bins.
  * Filled with Y = 2.0 and E = M_SQRT2w
  */
-Workspace2D_sptr create2DWorkspaceBinned(int nhist, int numVals, double x0,
-                                         double deltax) {
+Workspace2D_sptr create2DWorkspaceBinned(size_t nhist, size_t numVals,
+                                         double x0, double deltax) {
   BinEdges x(numVals + 1, LinearGenerator(x0, deltax));
   Counts y(numVals, 2);
   CountStandardDeviations e(numVals, M_SQRT2);
-  auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(nhist, createHisto(true, y, e));
-  for (int i = 0; i < nhist; i++)
-    retVal->setBinEdges(i, x);
-  return retVal;
+  return create<Workspace2D>(nhist, Histogram(x, y, e));
 }
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
