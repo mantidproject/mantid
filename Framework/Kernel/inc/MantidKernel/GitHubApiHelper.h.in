@@ -26,7 +26,7 @@ public:
   bool isAuthenticated();
   /**
    * String describing the rate limit status. This uses a url that github claims
-   * will never cout against your REST API limit.
+   * will never count against your REST API limit.
    * https://developer.github.com/v3/rate_limit/
    *
    * @return description of the status or an empty string
