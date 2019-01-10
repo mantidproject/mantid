@@ -49,6 +49,8 @@ Improvements
 - The option to choose which workspace index to Plot Spectrum for and from which output workspace is now given in Elwin.
 - ConvFit now allows the loading of Dave ASCII files which end with '_sqw.dave'.
 - The results of a fit in MSDFit, IqtFit, ConvFit and F(Q)Fit are now plotted with error bars.
+- The AddWorkspace windows (opened from the Multiple Input tab) now stay open after adding a workspace to the data table. This 
+  is found on the MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit interfaces.
 
 
 Bugfixes

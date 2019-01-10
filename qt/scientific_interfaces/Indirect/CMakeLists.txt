@@ -149,6 +149,7 @@ set ( MOC_FILES
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
+    IAddWorkspaceDialog.h
     IIndirectFitDataView.h
     IIndirectFitPlotView.h
     ILLEnergyTransfer.h

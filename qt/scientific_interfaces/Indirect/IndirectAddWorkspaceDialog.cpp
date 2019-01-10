@@ -81,6 +81,8 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent)
           SLOT(workspaceChanged(const QString &)));
   connect(m_uiForm.ckAllSpectra, SIGNAL(stateChanged(int)), this,
           SLOT(selectAllSpectra(int)));
+  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SIGNAL(addData()));
+  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
 }
 
 std::string AddWorkspaceDialog::workspaceName() const {
