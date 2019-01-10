@@ -55,11 +55,14 @@ class EnginX:
         van_curves_file, van_int_file = self._get_van_names()
         if "cropped" in kwargs:
             if kwargs.get("cropped") == "banks":
-                Focus.focus_cropped(False, kwargs.get("bank"), van_curves_file, van_int_file, run_no)
+                Focus.focus_cropped(False, kwargs.get("bank"), van_curves_file, van_int_file, run_no,
+                                    self.focus_directory)
             elif kwargs.get("cropped") == "spectra":
-                Focus.focus_cropped(True, kwargs.get("spectra"), van_curves_file, van_int_file, run_no)
+                Focus.focus_cropped(True, kwargs.get("spectra"), van_curves_file, van_int_file, run_no,
+                                    self.focus_directory)
         else:
-            Focus.focus_whole(van_curves_file, van_int_file, run_no)
+            Focus.focus_whole(van_curves_file, van_int_file, run_no,
+                              self.focus_directory)
 
     def _get_van_names(self):
         van_file = _gen_filename(self.van_run)
