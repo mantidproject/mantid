@@ -190,14 +190,13 @@ void IndirectSqw::plotRqwContour() {
     const auto convertedWsName =
         sampleName.substr(0, sampleName.size() - 4) + "_rqw";
 
-    auto convertSpecAlg =
-        AlgorithmManager::Instance().create("ConvertSpectrumAxis");
-    convertSpecAlg->initialize();
-    convertSpecAlg->setProperty("InputWorkspace", sampleName);
-    convertSpecAlg->setProperty("OutputWorkspace", convertedWsName);
-    convertSpecAlg->setProperty("Target", "ElasticQ");
-    convertSpecAlg->setProperty("EMode", "Indirect");
-    convertSpecAlg->execute();
+    auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+    converter->initialize();
+    converter->setProperty("InputWorkspace", sampleName);
+    converter->setProperty("OutputWorkspace", convertedWsName);
+    converter->setProperty("Target", "ElasticQ");
+    converter->setProperty("EMode", "Indirect");
+    converter->execute();
 
     const auto rqwWorkspace = getADSMatrixWorkspace(convertedWsName);
     m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
