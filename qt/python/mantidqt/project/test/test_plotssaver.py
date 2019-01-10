@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -15,11 +15,14 @@ from mantidqt.project.plotssaver import PlotsSaver
 from mantidqt.project.plotsloader import PlotsLoader
 from mantid.simpleapi import CreateSampleWorkspace
 
+import matplotlib
+matplotlib.use('AGG')
+
 
 class PlotsSaverTest(unittest.TestCase):
     def setUp(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
-        plots_loader = PlotsLoader()
+        self.plots_loader = PlotsLoader()
 
         # Make a figure with a given input with all these values already set
         self.loader_plot_dict = {u'axes': [{u'legend': {u'exists': False}, u'lines': [{u'alpha': 1,
@@ -77,7 +80,7 @@ class PlotsSaverTest(unittest.TestCase):
                                  u'creationArguments': [[{u"workspaces": u"ws1", u"specNum": 2}]],
                                  u'label': u'',
                                  u'properties': {u'dpi': 100.0, u'figHeight': 4.8, u'figWidth': 6.4}}
-        self.fig = plots_loader.make_fig(self.loader_plot_dict, create_plot=False)
+        self.fig = self.plots_loader.make_fig(self.loader_plot_dict, create_plot=False)
 
         self.plot_saver = PlotsSaver()
 

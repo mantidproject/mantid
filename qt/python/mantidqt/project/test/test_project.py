@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -19,9 +19,11 @@ from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorks
 from mantid.api import AnalysisDataService as ADS
 from mantidqt.project.project import Project
 
-if sys.version_info.major == 3:
+if sys.version_info.major >= 3:
+    # Python 3 and above
     from unittest import mock
 else:
+    # Python 2
     import mock
 
 
@@ -53,6 +55,7 @@ class ProjectTest(unittest.TestCase):
         working_directory = tempfile.mkdtemp()
         self.project.last_project_location = working_directory
         CreateSampleWorkspace(OutputWorkspace="ws1")
+        self.project._offer_overwriting_gui = mock.MagicMock(return_value=QMessageBox.Yes)
 
         self.project.save()
 
@@ -60,15 +63,16 @@ class ProjectTest(unittest.TestCase):
         file_list = os.listdir(working_directory)
         self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
         self.assertTrue("ws1.nxs" in file_list)
+        self.assertEqual(self.project._offer_overwriting_gui.call_count, 1)
 
     def test_save_as_saves_project_successfully(self):
         working_directory = tempfile.mkdtemp()
-        self.project._file_dialog = mock.MagicMock(return_value=working_directory)
+        self.project._save_file_dialog = mock.MagicMock(return_value=working_directory)
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
         self.project.save_as()
 
-        self.assertEqual(self.project._file_dialog.call_count, 1)
+        self.assertEqual(self.project._save_file_dialog.call_count, 1)
         self.assertTrue(os.path.isdir(working_directory))
         file_list = os.listdir(working_directory)
         self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
@@ -77,16 +81,16 @@ class ProjectTest(unittest.TestCase):
     def test_load_calls_loads_successfully(self):
         working_directory = tempfile.mkdtemp()
         return_value_for_load = os.path.join(working_directory, os.path.basename(working_directory) + ".mtdproj")
-        self.project._file_dialog = mock.MagicMock(return_value=working_directory)
+        self.project._save_file_dialog = mock.MagicMock(return_value=working_directory)
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project.save_as()
 
-        self.assertEqual(self.project._file_dialog.call_count, 1)
+        self.assertEqual(self.project._save_file_dialog.call_count, 1)
         ADS.clear()
 
-        self.project._file_dialog = mock.MagicMock(return_value=return_value_for_load)
+        self.project._load_file_dialog = mock.MagicMock(return_value=return_value_for_load)
         self.project.load()
-        self.assertEqual(self.project._file_dialog.call_count, 1)
+        self.assertEqual(self.project._load_file_dialog.call_count, 1)
         self.assertEqual(["ws1"], ADS.getObjectNames())
 
     def test_offer_save_does_nothing_if_saved_is_true(self):

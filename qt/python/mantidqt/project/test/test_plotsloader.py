@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -8,20 +8,25 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import sys
-import unittest
-import matplotlib.pyplot as plt
-import matplotlib.figure
-import matplotlib.text
+import matplotlib
+matplotlib.use('AGG')
 
-from mantidqt.project.plotsloader import PlotsLoader
-import mantid.plots.plotfunctions
-from mantid.api import AnalysisDataService as ADS
-from mantid.dataobjects import Workspace2D
+import sys  # noqa
+import unittest  # noqa
+import matplotlib.pyplot as plt  # noqa
+import matplotlib.figure  # noqa
+import matplotlib.text  # noqa
 
-if sys.version_info.major == 3:
+from mantidqt.project.plotsloader import PlotsLoader  # noqa
+import mantid.plots.plotfunctions  # noqa
+from mantid.api import AnalysisDataService as ADS  # noqa
+from mantid.dataobjects import Workspace2D  # noqa
+
+if sys.version_info.major >= 3:
+    # Python 3 and above
     from unittest import mock
 else:
+    # Python 2
     import mock
 
 

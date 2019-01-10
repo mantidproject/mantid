@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -8,7 +8,9 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from matplotlib import ticker, axis  # noqa
+import copy
+
+from matplotlib import ticker, text, axis  # noqa
 import matplotlib.colors
 import matplotlib.axes
 
@@ -42,10 +44,19 @@ class PlotsLoader(object):
         import matplotlib.pyplot as plt
         # Grab creation arguments
         creation_args = plot_dict["creationArguments"]
+
+        # Make a copy so it can be applied to the axes, of the plot once created.
+        creation_args_copy = copy.deepcopy(creation_args[0])
+
+        # Populate workspace names
         workspace_name = creation_args[0][0].pop('workspaces')
         workspace = ADS.retrieve(workspace_name)
+
         # Make initial plot
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+
+        # Make sure that the axes gets it's creation_args as loading doesn't add them
+        ax.creation_args = creation_args_copy
 
         self.plot_func(workspace, ax, creation_args[0][0])
 

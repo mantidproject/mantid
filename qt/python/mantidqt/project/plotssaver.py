@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from matplotlib import ticker
-import matplotlib.colors
+import matplotlib.axis
 
 from mantid import logger
 
@@ -33,7 +33,8 @@ class PlotsSaver(object):
             try:
                 plot_list.append(self.get_dict_from_fig(plot_dict[index].canvas.figure))
             except BaseException as e:
-                # Catch all errors in here so it can fail silently-ish
+                # Catch all errors in here so it can fail silently-ish, if this is happening on all plots make sure you
+                # have built your project.
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt
                 logger.warning("A plot was unable to be saved")

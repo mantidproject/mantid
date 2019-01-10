@@ -32,11 +32,21 @@ Nexus Geometry Loading
 The changes above have also been encorporated directly into :ref:`LoadEventNexus <algm-LoadEventNexus>`, so it is possible to store data and geometry together for the first time in a NeXus compliant format for Mantid. These changes have made it possible to load experimental ESS event data files directly into Mantid.
 
 
-Archive Searching / ONCat
--------------------------
+Archive Searching
+-----------------
 
+SNS / ONCat
+###########
+
+- SNS file searching has been moved to `ONCAT <https://oncat.ornl.gov/>`_. Due to auto-updating of the ``Facilities.xml``, this was done by directing ``SNSDataSearch`` and ``ORNLDataSearch`` to both use ONCAT.
 - For HFIR instruments that write out raw files with run numbers, we have enabled functionality that allows for the searching of file locations by making calls to ONCat.  To use this, make sure that the "Search Data Archive" option is checked in your "Manage User Directories" settings.  The ``FileFinder`` and algorithms such as :ref:`Load <algm-Load>`  will then accept inputs such as "``HB2C_143210``".
-- In the short term, for SNS instruments, the default "out of the box" behaviour will be to continue using ICAT for archive searching.  This can be manually overridden by changing ``<archiveSearch plugin="SNSDataSearch" />`` to ``<archiveSearch plugin="ORNLDataSearch" />`` in your ``Facilities.xml`` file.  Existing functionality should be almost completely unaffected, except that you may find that archive searching is a little quicker and slightly more robust.  ``ORNLDataSearch`` will become the default option at SNS in a future version of Mantid.
+
+ISIS / ICat
+###########
+
+- The path returned by ICat starting ``\\isis\inst$`` is now overridden by the fully-qualified path starting ``\\isis.cclrc.ac.uk\inst$`` on Windows machines. This makes accessing the archive more reliable over the VPN.
+- On Linux and Mac machines, it is overridden by a path starting ``/archive``.
+- On all machines, you can override this locally by setting ``icatDownload.mountPoint=<my_path>`` in your ``Mantid.user.properties`` file.
 
 Stability
 ---------
@@ -53,6 +63,7 @@ New Algorithms
 - :ref:`MatchSpectra <algm-MatchSpectra>` is an algorithm that calculates factors to match all spectra to a reference spectrum.
 - :ref:`MaskBinsIf <algm-MaskBinsIf>` is an algorithm to mask bins according to criteria specified as a muparser expression.
 - :ref:`MaskNonOverlappingBins <algm-MaskNonOverlappingBins>` masks the bins that do not overlap with another workspace.
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` loads or adds to a sample environment from a .stl file, as well as allowing setting the material of the environment to load.
 - :ref:`ParallaxCorrection <algm-ParallaxCorrection>` will perform a geometric correction for the so-called parallax effect in tube based SANS detectors.
 
 Improvements
@@ -69,11 +80,13 @@ Improvements
 - :ref:`LoadSampleShape <algm-LoadSampleShape-v1>` now supports loading from binary .stl files.
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` now supports masking a workspace in addition to writing the masking information to a calfile.
 - :ref:`ApplyDetectorScanEffCorr <algm-ApplyDetectorScanEffCorr>` will properly propagate the masked bins in the calibration map to the output workspace.
-- :ref:`LoadSampleShape <algm-LoadSampleShape-v1>` now supports loading from binary .stl files.
 - :ref:`LoadNexusLogs <algm-LoadNexusLogs-v1>` now will load files that have 1D arrays for each time value in the logs, but will not load this data.
 - :ref:`GroupDetectors <algm-GroupDetectors>` now takes masked bins correctly into account when processing histogram workspaces.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` can now save and load a ``MaskWorkspace``.
 - :ref:`FitPeaks <algm-FitPeaks>` can output parameters' uncertainty (fitting error) in an optional workspace.
+- The documentation in :ref:`EventFiltering` and :ref:`FilterEvents <algm-FilterEvents>` have been extensively rewritten to aid in understanding what the code does.
+- All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``).
+- Various clarifications and additional links in the geometry and material documentation pages
 
 Bugfixes
 ########
@@ -90,8 +103,11 @@ Bugfixes
 - The output workspace now keeps the units of the input workspace for all sample log entries of algorithms :ref:`MergeRuns <algm-MergeRuns>` and :ref:`ConjoinXRuns <algm-ConjoinXRuns>`.
 - History for algorithms that took groups sometimes would get incorrect history causing history to be incomplete, so now full group history is saved for all items belonging to the group.
 - Fixed a bug in `SetGoniometer <algm-SetGoniometer>` where it would use the mean log value rather than the time series average value for goniometer angles.
+- Fixed a bug in `AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for using the passed on CompressTolerance and CompressWallClockTolerance in the child `CompressEvents <algm-CompressEvents>` algorithm instead of just in the child `AlignAndFocusPowder <algm-AlignAndFocusPowder>` algorithm.
 - `ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``
 - The input validator is fixed in :ref:`MostLikelyMean <algm-MostLikelyMean>` avoiding a segmentation fault.
+- Fixed a bug in `AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to `DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for `AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
+- Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 
 Python
 ------

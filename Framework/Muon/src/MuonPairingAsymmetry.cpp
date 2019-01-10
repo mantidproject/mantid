@@ -105,8 +105,8 @@ DECLARE_ALGORITHM(MuonPairingAsymmetry)
 
 void MuonPairingAsymmetry::init() {
   std::string emptyString("");
-  const std::vector<int> defaultGrouping1 = {1};
-  const std::vector<int> defaultGrouping2 = {2};
+  std::vector<int> defaultGrouping1 = {1};
+  std::vector<int> defaultGrouping2 = {2};
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -158,12 +158,12 @@ void MuonPairingAsymmetry::init() {
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
   declareProperty(make_unique<ArrayProperty<int>>(
-                      "Group1", defaultGrouping1,
+                      "Group1", std::move(defaultGrouping1),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
                   "IDs or hyphenated ranges of IDs.");
   declareProperty(make_unique<ArrayProperty<int>>(
-                      "Group2", defaultGrouping2,
+                      "Group2", std::move(defaultGrouping2),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
                   "IDs or hyphenated ranges of IDs.");

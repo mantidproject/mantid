@@ -65,6 +65,8 @@ public:
 
   void setCustomSettingEnabled(const QString &customName, bool enabled);
 
+  void setFitEnabled(bool enable) override;
+
   void addCheckBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions,
