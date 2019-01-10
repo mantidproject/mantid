@@ -17,7 +17,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
 
-MatrixWorkspace_sptr getADSMatrixWorkspace(const std::string &workspaceName) {
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
 }
@@ -185,9 +185,9 @@ void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
  */
 void IndirectSqw::plotRqwContour() {
   if (m_uiForm.dsSampleInput->isValid()) {
-    const auto sampleName =
+    auto const sampleName =
         m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-    const auto convertedWsName =
+    auto const convertedWsName =
         sampleName.substr(0, sampleName.size() - 4) + "_rqw";
 
     auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
@@ -198,7 +198,7 @@ void IndirectSqw::plotRqwContour() {
     converter->setProperty("EMode", "Indirect");
     converter->execute();
 
-    const auto rqwWorkspace = getADSMatrixWorkspace(convertedWsName);
+    auto const rqwWorkspace = getADSMatrixWorkspace(convertedWsName);
     m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
   } else {
     emit showMessageBox("Invalid filename.");
