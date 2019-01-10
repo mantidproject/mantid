@@ -14,6 +14,22 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+enum ColumnNumber {
+  // 0-based column indices for cells in a row. The Actual values are important
+  // here so set them explicitly
+  RUNS_COLUMN = 0,
+  THETA_COLUMN = 1,
+  FIRST_TRANS_COLUMN = 2,
+  SECOND_TRANS_COLUMN = 3,
+  QMIN_COLUMN = 4,
+  QMAX_COLUMN = 5,
+  QSTEP_COLUMN = 6,
+  SCALE_COLUMN = 7,
+  OPTIONS_COLUMN = 8
+};
+}
+
 template <typename T>
 class AppendErrorIfNotType : public boost::static_visitor<boost::optional<T>> {
 public:
@@ -41,52 +57,55 @@ private:
 
 boost::optional<std::vector<std::string>>
 RowValidator::parseRunNumbers(std::vector<std::string> const &cellText) {
-  auto runNumbers = ::MantidQt::CustomInterfaces::parseRunNumbers(cellText[0]);
+  auto runNumbers =
+      ::MantidQt::CustomInterfaces::parseRunNumbers(cellText[RUNS_COLUMN]);
   if (!runNumbers.is_initialized())
-    m_invalidColumns.emplace_back(0);
+    m_invalidColumns.emplace_back(RUNS_COLUMN);
   return runNumbers;
 }
 
 boost::optional<double>
 RowValidator::parseTheta(std::vector<std::string> const &cellText) {
-  auto theta = ::MantidQt::CustomInterfaces::parseTheta(cellText[1]);
+  auto theta = ::MantidQt::CustomInterfaces::parseTheta(cellText[THETA_COLUMN]);
   if (!theta.is_initialized())
-    m_invalidColumns.emplace_back(1);
+    m_invalidColumns.emplace_back(THETA_COLUMN);
   return theta;
 }
 
 boost::optional<TransmissionRunPair>
 RowValidator::parseTransmissionRuns(std::vector<std::string> const &cellText) {
   auto transmissionRunsOrError =
-      ::MantidQt::CustomInterfaces::parseTransmissionRuns(cellText[2],
-                                                          cellText[3]);
-  return boost::apply_visitor(
-      AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, 2),
-      transmissionRunsOrError);
+      ::MantidQt::CustomInterfaces::parseTransmissionRuns(
+          cellText[FIRST_TRANS_COLUMN], cellText[SECOND_TRANS_COLUMN]);
+  return boost::apply_visitor(AppendErrorIfNotType<TransmissionRunPair>(
+                                  m_invalidColumns, FIRST_TRANS_COLUMN),
+                              transmissionRunsOrError);
 }
 
 boost::optional<RangeInQ>
 RowValidator::parseQRange(std::vector<std::string> const &cellText) {
   auto qRangeOrError = ::MantidQt::CustomInterfaces::parseQRange(
-      cellText[4], cellText[5], cellText[6]);
+      cellText[QMIN_COLUMN], cellText[QMAX_COLUMN], cellText[QSTEP_COLUMN]);
   return boost::apply_visitor(
-      AppendErrorIfNotType<RangeInQ>(m_invalidColumns, 4), qRangeOrError);
+      AppendErrorIfNotType<RangeInQ>(m_invalidColumns, QMIN_COLUMN),
+      qRangeOrError);
 }
 
 boost::optional<boost::optional<double>>
 RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
   auto optionalScaleFactorOrNoneIfError =
-      ::MantidQt::CustomInterfaces::parseScaleFactor(cellText[7]);
+      ::MantidQt::CustomInterfaces::parseScaleFactor(cellText[SCALE_COLUMN]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(7);
+    m_invalidColumns.emplace_back(SCALE_COLUMN);
   return optionalScaleFactorOrNoneIfError;
 }
 
 boost::optional<std::map<std::string, std::string>>
 RowValidator::parseOptions(std::vector<std::string> const &cellText) {
-  auto options = ::MantidQt::CustomInterfaces::parseOptions(cellText[8]);
+  auto options =
+      ::MantidQt::CustomInterfaces::parseOptions(cellText[OPTIONS_COLUMN]);
   if (!options.is_initialized())
-    m_invalidColumns.emplace_back(8);
+    m_invalidColumns.emplace_back(OPTIONS_COLUMN);
   return options;
 }
 

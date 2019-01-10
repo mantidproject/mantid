@@ -17,8 +17,8 @@ namespace CustomInterfaces {
 /** Constructor
  * @param parent :: The parent of this view
  */
-QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter(nullptr) {
-  UNUSED_ARG(parent);
+QtReflSaveTabView::QtReflSaveTabView(QWidget *parent)
+    : QWidget(parent), m_presenter(nullptr) {
   initLayout();
 }
 
