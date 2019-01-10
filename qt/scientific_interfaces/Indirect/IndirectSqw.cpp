@@ -15,6 +15,15 @@
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
+namespace {
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(const std::string &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
@@ -24,8 +33,8 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(loadClicked()), this,
-          SLOT(plotContour()));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
+          SLOT(plotRqwContour()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(sqwAlgDone(bool)));
 
@@ -43,7 +52,6 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
-  // m_uiForm.rqwPlot2D->setPlotVisible(false);
   m_uiForm.rqwPlot2D->setColourBarVisible(false);
 }
 
@@ -146,13 +154,8 @@ void IndirectSqw::run() {
   m_batchAlgoRunner->executeBatch();
 }
 
-MatrixWorkspace_const_sptr
-IndirectSqw::getADSWorkspace(std::string const &name) const {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-}
-
 std::size_t IndirectSqw::getOutWsNumberOfSpectra() const {
-  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
+  return getADSMatrixWorkspace(m_pythonExportWsName)->getNumberHistograms();
 }
 
 /**
@@ -180,32 +183,24 @@ void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
  *
  * Creates a colour 2D plot of the data
  */
-void IndirectSqw::plotContour() {
+void IndirectSqw::plotRqwContour() {
   if (m_uiForm.dsSampleInput->isValid()) {
-    QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+    const auto sampleName =
+        m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+    const auto convertedWsName =
+        sampleName.substr(0, sampleName.size() - 4) + "_rqw";
 
-    QString convertedWsName =
-        sampleWsName.left(sampleWsName.length() - 4) + "_rqw";
-
-    IAlgorithm_sptr convertSpecAlg =
+    auto convertSpecAlg =
         AlgorithmManager::Instance().create("ConvertSpectrumAxis");
     convertSpecAlg->initialize();
-
-    convertSpecAlg->setProperty("InputWorkspace", sampleWsName.toStdString());
-    convertSpecAlg->setProperty("OutputWorkspace",
-                                convertedWsName.toStdString());
+    convertSpecAlg->setProperty("InputWorkspace", sampleName);
+    convertSpecAlg->setProperty("OutputWorkspace", convertedWsName);
     convertSpecAlg->setProperty("Target", "ElasticQ");
     convertSpecAlg->setProperty("EMode", "Indirect");
-
     convertSpecAlg->execute();
 
-    auto hhh = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        convertedWsName.toStdString());
-    m_uiForm.rqwPlot2D->setWorkspace(hhh);
-    // m_uiForm.rqwPlot2D->setPlotVisible(true);
-
-    // QString pyInput = "plot2D('" + convertedWsName + "')\n";
-    // m_pythonRunner.runPythonCode(pyInput);
+    const auto rqwWorkspace = getADSMatrixWorkspace(convertedWsName);
+    m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
   } else {
     emit showMessageBox("Invalid filename.");
   }
