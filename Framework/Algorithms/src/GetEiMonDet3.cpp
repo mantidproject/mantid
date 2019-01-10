@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetEiMonDet3.h"
 
 #include "MantidAPI/ITableWorkspace.h"
@@ -146,6 +152,9 @@ void GetEiMonDet3::exec() {
           "MonitorIndex is also listed in DetectorWorkspaceIndexSet.");
     }
   }
+  if (!monitorWs->spectrumInfo().isMonitor(monitorIndex)) {
+    m_log.warning("The monitor spectrum is not marked as a monitor.");
+  }
   const auto detWsIndices = toWorkspaceIndices(detectorIndices);
   auto detectorSumWs = groupSpectra(detectorWs, detWsIndices);
   progress(0.3);
@@ -175,7 +184,8 @@ void GetEiMonDet3::exec() {
   }
   progress(0.7);
   // SpectrumInfo returns a negative l2 for monitor.
-  const auto monitorToSampleDistance = -monitorSumWs->spectrumInfo().l2(0);
+  const auto monitorToSampleDistance =
+      std::abs(monitorSumWs->spectrumInfo().l2(0));
   const double minTOF = minimumTOF(*detectorWs, sampleToDetectorDistance);
 
   double timeOfFlight =
