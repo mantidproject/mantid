@@ -33,6 +33,11 @@ class TableWorkspaceDisplay(object):
     ITEM_CHANGED_INVALID_DATA_MESSAGE = "Error: Trying to set invalid data for the column."
     ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
     TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
+    CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
+    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "There is no associated YErr for each selected Y column."
+    PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for MatPlotLib.\n\nError message:\n{}"
+    INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
+    COLUMN_DISPLAY_LABEL = 'Column {}'
 
     def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None):
         """
@@ -274,7 +279,7 @@ class TableWorkspaceDisplay(object):
             pass
 
         if len(selected_columns) == 0:
-            self.view.show_warning("Cannot plot column against itself.")
+            self.view.show_warning(self.CANNOT_PLOT_AGAINST_SELF_MESSAGE)
             return
 
         self._do_plot(selected_columns, selected_x, plot_type)
@@ -283,7 +288,7 @@ class TableWorkspaceDisplay(object):
         if plot_type == PlotType.LINEAR_WITH_ERR:
             yerr = self.model.marked_columns.find_yerr(selected_columns)
             if len(yerr) != len(selected_columns):
-                self.view.show_warning("There is no associated YErr for each selected Y column.")
+                self.view.show_warning(self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE)
                 return
         x = self.model.get_column(selected_x)
 
@@ -302,12 +307,11 @@ class TableWorkspaceDisplay(object):
             y = self.model.get_column(column)
             column_label = self.model.get_column_header(column)
             try:
-                plot_func(x, y, label='Column {}'.format(column_label), **kwargs)
+                plot_func(x, y, label=self.COLUMN_DISPLAY_LABEL.format(column_label), **kwargs)
             except ValueError as e:
-                error_message = "One or more of the columns being plotted contain invalid data for MatPlotLib.\
-                \n\nError message:\n{}".format(e)
+                error_message = self.PLOT_FUNCTION_ERROR_MESSAGE.format(e)
                 logger.error(error_message)
-                self.view.show_warning(error_message, "Invalid data - Mantid Workbench")
+                self.view.show_warning(error_message, self.INVALID_DATA_WINDOW_TITLE)
                 return
 
             ax.set_ylabel(column_label)
@@ -326,3 +330,6 @@ class TableWorkspaceDisplay(object):
         else:
             raise ValueError("Plot Type: {} not currently supported!".format(type))
         return plot_func
+
+    def get_columns_marked_as_y(self):
+        return self.model.marked_columns.as_y[:]
