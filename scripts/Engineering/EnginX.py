@@ -16,15 +16,12 @@ class EnginX:
         if kwargs:
             self.user = kwargs.get("user")
             self.van_run = kwargs.get("vanadium_run")
-            if "calibration_directory" in kwargs:
-                self.calibration_directory = "{0}/{1}/EnginX_Mantid/Calibration".format(
-                    kwargs.get("calibration_directoy"), self.user)
+            if "output_directory" in kwargs:
+                location = "{0}/{1}/{2}"
+                self.calibration_directory = location.format(kwargs.get("output_directory"), self.user,"Calibration")
+                self.focus_directory = location.format(kwargs.get("output_directory"), self.user,Focus)
             else:
-                self.calibration_directory = "/home/sjenkins/user/{0}/EnginX_Mantid/Calibration".format(self.user)
-            if "focus_directory" in kwargs:
-                self.focus_directory = "{0}/{1}/EnginX_Mantid/Focus".format(kwargs.get("focus_directoy"), self.user)
-            else:
-                self.focus_directory = "/home/sjenkins/user/{0}/EnginX_Mantid/Focus".format(self.user)
+                raise KeyError("You must set an output_directory")
 
     def create_vanadium(self):
         van_file = _gen_filename(self.van_run)

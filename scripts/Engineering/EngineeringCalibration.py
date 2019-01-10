@@ -37,7 +37,9 @@ def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, cu
                                       OutputParametersTableName=param_tbl_name)
         difc = [output.DIFC]
         tzero = [output.TZERO]
-        save_calibration(ceria_run, van_run, "bank", ".prm", cal_dir, [param_tbl_name], difc, tzero)
+        save_calibration(ceria_run, van_run, ".prm", cal_dir, [param_tbl_name], difc, tzero, "all_banks")
+        save_calibration(ceria_run, van_run, ".prm", cal_dir, [param_tbl_name], difc, tzero,
+                         "bank_{}".format(param_tbl_name))
     else:
         if spec_nos == "North":
             param_tbl_name = "engg_calibration_bank_1"
@@ -50,26 +52,28 @@ def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, cu
                                       OutputParametersTableName=param_tbl_name)
         difc = [output.DIFC]
         tzero = [output.TZERO]
-        save_calibration(ceria_run, van_run, "bank", ".prm", cal_dir, [spec_nos], difc, tzero)
+        save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "all_banks")
+        save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "bank_{}".format(spec_nos))
 
 
 def create_calibration_files(curve_van, int_van, ceria_run, cal_dir, van_run):
     van_curves_ws, van_integrated_ws = load_van_files(curve_van, int_van)
     ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
-    difc =[]
-    tzero=[]
+    difcs = []
+    tzeros = []
     banks = 3
-    bank = {1: "North",
-            2: "South"}
+    bank_names = ["North", "South"]
     for i in range(1, banks):
         param_tbl_name = "engg_calibration_bank_{}".format(i)
         print(param_tbl_name)
         output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
                                       VanCurvesWorkspace=van_curves_ws, Bank=str(i), FittedPeaks=param_tbl_name,
                                       OutputParametersTableName=param_tbl_name)
-        difc.append[output.DIFC]
-        tzero.append[output.TZERO]
-    save_calibration(ceria_run, van_run, "bank", bank.get(i), ".prm", cal_dir, ["North, South"], difc, tzero)
+        difcs.append(output.DIFC)
+        tzeros.append(output.TZERO)
+        save_calibration(ceria_run, van_run, ".prm", cal_dir, [bank_names[i-1]], [difcs[i-1]], [tzeros[i-1]],
+                         "bank_{}".format(bank_names[i-1]))
+    save_calibration(ceria_run, van_run, ".prm", cal_dir, bank_names, difcs, tzeros, "all_banks")
 
 
 def load_van_files(curves_van, ints_van):
@@ -78,9 +82,14 @@ def load_van_files(curves_van, ints_van):
     return van_curves_ws, van_integrated_ws
 
 
-def save_calibration(ceria_run, van_run, ext, cal_dir, bank_names, difcs, zeros):
-    gsas_iparm_fname = os.path.join(cal_dir, "ENGINX_"+van_run+"_"+ceria_run+"_all_banks"+ext)
-    template_file = None
+def save_calibration(ceria_run, van_run, ext, cal_dir, bank_names, difcs, zeros, name):
+    gsas_iparm_fname = os.path.join(cal_dir, "ENGINX_"+van_run+"_"+ceria_run+"_"+name+ext)
+    if name == "all_banks":
+        template_file = None
+    elif name == "bank_South":
+        template_file = "template_ENGINX_241391_236516_South_bank.prm";
+    else:
+        template_file = "template_ENGINX_241391_236516_North_bank.prm"
     Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difc=difcs, tzero=zeros,
                                         ceria_run=ceria_run, vanadium_run=van_run,
                                         template_file=template_file)
