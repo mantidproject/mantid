@@ -36,17 +36,17 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(
     const std::string &ev_ws_name, const std::string &md_ws_name,
     const double modQ, const double minQ, const double maxQ,
     const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
-    const std::string &det_cal_file, const std::string &det_cal_file2)
+    const std::string &det_cal_file, const std::string &det_cal_file2, const std::string &axisCORELLI)
     : worker(worker), file_name(file_name), ev_ws_name(ev_ws_name),
       md_ws_name(md_ws_name), modQ(modQ), minQ(minQ), maxQ(maxQ),
       do_lorentz_corr(do_lorentz_corr), load_data(load_data),
       load_det_cal(load_det_cal), det_cal_file(det_cal_file),
-      det_cal_file2(det_cal_file2) {}
+      det_cal_file2(det_cal_file2), axisCORELLI(axisCORELLI) {}
 
 void RunLoadAndConvertToMD::run() {
   worker->loadAndConvertToMD(file_name, ev_ws_name, md_ws_name, modQ, minQ,
                              maxQ, do_lorentz_corr, load_data, load_det_cal,
-                             det_cal_file, det_cal_file2);
+                             det_cal_file, det_cal_file2, axisCORELLI);
 }
 
 /**
@@ -478,6 +478,7 @@ void MantidEV::setDefaultState_slot() {
   m_uiForm.IntegrateEdge_ckbx->setChecked(true);
   m_uiForm.Cylinder_ckbx->setChecked(false);
   m_uiForm.CylinderProfileFit_cmbx->setCurrentIndex(5);
+  m_uiForm.axisCORELLI_cmbx->setCurrentIndex(0);
   m_uiForm.TwoDFitIntegration_rbtn->setChecked(false);
   m_uiForm.FitRebinParams_ledt->setText("1000,-0.004,16000");
   m_uiForm.NBadEdgePixels_ledt->setText("5");
@@ -571,12 +572,14 @@ void MantidEV::selectWorkspace_slot() {
                    "Calibration is selected");
       return;
     }
+    std::string axisCORELLI =
+        m_uiForm.axisCORELLI_cmbx->currentText().toStdString();
 
     RunLoadAndConvertToMD *runner = new RunLoadAndConvertToMD(
         worker, file_name, ev_ws_name, md_ws_name, modQ, minQ, maxQ,
         m_uiForm.LorentzCorrection_ckbx->isChecked(),
         m_uiForm.loadDataGroupBox->isChecked(), load_det_cal, det_cal_file,
-        det_cal_file2);
+        det_cal_file2, axisCORELLI);
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
       errorMessage("Failed to start Load and ConvertToMD thread...previous "
@@ -1764,6 +1767,7 @@ void MantidEV::setEnabledSphereIntParams_slot(bool on) {
   m_uiForm.CylinderLength_ledt->setEnabled(on);
   m_uiForm.CylinderPercentBkg_ledt->setEnabled(on);
   m_uiForm.CylinderProfileFit_cmbx->setEnabled(on);
+  m_uiForm.axisCORELLI_cmbx->setEnabled(on);
   m_uiForm.AdaptiveQBkg_ckbx->setEnabled(on);
   m_uiForm.AdaptiveQMult_ledt->setEnabled(on);
 }
@@ -2086,6 +2090,8 @@ void MantidEV::saveSettings(const std::string &filename) {
   state->setValue("Cylinder_ckbx", m_uiForm.Cylinder_ckbx->isChecked());
   state->setValue("CylinderProfileFit_cmbx",
                   m_uiForm.CylinderProfileFit_cmbx->currentIndex());
+  state->setValue("axisCORELLI_cmbx",
+                  m_uiForm.axisCORELLI_cmbx->currentIndex());
   state->setValue("TwoDFitIntegration_rbtn",
                   m_uiForm.TwoDFitIntegration_rbtn->isChecked());
   state->setValue("FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt->text());
@@ -2217,6 +2223,7 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "IntegrateEdge_ckbx", m_uiForm.IntegrateEdge_ckbx);
   restore(state, "Cylinder_ckbx", m_uiForm.Cylinder_ckbx);
   restore(state, "CylinderProfileFit_cmbx", m_uiForm.CylinderProfileFit_cmbx);
+  restore(state, "axisCORELLI_cmbx", m_uiForm.axisCORELLI_cmbx);
   restore(state, "TwoDFitIntegration_rbtn", m_uiForm.TwoDFitIntegration_rbtn);
   restore(state, "FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt);
   restore(state, "NBadEdgePixels_ledt", m_uiForm.NBadEdgePixels_ledt);

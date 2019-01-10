@@ -44,7 +44,7 @@ public:
       const std::string &ev_ws_name, const std::string &md_ws_name,
       const double modQ, const double minQ, const double maxQ,
       const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
-      const std::string &det_cal_file, const std::string &det_cal_file2);
+      const std::string &det_cal_file, const std::string &det_cal_file2, const std::string &axisCORELLI);
 
   /// Calls worker->loadAndConvertToMD from a separate thread
   void run() override;
@@ -62,6 +62,7 @@ private:
   bool load_det_cal;
   std::string det_cal_file;
   std::string det_cal_file2;
+  std::string axisCORELLI;
 };
 
 /// Local class to run FindPeaks in a Non-Qt thread.

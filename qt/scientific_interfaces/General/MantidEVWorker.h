@@ -52,7 +52,7 @@ public:
                           const bool do_lorentz_corr, const bool load_data,
                           const bool load_det_cal,
                           const std::string &det_cal_file,
-                          const std::string &det_cal_file2);
+                          const std::string &det_cal_file2, const std::string &axisCORELLI);
   bool convertToHKL(const std::string &ev_ws_name,
                     const std::string &md_ws_name, const double minQ,
                     const double maxQ);
