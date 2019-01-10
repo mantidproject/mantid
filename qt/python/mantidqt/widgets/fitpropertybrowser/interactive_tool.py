@@ -61,8 +61,16 @@ class VerticalMarker(QObject):
             self.x = xd
             self.moved.emit(xd)
 
-    def should_override_cursor(self, x):
-        return self.is_moving or self.is_above(x)
+    def override_cursor(self, pos_pixel, pos_data):
+        xd, yd = pos_data
+        if self.y0 is not None and yd < self.y0:
+            return None
+        if self.y1 is not None and yd > self.y1:
+            return None
+        x, y = pos_pixel
+        if self.is_moving or self.is_above(x):
+            return QCursor(Qt.SizeHorCursor)
+        return None
 
 
 class FitInteractiveTool(QObject):
@@ -111,10 +119,16 @@ class FitInteractiveTool(QObject):
         for pm in self.peak_markers:
             pm.redraw()
 
-    def get_override_cursor(self, x, y):
-        if self.fit_start_x.should_override_cursor(x) or self.fit_end_x.should_override_cursor(x):
-            return QCursor(Qt.SizeHorCursor)
-        return None
+    def get_override_cursor(self, pos_pixel, pos_data):
+        cursor = self.fit_start_x.override_cursor(pos_pixel, pos_data)
+        if cursor is None:
+            cursor = self.fit_end_x.override_cursor(pos_pixel, pos_data)
+        if cursor is None:
+            for pm in self.peak_markers:
+                cursor = pm.override_cursor(pos_pixel, pos_data)
+                if cursor is not None:
+                    break
+        return cursor
 
     @property
     def override_cursor(self):
@@ -129,9 +143,10 @@ class FitInteractiveTool(QObject):
 
     def motion_notify_callback(self, event):
         x = event.x
-        if x is None:
+        y = event.y
+        if x is None or y is None:
             return
-        self.override_cursor = self.get_override_cursor(x, 0)
+        self.override_cursor = self.get_override_cursor((x, y), (event.xdata, event.ydata))
         self.fit_start_x.mouse_move(event.xdata)
         self.fit_end_x.mouse_move(event.xdata)
 
@@ -167,3 +182,6 @@ class PeakMarker(QObject):
 
     def redraw(self):
         self.centre_marker.redraw()
+
+    def override_cursor(self, x, y):
+        return self.centre_marker.override_cursor(x, y)
