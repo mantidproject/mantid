@@ -2454,14 +2454,13 @@ int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
   }
 
   auto const allowedIndices =
-    m_allowedSpectra.empty()
-        ? QList<int>()
-        : m_allowedSpectra[QString::fromStdString(workspaceName())];
-  auto const firstIndex =
-      m_allowedSpectra.empty() ? 0 : allowedIndices.front();
+      m_allowedSpectra.empty()
+          ? QList<int>()
+          : m_allowedSpectra[QString::fromStdString(workspaceName())];
+  auto const firstIndex = m_allowedSpectra.empty() ? 0 : allowedIndices.front();
   auto const lastIndex = m_allowedSpectra.empty()
-                              ? getNumberOfSpectra(workspace) - 1
-                              : allowedIndices.back();
+                             ? getNumberOfSpectra(workspace) - 1
+                             : allowedIndices.back();
 
   auto allowedIndex = currentIndex;
   if (currentIndex < firstIndex) {
@@ -2469,7 +2468,7 @@ int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
   } else if (currentIndex > lastIndex) {
     allowedIndex = lastIndex;
   } else if (!m_allowedSpectra.empty() &&
-              !allowedIndices.contains(currentIndex)) {
+             !allowedIndices.contains(currentIndex)) {
     allowedIndex = m_oldWorkspaceIndex;
     auto i = allowedIndices.indexOf(m_oldWorkspaceIndex);
     if (i >= 0) {
