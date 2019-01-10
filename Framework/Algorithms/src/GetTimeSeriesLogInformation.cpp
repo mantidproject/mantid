@@ -7,11 +7,12 @@
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
@@ -20,6 +21,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::Types::Core::DateAndTime;
 
 using namespace std;
@@ -375,9 +377,7 @@ Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
   g_log.notice() << "Distribution has " << numbins << " bins.  Delta T = ("
                  << dtmin << ", " << dtmax << ")\n";
 
-  Workspace2D_sptr distws = boost::dynamic_pointer_cast<Workspace2D>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, numbins,
-                                               numbins));
+  Workspace2D_sptr distws = create<Workspace2D>(1, Points(numbins));
   auto &vecDeltaT = distws->mutableX(0);
   auto &vecCount = distws->mutableY(0);
 

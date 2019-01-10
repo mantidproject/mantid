@@ -9,9 +9,14 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace {
 const std::array<std::string, 2> phaseNames = {{"phase", "phi"}};
@@ -291,7 +296,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   const size_t npoints = ws->blocksize();
   // Create and populate output workspace
   API::MatrixWorkspace_sptr ows =
-      API::WorkspaceFactory::Instance().create(ws, 2, npoints + 1, npoints);
+      create<API::MatrixWorkspace>(*ws, 2, BinEdges(npoints + 1));
 
   // X
   ows->setSharedX(0, ws->sharedX(0));

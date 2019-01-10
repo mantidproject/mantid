@@ -14,11 +14,12 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
@@ -29,6 +30,9 @@
 #include <gsl/gsl_multimin.h>
 
 #include <sstream>
+
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace Mantid {
 namespace Algorithms {
@@ -1166,8 +1170,7 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
   }
 
   // Create resolution (delta(d)/d) workspace
-  m_resolutionWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
+  m_resolutionWS = create<Workspace2D>(numspec, Points(1));
 }
 
 //----------------------------------------------------------------------------------------------
