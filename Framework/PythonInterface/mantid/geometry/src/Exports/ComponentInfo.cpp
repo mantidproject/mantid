@@ -138,5 +138,12 @@ void export_ComponentInfo() {
 
       .def("shape", &ComponentInfo::shape, (arg("self"), arg("index")),
            return_value_policy<reference_existing_object>(),
-           "Returns the shape of the component identified by 'index'.");
+           "Returns the shape of the component identified by 'index'.")
+
+      .def("indexOfAny", &ComponentInfo::indexOfAny, (arg("self"), arg("name")),
+           "Returns the index of any component matching name. Raises "
+           "ValueError if name not found")
+
+      .def("root", &ComponentInfo::root, arg("self"),
+           "Returns the index of the root component");
 }

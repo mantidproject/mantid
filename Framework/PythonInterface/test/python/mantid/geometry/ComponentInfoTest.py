@@ -185,7 +185,16 @@ class ComponentInfoTest(unittest.TestCase):
         info = workspace.componentInfo()
         self.assertEquals(info.size(), 1)
 
-
+    def test_indexOfAny(self):
+        info = self._ws.componentInfo()
+        index = info.indexOfAny(info.name(info.root()))
+        # Root index and the discovered index should be the same
+        self.assertEquals(index, info.root())
+    
+    def test_indexOfAny_throws(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(ValueError):
+            info.indexOfAny('fictitious')
     """
     ----------------------------------------------------------------------------
     Extreme Tests
