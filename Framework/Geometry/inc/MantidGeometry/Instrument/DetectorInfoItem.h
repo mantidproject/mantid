@@ -53,6 +53,8 @@ public:
     return m_detectorInfo->rotation(m_index);
   }
 
+  double l2() const { return m_detectorInfo->l2(m_index); }
+
   DetectorInfoItem(T &detectorInfo, const size_t index)
       : m_detectorInfo(&detectorInfo), m_index(index) {}
 
