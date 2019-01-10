@@ -176,12 +176,9 @@ bool MantidEVWorker::loadAndConvertToMD(
     IAlgorithm_sptr alg;
     if (load_data) {
       bool topaz = false;
-      bool corelli = false;
       // Limits and filtering only done for topaz
       if (file_name.find("TOPAZ") != std::string::npos)
         topaz = true;
-      if (file_name.find("CORELLI") != std::string::npos)
-        corelli = true;
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
       alg->setProperty("Filename", file_name);
       alg->setProperty("OutputWorkspace", ev_ws_name);
@@ -201,7 +198,7 @@ bool MantidEVWorker::loadAndConvertToMD(
 
         if (!alg->execute())
           return false;
-      } else if (corelli) {
+      } else if (axisCORELLI.compare("Select Goniometer Axis for CORELLI only")  != 0) {
         const auto &ADS = AnalysisDataService::Instance();
         Mantid::API::MatrixWorkspace_sptr ev_ws =
             ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
