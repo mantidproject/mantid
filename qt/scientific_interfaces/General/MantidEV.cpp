@@ -36,7 +36,8 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(
     const std::string &ev_ws_name, const std::string &md_ws_name,
     const double modQ, const double minQ, const double maxQ,
     const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
-    const std::string &det_cal_file, const std::string &det_cal_file2, const std::string &axisCORELLI)
+    const std::string &det_cal_file, const std::string &det_cal_file2,
+    const std::string &axisCORELLI)
     : worker(worker), file_name(file_name), ev_ws_name(ev_ws_name),
       md_ws_name(md_ws_name), modQ(modQ), minQ(minQ), maxQ(maxQ),
       do_lorentz_corr(do_lorentz_corr), load_data(load_data),

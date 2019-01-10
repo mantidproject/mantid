@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -127,21 +128,26 @@ void WorkspaceFactoryImpl::initializeFromParent(
 
   // deal with axis
   for (size_t i = 0; i < parent.m_axes.size(); ++i) {
-    const size_t newAxisLength = child.getAxis(i)->length();
-    const size_t oldAxisLength = parent.getAxis(i)->length();
+    if (parent.m_axes[i]->isSpectra()) {
+      // By default the child already has a spectra axis which
+      // does not need to get cloned from the parent.
+      continue;
+    }
+    const bool isBinEdge =
+        dynamic_cast<const BinEdgeAxis *const>(parent.m_axes[i]) != nullptr;
+    const size_t newAxisLength =
+        child.m_axes[i]->length() + (isBinEdge ? 1 : 0);
+    const size_t oldAxisLength = parent.m_axes[i]->length();
 
-    if (!differentSize || newAxisLength == oldAxisLength) {
-      // Need to delete the existing axis created in init above
-      delete child.m_axes[i];
+    // Need to delete the existing axis created in init above
+    delete child.m_axes[i];
+    child.m_axes[i] = nullptr;
+    if (newAxisLength == oldAxisLength) {
       // Now set to a copy of the parent workspace's axis
       child.m_axes[i] = parent.m_axes[i]->clone(&child);
     } else {
-      if (!parent.getAxis(i)->isSpectra()) // WHY???
-      {
-        delete child.m_axes[i];
-        // Call the 'different length' clone variant
-        child.m_axes[i] = parent.m_axes[i]->clone(newAxisLength, &child);
-      }
+      // Call the 'different length' clone variant
+      child.m_axes[i] = parent.m_axes[i]->clone(newAxisLength, &child);
     }
   }
 }

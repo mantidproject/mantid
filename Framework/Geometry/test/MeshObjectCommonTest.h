@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_MESHOBJECTCOMMONTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <limits>
 
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
 #include "MantidKernel/V3D.h"
@@ -117,6 +118,12 @@ public:
         !MeshObjectCommon::isOnTriangle(p3 + V3D(0.0001, 0, 0), p1, p2, p3));
     TS_ASSERT(
         !MeshObjectCommon::isOnTriangle(p3 + V3D(0, 0.0001, 0), p1, p2, p3));
+  }
+
+  void testTooManyVertices() {
+    TS_ASSERT_THROWS(MeshObjectCommon::checkVertexLimit(
+                         std::numeric_limits<uint32_t>::max()),
+                     std::invalid_argument &);
   }
 };
 

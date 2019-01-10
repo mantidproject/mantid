@@ -40,12 +40,29 @@ def apiVersion():
     return 2
 
 
+def _bin_dirs():
+    """
+    Generate a list of possible paths that contain the Mantid.properties file
+    """
+    _moduledir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+    # std install
+    yield _moduledir
+    # conda layout
+    yield os.path.dirname(sys.executable)
+
+
 # Bail out early if a Mantid.properties files is not found in the
-# parent directory - it indicates a broken installation or build.
-_moduledir = os.path.abspath(os.path.dirname(__file__))
-_bindir = os.path.dirname(_moduledir)
-if not os.path.exists(os.path.join(_bindir, 'Mantid.properties')):
-    raise ImportError("Unable to find Mantid.properties file next to this package - broken installation!")
+# 1 of the expected places - it indicates a broken installation or build.
+_bindir = None
+for path in _bin_dirs():
+    if os.path.exists(os.path.join(path, "Mantid.properties")):
+        _bindir = path
+        break
+
+if _bindir is None:
+    raise ImportError(
+        "Broken installation! Unable to find Mantid.properties file.\n"
+        "Directories searched: {}".format(', '.join(_bin_dirs())))
 
 # Windows doesn"t have rpath settings so make sure the C-extensions can find the rest of the
 # mantid dlls. We assume they will be next to the properties file.

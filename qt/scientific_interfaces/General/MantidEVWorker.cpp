@@ -161,7 +161,7 @@ bool MantidEVWorker::isEventWorkspace(const std::string &event_ws_name) {
  *  @param det_cal_file     Fully qualified name of the .DetCal file.
  *  @param det_cal_file2    Fully qualified name of the second .DetCal
  *                          file for the second panel on SNAP.
- *  @param axisCORELLI      Which axis for phi for CORELLI goniometer 
+ *  @param axisCORELLI      Which axis for phi for CORELLI goniometer
  *
  *  @return true if the file was loaded and MD workspace was
  *          successfully created.
@@ -198,12 +198,13 @@ bool MantidEVWorker::loadAndConvertToMD(
 
         if (!alg->execute())
           return false;
-      } else if (axisCORELLI.compare("Select Goniometer Axis for CORELLI only")  != 0) {
+      } else if (axisCORELLI.compare(
+                     "Select Goniometer Axis for CORELLI only") != 0) {
         const auto &ADS = AnalysisDataService::Instance();
         Mantid::API::MatrixWorkspace_sptr ev_ws =
             ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
         double phi = ev_ws->run().getLogAsSingleValue(
-              axisCORELLI, Mantid::Kernel::Math::TimeAveragedMean);
+            axisCORELLI, Mantid::Kernel::Math::TimeAveragedMean);
         ev_ws->mutableRun().mutableGoniometer().setRotationAngle(0, phi);
       }
 

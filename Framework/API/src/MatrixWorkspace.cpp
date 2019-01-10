@@ -1204,7 +1204,7 @@ size_t MatrixWorkspace::getMemorySizeForXAxes() const {
  * a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990.
  *
  * @return the time of the first pulse
- * @throw runtime_error if the log is not found; or if it is empty.
+ * @throw Exception::NotFoundError if the log is not found; or if it is empty.
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */

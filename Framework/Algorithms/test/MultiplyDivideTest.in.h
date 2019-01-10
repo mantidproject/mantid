@@ -15,7 +15,6 @@
 #include "MantidAlgorithms/Divide.h"
 #include "MantidAlgorithms/Multiply.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -97,19 +96,19 @@ public:
     if (DO_DIVIDE)
     {
       a /= 5;
-      TS_ASSERT_EQUALS(a->readY(0)[0], 0.6)
+      TS_ASSERT_EQUALS(a->y(0)[0], 0.6)
       TS_ASSERT_EQUALS(a,b);
       a /= c;
-      TS_ASSERT_EQUALS(a->readY(0)[0], 0.3);
+      TS_ASSERT_EQUALS(a->y(0)[0], 0.3);
       TS_ASSERT_EQUALS(a,b);
     }
     else
     {
       a *= 5;
-      TS_ASSERT_EQUALS(a->readY(0)[0],15.0)
+      TS_ASSERT_EQUALS(a->y(0)[0],15.0)
       TS_ASSERT_EQUALS(a,b);
       a *= c;
-      TS_ASSERT_EQUALS(a->readY(0)[0],30.0);
+      TS_ASSERT_EQUALS(a->y(0)[0],30.0);
       TS_ASSERT_EQUALS(a,b);
     }
   }
@@ -155,6 +154,31 @@ public:
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), nHist-1);
+    }
+  }
+
+  void test_2D_denominator_with_fewer_spectra()
+  {
+    if(DO_DIVIDE)
+    {
+    int nHist = 5,nBins=5;
+    MatrixWorkspace_sptr numerator  = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins);
+    MatrixWorkspace_sptr denominator = WorkspaceCreationHelper::create2DWorkspace123(nHist-1, nBins); // Cropped
+    Divide alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("LHSWorkspace", numerator);
+    alg.setProperty("RHSWorkspace", denominator);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("AllowDifferentNumberSpectra", true);
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(outWS->y(0)[0], 1.0);
+    TS_ASSERT_EQUALS(outWS->y(1)[0], 1.0);
+    TS_ASSERT_EQUALS(outWS->y(2)[0], 1.0);
+    TS_ASSERT_EQUALS(outWS->y(3)[0], 1.0);
+    TS_ASSERT_EQUALS(outWS->y(4)[0], 0.0);
     }
   }
 
@@ -208,9 +232,9 @@ public:
       work_out3 = value/work_in2;
       // checkData won't work on this one, do a few checks here
       TS_ASSERT_EQUALS( work_out3->size(), work_in2->size() );
-      TS_ASSERT_EQUALS( work_out3->readX(1), work_in2->readX(1) );
-      TS_ASSERT_DELTA( work_out3->readY(2)[6], 0.6,  0.0001 );
-      TS_ASSERT_DELTA( work_out3->readE(3)[4], 0.48, 0.0001 );
+      TS_ASSERT_EQUALS( work_out3->x(1), work_in2->x(1) );
+      TS_ASSERT_DELTA( work_out3->y(2)[6], 0.6,  0.0001 );
+      TS_ASSERT_DELTA( work_out3->e(3)[4], 0.48, 0.0001 );
     }
     else
     {
@@ -596,13 +620,13 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createGroupedEventWorkspace(lhs, 10, 1.0);
     if (lhs2D)
       work_in1 = EventWorkspaceHelpers::convertEventTo2D(work_in1);
-    TS_ASSERT_DELTA( work_in1->readE(0)[0], sqrt( double(lhs_grouping*1.0) ), 1e-5);
+    TS_ASSERT_DELTA( work_in1->e(0)[0], sqrt( double(lhs_grouping*1.0) ), 1e-5);
 
     // Grouped workspace will have rhs_grouping events in each bin (also).
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createGroupedEventWorkspace(rhs, 10, 1.0);
     if (rhs2D)
       work_in2 = EventWorkspaceHelpers::convertEventTo2D(work_in2);
-    TS_ASSERT_DELTA( work_in2->readE(0)[0], sqrt( double(rhs_grouping*1.0) ), 1e-5);
+    TS_ASSERT_DELTA( work_in2->e(0)[0], sqrt( double(rhs_grouping*1.0) ), 1e-5);
 
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, !lhs2D, divideValue, divideError, true);
@@ -675,7 +699,7 @@ public:
     else
       mess << "2D";
     mess << "(" << ws->getNumberHistograms() << " spectra," << ws->blocksize() << " bins,";
-    mess << "Y[0][0] = " << ws->readY(0)[0] << ")";
+    mess << "Y[0][0] = " << ws->y(0)[0] << ")";
     return mess.str();
   }
 
@@ -852,10 +876,10 @@ public:
       bool breakOut=false;
       std::string  dummy;
       for (size_t wi=0; wi < work_out1->getNumberHistograms(); wi++) {
-        const auto &xIn = work_in1->readX(wi);
-        const auto &xOut = work_out1->readX(wi);
-        const auto &yOut = work_out1->readY(wi);
-        const auto &eOut = work_out1->readE(wi);
+        const auto &xIn = work_in1->x(wi);
+        const auto &xOut = work_out1->x(wi);
+        const auto &yOut = work_out1->y(wi);
+        const auto &eOut = work_out1->e(wi);
         for (size_t i=0; i < yOut.size(); i++) {
           //std::ostringstream mess;
           //mess << message << ", evaluated at wi " << wi << ", i " << i;
@@ -887,16 +911,16 @@ public:
 //      return true;
 //    if (ws2Index/work_in2->blocksize() >= work_in2->getNumberHistograms())
 //      return true;
-    double sig1 = work_in1->readY(i/work_in1->blocksize())[i%work_in1->blocksize()];
-    double sig2 = work_in2->readY(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
-    double sig3 = work_out1->readY(i/work_in1->blocksize())[i%work_in1->blocksize()];
+    double sig1 = work_in1->y(i/work_in1->blocksize())[i%work_in1->blocksize()];
+    double sig2 = work_in2->y(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
+    double sig3 = work_out1->y(i/work_in1->blocksize())[i%work_in1->blocksize()];
 
-    TS_ASSERT_DELTA(work_in1->readX(i/work_in1->blocksize())[i%work_in1->blocksize()],
-        work_out1->readX(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
+    TS_ASSERT_DELTA(work_in1->x(i/work_in1->blocksize())[i%work_in1->blocksize()],
+        work_out1->x(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
 
-    double err1 = work_in1->readE(i/work_in1->blocksize())[i%work_in1->blocksize()];
-    double err2 = work_in2->readE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
-    double err3 = work_out1->readE(i/work_in1->blocksize())[i%work_in1->blocksize()];
+    double err1 = work_in1->e(i/work_in1->blocksize())[i%work_in1->blocksize()];
+    double err2 = work_in2->e(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
+    double err3 = work_out1->e(i/work_in1->blocksize())[i%work_in1->blocksize()];
 
     double expectValue, expectError;
     //Compute the expectation
@@ -978,7 +1002,7 @@ public:
       else
       {
         TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
-        double yValue = output->readY(i)[0];
+        double yValue = output->y(i)[0];
         TS_ASSERT_EQUALS(yValue, yValue );
         TS_ASSERT( !std::isinf(yValue) );
       }
