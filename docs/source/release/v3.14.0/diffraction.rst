@@ -41,10 +41,9 @@ New
 
 - New algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` to index peaks with satellites and set modulation vectors and maximum order of satellite from input values.
 
-- New algorithm :ref:`IntegrateEllipsoidsWithSatellites <algm-IntegrateEllipsoidsWithSatellites>` to integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
-
 Improvements
 ############
+- :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` will integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
 
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` will load satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
 
