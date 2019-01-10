@@ -18,8 +18,8 @@ class EnginX:
             self.van_run = kwargs.get("vanadium_run")
             if "output_directory" in kwargs:
                 location = "{0}/{1}/{2}"
-                self.calibration_directory = location.format(kwargs.get("output_directory"), self.user,"Calibration")
-                self.focus_directory = location.format(kwargs.get("output_directory"), self.user,Focus)
+                self.calibration_directory = location.format(kwargs.get("output_directory"), self.user, "Calibration")
+                self.focus_directory = location.format(kwargs.get("output_directory"), self.user, "Focus")
             else:
                 raise KeyError("You must set an output_directory")
 
@@ -51,14 +51,18 @@ class EnginX:
         if "run_number" in kwargs:
             run_no = kwargs.get("run_number")
         else:
-            return
+            raise KeyError("Cannot focus without run_number")
         van_curves_file, van_int_file = self._get_van_names()
-        if "cropped" in kwargs:
+        if "grouping_file" in kwargs:
+            grouping_file = os.path.join(self.calibration_directory, kwargs.get("grouping_file"))
+            Focus.focus_texture_mode(van_curves_file, van_int_file, run_no,
+                                     self.focus_directory, grouping_file)
+        elif "cropped" in kwargs:
             if kwargs.get("cropped") == "banks":
-                Focus.focus_cropped(False, kwargs.get("bank"), van_curves_file, van_int_file, run_no,
+                Focus.focus_cropped(False, False, kwargs.get("bank"), van_curves_file, van_int_file, run_no,
                                     self.focus_directory)
             elif kwargs.get("cropped") == "spectra":
-                Focus.focus_cropped(True, kwargs.get("spectra"), van_curves_file, van_int_file, run_no,
+                Focus.focus_cropped(True, False, kwargs.get("spectra"), van_curves_file, van_int_file, run_no,
                                     self.focus_directory)
         else:
             Focus.focus_whole(van_curves_file, van_int_file, run_no,
