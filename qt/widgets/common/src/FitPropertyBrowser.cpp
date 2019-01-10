@@ -111,7 +111,7 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),
       m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
-      m_shouldBeNormalised(false), m_oldWorkspaceIndex(0) {
+      m_shouldBeNormalised(false), m_oldWorkspaceIndex(-1) {
   Mantid::API::FrameworkManager::Instance().loadPlugins();
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
@@ -1158,7 +1158,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
       }
     }
   }
-  setWorkspaceIndex(-1);
+  setWorkspaceIndex(0);
 }
 
 /// Get workspace index
@@ -1375,7 +1375,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
       setWorkspaceIndex(allowedIndex);
       emit workspaceIndexChanged(allowedIndex);
     }
-    m_oldWorkspaceIndex = currentIndex;
+    m_oldWorkspaceIndex = allowedIndex;
   } else if (prop->propertyName() == "Workspace Index") {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
@@ -1766,7 +1766,7 @@ void FitPropertyBrowser::populateWorkspaceNames() {
     }
   }
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
-  setWorkspaceIndex(-1);
+  setWorkspaceIndex(0);
 }
 
 /**
@@ -2450,7 +2450,7 @@ int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
   }
 
   if (currentIndex == m_oldWorkspaceIndex) {
-    return currentIndex;
+    return currentIndex < 0 ? 0 : currentIndex;
   }
 
   auto const allowedIndices =
