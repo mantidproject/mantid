@@ -15,8 +15,9 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -64,7 +65,7 @@ constexpr double mmToMeter(const double x) { return x * 1.e-3; }
  */
 Mantid::API::ITableWorkspace_sptr
 createPeakPositionTable(const PeakInfo &info) {
-  auto table = Mantid::API::WorkspaceFactory::Instance().createTable();
+  auto table = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
   table->addColumn("double", "DetectorAngle");
   table->addColumn("double", "DetectorDistance");
   table->addColumn("double", "PeakCentre");
@@ -386,9 +387,9 @@ void LoadILLReflectometry::initWorkspace(
   }
   // create the workspace
   try {
-    m_localWorkspace = WorkspaceFactory::Instance().create(
-        "Workspace2D", m_numberOfHistograms + monitorsData.size(),
-        m_numberOfChannels + 1, m_numberOfChannels);
+    m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(
+        m_numberOfHistograms + monitorsData.size(),
+        HistogramData::BinEdges(m_numberOfChannels + 1));
   } catch (std::out_of_range &) {
     throw std::runtime_error(
         "Workspace2D cannot be created, check number of histograms (" +
