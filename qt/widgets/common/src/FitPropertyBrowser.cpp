@@ -1169,7 +1169,8 @@ int FitPropertyBrowser::workspaceIndex() const {
 /// Set workspace index
 void FitPropertyBrowser::setWorkspaceIndex(int i) {
   try {
-    m_intManager->setValue(m_workspaceIndex, i);
+    auto const index = getAllowedIndex(i);
+    m_intManager->setValue(m_workspaceIndex, index);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     // ignore this error
   }
@@ -1368,50 +1369,13 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
-
-    auto const workspace =
-        convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
-
-    if (workspace) {
-      auto const allowedIndices =
-          m_allowedSpectra.empty()
-              ? QList<int>()
-              : m_allowedSpectra[QString::fromStdString(workspaceName())];
-      auto const firstIndex =
-          m_allowedSpectra.empty() ? 0 : allowedIndices.front();
-      auto const lastIndex = m_allowedSpectra.empty()
-                                 ? getNumberOfSpectra(workspace) - 1
-                                 : allowedIndices.back();
-      int const currentIndex = workspaceIndex();
-      if (currentIndex == m_oldWorkspaceIndex) {
-        return;
-      }
-
-      auto allowedIndex = currentIndex;
-      if (currentIndex < firstIndex) {
-        allowedIndex = firstIndex;
-      } else if (currentIndex > lastIndex) {
-        allowedIndex = lastIndex;
-      } else if (!m_allowedSpectra.empty() &&
-                 !allowedIndices.contains(currentIndex)) {
-        allowedIndex = m_oldWorkspaceIndex;
-        auto i = allowedIndices.indexOf(m_oldWorkspaceIndex);
-        if (i >= 0) {
-          i = currentIndex > m_oldWorkspaceIndex ? i + 1 : i - 1;
-          if (i >= 0 && i < allowedIndices.size()) {
-            allowedIndex = allowedIndices[i];
-          }
-        }
-      }
-
-      if (allowedIndex != currentIndex) {
-        setWorkspaceIndex(allowedIndex);
-        emit workspaceIndexChanged(allowedIndex);
-      }
-
-      m_oldWorkspaceIndex = currentIndex;
-    } else
-      setWorkspaceIndex(0);
+    auto const currentIndex = workspaceIndex();
+    auto const allowedIndex = getAllowedIndex(currentIndex);
+    if (allowedIndex != currentIndex) {
+      setWorkspaceIndex(allowedIndex);
+      emit workspaceIndexChanged(allowedIndex);
+    }
+    m_oldWorkspaceIndex = currentIndex;
   } else if (prop->propertyName() == "Workspace Index") {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
@@ -2472,6 +2436,51 @@ Mantid::API::IFunction_const_sptr FitPropertyBrowser::theFunction() const {
 }
 
 void FitPropertyBrowser::checkFunction() {}
+
+/**
+ * If the current wrkspace index is set to a disallowed value this fuunction
+ * returns the nearest allowed index. Otherwise the current index is returned.
+ */
+int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
+  auto const workspace =
+      convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
+
+  if (!workspace) {
+    return 0;
+  }
+
+  if (currentIndex == m_oldWorkspaceIndex) {
+    return currentIndex;
+  }
+
+  auto const allowedIndices =
+    m_allowedSpectra.empty()
+        ? QList<int>()
+        : m_allowedSpectra[QString::fromStdString(workspaceName())];
+  auto const firstIndex =
+      m_allowedSpectra.empty() ? 0 : allowedIndices.front();
+  auto const lastIndex = m_allowedSpectra.empty()
+                              ? getNumberOfSpectra(workspace) - 1
+                              : allowedIndices.back();
+
+  auto allowedIndex = currentIndex;
+  if (currentIndex < firstIndex) {
+    allowedIndex = firstIndex;
+  } else if (currentIndex > lastIndex) {
+    allowedIndex = lastIndex;
+  } else if (!m_allowedSpectra.empty() &&
+              !allowedIndices.contains(currentIndex)) {
+    allowedIndex = m_oldWorkspaceIndex;
+    auto i = allowedIndices.indexOf(m_oldWorkspaceIndex);
+    if (i >= 0) {
+      i = currentIndex > m_oldWorkspaceIndex ? i + 1 : i - 1;
+      if (i >= 0 && i < allowedIndices.size()) {
+        allowedIndex = allowedIndices[i];
+      }
+    }
+  }
+  return allowedIndex;
+}
 
 void FitPropertyBrowser::saveFunction() {
   bool ok(false);
