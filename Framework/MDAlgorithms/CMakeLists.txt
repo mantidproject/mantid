@@ -318,7 +318,6 @@ set ( TEST_FILES
 	Integrate3DEventsTest.h
 	IntegrateEllipsoidsTest.h
 	IntegrateEllipsoidsTwoStepTest.h
-	IntegrateEllipsoidsWithSatellitesTest.h
 	IntegrateFluxTest.h
 	IntegrateMDHistoWorkspaceTest.h
 	IntegratePeaksCWSDTest.h
