@@ -2438,7 +2438,7 @@ Mantid::API::IFunction_const_sptr FitPropertyBrowser::theFunction() const {
 void FitPropertyBrowser::checkFunction() {}
 
 /**
- * If the current wrkspace index is set to a disallowed value this fuunction
+ * If the current workspace index is set to a disallowed value this function
  * returns the nearest allowed index. Otherwise the current index is returned.
  */
 int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
