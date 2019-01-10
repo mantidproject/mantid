@@ -42,6 +42,9 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
           this,
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
+
+  // m_uiForm.rqwPlot2D->setPlotVisible(false);
+  m_uiForm.rqwPlot2D->setColourBarVisible(false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -196,8 +199,13 @@ void IndirectSqw::plotContour() {
 
     convertSpecAlg->execute();
 
-    QString pyInput = "plot2D('" + convertedWsName + "')\n";
-    m_pythonRunner.runPythonCode(pyInput);
+    auto hhh = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        convertedWsName.toStdString());
+    m_uiForm.rqwPlot2D->setWorkspace(hhh);
+    // m_uiForm.rqwPlot2D->setPlotVisible(true);
+
+    // QString pyInput = "plot2D('" + convertedWsName + "')\n";
+    // m_pythonRunner.runPythonCode(pyInput);
   } else {
     emit showMessageBox("Invalid filename.");
   }

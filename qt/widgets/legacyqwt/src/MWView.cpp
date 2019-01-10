@@ -119,6 +119,14 @@ void MWView::updateDisplay() {
 
 SafeQwtPlot *MWView::getPlot2D() { return m_uiForm.plot2D; }
 
+void MWView::setPlotVisible(bool visible) {
+  m_uiForm.plot2D->setVisible(visible);
+}
+
+void MWView::setColourBarVisible(bool visible) {
+  m_uiForm.colorBar->setVisible(visible);
+}
+
 //               ++++++++++++++++++++++++++++++++
 //               ++++++++ Public slots   ++++++++
 //               ++++++++++++++++++++++++++++++++
