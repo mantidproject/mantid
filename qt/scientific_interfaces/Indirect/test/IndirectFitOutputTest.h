@@ -347,7 +347,7 @@ public:
   void
   test_that_the_resultworkspace_is_renamed_to_have_the_correct_name_after_a_fit_is_executed_with_multiple_data() {
     (void)getFitOutputData();
-    TS_ASSERT(m_ads->doesExist("_ConvFit_1L_Result"));
+    TS_ASSERT(m_ads->doesExist("MultiConvFit_1L__s0_to_4_Result"));
   }
 
 private:
