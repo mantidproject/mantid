@@ -86,6 +86,7 @@ Improvements
 - :ref:`FitPeaks <algm-FitPeaks>` can output parameters' uncertainty (fitting error) in an optional workspace.
 - The documentation in :ref:`EventFiltering` and :ref:`FilterEvents <algm-FilterEvents>` have been extensively rewritten to aid in understanding what the code does.
 - All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``).
+- Various clarifications and additional links in the geometry and material documentation pages
 
 Bugfixes
 ########

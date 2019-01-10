@@ -1,11 +1,26 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAPI/AnalysisDataServiceObserver.h"
+
+namespace {
+template <typename Observer>
+void modifyObserver(const bool turnOn, bool &isObserving, Observer &observer) {
+  if (turnOn && !isObserving) {
+    AnalysisDataService::Instance().notificationCenter.addObserver(observer);
+  } else if (!turnOn && isObserving) {
+    AnalysisDataService::Instance().notificationCenter.removeObserver(observer);
+  }
+  isObserving = turnOn;
+}
+} // namespace
+
+namespace Mantid {
+namespace API {
 
 AnalysisDataServiceObserver::AnalysisDataServiceObserver()
     : m_addObserver(*this, &AnalysisDataServiceObserver::_addHandle),
@@ -31,8 +46,8 @@ AnalysisDataServiceObserver::~AnalysisDataServiceObserver() {
 /**
  * @brief Function will turn on/off all observers for the ADS
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True, then if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeAll(bool turnOn) {
   this->observeAdd(turnOn);
@@ -46,147 +61,91 @@ void AnalysisDataServiceObserver::observeAll(bool turnOn) {
 }
 
 /**
- * @brief Function will add/remove the observer to the ADS for if a workspace is
- * added to it.
+ * @brief Function will add/remove the observer to the ADS for when a workspace
+ * is added to it.
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True then, if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeAdd(bool turnOn) {
-  if (turnOn && !m_observingAdd) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_addObserver);
-  } else if (!turnOn && m_observingAdd) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_addObserver);
-  }
-  m_observingAdd = turnOn;
+  modifyObserver(turnOn, m_observingAdd, m_addObserver);
 }
 
 /**
- * @brief Function will add/remove the observer to the ADS for if a workspace is
- * replaced
+ * @brief Function will add/remove the observer to the ADS for when a workspace
+ * is replaced
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True then, if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeReplace(bool turnOn) {
-  if (turnOn && !m_observingReplace) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_replaceObserver);
-  } else if (!turnOn && m_observingReplace) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_replaceObserver);
-  }
-  m_observingReplace = turnOn;
+  modifyObserver(turnOn, m_observingReplace, m_replaceObserver);
 }
 
 /**
- * @brief Function will add/remove the observer to the ADS for if a workspace is
- * deleted.
+ * @brief Function will add/remove the observer to the ADS for when a workspace
+ * is deleted.
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True then, if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeDelete(bool turnOn) {
-  if (turnOn && !m_observingDelete) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_deleteObserver);
-  } else if (!turnOn && m_observingDelete) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_deleteObserver);
-  }
-  m_observingDelete = turnOn;
+  modifyObserver(turnOn, m_observingDelete, m_deleteObserver);
 }
 
 /**
- * @brief Function will add/remove the observer to the ADS for if the ADS is
+ * @brief Function will add/remove the observer to the ADS for when the ADS is
  * cleared.
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True then, if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeClear(bool turnOn) {
-  if (turnOn && !m_observingClear) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_clearObserver);
-  } else if (!turnOn && m_observingClear) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_clearObserver);
-  }
-  m_observingClear = turnOn;
+  modifyObserver(turnOn, m_observingClear, m_clearObserver);
 }
 
 /**
- * @brief Function will add/remove the observer to the ADS for if a workspace is
- * renamed
+ * @brief Function will add/remove the observer to the ADS for when a workspace
+ * is renamed
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True then, if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeRename(bool turnOn) {
-  if (turnOn && !m_observingRename) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_renameObserver);
-  } else if (!turnOn && m_observingRename) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_renameObserver);
-  }
-  m_observingRename = turnOn;
+  modifyObserver(turnOn, m_observingRename, m_renameObserver);
 }
 
 /**
- * @brief Function will add/remove the observer to the ADS for if a group is
+ * @brief Function will add/remove the observer to the ADS for when a group is
  * added/created in the ADS
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True then, if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeGroup(bool turnOn) {
-  if (turnOn && !m_observingGroup) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_groupObserver);
-  } else if (!turnOn && m_observingGroup) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_groupObserver);
-  }
-  m_observingGroup = turnOn;
+  modifyObserver(turnOn, m_observingGroup, m_groupObserver);
 }
 
 /**
- * @brief Function will add/remove the observer to the ADS for if a group is
+ * @brief Function will add/remove the observer to the ADS for when a group is
  * removed/delete from the ADS
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True then, if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeUnGroup(bool turnOn) {
-  if (turnOn && !m_observingUnGroup) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_unGroupObserver);
-  } else if (!turnOn && m_observingUnGroup) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_unGroupObserver);
-  }
-  m_observingUnGroup = turnOn;
+  modifyObserver(turnOn, m_observingUnGroup, m_unGroupObserver);
 }
 
 /**
  * @brief Function will add/remove the observer to the ADS for if a workspace is
  * added to a group or removed.
  *
- * @param turnOn bool; if this is True then if not already present the observer
- * will be added else removed if it's false.
+ * @param turnOn bool; if this is True then, if not already present, the
+ * observer will be added else removed if it's false.
  */
 void AnalysisDataServiceObserver::observeGroupUpdate(bool turnOn) {
-  if (turnOn && !m_observingGroupUpdate) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_groupUpdatedObserver);
-  } else if (!turnOn && m_observingGroupUpdate) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_groupUpdatedObserver);
-  }
-  m_observingGroupUpdate = turnOn;
+  modifyObserver(turnOn, m_observingGroupUpdate, m_groupUpdatedObserver);
 }
 
 // ------------------------------------------------------------
@@ -351,3 +310,6 @@ void AnalysisDataServiceObserver::_groupUpdateHandle(
   this->anyChangeHandle();
   this->groupUpdateHandle(pNf->objectName(), pNf->object());
 }
+
+} // namespace API
+} // namespace Mantid

@@ -26,7 +26,8 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
+                                       add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
@@ -331,6 +332,10 @@ class RunTabPresenter(object):
             if not batch_file_path:
                 return
 
+            datasearch_dirs = ConfigService["datasearch.directories"]
+            batch_file_directory, datasearch_dirs = add_dir_to_datasearch(batch_file_path, datasearch_dirs)
+            ConfigService["datasearch.directories"] = datasearch_dirs
+
             if not os.path.exists(batch_file_path):
                 raise RuntimeError(
                     "The batch file path {} does not exist. Make sure a valid batch file path"
@@ -348,6 +353,10 @@ class RunTabPresenter(object):
                 self._add_row_to_table_model(row, index)
             self._table_model.remove_table_entries([len(parsed_rows)])
         except RuntimeError as e:
+            if batch_file_directory:
+                # Remove added directory from datasearch.directories
+                ConfigService["datasearch.directories"] = remove_dir_from_datasearch(batch_file_directory, datasearch_dirs)
+
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 

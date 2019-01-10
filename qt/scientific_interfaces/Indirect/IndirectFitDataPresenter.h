@@ -53,6 +53,8 @@ protected slots:
   void setModelFromMultipleData();
   void showAddWorkspaceDialog();
 
+  virtual void closeDialog();
+
 signals:
   void singleSampleLoaded();
   void singleResolutionLoaded();
@@ -74,14 +76,16 @@ protected:
   virtual void addModelData(const std::string &name);
   void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
-  virtual void dialogExecuted(IAddWorkspaceDialog const *dialog,
-                              QDialog::DialogCode result);
+
+private slots:
+  void addData();
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(std::size_t dataIndex);
 
+  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModel *m_model;
   PrivateFittingData m_singleData;
   PrivateFittingData m_multipleData;

@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -14,9 +14,11 @@ import sys
 from mantid.api import AnalysisDataService as ADS, AnalysisDataServiceObserver
 from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace, GroupWorkspaces, UnGroupWorkspace, DeleteWorkspace
 
-if sys.version_info.major == 3:
+if sys.version_info.major >= 3:
+    # Python 3 and above
     from unittest import mock
 else:
+    # Python 2
     import mock
 
 
