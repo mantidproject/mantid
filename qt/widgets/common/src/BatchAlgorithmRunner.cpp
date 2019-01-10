@@ -64,6 +64,8 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  * @param algo Algorithm to add to queue
  * @param props Optional map of property name to property values to be set just
  *before execution (mainly intended for input and inout workspace names)
+ * @param notifyee Optional subscriber to be notified when this algorithm
+ *finishes
  */
 void BatchAlgorithmRunner::addAlgorithm(
     IAlgorithm_sptr algo, AlgorithmRuntimeProps props,

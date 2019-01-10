@@ -26,6 +26,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
 /** Constructor
  * @param view :: [input] The view we are managing
+ * @param model :: [input] The reduction configuration model
  * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
  * @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
  * presenter
