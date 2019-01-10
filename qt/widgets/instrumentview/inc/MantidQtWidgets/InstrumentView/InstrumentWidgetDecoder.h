@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTWIDGETDECODER_H_
-#define INSTRUMENTWIDGETDECODER_H_
+#ifndef MANTIDQT_WIDGETS_INSTRUMENTWIDGETDECODER_H_
+#define MANTIDQT_WIDGETS_INSTRUMENTWIDGETDECODER_H_
 
 #include "MantidQtWidgets/InstrumentView/ColorBar.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
@@ -28,7 +28,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetDecoder : QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetDecoder : public QObject {
   Q_OBJECT
 public:
   InstrumentWidgetDecoder();
@@ -38,7 +38,7 @@ public:
 signals:
   void shapeCreated();
 
-private:
+protected:
   void decodeTabs(const QMap<QString, QVariant> &map, InstrumentWidget &obj);
 
   void decodeMaskTab(const QMap<QString, QVariant> &map,
@@ -77,4 +77,4 @@ private:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /*INSTRUMENTWIDGETDECODER_H_*/
+#endif /*MANTIDQT_WIDGETS_INSTRUMENTWIDGETDECODER_H_*/

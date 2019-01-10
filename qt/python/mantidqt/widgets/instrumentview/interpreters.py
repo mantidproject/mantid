@@ -24,16 +24,19 @@ class Decoder(InstrumentViewAttributes):
         super(Decoder, self).__init__()
         self.widget_decoder = InstrumentWidgetDecoder()
 
-    def decode(self, obj_dic, project_path=None):
-        if obj_dic is None or project_path is None:
+    def decode(self, obj_dic, project_path):
+        if obj_dic is None:
             return None
         # Make the widget
         ws = ADS.retrieve(obj_dic["workspaceName"])
         instrument_view_presenter = InstrumentViewPresenter(ws)
         instrument_widget = instrument_view_presenter.view.layout().itemAt(0).widget()
 
-        #  Then decode
+        #  Then 'decode' set the values from the dictionary
         self.widget_decoder.decode(obj_dic, instrument_widget, project_path)
+
+        # Show the end result
+        instrument_view_presenter.view.show()
 
     @classmethod
     def has_tag(cls, tag):

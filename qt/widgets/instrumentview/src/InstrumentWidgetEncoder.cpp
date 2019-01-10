@@ -87,7 +87,7 @@ InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
   for (const auto name : names) {
     list.append(name);
   }
-  map.insert(QString("expandedItems"), QVariant("list"));
+  map.insert(QString("expandedItems"), QVariant(list));
 
   return map;
 }

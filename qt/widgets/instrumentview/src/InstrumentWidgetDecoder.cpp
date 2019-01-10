@@ -118,15 +118,25 @@ void InstrumentWidgetDecoder::decodeRenderTab(
       map[QString("showRelativeIntensity")].toBool());
 
   // Load color bar
-  this->decodeColorBar(map[QString("colormap")].toMap(), obj->m_colorBarWidget);
+  this->decodeColorBar(map[QString("colorBar")].toMap(), obj->m_colorBarWidget);
 }
 
 void InstrumentWidgetDecoder::decodeColorBar(const QMap<QString, QVariant> &map,
                                              ColorBar *bar) {
-  bar->setScaleType(map[QString("scaleType")].toInt());
-  bar->setNthPower(map[QString("power")].toDouble());
-  bar->setMinValue(map[QString("min")].toDouble());
-  bar->setMaxValue(map[QString("max")].toDouble());
+  const auto scaleType = map[QString("scaleType")].toInt();
+  const auto power = map[QString("power")].toString().toDouble();
+  const auto min = map[QString("min")].toString().toDouble();
+  const auto max = map[QString("max")].toString().toDouble();
+
+  bar->setScaleType(scaleType);
+  try {
+    bar->setNthPower(power);
+  } catch (const std::runtime_error &e) {
+    // Do nothing, because this is where the power was loaded in as 0.
+  }
+
+  bar->setMinValue(min);
+  bar->setMaxValue(max);
 }
 
 void InstrumentWidgetDecoder::decodeTreeTab(const QMap<QString, QVariant> &map,
@@ -195,7 +205,7 @@ void InstrumentWidgetDecoder::decodeSurface(
 
 void InstrumentWidgetDecoder::decodeMaskShapes(const QList<QVariant> &list,
                                                Shape2DCollection &obj) {
-  connect(this, SIGNAL(this->shapeCreated()), &obj, SLOT(obj->shapeCreated()));
+  connect(this, SIGNAL(shapeCreated()), &obj, SIGNAL(shapeCreated()));
   for (const auto &shape : list) {
     Shape2D *created_shape = this->decodeShape(shape.toMap());
     obj.m_shapes.push_back(created_shape);

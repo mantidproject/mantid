@@ -57,15 +57,18 @@ class ProjectLoader(object):
 
         if workspace_success:
             # Load plots
-            self.plot_loader.load_plots(self.project_reader.plot_lists)
+            if self.project_reader.plot_list is not None:
+                self.plot_loader.load_plots(self.project_reader.plot_list)
 
             # Load interfaces
-            for interface in self.project_reader.interface_list:
-                # Find decoder
-                decoder = self.decoder_factory.find_decoder(interface["tag"])
+            if self.project_reader.interface_list is not None:
+                for interface in self.project_reader.interface_list:
+                    # Find decoder
+                    decoder = self.decoder_factory.find_decoder(interface["tag"])
 
-                # Actually load the interface
-                decoder.decode()
+                    # Actually load the interface
+                    decoder_object = decoder()
+                    decoder_object.decode(interface, directory)
 
         return workspace_success
 
@@ -73,7 +76,7 @@ class ProjectLoader(object):
 class ProjectReader(object):
     def __init__(self, project_file_ext):
         self.workspace_names = None
-        self.plot_lists = None
+        self.plot_list = None
         self.interface_list = None
         self.project_file_ext = project_file_ext
 
@@ -87,6 +90,7 @@ class ProjectReader(object):
             with open(os.path.join(directory, (os.path.basename(directory) + self.project_file_ext))) as f:
                 json_data = json.load(f)
                 self.workspace_names = json_data["workspaces"]
-                self.plot_lists = json_data["plots"]
+                self.plot_list = json_data["plots"]
+                self.interface_list = json_data["interfaces"]
         except Exception:
             logger.warning("JSON project file unable to be loaded/read")

@@ -35,7 +35,7 @@ public:
                                  const QString &projectPath) /ReleaseGIL/;
 };
 
-class InstrumentWidgetDecoder {
+class InstrumentWidgetDecoder : QObject{
 %TypeHeaderCode
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h"
 %End

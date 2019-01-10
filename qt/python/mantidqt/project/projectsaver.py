@@ -47,11 +47,14 @@ class ProjectSaver(object):
         plots_to_save_list = PlotsSaver().save_plots(plots_to_save)
 
         # Save interfaces
-        interfaces = {}
+        interfaces = []
         for interface in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
             encoder = interface[1]()
-            interfaces[interface[1].__class__.__name__] = encoder.encode(interface[0], directory)
+            tag = interface[1].tags[0]
+            encoded_dict = encoder.encode(interface[0], directory)
+            encoded_dict["tag"] = tag
+            interfaces.append(encoded_dict)
 
         # Pass dicts to Project Writer
         writer = ProjectWriter(workspace_names=workspace_saver.get_output_list(),
