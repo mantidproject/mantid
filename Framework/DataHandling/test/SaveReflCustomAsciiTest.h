@@ -8,16 +8,20 @@
 #define SAVEREFLCUSTOMASCIITEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveReflCustomAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Points.h"
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
+using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
 class SaveReflCustomAsciiTest : public CxxTest::TestSuite {
@@ -62,6 +66,7 @@ public:
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
     headingsTests(in, fullline);
+
     getline(in, fullline);
 
     std::vector<std::string> columns;
@@ -70,9 +75,9 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 4);
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -103,9 +108,9 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 4);
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -136,9 +141,9 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 4);
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -169,16 +174,16 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 4);
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0., 0.01);
     in.close();
 
     cleanupafterwards();
   }
   void testParameters() {
     // create a new workspace and then delete it later on
-    createWS(false, false, false, true);
+    createWS(false, false, false);
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("SaveReflCustomAscii");
@@ -205,9 +210,9 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 4);
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -236,33 +241,16 @@ private:
     } else {
     };
   }
-  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
-                bool createLogs = false) {
-    createLogs = false;
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    AnalysisDataService::Instance().addOrReplace(m_name, ws);
+  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false) {
     // Check if any of X, Y or E should be zeroed to check for divide by zero or
     // similiar
-    if (zeroX) {
-      ws->dataX(0) = m_data0;
-    } else {
-      ws->dataX(0) = m_dataX;
-    }
-
-    if (zeroY) {
-      ws->dataY(0) = m_data0;
-    } else {
-      ws->dataY(0) = m_dataY;
-    }
-
-    if (zeroE) {
-      ws->dataE(0) = m_data0;
-    } else {
-      ws->dataE(0) = m_dataE;
-    }
-    if (createLogs) {
-    } else {
-    }
+    Points points(zeroX ? m_data0 : m_dataX);
+    Counts counts(zeroY ? m_data0 : m_dataY);
+    CountStandardDeviations stddev(zeroE ? m_data0 : m_dataE);
+    MatrixWorkspace_sptr ws =
+        create<Workspace2D>(1, Histogram(points, counts, stddev));
+    AnalysisDataService::Instance().addOrReplace(m_name, ws);
+    AnalysisDataService::Instance().addOrReplace(m_name, ws);
   }
   void cleanupafterwards() {
     Poco::File(m_long_filename).remove();

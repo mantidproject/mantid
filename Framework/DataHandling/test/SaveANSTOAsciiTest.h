@@ -8,16 +8,19 @@
 #define SAVEANSTOASCIITEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveANSTOAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
+using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
 class SaveANSTOAsciiTest : public CxxTest::TestSuite {
@@ -64,9 +67,9 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
     TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
@@ -95,9 +98,9 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 0., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
     TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
@@ -126,9 +129,9 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
     TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
@@ -157,9 +160,9 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0., 0.01);
     TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
@@ -189,9 +192,9 @@ public:
     boost::split(columns, fullline, boost::is_any_of(","),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
     TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
@@ -214,27 +217,14 @@ public:
 
 private:
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false) {
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    AnalysisDataService::Instance().addOrReplace(m_name, ws);
     // Check if any of X, Y or E should be zeroed to check for divide by zero or
     // similiar
-    if (zeroX) {
-      ws->dataX(0) = m_data0;
-    } else {
-      ws->dataX(0) = m_dataX;
-    }
-
-    if (zeroY) {
-      ws->dataY(0) = m_data0;
-    } else {
-      ws->dataY(0) = m_dataY;
-    }
-
-    if (zeroE) {
-      ws->dataE(0) = m_data0;
-    } else {
-      ws->dataE(0) = m_dataE;
-    }
+    Points points(zeroX ? m_data0 : m_dataX);
+    Counts counts(zeroY ? m_data0 : m_dataY);
+    CountStandardDeviations stddev(zeroE ? m_data0 : m_dataE);
+    MatrixWorkspace_sptr ws =
+        create<Workspace2D>(1, Histogram(points, counts, stddev));
+    AnalysisDataService::Instance().addOrReplace(m_name, ws);
   }
   void cleanupafterwards() {
     Poco::File(m_long_filename).remove();

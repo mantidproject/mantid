@@ -501,7 +501,7 @@ void FitOneSinglePeak::highBkgdFit() {
     size_t numpts = i_maxFitX - i_minFitX;
     size_t shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
     i_minPeakX += shift;
-    auto Xdata = m_dataWS->x(m_wsIndex);
+    const auto &Xdata = m_dataWS->x(m_wsIndex);
     if (i_minPeakX >= Xdata.size())
       i_minPeakX = Xdata.size() - 1;
     m_minPeakX = Xdata[i_minPeakX];
