@@ -12,7 +12,7 @@ Check that file manipulation works fine
 
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import SANSUtility as su
 import os
@@ -221,9 +221,9 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
 
 
-class SANSSwitchIDFTestRunner(stresstesting.MantidStressTest):
+class SANSSwitchIDFTestRunner(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

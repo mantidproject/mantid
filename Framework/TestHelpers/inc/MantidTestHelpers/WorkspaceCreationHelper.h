@@ -271,6 +271,9 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist,
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
                                            int numBins);
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspace123WithMaskedBin(int numHist, int numBins,
+                                  int maskedWorkspaceIndex, int maskedBinIndex);
 
 /** Create an Eventworkspace with an instrument that contains
  * RectangularDetector's */

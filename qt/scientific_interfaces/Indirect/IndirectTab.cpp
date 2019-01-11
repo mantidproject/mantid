@@ -167,19 +167,23 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
  */
 void IndirectTab::addSaveWorkspaceToQueue(const QString &wsName,
                                           const QString &filename) {
+  addSaveWorkspaceToQueue(wsName.toStdString(), filename.toStdString());
+}
+
+void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName,
+                                          const std::string &filename) {
   // Setup the input workspace property
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-  saveProps["InputWorkspace"] = wsName.toStdString();
+  saveProps["InputWorkspace"] = wsName;
 
   // Setup the algorithm
-  IAlgorithm_sptr saveAlgo =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
+  auto saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
   saveAlgo->initialize();
 
-  if (filename.isEmpty())
-    saveAlgo->setProperty("Filename", wsName.toStdString() + ".nxs");
+  if (filename.empty())
+    saveAlgo->setProperty("Filename", wsName + ".nxs");
   else
-    saveAlgo->setProperty("Filename", filename.toStdString());
+    saveAlgo->setProperty("Filename", filename);
 
   // Add the save algorithm to the batch
   m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
@@ -257,21 +261,22 @@ void IndirectTab::plotMultipleSpectra(
  * This uses the plotSpectrum function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param wsIndex Index of spectrum from each workspace to plot
+ * @param spectraIndex Index of spectrum from each workspace to plot
  */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
-  if (workspaceNames.isEmpty())
-    return;
+void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
+                               const int &spectraIndex, const bool &errorBars) {
+  if (!workspaceNames.isEmpty()) {
+    const QString errors = errorBars ? "True" : "False";
 
-  QString pyInput = "from mantidplot import plotSpectrum\n";
+    QString pyInput = "from mantidplot import plotSpectrum\n";
+    pyInput += "plotSpectrum(['";
+    pyInput += workspaceNames.join("','");
+    pyInput += "'], ";
+    pyInput += QString::number(spectraIndex);
+    pyInput += ", error_bars=" + errors + ")\n";
 
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], ";
-  pyInput += QString::number(wsIndex);
-  pyInput += ")\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
+    m_pythonRunner.runPythonCode(pyInput);
+  }
 }
 
 /**
@@ -279,15 +284,16 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
  * index.
  *
  * @param workspaceName Names of workspace to plot
- * @param wsIndex Workspace Index of spectrum to plot
+ * @param spectraIndex Workspace Index of spectrum to plot
+ * @param errorBars Is true if you want to plot the error bars
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int wsIndex) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, wsIndex);
+void IndirectTab::plotSpectrum(const QString &workspaceName,
+                               const int &spectraIndex, const bool &errorBars) {
+  if (!workspaceName.isEmpty()) {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotSpectrum(workspaceNames, spectraIndex, errorBars);
+  }
 }
 
 /**
@@ -627,7 +633,7 @@ void IndirectTab::algorithmFinished(bool error) {
 /**
  * Run Python code and return anything printed to stdout.
  *
- * @param code Python code the execute
+ * @param code Python code to execute
  * @param no_output Enable to ignore any output
  * @returns What was printed to stdout
  */

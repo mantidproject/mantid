@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division,
                         print_function)
 import os as _os
 import sys as _sys
-###############################################################################
+
 
 def update_sys_paths(paths, recursive=False):
     """
@@ -25,7 +25,7 @@ def update_sys_paths(paths, recursive=False):
         paths = paths.split(";")
 
     def _append_to_path(path):
-        #sys.path doesn't like trailing slashes
+        # sys.path doesn't like trailing slashes
         _sys.path.append(path.rstrip("\\").rstrip("/"))
 
     for path in paths:
@@ -35,7 +35,6 @@ def update_sys_paths(paths, recursive=False):
                 for dirname in dirnames:
                     _append_to_path(_os.path.join(dirpath, dirname))
 
-########################################################################################
 
 def set_NEXUSLIB_var():
     """
@@ -52,18 +51,3 @@ def set_NEXUSLIB_var():
         _nexuslib = _os.path.normpath(_os.path.join(thisdir, _nexuslib))
 
     _os.environ['NEXUSLIB'] = _nexuslib
-
-#########################################################################################
-
-## Setup on import ##
-import os as _os
-update_sys_paths(_os.environ.get("MANTIDPATH",""))
-
-from ._aliases import config as _config
-_path_keys = ['requiredpythonscript.directories','pythonscripts.directories']
-for key in _path_keys:
-    paths = _config[key]
-    update_sys_paths(paths)
-
-# NeXus
-set_NEXUSLIB_var()

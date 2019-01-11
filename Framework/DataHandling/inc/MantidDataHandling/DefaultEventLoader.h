@@ -126,10 +126,9 @@ void DefaultEventLoader::makeMapToEventLists(
       }
     }
   } else {
-    // To avoid going out of range in the vector, this is the MAX index that can
+    // To avoid going out of range in the vector, this is the MAX INDEX that can
     // go into it
-    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size()) +
-                  pixelID_to_wi_offset;
+    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size());
 
     // Make an array where index = pixel ID
     // Set the value to NULL by default
@@ -137,8 +136,7 @@ void DefaultEventLoader::makeMapToEventLists(
       vectors[i].resize(eventid_max + 1, nullptr);
     }
 
-    for (size_t j = size_t(pixelID_to_wi_offset);
-         j < pixelID_to_wi_vector.size(); j++) {
+    for (size_t j = 0; j < pixelID_to_wi_vector.size(); j++) {
       size_t wi = pixelID_to_wi_vector[j];
       // Save a POINTER to the vector
       if (wi < m_ws.getNumberHistograms()) {

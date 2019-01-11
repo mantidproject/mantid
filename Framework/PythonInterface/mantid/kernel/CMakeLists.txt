@@ -60,7 +60,8 @@ set ( EXPORT_FILES
   src/Exports/UsageService.cpp
   src/Exports/Atom.cpp
   src/Exports/StringContainsValidator.cpp
-  src/Exports/PropertyFactory.cpp	
+  src/Exports/PropertyFactory.cpp
+  src/Exports/RebinParamsValidator.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )

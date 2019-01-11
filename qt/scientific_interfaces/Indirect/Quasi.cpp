@@ -286,7 +286,7 @@ void Quasi::updateMiniPlot() {
       curveColour = Qt::magenta;
 
     else if (specName.contains("diff.1"))
-      curveColour = Qt::green;
+      curveColour = Qt::blue;
     else if (specName.contains("diff.2"))
       curveColour = Qt::cyan;
 
@@ -336,7 +336,7 @@ void Quasi::plotCurrentPreview() {
     QString QfitWS = QString::fromStdString(fitName + "_");
     QfitWS += QString::number(m_previewSpec);
     if (program == "Lorentzians")
-      plotSpectra(QfitWS, {0, 1, 2, 4});
+      plotSpectra(QfitWS, {0, 1, 2, 3, 4});
     else
       plotSpectra(QfitWS, {0, 1, 2});
   } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
@@ -493,17 +493,6 @@ void Quasi::plotClicked() {
     IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
     QString const QprobWS = QString::fromStdString(probWS);
     IndirectTab::plotSpectrum(QprobWS, 1, 2);
-  }
-  if (plot == "Fit" || plot == "All") {
-    std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-    fitName.pop_back();
-    fitName.append("_0");
-    IndirectTab::checkADSForPlotSaveWorkspace(fitName, true);
-    QString const QfitWS = QString::fromStdString(fitName);
-    if (program == "Lorentzians")
-      IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
-    else
-      IndirectTab::plotSpectra(QfitWS, {0, 1, 2});
   }
 
   auto const resultWS =

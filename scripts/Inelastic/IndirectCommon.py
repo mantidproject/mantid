@@ -49,7 +49,13 @@ def get_run_number(ws_name):
         if match:
             run_number = match.group(2)
         else:
-            raise RuntimeError("Could not find run number associated with workspace.")
+            # attempt reading from the logs (ILL)
+            run = workspace.getRun()
+            if run.hasProperty('run_number'):
+                log = run.getLogData('run_number').value
+                run_number = log.split(',')[0]
+            else:
+                raise RuntimeError("Could not find run number associated with workspace.")
 
     return run_number
 

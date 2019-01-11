@@ -8,12 +8,12 @@ from __future__ import (absolute_import, division, print_function)
 
 from tempfile import gettempdir
 from os import path, remove
-import stresstesting
+import systemtesting
 from mantid.simpleapi import PowderDiffILLDetEffCorr, SaveNexusProcessed
 from mantid import config, mtd
 
 
-class ILLPowderDiffDetEffCorrClosureTest(stresstesting.MantidStressTest):
+class ILLPowderDiffDetEffCorrClosureTest(systemtesting.MantidSystemTest):
 
     _m_tmp_file = None
 

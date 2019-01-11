@@ -6,13 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
 # A dummy test class to subclass from.
 # Sets up the facility and data search directories.
-class _DiffReductionTest(stresstesting.MantidStressTest):
+class _DiffReductionTest(systemtesting.MantidSystemTest):
 
     _facility = ''
     _directories = ''

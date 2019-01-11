@@ -111,6 +111,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pbFitSingle">
+       <property name="minimumSize">
+        <size>
+         <width>99</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Fit Single Spectrum</string>
        </property>

@@ -254,16 +254,18 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get table file name
-        table_file = str(QFileDialog.getOpenFileName(self, 'Peak Integration Table', self._working_dir))
-        if len(table_file) == 0 or os.path.exists(table_file) is False:
+        table_file = QFileDialog.getOpenFileName(self, 'Peak Integration Table', self._working_dir)
+        if not table_file:
+            return
+        if isinstance(table_file, tuple):
+            table_file = table_file[0]
+        if not os.path.exists(table_file):
             return
 
         # load
         status, error_msg = self._controller.load_peak_integration_table(table_file)
         if not status:
             raise RuntimeError(error_msg)
-
-        return
 
     def do_plot_integrated_pt(self, show_plot=True, save_plot_to=None):
         """ plot integrated Pt with model and raw data
@@ -430,13 +432,13 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get output file
-        out_file_name = str(QFileDialog.getSaveFileName(self, 'File to save integrated intensities', self._working_dir))
-        if len(out_file_name) == 0:
+        out_file_name = QFileDialog.getSaveFileName(self, 'File to save integrated intensities', self._working_dir)
+        if not out_file_name:
             return
+        if isinstance(out_file_name, tuple):
+            out_file_name = out_file_name[0]
 
         self.ui.tableView_summary.save_intensities_to_file(out_file_name)
-
-        return
 
     def do_retrieve_fwhm(self):
         """
@@ -472,8 +474,6 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         if len(error_messages) > 0:
             guiutility.show_message(self, error_messages)
 
-        return
-
     def menu_load_gauss_sigma_file(self):
         """
         load a Gaussian sigma curve for interpolation or matching
@@ -481,11 +481,13 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """
         # get the column ascii file name
         file_filter = 'Data Files (*.dat);;All Files (*.*)'
-        twotheta_sigma_file_name = str(QFileDialog.getOpenFileName(self, self._working_dir,
-                                                                   '2theta Gaussian-Sigma File',
-                                                                   file_filter))
-        if len(twotheta_sigma_file_name) == 0 or twotheta_sigma_file_name == 'None':
+        twotheta_sigma_file_name = QFileDialog.getOpenFileName(self, self._working_dir,
+                                                               '2theta Gaussian-Sigma File',
+                                                               file_filter)
+        if not twotheta_sigma_file_name:
             return
+        if isinstance(twotheta_sigma_file_name, tuple):
+            twotheta_sigma_file_name = twotheta_sigma_file_name[0]
 
         # set the file to controller
         try:
@@ -493,9 +495,6 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             self.ui.graphicsView_integration1DView.plot_2theta_model(vec_x, vec_y)
         except RuntimeError as run_err:
             guiutility.show_message(self, str(run_err))
-            return
-
-        return
 
     def menu_table_select_all(self):
         """

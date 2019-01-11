@@ -42,16 +42,16 @@ public:
   static void destroySuite(ErrorReporterTest *suite) { delete suite; }
 
   void test_errorMessage() {
-    std::string name = "My testing application name";
-    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string name = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", false);
-    std::string message = errorService.generateErrorMessage();
+    const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
     ::Json::Value root;
     reader.parse(message, root);
     auto members = root.getMemberNames();
-    std::vector<std::string> expectedMembers{
+    const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode"};
@@ -67,17 +67,17 @@ public:
   }
 
   void test_errorMessageWithShare() {
-    std::string name = "My testing application name";
-    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string name = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
                                        "textBox");
-    std::string message = errorService.generateErrorMessage();
+    const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
     ::Json::Value root;
     reader.parse(message, root);
     auto members = root.getMemberNames();
-    std::vector<std::string> expectedMembers{
+    const std::vector<std::string> expectedMembers{
         "ParaView",      "application", "host",     "mantidSha1",
         "mantidVersion", "osArch",      "osName",   "osReadable",
         "osVersion",     "uid",         "facility", "upTime",
@@ -93,6 +93,69 @@ public:
     TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
     TS_ASSERT_EQUALS(root["name"].asString(), "name");
     TS_ASSERT_EQUALS(root["email"].asString(), "email");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
+  }
+
+  void test_errorMessageWithShareAndRecoveryFileHash() {
+    const std::string name = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
+                                       "textBox", "fileHash");
+    const std::string message = errorService.generateErrorMessage();
+
+    ::Json::Reader reader;
+    ::Json::Value root;
+    reader.parse(message, root);
+    auto members = root.getMemberNames();
+    const std::vector<std::string> expectedMembers{
+        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "osArch",   "osName",      "osReadable", "osVersion",  "uid",
+        "facility", "upTime",      "exitCode",   "textBox",    "name",
+        "email",    "fileHash"};
+    for (auto expectedMember : expectedMembers) {
+      TSM_ASSERT(expectedMember + " not found",
+                 std::find(members.begin(), members.end(), expectedMember) !=
+                     members.end());
+    }
+
+    TS_ASSERT_EQUALS(root["application"].asString(), name);
+    TS_ASSERT_EQUALS(root["upTime"].asString(), to_simple_string(upTime));
+    TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
+    TS_ASSERT_EQUALS(root["name"].asString(), "name");
+    TS_ASSERT_EQUALS(root["email"].asString(), "email");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
+    TS_ASSERT_EQUALS(root["fileHash"].asString(), "fileHash");
+  }
+
+  void test_errorMessageWithNoShareAndRecoveryFileHash() {
+    const std::string name = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    TestableErrorReporter errorService(name, upTime, "0", false, "name",
+                                       "email", "textBox", "fileHash");
+    const std::string message = errorService.generateErrorMessage();
+
+    ::Json::Reader reader;
+    ::Json::Value root;
+    reader.parse(message, root);
+    auto members = root.getMemberNames();
+    const std::vector<std::string> expectedMembers{
+        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "osArch",   "osName",      "osReadable", "osVersion",  "uid",
+        "facility", "upTime",      "exitCode",   "textBox",    "name",
+        "email",    "fileHash"};
+    for (auto expectedMember : expectedMembers) {
+      TSM_ASSERT(expectedMember + " not found",
+                 std::find(members.begin(), members.end(), expectedMember) !=
+                     members.end());
+    }
+
+    TS_ASSERT_EQUALS(root["application"].asString(), name);
+    TS_ASSERT_EQUALS(root["upTime"].asString(), to_simple_string(upTime));
+    TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
+    TS_ASSERT_EQUALS(root["name"].asString(), "");
+    TS_ASSERT_EQUALS(root["email"].asString(), "");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "");
+    TS_ASSERT_EQUALS(root["fileHash"].asString(), "");
   }
 };
 

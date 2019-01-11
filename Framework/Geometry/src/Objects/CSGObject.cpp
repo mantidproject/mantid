@@ -915,7 +915,7 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
         }
       }
     }
-    // this break (only used in no BB defined) may be wrong if object has hole
+    // this break (only used if no BB defined) may be wrong if object has hole
     // in middle
     if (!useBB && countPhi == 0)
       break;
@@ -1131,7 +1131,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
     //
     // No special case, do the ray trace.
     //
-    return rayTraceSolidAngle(observer); // so is this
+    return rayTraceSolidAngle(observer);
   }
   const auto &vertices = this->getTriangleVertices();
   const auto &faces = this->getTriangleFaces();
@@ -1151,7 +1151,6 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
       sangle += sa;
     else
       sneg += sa;
-    //    std::cout << vp1 << vp2 << vp2;
   }
   return (0.5 * (sangle - sneg));
 }

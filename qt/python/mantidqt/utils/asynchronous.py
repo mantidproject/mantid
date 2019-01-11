@@ -13,6 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 import sys
 import threading
 import time
+from traceback import extract_tb
 
 
 def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
@@ -147,6 +148,14 @@ class AsyncTaskFailure(AsyncTaskResult):
         self.exc_type = exc_type
         self.exc_value = exc_value
         self.stack = stack
+
+    def __str__(self):
+        error_name = type(self.exc_value).__name__
+        filename, lineno, _, _ = extract_tb(self.stack)[-1]
+        msg = self.exc_value.args
+        if isinstance(msg, tuple):
+            msg = msg[0]
+        return '{} on line {} of \'{}\': {}'.format(error_name, lineno, filename, msg)
 
     @property
     def success(self):

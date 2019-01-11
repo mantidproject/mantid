@@ -14,13 +14,15 @@ The "worker" handles running the function via a unique process ID; "listeners" m
 each process which are then notified upon certain actions (such as an error being thrown by the
 worker, or the worker finishing its task) using the nested class WorkListener.
 """
+from __future__ import absolute_import
 
 from PyQt4.QtCore import pyqtSlot, QThreadPool
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
-from worker import Worker
 import functools
 import uuid
+
+from .worker import Worker
 
 
 class WorkHandler(object):

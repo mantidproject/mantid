@@ -8,15 +8,19 @@
 #include <vector>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -24,8 +28,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMuon/PlotAsymmetryByLogValue.h"
 #include "Poco/File.h"
-#include <MantidAPI/FileFinder.h>
 
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 namespace // anonymous
 {
 
@@ -186,19 +191,16 @@ void PlotAsymmetryByLogValue::exec() {
   // Create the 2D workspace for the output
   int nplots = !m_greenY.empty() ? 4 : 1;
   size_t npoints = m_logValue.size();
-  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
-      "Workspace2D",
-      nplots,  //  the number of plots
-      npoints, //  the number of data points on a plot
-      npoints  //  it's not a histogram
+  MatrixWorkspace_sptr outWS = create<Workspace2D>(
+      nplots,         //  the number of plots
+      Points(npoints) //  the number of data points on a plot
   );
   // Populate output workspace with data
   populateOutputWorkspace(outWS, nplots);
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
 
-  outWS = WorkspaceFactory::Instance().create("Workspace2D", nplots + 1,
-                                              npoints, npoints);
+  outWS = create<Workspace2D>(nplots + 1, Points(npoints));
   // Populate ws holding current results
   saveResultsToADS(outWS, nplots + 1);
 }
@@ -588,8 +590,7 @@ Workspace_sptr
 PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd,
                                               const std::vector<int> &bwd) {
 
-  ITableWorkspace_sptr group =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  ITableWorkspace_sptr group = boost::make_shared<TableWorkspace>();
   group->addColumn("vector_int", "group");
   TableRow row = group->appendRow();
   row << fwd;
@@ -747,10 +748,12 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws_red,
                                                MatrixWorkspace_sptr ws_green,
                                                double &Y, double &E) {
   if (!m_int) { //  "Differential asymmetry"
-
-    MatrixWorkspace_sptr tmpWS = WorkspaceFactory::Instance().create(
-        ws_red, 1, ws_red->x(0).size(), ws_red->y(0).size());
-
+    HistogramBuilder builder;
+    builder.setX(ws_red->x(0).size());
+    builder.setY(ws_red->y(0).size());
+    builder.setDistribution(ws_red->isDistribution());
+    MatrixWorkspace_sptr tmpWS =
+        create<MatrixWorkspace>(*ws_red, 1, builder.build());
     for (size_t i = 0; i < tmpWS->y(0).size(); i++) {
       double FNORM = ws_green->y(0)[i] + ws_red->y(0)[i];
       FNORM = FNORM != 0.0 ? 1.0 / FNORM : 1.0;

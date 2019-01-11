@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
+from mantid.api import FrameworkManager
 import math
 
 from sans.common.general_functions import (create_unmanaged_algorithm)
@@ -19,6 +19,11 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class SANSScaleTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
+
     @staticmethod
     def _get_workspace():
         sample_name = "CreateSampleWorkspace"

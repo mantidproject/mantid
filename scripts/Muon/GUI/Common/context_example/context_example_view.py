@@ -95,6 +95,9 @@ class ContextExampleView(QtGui.QWidget):
         self.ws1.setText(group_name[1])
         self.ws2.setText(group_name[2])
 
+        #store the detectors
+        self.dets = context["Group dets"]
+
         # update combo boxes (clear and repopulate)
         self.g1.clear()
         self.g2.clear()
@@ -120,6 +123,7 @@ class ContextExampleView(QtGui.QWidget):
         context = {}
         context["Group Names"] = [
             self.ws0.text(), self.ws1.text(), self.ws2.text()]
+        context["Group dets"] = self.dets
         context["Pair_F"] = str(self.g1.currentText())
         context["Pair_B"] = str(self.g2.currentText())
         context["Pair_alpha"] = float(self.alpha.text())

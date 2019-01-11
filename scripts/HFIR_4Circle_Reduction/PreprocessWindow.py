@@ -75,15 +75,11 @@ class ScanPreProcessWindow(QMainWindow):
         self.ui.pushButton_fixSettings.clicked.connect(self.do_fix_calibration_settings)
         self.ui.actionExit.triggered.connect(self.do_quit)
 
-        return
-
     def _promote_widgets(self):
         tableView_scanProcessState_layout = QVBoxLayout()
         self.ui.frame_tableView_scanProcessState.setLayout(tableView_scanProcessState_layout)
         self.ui.tableView_scanProcessState = ScanPreProcessStatusTable(self)
         tableView_scanProcessState_layout.addWidget(self.ui.tableView_scanProcessState)
-
-        return
 
     @property
     def controller(self):
@@ -110,12 +106,12 @@ class ScanPreProcessWindow(QMainWindow):
         default_dir = os.path.join('/HFIR/HB3A/Exp{0}/shared/'.format(exp_number))
 
         # get output directory
-        output_dir = str(QFileDialog.getExistingDirectory(self, 'Outputs for pre-processed scans', default_dir))
-        if output_dir is None or len(output_dir) == 0:
+        output_dir = QFileDialog.getExistingDirectory(self, 'Outputs for pre-processed scans', default_dir)
+        if not output_dir:
             return
+        if isinstance(output_dir, tuple):
+            output_dir = output_dir[0]
         self.ui.lineEdit_outputDir.setText(output_dir)
-
-        return
 
     def do_change_calibration_settings(self):
         """
@@ -124,16 +120,12 @@ class ScanPreProcessWindow(QMainWindow):
         """
         self.enable_calibration_settings(True)
 
-        return
-
     def do_fix_calibration_settings(self):
         """
         disable the settings to be modifiable
         :return:
         """
         self.enable_calibration_settings(False)
-
-        return
 
     def do_quit(self):
         """close window properly
@@ -144,8 +136,6 @@ class ScanPreProcessWindow(QMainWindow):
 
         if self._myMergePeaksThread is not None:
             self._myMergePeaksThread.terminate()
-
-        return
 
     def do_start_pre_process(self):
         """
@@ -196,8 +186,6 @@ class ScanPreProcessWindow(QMainWindow):
         self._currExpNumber = exp_number
         self._myMergePeaksThread.start()
 
-        return
-
     def enable_calibration_settings(self, to_enable):
         """
         enable or disable the calibration settings
@@ -208,8 +196,6 @@ class ScanPreProcessWindow(QMainWindow):
         self.ui.lineEdit_infoWavelength.setEnabled(to_enable)
         self.ui.lineEdit_infoDetSampleDistance.setEnabled(to_enable)
         self.ui.comboBox_detSize.setEnabled(to_enable)
-
-        return
 
     def get_scan_numbers(self):
         """
@@ -322,8 +308,6 @@ class ScanPreProcessWindow(QMainWindow):
         det_size = [256, 512][curr_det_size_index]
         self._myController.set_detector_geometry(det_size, det_size)
 
-        return
-
     def set_instrument_calibration(self, exp_number, det_size, det_center, det_sample_distance, wave_length):
         """set up the calibration parameters
 
@@ -372,8 +356,6 @@ class ScanPreProcessWindow(QMainWindow):
             # END-IF
         # END-IF
 
-        return
-
     def setup(self, controller):
         """
         setup the 4-circle reduction controller
@@ -385,8 +367,6 @@ class ScanPreProcessWindow(QMainWindow):
             ''.format(controller.__class__.__name__)
 
         self._myController = controller
-
-        return
 
     def update_file_name(self, scan_number, file_name):
         """Update merged file name
@@ -422,8 +402,6 @@ class ScanPreProcessWindow(QMainWindow):
         self.ui.tableView_scanProcessState.set_file_name(row_number, file_name)
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
 
-        return
-
     def update_merge_value(self, scan_number, message):
         """update merged signal
         :param scan_number:
@@ -433,8 +411,6 @@ class ScanPreProcessWindow(QMainWindow):
         row_number = self._rowScanDict[scan_number]
         self.ui.tableView_scanProcessState.set_status(row_number, message)
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
-
-        return
 
     def update_record_file(self, exp_number, check_duplicates, scan_list):
         """ update the record file
@@ -503,8 +479,6 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         # a quick-reference list
         self._scanRowDict = dict()
 
-        return
-
     def setup(self):
         """
         Init setup
@@ -523,8 +497,6 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         self._iColStatus = self.TableSetup.index(('Status', 'str'))
         self._iColFile = self.TableSetup.index(('File', 'str'))
         self._iColNote = self.TableSetup.index(('Note', 'str'))
-
-        return
 
     def add_new_scans(self, scan_numbers):
         """add scans to the table
@@ -563,7 +535,4 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         :return:
         """
         # check
-
         self.update_cell_value(row_number, self._iColStatus, status)
-
-        return

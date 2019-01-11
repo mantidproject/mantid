@@ -81,6 +81,8 @@ protected:
                 const int specMin = -1, const int specMax = -1);
 
   /// Add a SaveNexusProcessed step to the batch queue
+  void addSaveWorkspaceToQueue(const std::string &wsName,
+                               const std::string &filename = "");
   void addSaveWorkspaceToQueue(const QString &wsName,
                                const QString &filename = "");
 
@@ -92,9 +94,11 @@ protected:
   void plotMultipleSpectra(const QStringList &workspaceNames,
                            const std::vector<int> &workspaceIndices);
   /// Plot a spectrum plot with a given ws index
-  void plotSpectrum(const QStringList &workspaceNames, int wsIndex = 0);
+  void plotSpectrum(const QStringList &workspaceNames,
+                    const int &spectraIndex = 0, const bool &errorBars = false);
   /// Plot a spectrum plot of a given workspace
-  void plotSpectrum(const QString &workspaceName, int wsIndex = 0);
+  void plotSpectrum(const QString &workspaceName, const int &spectraIndex = 0,
+                    const bool &errorBars = false);
 
   /// Plot a spectrum plot with a given spectra range
   void plotSpectrum(const QStringList &workspaceNames, int specStart,

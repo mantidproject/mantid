@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
-import stresstesting
+import systemtesting
 
 import mantid
 from mantid.api import AlgorithmManager
@@ -188,9 +188,9 @@ class SANSReductionCoreTest(unittest.TestCase):
         self._compare_workspace(unfitted_transmission, unfitted_transmission_reference_file)
 
 
-class SANSReductionCoreRunnerTest(stresstesting.MantidStressTest):
+class SANSReductionCoreRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

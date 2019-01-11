@@ -75,7 +75,9 @@ public:
         "regex=\"\\\\\\\\isis\\\\inst\\$\\\\Instruments\\$\"></"
         "prefix>" // Same regex from facilities.xml, lots of "\"
                   // character escaping.
-        "<windows replacement=\"\"></windows>"
+        "<windows "
+        "replacement=\"\\\\\\\\isis\\.cclrc\\.ac\\.uk\\\\inst\\$"
+        "\\\\Instruments\\$\"></windows>"
         "<linux replacement=\"/archive\"></linux>"
         "<mac replacement=\"/archive\"></mac>"
         "</filelocation>"
@@ -92,10 +94,9 @@ public:
     std::string macPrefixPath =
         "/archive/NDXSANDALS/Instrument/data/cycle_05_3/ALF06716.LOG";
     std::string winPrefixPath =
-        R"(\NDXSANDALS\Instrument\data\cycle_05_3\ALF06716.LOG)";
-    std::string winDefaultPath = "\\\\isis\\inst$\\Instruments$"
-                                 "\\NDXSANDALS\\Instrument\\data\\cycle_05_"
-                                 "3\\ALF06716.LOG";
+        R"(\\isis.cclrc.ac.uk\inst$\Instruments$\NDXSANDALS\Instrument\data\cycle_05_3\ALF06716.LOG)";
+    std::string winDefaultPath =
+        R"(\\isis\inst$\Instruments$\NDXSANDALS\Instrument\data\cycle_05_3\ALF06716.LOG)";
 
     // Perform the transformation of each path prior to assertions for
     // re-usability of code.
@@ -115,7 +116,7 @@ public:
     TS_ASSERT_EQUALS(macPrefixPath, transformWin);
     TS_ASSERT_EQUALS(macPrefixPath, transformLin);
 #elif _WIN32
-    TS_ASSERT_EQUALS(winDefaultPath, transformWin);
+    TS_ASSERT_EQUALS(winPrefixPath, transformWin);
     TS_ASSERT_EQUALS(winPrefixPath, transformMac);
     TS_ASSERT_EQUALS(winPrefixPath, transformLin);
 #endif

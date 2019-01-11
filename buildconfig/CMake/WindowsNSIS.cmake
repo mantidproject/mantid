@@ -75,9 +75,11 @@ endforeach()
 # Other third party dependencies
 set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
+    boost_filesystem-mt.dll
     boost_python27-mt.dll
     boost_regex-mt.dll
     boost_serialization-mt.dll
+    boost_system-mt.dll
 )
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll

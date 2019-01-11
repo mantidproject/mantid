@@ -127,9 +127,7 @@ void SphericalAbsorption::retrieveBaseProperties() {
       sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, sigma_s, 0.0,
-                        sigma_s, sigma_atten);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
     auto shape = boost::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInSphericalAbsorption", neutron, rho)));

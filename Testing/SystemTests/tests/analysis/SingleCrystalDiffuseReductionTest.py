@@ -4,11 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import stresstesting
+import systemtesting
 from mantid.simpleapi import SingleCrystalDiffuseReduction, Load, AlgorithmManager, SaveMD
 
 
-class SingleCrystalDiffuseTest(stresstesting.MantidStressTest):
+class SingleCrystalDiffuseTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ["CORELLI_29782.nxs","CORELLI_29792.nxs",
                 "SingleCrystalDiffuseReduction_SA.nxs",

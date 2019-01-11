@@ -20,7 +20,54 @@ import mantid.plots.plotfunctions
 import mantid.plots.plotfunctions3D
 from matplotlib.axes import Axes
 from matplotlib.projections import register_projection
-from mpl_toolkits.mplot3d.axes3d import Axes3D
+
+try:
+    from mpl_toolkits.mplot3d.axes3d import Axes3D
+except ImportError:
+    # Special case to handle issues with importing mpl_toolkits
+    #
+    # Matplotlib adds a *nspkg.pth file to the user site packages directory.
+    # When that file is processed a fake built-in mpl_toolkits is imported
+    # which forces the site packages version to take precidence over our
+    # local copy regardless of python sys path settings.
+    #
+    # Work around by removing the fake built-in module from sys modules,
+    # then forcing python to search the path as expected.
+    #
+    # This is mostly but not necessarily limited to being an issue on OSX
+    # where there are multiple versions of matplotlib installed across the
+    # system.
+    import sys
+    del sys.modules['mpl_toolkits']
+    from mpl_toolkits.mplot3d.axes3d import Axes3D
+
+
+def plot_decorator(func):
+    def wrapper(self, *args, **kwargs):
+        func_value = func(self, *args, **kwargs)
+        # Saves saving it on array objects
+        if mantid.plots.helperfunctions.validate_args(*args, **kwargs):
+            # Fill out kwargs with the values of args
+            for index, arg in enumerate(args):
+                if index is 0:
+                    kwargs["workspaces"] = args[0].name()
+                if index is 1:
+                    kwargs["spectrum_nums"] = args[1]
+                if index is 2:
+                    kwargs["wksp_indices"] = args[2]
+                if index is 3:
+                    kwargs["errors"] = args[3]
+                if index is 4:
+                    kwargs["overplot"] = arg[4]
+                # ignore 5 as no need to save the fig object
+                if index is 6:
+                    kwargs["plot_kwargs"] = arg[6]
+            if hasattr(self, "creation_args"):
+                self.creation_args.append(kwargs)
+            else:
+                self.creation_args = [kwargs]
+        return func_value
+    return wrapper
 
 
 class MantidAxes(Axes):
@@ -43,7 +90,10 @@ class MantidAxes(Axes):
     '''
 
     name = 'mantid'
+    HORIZONTAL = BIN = 0
+    VERTICAL = SPECTRUM = 1
 
+    @plot_decorator
     def plot(self, *args, **kwargs):
         '''
         If the **mantid** projection is chosen, it can be
@@ -244,6 +294,7 @@ class MantidAxes(Axes):
         else:
             return Axes.contour(self, *args, **kwargs)
 
+    @plot_decorator
     def contourf(self, *args, **kwargs):
         '''
         If the **mantid** projection is chosen, it can be

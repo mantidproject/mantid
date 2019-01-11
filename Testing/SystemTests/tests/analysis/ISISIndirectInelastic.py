@@ -21,7 +21,7 @@ For diagrams on the intended work flow of the IDR and IDA interfaces see:
 
 System test class hierarchy as shown below:
 
-stresstesting.MantidStressTest
+systemtesting.MantidSystemTest
  |
  +--ISISIndirectInelasticBase
      |
@@ -74,7 +74,7 @@ stresstesting.MantidStressTest
 '''
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
@@ -85,7 +85,7 @@ import platform
 from six import with_metaclass
 
 
-class ISISIndirectInelasticBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class ISISIndirectInelasticBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
     '''

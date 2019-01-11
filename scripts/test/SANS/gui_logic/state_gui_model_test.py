@@ -9,7 +9,7 @@ import unittest
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId, det_fit_range)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SampleShape, SaveType,
-                               FitType)
+                               FitType, SANSInstrument)
 from sans.user_file.settings_tags import (det_fit_range)
 
 
@@ -19,13 +19,16 @@ class StateGuiModelTest(unittest.TestCase):
     # FRONT TAB
     # ==================================================================================================================
     # ==================================================================================================================
+    def test_that_default_instrument_is_NoInstrument(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertEqual(state_gui_model.instrument, SANSInstrument.NoInstrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Compatibility Mode
     # ------------------------------------------------------------------------------------------------------------------
-    def test_that_default_compatibility_mode_is_false(self):
+    def test_that_default_compatibility_mode_is_true(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertFalse(state_gui_model.compatibility_mode)
+        self.assertTrue(state_gui_model.compatibility_mode)
 
     def test_that_can_set_compatibility_mode(self):
         state_gui_model = StateGuiModel({"test": [1]})
