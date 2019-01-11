@@ -10,11 +10,15 @@
 #include "MantidAPI/SingleCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -413,7 +417,7 @@ void NormaliseToMonitor::checkProperties(
   }
 
   // Do a check for common binning and store
-  m_commonBins = inputWorkspace->isCommonBins();
+  m_commonBins = WorkspaceHelpers::commonBoundaries(*inputWorkspace);
 
   // Check the monitor spectrum or workspace and extract into new workspace
   m_monitor = sepWS ? getMonitorWorkspace(inputWorkspace)
@@ -685,7 +689,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     if (inputEvent) {
       outputWorkspace = inputWorkspace->clone();
     } else
-      outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+      outputWorkspace = create<MatrixWorkspace>(*inputWorkspace);
   }
   auto outputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);

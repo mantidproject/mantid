@@ -89,7 +89,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "x"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT(!alg.isExecuted());
     Workspace2D_sptr outws;
     TS_ASSERT_THROWS_ANYTHING(
         outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(

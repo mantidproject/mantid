@@ -9,11 +9,12 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -725,8 +726,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     MantidVec::difference_type bins = X0.cend() - start;
     MantidVec::difference_type first = start - X0.cbegin();
 
-    result =
-        WorkspaceFactory::Instance().create(workspace, numSpec, bins, bins - 1);
+    result = create<MatrixWorkspace>(*workspace, BinEdges(bins));
 
     for (size_t i = 0; i < numSpec; ++i) {
       auto &X = workspace->x(i);
@@ -756,8 +756,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     g_log.debug() << maxBins << '\n';
     // Now create an output workspace large enough for the longest 'good'
     // range
-    result = WorkspaceFactory::Instance().create(workspace, numSpec, maxBins,
-                                                 maxBins - 1);
+    result = create<MatrixWorkspace>(*workspace, numSpec, BinEdges(maxBins));
     // Next, loop again copying in the correct range for each spectrum
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
       auto edges = workspace->binEdges(j);
