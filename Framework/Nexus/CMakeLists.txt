@@ -8,6 +8,7 @@ set ( INC_FILES
         inc/MantidNexus/MuonNexusReader.h
         inc/MantidNexus/NexusClasses.h
         inc/MantidNexus/NexusFileIO.h
+        inc/MantidNexus/NexusIOHelper.h
 )
 
 if (COVERALLS)

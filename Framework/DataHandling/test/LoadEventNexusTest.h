@@ -162,9 +162,11 @@ public:
     auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
 
-    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 43277);
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
-                     (150 * 150) + 2) // Two monitors
+                     (300 * 300) + 2) // Two monitors
+    TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
   }
 
   void test_load_event_nexus_sans2d_ess() {
