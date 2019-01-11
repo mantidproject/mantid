@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
 
 
 class HelpWidgetPresenter(object):
@@ -14,3 +15,8 @@ class HelpWidgetPresenter(object):
 
     def handle_help_button_clicked(self):
         self._view.warning_popup("Help is not currently implemented!")
+
+class HelpWidget(object):
+    def __init__(self):
+        self.view = HelpWidgetView()
+        self.presenter = HelpWidgetPresenter(self.view)
