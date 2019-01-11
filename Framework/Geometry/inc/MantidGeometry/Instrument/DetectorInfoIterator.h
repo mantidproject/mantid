@@ -15,9 +15,9 @@ using Mantid::Geometry::DetectorInfoItem;
 namespace Mantid {
 namespace Geometry {
 
-/** DetectorInfoIterator
+/** InfoIterator
 
-DetectorInfoIterator allows users of the DetectorInfo object access to data
+InfoIterator allows users of the Info objects (DetectorInfo etc) access to data
 via an iterator. The iterator works as a slice view in that the index is
 incremented and all items accessible at that index are made available via the
 iterator.
@@ -25,15 +25,13 @@ iterator.
 @author Bhuvan Bezawada, STFC
 @date 2018
 */
-template <typename T>
-class DetectorInfoIterator
-    : public boost::iterator_facade<DetectorInfoIterator<T>,
-                                    DetectorInfoItem<T> &,
+template <typename T, template <typename> class InfoItem>
+class InfoIterator
+    : public boost::iterator_facade<InfoIterator<T, InfoItem>, InfoItem<T> &,
                                     boost::random_access_traversal_tag> {
 
 public:
-  DetectorInfoIterator(T &detectorInfo, const size_t index)
-      : m_item(detectorInfo, index) {}
+  InfoIterator(T &info, const size_t index) : m_item(info, index) {}
 
 private:
   // Allow boost iterator access
@@ -53,7 +51,7 @@ private:
   // exist). Adding range checks to all the above methods may slow down
   // performance though.
   void increment() {
-    if (m_item.m_index < m_item.m_detectorInfo->size()) {
+    if (m_item.m_index < m_item.infoSize()) {
       ++m_item.m_index;
     }
   }
@@ -68,20 +66,25 @@ private:
 
   void setIndex(const size_t index) { m_item.m_index = index; }
 
-  bool equal(const DetectorInfoIterator<T> &other) const {
+  bool equal(const InfoIterator<T, InfoItem> &other) const {
     return getIndex() == other.getIndex();
   }
 
-  DetectorInfoItem<T> &dereference() const { return m_item; }
+  InfoItem<T> &dereference() const { return m_item; }
 
-  uint64_t distance_to(const DetectorInfoIterator<T> &other) const {
+  uint64_t distance_to(const InfoIterator<T, InfoItem> &other) const {
     return static_cast<uint64_t>(other.getIndex()) -
            static_cast<uint64_t>(getIndex());
   }
 
-  mutable DetectorInfoItem<T> m_item;
+  mutable InfoItem<T> m_item;
 };
 
+template <typename T>
+class DetectorInfoIterator : public InfoIterator<T, DetectorInfoItem> {
+public:
+  using InfoIterator<T, DetectorInfoItem>::InfoIterator;
+};
 } // namespace Geometry
 } // namespace Mantid
 
