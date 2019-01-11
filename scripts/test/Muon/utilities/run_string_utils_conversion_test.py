@@ -116,6 +116,11 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
         run_list = [1, 2, 3, 48, 49, 50]
         self.assertEqual(utils.run_string_to_list(run_string), run_list)
 
+    def test_run_string_allows_incomplete_upper_range(self):
+        run_string = '62260-66'
+        run_list = [62260, 62261, 62262, 62263, 62264, 62265, 62266]
+        self.assertEqual(utils.run_string_to_list(run_string), run_list)
+
 
 if __name__ == '__main__':
     unittest.main()
