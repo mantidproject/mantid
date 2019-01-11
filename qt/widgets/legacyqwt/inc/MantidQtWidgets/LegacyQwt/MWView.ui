@@ -16,10 +16,10 @@
   <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>9</x>
-     <y>9</y>
-     <width>671</width>
-     <height>431</height>
+     <x>20</x>
+     <y>20</y>
+     <width>681</width>
+     <height>441</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="viewer">
