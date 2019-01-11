@@ -166,7 +166,7 @@ def execute_process(cmd, args):
     proc = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             startupinfo=startupinfo)
     output, _ = proc.communicate()
-    output = output.replace("\r\n","\n")
+    output = output.replace("\r\n", "\n")
     return output
 
 # ------------------------------------------------------------------------------
@@ -177,17 +177,17 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
     """Takes raw reST text produced by pandoc and applies several post-processing steps
     as described in the module documentation
     """
-    post_processed_rst = pandoc_rst#fix_underscores_in_ref_links(pandoc_rst)
+    post_processed_rst = pandoc_rst  # fix_underscores_in_ref_links(pandoc_rst)
     post_processed_rst, image_names = fix_image_links(post_processed_rst, wiki_markup,
                                                       post_process_args["rel_img_dir"])
     download_images_from_wiki(wiki_url, image_names, post_process_args["img_dir"])
     post_processed_rst = add_mantid_concept_links(post_processed_rst)
     if post_process_args["add_heading"]:
-        post_processed_rst = add_page_heading(post_processed_rst, 
-                post_process_args["page_handle"])
+        post_processed_rst = add_page_heading(post_processed_rst,
+                                              post_process_args["page_handle"])
     if post_process_args["add_page_handle"]:
-        post_processed_rst = add_page_handle(post_processed_rst, 
-                post_process_args["page_handle"])
+        post_processed_rst = add_page_handle(post_processed_rst,
+                                             post_process_args["page_handle"])
     post_processed_rst = fix_internal_links(post_processed_rst)
     return post_processed_rst
 
@@ -200,7 +200,7 @@ def add_page_heading(pandoc_rst, page_handle):
     page_heading = ' '.join(word for word in _heading)
     heading_markup = "=" * len(page_heading)
     pandoc_rst = heading_markup + "\n" + page_heading + "\n" + \
-            heading_markup + "\n \n" + pandoc_rst
+        heading_markup + "\n\n" + pandoc_rst
     return pandoc_rst
 
 # ------------------------------------------------------------------------------
@@ -249,7 +249,7 @@ def fix_image_links(rst_text, wiki_markup, rel_img_dir):
     img_link_dict = dict()
     # for all of the mediawiki links
     for match in re.finditer(mw_img_re, wiki_markup):
-        display_info("Processing image link",match.group(0))
+        display_info("Processing image link", match.group(0))
         img_link_dict[match.group(2)] = generate_rst_img_link(match, rel_img_dir)
 
     # for all of the rst figure links
@@ -279,7 +279,7 @@ def fix_image_links(rst_text, wiki_markup, rel_img_dir):
 
 def generate_rst_img_link(match, rel_img_dir):
     link = "image:: " + rel_img_dir + "/" + match.group(2) + "\n"
-    for i in range(3,len(match.groups())):
+    for i in range(3, len(match.groups())):
         if match.group(i) is None:
             break
         # strip off the first character as it is the | pipe
@@ -296,7 +296,7 @@ def add_img_option(mw_img_opt):
     if len(mw_img_opt) > 0:
         if mw_img_opt.endswith("px"):
             return ":width: " + mw_img_opt
-        elif mw_img_opt in ["right","left","middle","centre"]:
+        elif mw_img_opt in ["right", "left", "middle", "centre"]:
             return ":align: " + mw_img_opt
         else:
             return ":alt: " + mw_img_opt
@@ -356,7 +356,7 @@ def add_mantid_concept_links(post_processed_rst):
         post_processed_rst = add_local_links(post_processed_rst, algorithms, "algm-")
     fitfunctions = mantid.FunctionFactory.getFunctionNames()
     if len(fitfunctions) > 0:
-        post_processed_rst = add_local_links(post_processed_rst, fitfunctions,"func-")
+        post_processed_rst = add_local_links(post_processed_rst, fitfunctions, "func-")
 
     return post_processed_rst
 
@@ -414,8 +414,8 @@ def main(argv):
             page_handle = args.page_handle
 
         post_process_args = {"rel_img_dir": rel_img_dir, "img_dir": img_dir, "page_handle":
-            page_handle, "add_page_handle": args.add_page_handle,
-            "add_heading": args.add_heading}
+                             page_handle, "add_page_handle": args.add_page_handle,
+                             "add_heading": args.add_heading}
         display_debug("Post processing arguments: '{}'".format(post_process_args))
         rst_text = to_rst(wiki_url, post_process_args)
         if args.output_file:
