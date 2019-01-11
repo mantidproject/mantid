@@ -18,6 +18,7 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
+from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 
 
 Name = "Muon_Analysis_2"
@@ -65,10 +66,12 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
+        self.help_widget = HelpWidget()
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget.load_widget_view)
         splitter.addWidget(self.grouping_tab_widget.group_tab_view)
+        splitter.addWidget(self.help_widget.view)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
