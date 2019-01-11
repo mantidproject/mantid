@@ -11,15 +11,16 @@
 """
 from __future__ import absolute_import
 
+import os.path as osp
 # stdlib modules
 from contextlib import contextmanager
 from importlib import import_module
-import os.path as osp
 
 # 3rd-party modules
 from qtpy import QT_VERSION
-from qtpy.uic import loadUi, loadUiType
+from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import QAction, QMenu
+from qtpy.uic import loadUi, loadUiType
 
 # local modules
 from ...icons import get_icon
@@ -130,7 +131,12 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
     if on_triggered is not None:
         action.triggered.connect(on_triggered)
     if shortcut is not None:
-        action.setShortcut(shortcut)
+        if isinstance(shortcut, list):
+            qshortcuts = [QKeySequence(s) for s in shortcut]
+            action.setShortcuts(qshortcuts)
+        else:
+            action.setShortcut(shortcut)
+
         if shortcut_context is not None:
             action.setShortcutContext(shortcut_context)
     if icon_name is not None:
