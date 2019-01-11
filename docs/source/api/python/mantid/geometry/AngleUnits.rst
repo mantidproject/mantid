@@ -2,7 +2,7 @@
  AngleUnits
 ============
 
-This a python binding to the C++ class Mantid::Geometry::AngleUnits.
+This is a Python binding to the C++ class Mantid::Geometry::AngleUnits.
 
 
 .. module:`mantid.geometry`

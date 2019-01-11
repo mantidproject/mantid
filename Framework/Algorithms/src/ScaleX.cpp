@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -28,11 +34,6 @@ DECLARE_ALGORITHM(ScaleX)
 ScaleX::ScaleX()
     : API::Algorithm(), m_progress(nullptr), m_algFactor(1.0), m_parname(),
       m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1) {}
-
-/**
- * Destructor
- */
-ScaleX::~ScaleX() { delete m_progress; }
 
 /**
  * Initialisation method. Declares properties to be used in algorithm.
@@ -93,7 +94,7 @@ void ScaleX::exec() {
   API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
   // Get number of histograms
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
-  m_progress = new API::Progress(this, 0.0, 1.0, histnumber + 1);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, histnumber + 1);
   m_progress->report("Scaling X");
   m_wi_min = 0;
   m_wi_max = histnumber - 1;

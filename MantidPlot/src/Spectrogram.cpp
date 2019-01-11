@@ -472,7 +472,8 @@ MantidColorMap Spectrogram::getDefaultColorMap() {
   settings.endGroup();
 
   // if the file is not valid you will get the default
-  MantidColorMap retColorMap(lastColormapFile, GraphOptions::Linear);
+  MantidColorMap retColorMap(lastColormapFile,
+                             MantidColorMap::ScaleType::Linear);
 
   return retColorMap;
 }
@@ -666,7 +667,8 @@ void Spectrogram::saveSettings() {
   // settings.setValue("BackgroundColor",
   // mInstrumentDisplay->currentBackgroundColor());
   settings.setValue("ColormapFile", mCurrentColorMap);
-  settings.setValue("ScaleType", getColorMap().getScaleType());
+  settings.setValue("ScaleType",
+                    static_cast<int>(getColorMap().getScaleType()));
   settings.endGroup();
 }
 /**
@@ -682,9 +684,8 @@ void Spectrogram::loadSettings() {
   // Set values from settings
   mutableColorMap().loadMap(mCurrentColorMap);
 
-  GraphOptions::ScaleType type =
-      (GraphOptions::ScaleType)settings.value("ScaleType", GraphOptions::Log10)
-          .toUInt();
+  auto type = static_cast<MantidColorMap::ScaleType>(
+      settings.value("ScaleType", GraphOptions::Log10).toUInt());
 
   mutableColorMap().changeScaleType(type);
 
@@ -1077,7 +1078,7 @@ void Spectrogram::loadFromProject(const std::string &lines) {
       // color map will revert to the default color map if
       // the file path is invalid
       MantidColorMap colorMap(QString::fromStdString(filename),
-                              GraphOptions::Linear);
+                              MantidColorMap::ScaleType::Linear);
       mCurrentColorMap = colorMap.getFilePath();
       mColorMap = colorMap;
       setCustomColorMap(colorMap);

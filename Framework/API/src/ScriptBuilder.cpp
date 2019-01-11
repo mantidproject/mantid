@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -29,13 +35,14 @@ Mantid::Kernel::Logger g_log("ScriptBuilder");
 
 const std::string COMMENT_ALG = "Comment";
 
-ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
-                             std::string versionSpecificity,
-                             bool appendTimestamp,
-                             std::vector<std::string> ignoreTheseAlgs)
+ScriptBuilder::ScriptBuilder(
+    boost::shared_ptr<HistoryView> view, std::string versionSpecificity,
+    bool appendTimestamp, std::vector<std::string> ignoreTheseAlgs,
+    std::vector<std::vector<std::string>> ignoreTheseAlgProperties)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs) {}
+      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs),
+      m_propertiesToIgnore(ignoreTheseAlgProperties) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -199,7 +206,7 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   }
 
   for (auto &propIter : props) {
-    prop = buildPropertyString(*propIter);
+    prop = buildPropertyString(*propIter, name);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }
@@ -242,11 +249,22 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
  * Build the script output for a single property
  *
  * @param propHistory :: reference to a property history object
+ * @param algName :: reference to the algorithm that the property is from's name
  * @returns std::string for this property
  */
 const std::string ScriptBuilder::buildPropertyString(
-    const Mantid::Kernel::PropertyHistory &propHistory) {
+    const Mantid::Kernel::PropertyHistory &propHistory,
+    const std::string &algName) {
   using Mantid::Kernel::Direction;
+
+  // If the property is to be ignored then return with an empty string
+  if (std::find_if(
+          m_propertiesToIgnore.begin(), m_propertiesToIgnore.end(),
+          [&propHistory, algName](std::vector<std::string> &c) -> bool {
+            return algName == c[0] && propHistory.name() == c[1];
+          }) != m_propertiesToIgnore.end()) {
+    return "";
+  }
 
   // Create a vector of all non workspace property type names
   std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};
@@ -258,8 +276,11 @@ const std::string ScriptBuilder::buildPropertyString(
     if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
              propHistory.type()) != nonWorkspaceTypes.end() &&
         propHistory.direction() == Direction::Output) {
-      g_log.debug() << "Ignoring property " << propHistory.name() << " of type "
-                    << propHistory.type() << '\n';
+      // If algs are to be ignored (Common use case is project recovery) ignore
+      if (m_algsToIgnore.size() == 0) {
+        g_log.debug() << "Ignoring property " << propHistory.name()
+                      << " of type " << propHistory.type() << '\n';
+      }
       // Handle numerical properties
     } else if (propHistory.type() == "number") {
       prop = propHistory.name() + "=" + propHistory.value();

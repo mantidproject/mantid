@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
     Defines functions that can be used to inspect the properties of a
     function call. For example
@@ -14,7 +20,7 @@ import sys
 import dis
 from six import PY3
 
-#-------------------------------------------------------------------------------
+
 def replace_signature(func, varnames):
     """
     Replace the signature of the given function object with that given by
@@ -42,7 +48,7 @@ def replace_signature(func, varnames):
     #endif
     setattr(func, code_attr, c)
 
-#-------------------------------------------------------------------------------
+
 def customise_func(func, name, signature, docstring):
     """
     Takes the definition of the algorithm function and replaces

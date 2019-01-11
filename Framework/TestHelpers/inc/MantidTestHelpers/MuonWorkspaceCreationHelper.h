@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MUONWORKSPACECREATIONHELPER_H_
 #define MUONWORKSPACECREATIONHELPER_H_
 
@@ -86,18 +92,27 @@ Mantid::API::MatrixWorkspace_sptr
 createCountsWorkspace(size_t nspec, size_t maxt, double seed,
                       size_t detectorIDseed = 1);
 
+Mantid::API::MatrixWorkspace_sptr
+createCountsWorkspace(size_t nspec, size_t maxt, double seed,
+                      size_t detectorIDseed, bool hist, double xStart,
+                      double xEnd);
+
 /**
- * Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
- * simulating periods as used in muon analysis. Workspace for period i has a
- * name ending _i.
+ * Create a WorkspaceGroup and add to the ADS, populate with
+ * MatrixWorkspaces simulating periods as used in muon analysis. Workspace
+ * for period i has a name ending _i.
  */
 Mantid::API::WorkspaceGroup_sptr
 createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
                                 const std::string &wsGroupName);
 
+Mantid::API::WorkspaceGroup_sptr
+createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
+                               const std::string &wsGroupName);
+
 /**
- * Create a simple dead time TableWorkspace with two columns (spectrum number
- * and dead time).
+ * Create a simple dead time TableWorkspace with two columns (spectrum
+ * number and dead time).
  */
 Mantid::API::ITableWorkspace_sptr
 createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);

@@ -79,6 +79,7 @@ set ( TEST_PY_FILES
   NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   ReflectometryReductionOneLiveDataTest.py
+  ReflectometrySliceEventWorkspaceTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SaveGEMMAUDParamFileTest.py
@@ -117,4 +118,5 @@ set ( TEST_PY_FILES
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonAlgorithms
+set ( PYUNITTEST_PYTHONPATH_EXTRA ${PYTHONINTERFACE_PLUGINS_DIR}/algorithms )
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.algorithms ${TEST_PY_FILES} )

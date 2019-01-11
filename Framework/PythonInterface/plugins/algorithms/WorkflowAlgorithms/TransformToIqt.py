@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
@@ -204,7 +210,8 @@ class TransformToIqt(PythonAlgorithm):
                             resolution, resolution_bins])
 
         workflow_prog.report('Deleting temp Workspace')
-        DeleteWorkspace('__TransformToIqt_sample_cropped')
+        if mtd.doesExist('__TransformToIqt_sample_cropped'):
+            DeleteWorkspace('__TransformToIqt_sample_cropped')
 
         self.setProperty('ParameterWorkspace', param_table)
 

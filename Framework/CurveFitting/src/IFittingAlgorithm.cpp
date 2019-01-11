@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
@@ -303,6 +309,7 @@ void IFittingAlgorithm::declareCostFunctionProperty() {
 boost::shared_ptr<CostFunctions::CostFuncFitting>
 IFittingAlgorithm::getCostFunctionInitialized() const {
   // Function may need some preparation.
+  m_function->sortTies();
   m_function->setUpForFit();
 
   API::FunctionDomain_sptr domain;

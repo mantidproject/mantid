@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
@@ -2918,9 +2924,7 @@ double EventList::getTofMin() const {
  */
 double EventList::getTofMax() const {
   // set up as the minimum available double
-  double tMax =
-      -1. *
-      std::numeric_limits<double>::max(); // min is a small number, not negative
+  double tMax = std::numeric_limits<double>::lowest();
 
   // no events is a soft error
   if (this->empty())

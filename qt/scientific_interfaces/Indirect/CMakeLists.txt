@@ -10,7 +10,7 @@ set ( SRC_FILES
 	ConvFitDataTablePresenter.cpp
 	ConvFitModel.cpp
 	DensityOfStates.cpp
-        Elwin.cpp
+	Elwin.cpp
 	ILLEnergyTransfer.cpp
 	ISISCalibration.cpp
 	ISISDiagnostics.cpp
@@ -67,7 +67,7 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
-    DllConfig.h
+	DllConfig.h
 	AbsorptionCorrections.h
 	ApplyAbsorptionCorrections.h
 	CalculatePaalmanPings.h
@@ -79,8 +79,9 @@ set ( INC_FILES
 	ConvFitModel.h
 	CorrectionsTab.h
 	DensityOfStates.h
-        Elwin.h
+	Elwin.h
 	IAddWorkspaceDialog.h
+	IIndirectFitPlotView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
@@ -147,6 +148,7 @@ set ( MOC_FILES
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
+    IIndirectFitPlotView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
     IndirectBayes.h
@@ -267,3 +269,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/"
 
 )
+
+# Testing target
+add_subdirectory ( test )

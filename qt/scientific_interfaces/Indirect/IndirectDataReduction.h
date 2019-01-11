@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_
 
@@ -31,27 +37,6 @@ mode is defined in the instrument definition file using the "deltaE-mode".
 
 @author Martyn Gigg, Tessella Support Services plc
 @author Michael Whitty
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class IndirectDataReduction : public MantidQt::API::UserSubWindow {
@@ -87,6 +72,10 @@ public:
 signals:
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();
+  /// Emitted to update the state of the Run button
+  void updateRunButton(bool enabled = true,
+                       std::string const &enableOutputButtons = "unchanged",
+                       QString message = "Run", QString tooltip = "");
 
 private slots:
   /// Shows/hides tabs based on facility
@@ -95,16 +84,15 @@ private slots:
   void helpClicked();
   /// Exports the current tab algorithms as a Python script
   void exportTabPython();
-  /// Runs the current tab
-  void runClicked();
   /// Opens the manage directory dialog
   void openDirectoryDialog();
 
   /// Shows a information dialog box
   void showMessageBox(const QString &message);
   /// Updates the state of the Run button
-  void updateRunButton(bool enabled = true, QString message = "Run",
-                       QString tooltip = "");
+  void emitUpdateRunButton(bool enabled = true,
+                           std::string const &enableOutputButtons = "unchanged",
+                           QString message = "Run", QString tooltip = "");
 
   /// Called when the load instrument algorithms complete
   void instrumentLoadingDone(bool error);

@@ -1,22 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,relative-import
 from __future__ import (absolute_import, division, print_function)
 from . import InstrumentSetupWidget
 from . import ClassicUBInputWidget
 from . import MatrixUBInputWidget
 from . import DimensionSelectorWidget
-from PyQt4 import QtCore, QtGui
+from qtpy import QtCore, QtWidgets
 import sys
 import mantid
-import mantidqtpython as mqt
 from .ValidateOL import ValidateOL
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-try:
-    from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
-except ImportError:
-    try:
-        from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-    except ImportError:
-        raise ImportError("Cannot import navigation toolbar")
+import matplotlib
+from gui_helper import show_interface_help
+from MPLwidgets import *
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
@@ -35,11 +35,11 @@ def float2Input(x):
 # pylint: disable=too-many-instance-attributes
 
 
-class CustomNavigationToolbar(NavigationToolbar):
-    toolitems = [t for t in NavigationToolbar.toolitems if t[0] in ('Home', 'Pan', 'Zoom')]
+class CustomNavigationToolbar(NavigationToolbar2QT):
+    toolitems = [t for t in NavigationToolbar2QT.toolitems if t[0] in ('Home', 'Pan', 'Zoom')]
 
 
-class DGSPlannerGUI(QtGui.QWidget):
+class DGSPlannerGUI(QtWidgets.QWidget):
     def __init__(self, ol=None, parent=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(DGSPlannerGUI, self).__init__(parent)
@@ -53,10 +53,10 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.updatedOL = False
         self.wg = None  # workspace group
         self.instrumentWidget = InstrumentSetupWidget.InstrumentSetupWidget(self)
-        self.setLayout(QtGui.QHBoxLayout())
-        controlLayout = QtGui.QVBoxLayout()
+        self.setLayout(QtWidgets.QHBoxLayout())
+        controlLayout = QtWidgets.QVBoxLayout()
         controlLayout.addWidget(self.instrumentWidget)
-        self.ublayout = QtGui.QHBoxLayout()
+        self.ublayout = QtWidgets.QHBoxLayout()
         self.classic = ClassicUBInputWidget.ClassicUBInputWidget(self.ol)
         self.ublayout.addWidget(self.classic, alignment=QtCore.Qt.AlignTop, stretch=1)
         self.matrix = MatrixUBInputWidget.MatrixUBInputWidget(self.ol)
@@ -64,16 +64,16 @@ class DGSPlannerGUI(QtGui.QWidget):
         controlLayout.addLayout(self.ublayout)
         self.dimensionWidget = DimensionSelectorWidget.DimensionSelectorWidget(self)
         controlLayout.addWidget(self.dimensionWidget)
-        plotControlLayout = QtGui.QGridLayout()
-        self.plotButton = QtGui.QPushButton("Plot", self)
-        self.oplotButton = QtGui.QPushButton("Overplot", self)
-        self.helpButton = QtGui.QPushButton("?", self)
-        self.colorLabel = QtGui.QLabel('Color by angle', self)
-        self.colorButton = QtGui.QCheckBox(self)
+        plotControlLayout = QtWidgets.QGridLayout()
+        self.plotButton = QtWidgets.QPushButton("Plot", self)
+        self.oplotButton = QtWidgets.QPushButton("Overplot", self)
+        self.helpButton = QtWidgets.QPushButton("?", self)
+        self.colorLabel = QtWidgets.QLabel('Color by angle', self)
+        self.colorButton = QtWidgets.QCheckBox(self)
         self.colorButton.toggle()
-        self.aspectLabel = QtGui.QLabel('Aspect ratio 1:1', self)
-        self.aspectButton = QtGui.QCheckBox(self)
-        self.saveButton = QtGui.QPushButton("Save Figure", self)
+        self.aspectLabel = QtWidgets.QLabel('Aspect ratio 1:1', self)
+        self.aspectButton = QtWidgets.QCheckBox(self)
+        self.saveButton = QtWidgets.QPushButton("Save Figure", self)
         plotControlLayout.addWidget(self.plotButton, 0, 0)
         plotControlLayout.addWidget(self.oplotButton, 0, 1)
         plotControlLayout.addWidget(self.colorLabel, 0, 2, QtCore.Qt.AlignRight)
@@ -91,10 +91,11 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.canvas = FigureCanvas(self.figure)
         self.grid_helper = GridHelperCurveLinear((self.tr, self.inv_tr))
         self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)
-        self.trajfig.hold(True)
+        if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            self.trajfig.hold(True) # hold is deprecated since 2.1.0, true by default
         self.figure.add_subplot(self.trajfig)
         self.toolbar = CustomNavigationToolbar(self.canvas, self)
-        figureLayout = QtGui.QVBoxLayout()
+        figureLayout = QtWidgets.QVBoxLayout()
         figureLayout.addWidget(self.toolbar,0)
         figureLayout.addWidget(self.canvas,1)
         self.layout().addLayout(figureLayout)
@@ -116,12 +117,13 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.instrumentWidget.updateAll()
         self.dimensionWidget.updateChanges()
         # help
-        self.assistantProcess = QtCore.QProcess(self)
+        self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
-        self.collectionFile = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
+        self.mantidplot_name='DGS Planner'
+        self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
         version = ".".join(mantid.__version__.split(".")[:2])
-        self.qtUrl = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/DGS Planner.html'
-        self.externalUrl = 'http://docs.mantidproject.org/nightly/interfaces/DGS Planner.html'
+        self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/DGS Planner.html'
+        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/DGS Planner.html'
         # control for cancel button
         self.iterations = 0
         self.progress_canceled = False
@@ -129,13 +131,13 @@ class DGSPlannerGUI(QtGui.QWidget):
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface", "DGSPlanner", False)
 
-    @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
+    @QtCore.Slot(mantid.geometry.OrientedLattice)
     def updateUB(self, ol):
         self.ol = ol
         self.updatedOL = True
         self.trajfig.clear()
 
-    @QtCore.pyqtSlot(dict)
+    @QtCore.Slot(dict)
     def updateParams(self, d):
         if self.sender() is self.instrumentWidget:
             self.updatedInstrument = True
@@ -146,25 +148,15 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.masterDict.update(copy.deepcopy(d))
 
     def help(self):
-        try:
-            import pymantidplot
-            pymantidplot.proxies.showCustomInterfaceHelp('DGS Planner')
-        except ImportError:
-            self.assistantProcess.close()
-            self.assistantProcess.waitForFinished()
-            helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
-            helpapp += 'assistant'
-            args = ['-enableRemoteControl', '-collectionFile', self.collectionFile, '-showUrl', self.qtUrl]
-            if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
-                self.assistantProcess.close()
-                self.assistantProcess.waitForFinished()
-                self.assistantProcess.start(helpapp, args)
-            else:
-                mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+        show_interface_help(self.mantidplot_name,
+                            self.assistant_process,
+                            self.collection_file,
+                            self.qt_url,
+                            self.external_url)
 
     def closeEvent(self, event):
-        self.assistantProcess.close()
-        self.assistantProcess.waitForFinished()
+        self.assistant_process.close()
+        self.assistant_process.waitForFinished()
         event.accept()
 
     def _create_goniometer_workspaces(self, gonioAxis0values, gonioAxis1values, gonioAxis2values, progressDialog):
@@ -177,7 +169,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                     i += 1
                     progressDialog.setValue(i)
                     progressDialog.setLabelText("Creating workspace %d of %d..." % (i, self.iterations))
-                    QtGui.qApp.processEvents()
+                    QtWidgets.qApp.processEvents()
                     if progressDialog.wasCanceled():
                         self.progress_canceled = True
                         progressDialog.close()
@@ -211,11 +203,12 @@ class DGSPlannerGUI(QtGui.QWidget):
                                             self.masterDict['gonioSteps'][2])
             self.iterations = len(gonioAxis0values) * len(gonioAxis1values) * len(gonioAxis2values)
             if self.iterations > 10:
-                reply = QtGui.QMessageBox.warning(self, 'Goniometer',
-                                                  "More than 10 goniometer settings. This might be long.\n"
-                                                  "Are you sure you want to proceed?",
-                                                  QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
-                if reply == QtGui.QMessageBox.No:
+                reply = QtWidgets.QMessageBox.warning(self, 'Goniometer',
+                                                      "More than 10 goniometer settings. This might be long.\n"
+                                                      "Are you sure you want to proceed?",
+                                                      QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                      QtWidgets.QMessageBox.No)
+                if reply == QtWidgets.QMessageBox.No:
                     return
 
             if self.wg is not None:
@@ -243,19 +236,19 @@ class DGSPlannerGUI(QtGui.QWidget):
                     __maskWS = mantid.simpleapi.Load(self.masterDict['maskFilename'])
                     mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument", MaskedWorkspace=__maskWS)
                 except (ValueError, RuntimeError) as e:
-                    reply = QtGui.QMessageBox.critical(self, 'Error',
-                                                       "The following error has occurred in loading the mask:\n" +
-                                                       str(e) + "\nDo you want to continue without mask?",
-                                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                                                       QtGui.QMessageBox.No)
-                    if reply == QtGui.QMessageBox.No:
+                    reply = QtWidgets.QMessageBox.critical(self, 'Error',
+                                                           "The following error has occurred in loading the mask:\n" +
+                                                           str(e) + "\nDo you want to continue without mask?",
+                                                           QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                           QtWidgets.QMessageBox.No)
+                    if reply == QtWidgets.QMessageBox.No:
                         return
             if self.masterDict['makeFast']:
                 sp = list(range(mantid.mtd["__temp_instrument"].getNumberHistograms()))
                 tomask = sp[1::4] + sp[2::4] + sp[3::4]
                 mantid.simpleapi.MaskDetectors("__temp_instrument", SpectraList=tomask)
 
-            progressDialog = QtGui.QProgressDialog(self)
+            progressDialog = QtWidgets.QProgressDialog(self)
             progressDialog.setMinimumDuration(0)
             progressDialog.setCancelButtonText("&Cancel")
             progressDialog.setRange(0, self.iterations)
@@ -276,7 +269,7 @@ class DGSPlannerGUI(QtGui.QWidget):
             self.updatedOL = False
         # calculate coverage
         dimensions = ['Q1', 'Q2', 'Q3', 'DeltaE']
-        progressDialog = QtGui.QProgressDialog(self)
+        progressDialog = QtWidgets.QProgressDialog(self)
         progressDialog.setMinimumDuration(0)
         progressDialog.setCancelButtonText("&Cancel")
         progressDialog.setRange(0, self.iterations)
@@ -284,7 +277,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         for i in range(self.iterations):
             progressDialog.setValue(i)
             progressDialog.setLabelText("Calculating orientation %d of %d..." % (i, self.iterations))
-            QtGui.qApp.processEvents()
+            QtWidgets.qApp.processEvents()
             if progressDialog.wasCanceled():
                 self.progress_canceled = True
                 progressDialog.close()
@@ -345,7 +338,11 @@ class DGSPlannerGUI(QtGui.QWidget):
         mantid.simpleapi.DeleteWorkspace(__mdws)
 
     def save(self):
-        fileName = str(QtGui.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir, '*.png'))
+        fileName = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir, '*.png')
+        if isinstance(fileName,tuple):
+            fileName = fileName[0]
+        if not fileName:
+            return
         data = "Instrument " + self.masterDict['instrument'] + '\n'
         if self.masterDict['instrument'] == 'HYSPEC':
             data += "S2 = " + str(self.masterDict['S2']) + '\n'
@@ -407,7 +404,7 @@ class DGSPlannerGUI(QtGui.QWidget):
 
 
 if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     orl = mantid.geometry.OrientedLattice(2, 3, 4, 90, 90, 90)
     mainForm = DGSPlannerGUI()
     mainForm.show()

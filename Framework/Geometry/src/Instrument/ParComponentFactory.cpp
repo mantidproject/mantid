@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include <boost/make_shared.hpp>
 
@@ -24,7 +30,7 @@ namespace Geometry {
 boost::shared_ptr<IDetector>
 ParComponentFactory::createDetector(const IDetector *base,
                                     const ParameterMap *map) {
-  // Clone may be a Detector or RectangularDetectorPixel instance (or nullptr)
+  // Clone may be a Detector or GridDetectorPixel instance (or nullptr)
   auto clone = base->cloneParameterized(map);
   return boost::shared_ptr<IDetector>(clone);
 }
@@ -84,6 +90,10 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
       dynamic_cast<const RectangularDetector *>(base.get());
   if (rd)
     return boost::make_shared<RectangularDetector>(rd, map);
+
+  const GridDetector *gd = dynamic_cast<const GridDetector *>(base.get());
+  if (gd)
+    return boost::make_shared<GridDetector>(gd, map);
 
   const CompAssembly *ac = dynamic_cast<const CompAssembly *>(base.get());
   if (ac)

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
@@ -29,7 +35,8 @@ WorkspaceNearestNeighbours::WorkspaceNearestNeighbours(
     std::vector<specnum_t> spectrumNumbers, bool ignoreMaskedDetectors)
     : m_spectrumInfo(spectrumInfo),
       m_spectrumNumbers(std::move(spectrumNumbers)),
-      m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_radius(0),
+      m_noNeighbours(nNeighbours),
+      m_cutoff(std::numeric_limits<double>::lowest()), m_radius(0.),
       m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
   this->build(m_noNeighbours);
 }
@@ -148,23 +155,25 @@ void WorkspaceNearestNeighbours::build(const int noNeighbours) {
     ++pointNo;
   }
 
-  auto annTree = new ANNkd_tree(dataPoints, nspectra, 3);
+  auto annTree = std::make_unique<ANNkd_tree>(dataPoints, nspectra, 3);
   pointNo = 0;
   // Run the nearest neighbour search on each detector, reusing the arrays
-  auto nnIndexList = new ANNidx[m_noNeighbours];
-  auto nnDistList = new ANNdist[m_noNeighbours];
+  std::vector<ANNidx> nnIndexList;
+  nnIndexList.reserve(m_noNeighbours);
+  std::vector<ANNdist> nnDistList;
+  nnDistList.reserve(m_noNeighbours);
 
   for (const auto idx : indices) {
     ANNpoint scaledPos = dataPoints[pointNo];
     annTree->annkSearch(scaledPos,      // Point to search nearest neighbours of
                         m_noNeighbours, // Number of neighbours to find (8)
-                        nnIndexList,    // Index list of results
-                        nnDistList,     // List of distances to each of these
+                        nnIndexList.data(), // Index list of results
+                        nnDistList.data(), // List of distances to each of these
                         0.0 // Error bound (?) is this the radius to search in?
     );
     // The distances that are returned are in our scaled coordinate
     // system. We store the real space ones.
-    V3D realPos = V3D(scaledPos[0], scaledPos[1], scaledPos[2]) * m_scale;
+    const V3D realPos = V3D(scaledPos[0], scaledPos[1], scaledPos[2]) * m_scale;
     for (int i = 0; i < m_noNeighbours; i++) {
       ANNidx index = nnIndexList[i];
       V3D neighbour = V3D(dataPoints[index][0], dataPoints[index][1],
@@ -181,9 +190,6 @@ void WorkspaceNearestNeighbours::build(const int noNeighbours) {
     }
     pointNo++;
   }
-  delete[] nnIndexList;
-  delete[] nnDistList;
-  delete annTree;
   annDeallocPts(dataPoints);
   annClose();
   pointNoToVertex.clear();
@@ -225,11 +231,14 @@ WorkspaceNearestNeighbours::defaultNeighbours(const specnum_t spectrum) const {
 /// Returns the list of valid spectrum indices
 std::vector<size_t> WorkspaceNearestNeighbours::getSpectraDetectors() {
   std::vector<size_t> indices;
-  for (size_t i = 0; i < m_spectrumNumbers.size(); ++i) {
+  const auto nSpec = m_spectrumNumbers.size();
+  indices.reserve(nSpec);
+  for (size_t i = 0; i < nSpec; ++i) {
     // Always ignore monitors and ignore masked detectors if requested.
-    bool heedMasking = m_bIgnoreMaskedDetectors && m_spectrumInfo.isMasked(i);
+    const bool heedMasking =
+        m_bIgnoreMaskedDetectors && m_spectrumInfo.isMasked(i);
     if (!m_spectrumInfo.isMonitor(i) && !heedMasking) {
-      indices.push_back(i);
+      indices.emplace_back(i);
     }
   }
   return indices;

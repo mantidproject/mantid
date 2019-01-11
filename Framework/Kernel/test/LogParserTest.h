@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOGPARSERTEST_H_
 #define LOGPARSERTEST_H_
 
@@ -11,7 +17,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/lexical_cast.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <Poco/File.h>
 

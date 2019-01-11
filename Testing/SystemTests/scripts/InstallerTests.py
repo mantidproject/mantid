@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 """Finds a package, installs it and runs the tests against it.
 """
@@ -48,32 +54,35 @@ if options.doInstall:
     log("Installing package '%s'" % installer.mantidInstaller)
     try:
         installer.install()
-        log("Application path " + installer.mantidPlotPath)
+        log("Application path: %r" % installer.mantidPlotPath)
         installer.no_uninstall = False
     except Exception as err:
         scriptfailure("Installing failed. "+str(err))
 else:
     installer.no_uninstall = True
 
-try:
-    # Keep hold of the version that was run
-    version = run(installer.mantidPlotPath + ' -v')
-    version_tested = open(os.path.join(output_dir,'version_tested.log'),'w')
-    if version and len(version) > 0:
-        version_tested.write(version)
-    version_tested.close()
-except Exception as err:
-    scriptfailure('Version test failed: '+str(err), installer)
+# conda mantid-framework does not have mantid plot. skip these
+if not os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
+    try:
+        # Keep hold of the version that was run
+        version = run(installer.mantidPlotPath + ' -v')
+        version_tested = open(os.path.join(output_dir,'version_tested.log'),'w')
+        if version and len(version) > 0:
+            version_tested.write(version)
+        version_tested.close()
+    except Exception as err:
+        scriptfailure('Version test failed: '+str(err), installer)
 
-try:
-    # Now get the revision number/git commit ID (remove the leading 'g' that isn't part of it)
-    revision = run(installer.mantidPlotPath + ' -r').lstrip('g')
-    revision_tested = open(os.path.join(output_dir, 'revision_tested.log'), 'w')
-    if revision and len(version) > 0:
-        revision_tested.write(revision)
-    revision_tested.close()
-except Exception as err:
-    scriptfailure('Revision test failed: '+str(err), installer)
+    try:
+        # Now get the revision number/git commit ID (remove the leading 'g' that isn't part of it)
+        revision = run(installer.mantidPlotPath + ' -r').lstrip('g')
+        revision_tested = open(os.path.join(output_dir, 'revision_tested.log'), 'w')
+        if revision and len(version) > 0:
+            revision_tested.write(revision)
+        revision_tested.close()
+    except Exception as err:
+        scriptfailure('Revision test failed: '+str(err), installer)
+
 
 log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath,testRunErrPath))
 try:

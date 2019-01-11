@@ -1,5 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutput.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
@@ -129,17 +136,23 @@ std::vector<std::string> getAxisLabels(MatrixWorkspace_sptr workspace,
   return std::vector<std::string>();
 }
 
+void renameWorkspace(std::string const &name, std::string const &newName) {
+  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+  renamer->setProperty("InputWorkspace", name);
+  renamer->setProperty("OutputWorkspace", newName);
+  renamer->execute();
+}
+
 void renameResult(Workspace_sptr resultWorkspace,
                   const std::string &workspaceName) {
-  AnalysisDataService::Instance().rename(resultWorkspace->getName(),
-                                         workspaceName + "_Result");
+  renameWorkspace(resultWorkspace->getName(), workspaceName + "_Result");
 }
 
 void renameResult(Workspace_sptr resultWorkspace,
                   IndirectFitData const *fitData) {
   const auto name = resultWorkspace->getName();
   const auto newName = fitData->displayName("%1%_s%2%_Result", "_to_");
-  AnalysisDataService::Instance().rename(name, newName);
+  renameWorkspace(name, newName);
 }
 
 void renameResultWithoutSpectra(WorkspaceGroup_sptr resultWorkspace,
@@ -266,10 +279,9 @@ IndirectFitOutput::getResultLocation(IndirectFitData const *fitData,
 }
 
 std::vector<std::string> IndirectFitOutput::getResultParameterNames() const {
-  if (auto resultWorkspace = getLastResultWorkspace()) {
+  if (auto resultWorkspace = getLastResultWorkspace())
     if (auto workspace = getMatrixWorkspaceFromGroup(resultWorkspace, 0))
       return getAxisLabels(workspace, 1);
-  }
   return std::vector<std::string>();
 }
 
@@ -318,11 +330,11 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
   m_resultGroup = resultGroup;
 }
 
-void IndirectFitOutput::addOutput(
-    Mantid::API::WorkspaceGroup_sptr resultGroup,
-    Mantid::API::ITableWorkspace_sptr parameterTable,
-    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-    IndirectFitData const *fitData, std::size_t spectrum) {
+void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
+                                  ITableWorkspace_sptr parameterTable,
+                                  WorkspaceGroup_sptr resultWorkspace,
+                                  IndirectFitData const *fitData,
+                                  std::size_t spectrum) {
   TableRowExtractor extractRowFromTable(parameterTable);
   m_parameters[fitData][spectrum] = extractRowFromTable(0);
   m_outputResultLocations[fitData][spectrum] = ResultLocation(resultGroup, 0);
@@ -353,8 +365,8 @@ void IndirectFitOutput::updateParameters(ITableWorkspace_sptr parameterTable,
 }
 
 void IndirectFitOutput::updateFitResultsFromUnstructured(
-    Mantid::API::WorkspaceGroup_sptr resultGroup,
-    const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
+    WorkspaceGroup_sptr resultGroup, const FitDataIterator &fitDataBegin,
+    const FitDataIterator &fitDataEnd) {
   std::unordered_map<MatrixWorkspace *,
                      std::unordered_map<std::size_t, std::size_t>>
       resultIndices;
@@ -370,8 +382,8 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
 }
 
 void IndirectFitOutput::updateFitResultsFromStructured(
-    Mantid::API::WorkspaceGroup_sptr resultGroup,
-    const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
+    WorkspaceGroup_sptr resultGroup, const FitDataIterator &fitDataBegin,
+    const FitDataIterator &fitDataEnd) {
   auto update = [&](IndirectFitData const *inputData) {
     auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
     return [&](std::size_t index, std::size_t spectrum) {

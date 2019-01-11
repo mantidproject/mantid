@@ -2,7 +2,7 @@
  WorkspaceFactoryImpl
 ======================
 
-This a python binding to the C++ class Mantid::API::WorkspaceFactoryImpl.
+This is a Python binding to the C++ class Mantid::API::WorkspaceFactoryImpl.
 
 
 .. module:`mantid.api`

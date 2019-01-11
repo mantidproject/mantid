@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADEVENTNEXUSTEST_H_
 #define LOADEVENTNEXUSTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
+
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -10,6 +16,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidIndexing/SpectrumNumber.h"
@@ -47,7 +54,6 @@ load_reference_workspace(const std::string &filename) {
   Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
   return boost::dynamic_pointer_cast<const EventWorkspace>(out);
 }
-
 void run_MPI_load(const Parallel::Communicator &comm,
                   boost::shared_ptr<std::mutex> mutex,
                   const std::string &filename) {
@@ -143,6 +149,51 @@ private:
   }
 
 public:
+  void test_load_event_nexus_v20_ess() {
+    const std::string file = "V20_ESS_example.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
+    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
+                     (150 * 150) + 2) // Two monitors
+  }
+
+  void test_load_event_nexus_sans2d_ess() {
+    const std::string file = "SANS2D_ESS_example.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 14258850);
+    TS_ASSERT_EQUALS(eventWS->counts(0)[0], 0.0);
+    TS_ASSERT_EQUALS(eventWS->counts(1)[0], 2.0);
+    TS_ASSERT_EQUALS(eventWS->counts(2)[0], 1.0);
+    TS_ASSERT_EQUALS(eventWS->counts(122879)[0],
+                     4.0); // Regession test for miss
+                           // setting max detector and
+                           // subsequent incorrect event
+                           // count
+    TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(2), 3);
+  }
+
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
   void test_Normal_vs_Precount() {
@@ -150,6 +201,7 @@ public:
     LoadEventNexus ld;
     std::string outws_name = "cncs_noprecount";
     ld.initialize();
+    ld.setRethrows(true);
     ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace", outws_name);
     ld.setPropertyValue("Precount", "0");
@@ -157,10 +209,8 @@ public:
     ld.execute();
     TS_ASSERT(ld.isExecuted());
 
-    EventWorkspace_sptr WS;
-    TS_ASSERT_THROWS_NOTHING(
-        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outws_name));
+    EventWorkspace_sptr WS =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
     // Pixels have to be padded

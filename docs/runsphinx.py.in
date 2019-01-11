@@ -47,9 +47,6 @@ def main(sysarg):
         raise RuntimeError("Unexpected command line arguments: %s. "
                            "Use -h for help" % ' '.join(args))
 
-    # Update sys path if we need to
-    update_path()
-
     # Find test files
     testpaths = find_test_files(CONF_DIR, opts.testinclude)
 
@@ -68,8 +65,8 @@ def main(sysarg):
     doctree_dir = pathjoin(SPHINX_BUILD_DIR, "doctrees")
     argv = []
     if LooseVersion(get_sphinx_version()) < LooseVersion("1.7.0"):
-        # prior to v1.7.0 paths positional argument required       
-        argv = [sys.executable] 
+        # prior to v1.7.0 paths positional argument required
+        argv = [sys.executable]
     argv += ["-N",
             "-b", BUILDER,
             "-d", doctree_dir]
@@ -107,7 +104,6 @@ def main(sysarg):
         RegexLexer.get_tokens_unprocessed = pygments_highlighter.get_tokens_unprocessed
     sys.exit(return_value)
 
-#-----------------------------------------------------------------------------------------------
 
 def parseargs(arglist):
     """
@@ -123,45 +119,6 @@ def parseargs(arglist):
                       "filename when considering whether to run a test.")
     return parser.parse_args(arglist[1:]) # hack off filename
 
-#-----------------------------------------------------------------------------------------------
-
-def update_path():
-    """
-    If not inside MantidPlot (current check is whether we can import _qti)
-    then insert given path as first directory in sys.path
-    """
-    try:
-        import _qti
-        gui = True
-    except ImportError:
-        gui = False
-
-
-    # If it's MantidPlot then we already know what our paths should be so ignore it
-    if gui:
-        return
-
-    # the python wrapper sets this environment variable
-    mantidpath = os.environ.get('MANTIDPATH', None)
-
-    # otherwise try to expand based off of information in cmake
-    if mantidpath is None or len(mantidpath) == 0:
-        mantidpath = BUILD_DIR
-        if os.path.split(mantidpath)[-1] != 'bin' and \
-           os.path.isdir(os.path.join(mantidpath, 'bin')):
-            mantidpath = os.path.join(mantidpath, 'bin')
-
-    # check for directory
-    if not os.path.isdir(os.path.join(mantidpath, "mantid")):
-        raise ValueError("Unable to find mantid package in '%s'" % mantidpath)
-    # is package valid
-    if not os.path.isfile(os.path.join(mantidpath, "mantid", "__init__.py")):
-        raise ValueError("Invalid mantid package. No __init__ found in '%s' %s")
-
-    # Update sys.path
-    sys.path.insert(0, mantidpath)
-
-#-----------------------------------------------------------------------------------------------
 
 def find_test_files(src_dir, name_re):
     """
@@ -206,7 +163,7 @@ def find_matching_tests(filenames, name_re):
 
     return testfiles
 
-#-----------------------------------------------------------------------------------------------
+
 def pathjoin(left, *args):
     """
     Similar to os.path.join but just uses "/" as it's populated with CMake-style paths that are
@@ -214,10 +171,6 @@ def pathjoin(left, *args):
     """
     return left + "/" + "/".join(args)
 
-#-----------------------------------------------------------------------------------------------
-
-
-##################################################################################
 
 if __name__ == "__main__":
     main(sys.argv)

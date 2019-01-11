@@ -1,3 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#
+# Mantid Repository : https://github.com/mantidproject/mantid
+
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from Direct.NonIDF_Properties import *
@@ -66,9 +75,6 @@ class PropertyManager(NonIDF_Properties):
            If this changes, careful refactoring will be necessary
 
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-    This file is part of Mantid and is distributed under GPL
     """
 
     #-----------------------------------------------------------------------------------

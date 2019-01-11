@@ -11,7 +11,7 @@ Description
 
 This algorithm is designed to normalise a workspace via detector
 efficiency functions. **For this algorithm to work, the Instrument
-Definition File `IDF <http://www.mantidproject.org/IDF>`_ must have fitting functions on the
+Definition File :ref:`IDF <InstrumentDefinitionFile>` must have fitting functions on the
 component tree**. The setup information for this, as well as some
 examples, are provided below.
 
@@ -45,7 +45,7 @@ Background
 In brief, the components in the IDF file form a tree structure.
 Detectors and Instruments are both types of component. Detectors are
 ultimately children of Instruments in the tree structure. For a more
-complete description see `IDF <http://www.mantidproject.org/IDF>`_. The tree structure of the
+complete description see :ref:`IDF <InstrumentDefinitionFile>`. The tree structure of the
 components, mean that fitting functions do not necessarily have to be
 assigned on a detector-by-detector basis. Applying a fit function to the
 instrument, will ensure that all subcomponents (including detectors),

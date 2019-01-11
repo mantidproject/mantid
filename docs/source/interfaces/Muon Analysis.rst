@@ -40,9 +40,8 @@ Instrument
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Instrument**           | Selection of instrument that the experiments were run on.                               |
-|       |                          | It is an advantage if an Instrument Definition File (                                   |
-|       |                          | `IDF <http://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html>`_)  |
-|       |                          | is available for the instrument selection.                                              |
+|       |                          | It is an advantage if an Instrument Definition File                                     |
+|       |                          | (:ref:`IDF <InstrumentDefinitionFile>`) is available for the instrument selection.      |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **2** | **Time Zero**            | Time zero value (:math:`\mu s`). Any bins before that time will be discarded.           |
 |       |                          | If *From datafile* is checked, the value stored in the loaded Muon data file is used.   |
@@ -150,8 +149,7 @@ Run Information etc.
    :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **1** | **Run Information**      | Information about the loaded run.                                                       |
-|       |                          | See `Run <http://docs.mantidproject.org/nightly/concepts/Run.html#isis-muon-data>`_     |
+| **1** | **Run Information**      | Information about the loaded run. See :ref:`Run <RunInfoOnISISMuonData>`                |
 |       |                          | for the list of parameters which are looked up in the data files.                       |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **2** | **Connected plot**       | The name of the workspace produced for the last plot, i.e. "connected" to the interface.|

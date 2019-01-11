@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
 import re
@@ -47,6 +53,10 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         self.tree = None
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self, include_hidden)
+
+    def refresh(self):
+        """Update the algorithms list"""
+        self.presenter.refresh()
 
     def _make_execute_button(self):
         """

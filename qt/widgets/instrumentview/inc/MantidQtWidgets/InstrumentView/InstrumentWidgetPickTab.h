@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGETPICKTAB_H_
 #define INSTRUMENTWIDGETPICKTAB_H_
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
+#include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -24,7 +31,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
 class CollapsiblePanel;
-class MiniPlotQwt;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
@@ -118,7 +124,7 @@ private:
   QColor getShapeBorderColor() const;
 
   /* Pick tab controls */
-  MiniPlotQwt *m_plot;  ///< Miniplot to display data in the detectors
+  MiniPlot *m_plot;     ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode
@@ -230,7 +236,7 @@ public:
   };
 
   DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentWidget *instrWidget, MiniPlotQwt *plot);
+                         InstrumentWidget *instrWidget, MiniPlot *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(const std::vector<size_t> &detIndices);
@@ -270,7 +276,7 @@ private:
 
   InstrumentWidgetPickTab *m_tab;
   InstrumentWidget *m_instrWidget;
-  MiniPlotQwt *m_plot;
+  MiniPlot *m_plot;
 
   PlotType m_plotType;
   bool m_enabled;

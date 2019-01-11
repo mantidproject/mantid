@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GLOBTEST_H_
 #define GLOBTEST_H_
 
@@ -115,7 +121,7 @@ public:
 
   void test_filename_contains_directory() {
     Poco::Path pattern(base.toString() + "instrument",
-                       "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+                       "unit_testing/DUM_Definition.xml");
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
@@ -124,7 +130,7 @@ public:
 
   void test_caseless() {
     Poco::Path pattern(base.toString() + "instrument",
-                       "IDFs_for_unit_TESTING/dum_Definition.xml");
+                       "unit_TESTING/dum_Definition.xml");
 
     std::set<std::string> files;
     Glob::glob(pattern, files, Poco::Glob::GLOB_CASELESS);

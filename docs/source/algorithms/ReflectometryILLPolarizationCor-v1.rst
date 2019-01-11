@@ -59,6 +59,7 @@ Usage
    reflectivity11 = ReflectometryILLSumForeground(
        InputWorkspace=reflected11,
        DirectForegroundWorkspace=directFgd,
+       DirectBeamWorkspace=direct.OutputWorkspace,
        WavelengthRange=[2, 15],
    )
    # Reload the reflected be. We will fake the '--' flipper settings
@@ -71,6 +72,7 @@ Usage
    reflectivity00 = ReflectometryILLSumForeground(
        InputWorkspace=reflected00,
        DirectForegroundWorkspace=directFgd,
+       DirectBeamWorkspace=direct.OutputWorkspace,
        WavelengthRange=[2, 15],
    )
    # Overwrite sample logs

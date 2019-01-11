@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADNEXUSPROCESSEDTEST_H_
 #define LOADNEXUSPROCESSEDTEST_H_
 
@@ -720,7 +726,7 @@ public:
     // Loading a peaks workspace without a instrument from an IDF doesn't work
     // ...
     const std::string filename = FileFinder::Instance().getFullPath(
-        "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+        "unit_testing/MINITOPAZ_Definition.xml");
     InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                       Strings::loadFile(filename));
     auto instrument = parser.parseXML(nullptr);
@@ -765,7 +771,7 @@ public:
     // Loading a peaks workspace without a instrument from an IDF doesn't work
     // ...
     const std::string filename = FileFinder::Instance().getFullPath(
-        "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+        "unit_testing/MINITOPAZ_Definition.xml");
     InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                       Strings::loadFile(filename));
     auto instrument = parser.parseXML(nullptr);

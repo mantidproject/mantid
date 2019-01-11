@@ -49,7 +49,7 @@ Example Rebin param strings
 For EventWorkspaces
 ###################
 
-If the input is an `EventWorkspace <www.mantidproject.org/EventWorkspace>`__ and the "Preserve
+If the input is an :ref:`EventWorkspace <EventWorkspace>` and the "Preserve
 Events" property is True, the rebinning is performed in place, and only
 the X axes of the workspace are set. The actual Y histogram data will
 only be requested as needed, for example, when plotting or displaying

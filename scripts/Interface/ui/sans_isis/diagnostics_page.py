@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 
 from PyQt4 import QtGui, QtCore
 from six import with_metaclass
-import ui_diagnostics_page
+from . import ui_diagnostics_page
 from sans.gui_logic.gui_common import (load_file, GENERIC_SETTINGS)
 
 try:
@@ -49,6 +55,7 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         # Q Settings
         self.__generic_settings = GENERIC_SETTINGS
         self.__path_key = "sans_path"
+        self.detector_combo_box.currentIndexChanged.connect(self.combo_box_changed)
 
     def update_simple_line_edit_field(self, line_edit, value):
         gui_element = getattr(self, line_edit)
@@ -103,6 +110,10 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.detector_combo_box.clear()
         for element in detector_list:
             self.detector_combo_box.addItem(element)
+
+    def combo_box_changed(self, index):
+        current_detector_name = self.detector_combo_box.currentText()
+        self.detector_group_box.setTitle(current_detector_name)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties
@@ -186,3 +197,16 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
     @detector.setter
     def detector(self, value):
         self.detector_combo_box.currentText(value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Activate buttons
+    # ------------------------------------------------------------------------------------------------------------------
+    def enable_integrals(self):
+        self.horizontal_button.setEnabled(True)
+        self.vertical_button.setEnabled(True)
+        self.time_button.setEnabled(True)
+
+    def disable_integrals(self):
+        self.horizontal_button.setEnabled(False)
+        self.vertical_button.setEnabled(False)
+        self.time_button.setEnabled(False)

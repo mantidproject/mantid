@@ -2,7 +2,7 @@
  InstrumentView
 ================
 
-This a python binding to the C++ class Mantidplot::InstrumentView.
+This is a Python binding to the C++ class Mantidplot::InstrumentView.
 
 *bases:* :py:obj:`mantidplot.MDIWindow`
 

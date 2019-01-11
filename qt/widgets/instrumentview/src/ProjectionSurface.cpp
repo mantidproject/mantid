@@ -1,6 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/Common/InputController.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
@@ -998,6 +1006,7 @@ QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
  * @param lines :: lines from the project file to load state from
  */
 void ProjectionSurface::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("BackgroundColor")) {
@@ -1035,12 +1044,18 @@ void ProjectionSurface::loadFromProject(const std::string &lines) {
                      return std::make_pair(qValue, origin);
                    });
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "ProjectionSurface::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the projection surface to a Mantid project file
  * @return a string representing the state of the projection surface
  */
 std::string ProjectionSurface::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   tsv.writeLine("BackgroundColor") << m_backgroundColor;
   tsv.writeSection("shapes", m_maskShapes.saveToProject());
@@ -1054,6 +1069,10 @@ std::string ProjectionSurface::saveToProject() const {
 
   tsv.writeSection("AlignmentInfo", alignmentInfo.outputLines());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "ProjectionSurface::loadsaveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets

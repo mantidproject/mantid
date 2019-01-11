@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -165,6 +171,7 @@ InstrumentBuilder::createInstrument() {
       m_instrument->getName());
   auto *product = m_instrument.release();
   m_instrument = std::move(temp);
+  product->parseTreeAndCacheBeamline();
   // Some older compilers (Apple clang 7) don't support copy construction
   // std::unique_ptr<const T>(const std::ptr<T>&)
   return std::unique_ptr<const Geometry::Instrument>(product);

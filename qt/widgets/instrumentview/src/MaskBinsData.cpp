@@ -1,7 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/MaskBinsData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 
 #include <vector>
 
@@ -65,6 +74,7 @@ void MaskBinsData::clear() { m_masks.clear(); }
  * @param lines :: lines from the project file to load state from
  */
 void MaskBinsData::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
   for (auto &maskLines : tsv.sections("Mask")) {
     API::TSVSerialiser mask(maskLines);
@@ -82,12 +92,18 @@ void MaskBinsData::loadFromProject(const std::string &lines) {
 
     addXRange(start, end, spectra);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "MaskBinsData::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the mask bins to a Mantid project file
  * @return a string representing the state of the mask bins
  */
 std::string MaskBinsData::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   for (const auto &binMask : m_masks) {
     API::TSVSerialiser mask;
@@ -99,6 +115,10 @@ std::string MaskBinsData::saveToProject() const {
     tsv.writeSection("Mask", mask.outputLines());
   }
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "MaskBinsData::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets

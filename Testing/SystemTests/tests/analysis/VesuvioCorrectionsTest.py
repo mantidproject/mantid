@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name,no-init
 
 """
@@ -7,7 +13,7 @@ Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import numpy as np
 
 from mantid.api import *
@@ -141,7 +147,7 @@ def _create_dummy_profiles():
 # ===========================================================================================
 # ========================================Success cases======================================
 
-class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
+class TestGammaAndMsCorrectWorkspaceIndexOne(systemtesting.MantidSystemTest):
     _algorithm = None
     _is_linux = None
     _is_rhel6 = None
@@ -197,7 +203,7 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         tear_down()
 
 
-class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
+class TestGammaAndMsCorrectWorkspaceIndexTwo(systemtesting.MantidSystemTest):
     _algorithm = None
     _is_linux = None
     _is_rhel6 = None
@@ -254,7 +260,7 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         tear_down()
 
 
-class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
+class TestMsCorrectWithContainer(systemtesting.MantidSystemTest):
     _algorithm = None
     _input_bins = None
 
@@ -311,7 +317,7 @@ class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
         tear_down()
 
 
-class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
+class TestGammaAndMsCorrectWithContainer(systemtesting.MantidSystemTest):
     _algorithm = None
     _input_bins = None
 
@@ -365,7 +371,7 @@ class TestGammaAndMsCorrectWithContainer(stresstesting.MantidStressTest):
         tear_down()
 
 
-class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressTest):
+class TestGammaAndMsCorrectWithContainerFixedScaling(systemtesting.MantidSystemTest):
     _algorithm = None
     _input_bins = None
 
@@ -423,7 +429,7 @@ class TestGammaAndMsCorrectWithContainerFixedScaling(stresstesting.MantidStressT
         tear_down()
 
 
-class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
+class TestCorrectionsInBackScatteringSpectra(systemtesting.MantidSystemTest):
     _algorithm = None
     _input_bins = None
 
@@ -492,7 +498,7 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
 
 # ========================================Failure cases======================================
 
-class TestRunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutFitParamsRaisesError(systemtesting.MantidSystemTest):
     _algorithm = None
 
     def runTest(self):
@@ -505,7 +511,7 @@ class TestRunningWithoutFitParamsRaisesError(stresstesting.MantidStressTest):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
 
-class TestRunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutMassesRaisesError(systemtesting.MantidSystemTest):
     _algorithm = None
 
     def runTest(self):
@@ -518,7 +524,7 @@ class TestRunningWithoutMassesRaisesError(stresstesting.MantidStressTest):
         self.assertRaises(RuntimeError, self._algorithm.execute)
 
 
-class TestRunningWithoutProfilesRaisesError(stresstesting.MantidStressTest):
+class TestRunningWithoutProfilesRaisesError(systemtesting.MantidSystemTest):
     _algorithm = None
 
     def runTest(self):

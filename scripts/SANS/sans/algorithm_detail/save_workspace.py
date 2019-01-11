@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
 from mantid.api import MatrixWorkspace
@@ -5,6 +11,7 @@ from mantid.dataobjects import EventWorkspace
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import SaveType
+# from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 
 ZERO_ERROR_DEFAULT = 1e6
 
@@ -95,6 +102,11 @@ def remove_zero_errors_from_workspace(workspace):
     # Make sure we are dealing with a MatrixWorkspace
     if not isinstance(workspace, MatrixWorkspace) or isinstance(workspace,EventWorkspace):
         raise ValueError('Cannot remove zero errors from a workspace which is not a MatrixWorkspace.')
+
+    # Uncomment the next line and tests fail for checking error values should not be zero, and
+    # comparing loaded workspace to calculated workspace. If we want to remove RuntimeWarning for nan
+    # values strip_end_nans should be moved up the workflow
+    # workspace = strip_end_nans(workspace, None)
 
     # Iterate over the workspace and replace the zero values with a large default value
     number_of_spectra = workspace.getNumberHistograms()

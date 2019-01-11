@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LoadSpice2D_H
 #define MANTID_DATAHANDLING_LoadSpice2D_H
 
@@ -106,9 +112,8 @@ private:
   void addRunProperty(const std::string &name, const T &value,
                       const std::string &units = "");
   void setBeamTrapRunProperty(std::map<std::string, std::string> &metadata);
-  void moveDetector(double, double);
-  double detectorDistance(std::map<std::string, std::string> &metadata);
-  double detectorTranslation(std::map<std::string, std::string> &metadata);
+  void detectorDistance(std::map<std::string, std::string> &metadata);
+  void detectorTranslation(std::map<std::string, std::string> &metadata);
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
   void rotateDetector(const double &);
   void setTimes();

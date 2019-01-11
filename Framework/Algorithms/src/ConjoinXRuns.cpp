@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConjoinXRuns.h"
 
 #include "MantidAPI/ADSValidator.h"
@@ -39,6 +45,17 @@ static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConjoinXRuns)
+
+const std::string ConjoinXRuns::SUM_MERGE = "conjoin_sample_logs_sum";
+const std::string ConjoinXRuns::TIME_SERIES_MERGE =
+    "conjoin_sample_logs_time_series";
+const std::string ConjoinXRuns::LIST_MERGE = "conjoin_sample_logs_list";
+const std::string ConjoinXRuns::WARN_MERGE = "conjoin_sample_logs_warn";
+const std::string ConjoinXRuns::WARN_MERGE_TOLERANCES =
+    "conjoin_sample_logs_warn_tolerances";
+const std::string ConjoinXRuns::FAIL_MERGE = "conjoin_sample_logs_fail";
+const std::string ConjoinXRuns::FAIL_MERGE_TOLERANCES =
+    "conjoin_sample_logs_fail_tolerances";
 
 //----------------------------------------------------------------------------------------------
 
@@ -327,19 +344,17 @@ void ConjoinXRuns::exec() {
       getProperty(INPUT_WORKSPACE_PROPERTY);
   m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
-  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
-  const std::string sampleLogsTimeSeries =
-      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
-  const std::string sampleLogsList =
-      getProperty(SampleLogsBehaviour::LIST_PROP);
-  const std::string sampleLogsWarn =
-      getProperty(SampleLogsBehaviour::WARN_PROP);
-  const std::string sampleLogsWarnTolerances =
-      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
-  const std::string sampleLogsFail =
-      getProperty(SampleLogsBehaviour::FAIL_PROP);
-  const std::string sampleLogsFailTolerances =
-      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
+  SampleLogsBehaviour::SampleLogNames logEntries = {};
+  logEntries.sampleLogsSum = getPropertyValue(SampleLogsBehaviour::SUM_PROP);
+  logEntries.sampleLogsTimeSeries =
+      getPropertyValue(SampleLogsBehaviour::TIME_SERIES_PROP);
+  logEntries.sampleLogsList = getPropertyValue(SampleLogsBehaviour::LIST_PROP);
+  logEntries.sampleLogsWarn = getPropertyValue(SampleLogsBehaviour::WARN_PROP);
+  logEntries.sampleLogsWarnTolerances =
+      getPropertyValue(SampleLogsBehaviour::WARN_TOL_PROP);
+  logEntries.sampleLogsFail = getPropertyValue(SampleLogsBehaviour::FAIL_PROP);
+  logEntries.sampleLogsFailTolerances =
+      getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
 
   m_inputWS.clear();
@@ -351,11 +366,18 @@ void ConjoinXRuns::exec() {
   }
 
   auto first = m_inputWS.front();
-  SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-      *first, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
-      sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
-      sampleLogsFailTolerances);
 
+  SampleLogsBehaviour::ParameterName parName = {
+      ConjoinXRuns::SUM_MERGE,
+      ConjoinXRuns::TIME_SERIES_MERGE,
+      ConjoinXRuns::LIST_MERGE,
+      ConjoinXRuns::WARN_MERGE,
+      ConjoinXRuns::WARN_MERGE_TOLERANCES,
+      ConjoinXRuns::FAIL_MERGE,
+      ConjoinXRuns::FAIL_MERGE_TOLERANCES};
+
+  SampleLogsBehaviour sampleLogsBehaviour =
+      SampleLogsBehaviour(first, g_log, logEntries, parName);
   auto it = m_inputWS.begin();
 
   // Temporary workspace to carry the merged sample logs
@@ -363,21 +385,21 @@ void ConjoinXRuns::exec() {
   // the correct size to be the output, since the size is unknown
   // at this point. We can check only later which ones are going
   // to be skipped, to compute the size of the output respectively.
-  MatrixWorkspace_uptr temp = first->clone();
+  MatrixWorkspace_sptr temp = first->clone();
 
   size_t outBlockSize = (*it)->blocksize();
   // First sequentially merge the sample logs
   for (++it; it != m_inputWS.end(); ++it) {
     // attempt to merge the sample logs
     try {
-      sampleLogsBehaviour.mergeSampleLogs(**it, *temp);
-      sampleLogsBehaviour.setUpdatedSampleLogs(*temp);
+      sampleLogsBehaviour.mergeSampleLogs(*it, temp);
+      sampleLogsBehaviour.setUpdatedSampleLogs(temp);
       outBlockSize += (*it)->blocksize();
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error() << "Could not join workspace: " << (*it)->getName()
                       << ". Reason: \"" << e.what() << "\". Skipping.\n";
-        sampleLogsBehaviour.resetSampleLogs(*temp);
+        sampleLogsBehaviour.resetSampleLogs(temp);
         // remove the skipped one from the list
         m_inputWS.erase(it);
         --it;

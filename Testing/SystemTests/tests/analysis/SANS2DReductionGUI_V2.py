@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,attribute-defined-outside-init
 """
 The tests here are ports from the original SANS2DReductionGUI.py test suite. Not all tests can be ported since they
@@ -5,7 +11,7 @@ include details about the ReductionSingleton
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.kernel import (config)
 from mantid.api import (FileFinder)
 from mantid.simpleapi import RenameWorkspace
@@ -17,7 +23,7 @@ MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
 
 
-class SANS2DMinimalBatchReductionTest_V2(stresstesting.MantidStressTest):
+class SANS2DMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in batch mode
     """
     def __init__(self):
@@ -37,7 +43,7 @@ class SANS2DMinimalBatchReductionTest_V2(stresstesting.MantidStressTest):
         return "trans_test_rear", "SANSReductionGUI.nxs"
 
 
-class SANS2DMinimalSingleReductionTest_V2(stresstesting.MantidStressTest):
+class SANS2DMinimalSingleReductionTest_V2(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in single mode"""
 
     def __init__(self):
@@ -62,7 +68,7 @@ class SANS2DMinimalSingleReductionTest_V2(stresstesting.MantidStressTest):
         return "trans_test_rear", "SANSReductionGUI.nxs"
 
 
-class SANS2DSearchCentreGUI_V2(stresstesting.MantidStressTest):
+class SANS2DSearchCentreGUI_V2(systemtesting.MantidSystemTest):
     """Minimal script to perform FindBeamCentre"""
 
     def __init__(self):

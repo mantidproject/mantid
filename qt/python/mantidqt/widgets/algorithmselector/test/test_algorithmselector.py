@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import
 
 from collections import Counter, namedtuple
@@ -25,40 +18,31 @@ import unittest
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
+from mantid.api import AlgorithmFactoryImpl
 from mantidqt.utils.qt.test import select_item_in_combo_box, select_item_in_tree, GuiTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
 AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
 mock_get_algorithm_descriptors = Mock()
-mock_get_algorithm_descriptors.return_value = [AlgorithmDescriptorMock(name='Rebin', version=1,
-                                                                       category='Transform', alias=''),
-                                               AlgorithmDescriptorMock(name='Rebin', version=1,
-                                                                       category='Transform\\Rebin', alias=''),
-                                               AlgorithmDescriptorMock(name='Load', version=1,
-                                                                       category='Data', alias=''),
-                                               AlgorithmDescriptorMock(name='DoStuff', version=1,
-                                                                       category='Stuff', alias=''),
-                                               AlgorithmDescriptorMock(name='DoStuff', version=2,
-                                                                       category='Stuff', alias=''),
-                                               ]
+mock_get_algorithm_descriptors.return_value = [
+    AlgorithmDescriptorMock(name='Rebin', version=1,
+                            category='Transform', alias=''),
+    AlgorithmDescriptorMock(name='Rebin', version=1,
+                            category='Transform\\Rebin', alias=''),
+    AlgorithmDescriptorMock(name='Load', version=1,
+                            category='Data', alias=''),
+    AlgorithmDescriptorMock(name='DoStuff', version=1,
+                            category='Stuff', alias=''),
+    AlgorithmDescriptorMock(name='DoStuff', version=2,
+                            category='Stuff', alias=''),
+]
+
+empty_mock_get_algorithm_descriptors = Mock()
+empty_mock_get_algorithm_descriptors.return_value = []
 
 
-class AlgorithmFactoryTest(unittest.TestCase):
-
-    def test_getDescriptors(self):
-        from mantid import AlgorithmFactory
-        descriptors = AlgorithmFactory.getDescriptors(True)
-        self.assertGreater(len(descriptors), 0)
-        d = descriptors[0]
-        self.assertFalse(isinstance(d, AlgorithmDescriptorMock))
-        self.assertTrue(hasattr(d, 'name'))
-        self.assertTrue(hasattr(d, 'alias'))
-        self.assertTrue(hasattr(d, 'category'))
-        self.assertTrue(hasattr(d, 'version'))
-
-
-@patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
+@patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
 class ModelTest(unittest.TestCase):
 
     def test_get_algorithm_data(self):
@@ -81,8 +65,15 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
 
 
-@patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
+@patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
 class WidgetTest(GuiTest):
+
+    # def setUp(self):
+    #     self.getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
+    #     AlgorithmFactoryImpl.getDescriptors = mock_get_algorithm_descriptors
+    #
+    # def tearDown(self):
+    #     AlgorithmFactoryImpl.getDescriptors = self.getDescriptors_orig
 
     def _select_in_tree(self, widget, item_label):
         select_item_in_tree(widget.tree, item_label)
@@ -127,7 +118,7 @@ class WidgetTest(GuiTest):
                           "and the default Qt behaviour is used")
         else:
             widget = AlgorithmSelectorWidget()
-            self.assertEquals(widget.search_box.completer().filterMode(), Qt.MatchContains)
+            self.assertEqual(widget.search_box.completer().filterMode(), Qt.MatchContains)
 
     def test_search_box_selection_ignores_tree_selection(self):
         widget = AlgorithmSelectorWidget()
@@ -165,6 +156,18 @@ class WidgetTest(GuiTest):
             self._select_in_tree(widget, 'DoStuff v.2')
             QTest.keyClick(widget.search_box, Qt.Key_Return)
             createDialog.assert_called_once_with('DoStuff', 2)
+
+    def test_refresh(self):
+        # Set a mock to return an empty descriptor list
+        getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
+        AlgorithmFactoryImpl.getDescriptors = empty_mock_get_algorithm_descriptors
+
+        widget = AlgorithmSelectorWidget()
+        self.assertEqual(0, widget.tree.topLevelItemCount())
+        # put back the original
+        AlgorithmFactoryImpl.getDescriptors = getDescriptors_orig
+        widget.refresh()
+        self.assertEqual(3, widget.tree.topLevelItemCount())
 
 
 if __name__ == '__main__':

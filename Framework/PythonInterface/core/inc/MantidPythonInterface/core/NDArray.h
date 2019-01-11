@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PYTHONINTERFACE_CORE_NDARRAY_H_
 #define PYTHONINTERFACE_CORE_NDARRAY_H_
 #include "MantidPythonInterface/core/DllConfig.h"
@@ -33,6 +39,7 @@ public:
   Py_intptr_t const *get_shape() const;
   int get_nd() const;
   void *get_data() const;
+  char get_typecode() const;
 
   NDArray astype(char dtype, bool copy = true) const;
 };

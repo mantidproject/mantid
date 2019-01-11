@@ -30,6 +30,8 @@ The four subplot arrangements are:
 
 *This layout can be changed by modifying ``plotting_utils.py``.*
 
+The python toolbar is available for use. Two custom buttons have been added for adding and removing lines from a subplot.
+
 Usage
 ^^^^^
 ::
@@ -62,9 +64,14 @@ The Plotting_ files are arranged in the following format:
         AxisChanger/
             axis_changer_presenter.py
             axis_changer_view.py
+        edit_widows/
+            remove_plot_window.py
+            select_subplot.py
         plotting_presenter.py
         plotting_view.py
         plotting_utils.py
+        subPlot_object.py
+        navigation_toolbar.py
 
 Both the Plotting and AxisChanger modules are in MVP (Model, View, Presenter) format, as this benefits maintainability.
 
@@ -83,6 +90,7 @@ Exposes required functions from ``plotting_view.py``.
         :raises KeyError: if the subplot name doesn't exist
         """
         return self.view.get_subplot(name)
+
 *Functions should only be exposed if they are necessary for use with the plotting interface.*
 
 Plotting View
@@ -99,15 +107,19 @@ Handles the gridspec layouts: further gridspecs can be defined in ``plotting_uti
 TODO
 ^^^^
 - Move plotting to a more central, accessible location in the mantid codebase
-- Options for changing line colours, fonts etc.
 - Moveable lines with the related events (i.e. can check whether a line is moved within tolerance of a given x value)
 - Addition of more subplots
-- Exporting subplots as PNGs etc.
-- Removal of individual plots from a subplot (the way plotted lines are stored would have to be changed)
+- Allow any spectrum number to be plotted
+
+Done
+^^^^
+- Options for changing line colours, fonts etc. This is done by python toolbar.
+- Exporting subplots as PNGs etc. This is done by python toolbar.
+- Removal of individual plots from a subplot (the way plotted lines are stored would have to be changed). Needed some rewritting but done now.
 
 Known Issues
 ^^^^^^^^^^^^
-- TBC after testing
+- Axis change goes blank after removing subplot.
 
 Related Bugs/Notes
 ^^^^^^^^^^^^^^^^^^
@@ -120,6 +132,7 @@ Related Bugs/Notes
 
 AxisChanger
 ^^^^^^^^^^^
-``AxisChanger`` is a small widget comprising of two ``QLineEdit``s in a neat format,
+
+``AxisChanger`` is a small widget comprising of two ``QLineEdit`` widgets in a neat format,
 with events exposed for x/y limit changing. This functionality is inherently separate
 to that of the plotting, so the AxisChanger module is separate (albeit enclosed within) the plotting.

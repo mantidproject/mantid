@@ -2,7 +2,7 @@
  FacilityInfo
 ==============
 
-This a python binding to the C++ class Mantid::Kernel::FacilityInfo.
+This is a Python binding to the C++ class Mantid::Kernel::FacilityInfo.
 
 
 .. module:`mantid.kernel`

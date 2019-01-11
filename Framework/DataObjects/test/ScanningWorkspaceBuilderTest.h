@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
 #define MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
 
@@ -591,10 +597,8 @@ private:
   }
 
   void checkTimeRanges(const DetectorInfo &detectorInfo) {
-    for (size_t i = 0; i < nDetectors; ++i) {
-      for (size_t j = 0; j < nTimeIndexes; ++j) {
-        TS_ASSERT_EQUALS(detectorInfo.scanInterval({i, j}), timeRanges[j]);
-      }
+    for (size_t i = 0; i < nTimeIndexes; ++i) {
+      TS_ASSERT_EQUALS(detectorInfo.scanIntervals()[i], timeRanges[i]);
     }
   }
 };

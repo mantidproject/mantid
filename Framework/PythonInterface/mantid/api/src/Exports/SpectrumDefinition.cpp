@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/python/class.hpp>
@@ -19,6 +25,10 @@ void export_SpectrumDefinition() {
       .def("__getitem__", &toTuple, (arg("self"), arg("index")),
            "Returns the pair of detector index and time index at given index "
            "of spectrum definition.")
+
+      .def("__len__", &SpectrumDefinition::size, arg("self"),
+           "Returns the size of the SpectrumDefinition i.e. the number of "
+           "detectors for the spectrum.")
 
       .def("size", &SpectrumDefinition::size, arg("self"),
            "Returns the size of the SpectrumDefinition i.e. the number of "

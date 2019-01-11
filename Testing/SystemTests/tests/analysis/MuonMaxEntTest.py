@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from math import pi
 from mantid.simpleapi import *
 
 
-class MuonMaxEntTest(stresstesting.MantidStressTest):
+class MuonMaxEntTest(systemtesting.MantidSystemTest):
 
     '''Tests the MaxEnt algorithm on a MUSR workspace'''
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <stdexcept>
 
@@ -157,20 +163,28 @@ std::string ReferenceFrame::origin() const { return m_origin; }
 Getter for the up instrument direction
 @return up direction.
 */
-const V3D ReferenceFrame::vecPointingUp() const { return m_vecPointingUp; }
+V3D ReferenceFrame::vecPointingUp() const { return m_vecPointingUp; }
 
 /**
 Getter for the direction defining the theta sign
 @return theta sign direction.
 */
-const V3D ReferenceFrame::vecThetaSign() const { return m_vecThetaSign; }
+V3D ReferenceFrame::vecThetaSign() const { return m_vecThetaSign; }
 
 /**
 Getter for the along beam vector.
 @return along beam direction.
 */
-const V3D ReferenceFrame::vecPointingAlongBeam() const {
+V3D ReferenceFrame::vecPointingAlongBeam() const {
   return m_vecPointingAlongBeam;
+}
+
+/**
+Calculate the horizontal vector.
+@return horizontal direction.
+*/
+V3D ReferenceFrame::vecPointingHorizontal() const {
+  return directionToVector(pointingHorizontal());
 }
 
 /**

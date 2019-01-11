@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveGSS.h"
 
 #include "MantidAPI/AlgorithmHistory.h"
@@ -195,7 +201,8 @@ void SaveGSS::init() {
   std::vector<int> default_precision(3, 9);
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>(
-          "SLOGXYEPrecision", default_precision, precision_validator),
+          "SLOGXYEPrecision", std::move(default_precision),
+          std::move(precision_validator)),
       "Enter 3 integers as the precisions of output X, Y and E for SLOG data "
       "only."
       "Default is (9, 9, 9) if it is left empty.  Otherwise it is not "

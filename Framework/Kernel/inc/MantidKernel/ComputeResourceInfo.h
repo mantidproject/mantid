@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_COMPUTERESOURCEINFO_H_
 #define MANTID_KERNEL_COMPUTERESOURCEINFO_H_
 
@@ -24,27 +30,6 @@ resource present in a facility.
 At the moment (remote) compute resources are defined by their name,
 the URL they can be accessed at, and the type of remote job manager
 that they use/require (Mantid web service API, LSF, etc.).
-
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_KERNEL_DLL ComputeResourceInfo {
 public:

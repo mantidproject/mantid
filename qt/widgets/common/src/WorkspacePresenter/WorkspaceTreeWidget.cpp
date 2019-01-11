@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 #include <MantidGeometry/Instrument.h>
 #include <MantidKernel/make_unique.h>
@@ -45,10 +51,10 @@ WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
+WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly,
                                          QWidget *parent)
-    : QWidget(parent), m_mantidDisplayModel(mdb), m_updateCount(0),
-      m_treeUpdating(false), m_promptDelete(false),
+    : QWidget(parent), m_mantidDisplayModel(mdb), m_viewOnly(viewOnly),
+      m_updateCount(0), m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
       m_sortDirection(SortDirection::Ascending), m_mutex(QMutex::Recursive) {
   setObjectName(
@@ -56,6 +62,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   m_saveMenu = new QMenu(this);
 
   setupWidgetLayout();
+
   setupLoadButtonMenu();
 
   // Dialog box used for user to specify folder to save multiple workspaces into
@@ -81,6 +88,9 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
   auto presenter = boost::make_shared<WorkspacePresenter>(this);
   m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
   presenter->init();
+
+  if (m_viewOnly)
+    hideButtonToolbar();
 }
 
 WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
@@ -1228,9 +1238,11 @@ void WorkspaceTreeWidget::handleClearView() {
 
 /// Handles display of the workspace context menu.
 void WorkspaceTreeWidget::popupMenu(const QPoint &pos) {
-  m_menuPosition = pos;
-  m_presenter->notifyFromView(
-      ViewNotifiable::Flag::PopulateAndShowWorkspaceContextMenu);
+  if (!m_viewOnly) {
+    m_menuPosition = pos;
+    m_presenter->notifyFromView(
+        ViewNotifiable::Flag::PopulateAndShowWorkspaceContextMenu);
+  }
 }
 
 void WorkspaceTreeWidget::popupContextMenu() {
@@ -1736,6 +1748,14 @@ void WorkspaceTreeWidget::onClickClearUB() {
 bool WorkspaceTreeWidget::executeAlgorithmAsync(
     Mantid::API::IAlgorithm_sptr alg, const bool wait) {
   return m_mantidDisplayModel->executeAlgorithmAsync(alg, wait);
+}
+
+void WorkspaceTreeWidget::hideButtonToolbar() {
+  m_loadButton->hide();
+  m_saveButton->hide();
+  m_deleteButton->hide();
+  m_groupButton->hide();
+  m_sortButton->hide();
 }
 
 } // namespace MantidWidgets

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------
 // Includes
 //----------------------
@@ -80,6 +86,8 @@ void IndirectDataAnalysis::initLayout() {
             SLOT(showMessageBox(const QString &)));
   }
 
+  connect(m_uiForm.twIDATabs, SIGNAL(currentChanged(int)), this,
+          SLOT(tabChanged(int)));
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -115,6 +123,13 @@ void IndirectDataAnalysis::loadSettings() {
     tab->second->loadTabSettings(settings);
 
   settings.endGroup();
+}
+
+/**
+ * Sets the active workspace in the selected tab
+ */
+void IndirectDataAnalysis::tabChanged(int index) {
+  m_tabs[index]->setActiveWorkspace();
 }
 
 /**

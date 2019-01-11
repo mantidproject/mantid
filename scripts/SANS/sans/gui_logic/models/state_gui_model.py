@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The state gui model contains all the reduction information which is not explicitly available in the data table.
 
 This is one of the two models which is used for the data reduction. It contains generally all the settings which
@@ -11,7 +17,7 @@ from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, 
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
                                           q_rebin_values, fit_general, mask_angle_entry, range_entry, position_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
-                               DetectorType, DataType, FitType)
+                               DetectorType, DataType, FitType, SANSInstrument)
 
 
 class StateGuiModel(object):
@@ -47,13 +53,16 @@ class StateGuiModel(object):
     # FRONT TAB
     # ==================================================================================================================
     # ==================================================================================================================
+    @property
+    def instrument(self):
+        return self.get_simple_element(element_id=DetectorId.instrument, default_value=SANSInstrument.NoInstrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Compatibility Mode Options
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def compatibility_mode(self):
-        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=False)
+        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=True)
 
     @compatibility_mode.setter
     def compatibility_mode(self, value):
@@ -264,7 +273,7 @@ class StateGuiModel(object):
 
     @property
     def merge_scale(self):
-        return self.get_simple_element(element_id=DetectorId.rescale, default_value="")
+        return self.get_simple_element(element_id=DetectorId.rescale, default_value="1.0")
 
     @merge_scale.setter
     def merge_scale(self, value):
@@ -272,7 +281,7 @@ class StateGuiModel(object):
 
     @property
     def merge_shift(self):
-        return self.get_simple_element(element_id=DetectorId.shift, default_value="")
+        return self.get_simple_element(element_id=DetectorId.shift, default_value="0.0")
 
     @merge_shift.setter
     def merge_shift(self, value):

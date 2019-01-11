@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-locals
 # File: ReduceOneSCD_Run.py
 #
@@ -16,7 +22,7 @@
 from __future__ import (absolute_import, division, print_function)
 import time
 
-import stresstesting
+import systemtesting
 
 import os
 from mantid.api import *
@@ -26,7 +32,7 @@ from mantid import config
 config['Q.convention'] = 'Crystallography'
 
 
-class ReduceOneSCD_Run( stresstesting.MantidStressTest):
+class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
 
     __reduced_ws_name=""
     saved=False

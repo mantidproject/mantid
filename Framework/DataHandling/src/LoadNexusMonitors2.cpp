@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusMonitors2.h"
 
 #include "MantidAPI/Axis.h"
@@ -420,18 +426,16 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
  **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
-  ::NeXus::File *f = nullptr;
+  std::unique_ptr<::NeXus::File> filePointer;
   try {
-    f = new ::NeXus::File(fname);
-    if (f)
-      f->getEntries();
+    filePointer = std::make_unique<::NeXus::File>(fname);
+    if (filePointer)
+      filePointer->getEntries();
   } catch (::NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname
                   << "', error description: " << e.what() << '\n';
     res = false;
   }
-  if (f)
-    delete f;
   return res;
 }
 

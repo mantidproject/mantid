@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /******************************************************************************
  * Python module wrapper for the WorkspaceCreationHelper methods
  ******************************************************************************/
@@ -35,6 +41,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads,
 BOOST_PYTHON_FUNCTION_OVERLOADS(
     create2DWorkspaceWithRectangularInstrument_overloads,
     create2DWorkspaceWithRectangularInstrument, 3, 3)
+
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -50,6 +57,7 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   // Function pointers to disambiguate the calls
   using Signature1_2D = Workspace2D_sptr (*)(int, int, bool, bool);
   using Signature2_2D = Workspace2D_sptr (*)(int, int, int);
+  using Signature3_2D = Workspace2D_sptr (*)(int, int, int, int);
 
   def("create2DWorkspaceWithFullInstrument",
       reinterpret_cast<Signature1_2D>(&create2DWorkspaceWithFullInstrument),
@@ -58,6 +66,9 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   def("create2DWorkspaceWithRectangularInstrument",
       (Signature2_2D)&create2DWorkspaceWithRectangularInstrument,
       create2DWorkspaceWithRectangularInstrument_overloads());
+
+  def("create2DWorkspace123WithMaskedBin",
+      reinterpret_cast<Signature3_2D>(&create2DWorkspace123WithMaskedBin));
 
   //=================================== Event Workspaces
   //===================================

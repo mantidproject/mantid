@@ -2,7 +2,7 @@
  IWorkspaceProperty
 ====================
 
-This a python binding to the C++ class Mantid::API::WorkspaceProperty.
+This is a Python binding to the C++ class Mantid::API::WorkspaceProperty.
 
 
 .. module:`mantid.api`

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import tempfile
 import os
@@ -20,7 +26,7 @@ class SaveReflectionsTest(unittest.TestCase):
 
     def _create_peaks_workspace(self):
         """Create a dummy peaks workspace"""
-        path = FileFinder.getFullPath("IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml")
+        path = FileFinder.getFullPath("unit_testing/MINITOPAZ_Definition.xml")
         inst = LoadEmptyInstrument(Filename=path)
         ws = CreatePeaksWorkspace(inst, 0)
         DeleteWorkspace(inst)

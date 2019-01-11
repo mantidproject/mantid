@@ -15,10 +15,10 @@ Units are a set of small classes in Mantid that define a unit of measure, and th
 The Unit Factory is a :ref:`Dynamic Factory <Dynamic Factory>` that creates
 and hands out instances of Mantid Unit objects.
 
-Available units
----------------
+Available TOF Convertible units
+-------------------------------
 
-The following units are available in the default Mantid distribution.
+The following units are available in the default Mantid distribution. These units are TOF convertible.
 
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
 | Name                                      | ID (as known by Unit Factory)   | Unit                        | Relevant equation                                                                                                |
@@ -71,6 +71,23 @@ workspace (when energy transfer is specified along x-axis)
 **d-spacingPerpendicular** is a unit invented in `J. Appl. Cryst. (2015) 48, pp. 1627--1636 <https://doi.org/10.1107/S1600576715016520>`_ for 2D Rietveld refinement
 of angular and wavelength-dispersive neutron time-of-flight powder diffraction data. Together with the d-Spacing :math:`d`,
 d-SpacingPerpendicular :math:`d_{\perp}` forms a new orthogonal coordinate system.
+
+Available non-TOF Convertible units
+-----------------------------------
+
+The following units are available in the default Mantid distribution. These units cannot be converted to or from TOF.
+
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| Name                                      | ID (as known by Unit Factory)   | Unit                        | Description                                                                                                      |
++===========================================+=================================+=============================+==================================================================================================================+
+|                                           | Empty                           | No unit                     | An empty label                                                                                                   |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| t                                         | Time                            | :math:`s`                   | An independent unit of time not related to energy or TOF                                                         |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| Scattering angle                          | Degrees                         | :math:`degrees`             | Degrees is a measurement of angular position                                                                     |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| Temperature                               | Temperature                     | :math:`K`                   | Temperature in Kelvin                                                                                            |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
 
 
 Working with Units in Python

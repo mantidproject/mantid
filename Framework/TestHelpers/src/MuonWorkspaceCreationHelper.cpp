@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -59,15 +65,20 @@ double eData::operator()(const double, size_t) { return 0.005; }
  * Number of bins = maxt - 1 .
  * @param seed :: Number added to all y-values.
  * @param detectorIDseed :: detector IDs starting from this number.
+ * @param isHist :: Whether to output histogram data or not
+ * @param xStart :: The start value of the x-axis.
+ * @param xEnd :: The end value of the x-axis.
  * @return Pointer to the workspace.
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed, size_t detectorIDseed) {
+                                           double seed, size_t detectorIDseed,
+                                           bool isHist, double xStart,
+                                           double xEnd) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yDataCounts(), static_cast<int>(nspec), 0.0, 1.0,
-          (1.0 / static_cast<double>(maxt)), true, eData());
+          yDataCounts(), static_cast<int>(nspec), xStart, xEnd,
+          (1.0 / static_cast<double>(maxt)), isHist, eData());
 
   ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
       static_cast<int>(nspec)));
@@ -89,6 +100,12 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
   ws->mutableRun().addProperty("run_number", 12345);
 
   return ws;
+}
+
+MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
+                                           double seed, size_t detectorIDseed) {
+  return createCountsWorkspace(nspec, maxt, seed, detectorIDseed, true, 0.0,
+                               1.0);
 }
 
 /**
@@ -125,6 +142,33 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
     wsGroup->addWorkspace(ws);
     wsName = wsNameStem + std::to_string(period);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
+  }
+
+  return wsGroup;
+}
+
+Mantid::API::WorkspaceGroup_sptr
+createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
+                               const std::string &wsGroupName) {
+  Mantid::API::WorkspaceGroup_sptr wsGroup =
+      boost::make_shared<Mantid::API::WorkspaceGroup>();
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(wsGroupName,
+                                                            wsGroup);
+
+  std::string wsNameStem = "MuonDataPeriod_";
+  std::string wsName;
+
+  boost::shared_ptr<Mantid::Geometry::Instrument> inst1 =
+      boost::make_shared<Mantid::Geometry::Instrument>();
+  inst1->setName("EMU");
+
+  for (int period = 1; period < nPeriods + 1; period++) {
+    Mantid::API::MatrixWorkspace_sptr ws = createAsymmetryWorkspace(
+        nspec, maxt, yDataAsymmetry(10.0 * period, 0.1 * period));
+
+    wsGroup->addWorkspace(ws);
+    wsName = wsNameStem + std::to_string(period);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
   }
 
   return wsGroup;

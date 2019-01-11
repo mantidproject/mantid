@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyNexus.h"
 
 // clang-format off
@@ -51,7 +57,8 @@ makeProperty(::NeXus::File *file, const std::string &name,
       return Mantid::Kernel::make_unique<PropertyWithValue<NumT>>(name,
                                                                   values[0]);
     } else {
-      return Mantid::Kernel::make_unique<ArrayProperty<NumT>>(name, values);
+      return Mantid::Kernel::make_unique<ArrayProperty<NumT>>(
+          name, std::move(values));
     }
   } else {
     auto prop = Mantid::Kernel::make_unique<TimeSeriesProperty<NumT>>(name);

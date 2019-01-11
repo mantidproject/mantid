@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SCRIPTINGWINDOW_H_
 #define SCRIPTINGWINDOW_H_
 
@@ -13,6 +19,7 @@
 //----------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------
+class ScriptFileInterpreter;
 class MultiTabScriptInterpreter;
 class ScriptingEnv;
 class QTextEdit;
@@ -69,6 +76,9 @@ public:
   /// Sets a flag which is set to true if synchronous execution fails
   // We set a flag on failure to avoid problems with Async not returning success
   bool getSynchronousErrorFlag() { return m_failureFlag; }
+
+  /// Get a reference to the runner of the current script on the current tab
+  const Script &getCurrentScriptRunner();
 
 signals:
   /// Show the scripting language dialog

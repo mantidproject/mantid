@@ -9,6 +9,7 @@ set ( SRC_FILES src/CatalogPublishDialog.cpp
                 src/LOQScriptInputDialog.cpp
                 src/MantidGLWidget.cpp
                 src/GetNegMuMuonicXRDDialog.cpp
+                src/PeriodicTableWidget.cpp
                 src/PlotAsymmetryByLogValueDialog.cpp
                 src/SampleShapeHelpers.cpp
                 src/SmoothNeighboursDialog.cpp
@@ -16,25 +17,26 @@ set ( SRC_FILES src/CatalogPublishDialog.cpp
 )
 
 set ( MOC_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CreateSampleShapeDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/ConvertTableToMatrixWorkspaceDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/StartLiveDataDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDAEDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadRawDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LOQScriptInputDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/GetNegMuMuonicXRDDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PlotAsymmetryByLogValueDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SmoothNeighboursDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SortTableWorkspaceDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CreateSampleShapeDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/ConvertTableToMatrixWorkspaceDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/StartLiveDataDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDAEDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadRawDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LOQScriptInputDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/GetNegMuMuonicXRDDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PeriodicTableWidget.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PlotAsymmetryByLogValueDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SmoothNeighboursDialog.h
+inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SortTableWorkspaceDialog.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-    ${MOC_FILES}
+${MOC_FILES}
 )
 
 set ( UI_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog.ui
@@ -42,6 +44,7 @@ set ( UI_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog
                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/ConvertTableToMatrixWorkspaceDialog.ui
                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/DiagScriptInputDialog.ui
                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LOQScriptInputDialog.ui
+               inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PeriodicTableWidget.ui
                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PlotAsymmetryByLogValueDialog.ui
                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDialog.ui
                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/StartLiveDataDialog.ui

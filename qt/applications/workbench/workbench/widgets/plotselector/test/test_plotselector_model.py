@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2018 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
 from workbench.plotting.globalfiguremanager import FigureAction
@@ -87,7 +80,7 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.presenter.update_visibility_icon.assert_called_once_with(42)
 
     def test_notify_unknwon_updates_plot_list_in_presenter(self):
-        self.model.notify(FigureAction.Unknown, -1)
+        self.model.notify(FigureAction.Update, -1)
         self.presenter.update_plot_list.assert_called_once_with()
 
     # ------------------------ Plot Showing ------------------------

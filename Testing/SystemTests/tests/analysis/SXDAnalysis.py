@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class SXDAnalysis(stresstesting.MantidStressTest):
+class SXDAnalysis(systemtesting.MantidSystemTest):
     """
     Start of a system test for SXD data analyiss
     """

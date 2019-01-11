@@ -76,7 +76,6 @@ Deprecated
 - :ref:`OneStepMDEW	 <algm-OneStepMDEW>`.
 - :ref:`QueryAllRemoteJobs	 <algm-QueryAllRemoteJobs>` is deprecated in favour of v2.
 - :ref:`RefinePowderInstrumentParameters	 <algm-RefinePowderInstrumentParameters>` is deprecated in favour of v2.
-- :ref:`SetupILLD33Reduction	 <algm-SetupILLD33Reduction>`.
 - :ref:`StartRemoteTransaction	 <algm-StartRemoteTransaction>` is deprecated in favour of v2.
 - :ref:`LoadILLAscii	 <algm-LoadILLDiffraction>`.
 - :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` is deprecated in favour of v2.
@@ -107,7 +106,7 @@ CurveFitting
 - `Exclude` is new property of :ref:`Fit <algm-Fit>`, which allows for a user defined range to be excluded from a fit.
 - System tests and Fitting Benchmarks have been added for testing the minimizer, the scripts generate the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This System tests also demo how these tables can be created as a standard Mantid script.
 
-The work on benchmarking fitting has received funding from the Horizon 2020 Framework 
+The work on benchmarking fitting has received funding from the Horizon 2020 Framework
 Programme of the European Union under the SINE2020 project Grant No 654000
 
 Improved

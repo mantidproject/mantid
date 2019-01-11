@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 #pylint: disable=too-many-public-methods
 """
@@ -6,7 +12,7 @@ Check that file manipulation works fine
 
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import SANSUtility as su
 import os
@@ -215,9 +221,9 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
 
 
-class SANSSwitchIDFTestRunner(stresstesting.MantidStressTest):
+class SANSSwitchIDFTestRunner(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

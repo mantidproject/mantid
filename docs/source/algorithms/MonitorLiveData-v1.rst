@@ -19,7 +19,7 @@ This algorithm simply calls :ref:`algm-LoadLiveData` at the given
 :ref:`algm-StartLiveData`.
 
 For details on the way to specify the data processing steps, see:
-`LoadLiveData <LoadLiveData#Description>`__.
+:ref:`LoadLiveData <algm-LoadLiveData>`.
 
 Usage
 -----

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -437,7 +443,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
  * @param numBanks :: number of rectangular banks
  * @param numPixels :: each bank will be numPixels*numPixels
  * @param numBins :: each spectrum will have this # of bins
- * @return The EventWorkspace
+ * @return The Workspace2D
  */
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
@@ -1534,6 +1540,12 @@ createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
     statusColumn->cell<std::string>(i) =
         row.fitStatus == EPPTableRow::FitStatus::SUCCESS ? "success" : "failed";
   }
+  return ws;
+}
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123WithMaskedBin(
+    int numHist, int numBins, int maskedWorkspaceIndex, int maskedBinIndex) {
+  auto ws = create2DWorkspace123(numHist, numBins);
+  ws->flagMasked(maskedWorkspaceIndex, maskedBinIndex);
   return ws;
 }
 } // namespace WorkspaceCreationHelper

@@ -1,7 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,attribute-defined-outside-init
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.api import (AnalysisDataService, FileFinder)
 from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, BatchReduce, SetEventSlices,
                                                          UseCompatibilityMode, AssignSample, AssignCan,
@@ -12,7 +18,7 @@ MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
 
 
-class SANS2DMinimalBatchReductionSlicedTest_V2(stresstesting.MantidStressTest):
+class SANS2DMinimalBatchReductionSlicedTest_V2(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DMinimalBatchReductionSlicedTest_V2, self).__init__()
 
@@ -33,7 +39,7 @@ class SANS2DMinimalBatchReductionSlicedTest_V2(stresstesting.MantidStressTest):
             return '', 'SANSReductionGUI.nxs'
 
 
-class SANS2DMinimalSingleReductionSlicedTest_V2(stresstesting.MantidStressTest):
+class SANS2DMinimalSingleReductionSlicedTest_V2(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DMinimalSingleReductionSlicedTest_V2, self).__init__()
 

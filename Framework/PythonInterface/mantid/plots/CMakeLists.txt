@@ -3,6 +3,7 @@ set ( PY_FILES
   helperfunctions.py
   plotfunctions.py
   plotfunctions3D.py
+  utility.py
 )
 
 

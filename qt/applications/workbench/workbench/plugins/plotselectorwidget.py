@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
-#    Copyright (C) 2018 mantidproject
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
@@ -25,6 +18,7 @@ from qtpy.QtWidgets import QVBoxLayout
 from workbench.plugins.base import PluginWidget
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
+# from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
 class PlotSelector(PluginWidget):
@@ -49,5 +43,8 @@ class PlotSelector(PluginWidget):
     def get_plugin_title(self):
         return "Plots"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass

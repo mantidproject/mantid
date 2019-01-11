@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/Exception.h"
@@ -33,12 +39,12 @@ namespace Kernel {
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
-                                           const TYPE &defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(std::string name,
+                                           TYPE defaultValue,
                                            IValidator_sptr validator,
-                                           const unsigned int direction)
-    : Property(name, typeid(TYPE), direction), m_value(defaultValue),
-      m_initialValue(defaultValue), m_validator(validator) {}
+                                           unsigned int direction)
+    : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
+      m_initialValue(std::move(defaultValue)), m_validator(std::move(validator)) {}
 
 /** Constructor
  *  @param name :: The name to assign to the property
@@ -47,11 +53,11 @@ PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
-                                           const TYPE &defaultValue,
-                                           const unsigned int direction)
-    : Property(name, typeid(TYPE), direction), m_value(defaultValue),
-      m_initialValue(defaultValue),
+PropertyWithValue<TYPE>::PropertyWithValue(std::string name,
+                                           TYPE defaultValue,
+                                           unsigned int direction)
+    : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
+      m_initialValue(std::move(defaultValue)),
       m_validator(boost::make_shared<NullValidator>()) {}
 
 /*
@@ -69,15 +75,15 @@ PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
   * or Direction::InOut (Input & Output) property
   */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
-                                           const TYPE &defaultValue,
-                                           const std::string defaultValueStr,
+PropertyWithValue<TYPE>::PropertyWithValue(std::string name,
+                                           TYPE defaultValue,
+                                           const std::string &defaultValueStr,
                                            IValidator_sptr validator,
-                                           const unsigned int direction)
-    : Property(name, typeid(TYPE), direction),
+                                           unsigned int direction)
+    : Property(std::move(name), typeid(TYPE), direction),
       m_value(extractToValueVector<TYPE>(defaultValueStr)),
-      m_initialValue(extractToValueVector<TYPE>(defaultValueStr)),
-      m_validator(validator) {
+      m_initialValue(m_value),
+      m_validator(std::move(validator)) {
   UNUSED_ARG(defaultValue);
 }
 

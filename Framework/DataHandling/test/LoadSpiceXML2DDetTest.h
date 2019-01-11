@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADSPICEXML2DDETTEST_H_
 #define MANTID_DATAHANDLING_LOADSPICEXML2DDETTEST_H_
 
@@ -673,6 +679,43 @@ public:
     TS_ASSERT(ll_det_pos.Y() + lu_det_pos.Y() > 0);
 
     TS_ASSERT(ll_det_pos.X() > center_det_pos.X());
+
+    // Clean
+    AnalysisDataService::Instance().remove("Exp0335_S0038F");
+  }
+
+  //----
+  void test_loadBinaryFile() {
+    // HB3A_exp685_scan0248_0004.bin
+    // initialize the algorithm
+    LoadSpiceXML2DDet loader;
+    loader.initialize();
+
+    // set up properties
+    const std::string filename("LaB6_10kev_35deg.bin");
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
+    std::vector<size_t> geometryvec;
+    geometryvec.push_back(0);
+    geometryvec.push_back(0);
+    loader.setProperty("LoadInstrument", false);
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038F"));
+    TS_ASSERT(outws);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1024 * 1024);
+
+    // Value
+    // test signal value on various pixels
+    // pixel at (256, 1): column 1
+    TS_ASSERT_DELTA(outws->readY(0)[0], 60000., 0.0001);
+    TS_ASSERT_DELTA(outws->readY(1)[0], 50000., 0.0001);
+    TS_ASSERT_DELTA(outws->readY(2)[0], 40000., 0.0001);
 
     // Clean
     AnalysisDataService::Instance().remove("Exp0335_S0038F");

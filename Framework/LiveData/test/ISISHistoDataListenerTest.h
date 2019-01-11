@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 #define MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 
@@ -55,7 +61,7 @@ public:
 // cannot make it work for linux
 #ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -140,7 +146,7 @@ public:
   void test_Receiving_multiperiod_data() {
 #ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -247,7 +253,7 @@ public:
   void test_Receiving_selected_periods() {
 #ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -297,7 +303,7 @@ public:
   void test_Receiving_selected_monitors() {
 #ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -354,7 +360,7 @@ public:
   void test_invalid_spectra_numbers() {
 #ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -393,7 +399,7 @@ public:
   void test_no_period() {
 #ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();

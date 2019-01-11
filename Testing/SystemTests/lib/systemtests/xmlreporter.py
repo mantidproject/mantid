@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 from xml.dom.minidom import getDOMImplementation
-import stresstesting
+import systemtesting
 
-class XmlResultReporter(stresstesting.ResultReporter):
+class XmlResultReporter(systemtesting.ResultReporter):
 
 	_time_taken = 0.0
 	_failures = []

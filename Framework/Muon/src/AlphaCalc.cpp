@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -26,13 +32,13 @@ void AlphaCalc::init() {
                   "Name of the input workspace");
 
   std::vector<int> forwardDefault{1};
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("ForwardSpectra", forwardDefault),
-      "The spectra numbers of the forward group (default to 1)");
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
+                      "ForwardSpectra", std::move(forwardDefault)),
+                  "The spectra numbers of the forward group (default to 1)");
 
   std::vector<int> backwardDefault{2};
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>("BackwardSpectra",
-                                                          backwardDefault),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
+                      "BackwardSpectra", std::move(backwardDefault)),
                   "The spectra numbers of the backward group (default to 2)");
 
   declareProperty("FirstGoodValue", EMPTY_DBL(),

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CREATEMDFITWORKSPACE_TEST_H_
 #define CREATEMDFITWORKSPACE_TEST_H_
 
@@ -24,15 +30,12 @@ public:
     maker.execute();
     TS_ASSERT(maker.isExecuted());
 
-    IFitFunction *fun = FunctionFactory::Instance().createInitialized(
-        "name=UserFunctionMD,Formula=h*exp(-a*(x-c)^2),Workspace="
-        "CreateMDFitWorkspaceTest_ws");
+    std::unique_ptr<IFitFunction> fun = std::unique_ptr<IFitFunction>(
+        FunctionFactory::Instance().createInitialized(
+            "name=UserFunctionMD,Formula=h*exp(-a*(x-c)^2),Workspace="
+            "CreateMDFitWorkspaceTest_ws"));
     TS_ASSERT(fun);
     TS_ASSERT(fun->getWorkspace());
-
-    if (fun) {
-      delete fun;
-    }
   }
 };
 

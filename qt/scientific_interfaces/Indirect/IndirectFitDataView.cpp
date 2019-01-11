@@ -1,6 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataView.h"
 
 using namespace Mantid::API;
+
+namespace {
+
+bool isWorkspaceLoaded(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -99,11 +113,30 @@ IndirectFitDataView::validateMultipleData(UserInputValidator &validator) {
 
 UserInputValidator &
 IndirectFitDataView::validateSingleData(UserInputValidator &validator) {
+  validator = validateSample(validator);
+  if (!isResolutionHidden())
+    validator = validateResolution(validator);
+  return validator;
+}
+
+UserInputValidator &
+IndirectFitDataView::validateSample(UserInputValidator &validator) {
+  const auto sampleIsLoaded = isWorkspaceLoaded(getSelectedSample());
   validator.checkDataSelectorIsValid("Sample Input", m_dataForm->dsSample);
 
-  if (!isResolutionHidden())
-    validator.checkDataSelectorIsValid("Resolution Input",
-                                       m_dataForm->dsResolution);
+  if (!sampleIsLoaded)
+    emit sampleLoaded(QString::fromStdString(getSelectedSample()));
+  return validator;
+}
+
+UserInputValidator &
+IndirectFitDataView::validateResolution(UserInputValidator &validator) {
+  const auto resolutionIsLoaded = isWorkspaceLoaded(getSelectedResolution());
+  validator.checkDataSelectorIsValid("Resolution Input",
+                                     m_dataForm->dsResolution);
+
+  if (!resolutionIsLoaded)
+    emit resolutionLoaded(QString::fromStdString(getSelectedResolution()));
   return validator;
 }
 

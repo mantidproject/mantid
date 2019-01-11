@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
-
+#include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -22,11 +29,17 @@ using Mantid::PythonInterface::DetectorInfoPythonIterator;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
+using namespace Mantid::PythonInterface;
 
+namespace {
 // Helper method to make the python iterator
-DetectorInfoPythonIterator make_pyiterator(const DetectorInfo &detectorInfo) {
+DetectorInfoPythonIterator make_pyiterator(DetectorInfo &detectorInfo) {
   return DetectorInfoPythonIterator(detectorInfo);
 }
+/// return_value_policy for read-only numpy array
+using return_readonly_numpy =
+    return_value_policy<Policies::VectorRefToNumpy<Converters::WrapReadOnly>>;
+} // namespace
 
 // Export DetectorInfo
 void export_DetectorInfo() {
@@ -90,5 +103,7 @@ void export_DetectorInfo() {
 
       .def("rotation", rotation, (arg("self"), arg("index")),
            "Returns the absolute rotation of the detector where the detector "
-           "is identified by 'index'.");
+           "is identified by 'index'.")
+      .def("detectorIDs", &DetectorInfo::detectorIDs, return_readonly_numpy(),
+           "Returns all detector ids sorted by detector index");
 }

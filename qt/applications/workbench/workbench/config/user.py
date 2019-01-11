@@ -1,23 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from mantidqt.py3compat import is_text_string
+from mantid.py3compat import is_text_string
 from posixpath import join as joinsettings
 from qtpy.QtCore import QSettings
 
@@ -56,7 +49,10 @@ class UserConfig(object):
         # fixup the values of booleans - they do not evaluate correctly when read from the config file
         # TODO come up with a unit test for this
         for key in self.all_keys():
-            value = self.get(key)
+            try:
+                value = self.get(key)
+            except KeyError:
+                continue
             if value == 'true':
                 self.set(key, True)
             elif value == 'false':

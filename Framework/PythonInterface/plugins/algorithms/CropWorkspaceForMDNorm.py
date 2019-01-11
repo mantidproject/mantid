@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -27,9 +33,8 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
         """
         return "CropWorkspaceForMDNorm"
 
-    #TODO: add here the new MDNorm and related
-    #def seeAlso(self):
-    #    return []
+    def seeAlso(self):
+        return ["RecalculateTrajectoriesExtents"]
 
     def summary(self):
         return "Crops an event workspace and store the information"+\

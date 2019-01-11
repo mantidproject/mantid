@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -9,8 +15,8 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, Property, StringArrayProperty, StringListValidator)
-from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, Divide,
-                              ExtractMask, Integration, LoadMask, MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
+from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, CreateSingleValuedWorkspace, Divide,
+                              ExtractMask, Integration, LoadMask, MaskDetectors, MedianDetectorTest, Multiply, Plus, SolidAngle)
 import numpy
 import os.path
 
@@ -83,10 +89,17 @@ def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLoggi
 
 def _createMaskWS(ws, name, algorithmLogging):
     """Return a single bin workspace with same number of histograms as ws."""
-    maskWS, detList = ExtractMask(InputWorkspace=ws,
-                                  OutputWorkspace=name,
-                                  EnableLogging=algorithmLogging)
-    maskWS *= 0.0
+    extractResult = ExtractMask(InputWorkspace=ws,
+                                OutputWorkspace=name,
+                                EnableLogging=algorithmLogging)
+    zeroWS = CreateSingleValuedWorkspace(DataValue=0.,
+                                         ErrorValue=0.,
+                                         EnableLogging=algorithmLogging,
+                                         StoreInADS=False)
+    maskWS = Multiply(LHSWorkspace=extractResult.OutputWorkspace,
+                      RHSWorkspace=zeroWS,
+                      OutputWorkspace=name,
+                      EnableLogging=algorithmLogging)
     return maskWS
 
 
@@ -793,10 +806,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                       DetectorList=userMask,
                       ComponentList=maskComponents,
                       EnableLogging=algorithmLogging)
-        maskWS, detectorList = ExtractMask(InputWorkspace=maskWS,
-                                           OutputWorkspace=maskWSName,
-                                           EnableLogging=algorithmLogging)
-        return maskWS
+        extractResult = ExtractMask(InputWorkspace=maskWS,
+                                    OutputWorkspace=maskWSName,
+                                    EnableLogging=algorithmLogging)
+        return extractResult.OutputWorkspace
 
     def _value(self, ws, propertyName, instrumentParameterName, defaultValue):
         """Return a suitable value either from a property, the IPF or the supplied defaultValue."""

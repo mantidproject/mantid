@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RenameWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {
@@ -87,8 +94,14 @@ std::map<std::string, std::string> RenameWorkspace::validateInputs() {
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
 void RenameWorkspace::exec() {
+  auto &ADS = AnalysisDataService::Instance();
+
   // Get the input workspace
   Workspace_sptr inputWS = getProperty("InputWorkspace");
+
+  WorkspaceGroup_sptr inputGroup =
+      boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+
   // get the workspace name
   std::string inputwsName = inputWS->getName();
   // get the output workspace name
@@ -98,7 +111,7 @@ void RenameWorkspace::exec() {
   setProperty("OutputWorkspace", inputWS);
 
   // rename the input workspace using the rename method
-  AnalysisDataService::Instance().rename(inputwsName, outputwsName);
+  ADS.rename(inputwsName, outputwsName);
 
   const bool renameMonitors = getProperty("RenameMonitors");
   if (!renameMonitors)
@@ -115,15 +128,13 @@ void RenameWorkspace::exec() {
     if (monWSName.empty()) {
       // workspace will always have name after added to ADS, so apparently not
       // the case
-      AnalysisDataService::Instance().add(outputwsName + "_monitors", monWS);
+      ADS.add(outputwsName + "_monitors", monWS);
     } else {
       try {
-        AnalysisDataService::Instance().rename(monWSName,
-                                               outputwsName + "_monitors");
+        ADS.rename(monWSName, outputwsName + "_monitors");
       } catch (Kernel::Exception::NotFoundError &) { // it may be deleted
-        AnalysisDataService::Instance().add(monWSName, monWS);
-        AnalysisDataService::Instance().rename(monWSName,
-                                               outputwsName + "_monitors");
+        ADS.add(monWSName, monWS);
+        ADS.rename(monWSName, outputwsName + "_monitors");
       }
     }
   }
@@ -169,6 +180,8 @@ bool RenameWorkspace::processGroups() {
             this->name(), this->version());
         alg->setPropertyValue("InputWorkspace", names[i]);
         alg->setPropertyValue("OutputWorkspace", wsName);
+        alg->setChild(true);
+        alg->enableHistoryRecordingForChild(false);
         alg->execute();
       } catch (Kernel::Exception::NotFoundError &ex) {
         // Will wind up here if group has somehow got messed up and a member
@@ -177,7 +190,8 @@ bool RenameWorkspace::processGroups() {
       }
     }
   }
-  setProperty("OutputWorkspace", inputWS);
+
+  setProperty("OutputWorkspace", inputGroup);
 
   // We finished successfully.
   g_log.notice() << name() << " successful\n";

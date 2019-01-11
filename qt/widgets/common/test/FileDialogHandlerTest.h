@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_FILEDIALOGHANDLERTEST_H_
 #define MANTIDQT_API_FILEDIALOGHANDLERTEST_H_
 
@@ -11,37 +17,46 @@ public:
     const QString singleExt(".nxs (*.nxs)");
     const QString nexusResult("/tmp/testing.nxs");
 
-    auto result1 = MantidQt::API::FileDialogHandler::addExtension(
+    auto result = MantidQt::API::FileDialogHandler::addExtension(
         QString::fromStdString("/tmp/testing"), singleExt);
-    TS_ASSERT_EQUALS(nexusResult.toStdString(), result1.toStdString());
+    TS_ASSERT_EQUALS(nexusResult.toStdString(), result.toStdString());
 
-    auto result2 = MantidQt::API::FileDialogHandler::addExtension(
+    result = MantidQt::API::FileDialogHandler::addExtension(
         QString::fromStdString("/tmp/testing."), singleExt);
-    TS_ASSERT_EQUALS(nexusResult.toStdString(), result2.toStdString());
+    TS_ASSERT_EQUALS(nexusResult.toStdString(), result.toStdString());
 
-    auto result3 =
+    result =
         MantidQt::API::FileDialogHandler::addExtension(nexusResult, singleExt);
-    TS_ASSERT_EQUALS(nexusResult.toStdString(), result3.toStdString());
+    TS_ASSERT_EQUALS(nexusResult.toStdString(), result.toStdString());
 
     // don't override if it is already specified
     const QString singleH5("/tmp/testing.h5");
-    auto result4 =
+    result =
         MantidQt::API::FileDialogHandler::addExtension(singleH5, singleExt);
-    TS_ASSERT_EQUALS(singleH5.toStdString(), result4.toStdString());
+    TS_ASSERT_EQUALS(singleH5.toStdString(), result.toStdString());
 
     // --- double extensions
     const QString doubleExt("JPEG (*.jpg *.jpeg)");
     const QString jpegResult("/tmp/testing.jpg");
 
-    // this can't work because you can't determine one extension
-    TS_ASSERT_THROWS(MantidQt::API::FileDialogHandler::addExtension(
-                         QString::fromStdString("/tmp/testing"), doubleExt),
-                     std::runtime_error);
+    // this picks the first extension in doubleExt
+    result = MantidQt::API::FileDialogHandler::addExtension(
+        QString::fromStdString("/tmp/testing"), doubleExt);
+    TS_ASSERT_EQUALS(jpegResult.toStdString(), result.toStdString());
 
     // this shouldn't do anything
-    auto result5 =
+    result =
         MantidQt::API::FileDialogHandler::addExtension(jpegResult, doubleExt);
-    TS_ASSERT_EQUALS(jpegResult.toStdString(), result5.toStdString());
+    TS_ASSERT_EQUALS(jpegResult.toStdString(), result.toStdString());
+
+    // Just the wildcard *
+    const QString wildcardExt("All files (*)");
+    const QString wildcardResult("/tmp/testing");
+
+    // this shouldn't do anything
+    result = MantidQt::API::FileDialogHandler::addExtension(
+        QString::fromStdString("/tmp/testing"), wildcardExt);
+    TS_ASSERT_EQUALS(wildcardResult.toStdString(), result.toStdString());
   }
 
   void test_getFileDialogFilter() {

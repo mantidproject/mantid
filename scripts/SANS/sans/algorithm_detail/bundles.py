@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ This module contains bundle definitions for passing reduction settings between functions."""
 from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
@@ -23,7 +29,7 @@ ReductionSettingBundle = namedtuple('ReductionSettingBundle', 'state, data_type,
 # 1. Handle to a merged workspace
 # 2. The shift factor which was used for the merge.
 # 3. The scale factor which was used for the merge.
-MergeBundle = namedtuple('MergeBundle', 'merged_workspace, shift, scale')
+MergeBundle = namedtuple('MergeBundle', 'merged_workspace, shift, scale, scaled_hab_workspace')
 
 # The OutputBundle contains.
 # 1. The state object for this particular reduction.

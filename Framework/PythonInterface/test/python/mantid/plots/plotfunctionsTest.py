@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
@@ -115,6 +121,7 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.tripcolor(ax, self.ws2d_histo, vmin=0)
         funcs.pcolormesh(ax, self.ws_MD_2d)
         funcs.pcolorfast(ax, self.ws2d_point_uneven, vmin=-1)
+        funcs.imshow(ax, self.ws2d_histo)
 
     def test_1d_plots_with_unplottable_type_raises_attributeerror(self):
         table = CreateEmptyTableWorkspace()

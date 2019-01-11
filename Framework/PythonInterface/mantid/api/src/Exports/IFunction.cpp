@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
@@ -226,6 +232,10 @@ void export_IFunction() {
 
       .def("getConstraints", &IFunction::writeConstraints, arg("self"),
            "Returns the list of current constraints as a string")
+
+      .def("setConstraintPenaltyFactor", &IFunction::setConstraintPenaltyFactor,
+           (arg("self"), arg("name"), arg("value")),
+           "Set the constraint penalty factor for named parameter")
 
       .def("getNumberDomains", &IFunction::getNumberDomains, (arg("self")),
            "Get number of domains of a multi-domain function")

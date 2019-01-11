@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -45,7 +51,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/regex.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -164,7 +169,8 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
       m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
-  m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
+  m_pSysConfig =
+      std::make_unique<WrappedObject<Poco::Util::SystemConfiguration>>();
   m_pConf = nullptr;
 
   // Register StdChannel with Poco
@@ -275,8 +281,6 @@ ConfigServiceImpl::ConfigServiceImpl()
 ConfigServiceImpl::~ConfigServiceImpl() {
   // std::cerr << "ConfigService destroyed.\n";
   Kernel::Logger::shutdown();
-  delete m_pSysConfig;
-  delete m_pConf; // potential double delete???
   clearFacilities();
 }
 
@@ -382,7 +386,7 @@ std::string checkForBadConfigOptions(const std::string &filename,
  */
 void ConfigServiceImpl::loadConfig(const std::string &filename,
                                    const bool append) {
-  delete m_pConf;
+
   if (!append) {
     // remove the previous property string
     m_PropertyString = "";
@@ -423,7 +427,9 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
 
   // use the cached property string to initialise the POCO property file
   std::istringstream istr(m_PropertyString);
-  m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(istr);
+  m_pConf =
+      std::make_unique<WrappedObject<Poco::Util::PropertyFileConfiguration>>(
+          istr);
 }
 
 /**
@@ -457,7 +463,7 @@ void ConfigServiceImpl::configureLogging() {
   try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
-    configurator.configure(m_pConf);
+    configurator.configure(m_pConf.get());
   } catch (std::exception &e) {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << '\n';
@@ -2004,7 +2010,6 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
   // If this is already a full path, nothing to do
   if (Poco::Path(fName).isAbsolute())
     return fName;
-
   // First try the path relative to the current directory. Can throw in some
   // circumstances with extensions that have wild cards
   try {
@@ -2013,9 +2018,13 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
       return fullPath.path();
   } catch (std::exception &) {
   }
-
-  for (const auto &searchPath :
-       Kernel::ConfigService::Instance().getDataSearchDirs()) {
+  Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
+  std::vector<std::string> directoryNames = configService.getDataSearchDirs();
+  std::vector<std::string> instrDirectories =
+      configService.getInstrumentDirectories();
+  directoryNames.insert(directoryNames.end(), instrDirectories.begin(),
+                        instrDirectories.end());
+  for (const auto &searchPath : directoryNames) {
     g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
 // On windows globbing is not working properly with network drives
 // for example a network drive containing a $

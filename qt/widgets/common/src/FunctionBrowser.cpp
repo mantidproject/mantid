@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 
 #include "MantidAPI/CompositeFunction.h"
@@ -1373,22 +1379,26 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
   {
     auto from = m_ties.lowerBound(prop);
     auto to = m_ties.upperBound(prop);
-    QList<QtProperty *> filedTies; // ties can become invalid after some editing
+    // ties can become invalid after some editing
+    QList<QtProperty *> failedTies;
     for (auto it = from; it != to; ++it) {
+      auto const tie =
+          (it->paramName + "=" + m_tieManager->value(it.value().tieProp))
+              .toStdString();
       try {
-        QString tie =
-            it->paramName + "=" + m_tieManager->value(it.value().tieProp);
-        fun->addTies(tie.toStdString());
+        fun->addTies(tie);
       } catch (...) {
-        filedTies << it.value().tieProp;
+        failedTies << it.value().tieProp;
+        g_log.warning() << "Invalid tie has been removed: " << tie << std::endl;
       }
     }
     // remove failed ties from the browser
-    foreach (QtProperty *p, filedTies) {
+    foreach (QtProperty *p, failedTies) {
       auto paramProp = getParentParameterProperty(p);
       if (isLocalParameterProperty(paramProp)) {
-        auto paramName = paramProp->propertyName();
-        setLocalParameterTie(paramName, m_currentDataset, "");
+        auto const paramName = paramProp->propertyName();
+        auto const index = getIndex(paramProp);
+        setLocalParameterTie(index + paramName, m_currentDataset, "");
       }
       removeProperty(p);
     }

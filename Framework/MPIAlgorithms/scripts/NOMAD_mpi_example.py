@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import *
 
 #back = 'NOM_1000_event.nxs'#'/SNS/NOM/2011_2_1B_SCI/1/1000/preNeXus/

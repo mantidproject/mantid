@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0633,R0913,too-many-branches
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
@@ -436,6 +442,16 @@ def get_spice_file_url(server_url, instrument_name, exp_number, scan_number):
     return file_url
 
 
+def get_spice_group_name(exp_number):
+    """
+    get SPICE TableWorkspaces group name
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    return 'HB3A_Exp{0}_SPICES'.format(exp_number)
+
+
 def get_spice_table_name(exp_number, scan_number):
     """ Form the name of the table workspace for SPICE
     :param exp_number:
@@ -756,6 +772,62 @@ def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
                             (index_l - index_l_r) ** 2)
 
     return (index_h_r, index_k_r, index_l_r), round_error
+
+
+def check_dictionary(var_name, var_value):
+    """
+    check whether an input variable is a dictionary.
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, dict), \
+        '{0} {1} must be a dictionary but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_integer(var_name, var_value):
+    """
+    check whether an input variable is an integer.
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, int), \
+        '{0} {1} must be an integer but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_float(var_name, var_value):
+    """ check whether an input variable is a float (or an integer allowed).
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, int) or isinstance(var_value, float), \
+        '{0} {1} must be a float but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_list(var_name, var_value):
+    """
+    check whether an input variable is a list
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, list), \
+        '{0} {1} must be a list but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_string(var_name, var_value):
+    """ check whether an input variable is an integer.
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, str), \
+        '{0} {1} must be a string but not a {2}'.format(var_name, var_value, type(var_value))
 
 
 def is_peak_nuclear(index_h, index_k, index_l, magnetic_tolerance=0.2):

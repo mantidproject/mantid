@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IMANTID_GEOMETRY_OBJCOMPONENT_H_
 #define IMANTID_GEOMETRY_OBJCOMPONENT_H_
 
@@ -28,27 +34,6 @@ class GeometryHandler;
     @date 26/09/2007
     @author Russell Taylor, Tessella Support Services plc
     @date 26/06/2008
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-          GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-          along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL IObjComponent : public virtual IComponent {
 public:
@@ -105,7 +90,7 @@ public:
   virtual const Kernel::Material material() const = 0;
 
   /// Gets the GeometryHandler
-  GeometryHandler *Handle() const { return handle; }
+  GeometryHandler *Handle() const { return handle.get(); }
 
 protected:
   /// Reset the current geometry handler
@@ -113,7 +98,7 @@ protected:
 
 private:
   /// Geometry Handle for rendering
-  GeometryHandler *handle;
+  std::unique_ptr<GeometryHandler> handle;
 
   friend class GeometryHandler;
 };

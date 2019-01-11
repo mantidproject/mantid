@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/LoadHKL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
@@ -169,8 +175,7 @@ void LoadHKL::exec() {
                  << " calculated from tbar and transmission of 2 peaks\n";
   API::Run &mrun = ws->mutableRun();
   mrun.addProperty<double>("Radius", radius, true);
-  NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                      static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
+  NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
   auto shape =
       boost::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(
           Material("SetInLoadHKL", neutron, 1.0)));

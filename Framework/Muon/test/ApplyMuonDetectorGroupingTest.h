@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MUON_APPLYMUONDETECTORGROUPINGTEST_H_
 #define MANTID_MUON_APPLYMUONDETECTORGROUPINGTEST_H_
 
@@ -208,13 +214,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.988, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.709, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.00275, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.350, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.771, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.2158, 0.001);
     // Errors are simply normalized by a constant.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00120, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00144, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00181, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00094, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00113, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00142, 0.00001);
   }
 
   void
@@ -239,13 +245,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 2.101, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.841, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 0.219, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.410, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.876, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.053, 0.001);
     // Errors : quadrature addition + normalized by a constant.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.000362, 0.000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.000435, 0.000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.000546, 0.000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.000282, 0.000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.000338, 0.000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.000424, 0.000001);
   }
 
   void

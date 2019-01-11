@@ -12,7 +12,7 @@ Description
 Calculates the probability of a neutron being transmitted through the
 sample using detected counts from two monitors, one in front and one
 behind the sample. A data workspace can be corrected for transmission by
-`dividing <http://www.mantidproject.org/Divide>`_ by the output of this algorithm.
+:ref:`dividing <algm-Divide>` by the output of this algorithm.
 
 Because the detection efficiency of the monitors can be different the
 transmission calculation is done using two runs, one run with the sample

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -147,13 +153,13 @@ void PDDetermineCharacterizations::init() {
   std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
                                                  "frequency", "skf1.speed"};
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
-                      FREQ_PROP_NAME, defaultFrequencyNames),
+                      FREQ_PROP_NAME, std::move(defaultFrequencyNames)),
                   "Candidate log names for frequency");
 
   std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda",
                                                   "skf12.lambda"};
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
-                      WL_PROP_NAME, defaultWavelengthNames),
+                      WL_PROP_NAME, std::move(defaultWavelengthNames)),
                   "Candidate log names for wave length");
 }
 
@@ -239,7 +245,8 @@ void PDDetermineCharacterizations::getInformationFromTable(
             columnNames.end()) {
           g_log.warning() << "Failed to find container name \"" << canName
                           << "\" in characterizations table \""
-                          << m_characterizations->getName() << "\"\n";
+                          << m_characterizations->getName()
+                          << " - using default container value\n";
         } else {
           const auto canRuns =
               m_characterizations->getRef<std::string>(canName, i);

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //--------------------------------------
 // Includes
 //--------------------------------------
@@ -49,6 +55,11 @@ QString MantidColorMap::chooseColorMap(const QString &previousFile,
 }
 
 /**
+ * @return An empty string to indicate to load the internal map
+ */
+QString MantidColorMap::defaultColorMap() { return ""; }
+
+/**
  * Does the given colormap exist
  * @param filename A filename to check
  * @return The full file path if it exists
@@ -70,8 +81,9 @@ QString MantidColorMap::exists(const QString &filename) {
  * Default
  */
 MantidColorMap::MantidColorMap()
-    : QwtColorMap(QwtColorMap::Indexed), m_scale_type(GraphOptions::Log10),
-      m_colors(0), m_num_colors(0), m_name(), m_path(), m_nth_power(2.0) {
+    : QwtColorMap(QwtColorMap::Indexed),
+      m_scale_type(MantidColorMap::ScaleType::Log10), m_colors(0),
+      m_num_colors(0), m_name(), m_path(), m_nth_power(2.0) {
   m_nan = std::numeric_limits<double>::quiet_NaN();
   this->setNanColor(255, 255, 255);
   setupDefaultMap();
@@ -84,7 +96,7 @@ MantidColorMap::MantidColorMap()
  * @param type :: The scale type
  */
 MantidColorMap::MantidColorMap(const QString &filename,
-                               GraphOptions::ScaleType type)
+                               MantidColorMap::ScaleType type)
     : QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0),
       m_num_colors(0), m_name(), m_path(), m_nth_power(2.0) {
   m_nan = std::numeric_limits<double>::quiet_NaN();
@@ -117,9 +129,7 @@ QwtColorMap *MantidColorMap::copy() const {
  * Change the scale type
  * @param type :: The new scale type
  */
-void MantidColorMap::changeScaleType(GraphOptions::ScaleType type) {
-  m_scale_type = type;
-}
+void MantidColorMap::changeScaleType(ScaleType type) { m_scale_type = type; }
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -283,9 +293,9 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval,
     return 1.0;
 
   double ratio(0.0);
-  if (m_scale_type == GraphOptions::Linear) {
+  if (m_scale_type == ScaleType::Linear) {
     ratio = (value - interval.minValue()) / width;
-  } else if (m_scale_type == GraphOptions::Power) {
+  } else if (m_scale_type == ScaleType::Power) {
     ratio = (pow(value, m_nth_power) - pow(interval.minValue(), m_nth_power)) /
             (pow(interval.maxValue(), m_nth_power) -
              pow(interval.minValue(), m_nth_power));
@@ -303,6 +313,36 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval,
 }
 
 //-------------------------------------------------------------------------------------------------
+/**
+ * Convenience method to call rbg without constructing a QwtDoubleInterval
+ * externally
+ * @param vmin Minimum value of the data range
+ * @param vmax Maximum value of the data range
+ * @param value The data value within the above range whose rgb color should
+ * be identified
+ */
+QRgb MantidColorMap::rgb(double vmin, double vmax, double value) const {
+  return rgb(QwtDoubleInterval(vmin, vmax), value);
+}
+
+/**
+ * @brief Compute RGB color values on the current scale type for the given
+ * data values
+ * @param vmin The minimum value of the data range
+ * @param vmax The maximum value of the data range
+ * @param values The values to be transformed
+ * @return An array of QRgb describing the colors
+ */
+std::vector<QRgb> MantidColorMap::rgb(double vmin, double vmax,
+                                      const std::vector<double> &values) const {
+  const QwtDoubleInterval interval(vmin, vmax);
+  std::vector<QRgb> rgba(values.size());
+  for (size_t i = 0; i < rgba.size(); ++i) {
+    rgba[i] = rgb(interval, values[i]);
+  }
+  return rgba;
+}
+
 /**
  * Compute an rgb value for the given data value and interval
  * @param interval :: The data range
@@ -357,8 +397,8 @@ unsigned char MantidColorMap::colorIndex(const QwtDoubleInterval &interval,
 QVector<QRgb>
 MantidColorMap::colorTable(const QwtDoubleInterval &interval) const {
   // Swicth to linear scaling when computing the lookup table
-  GraphOptions::ScaleType current_type = m_scale_type;
-  m_scale_type = GraphOptions::Linear;
+  ScaleType current_type = m_scale_type;
+  m_scale_type = ScaleType::Linear;
 
   short table_size = (m_num_colors > 1) ? m_num_colors : 2;
   QVector<QRgb> rgbtable(table_size + 1);

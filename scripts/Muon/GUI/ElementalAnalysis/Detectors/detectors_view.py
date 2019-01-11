@@ -1,20 +1,35 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from PyQt4 import QtGui
+
+from collections import OrderedDict
+
 
 from Muon.GUI.Common.checkbox import Checkbox
 
 
 class DetectorsView(QtGui.QWidget):
+
     def __init__(self, parent=None):
         super(DetectorsView, self).__init__(parent)
 
         self.list = QtGui.QVBoxLayout()
 
-        self.GE1 = Checkbox("GE1")
-        self.GE2 = Checkbox("GE2")
-        self.GE3 = Checkbox("GE3")
-        self.GE4 = Checkbox("GE4")
+        self.widgets = OrderedDict()
+        labels = ["GE1", "GE2", "GE3", "GE4"]
+        for label in labels:
+            self.widgets[label] = Checkbox(label)
 
         self.list.addWidget(QtGui.QLabel("Detectors"))
-        for detector in [self.GE1, self.GE2, self.GE3, self.GE4]:
-            self.list.addWidget(detector)
+        for detector in self.widgets.keys():
+            self.list.addWidget(self.widgets[detector])
         self.setLayout(self.list)
+
+    def setStateQuietly(self, name, state):
+        self.widgets[name].blockSignals(True)
+        self.widgets[name].setChecked(state)
+        self.widgets[name].blockSignals(False)

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/ComponentType.h"
@@ -117,32 +123,24 @@ size_t ComponentInfo::size() const { return m_componentInfo->size(); }
 ComponentInfo::QuadrilateralComponent
 ComponentInfo::quadrilateralComponent(const size_t componentIndex) const {
   auto type = componentType(componentIndex);
+  auto parentType = componentType(parent(componentIndex));
   if (!(type == Beamline::ComponentType::Structured ||
-        type == Beamline::ComponentType::Rectangular))
+        type == Beamline::ComponentType::Rectangular ||
+        parentType == Beamline::ComponentType::Grid))
     throw std::runtime_error("ComponentType is not Structured or Rectangular "
                              "in ComponentInfo::quadrilateralComponent.");
 
   QuadrilateralComponent corners;
   const auto &innerRangeComp = m_componentInfo->children(componentIndex);
-  // nSubComponents, subtract off self hence -1. nSubComponents = number of
-  // horizontal columns.
   corners.nX = innerRangeComp.size();
-  auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(componentIndex);
-  auto nSubDetectors =
-      std::distance(innerRangeDet.begin(), innerRangeDet.end());
-  corners.nY = nSubDetectors / corners.nX;
-  auto firstComp = innerRangeComp.front();
-  // The ranges contain the parent component as the last index
-  // therefore end() - 2
-  auto lastComp = innerRangeComp.back();
-  corners.bottomLeft =
-      *(m_componentInfo->detectorRangeInSubtree(firstComp).begin());
-  corners.topRight =
-      *(m_componentInfo->detectorRangeInSubtree(lastComp).end() - 1);
-  corners.topLeft =
-      *(m_componentInfo->detectorRangeInSubtree(firstComp).end() - 1);
-  corners.bottomRight =
-      *m_componentInfo->detectorRangeInSubtree(lastComp).begin();
+  const auto &firstCol = m_componentInfo->children(innerRangeComp[0]);
+  const auto &lastCol =
+      m_componentInfo->children(innerRangeComp[corners.nX - 1]);
+  corners.nY = firstCol.size();
+  corners.bottomLeft = firstCol.front();
+  corners.topRight = lastCol.back();
+  corners.topLeft = firstCol.back();
+  corners.bottomRight = lastCol.front();
 
   return corners;
 }
@@ -395,6 +393,11 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
 
   BoundingBox absoluteBB;
   const auto compFlag = componentType(componentIndex);
+
+  auto parentFlag = Beamline::ComponentType::Generic;
+  if (size() > 1)
+    parentFlag = componentType(parent(componentIndex));
+
   if (hasSource() && componentIndex == source()) {
     // Do nothing. Source is not considered part of the beamline for bounding
     // box calculations.
@@ -402,8 +405,13 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
     for (const auto &childIndex : this->children(componentIndex)) {
       absoluteBB.grow(boundingBox(childIndex, reference));
     }
+  } else if (compFlag == Beamline::ComponentType::Grid) {
+    for (const auto &childIndex : this->children(componentIndex)) {
+      growBoundingBoxAsRectuangularBank(childIndex, reference, absoluteBB);
+    }
   } else if (compFlag == Beamline::ComponentType::Rectangular ||
-             compFlag == Beamline::ComponentType::Structured) {
+             compFlag == Beamline::ComponentType::Structured ||
+             parentFlag == Beamline::ComponentType::Grid) {
     growBoundingBoxAsRectuangularBank(componentIndex, reference, absoluteBB);
   } else if (compFlag == Beamline::ComponentType::OutlineComposite) {
     growBoundingBoxAsOutline(componentIndex, reference, absoluteBB);
@@ -420,15 +428,17 @@ ComponentInfo::componentType(const size_t componentIndex) const {
 }
 
 void ComponentInfo::setScanInterval(
-    const std::pair<int64_t, int64_t> &interval) {
-  m_componentInfo->setScanInterval(interval);
+    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
+        &interval) {
+  m_componentInfo->setScanInterval(
+      {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
 }
+
+size_t ComponentInfo::scanCount() const { return m_componentInfo->scanCount(); }
 
 void ComponentInfo::merge(const ComponentInfo &other) {
   m_componentInfo->merge(*other.m_componentInfo);
 }
-
-size_t ComponentInfo::scanSize() const { return m_componentInfo->scanSize(); }
 
 } // namespace Geometry
 } // namespace Mantid

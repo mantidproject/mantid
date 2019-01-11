@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITOUTPUT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITOUTPUT_H_
 
 #include "IndirectFitData.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -42,29 +49,8 @@ using FitDataIterator =
 /*
     IndirectFitOutput - Stores the output of a QENS fit and provides
     convenient access to the output parameters.
-
-    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-    Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IndirectFitOutput {
+class MANTIDQT_INDIRECT_DLL IndirectFitOutput {
 public:
   IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,

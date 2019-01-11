@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
@@ -174,7 +180,8 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.createDiff    = True
         self.scriptElement.keepSteps     = True
 
-        testhelpers.assertRaisesNothing(self, self.execScript, 'from mantid.simpleapi import *\n' + self.scriptElement.to_script())
+        testhelpers.assertRaisesNothing(self, self.execScript, 
+                                        self.scriptElement.to_script().replace('import matplotlib.pyplot as plt', ''))
 
     def test_that_script_has_correct_syntax(self):
         self.scriptElement.binEon = False

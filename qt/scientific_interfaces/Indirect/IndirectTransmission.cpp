@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTransmission.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -26,8 +32,17 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
           SLOT(dataLoaded()));
   connect(m_uiForm.dsCanInput, SIGNAL(dataReady(QString)), this,
           SLOT(dataLoaded()));
+
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -128,6 +143,11 @@ void IndirectTransmission::instrumentSet() {
 }
 
 /**
+ * Handle when Run is clicked
+ */
+void IndirectTransmission::runClicked() { runTab(); }
+
+/**
  * Handle saving of workspace
  */
 void IndirectTransmission::saveClicked() {
@@ -143,10 +163,49 @@ void IndirectTransmission::saveClicked() {
  * Handle mantid plotting
  */
 void IndirectTransmission::plotClicked() {
+  setPlotIsPlotting(true);
   QString outputWs =
       (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
     plotSpectrum(outputWs);
+  setPlotIsPlotting(false);
 }
+
+void IndirectTransmission::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void IndirectTransmission::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+
+void IndirectTransmission::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void IndirectTransmission::setOutputButtonsEnabled(
+    std::string const &enableOutputButtons) {
+  bool enable = enableOutputButtons == "enable" ? true : false;
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void IndirectTransmission::updateRunButton(
+    bool enabled, std::string const &enableOutputButtons, QString const message,
+    QString const tooltip) {
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
+  if (enableOutputButtons != "unchanged")
+    setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void IndirectTransmission::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
 
 #include "../General/UserInputValidator.h"
@@ -117,32 +123,59 @@ void IqtFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
-void IqtFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
-void IqtFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
-}
-
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   fitAlgorithm->setProperty("ExtractMembers",
                             boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
+void IqtFit::runClicked() { runTab(); }
+
 void IqtFit::plotResult() {
+  setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+  setPlotResultIsPlotting(false);
+}
+
+void IqtFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void IqtFit::setFitSingleSpectrumIsFitting(bool fitting) {
+  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
+      fitting ? "Fitting..." : "Fit Single Spectrum");
+  setButtonsEnabled(!fitting);
+}
+
+void IqtFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void IqtFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
 }
 
 void IqtFit::setRunEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
   m_uiForm->pbRun->setEnabled(enabled);
-  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
 }
 
-void IqtFit::runClicked() { runTab(); }
+void IqtFit::setPlotResultEnabled(bool enabled) {
+  m_uiForm->pbPlot->setEnabled(enabled);
+  m_uiForm->cbPlotType->setEnabled(enabled);
+}
+
+void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+}
+
+void IqtFit::setSaveResultEnabled(bool enabled) {
+  m_uiForm->pbSave->setEnabled(enabled);
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

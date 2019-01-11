@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 
 #include "../General/UserInputValidator.h"
@@ -94,9 +100,17 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
-  // Handle plotting and saving
+  // Handle running, plotting and saving
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
@@ -411,19 +425,34 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   m_uiForm.ckSaveSPE->setEnabled(true);
 }
 
-void ISISEnergyTransfer::removeGroupingOption(const QString &option) {
+int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
   for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
-    if (m_uiForm.cbGroupingOptions->itemText(i) == option) {
-      m_uiForm.cbGroupingOptions->removeItem(i);
-      return;
-    }
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
+      return i;
+  return 0;
+}
+
+bool ISISEnergyTransfer::isOptionHidden(QString const &option) {
+  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
+      return false;
+  return true;
+}
+
+void ISISEnergyTransfer::setCurrentGroupingOption(QString const &option) {
+  m_uiForm.cbGroupingOptions->setCurrentIndex(getGroupingOptionIndex(option));
+}
+
+void ISISEnergyTransfer::removeGroupingOption(QString const &option) {
+  m_uiForm.cbGroupingOptions->removeItem(getGroupingOptionIndex(option));
 }
 
 void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
-                                                    const QString &option) {
-  if (includeOption)
+                                                    QString const &option) {
+  if (includeOption && isOptionHidden(option)) {
     m_uiForm.cbGroupingOptions->addItem(option);
-  else
+    setCurrentGroupingOption(option);
+  } else if (!includeOption && !isOptionHidden(option))
     removeGroupingOption(option);
 }
 
@@ -765,17 +794,16 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
  * Called when a user starts to type / edit the runs to load.
  */
 void ISISEnergyTransfer::pbRunEditing() {
-  emit updateRunButton(false, "Editing...",
-                       "Run numbers are currently being edited.");
+  updateRunButton(false, "unchanged", "Editing...",
+                  "Run numbers are currently being edited.");
 }
 
 /**
  * Called when the FileFinder starts finding the files.
  */
 void ISISEnergyTransfer::pbRunFinding() {
-  emit updateRunButton(
-      false, "Finding files...",
-      "Searching for data files for the run numbers entered...");
+  updateRunButton(false, "unchanged", "Finding files...",
+                  "Searching for data files for the run numbers entered...");
   m_uiForm.dsRunFiles->setEnabled(false);
 }
 
@@ -783,20 +811,26 @@ void ISISEnergyTransfer::pbRunFinding() {
  * Called when the FileFinder has finished finding the files.
  */
 void ISISEnergyTransfer::pbRunFinished() {
-  if (!m_uiForm.dsRunFiles->isValid()) {
-    emit updateRunButton(
-        false, "Invalid Run(s)",
+  if (!m_uiForm.dsRunFiles->isValid())
+    updateRunButton(
+        false, "unchanged", "Invalid Run(s)",
         "Cannot find data files for some of the run numbers entered.");
-  } else {
-    emit updateRunButton();
-  }
+  else
+    updateRunButton();
 
   m_uiForm.dsRunFiles->setEnabled(true);
 }
+
+/**
+ * Handle when Run is clicked
+ */
+void ISISEnergyTransfer::runClicked() { runTab(); }
+
 /**
  * Handle mantid plotting of workspaces
  */
 void ISISEnergyTransfer::plotClicked() {
+  setPlotIsPlotting(true);
   for (const auto &it : m_outputWorkspaces) {
     if (checkADSForPlotSaveWorkspace(it, true)) {
       const auto plotType = m_uiForm.cbPlotType->currentText();
@@ -807,6 +841,7 @@ void ISISEnergyTransfer::plotClicked() {
       m_pythonRunner.runPythonCode(pyInput);
     }
   }
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -828,6 +863,45 @@ void ISISEnergyTransfer::saveClicked() {
     pyInput += ", 'DeltaE_inWavenumber'";
   pyInput += ")\n";
   m_pythonRunner.runPythonCode(pyInput);
+}
+
+void ISISEnergyTransfer::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ISISEnergyTransfer::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotType->setEnabled(enabled);
+}
+
+void ISISEnergyTransfer::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+  m_uiForm.loSaveFormats->setEnabled(enabled);
+}
+
+void ISISEnergyTransfer::setOutputButtonsEnabled(
+    std::string const &enableOutputButtons) {
+  bool enable = enableOutputButtons == "enable" ? true : false;
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void ISISEnergyTransfer::updateRunButton(bool enabled,
+                                         std::string const &enableOutputButtons,
+                                         QString const message,
+                                         QString const tooltip) {
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
+  if (enableOutputButtons != "unchanged")
+    setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void ISISEnergyTransfer::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

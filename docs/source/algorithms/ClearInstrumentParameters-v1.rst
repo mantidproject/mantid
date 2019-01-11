@@ -12,7 +12,7 @@ Description
 This algorithm clears all the parameters associated with a workspace's instrument.
 
 Parameters are used by Mantid to tweak an instrument's values without having to change
-the `instrument definition file <http://mantidproject.org/InstrumentDefinitionFile>`__ itself.
+the :ref:`instrument definition file <InstrumentDefinitionFile>` itself.
 
 Usage
 -----

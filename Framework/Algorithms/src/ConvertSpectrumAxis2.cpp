@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
@@ -39,15 +45,9 @@ void ConvertSpectrumAxis2::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
-  std::vector<std::string> targetOptions(7);
-  targetOptions[0] = "Theta";
-  targetOptions[1] = "SignedTheta";
-  targetOptions[2] = "ElasticQ";
-  targetOptions[3] = "ElasticQSquared";
-  targetOptions[4] = "theta";
-  targetOptions[5] = "signed_theta";
-  targetOptions[6] = "ElasticDSpacing";
-
+  std::vector<std::string> targetOptions{
+      "Theta", "SignedTheta",  "ElasticQ",       "ElasticQSquared",
+      "theta", "signed_theta", "ElasticDSpacing"};
   declareProperty(
       "Target", "", boost::make_shared<StringListValidator>(targetOptions),
       "The unit to which spectrum axis is converted to - \"theta\" (for the "

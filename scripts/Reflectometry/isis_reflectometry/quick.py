@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-branches, too-few-public-methods, too-many-arguments, too-many-locals
 ''' SVN Info:      The variables below will only get subsituted at svn checkout if
         the repository is configured for variable substitution.

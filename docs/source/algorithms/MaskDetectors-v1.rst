@@ -85,7 +85,7 @@ If *MaskedWorkspace* is provided, both *MaskedWorkspace* and
 
 The algorithm works differently depending on *MaskedWorkspace* property 
 being a *Mask Workspace* (SpecialWorkspace2D object) or 
-`Matrix Workspace <http://docs.mantidproject.org/nightly/concepts/MatrixWorkspace.html#matrixworkspace>`_. 
+:ref:`Matrix Workspace <MatrixWorkspace>`. 
 
 If source *MaskedWorkspace* is a *Mask Workspace* and the number of spectra in the source 
 *MaskedWorkspace* is equal to number of spectra in the target *Workspace*, the 
@@ -97,12 +97,11 @@ the algorithm extracts list of masked detector IDS from source workspace and
 uses them to mask the corresponding spectra of the target workspace. 
 
 Setting property *ForceInstrumentMasking* to true forces algorithm 
-to always use *MaskedWorkspace* detector IDs
-as the source of the masking information. 
-If a detector is masked, then the corresponding detector
+to always use *MaskedWorkspace* detector IDs as the source of the masking
+information. If a detector is masked, then the corresponding detector
 will be masked in the input *Workspace*.
 
-If the input *MaskedWorkspace* is a `Matrix Workspace <http://docs.mantidproject.org/nightly/concepts/MatrixWorkspace.html#matrixworkspace>`_ 
+If the input *MaskedWorkspace* is a :ref:`Matrix Workspace <MatrixWorkspace>` 
 and the number of spectra in the source *MaskedWorkspace* is equal to the number 
 of spectra in the target *Workspace*, then workspace indices of the source are
 used.
@@ -173,8 +172,7 @@ There are 2 operations to mask a detector and thus spectrum related
 Usage
 -----
 
-Example 1: specifying spectrum numbers
-######################################
+**Example 1: specifying spectrum numbers**
 
 .. testcode:: ExMaskSpec
 
@@ -219,8 +217,7 @@ Example 1: specifying spectrum numbers
   y = ws.readY(3)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExMaskSpec
 
@@ -238,8 +235,7 @@ Output
   All counts in the spectrum are 0:    False
 
 
-Example 2: specifying detector IDs
-##################################
+**Example 2: specifying detector IDs**
 
 .. testcode:: ExMaskIDs
 
@@ -266,8 +262,7 @@ Example 2: specifying detector IDs
   det = ws.getInstrument().getDetector(105)
   print('Detector  {}  is masked: {}'.format(det.getID(), det.isMasked()))
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExMaskIDs
 
@@ -278,8 +273,7 @@ Output
   Detector  105  is masked: False
 
 
-Example 3: specifying workspace indices
-#######################################
+**Example 3: specifying workspace indices**
 
 .. testcode:: ExMaskWI
 
@@ -311,8 +305,7 @@ Example 3: specifying workspace indices
   det = ws.getDetector( workspaceIndex )
   print('Detector in spectrum with workspace index  {}  is masked: {}'.format(workspaceIndex, det.isMasked()))
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExMaskWI
 
@@ -323,8 +316,7 @@ Output
   Detector in spectrum with workspace index  4  is masked: False
 
 
-Example 4: specifying instrument components
-###########################################
+**Example 4: specifying instrument components**
 
 .. testcode:: ExMaskComp
 
@@ -356,13 +348,14 @@ Example 4: specifying instrument components
   # Check bank2
   checkMasked(200,300)
 
+Output:
+
 .. testoutput:: ExMaskComp
 
   Detectors from 130 to 140 are masked.
   Detectors from 200 to 300 are masked.
 
-Example 5: specifying a masking workspace
-#########################################
+**Example 5: specifying a masking workspace**
 
 .. testcode:: ExMaskMask
 
@@ -401,8 +394,7 @@ Example 5: specifying a masking workspace
   print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
 
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExMaskMask
 
@@ -419,8 +411,7 @@ Output
   Detector 103 is masked: True
   Detector 104 is masked: False
   
-Example 6: specifying a masking range
-#####################################
+**Example 6: specifying a masking range**
 
 .. testcode:: ExMaskInRange
 
@@ -435,8 +426,7 @@ Example 6: specifying a masking range
     print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
 
 
-Output
-^^^^^^
+Output:
 
 .. testoutput:: ExMaskInRange
 
@@ -447,8 +437,7 @@ Output
   Detector 104 is masked: True
   Detector 105 is masked: False
   
-Example 7: constraining the masking range
-#########################################
+**Example 7: constraining the masking range**
 
 .. testcode:: ExMaskConstrainInRange
 
@@ -478,9 +467,8 @@ Example 7: constraining the masking range
   for ind in range(0,7):
     det = ws.getDetector(ind)
     print('Detector {} is masked: {}'.format(det.getID(), det.isMasked()))
-    
-Output
-^^^^^^
+
+Output:
 
 .. testoutput:: ExMaskConstrainInRange
 

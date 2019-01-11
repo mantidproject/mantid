@@ -2,7 +2,7 @@
  IEventList
 ============
 
-This a python binding to the C++ class Mantid::API::IEventList.
+This is a Python binding to the C++ class Mantid::API::IEventList.
 
 
 .. module:`mantid.api`

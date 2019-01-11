@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/SpectrumInfoItem.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
@@ -17,7 +23,7 @@ using Mantid::SpectrumDefinition;
 using namespace boost::python;
 
 // Helper method to make the python iterator
-SpectrumInfoPythonIterator make_pyiterator(const SpectrumInfo &spectrumInfo) {
+SpectrumInfoPythonIterator make_pyiterator(SpectrumInfo &spectrumInfo) {
   return SpectrumInfoPythonIterator(spectrumInfo);
 }
 

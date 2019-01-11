@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 #pylint: disable=invalid-name
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from isis_reduction_steps import DarkRunSubtraction
 from SANSUserFileParser import DarkRunSettings
@@ -615,9 +621,9 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                mon_number = mon_number)
 
 
-class DarkRunSubtractionTestStressTest(stresstesting.MantidStressTest):
+class DarkRunSubtractionTestSystemTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

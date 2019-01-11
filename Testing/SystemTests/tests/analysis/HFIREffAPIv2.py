@@ -1,5 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid.api import FileFinder
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -20,7 +26,7 @@ def do_cleanup():
     return True
 
 
-class HFIREffAPIv2(stresstesting.MantidStressTest):
+class HFIREffAPIv2(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         do_cleanup()
@@ -50,7 +56,7 @@ class HFIREffAPIv2(stresstesting.MantidStressTest):
         return "BioSANS_test_data_Iq", 'HFIREff.nxs'
 
 
-class HFIRSensitivityDirectBeamCenter(stresstesting.MantidStressTest):
+class HFIRSensitivityDirectBeamCenter(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         do_cleanup()
@@ -82,7 +88,7 @@ class HFIRSensitivityDirectBeamCenter(stresstesting.MantidStressTest):
         return "BioSANS_test_data_Iq", 'HFIRSensitivityDirectBeamCenter.nxs'
 
 
-class HFIRSensitivityScatteringBeamCenter(stresstesting.MantidStressTest):
+class HFIRSensitivityScatteringBeamCenter(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         do_cleanup()

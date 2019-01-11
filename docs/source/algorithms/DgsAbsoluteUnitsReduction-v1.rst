@@ -17,7 +17,7 @@ workflow. The AbsUnitsIncidentEnergy parameter needs to be passed via a
 property manager since the absolute units sample may have been measured
 at an energy different from the sample of interest. Parameters in
 italics are controlled by the
-`instrument parameter file (IPF) <http://www.mantidproject.org/InstrumentParameterFile>`_
+:ref:`instrument parameter file (IPF) <InstrumentParameterFile>`
 unless provided to the algorithm via a property manager. The mappings are given
 below.
 

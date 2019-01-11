@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DIFFRACTIONEVENTREADDETCALTEST_H_
 #define DIFFRACTIONEVENTREADDETCALTEST_H_
 
@@ -70,8 +76,7 @@ public:
 
   void testMINITOPAZ() {
     const std::string wsName("testMINITOPAZ");
-    loadEmptyInstrument("IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml",
-                        wsName);
+    loadEmptyInstrument("unit_testing/MINITOPAZ_Definition.xml", wsName);
 
     // generate test file
     std::string inputFile = "test.DetCal";

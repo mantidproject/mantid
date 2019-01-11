@@ -1,5 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -18,7 +24,7 @@ def do_cleanup():
     return True
 
 
-class EQSANSTransmission(stresstesting.MantidStressTest):
+class EQSANSTransmission(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         do_cleanup()
@@ -89,7 +95,7 @@ class EQSANSTransmissionEvent(EQSANSTransmission):
         return "EQSANS_1466_event_Iq", 'EQSANSTransEvent.nxs'
 
 
-class EQSANSTransmissionDC(stresstesting.MantidStressTest):
+class EQSANSTransmissionDC(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         do_cleanup()
@@ -168,7 +174,7 @@ class EQSANSTransmissionCompatibility(EQSANSTransmission):
         return "EQSANS_1466_event_Iq", 'EQSANSTransmissionCompatibility.nxs'
 
 
-class EQSANSTransmissionFS(stresstesting.MantidStressTest):
+class EQSANSTransmissionFS(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         do_cleanup()
@@ -201,7 +207,7 @@ class EQSANSTransmissionFS(stresstesting.MantidStressTest):
         return "EQSANS_4061_event_frame1_Iq", 'EQSANSTransmissionFS.nxs'
 
 
-class EQSANSDirectTransFS(stresstesting.MantidStressTest):
+class EQSANSDirectTransFS(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         do_cleanup()

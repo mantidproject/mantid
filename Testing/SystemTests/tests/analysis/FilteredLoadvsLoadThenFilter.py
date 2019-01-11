@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class FilteredLoadvsLoadThenFilter(stresstesting.MantidStressTest):
+class FilteredLoadvsLoadThenFilter(systemtesting.MantidSystemTest):
     '''Tests that filtering with LoadEventNexus gives the same answer as loading the whole file and then filtering'''
 
     def runTest(self):

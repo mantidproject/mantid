@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
@@ -122,7 +128,7 @@ void LoadSpiceAscii::init() {
   defaultlogformat[2] = "time";
   defaultlogformat[3] = "HH:MM:SS AM";
   declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
-                      "DateAndTimeLog", defaultlogformat),
+                      "DateAndTimeLog", std::move(defaultlogformat)),
                   "Name and format for date and time");
 
   // Output

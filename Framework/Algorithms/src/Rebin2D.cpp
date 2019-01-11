@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -106,10 +112,11 @@ void Rebin2D::exec() {
   auto inputHasFA = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   // For MatrixWorkspace, only UseFractionalArea=False makes sense.
   if (useFractionalArea && !inputHasFA) {
-    g_log.warning("Fractional area tracking requires the input workspace to "
-                  "contain calculated bin fractions from a parallelpiped rebin "
-                  "like SofQW. Continuing without fractional area tracking");
-    useFractionalArea = false;
+    g_log.warning(
+        "Fractional area tracking was requested but input workspace does "
+        "not have calculated bin fractions. Assuming bins are exact "
+        "(fractions are unity). The results may not be accurate if this "
+        "workspace was previously rebinned.");
   }
   // For RebinnedOutput, should always use useFractionalArea to get the
   // correct signal and errors (so that weights of input ws is accounted for).

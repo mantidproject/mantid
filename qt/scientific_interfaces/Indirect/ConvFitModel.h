@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 
@@ -16,6 +22,8 @@ public:
   boost::optional<double> getInstrumentResolution(std::size_t dataIndex) const;
   std::size_t getNumberHistograms(std::size_t index) const;
   Mantid::API::MatrixWorkspace_sptr getResolution(std::size_t index) const;
+
+  std::vector<std::string> getSpectrumDependentAttributes() const override;
 
   void setFitFunction(Mantid::API::IFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);

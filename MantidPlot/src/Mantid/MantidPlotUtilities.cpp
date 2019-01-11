@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPlotUtilities.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -5,6 +11,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <MantidQtWidgets/Common/MantidDisplayBase.h>
 
 using namespace MantidQt::MantidWidgets;
@@ -42,15 +49,8 @@ double getSingleWorkspaceLogValue(
     return static_cast<double>(wsIndex); // cast for plotting
 
   // MatrixWorkspace is an ExperimentInfo
-  auto log = matrixWS->run().getLogData(logName.toStdString());
-  if (!log)
-    throw std::invalid_argument("Log not present in workspace");
-  if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log))
-    return std::stod(log->value());
-
-  throw std::invalid_argument(
-      "Log is of wrong type (expected single numeric value");
+  return matrixWS->run().getLogAsSingleValue(
+      logName.toStdString(), Mantid::Kernel::Math::TimeAveragedMean);
 }
 
 /**

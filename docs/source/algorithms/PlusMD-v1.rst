@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm sums two :ref:`MDHistoWorkspaces <MDHistoWorkspace>` or
-merges two `MDEventWorkspaces <http://www.mantidproject.org/MDEventWorkspace>`_ together.
+merges two :ref:`MDEventWorkspaces <MDWorkspace>` together.
 
 MDHistoWorkspaces
 #################
@@ -37,7 +37,7 @@ Note for file-backed workspaces
 The algorithm uses :ref:`algm-CloneMDWorkspace` to create the
 output workspace, except when adding in place (e.g. :math:`A = A + B` ).
 See :ref:`algm-CloneMDWorkspace` for details, but note that a
-file-backed `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ will have its file
+file-backed :ref:`MDEventWorkspace <MDWorkspace>` will have its file
 copied.
 
 -  If A is in memory and B is file-backed, the operation

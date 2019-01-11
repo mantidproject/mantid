@@ -1,12 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import (CreateFloodWorkspace, ApplyFloodWorkspace, CreateWorkspace,
                               SaveNexus, Load, Rebin, ConvertUnits, mtd)
 import os
 import tempfile
 
 
-class ReflectometryCreateFloodWorkspaceNoExclude(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceNoExclude(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 
@@ -18,7 +24,7 @@ class ReflectometryCreateFloodWorkspaceNoExclude(stresstesting.MantidStressTest)
         return self.flood_ws_name,'ReflectometryCreateFloodWorkspaceNoExclude.nxs'
 
 
-class ReflectometryCreateFloodWorkspaceExclude(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceExclude(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 
@@ -31,7 +37,7 @@ class ReflectometryCreateFloodWorkspaceExclude(stresstesting.MantidStressTest):
         return self.flood_ws_name,'ReflectometryCreateFloodWorkspaceExclude.nxs'
 
 
-class ReflectometryCreateFloodWorkspaceQuadratic(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceQuadratic(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 
@@ -44,7 +50,7 @@ class ReflectometryCreateFloodWorkspaceQuadratic(stresstesting.MantidStressTest)
         return self.flood_ws_name,'ReflectometryCreateFloodWorkspaceQuadratic.nxs'
 
 
-class ReflectometryCreateFloodWorkspaceNegativeBackground(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceNegativeBackground(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 
@@ -60,7 +66,7 @@ class ReflectometryCreateFloodWorkspaceNegativeBackground(stresstesting.MantidSt
             os.unlink(input_file)
 
 
-class ReflectometryApplyFloodWorkspace(stresstesting.MantidStressTest):
+class ReflectometryApplyFloodWorkspace(systemtesting.MantidSystemTest):
 
     out_ws_name = 'out'
 
@@ -75,7 +81,7 @@ class ReflectometryApplyFloodWorkspace(stresstesting.MantidStressTest):
         return self.out_ws_name,'ReflectometryApplyFloodWorkspace.nxs'
 
 
-class ReflectometryApplyFloodWorkspaceRebinned(stresstesting.MantidStressTest):
+class ReflectometryApplyFloodWorkspaceRebinned(systemtesting.MantidSystemTest):
 
     out_ws_name = 'out'
 
@@ -91,7 +97,7 @@ class ReflectometryApplyFloodWorkspaceRebinned(stresstesting.MantidStressTest):
         return self.out_ws_name,'ReflectometryApplyFloodWorkspaceRebinned.nxs'
 
 
-class ReflectometryApplyFloodWorkspaceUnits(stresstesting.MantidStressTest):
+class ReflectometryApplyFloodWorkspaceUnits(systemtesting.MantidSystemTest):
 
     out_ws_name = 'out'
 
@@ -108,7 +114,7 @@ class ReflectometryApplyFloodWorkspaceUnits(stresstesting.MantidStressTest):
         return self.out_ws_name,'ReflectometryApplyFloodWorkspaceUnits.nxs'
 
 
-class ReflectometryCreateFloodWorkspaceCentralPixel(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceCentralPixel(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 
@@ -131,7 +137,7 @@ class ReflectometryCreateFloodWorkspaceCentralPixel(stresstesting.MantidStressTe
             os.unlink(input_file)
 
 
-class ReflectometryCreateFloodWorkspaceIntegrationRange(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceIntegrationRange(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 
@@ -154,7 +160,7 @@ class ReflectometryCreateFloodWorkspaceIntegrationRange(stresstesting.MantidStre
             os.unlink(input_file)
 
 
-class ReflectometryCreateFloodWorkspaceDivisionByZero(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceDivisionByZero(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 
@@ -171,7 +177,7 @@ class ReflectometryCreateFloodWorkspaceDivisionByZero(stresstesting.MantidStress
             os.unlink(input_file)
 
 
-class ReflectometryCreateFloodWorkspaceCentralPixelExclude(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceCentralPixelExclude(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 
@@ -194,7 +200,7 @@ class ReflectometryCreateFloodWorkspaceCentralPixelExclude(stresstesting.MantidS
             os.unlink(input_file)
 
 
-class ReflectometryCreateFloodWorkspaceCentralPixelRange(stresstesting.MantidStressTest):
+class ReflectometryCreateFloodWorkspaceCentralPixelRange(systemtesting.MantidSystemTest):
 
     flood_ws_name = 'flood'
 

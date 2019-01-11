@@ -19,6 +19,17 @@ fi
 $CMAKE_EXE --version
 
 ###############################################################################
+# Wraps calls for gui emulation
+###############################################################################
+if [ $(command -v xvfb-run) ]; then
+  X11_RUNNER="xvfb-run"
+  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24"
+else
+  X11_RUNNER="eval"
+  X11_RUNNER_ARGS=""
+fi
+
+###############################################################################
 # Set up the location for the local object store outside of the build and
 # source tree, which can be shared by multiple builds.
 # It defaults to a MantidExternalData directory within the HOME directory.
@@ -72,4 +83,4 @@ find ${default_save_directory} -name "*-mismatch*" -delete
 
 # Run
 PKGDIR=${WORKSPACE}/build
-python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${BUILD_THREADS:?} $EXTRA_ARGS
+${X11_RUNNER} "${X11_RUNNER_ARGS}" python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${BUILD_THREADS:?} $EXTRA_ARGS

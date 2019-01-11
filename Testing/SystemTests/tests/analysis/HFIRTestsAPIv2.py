@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint:
 # disable=invalid-name,no-init,bad-builtin,attribute-defined-outside-init,protected-access,too-many-arguments
 
@@ -5,7 +11,7 @@
     System tests for HFIR SANS reduction.
 
     The following tests were converted from the unittest framework
-    that is part of python to the stresstesting framework used in Mantid.
+    that is part of python to the systemtesting framework used in Mantid.
 """
 from __future__ import (absolute_import, division, print_function)
 import types
@@ -14,7 +20,7 @@ import traceback
 import math
 import os
 
-import stresstesting
+import systemtesting
 from mantid.api import *
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -145,7 +151,7 @@ def do_cleanup():
     return True
 
 
-class HFIRTestsAPIv2(stresstesting.MantidStressTest):
+class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         do_cleanup()

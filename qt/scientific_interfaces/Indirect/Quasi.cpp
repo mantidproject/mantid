@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/TextAxis.h"
@@ -65,10 +71,8 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
-  // Post saving
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-
-  // Post plotting
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
@@ -140,24 +144,6 @@ bool Quasi::validate() {
  * Run the BayesQuasi algorithm
  */
 void Quasi::run() {
-
-  auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
-      "defaultsave.directory");
-  if (saveDirectory.compare("") == 0) {
-    const char *textMessage =
-        "BayesQuasi requires a default save directory and "
-        "one is not currently set."
-        " If run, the algorithm will default to saving files "
-        "to the current working directory."
-        " Would you still like to run the algorithm?";
-    int result = QMessageBox::question(nullptr, tr("Save Directory"),
-                                       tr(textMessage), QMessageBox::Yes,
-                                       QMessageBox::No, QMessageBox::NoButton);
-    if (result == QMessageBox::No) {
-      return;
-    }
-  }
-
   bool elasticPeak = false;
   bool sequence = false;
 
@@ -167,9 +153,9 @@ void Quasi::run() {
   bool useResNorm = false;
   std::string resNormFile("");
 
-  std::string sampleName =
+  std::string const sampleName =
       m_uiForm.dsSample->getCurrentDataName().toStdString();
-  std::string resName =
+  std::string const resName =
       m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   std::string program = m_uiForm.cbProgram->currentText().toStdString();
@@ -181,7 +167,8 @@ void Quasi::run() {
   }
 
   // Collect input from fit options section
-  std::string background = m_uiForm.cbBackground->currentText().toStdString();
+  std::string const background =
+      m_uiForm.cbBackground->currentText().toStdString();
 
   if (m_uiForm.chkElasticPeak->isChecked()) {
     elasticPeak = true;
@@ -201,11 +188,11 @@ void Quasi::run() {
   }
 
   // Collect input from the properties browser
-  double eMin = m_properties["EMin"]->valueText().toDouble();
-  double eMax = m_properties["EMax"]->valueText().toDouble();
+  double const eMin = m_properties["EMin"]->valueText().toDouble();
+  double const eMax = m_properties["EMax"]->valueText().toDouble();
 
-  long sampleBins = m_properties["SampleBinning"]->valueText().toLong();
-  long resBins = m_properties["ResBinning"]->valueText().toLong();
+  long const sampleBins = m_properties["SampleBinning"]->valueText().toLong();
+  long const resBins = m_properties["ResBinning"]->valueText().toLong();
 
   IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
   runAlg->initialize();
@@ -238,13 +225,12 @@ void Quasi::run() {
  * Enable plotting and saving and fit curves on the mini plot.
  */
 void Quasi::algorithmComplete(bool error) {
-  if (error)
-    return;
-  else {
+  setRunIsRunning(false);
+  if (!error)
     updateMiniPlot();
-    m_uiForm.cbPlot->setEnabled(true);
-    m_uiForm.pbPlot->setEnabled(true);
-    m_uiForm.pbSave->setEnabled(true);
+  else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
   }
 }
 
@@ -300,7 +286,7 @@ void Quasi::updateMiniPlot() {
       curveColour = Qt::magenta;
 
     else if (specName.contains("diff.1"))
-      curveColour = Qt::green;
+      curveColour = Qt::blue;
     else if (specName.contains("diff.2"))
       curveColour = Qt::cyan;
 
@@ -350,7 +336,7 @@ void Quasi::plotCurrentPreview() {
     QString QfitWS = QString::fromStdString(fitName + "_");
     QfitWS += QString::number(m_previewSpec);
     if (program == "Lorentzians")
-      plotSpectra(QfitWS, {0, 1, 2, 4});
+      plotSpectra(QfitWS, {0, 1, 2, 3, 4});
     else
       plotSpectra(QfitWS, {0, 1, 2});
   } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
@@ -443,61 +429,86 @@ void Quasi::saveClicked() {
   QString saveDirectory = QString::fromStdString(
       Mantid::Kernel::ConfigService::Instance().getString(
           "defaultsave.directory"));
-  const auto fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+  auto const fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
   IndirectTab::checkADSForPlotSaveWorkspace(fitWS, false);
-  QString QfitWS = QString::fromStdString(fitWS);
-  const auto fitPath = saveDirectory + QfitWS + ".nxs";
+  QString const QfitWS = QString::fromStdString(fitWS);
+  auto const fitPath = saveDirectory + QfitWS + ".nxs";
   addSaveWorkspaceToQueue(QfitWS, fitPath);
 
-  const auto resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+  auto const resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
   IndirectTab::checkADSForPlotSaveWorkspace(resultWS, false);
-  QString QresultWS = QString::fromStdString(resultWS);
-  const auto resultPath = saveDirectory + QresultWS + ".nxs";
+  QString const QresultWS = QString::fromStdString(resultWS);
+  auto const resultPath = saveDirectory + QresultWS + ".nxs";
   addSaveWorkspaceToQueue(QresultWS, resultPath);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void Quasi::runClicked() {
+  if (validateTab()) {
+    auto const saveDirectory =
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory");
+    displayMessageAndRun(saveDirectory);
+  }
+}
+
+void Quasi::displayMessageAndRun(std::string const &saveDirectory) {
+  if (saveDirectory.empty()) {
+    int const result = displaySaveDirectoryMessage();
+    if (result != QMessageBox::No) {
+      setRunIsRunning(true);
+      runTab();
+    }
+  } else {
+    setRunIsRunning(true);
+    runTab();
+  }
+}
+
+int Quasi::displaySaveDirectoryMessage() {
+  char const *textMessage =
+      "BayesQuasi requires a default save directory and "
+      "one is not currently set."
+      " If run, the algorithm will default to saving files "
+      "to the current working directory."
+      " Would you still like to run the algorithm?";
+  return QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage),
+                               QMessageBox::Yes, QMessageBox::No,
+                               QMessageBox::NoButton);
 }
 
 /**
  * Handles plotting the selected plot when plot is clicked
  */
 void Quasi::plotClicked() {
+  setPlotResultIsPlotting(true);
+
   // Output options
-  std::string plot = m_uiForm.cbPlot->currentText().toStdString();
-  QString program = m_uiForm.cbProgram->currentText();
-  const auto resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+  std::string const plot = m_uiForm.cbPlot->currentText().toStdString();
+  QString const program = m_uiForm.cbProgram->currentText();
+  auto const resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
   if ((plot == "Prob" || plot == "All") && (program == "Lorentzians")) {
-    const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
+    auto const probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     // Check workspace exists
     IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
-    QString QprobWS = QString::fromStdString(probWS);
+    QString const QprobWS = QString::fromStdString(probWS);
     IndirectTab::plotSpectrum(QprobWS, 1, 2);
   }
-  if (plot == "Fit" || plot == "All") {
-    std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-    fitName.pop_back();
-    fitName.append("_0");
-    IndirectTab::checkADSForPlotSaveWorkspace(fitName, true);
-    QString QfitWS = QString::fromStdString(fitName);
-    if (program == "Lorentzians")
-      IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
-    else
-      IndirectTab::plotSpectra(QfitWS, {0, 1, 2});
-  }
 
-  MatrixWorkspace_sptr resultWS =
+  auto const resultWS =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
-  int numSpectra = (int)resultWS->getNumberHistograms();
+  int const numSpectra = (int)resultWS->getNumberHistograms();
   IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
-  QString QresultWS = QString::fromStdString(resultName);
-  auto paramNames = {"Amplitude", "FWHM", "Beta"};
-  for (std::string paramName : paramNames) {
+  QString const QresultWS = QString::fromStdString(resultName);
+  auto const paramNames = {"Amplitude", "FWHM", "Beta"};
+  for (std::string const &paramName : paramNames) {
 
     if (plot == paramName || plot == "All") {
       std::vector<int> spectraIndices = {};
       for (int i = 0; i < numSpectra; i++) {
         auto axisLabel = resultWS->getAxis(1)->label(i);
 
-        auto found = axisLabel.find(paramName);
+        auto const found = axisLabel.find(paramName);
         if (found != std::string::npos) {
           spectraIndices.push_back(i);
 
@@ -511,6 +522,34 @@ void Quasi::plotClicked() {
       }
     }
   }
+  setPlotResultIsPlotting(false);
+}
+
+void Quasi::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+
+void Quasi::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlot->setEnabled(enabled);
+}
+
+void Quasi::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void Quasi::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
+void Quasi::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void Quasi::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

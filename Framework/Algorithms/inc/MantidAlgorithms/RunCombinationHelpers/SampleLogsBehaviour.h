@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MERGERUNS_SAMPLELOGSBEHAVIOUR_H_
 #define MANTID_ALGORITHMS_MERGERUNS_SAMPLELOGSBEHAVIOUR_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include <MantidAPI/MatrixWorkspace.h>
+#include <MantidAPI/MatrixWorkspace_fwd.h>
+#include <MantidKernel/Logger.h>
+#include <MantidKernel/Property.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -10,39 +18,24 @@ namespace Algorithms {
 /** SampleLogsBehaviour : This class holds information relating to the
   behaviour of the sample log merging. It holds a map of all the sample log
   parameters to merge, how to merge them, and the associated tolerances.
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
+  Algorithms which already define paramter names for the instrument parameter
+  file are ConjoinXRuns and MergeRuns. Please use different names for new
+  algorithms.
 */
 class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
   enum class MergeLogType { Sum, TimeSeries, List, Warn, Fail };
 
-  static const std::string SUM_MERGE;
-  static const std::string TIME_SERIES_MERGE;
-  static const std::string LIST_MERGE;
-  static const std::string WARN_MERGE;
-  static const std::string FAIL_MERGE;
-  static const std::string WARN_MERGE_TOLERANCES;
-  static const std::string FAIL_MERGE_TOLERANCES;
+  // names of parameters in IPF containing names of sample log entries as values
+  struct ParameterName {
+    std::string SUM_MERGE;
+    std::string TIME_SERIES_MERGE;
+    std::string LIST_MERGE;
+    std::string WARN_MERGE;
+    std::string WARN_MERGE_TOLERANCES;
+    std::string FAIL_MERGE;
+    std::string FAIL_MERGE_TOLERANCES;
+  } parameterNames;
 
   // the names and docs of the override properties
   static const std::string TIME_SERIES_PROP;
@@ -66,22 +59,28 @@ public:
     bool isNumeric;
   };
 
-  SampleLogsBehaviour(API::MatrixWorkspace &ws, Kernel::Logger &logger,
-                      const std::string &sampleLogsSum = "",
-                      const std::string &sampleLogsTimeSeries = "",
-                      const std::string &sampleLogsList = "",
-                      const std::string &sampleLogsWarn = "",
-                      const std::string &sampleLogsWarnTolerances = "",
-                      const std::string &sampleLogsFail = "",
-                      const std::string &sampleLogsFailTolerances = "");
+  // override sample log entries for specific merge type
+  struct SampleLogNames {
+    std::string sampleLogsSum;
+    std::string sampleLogsTimeSeries;
+    std::string sampleLogsList;
+    std::string sampleLogsWarn;
+    std::string sampleLogsWarnTolerances;
+    std::string sampleLogsFail;
+    std::string sampleLogsFailTolerances;
+  };
+
+  SampleLogsBehaviour(API::MatrixWorkspace_sptr ws, Kernel::Logger &logger,
+                      const SampleLogNames &logEntries = {},
+                      const ParameterName &parName = {});
 
   /// Create and update sample logs according to instrument parameters
-  void mergeSampleLogs(API::MatrixWorkspace &addeeWS,
-                       API::MatrixWorkspace &outWS);
-  void setUpdatedSampleLogs(API::MatrixWorkspace &outWS);
-  void removeSampleLogsFromWorkspace(API::MatrixWorkspace &addeeWS);
-  void readdSampleLogToWorkspace(API::MatrixWorkspace &addeeWS);
-  void resetSampleLogs(API::MatrixWorkspace &ws);
+  void mergeSampleLogs(API::MatrixWorkspace_sptr addeeWS,
+                       API::MatrixWorkspace_sptr outWS);
+  void setUpdatedSampleLogs(API::MatrixWorkspace_sptr outWS);
+  void removeSampleLogsFromWorkspace(API::MatrixWorkspace_sptr addeeWS);
+  void readdSampleLogToWorkspace(API::MatrixWorkspace_sptr addeeWS);
+  void resetSampleLogs(API::MatrixWorkspace_sptr ws);
 
 private:
   Kernel::Logger &m_logger;

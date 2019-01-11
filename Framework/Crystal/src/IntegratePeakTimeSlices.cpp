@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * IntegratePeakTimeSlices.cpp
  *
@@ -697,10 +703,8 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(
     return true;
   ;
 
-  boost::shared_ptr<Geometry::Detector> det =
-      boost::dynamic_pointer_cast<Geometry::Detector>(comp);
-  // if( comp->type().compare(0,8,"Detector")==0 ||
-  // comp->type().compare("RectangularDetectorPixel")==0)
+  auto det = boost::dynamic_pointer_cast<Geometry::Detector>(comp);
+
   if (det) {
     V3D pos = det->getPos() - Center;
     if (pos.X() * pos.X() + pos.Y() * pos.Y() + pos.Z() * pos.Z() <
@@ -712,7 +716,7 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(
     return true;
   }
 
-  boost::shared_ptr<const Geometry::ICompAssembly> Assembly =
+  auto Assembly =
       boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
 
   if (!Assembly)

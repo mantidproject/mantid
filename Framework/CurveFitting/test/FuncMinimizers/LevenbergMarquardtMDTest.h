@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CURVEFITTING_LEVENBERGMARQUARDMDTTEST_H_
 #define CURVEFITTING_LEVENBERGMARQUARDMDTTEST_H_
 
@@ -250,6 +256,7 @@ public:
     // 0
     fun->addConstraint(
         Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
+    fun->setConstraintPenaltyFactor("a", 1.e20);
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();

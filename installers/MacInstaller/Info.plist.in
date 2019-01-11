@@ -31,6 +31,6 @@
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2011 ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory</string>
+	<string>Copyright (c) 2007 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European Spallation Source, and Institut Laue - Langevin</string>
 </dict>
 </plist>
