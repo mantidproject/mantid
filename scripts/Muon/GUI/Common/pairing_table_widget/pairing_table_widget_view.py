@@ -6,6 +6,7 @@ from PyQt4.QtCore import pyqtSignal as Signal
 from Muon.GUI.Common import message_box
 from Muon.GUI.Common.utilities import table_utils
 
+pair_columns = {0: 'pair_name', 1: 'group_1', 2: 'group_2', 3: 'alpha', 4: 'guess_alpha'}
 
 class PairingTableView(QtGui.QWidget):
     dataChanged = Signal()
@@ -135,28 +136,28 @@ class PairingTableView(QtGui.QWidget):
         self.pairing_table.insertRow(row_position)
         for i, entry in enumerate(row_entries):
             item = QtGui.QTableWidgetItem(entry)
-            if i == 0:
+            if pair_columns[i] == 'pair_name':
                 pair_name_widget = table_utils.ValidatedTableItem(self._validate_pair_name_entry)
                 pair_name_widget.setText(entry)
-                self.pairing_table.setItem(row_position, 0, pair_name_widget)
-            if i == 1:
+                self.pairing_table.setItem(row_position, i, pair_name_widget)
+            if pair_columns[i] == 'group_1':
                 group1_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
                 group1_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 1))
                 index = self.get_index_of_text(group1_selector_widget, entry)
                 group1_selector_widget.setCurrentIndex(index)
-                self.pairing_table.setCellWidget(row_position, 1, group1_selector_widget)
-            if i == 2:
+                self.pairing_table.setCellWidget(row_position, i, group1_selector_widget)
+            if pair_columns[i] == 'group_2':
                 group2_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
                 group2_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 2))
                 index = self.get_index_of_text(group2_selector_widget, entry)
                 group2_selector_widget.setCurrentIndex(index)
-                self.pairing_table.setCellWidget(row_position, 2, group2_selector_widget)
-            if i == 3:
+                self.pairing_table.setCellWidget(row_position, i, group2_selector_widget)
+            if pair_columns[i] == 'alpha':
                 alpha_widget = table_utils.ValidatedTableItem(self._validate_alpha)
                 alpha_widget.setText(entry)
-                self.pairing_table.setItem(row_position, 3, alpha_widget)
+                self.pairing_table.setItem(row_position, i, alpha_widget)
             self.pairing_table.setItem(row_position, i, item)
         # guess alpha button
         guess_alpha_widget = self._guess_alpha_button()
