@@ -32,10 +32,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     closing = Signal()
 
-    def __init__(self, canvas, parent=None):
+    def __init__(self, canvas, toolbar_state_checker, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
         self.init()
         self.canvas = canvas
+        self.toolbar_state_checker = toolbar_state_checker
         self.tool = None
         self.fit_result_lines = []
         self.startXChanged.connect(self.move_start_x)
@@ -57,7 +58,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             allowed_spectra[name] = spec_list
         for name, spec_list in allowed_spectra.items():
             self.addAllowedSpectra(name, spec_list)
-        self.tool = FitInteractiveTool(self.canvas)
+        self.tool = FitInteractiveTool(self.canvas, self.toolbar_state_checker)
         self.tool.fit_start_x_moved.connect(self.setStartX)
         self.tool.fit_end_x_moved.connect(self.setEndX)
         self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)

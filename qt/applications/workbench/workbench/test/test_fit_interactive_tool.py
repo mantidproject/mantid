@@ -19,18 +19,22 @@ def on_darwin():
 @unittest.skipIf(on_darwin(), "Couldn't make it work for a mac")
 class TestFitPropertyBrowser(WorkbenchGuiTest):
 
-    def start(self, ws_name='ws'):
+    def start(self, ws_name='ws', fit=True):
         if ws_name not in mtd:
             ws = Load(r'irs26176_graphite002_conv_1LFixF_s0_to_9_Result.nxs', OutputWorkspace=ws_name)
         else:
             ws = mtd[ws_name]
         plot([ws], [1])
-        manager = GlobalFigureManager.get_active()
-        self.w = manager.window
+        self.figure_manager = GlobalFigureManager.get_active()
+        self.fit_browser = self.figure_manager.fit_browser
+        self.w = self.figure_manager.window
         self.fit_action = find_action_with_text(self.w, 'Fit')
+        if fit:
+            yield self.start_fit()
+
+    def start_fit(self):
         trigger_action(self.fit_action)
         yield 0.1
-        self.fit_browser = manager.fit_browser
 
     def start_draw_calls_count(self):
         self.draw_count = 0
@@ -86,6 +90,42 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.isVisible())
         self.assertFalse(self.fit_browser.tool is None)
         self.assertEqual(self.draw_count, 3)
+
+    def test_zoom_on_off(self):
+        yield self.start(fit=False)
+        self.figure_manager.toolbar.zoom()
+        yield self.wait_for_true(self.fit_browser.toolbar_state_checker.is_tool_active)
+        yield self.start_fit()
+        self.assertFalse(self.fit_browser.toolbar_state_checker.is_tool_active())
+
+    def test_pan_on_off(self):
+        yield self.start(fit=False)
+        self.figure_manager.toolbar.pan()
+        yield self.wait_for_true(self.fit_browser.toolbar_state_checker.is_tool_active)
+        yield self.start_fit()
+        self.assertFalse(self.fit_browser.toolbar_state_checker.is_tool_active())
+
+    def test_zoom_active_fit_inactive(self):
+        yield self.start()
+        self.figure_manager.toolbar.zoom()
+        yield self.wait_for_true(self.fit_browser.toolbar_state_checker.is_tool_active)
+        self.assertTrue(self.fit_browser.toolbar_state_checker.is_tool_active())
+        start_x = self.fit_browser.startX()
+        pos = self.w._canvas.geometry().center()
+        canvas = self.w.childAt(pos)
+        yield self.move_start_x(canvas, pos, 0.5)
+        self.assertAlmostEqual(self.fit_browser.startX(), start_x, 2)
+
+    def test_pan_active_fit_inactive(self):
+        yield self.start()
+        self.figure_manager.toolbar.pan()
+        yield self.wait_for_true(self.fit_browser.toolbar_state_checker.is_tool_active)
+        self.assertTrue(self.fit_browser.toolbar_state_checker.is_tool_active())
+        start_x = self.fit_browser.startX()
+        pos = self.w._canvas.geometry().center()
+        canvas = self.w.childAt(pos)
+        yield self.move_start_x(canvas, pos, 0.5)
+        self.assertAlmostEqual(self.fit_browser.startX(), start_x, 2)
 
     def test_resize(self):
         yield self.start()

@@ -22,7 +22,7 @@ from six import text_type
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.figuretype import figure_type, FigureType
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.toolbar import WorkbenchNavigationToolbar
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateChecker
 from workbench.plotting.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 
@@ -102,7 +102,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.fit_browser = FitPropertyBrowser(canvas)
+        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateChecker(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
