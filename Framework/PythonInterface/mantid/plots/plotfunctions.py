@@ -419,6 +419,7 @@ class ScalingAxesImage(mimage.AxesImage):
         self.dx = None
         self.dy = None
         self.unsampled_data = None
+        self.sampled_data = None
         self.unsampled_extent = extent
         super(ScalingAxesImage, self).__init__(
             ax,
@@ -432,39 +433,20 @@ class ScalingAxesImage(mimage.AxesImage):
             resample=resample,
             **kwargs)
 
+
     def set_data(self, A):
+        self.unsampled_data = A
         dims = A.shape
         max_dims = (3840, 2160)  # 4K resolution
         if dims[0] > max_dims[0] or dims[1] > max_dims[1]:
             new_dims = numpy.minimum(dims, max_dims)
-            if (_skimage_version()):
-                self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
+            if(_skimage_version()):
+                self.sampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
             else:
-                self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan)
+                self.sampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan)
         else:
-            self.unsampled_data = A
-        super(ScalingAxesImage, self).set_data(A)
-
-    def draw(self, renderer):
-        ax = self.axes
-        # might not be calculated before first call
-        we = ax.get_window_extent()
-        dx = round(we.x1 - we.x0)
-        dy = round(we.y1 - we.y0)
-        # decide if we should downsample
-        dims = self.unsampled_data.shape
-        if dx != self.dx or dy != self.dy:
-            if dims[0] > dx or dims[1] > dy:
-                new_dims = numpy.minimum(dims, [dx, dy])
-                if (_skimage_version()):
-                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan,
-                                          anti_aliasing=True)
-                else:
-                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan)
-                self.dx = dx
-                self.dy = dy
-                super(ScalingAxesImage, self).set_data(sampled_data)
-        return super(ScalingAxesImage, self).draw(renderer)
+            self.sampled_data = A
+        super(ScalingAxesImage, self).set_data(self.sampled_data)
 
 
     def _update_extent(self, extent):
@@ -487,21 +469,13 @@ class ScalingAxesImage(mimage.AxesImage):
         dims = self.unsampled_data.shape
         new_xlim = ax.get_xlim()
         new_ylim = ax.get_ylim()
-        pxmin = int(round(dims[0]/(self.unsampled_extent[1] - self.unsampled_extent[0])*(new_xlim[0] - self.unsampled_extent[0])))
-        pxmax = int(round(dims[0]/(self.unsampled_extent[1] - self.unsampled_extent[0])*(new_xlim[1] - self.unsampled_extent[0])))
-        pymin = int(round(dims[1]/(self.unsampled_extent[3] - self.unsampled_extent[2])*(new_ylim[0] - self.unsampled_extent[2])))
-        pymax = int(round(dims[1]/(self.unsampled_extent[3] - self.unsampled_extent[2])*(new_ylim[1] - self.unsampled_extent[2])))
-        if pymax - pymin != dims[1] and pymax - pymin != dims[0]:
-            value = numpy.amax(self.unsampled_data)
-            for i in range(0, dims[0], 1):
-                for j in range(0, dims[1], 1):
-                    self.unsampled_data[i, j] = value
-        cropped_data = self.unsampled_data[pxmin:pxmax, pymin:pymax]
-        print('check cropped shape: ',pxmin, pxmax, pymin, pymax, cropped_data.shape)
-        print('check axis limits: ',new_xlim, new_ylim)
+        pxmin = int(math.floor(float(dims[1])/(self.unsampled_extent[1] - self.unsampled_extent[0])*(new_xlim[0] - self.unsampled_extent[0])))
+        pxmax = int(math.ceil(float(dims[1])/(self.unsampled_extent[1] - self.unsampled_extent[0])*(new_xlim[1] - self.unsampled_extent[0])))
+        pymin = int(math.floor(float(dims[0])/(self.unsampled_extent[3] - self.unsampled_extent[2])*(new_ylim[0] - self.unsampled_extent[2])))
+        pymax = int(math.ceil(float(dims[0])/(self.unsampled_extent[3] - self.unsampled_extent[2])*(new_ylim[1] - self.unsampled_extent[2])))
+        cropped_data = self.unsampled_data[pymin:pymax, pxmin:pxmax]
         super(ScalingAxesImage, self).set_data(cropped_data)
         self._update_extent((new_xlim[0],new_xlim[1],new_ylim[0],new_ylim[1]))
-        print('check extent: ',self.get_extent())
 
 
 
@@ -629,8 +603,8 @@ def tricontour(axes, workspace, *args, **kwargs):
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
 
     See :meth:`matplotlib.axes.Axes.tricontour` for more information.
-    '''
-    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
+'''
+if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x_temp, y_temp, z) = get_md_data2d_bin_centers(workspace, normalization)
         (x, y) = numpy.meshgrid(x_temp, y_temp)
