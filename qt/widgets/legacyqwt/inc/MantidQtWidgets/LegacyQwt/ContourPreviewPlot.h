@@ -19,6 +19,8 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
+#include <QSettings>
+
 namespace Mantid {
 namespace API {
 class MWDimension;
@@ -41,6 +43,8 @@ using MWDimension_sptr = boost::shared_ptr<Mantid::API::MWDimension>;
 using MWDimension_const_sptr =
     boost::shared_ptr<const Mantid::API::MWDimension>;
 
+using DimensionRange = std::pair<Mantid::coord_t, Mantid::coord_t>;
+
 /** A 2D viewer for a Matrix Workspace.
  *
  * Before drawing, it acquires a ReadLock to prevent
@@ -60,7 +64,7 @@ public:
   ContourPreviewPlot(QWidget *parent = nullptr);
   ~ContourPreviewPlot() override;
   void loadColorMap(QString filename = QString());
-  void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  void setWorkspace(Mantid::API::MatrixWorkspace_sptr const workspace);
   void updateDisplay();
   SafeQwtPlot *getPlot2D();
   void setPlotVisible(bool visible);
@@ -73,14 +77,23 @@ public slots:
 
 protected:
   void preDeleteHandle(
-      const std::string const &workspaceName,
+      std::string const &workspaceName,
       boost::shared_ptr<Mantid::API::Workspace> const workspace) override;
 
 private:
   void setupColourBarAndPlot();
+  QString colourMapFileName(QString const &filename);
   void loadSettings();
+  void setCurrentColourMapFile(QSettings const &settings);
+  void setCurrentColourMapFile(QString const &file);
   void saveSettings();
-  void checkRangeLimits();
+  void checkRangeLimits() const;
+  void checkForInfiniteLimits(DimensionRange const &range,
+                              std::size_t const &index,
+                              std::ostringstream &message) const;
+  DimensionRange dimensionRange(std::size_t const &index) const;
+  Mantid::coord_t dimensionMinimum(std::size_t const &index) const;
+  Mantid::coord_t dimensionMaximum(std::size_t const &index) const;
   void findRangeFull();
   void setVectorDimensions();
   void clearPlot();
