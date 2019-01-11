@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <iterator>
 
 #include <cxxtest/TestSuite.h>
 
