@@ -66,14 +66,14 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         self.window.close()
 
     @_catch_exceptions
-    def deleteHandle(self, name, _):
+    def deleteHandle(self, _, workspace):
         """
         Called when the ADS has deleted a workspace. Checks the
         attached axes for any hold a plot from this workspace. If removing
         this leaves empty axes then the parent window is triggered for
         closer
-        :param name: The name of the workspace
-        :param _: Unused callback argument
+        :param _: The name of the workspace. Unused
+        :param workspace: A pointer to the workspace
         """
         # Find the axes with this workspace reference
         all_axes = self.canvas.figure.axes
@@ -82,24 +82,24 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         empty_axes = True
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                empty_axes = empty_axes & ax.remove_workspace_artists(name)
+                empty_axes = empty_axes & ax.remove_workspace_artists(workspace)
         if empty_axes:
             self.window.close()
         else:
             self.canvas.draw_idle()
 
     @_catch_exceptions
-    def replaceHandle(self, name, workspace):
+    def replaceHandle(self, _, workspace):
         """
         Called when the ADS has replaced a workspace with one of the same name.
         If this workspace is attached tho this figure then its data is updated
-        :param name: The name of the workspace
+        :param _: The name of the workspace. Unused
         :param workspace: A reference to the new workspace
         """
         redraw = False
         for ax in self.canvas.figure.axes:
             if isinstance(ax, MantidAxes):
-                redraw_this = ax.replace_workspace_artists(name, workspace)
+                redraw_this = ax.replace_workspace_artists(workspace)
             else:
                 continue
             redraw = redraw | redraw_this
