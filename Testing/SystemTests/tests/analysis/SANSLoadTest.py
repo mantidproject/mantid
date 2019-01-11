@@ -21,9 +21,11 @@ from sans.common.constants import (CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG)
 # needs to be disabled here.
 # pylint: disable=no-name-in-module
 from sans.test_helper.test_director import TestDirector
-from sans.common.enums import SANSFacility
+from sans.common.enums import SANSFacility, DetectorType
 from sans.state.data import get_data_builder
 from sans.common.file_information import SANSFileInformationFactory
+
+
 
 
 def remove_all_workspaces_from_ads():
@@ -217,6 +219,47 @@ class SANSLoadTest(unittest.TestCase):
         load_alg.execute()
         # self.assertTrue(load_alg.isExecuted())
         return load_alg
+
+    def _check_that_sets_to_zero(self, workspace, move_info, comp_name=None):
+        """
+        Check that workspace is centred on SANSLoad.
+        """
+        def _get_components_to_compare(_key, _move_info, _component_names):
+            if _key in _move_info.detectors:
+                _name = _move_info.detectors[_key].detector_name
+                _component_names.append(_name)
+
+        # Get the components to compare
+        if comp_name is None:
+            component_names = list(move_info.monitor_names.values())
+            hab_name = DetectorType.to_string(DetectorType.HAB)
+            lab_name = DetectorType.to_string(DetectorType.LAB),
+            _get_components_to_compare(hab_name, move_info, component_names)
+            _get_components_to_compare(lab_name, move_info, component_names)
+            component_names.append("some-sample-holder")
+        else:
+            component_names = [comp_name]
+
+        # Ensure that the positions on the base instrument and the instrument are the same
+        instrument = workspace.getInstrument()
+        base_instrument = instrument.getBaseInstrument()
+        for component_name in component_names:
+            # Confirm that the positions are the same
+            component = instrument.getComponentByName(component_name)
+            base_component = base_instrument.getComponentByName(component_name)
+
+            # If we are dealing with a monitor which has not been implemented we need to continue
+            if component is None or base_component is None:
+                continue
+
+            position = component.getPos()
+            position_base = base_component.getPos()
+            for index in range(0, 3):
+                self.assertAlmostEquals(position[index], position_base[index], delta=1e-4)
+            rotation = component.getRotation()
+            rotation_base = base_component.getRotation()
+            for index in range(0, 4):
+                self.assertAlmostEquals(rotation[index], rotation_base[index], delta=1e-4)
 
     def test_that_when_transmission_is_event_monitor_is_used(self):
         # Arrange
@@ -493,6 +536,33 @@ class SANSLoadTest(unittest.TestCase):
 
         # Cleanup
         remove_all_workspaces_from_ads()
+
+    def test_that_centres_workspace_on_load(self):
+        # Arrange
+        state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00028827",
+                                               sample_trans="SANS2D00028784",
+                                               sample_direct="SANS2D00028804")
+
+        # Act
+        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
+                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
+                                  "SampleTransmissionWorkspace": "sample_transmission",
+                                  "SampleDirectWorkspace": "sample_direct"}
+
+        kwargs = {"state": state, "publish_to_cache": False, "use_cached": False, "move_workspace": False,
+                  "output_workspace_names": output_workspace_names}
+
+        load_alg = self._run_load(**kwargs)
+
+        # Assert
+        expected_number_of_workspaces = [1, 1, 1, 0, 0, 0]
+        expected_number_on_ads = 0
+        workspace_type = [EventWorkspace, Workspace2D, Workspace2D, None, None, None]
+        self._do_test_output(load_alg, expected_number_of_workspaces, expected_number_on_ads, workspace_type)
+
+        for workspace_name, _ in output_workspace_names.items():
+            workspace = load_alg.getProperty(workspace_name).value
+            self._check_that_sets_to_zero(workspace, state.move, comp_name=None)
 
 
 class SANSLoadDataRunnerTest(systemtesting.MantidSystemTest):

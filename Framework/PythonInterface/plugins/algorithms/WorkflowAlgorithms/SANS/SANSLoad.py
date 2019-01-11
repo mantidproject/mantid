@@ -345,10 +345,11 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                         "MoveType": "SetToZero",
                         "Component": ""}
 
+        move_alg = create_child_algorithm(self, move_name, **move_options)
+
         for key, workspace_list in workspaces.items():
             for workspace in list(workspace_list):
-                move_options.update({"Workspace": workspace})
-                move_alg = create_child_algorithm(self, move_name, **move_options)
+                move_alg.setProperty("Workspace", workspace)
                 move_alg.execute()
 
     def _perform_initial_move(self, workspaces, state):
