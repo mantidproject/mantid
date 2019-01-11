@@ -95,6 +95,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsLegacyQwt
 # Testing
 ###########################################################################
 set( TEST_FILES
+  test/ContourPreviewPlotTest.h
   test/MantidColorMapTest.h
   test/QwtWorkspaceBinDataTest.h
   test/QwtWorkspaceSpectrumDataTest.h

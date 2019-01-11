@@ -128,7 +128,7 @@ void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const workspace) {
   m_data->setNormalization(m_normalization);
 
   this->setVectorDimensions();
-  this->findRangeFull();
+  this->findFullRange();
 
   m_uiForm.colorBar->setViewRange(m_colorRangeFull);
   m_uiForm.colorBar->updateColorMap();
