@@ -63,8 +63,6 @@ public:
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
   void updateDisplay();
   SafeQwtPlot *getPlot2D();
-  void setPlotVisible(bool visible);
-  void setColourBarVisible(bool visible);
 
 public slots:
   void colorRangeChangedSlot();
