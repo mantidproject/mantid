@@ -177,7 +177,7 @@ class MuonDataContext(object):
             # return the first workspace in the group
             return self.current_data["OutputWorkspace"][0].workspace
         else:
-            return self.current_data["OutputWorkspace"].workspace
+            return self.current_data["OutputWorkspace"][0].workspace
 
     @property
     def period_string(self):

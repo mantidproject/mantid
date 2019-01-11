@@ -1,9 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
 from mantid import ConfigService
 from mantid import AnalysisDataService
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_base_data_directory, get_raw_data_directory, get_raw_data_workspace_name
 
+CO_ADD = 'Co-Add'
+SIMULTANEOUS = 'Simultaneous'
 
 class LoadWidgetPresenter(object):
     """
@@ -56,13 +65,13 @@ class LoadWidgetPresenter(object):
 
         selection = self._view.get_multiple_loading_combo_text()
 
-        if selection == "Co-Add":
-            self.load_file_widget.update_multiple_loading_behaviour("Co-Add")
-            self.load_run_widget.update_multiple_loading_behaviour("Co-Add")
+        if selection == CO_ADD:
+            self.load_file_widget.update_multiple_loading_behaviour(CO_ADD)
+            self.load_run_widget.update_multiple_loading_behaviour(CO_ADD)
 
-        if selection == "Simultaneous":
-            self.load_file_widget.update_multiple_loading_behaviour("Simultaneous")
-            self.load_run_widget.update_multiple_loading_behaviour("Simultaneous")
+        if selection == SIMULTANEOUS:
+            self.load_file_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
+            self.load_run_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
 
         self.clear_data_and_view()
 
@@ -126,9 +135,11 @@ class LoadWidgetPresenter(object):
             self.outer = outer  # handle to containing class
 
         def notify_subscribers(self, arg=None):
-            AnalysisDataService.clear()
+            # AnalysisDataService.clear()
             for workspace, run in zip(self.outer._model.workspaces, self.outer._model.runs):
-                workspace['OutputWorkspace'].show(str(run))
+                for i, single_ws in enumerate(workspace['OutputWorkspace']):
+                    name = str(run) + "_period_" + str(i)
+                    single_ws.show(name)
 
             Observable.notify_subscribers(self, arg)
 
