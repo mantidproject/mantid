@@ -655,20 +655,31 @@ def update_colorplot_datalimits(axes, mappables):
     # over
     xmin_all, xmax_all, ymin_all, ymax_all = _LARGEST, _SMALLEST, _LARGEST, _SMALLEST
     for mappable in mappables:
-        if isinstance(mappable, mimage.AxesImage):
-            xmin, xmax, ymin, ymax = mappable.get_extent()
-        elif isinstance(mappable, mcoll.QuadMesh):
-            # coordinates are vertices of the grid
-            coords = mappable._coordinates
-            xmin, ymin = coords[0][0]
-            xmax, ymax = coords[-1][-1]
-        elif isinstance(mappable, mcoll.PolyCollection):
-            xmin, ymin = mappable._paths[0].get_extents().min
-            xmax, ymax = mappable._paths[-1].get_extents().max
-        else:
-            raise ValueError("Unknown mappable type '{}'".format(type(mappable)))
+        xmin, xmax, ymin, ymax = get_colorplot_extents(mappable)
         xmin_all, xmax_all = min(xmin_all, xmin), max(xmax_all, xmax)
         ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
 
     axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
     axes.autoscale()
+
+
+def get_colorplot_extents(mappable):
+    """
+    Return the extent of the given mappable
+    :param mappable: A 2D mappable object
+    :return: (left, right, bottom, top)
+    """
+    if isinstance(mappable, mimage.AxesImage):
+        xmin, xmax, ymin, ymax = mappable.get_extent()
+    elif isinstance(mappable, mcoll.QuadMesh):
+        # coordinates are vertices of the grid
+        coords = mappable._coordinates
+        xmin, ymin = coords[0][0]
+        xmax, ymax = coords[-1][-1]
+    elif isinstance(mappable, mcoll.PolyCollection):
+        xmin, ymin = mappable._paths[0].get_extents().min
+        xmax, ymax = mappable._paths[-1].get_extents().max
+    else:
+        raise ValueError("Unknown mappable type '{}'".format(type(mappable)))
+
+    return xmin, xmax, ymin, ymax

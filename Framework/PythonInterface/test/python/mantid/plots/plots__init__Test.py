@@ -13,7 +13,10 @@ from matplotlib.container import ErrorbarContainer
 import numpy as np
 import unittest
 
-from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace
+from mantid.plots.plotfunctions import get_colorplot_extents
+from mantid.api import WorkspaceFactory
+from mantid.simpleapi import (AnalysisDataService, CreateWorkspace,
+                              CreateSampleWorkspace, DeleteWorkspace)
 
 
 class Plots__init__Test(unittest.TestCase):
@@ -119,6 +122,37 @@ class Plots__init__Test(unittest.TestCase):
         self.assertAlmostEqual(25, eb_container[0].get_xdata()[0])
         self.assertAlmostEqual(35, eb_container[0].get_xdata()[-1])
         self.assertEquals('r', eb_container[0].get_color())
+
+    def _do_image_replace_common_bins(self, color_func, artists):
+        im_data = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
+                                  DataY=[3, 4, 5, 3, 4, 5],
+                                  DataE=[1, 2, 3, 4, 1, 1],
+                                  NSpec=3)
+        getattr(self.ax, color_func)(im_data)
+        im_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40, 20, 30, 40],
+                                  DataY=[3, 4, 5, 3, 4, 5],
+                                  DataE=[.1, .2, .3, .4, .1, .1],
+                                  NSpec=3, VerticalAxisValues=[2, 3, 4],
+                                  VerticalAxisUnit='DeltaE')
+        self.ax.replace_workspace_artists(im_data)
+        self.assertEquals(1, len(artists))
+        left, right, bottom, top = get_colorplot_extents(artists[0])
+        self.assertAlmostEqual(20., left)
+        self.assertAlmostEqual(40., right)
+        self.assertAlmostEqual(1.5, bottom)
+        self.assertAlmostEqual(4.5, top)
+
+    def test_replace_workspace_data_imshow(self):
+        self._do_image_replace_common_bins('imshow', self.ax.images)
+
+    def test_replace_workspace_data_pcolor(self):
+        self._do_image_replace_common_bins('pcolor', self.ax.collections)
+
+    def test_replace_workspace_data_pcolorfast(self):
+        self._do_image_replace_common_bins('pcolorfast', self.ax.collections)
+
+    def test_replace_workspace_data_pcolormesh(self):
+        self._do_image_replace_common_bins('pcolormesh', self.ax.collections)
 
     def test_3d_plots(self):
         fig = plt.figure()
