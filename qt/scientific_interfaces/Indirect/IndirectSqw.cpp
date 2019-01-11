@@ -63,6 +63,7 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
+  m_uiForm.rqwPlot2D->setPlotVisible(false);
   m_uiForm.rqwPlot2D->setColourBarVisible(false);
 }
 
@@ -204,7 +205,10 @@ void IndirectSqw::plotRqwContour() {
     convertToSpectrumAxis(sampleName, outputName);
 
     auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
-    m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+    if (rqwWorkspace) {
+      m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+      m_uiForm.rqwPlot2D->setPlotVisible(true);
+    }
   } else {
     emit showMessageBox("Invalid filename.");
   }
