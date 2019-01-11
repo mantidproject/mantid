@@ -104,6 +104,8 @@ class Plots__init__Test(unittest.TestCase):
         self.assertAlmostEqual(25, line_ws2d_histo.get_xdata()[0])
         self.assertAlmostEqual(35, line_ws2d_histo.get_xdata()[-1])
         self.assertEquals('r', line_ws2d_histo.get_color())
+        # try deleting
+        self.ax.remove_workspace_artists(plot_data)
 
     def test_replace_workspace_data_errorbar(self):
         eb_data = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -122,6 +124,8 @@ class Plots__init__Test(unittest.TestCase):
         self.assertAlmostEqual(25, eb_container[0].get_xdata()[0])
         self.assertAlmostEqual(35, eb_container[0].get_xdata()[-1])
         self.assertEquals('r', eb_container[0].get_color())
+        # try deleting
+        self.ax.remove_workspace_artists(eb_data)
 
     def _do_image_replace_common_bins(self, color_func, artists):
         im_data = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -141,6 +145,8 @@ class Plots__init__Test(unittest.TestCase):
         self.assertAlmostEqual(40., right)
         self.assertAlmostEqual(1.5, bottom)
         self.assertAlmostEqual(4.5, top)
+        # try deleting
+        self.ax.remove_workspace_artists(im_data)
 
     def test_replace_workspace_data_imshow(self):
         self._do_image_replace_common_bins('imshow', self.ax.images)

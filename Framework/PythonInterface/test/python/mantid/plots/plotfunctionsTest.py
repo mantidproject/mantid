@@ -129,8 +129,10 @@ class PlotFunctionsTest(unittest.TestCase):
         ax.set_xlim(-0.05, 0.05)
         ax.set_ylim(-0.05, 0.05)
         funcs.update_colorplot_datalimits(ax, mesh)
-        self.assertEquals((10.0, 30.0), ax.get_xlim())
-        self.assertEquals((4., 8.), ax.get_ylim())
+        self.assertAlmostEqual(10.0, ax.get_xlim()[0])
+        self.assertAlmostEqual(30.0, ax.get_xlim()[1])
+        self.assertAlmostEqual(4.0, ax.get_ylim()[0])
+        self.assertAlmostEqual(8.0, ax.get_ylim()[1])
 
     def test_update_colorplot_datalimits_for_pcolormesh(self):
         self._do_update_colorplot_datalimits(funcs.pcolormesh)

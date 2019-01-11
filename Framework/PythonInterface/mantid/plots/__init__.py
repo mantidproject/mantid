@@ -85,7 +85,7 @@ class _WorkspaceArtists(object):
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
         """
-        self._artists = artists
+        self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
 
     def remove(self, axes):
@@ -110,7 +110,14 @@ class _WorkspaceArtists(object):
         """Replace or replot artists based on a new workspace
         :param workspace: The new workspace containing the data
         """
-        self._artists = self._data_replace_cb(self._artists, workspace)
+        self._set_artists(self._data_replace_cb(self._artists, workspace))
+
+    def _set_artists(self, artists):
+        """Ensure the stored artists is an iterable"""
+        if isinstance(artists, Container) or not isinstance(artists, Iterable):
+            self._artists = [artists]
+        else:
+            self._artists = artists
 
 
 class MantidAxes(Axes):
@@ -161,11 +168,7 @@ class MantidAxes(Axes):
                 def data_replace_cb(_, __):
                     logger.warning("Updating data on this plot type is not yet supported")
             artist_info = self.tracked_workspaces.setdefault(name, [])
-            if isinstance(artists, Container) or not isinstance(artists, Iterable):
-                artist_seq = [artists]
-            else:
-                artist_seq = artists
-            artist_info.append(_WorkspaceArtists(artist_seq, data_replace_cb))
+            artist_info.append(_WorkspaceArtists(artists, data_replace_cb))
 
         return artists
 
@@ -241,6 +244,7 @@ class MantidAxes(Axes):
                 artists[0].set_data(x, y)
                 self.relim()
                 self.autoscale()
+                return artists
 
             return self.track_workspace_artist(args[0], plotfunctions.plot(self, *args, **kwargs), _data_update)
         else:
