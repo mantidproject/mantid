@@ -51,23 +51,25 @@ public:
   ContourPreviewPlot(QWidget *parent = nullptr);
   ~ContourPreviewPlot() override;
 
-  void loadColorMap(QString filename = QString());
+  Mantid::API::MatrixWorkspace_sptr getActiveWorkspace() const;
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr const workspace);
-  void updateDisplay();
   SafeQwtPlot *getPlot2D();
 
   void setPlotVisible(bool visible);
   void setColourBarVisible(bool visible);
 
-public slots:
-  void handleColorRangeChanged();
-  void handleLoadColorMap();
-  void handleSetTransparentZeros(bool transparent);
+  bool isPlotVisible() const;
+  bool isColourBarVisible() const;
 
 protected:
   void preDeleteHandle(
       std::string const &workspaceName,
       boost::shared_ptr<Mantid::API::Workspace> const workspace) override;
+
+private slots:
+  void handleColourRangeChanged();
+  void handleLoadColourMap();
+  void handleSetTransparentZeros(bool transparent);
 
 private:
   void setupColourBarAndPlot();
@@ -76,6 +78,9 @@ private:
   void setCurrentColourMapFile(QSettings const &settings);
   void setCurrentColourMapFile(QString const &file);
   void saveSettings();
+
+  void loadColourMap(QString filename = QString());
+  void updateDisplay();
 
   void checkRangeLimits() const;
   void checkForInfiniteLimits(DimensionRange const &range,
@@ -94,14 +99,14 @@ private:
   std::unique_ptr<QwtPlotSpectrogram> m_spectrogram;
   /// Data presenter
   std::unique_ptr<API::QwtRasterDataMD> m_data;
-  /// File of the last loaded color map.
-  QString m_currentColorMapFile;
-  /// Md Settings for color maps
+  /// File of the last loaded colour map.
+  QString m_currentColourMapFile;
+  /// Md Settings for colour maps
   boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
   /// Workspace being shown
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   /// The calculated range of values in the full data set
-  QwtDoubleInterval m_colorRangeFull;
+  QwtDoubleInterval m_colourRangeFull;
   Mantid::API::MDNormalization m_normalization;
   /// Vector of the dimensions to show.
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;

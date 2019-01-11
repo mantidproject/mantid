@@ -27,7 +27,7 @@
       </widget>
      </item>
      <item>
-      <widget class="MantidQt::MantidWidgets::ColorBarWidget" name="colorBar" native="true">
+      <widget class="MantidQt::MantidWidgets::ColorBarWidget" name="colourBar" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
          <horstretch>0</horstretch>
