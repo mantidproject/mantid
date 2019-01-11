@@ -9,6 +9,7 @@
 
 #include <Eigen/Dense>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <ostream>
 
 using uint128_t = boost::multiprecision::uint128_t;
 
@@ -49,6 +50,7 @@ struct Morton96 {
   uint128_t operator/(const T& b)  const;
   template <typename T>
   uint128_t operator*(const T& b)  const;
+  friend std::ostream &operator<<(std::ostream &os, const Morton96 &morton96);
 };
 #pragma pack(pop)
 
@@ -126,6 +128,11 @@ inline uint128_t Morton96::operator/(const T& b)  const {
 template <typename T>
 inline uint128_t Morton96::operator*(const T& b)  const {
   return to_uint128_t() * b;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const Morton96 &morton96) {
+  os <<  morton96.to_uint128_t();
+  return os;
 }
 
 #endif // MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
