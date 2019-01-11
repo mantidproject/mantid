@@ -153,14 +153,12 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       issues[INPUT_WORKSPACE_PROPERTY] +=
           "Workspace " + ws->getName() + " is not a point-data\n";
     } else {
-      try {
-        ws->blocksize();
-      } catch (std::length_error &) {
+      if (!ws->isCommonBins()) {
         issues[INPUT_WORKSPACE_PROPERTY] +=
             "Workspace " + ws->getName() +
             " has different number of points per histogram\n";
       }
-      m_inputWS.push_back(ws);
+      m_inputWS.emplace_back(ws);
     }
   }
 
@@ -213,7 +211,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
         // try if numeric time series, then the size must match to the
         // blocksize
-        const int blocksize = static_cast<int>(ws->blocksize());
+        const int blocksize = static_cast<int>(ws->y(0).size());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
         TimeSeriesProperty<int> *timeSeriesInt(nullptr);
@@ -254,7 +252,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
   std::vector<double> axis;
-  axis.reserve(ws->blocksize());
+  axis.reserve(ws->y(0).size());
   auto &run = ws->run();
   // try time series first
   TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
@@ -310,10 +308,11 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> axis;
   std::vector<double> x;
   std::vector<double> xerrors;
-  spectrum.reserve(m_outWS->blocksize());
-  errors.reserve(m_outWS->blocksize());
-  axis.reserve(m_outWS->blocksize());
-  size_t index = static_cast<size_t>(wsIndex);
+  const size_t index = static_cast<size_t>(wsIndex);
+  const auto ySize = m_outWS->y(index).size();
+  spectrum.reserve(ySize);
+  errors.reserve(ySize);
+  axis.reserve(m_outWS->x(index).size());
   for (const auto &input : m_inputWS) {
     const auto &y = input->y(index);
     spectrum.insert(spectrum.end(), y.begin(), y.end());
@@ -390,14 +389,14 @@ void ConjoinXRuns::exec() {
   // to be skipped, to compute the size of the output respectively.
   MatrixWorkspace_sptr temp = first->clone();
 
-  size_t outBlockSize = (*it)->blocksize();
+  size_t outBlockSize = (*it)->y(0).size();
   // First sequentially merge the sample logs
   for (++it; it != m_inputWS.end(); ++it) {
     // attempt to merge the sample logs
     try {
       sampleLogsBehaviour.mergeSampleLogs(*it, temp);
       sampleLogsBehaviour.setUpdatedSampleLogs(temp);
-      outBlockSize += (*it)->blocksize();
+      outBlockSize += (*it)->y(0).size();
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error() << "Could not join workspace: " << (*it)->getName()
