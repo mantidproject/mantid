@@ -207,9 +207,10 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
-        inc/MantidGeometry/Instrument/GridDetector.h
+	inc/MantidGeometry/Instrument/GridDetector.h
 	inc/MantidGeometry/Instrument/GridDetectorPixel.h
 	inc/MantidGeometry/Instrument/IDFObject.h
+	inc/MantidGeometry/Instrument/InfoIteratorBase.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/InstrumentVisitor.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
