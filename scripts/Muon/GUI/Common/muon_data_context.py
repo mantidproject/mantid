@@ -114,6 +114,7 @@ class MuonDataContext(object):
 
     @property
     def instrument(self):
+        ConfigService['default.instrument'] = 'MUSR'
         inst = ConfigService.getInstrument().name()
         return inst
 
