@@ -109,7 +109,7 @@ void GetEiMonDet3::init() {
                       Prop::MONITOR_WORKSPACE.c_str(), "",
                       Kernel::Direction::Input, API::PropertyMode::Optional,
                       tofWorkspace),
-                  "A Workspace containing the monitor spectrum. If empty, " +
+                  "A Workspace containing the monitor spectrum; if empty, " +
                       Prop::DETECTOR_WORKSPACE + " will be used.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
@@ -122,7 +122,7 @@ void GetEiMonDet3::init() {
   declareProperty(Prop::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Usable monitor's workspace index.");
   declareProperty(Prop::PULSE_INTERVAL, EMPTY_DBL(),
-                  "Interval between neutron pulses, in microseconds. Taken "
+                  "Interval between neutron pulses, in microseconds; taken "
                   "from the sample logs, if not specified.");
   declareProperty(Prop::MAX_ENERGY, EMPTY_DBL(), mustBePositive,
                   "Multiple pulse intervals will be added to the flight time "
@@ -202,9 +202,12 @@ void GetEiMonDet3::exec() {
 }
 
 /** Calculates the time of flight from the monitor to the detectors.
+ *
+ *  Adds pulse intervals to the TOF until it is greater than `minTOF`.
  *  @param detectorWs Detector workspace
  *  @param detectorEPP The position of the detectors' elastic peak
  *  @param monitorEPP The position of the monitor's elastic peak
+ *  @param minTOF minimum expected time of flight, in microseconds
  *  @return The time of flight between the monitor and the detectors
  */
 double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs,
@@ -232,6 +235,12 @@ double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs,
   return timeOfFlight;
 }
 
+/** Runs GroupDetectors on given workspace indices
+ *
+ * @param ws a workspace to group
+ * @param wsIndices a vector of workspace indices to group
+ * @return a single spectrum workspace
+ */
 API::MatrixWorkspace_sptr
 GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws,
                            const std::vector<size_t> &wsIndices) {
@@ -243,6 +252,13 @@ GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws,
   return group->getProperty("OutputWorkspace");
 }
 
+/** Computes the minimum TOF between monitor and detectors from maximum
+ *  energy
+ *
+ * @param ws a workspace containing the instrument
+ * @param sampleToDetectorDistance the l2 distance
+ * @return minimum expected TOF, in microseconds
+ */
 double GetEiMonDet3::minimumTOF(const API::MatrixWorkspace &ws,
                                 const double sampleToDetectorDistance) {
   const double minEnergy = getProperty(Prop::MAX_ENERGY);
@@ -252,6 +268,11 @@ double GetEiMonDet3::minimumTOF(const API::MatrixWorkspace &ws,
       0., Kernel::DeltaEMode::Direct, 0.);
 }
 
+/** Returns the TOF of the monitor's peak.
+ *
+ * @param monitorIndex monitor spectrum workspace index
+ * @return monitor peak TOF in microseconds
+ */
 double GetEiMonDet3::monitorPeakPosition(const size_t monitorIndex) {
   API::ITableWorkspace_sptr monitorEPPWs = getProperty(Prop::MONITOR_EPP_TABLE);
   const auto &status =
@@ -262,6 +283,11 @@ double GetEiMonDet3::monitorPeakPosition(const size_t monitorIndex) {
   return monitorEPPWs->getRef<double>("PeakCentre", monitorIndex);
 }
 
+/** Returns the TOF of the grouped detectors' elastic peak.
+ *
+ * @param ws a single spectrum workspace
+ * @return detector peak in microseconds
+ */
 double GetEiMonDet3::peakPosition(API::MatrixWorkspace_sptr &ws) {
   auto findEPP = createChildAlgorithm("FindEPP");
   findEPP->setProperty("InputWorkspace", ws);

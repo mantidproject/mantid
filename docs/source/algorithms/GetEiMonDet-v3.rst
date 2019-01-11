@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm calculates the incident energy from the time-of-flight between one monitor and some detectors. The detector spectra are summed together using :ref:`GroupDetectors <algm-GroupDetectors>` and a Gaussian is fitted to both the monitor and summed detector data, the difference in the peak positions giving the time-of-flight. If the detector peak is before the monitor one, one pulse interval is added to the time-of-flight. The pulse interval can be given by the ``PulseInterval`` property or it is read from the sample logs under the entry ``pulse_interval``. It is also possible to specify a maximum expected neutron energy by ``MaximumEnergy``. The pulse interval is added to the time-of-flight also if the calculated energy exceeds this value.
+This algorithm calculates the incident energy from the time-of-flight between one monitor and some detectors. The detector spectra are summed together using :ref:`GroupDetectors <algm-GroupDetectors>` and a Gaussian is fitted to both the monitor and summed detector data, the difference in the peak positions giving the time-of-flight. If the detector peak is before the monitor one, one pulse interval is added to the time-of-flight. The pulse interval can be given by the ``PulseInterval`` property or it is read from the sample logs under the entry ``pulse_interval`` (in seconds). It is also possible to specify a maximum expected neutron energy by ``MaximumEnergy``. The pulse interval is added to the time-of-flight also if the calculated energy exceeds this value.
 
 If the monitor peak has been previously fitted using :ref:`FindEPP <algm-FindEPP>`, one fitting step can be omitted by supplying the EPP table via ``MonitorEPPWorkspace``.
 
@@ -40,7 +40,7 @@ Usage
 
 Output:
 
-.. testoutput:: SimpleEx
+.. testoutput:: Simple
 
    Calibrated energy: 53.298
 
