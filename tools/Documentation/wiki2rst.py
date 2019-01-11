@@ -184,10 +184,10 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
     post_processed_rst = add_mantid_concept_links(post_processed_rst)
     if post_process_args["add_heading"]:
         post_processed_rst = add_page_heading(post_processed_rst, 
-                                              post_process_args["page_handle"])
+                post_process_args["page_handle"])
     if post_process_args["add_page_handle"]:
         post_processed_rst = add_page_handle(post_processed_rst, 
-                                             post_process_args["page_handle"])
+                post_process_args["page_handle"])
     post_processed_rst = fix_internal_links(post_processed_rst)
     return post_processed_rst
 
@@ -200,7 +200,7 @@ def add_page_heading(pandoc_rst, page_handle):
     page_heading = ' '.join(word for word in _heading)
     heading_markup = "=" * len(page_heading)
     pandoc_rst = heading_markup + "\n" + page_heading + "\n" + \
-                 heading_markup + "\n \n" + pandoc_rst
+            heading_markup + "\n \n" + pandoc_rst
     return pandoc_rst
 
 # ------------------------------------------------------------------------------
@@ -220,7 +220,7 @@ def fix_internal_links(pandoc_rst):
     link_strings = re.findall("`[a-zA-Z ]+?<[a-zA-Z _-]+?>`__+", pandoc_rst, re.DOTALL)
     print("Converting links: ", link_strings)
     for string in link_strings:
-        ref_text = ":ref:" + string[:-2] 
+        ref_text = ":ref:" + string[:-2]
         pandoc_rst = re.sub(string, ref_text, pandoc_rst)
     return pandoc_rst
 
@@ -414,8 +414,8 @@ def main(argv):
             page_handle = args.page_handle
 
         post_process_args = {"rel_img_dir": rel_img_dir, "img_dir": img_dir, "page_handle":
-                page_handle, "add_page_handle": args.add_page_handle, 
-                "add_heading": args.add_heading}
+            page_handle, "add_page_handle": args.add_page_handle,
+            "add_heading": args.add_heading}
         display_debug("Post processing arguments: '{}'".format(post_process_args))
         rst_text = to_rst(wiki_url, post_process_args)
         if args.output_file:
