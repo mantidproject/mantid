@@ -39,8 +39,9 @@ private:
   std::vector<coord_t>
   getValuesFromOtherDimensions(bool &skipNormalization,
                                uint16_t expInfoIndex = 0) const;
-
-
+  void cacheDimensionXValues();
+  void calculateNormalization(const std::vector<coord_t> &otherValues,Geometry::SymmetryOperation so,
+                              uint16_t expInfoIndex);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
@@ -56,11 +57,23 @@ private:
   Mantid::Kernel::DblMatrix m_W;
   // matrix for transforming from intersections to positions in the normalization workspace
   Mantid::Kernel::DblMatrix m_transformation;
+  /// cached X values along dimensions h,k,l. dE
+  std::vector<double> m_hX, m_kX, m_lX, m_eX;
+
+  /// index of h,k,l, dE dimensions in the output workspaces
+  size_t m_hIdx, m_kIdx, m_lIdx, m_eIdx;
 
   size_t m_numExptInfos;
+  double m_Ei;
   bool m_diffraction;
   bool m_accumulate;
   bool m_dEIntegrated;
+  /// Sample position
+  Kernel::V3D m_samplePos;
+  /// Beam direction
+  Kernel::V3D m_beamDir;
+  /// ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
 };
 
 } // namespace MDAlgorithms

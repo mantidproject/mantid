@@ -9,7 +9,9 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
@@ -17,6 +19,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -47,8 +50,10 @@ DECLARE_ALGORITHM(MDNormalization)
  * Constructor
  */
 MDNormalization::MDNormalization()
-    :m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3,3), m_W(3,3,true), m_transformation(),
-      m_numExptInfos(0), m_diffraction(true), m_accumulate(false), m_dEIntegrated(false) {}
+    :m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3,3,true), m_W(3,3,true), m_transformation(),
+      m_hX(), m_kX(), m_lX(), m_eX(),m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1),
+      m_numExptInfos(0), m_Ei(0.0), m_diffraction(true), m_accumulate(false),
+      m_dEIntegrated(false), m_samplePos(), m_beamDir(), convention("") {}
 
 
 /// Algorithms name for identification. @see Algorithm::name
@@ -311,7 +316,7 @@ MDNormalization::validateInputs() {
 /** Execute the algorithm.
  */
 void MDNormalization::exec() {
-
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // symmetry operations
   std::string symOps = this->getProperty("SymmetryOperations");
   std::vector<Geometry::SymmetryOperation> symmetryOps;
@@ -336,8 +341,28 @@ void MDNormalization::exec() {
   m_isRLU = getProperty("RLU");
   //get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
+  const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
+  auto source = exptInfoZero.getInstrument()->getSource();
+  auto sample = exptInfoZero.getInstrument()->getSample();
+  if (source == nullptr || sample == nullptr) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Instrument not sufficiently defined: failed to get source and/or "
+        "sample");
+  }
+  m_samplePos = sample->getPos();
+  m_beamDir = m_samplePos - source->getPos();
+  m_beamDir.normalize();
   if ((m_inputWS->getNumDims() >3) && (m_inputWS->getDimension(3)->getMDFrame().name()=="DeltaE")) {
     m_diffraction = false;
+    if (exptInfoZero.run().hasProperty("Ei")) {
+      Kernel::Property *eiprop = exptInfoZero.run().getProperty("Ei");
+      m_Ei = boost::lexical_cast<double>(eiprop->value());
+      if (m_Ei <= 0) {
+        throw std::invalid_argument("Ei stored in the workspace is not positive");
+      }
+    } else {
+      throw std::invalid_argument("Could not find Ei value in the workspace.");
+    }
   }
   auto outputWS = binInputWS(symmetryOps);
 
@@ -354,19 +379,18 @@ void MDNormalization::exec() {
     bool skipNormalization = false;
     const std::vector<coord_t> otherValues =
         getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
-    g_log.warning()<<skipNormalization<<"\n";
-   /*
-    const auto affineTrans =
-        findIntergratedDimensions(otherValues, skipNormalization);
+
     cacheDimensionXValues();
 
     if (!skipNormalization) {
-      calculateNormalization(otherValues, affineTrans, expInfoIndex);
+        for( const auto &so:symmetryOps){
+          calculateNormalization(otherValues, so, expInfoIndex);
+        }
+
     } else {
       g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
                     "Not applying normalization.");
     }
-    */
     // if more than one experiment info, keep accumulating
     m_accumulate = true;
   }
@@ -581,6 +605,7 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(std::vector<Geome
         std::stringstream basisVector;
         std::vector<double> projection(m_inputWS->getNumDims(),0.);
         if (value.find("QDimension1")!=std::string::npos) {
+            m_hIdx=qindex;
             if (!m_isRLU) {
               projection[0]=1.;
               basisVector<<"Q_sample_x,A^{-1}";
@@ -592,6 +617,7 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(std::vector<Geome
               basisVector<<QDimensionName(m_Q1Basis)<<", r.l.u.";
             }
         } else if (value.find("QDimension2")!=std::string::npos) {
+            m_kIdx=qindex;
             if (!m_isRLU) {
               projection[1]=1.;
               basisVector<<"Q_sample_y,A^{-1}";
@@ -603,6 +629,7 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(std::vector<Geome
               basisVector<<QDimensionName(m_Q2Basis)<<", r.l.u.";
             }
         } else if (value.find("QDimension3")!=std::string::npos) {
+            m_lIdx=qindex;
             if (!m_isRLU) {
               projection[2]=1.;
               basisVector<<"Q_sample_z,A^{-1}";
@@ -613,12 +640,17 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(std::vector<Geome
               projection[2]=Q3.Z();
               basisVector<<QDimensionName(m_Q3Basis)<<", r.l.u.";
             }
+        } else if (value.find("DeltaE")!=std::string::npos) {
+            m_eIdx=qindex;
         }
         if (!basisVector.str().empty()){
             for(auto const& proji: projection){
                 basisVector<<","<<proji;
             }
             value=basisVector.str();
+        }
+        if (value.find("DeltaE")!=std::string::npos) {
+            m_eIdx=qindex;
         }
         g_log.debug()<<"Binning parameter "<<key<<" value: "<<value<<"\n";
         binMD->setPropertyValue(key, value);
@@ -688,6 +720,150 @@ std::vector<coord_t> MDNormalization::getValuesFromOtherDimensions(bool &skipNor
       }
     }
     return otherDimValues;
+}
+
+void MDNormalization::cacheDimensionXValues()
+{
+    constexpr double energyToK = 8.0 * M_PI * M_PI *
+                                 PhysicalConstants::NeutronMass *
+                                 PhysicalConstants::meV * 1e-20 /
+                                 (PhysicalConstants::h * PhysicalConstants::h);
+    auto &hDim = *m_normWS->getDimension(m_hIdx);
+    m_hX.resize(hDim.getNBoundaries());
+    for (size_t i = 0; i < m_hX.size(); ++i) {
+      m_hX[i] = hDim.getX(i);
+    }
+    auto &kDim = *m_normWS->getDimension(m_kIdx);
+    m_kX.resize(kDim.getNBoundaries());
+    for (size_t i = 0; i < m_kX.size(); ++i) {
+      m_kX[i] = kDim.getX(i);
+    }
+
+    auto &lDim = *m_normWS->getDimension(m_lIdx);
+    m_lX.resize(lDim.getNBoundaries());
+    for (size_t i = 0; i < m_lX.size(); ++i) {
+      m_lX[i] = lDim.getX(i);
+    }
+
+    if (!m_dEIntegrated) {
+      // NOTE: store k final instead
+      auto &eDim = *m_normWS->getDimension(m_eIdx);
+      m_eX.resize(eDim.getNBoundaries());
+      for (size_t i = 0; i < m_eX.size(); ++i) {
+        double temp = m_Ei - eDim.getX(i);
+        temp = std::max(temp, 0.);
+        m_eX[i] = std::sqrt(energyToK * temp);
+      }
+    }
+}
+
+void MDNormalization::calculateNormalization(const std::vector<coord_t> &otherValues, Geometry::SymmetryOperation so, uint16_t expInfoIndex){
+  constexpr double energyToK = 8.0 * M_PI * M_PI *
+            PhysicalConstants::NeutronMass *
+            PhysicalConstants::meV * 1e-20 /
+            (PhysicalConstants::h * PhysicalConstants::h);
+  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
+  DblMatrix R=currentExptInfo.run().getGoniometerMatrix();
+  DblMatrix soMatrix(3,3);
+  auto v=so.transformHKL(V3D(1,0,0));
+  soMatrix.setColumn(0,v);
+  v=so.transformHKL(V3D(0,1,0));
+  soMatrix.setColumn(1,v);
+  v=so.transformHKL(V3D(0,0,1));
+  soMatrix.setColumn(2,v);
+  DblMatrix Qtransform = R*m_UB*m_W*soMatrix;
+  Qtransform.Invert();
+  const double protonCharge = currentExptInfo.run().getProtonCharge();
+  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
+
+  // Mappings
+  const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
+  detid2index_map fluxDetToIdx;
+  detid2index_map solidAngDetToIdx;
+  bool haveSA = false;
+  API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
+  API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
+  if (solidAngleWS != nullptr) {
+    haveSA = true;
+    solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
+  }
+  if(m_diffraction)
+  {
+    fluxDetToIdx=integrFlux->getDetectorIDToWorkspaceIndexMap();
+  }
+
+  const size_t vmdDims = 4;
+  std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
+  std::vector<std::array<double, 4>> intersections;
+  std::vector<double> xValues, yValues;
+  std::vector<coord_t> pos, posNew;
+
+  double progStep = 0.7 / m_numExptInfos;
+  // TODO: fix progress to account for symmetry operations
+  auto prog =
+      make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
+                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
+
+  // cppcheck-suppress syntaxError
+PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
+for (int64_t i = 0; i < ndets; i++) {
+  PARALLEL_START_INTERUPT_REGION
+
+  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
+      spectrumInfo.isMasked(i)) {
+    continue;
+  }
+
+  const auto &detector = spectrumInfo.detector(i);
+  double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
+  double phi = detector.getPhi();
+  // If the dtefctor is a group, this should be the ID of the first detector
+  const auto detID = detector.getID();
+
+  // Intersections
+  //this->calculateIntersections(intersections, theta, phi);
+  if (intersections.empty())
+    continue;
+  // Get solid angle for this contribution
+  double solid = protonCharge;
+  if (haveSA) {
+    solid =
+        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+  }
+
+  if(m_diffraction) {
+      // -- calculate integrals for the intersection --
+      // momentum values at intersections
+      auto intersectionsBegin = intersections.begin();
+      // copy momenta to xValues
+      xValues.resize(intersections.size());
+      yValues.resize(intersections.size());
+      auto x = xValues.begin();
+      for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
+        *x = (*it)[3];
+      }
+      // calculate integrals at momenta from xValues by interpolating between
+      // points in spectrum sp
+      // of workspace integrFlux. The result is stored in yValues
+      //calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
+
+  }
+
+  prog->report();
+
+  PARALLEL_END_INTERUPT_REGION
+}
+PARALLEL_CHECK_INTERUPT_REGION
+if (m_accumulate) {
+  std::transform(
+      signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
+      m_normWS->getSignalArray(),
+      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+} else {
+  std::copy(signalArray.cbegin(), signalArray.cend(),
+            m_normWS->getSignalArray());
+}
+
 }
 
 } // namespace MDAlgorithms
