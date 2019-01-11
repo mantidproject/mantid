@@ -118,19 +118,19 @@ class GroupingTableView(QtGui.QWidget):
         self.grouping_table.insertRow(row_position)
         for i, entry in enumerate(row_entries):
             item = QtGui.QTableWidgetItem(entry)
-            if group_table_columns[i] == 'group_name':
+            if group_table_columns[i] == group_table_columns[0]:
                 # column 0 : group name
                 group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
                 group_name_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 0, group_name_widget)
                 self.grouping_table.item(row_position, 0).setToolTip(entry)
-            if group_table_columns[i] == 'detector_ids':
+            if group_table_columns[i] == group_table_columns[1]:
                 # column 1 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem(self._validate_detector_ID_entry)
                 detector_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 1, detector_widget)
                 self.grouping_table.item(row_position, 1).setToolTip(entry)
-            if group_table_columns[i] == 'number_of_detectors':
+            if group_table_columns[i] == group_table_columns[2]:
                 # column 2 : number of detectors
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
                 item.setFlags(QtCore.Qt.ItemIsSelectable)
