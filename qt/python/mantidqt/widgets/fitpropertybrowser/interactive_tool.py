@@ -47,30 +47,66 @@ class VerticalMarker(QObject):
         return x_pixels
 
     def is_above(self, x):
-        return np.abs(self.get_x_in_pixels() - x) < 3
+        x_pixels, _ = self.patch.get_transform().transform((x, 0))
+        return abs(self.get_x_in_pixels() - x_pixels) < 3
 
-    def on_click(self, x):
+    def on_click(self, x, y):
         if self.is_above(x):
             self.is_moving = True
 
     def stop(self):
         self.is_moving = False
 
-    def mouse_move(self, xd):
-        if self.is_moving and xd is not None:
-            self.x = xd
-            self.moved.emit(xd)
+    def mouse_move(self, x, y=None):
+        if self.is_moving and x is not None:
+            self.x = x
+            self.moved.emit(x)
+            return True
+        return False
 
-    def override_cursor(self, pos_pixel, pos_data):
-        xd, yd = pos_data
-        if self.y0 is not None and yd < self.y0:
+    def get_cursor_at_y(self, y):
+        return QCursor(Qt.SizeHorCursor)
+
+    def override_cursor(self, x, y):
+        if self.y0 is not None and y < self.y0:
             return None
-        if self.y1 is not None and yd > self.y1:
+        if self.y1 is not None and y > self.y1:
             return None
-        x, y = pos_pixel
         if self.is_moving or self.is_above(x):
-            return QCursor(Qt.SizeHorCursor)
+            return self.get_cursor_at_y(y)
         return None
+
+
+class CentreMarker(VerticalMarker):
+
+    def __init__(self, canvas, x, y0, y1):
+        VerticalMarker.__init__(self, canvas, 'red', x, y0, y1)
+        self.is_at_top = False
+
+    def _is_at_top(self, y):
+        _, y1_pixels = self.patch.get_transform().transform((0, self.y1))
+        _, y_pixels = self.patch.get_transform().transform((0, y))
+        return abs(y1_pixels - y_pixels) < 10
+
+    def on_click(self, x, y):
+        VerticalMarker.on_click(self, x, y)
+        self.is_at_top = self._is_at_top(y)
+
+    def stop(self):
+        VerticalMarker.stop(self)
+        self.is_at_top = False
+
+    def get_cursor_at_y(self, y):
+        is_at_top = self.is_at_top if self.is_moving else self._is_at_top(y)
+        return QCursor(Qt.SizeAllCursor) if is_at_top else VerticalMarker.get_cursor_at_y(self, y)
+
+    def mouse_move(self, x, y=None):
+        if not self.is_moving:
+            return False
+        if self.is_at_top:
+            self.y1 = y
+        self.x = x
+        return True
 
 
 class FitInteractiveTool(QObject):
@@ -78,9 +114,10 @@ class FitInteractiveTool(QObject):
     fit_start_x_moved = Signal(float)
     fit_end_x_moved = Signal(float)
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, toolbar_state_checker):
         super(FitInteractiveTool, self).__init__()
         self.canvas = canvas
+        self.toolbar_state_checker = toolbar_state_checker
         ax = canvas.figure.get_axes()[0]
         self.ax = ax
         xlim = ax.get_xlim()
@@ -104,6 +141,7 @@ class FitInteractiveTool(QObject):
         self._override_cursor = False
 
     def disconnect(self):
+        QObject.disconnect(self)
         for cid in self._cids:
             self.canvas.mpl_disconnect(cid)
         self.fit_start_x.remove()
@@ -119,13 +157,13 @@ class FitInteractiveTool(QObject):
         for pm in self.peak_markers:
             pm.redraw()
 
-    def get_override_cursor(self, pos_pixel, pos_data):
-        cursor = self.fit_start_x.override_cursor(pos_pixel, pos_data)
+    def get_override_cursor(self, x, y):
+        cursor = self.fit_start_x.override_cursor(x, y)
         if cursor is None:
-            cursor = self.fit_end_x.override_cursor(pos_pixel, pos_data)
+            cursor = self.fit_end_x.override_cursor(x, y)
         if cursor is None:
             for pm in self.peak_markers:
-                cursor = pm.override_cursor(pos_pixel, pos_data)
+                cursor = pm.override_cursor(x, y)
                 if cursor is not None:
                     break
         return cursor
@@ -142,31 +180,42 @@ class FitInteractiveTool(QObject):
             QApplication.setOverrideCursor(cursor)
 
     def motion_notify_callback(self, event):
-        x = event.x
-        y = event.y
+        if self.toolbar_state_checker.is_tool_active():
+            return
+        x, y = event.xdata, event.ydata
         if x is None or y is None:
             return
-        self.override_cursor = self.get_override_cursor((x, y), (event.xdata, event.ydata))
-        self.fit_start_x.mouse_move(event.xdata)
-        self.fit_end_x.mouse_move(event.xdata)
+        self.override_cursor = self.get_override_cursor(x, y)
+        should_redraw = self.fit_start_x.mouse_move(x)
+        should_redraw = self.fit_end_x.mouse_move(x) or should_redraw
+        for pm in self.peak_markers:
+            should_redraw = pm.mouse_move(x, y) or should_redraw
+        if should_redraw:
+            self.canvas.draw()
 
     def on_click(self, event):
         if event.button == 1:
-            self.fit_start_x.on_click(event.x)
-            self.fit_end_x.on_click(event.x)
+            x = event.xdata
+            y = event.ydata
+            self.fit_start_x.on_click(x, y)
+            self.fit_end_x.on_click(x, y)
+            for pm in self.peak_markers:
+                pm.on_click(x, y)
 
     def on_release(self, event):
         self.fit_start_x.stop()
         self.fit_end_x.stop()
+        for pm in self.peak_markers:
+            pm.stop()
 
-    def move_start_x(self, xd):
-        if xd is not None:
-            self.fit_start_x.x = xd
+    def move_start_x(self, x):
+        if x is not None:
+            self.fit_start_x.x = x
             self.canvas.draw()
 
-    def move_end_x(self, xd):
-        if xd is not None:
-            self.fit_end_x.x = xd
+    def move_end_x(self, x):
+        if x is not None:
+            self.fit_end_x.x = x
             self.canvas.draw()
 
     def add_peak(self, x, y_top, y_bottom=None):
@@ -178,10 +227,19 @@ class PeakMarker(QObject):
 
     def __init__(self, canvas, x, y_top, y_bottom):
         super(PeakMarker, self).__init__()
-        self.centre_marker = VerticalMarker(canvas, 'red', x, y0=y_bottom, y1=y_top)
+        self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top)
 
     def redraw(self):
         self.centre_marker.redraw()
 
     def override_cursor(self, x, y):
         return self.centre_marker.override_cursor(x, y)
+
+    def mouse_move(self, x, y):
+        return self.centre_marker.mouse_move(x, y)
+
+    def on_click(self, x, y):
+        self.centre_marker.on_click(x, y)
+
+    def stop(self):
+        self.centre_marker.stop()

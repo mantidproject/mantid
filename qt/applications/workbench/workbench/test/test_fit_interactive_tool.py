@@ -279,14 +279,6 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertFalse(action.isVisible())
         self.assertFalse(action.isEnabled())
 
-    def test_add_peak(self):
-        yield self.start()
-        self.start_draw_calls_count()
-        self.fit_browser.loadFunction('name=LinearBackground')
-        print(self.fit_browser.defaultPeakType())
-        self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
-        self.assertEqual(self.draw_count, 1)
-
     def test_fit_names_with_underscores(self):
         """
         Test that fit browser doesn't crash if the workspace name contains underscores
@@ -314,6 +306,13 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.fit()
         yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
         self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
+
+    def test_add_peak(self):
+        yield self.start()
+        self.start_draw_calls_count()
+        self.fit_browser.loadFunction('name=LinearBackground')
+        self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
+        self.assertEqual(self.draw_count, 1)
 
 
 runTests(TestFitPropertyBrowser)
