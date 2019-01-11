@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/ContourPreviewPlot.h"
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -22,6 +21,7 @@
 #include <qwt_double_rect.h>
 
 #include <cmath>
+#include <sstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -202,7 +202,7 @@ void ContourPreviewPlot::handleLoadColorMap() { this->loadColorMap(QString()); }
  * Set whether to display 0 signal as "transparent" color.
  * @param transparent :: true if you want zeros to be transparent.
  */
-void ContourPreviewPlot::setTransparentZerosSlot(bool transparent) {
+void ContourPreviewPlot::handleSetTransparentZeros(bool transparent) {
   m_data->setZerosAsNan(transparent);
   this->updateDisplay();
 }
@@ -247,7 +247,7 @@ void ContourPreviewPlot::loadSettings() {
 
   m_uiForm.colorBar->setScale(getScaleType(settings));
   m_uiForm.colorBar->setExponent(getExponent(settings));
-  this->setTransparentZerosSlot(transparentZeros(settings));
+  this->handleSetTransparentZeros(transparentZeros(settings));
 
   settings.endGroup();
 }
@@ -329,7 +329,7 @@ ContourPreviewPlot::dimensionMaximum(std::size_t const &index) const {
 /**
  * Finds the full range of values in the workspace
  */
-void ContourPreviewPlot::findRangeFull() {
+void ContourPreviewPlot::findFullRange() {
   if (m_workspace) {
     auto const workspace = m_workspace;
     Mantid::Kernel::ReadLock lock(*workspace);
