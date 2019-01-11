@@ -29,13 +29,16 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-InstrumentWidgetEncoder::InstrumentWidgetEncoder() : m_projectPath("") {}
+InstrumentWidgetEncoder::InstrumentWidgetEncoder()
+    : m_projectPath(""), m_saveMask(true) {}
 
 QMap<QString, QVariant>
 InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
-                                const QString &projectPath) {
+                                const QString &projectPath,
+                                const bool saveMask) {
   QMap<QString, QVariant> map;
   m_projectPath = projectPath.toStdString();
+  m_saveMask = saveMask;
 
   map.insert(QString("workspaceName"), QVariant(obj.getWorkspaceName()));
 
@@ -162,13 +165,17 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
   activeType.insert(QString("roiOn"), QVariant(tab->m_roi_on->isChecked()));
   map.insert(QString("activeType"), QVariant(activeType));
 
-  // Save the masks applied to view but not saved to a workspace
-  auto wsName = tab->m_instrWidget->getWorkspaceName() + "MaskView.xml";
-  bool success =
-      tab->saveMaskViewToProject(wsName.toStdString(), m_projectPath);
-  map.insert(QString("maskWorkspaceSaved"), QVariant(success));
-  if (success) {
-    map.insert(QString("maskWorkspaceName"), QVariant(wsName));
+  if (m_saveMask) {
+    // Save the masks applied to view but not saved to a workspace
+    auto wsName = tab->m_instrWidget->getWorkspaceName() + "MaskView.xml";
+    bool success =
+        tab->saveMaskViewToProject(wsName.toStdString(), m_projectPath);
+    map.insert(QString("maskWorkspaceSaved"), QVariant(success));
+    if (success) {
+      map.insert(QString("maskWorkspaceName"), QVariant(wsName));
+    }
+  } else {
+    map.insert(QString("maskWorkspaceSaved"), QVariant(false));
   }
 
   return map;
@@ -265,8 +272,22 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encodeShape(Shape2D *obj) {
   QMap<QString, QVariant> map;
 
   map.insert(QString("properties"), QVariant(this->encodeShapeProperties(obj)));
-  map.insert(QString("color"), QVariant(obj->getColor()));
-  map.insert(QString("fillColor"), QVariant(obj->getFillColor()));
+
+  const auto color = obj->getColor();
+  QMap<QString, QVariant> colorMap;
+  colorMap.insert(QString("red"), QVariant(color.red()));
+  colorMap.insert(QString("green"), QVariant(color.green()));
+  colorMap.insert(QString("blue"), QVariant(color.blue()));
+  colorMap.insert(QString("alpha"), QVariant(color.alpha()));
+  map.insert(QString("color"), QVariant(colorMap));
+
+  const auto fillColor = obj->getFillColor();
+  QMap<QString, QVariant> fillColorMap;
+  fillColorMap.insert(QString("red"), QVariant(fillColor.red()));
+  fillColorMap.insert(QString("green"), QVariant(fillColor.green()));
+  fillColorMap.insert(QString("blue"), QVariant(fillColor.blue()));
+  fillColorMap.insert(QString("alpha"), QVariant(fillColor.alpha()));
+  map.insert(QString("fillColor"), QVariant(fillColorMap));
 
   QMap<QString, QVariant> subShapeMap;
   auto ellipse = dynamic_cast<Shape2DEllipse *>(obj);
@@ -274,24 +295,24 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encodeShape(Shape2D *obj) {
   auto ring = dynamic_cast<Shape2DRing *>(obj);
   auto free_ = dynamic_cast<Shape2DFree *>(obj);
 
-  if (ellipse == nullptr) {
+  if (ellipse != nullptr) {
     subShapeMap = this->encodeEllipse(ellipse);
 
     map.insert(QString("type"), QVariant(QString("ellipse")));
-  } else if (rectangle == nullptr) {
+  } else if (rectangle != nullptr) {
     subShapeMap = this->encodeRectangle(rectangle);
 
     map.insert(QString("type"), QVariant(QString("rectangle")));
-  } else if (ring == nullptr) {
+  } else if (ring != nullptr) {
     subShapeMap = this->encodeRing(ring);
 
     map.insert(QString("type"), QVariant(QString("ring")));
-  } else if (free_ == nullptr) {
+  } else if (free_ != nullptr) {
     subShapeMap = this->encodeFree(free_);
 
     map.insert(QString("type"), QVariant(QString("free")));
   } else {
-    throw std::runtime_error("InstrumentView - Could not decode shape");
+    throw std::runtime_error("InstrumentView - Could not encode shape");
   }
 
   map.insert(QString("subShapeMap"), QVariant(subShapeMap));

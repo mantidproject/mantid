@@ -25,9 +25,10 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetEncoder {
 public:
   InstrumentWidgetEncoder();
   QMap<QString, QVariant> encode(const InstrumentWidget &obj,
-                                 const QString &projectPath);
+                                 const QString &projectPath,
+                                 const bool saveMask = true);
 
-protected:
+private:
   /// Encode Actor
   QMap<QString, QVariant>
   encodeActor(const std::unique_ptr<InstrumentActor> &obj);
@@ -64,6 +65,7 @@ protected:
   QList<QVariant> encodeAlignmentInfo(const ProjectionSurface_sptr &obj);
 
   std::string m_projectPath;
+  bool m_saveMask;
 };
 
 } // namespace MantidWidgets

@@ -8,9 +8,17 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from mantidqt.widgets.instrumentview.interpreterimports import InstrumentWidgetEncoder, InstrumentWidgetDecoder
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantid.api import AnalysisDataService as ADS
+
+# local imports
+from mantidqt.utils.qt import import_qt
+
+# Import widget from C++ wrappers
+_InstrumentWidgetEncoder = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
+                                     'InstrumentWidgetEncoder')
+_InstrumentWidgetDecoder = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
+                                     'InstrumentWidgetDecoder')
 
 
 class InstrumentViewAttributes(object):
@@ -19,34 +27,40 @@ class InstrumentViewAttributes(object):
     tags = ["InstrumentView", "InstrumentWidget"]
 
 
-class Decoder(InstrumentViewAttributes):
+class InstrumentViewDecoder(InstrumentViewAttributes):
     def __init__(self):
-        super(Decoder, self).__init__()
-        self.widget_decoder = InstrumentWidgetDecoder()
+        super(InstrumentViewDecoder, self).__init__()
+        self.widget_decoder = _InstrumentWidgetDecoder()
 
     def decode(self, obj_dic, project_path):
+        """
+
+        :param obj_dic:
+        :param project_path:
+        :return:
+        """
         if obj_dic is None:
             return None
         # Make the widget
         ws = ADS.retrieve(obj_dic["workspaceName"])
         instrument_view_presenter = InstrumentViewPresenter(ws)
-        instrument_widget = instrument_view_presenter.view.layout().itemAt(0).widget()
+        instrument_widget = instrument_view_presenter.view.cpp_widget
 
         #  Then 'decode' set the values from the dictionary
         self.widget_decoder.decode(obj_dic, instrument_widget, project_path)
 
         # Show the end result
-        instrument_view_presenter.view.show()
+        return instrument_view_presenter.view
 
     @classmethod
     def has_tag(cls, tag):
         return tag in cls.tags
 
 
-class Encoder(InstrumentViewAttributes):
+class InstrumentViewEncoder(InstrumentViewAttributes):
     def __init__(self):
-        super(Encoder, self).__init__()
-        self.widget_encoder = InstrumentWidgetEncoder()
+        super(InstrumentViewEncoder, self).__init__()
+        self.widget_encoder = _InstrumentWidgetEncoder()
 
     def encode(self, obj, project_path=None):
         if obj is None or project_path is None:

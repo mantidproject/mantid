@@ -66,9 +66,9 @@ class ProjectLoader(object):
                     # Find decoder
                     decoder = self.decoder_factory.find_decoder(interface["tag"])
 
-                    # Actually load the interface
-                    decoder_object = decoder()
-                    decoder_object.decode(interface, directory)
+                    # Decode and Show the interface
+                    decoded_interface = decoder.decode(interface, directory)
+                    decoded_interface.show()
 
         return workspace_success
 

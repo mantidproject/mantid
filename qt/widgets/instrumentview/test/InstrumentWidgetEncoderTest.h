@@ -14,12 +14,74 @@
 
 #include <cxxtest/TestSuite.h>
 
+// PythonInterpreter and QApplicationHolder imports
+#include "MantidPythonInterface/core/NDArray.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
+#include <QApplication>
+
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
-class InstrumentWidgetEncoderTest
-    : public CxxTest::TestSuite,
-      public MantidQt::MantidWidgets::InstrumentWidgetEncoder {
+/**
+ * PythonInterpreter
+ *
+ * Uses setUpWorld/tearDownWorld to initialize & finalize
+ * Python
+ */
+class PythonInterpreter : CxxTest::GlobalFixture {
+public:
+  bool setUpWorld() override {
+    Py_Initialize();
+    PyEval_InitThreads();
+    Mantid::PythonInterface::importNumpy();
+    return Py_IsInitialized();
+  }
+
+  bool tearDown() override {
+    // Some test methods may leave the Python error handler with an error
+    // set that confuse other tests when the executable is run as a whole
+    // Clear the errors after each suite method is run
+    PyErr_Clear();
+    return CxxTest::GlobalFixture::tearDown();
+  }
+
+  bool tearDownWorld() override {
+    Py_Finalize();
+    return true;
+  }
+};
+
+static PythonInterpreter PYTHON_INTERPRETER;
+
+/**
+ * QApplication
+ *
+ * Uses setUpWorld/tearDownWorld to initialize & finalize
+ * QApplication object
+ */
+class QApplicationHolder : CxxTest::GlobalFixture {
+public:
+  bool setUpWorld() override {
+    int argc(0);
+    char **argv = {};
+    m_app = new QApplication(argc, argv);
+
+    qRegisterMetaType<std::string>("StdString");
+
+    return true;
+  }
+
+  bool tearDownWorld() override {
+    delete m_app;
+    return true;
+  }
+
+  QApplication *m_app;
+};
+
+static QApplicationHolder MAIN_QAPPLICATION;
+
+class InstrumentWidgetEncoderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -28,41 +90,25 @@ public:
   }
   static void destroySuite(InstrumentWidgetEncoderTest *suite) { delete suite; }
 
-  // Ensure Framework is initialised
-  InstrumentWidgetEncoderTest() {
-    FrameworkManager::Instance();
-    m_instrumentWidget = nullptr;
-  }
-
   void setUp() override {
+    FrameworkManager::Instance();
     auto alg =
         AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
     alg->setProperty("OutputWorkspace", "ws");
-    m_instrumentWidget =
-        new InstrumentWidget(QString("ws"), 0, false, false, 0, 1000, false);
+    alg->execute();
+    m_instrumentWidget = new InstrumentWidget(QString("ws"));
+    m_encoder = new InstrumentWidgetEncoder();
   }
-  void test_encode() { TS_ASSERT(1==1) }
-  void test_encodeActor() {}
-  void test_encodeTabs() {}
-  void test_encodeTreeTab() {}
-  void test_encodeRenderTab() {}
-  void test_encodeColorBar() {}
-  void test_encodeMaskTab() {}
-  void test_encodePickTab() {}
-  void test_encodeMaskBinsData() {}
-  void test_encodeBinMask() {}
-  void test_encodeSurface() {}
-  void test_encodeShape() {}
-  void test_encodeEllipse() {}
-  void test_encodeRectangle() {}
-  void test_encodeRing() {}
-  void test_encodeFree() {}
-  void test_encodeMaskShapes() {}
-  void test_encodeShapeProperties() {}
-  void test_encodeAlignmentInfo() {}
+
+  void test_encode() {
+    const auto result =
+        m_encoder->encode(*m_instrumentWidget, QString(""), false);
+    TS_ASSERT_EQUALS(result.size(), 7);
+  }
 
   InstrumentWidget *m_instrumentWidget;
+  InstrumentWidgetEncoder *m_encoder;
 };
 
 #endif /* MANTIDQT_WIDGETS_INSTRUMENTWIDGETDECODERTEST_H_ */

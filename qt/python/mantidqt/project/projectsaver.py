@@ -48,11 +48,10 @@ class ProjectSaver(object):
 
         # Save interfaces
         interfaces = []
-        for interface in interfaces_to_save:
+        for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
-            encoder = interface[1]()
-            tag = interface[1].tags[0]
-            encoded_dict = encoder.encode(interface[0], directory)
+            tag = encoder.tags[0]
+            encoded_dict = encoder.encode(interface, directory)
             encoded_dict["tag"] = tag
             interfaces.append(encoded_dict)
 

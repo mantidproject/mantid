@@ -12,7 +12,7 @@ import unittest
 
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.project.decoderfactory import DecoderFactory
-from mantidqt.widgets.instrumentview.interpreters import Encoder, Decoder
+from mantidqt.widgets.instrumentview.io import Encoder, Decoder
 
 
 class InstrumentViewEncoderTest(unittest.TestCase):

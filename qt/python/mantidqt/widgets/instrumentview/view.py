@@ -33,7 +33,7 @@ class InstrumentView(QWidget):
     the window is open
     """
     _presenter = None
-    _widget = None
+    cpp_widget = None
 
     def __init__(self, presenter, name, parent=None):
         super(InstrumentView, self).__init__(parent)
@@ -42,7 +42,9 @@ class InstrumentView(QWidget):
         self.setWindowTitle(name)
         self.setWindowFlags(Qt.Window)
 
+        self.cpp_widget = InstrumentWidget(name)
+
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(InstrumentWidget(name))
+        layout.addWidget(self.cpp_widget)
         self.setLayout(layout)

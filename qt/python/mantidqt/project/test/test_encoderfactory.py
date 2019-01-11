@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import unittest
 
 from mantidqt.project.encoderfactory import EncoderFactory
-from mantidqt.widgets.instrumentview.interpreters import Encoder as InstrumentViewEncoder
+from mantidqt.widgets.instrumentview.io import Encoder as InstrumentViewEncoder
 
 
 class EncoderFactoryTest(unittest.TestCase):

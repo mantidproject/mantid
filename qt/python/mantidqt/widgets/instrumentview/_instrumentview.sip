@@ -32,7 +32,8 @@ class InstrumentWidgetEncoder {
 public:
   InstrumentWidgetEncoder();
   QMap<QString, QVariant> encode(const InstrumentWidget &obj,
-                                 const QString &projectPath) /ReleaseGIL/;
+                                 const QString &projectPath,
+                                 const bool saveMask = true) /ReleaseGIL/;
 };
 
 class InstrumentWidgetDecoder : QObject{

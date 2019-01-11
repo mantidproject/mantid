@@ -27,12 +27,12 @@ from qtpy import PYQT4
 
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.project.encoderfactory import EncoderFactory
-from mantidqt.widgets.instrumentview.interpreters import Decoder, Encoder
+from mantidqt.widgets.instrumentview.io import InstrumentViewDecoder, InstrumentViewEncoder
 
 if PYQT4:
     raise ImportError("Instrument view requires Qt >= v5")
 
 
 # Add encoder and decoders to the relevant factory
-DecoderFactory.register_decoder(Decoder)
-EncoderFactory.register_encoder(Encoder)
+DecoderFactory.register_decoder(InstrumentViewDecoder)
+EncoderFactory.register_encoder(InstrumentViewEncoder)

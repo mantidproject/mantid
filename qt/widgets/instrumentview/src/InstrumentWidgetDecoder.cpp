@@ -286,7 +286,8 @@ Shape2D *
 InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map) {
   QPolygonF polygon;
 
-  for (const auto param : map[QString("paramaters")].toList()) {
+  const auto parameters = map[QString("paramaters")].toList();
+  for (const auto param : parameters) {
     const auto paramList = param.toList();
     const double x = paramList[0].toDouble();
     const double y = paramList[1].toDouble();
