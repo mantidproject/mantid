@@ -22,6 +22,17 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
+void convertToSpectrumAxis(std::string const &inputName,
+                           std::string const &outputName) {
+  auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+  converter->initialize();
+  converter->setProperty("InputWorkspace", inputName);
+  converter->setProperty("OutputWorkspace", outputName);
+  converter->setProperty("Target", "ElasticQ");
+  converter->setProperty("EMode", "Indirect");
+  converter->execute();
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -187,18 +198,12 @@ void IndirectSqw::plotRqwContour() {
   if (m_uiForm.dsSampleInput->isValid()) {
     auto const sampleName =
         m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-    auto const convertedWsName =
+    auto const outputName =
         sampleName.substr(0, sampleName.size() - 4) + "_rqw";
 
-    auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
-    converter->initialize();
-    converter->setProperty("InputWorkspace", sampleName);
-    converter->setProperty("OutputWorkspace", convertedWsName);
-    converter->setProperty("Target", "ElasticQ");
-    converter->setProperty("EMode", "Indirect");
-    converter->execute();
+    convertToSpectrumAxis(sampleName, outputName);
 
-    auto const rqwWorkspace = getADSMatrixWorkspace(convertedWsName);
+    auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
     m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
   } else {
     emit showMessageBox("Invalid filename.");
