@@ -35,7 +35,7 @@ class TableWorkspaceDisplay(object):
     TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
     CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
     NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "There is no associated YErr for each selected Y column."
-    PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for MatPlotLib.\n\nError message:\n{}"
+    PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for Matplotlib.\n\nError message:\n{}"
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = 'Column {}'
 
@@ -45,7 +45,7 @@ class TableWorkspaceDisplay(object):
 
         :param ws: Workspace to be displayed
         :param parent: Parent of the widget
-        :param plot: Plotting function that will be used to plot workspaces. This requires MatPlotLib directly.
+        :param plot: Plotting function that will be used to plot workspaces. This requires Matplotlib directly.
                      Passed in as parameter to allow mocking
         :param model: Model to be used by the widget. Passed in as parameter to allow mocking
         :param view: View to be used by the widget. Passed in as parameter to allow mocking

@@ -21,9 +21,18 @@ from mantidqt.widgets.tableworkspacedisplay.model import TableWorkspaceDisplayMo
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.tableworkspacedisplay.test_helpers.mock_plotlib import MockAx, MockPlotLib
-from mantidqt.widgets.tableworkspacedisplay.test_helpers.mock_qtable import MockQTable
 from mantidqt.widgets.tableworkspacedisplay.view import TableWorkspaceDisplayView
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
+
+
+class MockQTable:
+    """
+    Mocks the necessary functions to replace a QTableView on which data is being set.
+    """
+
+    def __init__(self):
+        self.setItem = Mock()
+        self.setRowCount = Mock()
 
 
 def with_mock_presenter(add_selection_model=False, add_plot=False):

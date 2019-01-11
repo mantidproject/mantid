@@ -57,9 +57,6 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.resize(600, 400)
         self.show()
 
-    def doubleClickedHeader(self):
-        print("Double clicked WOO")
-
     def keyPressEvent(self, event):
         if event.matches(QKeySequence.Copy):
             self.presenter.action_keypress_copy()
