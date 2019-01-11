@@ -74,7 +74,7 @@
        <number>0</number>
       </property>
       <item>
-       <layout class="QGridLayout" name="loOptions" columnstretch="0,0,0,0,0">
+       <layout class="QGridLayout" name="loOptions" columnstretch="0">
         <property name="spacing">
          <number>6</number>
         </property>
@@ -394,14 +394,7 @@
        </layout>
       </item>
       <item>
-       <widget class="MantidQt::MantidWidgets::MWView" name="rqwPlot2D" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+       <widget class="MantidQt::MantidWidgets::ContourPreviewPlot" name="rqwPlot2D" native="true"/>
       </item>
      </layout>
     </widget>
@@ -565,9 +558,10 @@
    <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWView</class>
+   <class>MantidQt::MantidWidgets::ContourPreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/MWView.h</header>
+   <header>MantidQtWidgets/LegacyQwt/ContourPreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

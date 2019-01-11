@@ -67,40 +67,35 @@ public:
   void setColourBarVisible(bool visible);
 
 public slots:
-  void colorRangeChangedSlot();
-  void loadColorMapSlot();
+  void handleColorRangeChanged();
+  void handleLoadColorMap();
   void setTransparentZerosSlot(bool transparent);
 
 protected:
   void preDeleteHandle(
-      const std::string &workspaceName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+      const std::string const &workspaceName,
+      boost::shared_ptr<Mantid::API::Workspace> const workspace) override;
 
 private:
-  void initLayout();
+  void setupColourBarAndPlot();
   void loadSettings();
   void saveSettings();
   void checkRangeLimits();
   void findRangeFull();
   void setVectorDimensions();
-  void spawnWellcomeWorkspace();
-  void showWellcomeWorkspace();
+  void clearPlot();
 
   Ui::ContourPreviewPlot m_uiForm;
   /// Spectrogram plot of ContourPreviewPlot
-  QwtPlotSpectrogram *m_spect;
+  std::unique_ptr<QwtPlotSpectrogram> m_spectrogram;
   /// Data presenter
-  API::QwtRasterDataMD *m_data;
+  std::unique_ptr<API::QwtRasterDataMD> m_data;
   /// File of the last loaded color map.
   QString m_currentColorMapFile;
   /// Md Settings for color maps
   boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
   /// Workspace being shown
   Mantid::API::MatrixWorkspace_sptr m_workspace;
-  /// Default workspace shown if no data is loaded
-  Mantid::API::MatrixWorkspace_sptr m_wellcomeWorkspace;
-  /// Name of default workspace
-  const std::string m_wellcomeName;
   /// The calculated range of values in the FULL data set
   QwtDoubleInterval m_colorRangeFull;
   Mantid::API::MDNormalization m_normalization;

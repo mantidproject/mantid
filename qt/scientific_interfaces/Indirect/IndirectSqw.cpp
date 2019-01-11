@@ -63,7 +63,6 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
-  m_uiForm.rqwPlot2D->setPlotVisible(false);
   m_uiForm.rqwPlot2D->setColourBarVisible(false);
 }
 

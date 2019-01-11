@@ -5,62 +5,73 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/ContourPreviewPlot.h"
-// includes for workspace handling
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
-#include <boost/pointer_cast.hpp>
-#include <boost/shared_ptr.hpp>
-// includes for interface development
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
-#include <QSettings>
+#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
+
+#include <boost/pointer_cast.hpp>
+#include <boost/shared_ptr.hpp>
 #include <qwt_color_map.h>
 #include <qwt_double_rect.h>
-// system includes
+
 #include <cmath>
+
+#include <QSettings>
+
+using namespace Mantid::API;
+using namespace MantidQt::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("ContourPreviewPlot");
+
+MatrixWorkspace_sptr
+convertToMatrixWorkspace(boost::shared_ptr<Workspace> const workspace) {
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
+
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-//               ++++++++++++++++++++++++++++++++
-//               ++++++++ Public members ++++++++
-//               ++++++++++++++++++++++++++++++++
-
 ContourPreviewPlot::ContourPreviewPlot(QWidget *parent)
-    : QWidget(parent), MantidQt::API::WorkspaceObserver(),
-      m_mdSettings(boost::make_shared<MantidQt::API::MdSettings>()),
-      m_workspace(),
-      m_wellcomeWorkspace(), m_wellcomeName{"__MWViewWellcomeWorkspace"},
+    : QWidget(parent), WorkspaceObserver(),
+      m_mdSettings(boost::make_shared<MdSettings>()), m_workspace(),
       m_dimensions() {
   // Watch for the deletion of the associated workspace
   this->observePreDelete(true);
-  m_spect = new QwtPlotSpectrogram();
-  m_data = new MantidQt::API::QwtRasterDataMD();
-  m_normalization = Mantid::API::NoNormalization;
-  this->initLayout();
+  m_spectrogram = std::make_unique<QwtPlotSpectrogram>();
+  m_data = std::make_unique<QwtRasterDataMD>();
+  m_normalization = NoNormalization;
+
+  m_uiForm.setupUi(this);
+  QObject::connect(m_uiForm.colorBar,
+                   SIGNAL(changedColorRange(double, double, bool)), this,
+                   SLOT(handleColorRangeChanged()));
+  QObject::connect(m_uiForm.colorBar, SIGNAL(colorBarDoubleClicked()), this,
+                   SLOT(handleLoadColorMap()));
+
+  this->setupColourBarAndPlot();
   this->loadSettings();
   this->updateDisplay();
-  this->showWellcomeWorkspace();
 }
 
 ContourPreviewPlot::~ContourPreviewPlot() {
   this->observePreDelete(false); // Disconnect notifications
   saveSettings();
-  delete m_data;
-  delete m_spect;
+  m_data.reset();
+  m_spectrogram.reset();
 }
 
-/** Load a color map from a file
- *
+/**
+ * Load a color map from a file
  * @param filename :: file to open; empty to ask via a dialog box.
  */
 void ContourPreviewPlot::loadColorMap(QString filename) {
@@ -73,15 +84,19 @@ void ContourPreviewPlot::loadColorMap(QString filename) {
     fileselection = filename;
   m_currentColorMapFile = fileselection;
   m_uiForm.colorBar->getColorMap().loadMap(fileselection);
-  m_spect->setColorMap(m_uiForm.colorBar->getColorMap());
+  m_spectrogram->setColorMap(m_uiForm.colorBar->getColorMap());
   m_uiForm.colorBar->updateColorMap();
   this->updateDisplay();
 }
 
 /**
- * @brief Initialize objects after loading the workspace, and observe.
+ * Initialize objects after loading the workspace, and observe.
  */
-void ContourPreviewPlot::setWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
+void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr ws) {
+  bool update = false;
+  if (!m_workspace)
+    update = true;
+
   m_workspace = ws;
   this->checkRangeLimits();
   m_data->setWorkspace(ws);
@@ -92,55 +107,72 @@ void ContourPreviewPlot::setWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   m_uiForm.colorBar->setViewRange(m_colorRangeFull);
   m_uiForm.colorBar->updateColorMap();
   m_uiForm.plot2D->setWorkspace(ws);
-  m_spect->setColorMap(m_uiForm.colorBar->getColorMap());
+  m_spectrogram->setColorMap(m_uiForm.colorBar->getColorMap());
+
+  if (update) {
+    this->updateDisplay();
+    m_uiForm.colorBar->setScale(0);
+  }
 }
 
 void ContourPreviewPlot::updateDisplay() {
-  if (!m_workspace)
-    return;
-  m_data->setRange(m_uiForm.colorBar->getViewRange());
-  std::vector<Mantid::coord_t> slicePoint{0, 0};
-  constexpr size_t dimX(0);
-  constexpr size_t dimY(1);
-  Mantid::Geometry::IMDDimension_const_sptr X = m_dimensions[dimX];
-  Mantid::Geometry::IMDDimension_const_sptr Y = m_dimensions[dimY];
-  m_data->setSliceParams(dimX, dimY, X, Y, slicePoint);
-  double left{X->getMinimum()};
-  double top{Y->getMinimum()};
-  double width{X->getMaximum() - X->getMinimum()};
-  double height{Y->getMaximum() - Y->getMinimum()};
-  QwtDoubleRect bounds{left, top, width, height};
-  m_data->setBoundingRect(bounds.normalized());
-  m_spect->setColorMap(m_uiForm.colorBar->getColorMap());
-  m_spect->setData(*m_data);
-  m_spect->itemChanged();
-  m_uiForm.plot2D->replot();
+  if (m_workspace) {
+    m_data->setRange(m_uiForm.colorBar->getViewRange());
+    std::vector<Mantid::coord_t> slicePoint{0, 0};
+    constexpr size_t dimX(0);
+    constexpr size_t dimY(1);
+    Mantid::Geometry::IMDDimension_const_sptr X = m_dimensions[dimX];
+    Mantid::Geometry::IMDDimension_const_sptr Y = m_dimensions[dimY];
+    m_data->setSliceParams(dimX, dimY, X, Y, slicePoint);
+    double left{X->getMinimum()};
+    double top{Y->getMinimum()};
+    double width{X->getMaximum() - X->getMinimum()};
+    double height{Y->getMaximum() - Y->getMinimum()};
+    QwtDoubleRect bounds{left, top, width, height};
+    m_data->setBoundingRect(bounds.normalized());
+    m_spectrogram->setColorMap(m_uiForm.colorBar->getColorMap());
+    m_spectrogram->setData(*m_data);
+    m_spectrogram->itemChanged();
+    m_uiForm.plot2D->replot();
+  }
 }
 
+/**
+ * Get the 2D plot
+ */
 SafeQwtPlot *ContourPreviewPlot::getPlot2D() { return m_uiForm.plot2D; }
 
+/**
+ * Set the plot to be visible or hidden
+ * @param visible :: false to hide the plot
+ */
 void ContourPreviewPlot::setPlotVisible(bool visible) {
   m_uiForm.plot2D->setVisible(visible);
 }
 
+/**
+ * Set the colour bar to be visible or hidden
+ * @param visible :: false to hide the colour bar
+ */
 void ContourPreviewPlot::setColourBarVisible(bool visible) {
   m_uiForm.colorBar->setVisible(visible);
 }
 
-//               ++++++++++++++++++++++++++++++++
-//               ++++++++ Public slots   ++++++++
-//               ++++++++++++++++++++++++++++++++
-
-/// Slot called when the ColorBarWidget changes the range of colors
-void ContourPreviewPlot::colorRangeChangedSlot() {
-  m_spect->setColorMap(m_uiForm.colorBar->getColorMap());
+/**
+ * Slot called when the ColorBarWidget changes the range of colors
+ */
+void ContourPreviewPlot::handleColorRangeChanged() {
+  m_spectrogram->setColorMap(m_uiForm.colorBar->getColorMap());
   this->updateDisplay();
 }
 
-void ContourPreviewPlot::loadColorMapSlot() { this->loadColorMap(QString()); }
+/**
+ * Slot called to load a colour map
+ */
+void ContourPreviewPlot::handleLoadColorMap() { this->loadColorMap(QString()); }
 
-/** Set whether to display 0 signal as "transparent" color.
- *
+/**
+ * Set whether to display 0 signal as "transparent" color.
  * @param transparent :: true if you want zeros to be transparent.
  */
 void ContourPreviewPlot::setTransparentZerosSlot(bool transparent) {
@@ -148,54 +180,46 @@ void ContourPreviewPlot::setTransparentZerosSlot(bool transparent) {
   this->updateDisplay();
 }
 
-/*                 ***************************
- ***  Protected Members  ***
- ***************************/
-
-/*
- * @brief Clean shown data when associated workspace is deleted
+/**
+ * Remove the displayed data when the associated workspace is deleted
  */
 void ContourPreviewPlot::preDeleteHandle(
-    const std::string &workspaceName,
-    const boost::shared_ptr<Mantid::API::Workspace> workspace) {
+    std::string const &workspaceName,
+    boost::shared_ptr<Workspace> const workspace) {
   UNUSED_ARG(workspaceName);
-  Mantid::API::MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
-  if (ws && ws == m_workspace) {
-    this->showWellcomeWorkspace();
-  }
+  auto const deletedWorkspace = convertToMatrixWorkspace(workspace);
+  if (deletedWorkspace && deletedWorkspace == m_workspace)
+    this->clearPlot();
 }
 
-//               ++++++++++++++++++++++++++++++++
-//               ++++++++ Private members +++++++
-//               ++++++++++++++++++++++++++++++++
+/**
+ * Clear the plot
+ */
+void ContourPreviewPlot::clearPlot() { m_uiForm.plot2D->clear(); }
 
-/// Initialize the ui form and connect SIGNALS to SLOTS
-void ContourPreviewPlot::initLayout() {
-  m_uiForm.setupUi(this);
-  QObject::connect(m_uiForm.colorBar,
-                   SIGNAL(changedColorRange(double, double, bool)), this,
-                   SLOT(colorRangeChangedSlot()));
-  QObject::connect(m_uiForm.colorBar, SIGNAL(colorBarDoubleClicked()), this,
-                   SLOT(loadColorMapSlot()));
-  /// initialize the color on the bar and the data
+/**
+ * Setup the ColourBar and Plot. Attach the spectrogram to the plot
+ */
+void ContourPreviewPlot::setupColourBarAndPlot() {
   m_uiForm.colorBar->setViewRange(1, 10);
-  m_spect->attach(m_uiForm.plot2D); // attach the spectrogram to the plot
-  m_spect->setColorMap(m_uiForm.colorBar->getColorMap());
+  m_spectrogram->attach(m_uiForm.plot2D);
+  m_spectrogram->setColorMap(m_uiForm.colorBar->getColorMap());
   m_uiForm.plot2D->autoRefresh();
-  // initZoomer();  // TO BE IMPLEMENTED
 }
 
-/** Load QSettings from .ini-type files */
+/**
+ * Load QSettings from .ini-type files
+ */
 void ContourPreviewPlot::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/MWView");
+
   // Maintain backwards compatibility with use of LogColorScale
   int scaleType = settings.value("ColorScale", -1).toInt();
-  if (scaleType == -1) {
+  if (scaleType == -1)
     scaleType = settings.value("LogColorScale", 0).toInt();
-  }
-  double nth_power = settings.value("PowerScaleExponent", 2.0).toDouble();
+
+  double const nth_power = settings.value("PowerScaleExponent", 2.0).toDouble();
   // Load Colormap. If the file is invalid the default stored colour map is
   // used.
   // If the user selected a unified color map for the SliceViewer and the VSI,
@@ -282,53 +306,6 @@ void ContourPreviewPlot::setVectorDimensions() {
             m_workspace->getDimension(d).get()));
     m_dimensions.push_back(dimension);
   }
-}
-
-/*
- * @brief Generates a default workspace to be shown, if no workspace
- * is selected
- */
-void ContourPreviewPlot::spawnWellcomeWorkspace() {
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(m_wellcomeName)) {
-    m_wellcomeWorkspace =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>(m_wellcomeName);
-  } else {
-    int numberSpectra = 100;
-    double intensity = 10.0;
-    auto dataX = std::vector<double>();
-    auto dataY = std::vector<double>();
-    for (int i = 0; i < numberSpectra; i++) {
-      for (int j = 0; j < numberSpectra; j++) {
-        dataX.push_back(j * 1.);
-        dataY.push_back(intensity * (i * i + j * j) /
-                        (2 * numberSpectra * numberSpectra));
-      }
-    }
-    auto createWsAlg =
-        Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
-    createWsAlg->initialize();
-    createWsAlg->setChild(true);
-    createWsAlg->setLogging(false);
-    createWsAlg->setProperty("OutputWorkspace", m_wellcomeName);
-    createWsAlg->setProperty("NSpec", numberSpectra);
-    createWsAlg->setProperty("DataX", dataX);
-    createWsAlg->setProperty("DataY", dataY);
-    createWsAlg->execute();
-    m_wellcomeWorkspace = createWsAlg->getProperty("OutputWorkspace");
-    Mantid::API::AnalysisDataService::Instance().add(m_wellcomeName,
-                                                     m_wellcomeWorkspace);
-  }
-}
-
-/**
- * @brief Replace or start showing the wellcoming workspace
- */
-void ContourPreviewPlot::showWellcomeWorkspace() {
-  this->spawnWellcomeWorkspace();
-  this->setWorkspace(m_wellcomeWorkspace);
-  this->updateDisplay();
-  m_uiForm.colorBar->setScale(0); // reset to linear color scale
 }
 
 } // namespace MantidWidgets
