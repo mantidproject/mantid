@@ -42,6 +42,9 @@ private:
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues,Geometry::SymmetryOperation so,
                               uint16_t expInfoIndex);
+  void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
+                              const double theta, const double phi, Kernel::DblMatrix transform,
+                              double lowvalue, double highvalue);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
@@ -56,7 +59,7 @@ private:
   // W matrix
   Mantid::Kernel::DblMatrix m_W;
   // matrix for transforming from intersections to positions in the normalization workspace
-  Mantid::Kernel::DblMatrix m_transformation;
+  Mantid::Kernel::Matrix<coord_t> m_transformation;
   /// cached X values along dimensions h,k,l. dE
   std::vector<double> m_hX, m_kX, m_lX, m_eX;
 

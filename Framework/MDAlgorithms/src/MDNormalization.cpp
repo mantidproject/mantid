@@ -38,6 +38,19 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
+
+namespace {
+// function to  compare two intersections (h,k,l,Momentum) by Momentum
+bool compareMomentum(const std::array<double, 4> &v1,
+                     const std::array<double, 4> &v2) {
+  return (v1[3] < v2[3]);
+}
+constexpr double energyToK = 8.0 * M_PI * M_PI *
+          PhysicalConstants::NeutronMass *
+          PhysicalConstants::meV * 1e-20 /
+          (PhysicalConstants::h * PhysicalConstants::h);
+} // namespace
 
 static bool abs_compare(int a, int b) {
     return (std::abs(a) < std::abs(b));
@@ -51,7 +64,7 @@ DECLARE_ALGORITHM(MDNormalization)
  */
 MDNormalization::MDNormalization()
     :m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3,3,true), m_W(3,3,true), m_transformation(),
-      m_hX(), m_kX(), m_lX(), m_eX(),m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1),
+      m_hX(), m_kX(), m_lX(), m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1),
       m_numExptInfos(0), m_Ei(0.0), m_diffraction(true), m_accumulate(false),
       m_dEIntegrated(false), m_samplePos(), m_beamDir(), convention("") {}
 
@@ -481,7 +494,7 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
       maxQ=ki+std::max(kfmin,kfmax);
     }
     size_t basisVectorIndex=0;
-    std::vector<double> transformation;
+    std::vector<coord_t> transformation;
     for(std::size_t i=0;i<6;i++) {
       std::string propName = "Dimension"+Strings::toString(i)+"Name";
       std::string binningName = "Dimension"+Strings::toString(i)+"Binning";
@@ -549,7 +562,7 @@ std::map<std::string, std::string> MDNormalization::getBinParameters()
     }
     parameters.emplace("OutputExtents",extents.str());
     parameters.emplace("OutputBins",bins.str());
-    m_transformation = DblMatrix(transformation,static_cast<size_t>((transformation.size())/m_inputWS->getNumDims()), m_inputWS->getNumDims());
+    m_transformation = Mantid::Kernel::Matrix<coord_t>(transformation,static_cast<size_t>((transformation.size())/m_inputWS->getNumDims()), m_inputWS->getNumDims());
     return parameters;
 }
 
@@ -642,6 +655,7 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(std::vector<Geome
             }
         } else if (value.find("DeltaE")!=std::string::npos) {
             m_eIdx=qindex;
+            m_dEIntegrated=false;
         }
         if (!basisVector.str().empty()){
             for(auto const& proji: projection){
@@ -724,10 +738,6 @@ std::vector<coord_t> MDNormalization::getValuesFromOtherDimensions(bool &skipNor
 
 void MDNormalization::cacheDimensionXValues()
 {
-    constexpr double energyToK = 8.0 * M_PI * M_PI *
-                                 PhysicalConstants::NeutronMass *
-                                 PhysicalConstants::meV * 1e-20 /
-                                 (PhysicalConstants::h * PhysicalConstants::h);
     auto &hDim = *m_normWS->getDimension(m_hIdx);
     m_hX.resize(hDim.getNBoundaries());
     for (size_t i = 0; i < m_hX.size(); ++i) {
@@ -758,11 +768,15 @@ void MDNormalization::cacheDimensionXValues()
 }
 
 void MDNormalization::calculateNormalization(const std::vector<coord_t> &otherValues, Geometry::SymmetryOperation so, uint16_t expInfoIndex){
-  constexpr double energyToK = 8.0 * M_PI * M_PI *
-            PhysicalConstants::NeutronMass *
-            PhysicalConstants::meV * 1e-20 /
-            (PhysicalConstants::h * PhysicalConstants::h);
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
+  std::vector<double> lowValues, highValues;
+  auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(
+          currentExptInfo.getLog("MDNorm_low"));
+  lowValues = (*lowValuesLog)();
+  auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(
+          currentExptInfo.getLog("MDNorm_high"));
+  highValues = (*highValuesLog)();
+
   DblMatrix R=currentExptInfo.run().getGoniometerMatrix();
   DblMatrix soMatrix(3,3);
   auto v=so.transformHKL(V3D(1,0,0));
@@ -792,20 +806,24 @@ void MDNormalization::calculateNormalization(const std::vector<coord_t> &otherVa
     fluxDetToIdx=integrFlux->getDetectorIDToWorkspaceIndexMap();
   }
 
-  const size_t vmdDims = 4;
+  const size_t vmdDims = (m_diffraction)?3:4;
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
   std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
 
-  double progStep = 0.7 / m_numExptInfos;
+  double progStep = 0.7 / static_cast<double>(m_numExptInfos);
   // TODO: fix progress to account for symmetry operations
   auto prog =
       make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
                                  0.3 + progStep * (expInfoIndex + 1.), ndets);
 
+  bool safe = true;
+  if (m_diffraction) {
+      safe= Kernel::threadSafe(*integrFlux);
+  }
   // cppcheck-suppress syntaxError
-PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
+PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (safe))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
 
@@ -821,7 +839,7 @@ for (int64_t i = 0; i < ndets; i++) {
   const auto detID = detector.getID();
 
   // Intersections
-  //this->calculateIntersections(intersections, theta, phi);
+  this->calculateIntersections(intersections, theta, phi,Qtransform,lowValues[i],highValues[i]);
   if (intersections.empty())
     continue;
   // Get solid angle for this contribution
@@ -849,6 +867,53 @@ for (int64_t i = 0; i < ndets; i++) {
 
   }
 
+  // Compute final position in HKL
+  // pre-allocate for efficiency and copy non-hkl dim values into place
+  pos.resize(vmdDims + otherValues.size());
+  std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
+
+  auto intersectionsBegin = intersections.begin();
+  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+    const auto &curIntSec = *it;
+    const auto &prevIntSec = *(it - 1);
+    // the full vector isn't used so compute only what is necessary
+    double delta,eps;
+    size_t offset=0; //we skip the 4th dimension in intersection for diffraction
+    if(m_diffraction){
+        delta = curIntSec[3] - prevIntSec[3];
+        eps=1e-7;
+        offset=1;
+    } else {
+       delta= (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
+        energyToK;
+       eps=1e-10;
+    }
+    if (delta < eps)
+      continue; // Assume zero contribution if difference is small
+
+    // Average between two intersections for final position
+    std::transform(curIntSec.data(), curIntSec.data() + vmdDims -offset,
+                   prevIntSec.data(), pos.begin(),
+                   [](const double rhs, const double lhs) {
+                     return static_cast<coord_t>(0.5 * (rhs + lhs));
+                   });
+
+    // transform kf to energy transfer
+    if(!m_diffraction){
+      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
+    }
+    m_transformation.multiplyPoint(pos, posNew);
+    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+    if (linIndex == size_t(-1))
+      continue;
+
+    // signal = integral between two consecutive intersections *solid angle
+    // *PC
+    double signal = solid * delta;
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                             std::plus<signal_t>());
+  }
+
   prog->report();
 
   PARALLEL_END_INTERUPT_REGION
@@ -863,7 +928,138 @@ if (m_accumulate) {
   std::copy(signalArray.cbegin(), signalArray.cend(),
             m_normWS->getSignalArray());
 }
+m_accumulate=true;
+}
 
+void MDNormalization::calculateIntersections(std::vector<std::array<double, 4> > &intersections, const double theta, const double phi, Kernel::DblMatrix transform, double lowvalue, double highvalue)
+{
+    V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
+        qin(0., 0., 1);
+
+    qout = transform * qout;
+    qin = transform * qin;
+    if (convention == "Crystallography") {
+      qout *= -1;
+      qin *= -1;
+    }
+    double kfmin,kfmax,kimin,kimax;
+    if (m_diffraction){
+        kimin=lowvalue;
+        kimax=highvalue;
+        kfmin=kimin;
+        kfmax=kimax;
+    } else {
+       kimin = std::sqrt(energyToK * m_Ei);
+       kimax = kimin;
+       kfmin = std::sqrt(energyToK * (m_Ei-highvalue));
+       kfmax = std::sqrt(energyToK * (m_Ei-lowvalue));
+    }
+
+    double hStart = qin.X() * kimin - qout.X() * kfmin,
+           hEnd = qin.X() * kimax - qout.X() * kfmax;
+    double kStart = qin.Y() *kimin - qout.Y() * kfmin,
+           kEnd = qin.Y() * kimax - qout.Y() * kfmax;
+    double lStart = qin.Z() * kimin - qout.Z() * kfmin,
+           lEnd = qin.Z() * kimax - qout.Z() * kfmax;
+
+    double eps = 1e-10;
+    auto hNBins = m_hX.size();
+    auto kNBins = m_kX.size();
+    auto lNBins = m_lX.size();
+    auto eNBins = m_eX.size();
+    intersections.clear();
+    intersections.reserve(hNBins + kNBins + lNBins + eNBins +2);
+
+    // calculate intersections with planes perpendicular to h
+    if (fabs(hStart - hEnd) > eps) {
+      double fmom = (kfmax - kfmin) / (hEnd - hStart);
+      double fk = (kEnd - kStart) / (hEnd - hStart);
+      double fl = (lEnd - lStart) / (hEnd - hStart);
+      for (size_t i = 0; i < hNBins; i++) {
+        double hi = m_hX[i];
+        if (((hStart - hi) * (hEnd - hi) < 0)) {
+          // if hi is between hStart and hEnd, then ki and li will be between
+          // kStart, kEnd and lStart, lEnd and momi will be between kfmin and
+          // kfmax
+          double ki = fk * (hi - hStart) + kStart;
+          double li = fl * (hi - hStart) + lStart;
+          if ((ki >= m_kX[0]) && (ki <= m_kX[kNBins-1]) && (li >= m_lX[0]) &&
+              (li <= m_lX[lNBins-1])) {
+            double momi = fmom * (hi - hStart) + kfmin;
+            intersections.push_back({{hi, ki, li, momi}});
+          }
+        }
+      }
+    }
+    // calculate intersections with planes perpendicular to k
+    if (fabs(kStart - kEnd) > eps) {
+      double fmom = (kfmax - kfmin) / (kEnd - kStart);
+      double fh = (hEnd - hStart) / (kEnd - kStart);
+      double fl = (lEnd - lStart) / (kEnd - kStart);
+      for (size_t i = 0; i < kNBins; i++) {
+        double ki = m_kX[i];
+        if (((kStart - ki) * (kEnd - ki) < 0)) {
+          // if ki is between kStart and kEnd, then hi and li will be between
+          // hStart, hEnd and lStart, lEnd and momi will be between kfmin and
+          // kfmax
+          double hi = fh * (ki - kStart) + hStart;
+          double li = fl * (ki - kStart) + lStart;
+          if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins-1]) && (li >= m_lX[0]) &&
+              (li <= m_lX[lNBins-1])) {
+            double momi = fmom * (ki - kStart) + kfmin;
+            intersections.push_back({{hi, ki, li, momi}});
+          }
+        }
+      }
+    }
+
+    // calculate intersections with planes perpendicular to l
+    if (fabs(lStart - lEnd) > eps) {
+      double fmom = (kfmax - kfmin) / (lEnd - lStart);
+      double fh = (hEnd - hStart) / (lEnd - lStart);
+      double fk = (kEnd - kStart) / (lEnd - lStart);
+
+      for (size_t i = 0; i < lNBins; i++) {
+        double li = m_lX[i];
+        if (((lStart - li) * (lEnd - li) < 0)) {
+          double hi = fh * (li - lStart) + hStart;
+          double ki = fk * (li - lStart) + kStart;
+          if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins-1]) && (ki >= m_kX[0]) &&
+               (ki <= m_kX[kNBins-1])) {
+            double momi = fmom * (li - lStart) + kfmin;
+            intersections.push_back({{hi, ki, li, momi}});
+          }
+        }
+      }
+    }
+    // intersections with dE
+    if (!m_dEIntegrated) {
+      for (size_t i = 0; i < eNBins; i++) {
+        double kfi = m_eX[i];
+        if ((kfi - kfmin) * (kfi - kfmax) <= 0) {
+          double h = qin.X() - qout.X() * kfi;
+          double k = qin.Y() - qout.Y() * kfi;
+          double l = qin.Z() - qout.Z() * kfi;
+          if ((h >= m_hX[0]) && (h <= m_hX[hNBins-1]) && (k >= m_kX[0]) && (k <= m_kX[kNBins-1]) &&
+              (l >= m_lX[0]) && (l <= m_lX[lNBins-1])) {
+            intersections.push_back({{h, k, l, kfi}});
+          }
+        }
+      }
+    }
+
+    // endpoints
+    if ((hStart >= m_hX[0]) && (hStart <= m_hX[hNBins-1]) && (kStart >= m_kX[0]) &&
+        (kStart <= m_kX[kNBins-1]) && (lStart >= m_lX[0]) && (lStart <= m_lX[lNBins-1])) {
+      intersections.push_back({{hStart, kStart, lStart, kfmin}});
+    }
+    if ((hEnd >= m_hX[0]) && (hEnd <= m_hX[hNBins-1]) && (kEnd >= m_kX[0]) &&
+        (kEnd <= m_kX[kNBins-1]) && (lEnd >= m_lX[0]) && (lEnd <= m_lX[lNBins-1])) {
+      intersections.push_back({{hEnd, kEnd, lEnd, kfmax}});
+    }
+
+    // sort intersections by final momentum
+    std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
 }
 
 } // namespace MDAlgorithms
