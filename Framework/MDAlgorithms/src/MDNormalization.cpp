@@ -860,11 +860,12 @@ for (int64_t i = 0; i < ndets; i++) {
       for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
         *x = (*it)[3];
       }
+      // get the flux spetrum number
+      size_t wsIdx = fluxDetToIdx.find(detID)->second;
       // calculate integrals at momenta from xValues by interpolating between
       // points in spectrum sp
       // of workspace integrFlux. The result is stored in yValues
-      //calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
-
+      calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
   }
 
   // Compute final position in HKL
@@ -897,19 +898,23 @@ for (int64_t i = 0; i < ndets; i++) {
                    [](const double rhs, const double lhs) {
                      return static_cast<coord_t>(0.5 * (rhs + lhs));
                    });
-
-    // transform kf to energy transfer
-    if(!m_diffraction){
+    signal_t signal;
+    if(m_diffraction){
+      // index of the current intersection
+      size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
+      // signal = integral between two consecutive intersections
+      signal = (yValues[k] - yValues[k - 1]) * solid;
+    } else{
+      // transform kf to energy transfer
       pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
+      // signal = energy distance between two consecutive intersections *solid angle *PC
+      signal = solid * delta;
     }
     m_transformation.multiplyPoint(pos, posNew);
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))
       continue;
 
-    // signal = integral between two consecutive intersections *solid angle
-    // *PC
-    double signal = solid * delta;
     Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
                              std::plus<signal_t>());
   }
@@ -1060,6 +1065,73 @@ void MDNormalization::calculateIntersections(std::vector<std::array<double, 4> >
 
     // sort intersections by final momentum
     std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
+}
+
+void MDNormalization::calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux, size_t sp, std::vector<double> &yValues)
+{
+    assert(xValues.size() == yValues.size());
+
+    // the x-data from the workspace
+    const auto &xData = integrFlux.x(sp);
+    const double xStart = xData.front();
+    const double xEnd = xData.back();
+
+    // the values in integrFlux are expected to be integrals of a non-negative
+    // function
+    // ie they must make a non-decreasing function
+    const auto &yData = integrFlux.y(sp);
+    size_t spSize = yData.size();
+
+    const double yMin = 0.0;
+    const double yMax = yData.back();
+
+    size_t nData = xValues.size();
+    // all integrals below xStart must be 0
+    if (xValues[nData - 1] < xStart) {
+      std::fill(yValues.begin(), yValues.end(), yMin);
+      return;
+    }
+
+    // all integrals above xEnd must be equal tp yMax
+    if (xValues[0] > xEnd) {
+      std::fill(yValues.begin(), yValues.end(), yMax);
+      return;
+    }
+
+    size_t i = 0;
+    // integrals below xStart must be 0
+    while (i < nData - 1 && xValues[i] < xStart) {
+      yValues[i] = yMin;
+      i++;
+    }
+    size_t j = 0;
+    for (; i < nData; i++) {
+      // integrals above xEnd must be equal tp yMax
+      if (j >= spSize - 1) {
+        yValues[i] = yMax;
+      } else {
+        double xi = xValues[i];
+        while (j < spSize - 1 && xi > xData[j])
+          j++;
+        // if x falls onto an interpolation point return the corresponding y
+        if (xi == xData[j]) {
+          yValues[i] = yData[j];
+        } else if (j == spSize - 1) {
+          // if we get above xEnd it's yMax
+          yValues[i] = yMax;
+        } else if (j > 0) {
+          // interpolate between the consecutive points
+          double x0 = xData[j - 1];
+          double x1 = xData[j];
+          double y0 = yData[j - 1];
+          double y1 = yData[j];
+          yValues[i] = y0 + (y1 - y0) * (xi - x0) / (x1 - x0);
+        } else // j == 0
+        {
+          yValues[i] = yMin;
+        }
+      }
+    }
 }
 
 } // namespace MDAlgorithms
