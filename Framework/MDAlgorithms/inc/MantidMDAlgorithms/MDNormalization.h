@@ -7,17 +7,17 @@
 #ifndef MANTID_MDALGORITHMS_MDNORMALIZATION_H_
 #define MANTID_MDALGORITHMS_MDNORMALIZATION_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDAlgorithms/SlicingAlgorithm.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidMDAlgorithms/DllConfig.h"
+#include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** MDNormalization : Bin single crystal diffraction or direct geometry inelastic
- * data and calculate the corresponding statistical weight
-*/
+/** MDNormalization : Bin single crystal diffraction or direct geometry
+ * inelastic data and calculate the corresponding statistical weight
+ */
 class MANTID_MDALGORITHMS_DLL MDNormalization : public API::Algorithm {
 public:
   MDNormalization();
@@ -26,8 +26,10 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC", "RecalculateTrajectoriesExtents"};
+    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC",
+            "RecalculateTrajectoriesExtents"};
   }
+
 private:
   void init() override;
   void exec() override;
@@ -35,19 +37,22 @@ private:
   std::string QDimensionName(std::vector<double> projection);
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
-  DataObjects::MDHistoWorkspace_sptr binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps);
+  DataObjects::MDHistoWorkspace_sptr
+  binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps);
   std::vector<coord_t>
   getValuesFromOtherDimensions(bool &skipNormalization,
                                uint16_t expInfoIndex = 0) const;
   void cacheDimensionXValues();
-  void calculateNormalization(const std::vector<coord_t> &otherValues,Geometry::SymmetryOperation so,
+  void calculateNormalization(const std::vector<coord_t> &otherValues,
+                              Geometry::SymmetryOperation so,
                               uint16_t expInfoIndex);
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
-                              const double theta, const double phi, Kernel::DblMatrix transform,
-                              double lowvalue, double highvalue);
-  void calcIntegralsForIntersections(
-      const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
-      size_t sp, std::vector<double> &yValues);
+                              const double theta, const double phi,
+                              Kernel::DblMatrix transform, double lowvalue,
+                              double highvalue);
+  void calcIntegralsForIntersections(const std::vector<double> &xValues,
+                                     const API::MatrixWorkspace &integrFlux,
+                                     size_t sp, std::vector<double> &yValues);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
@@ -56,12 +61,14 @@ private:
   /// flag for reciprocal lattice units
   bool m_isRLU;
   /// The projection vectors
-  std::vector<double> m_Q1Basis{1., 0., 0.}, m_Q2Basis{0., 1., 0.},m_Q3Basis{0., 0., 1.};
+  std::vector<double> m_Q1Basis{1., 0., 0.}, m_Q2Basis{0., 1., 0.},
+      m_Q3Basis{0., 0., 1.};
   // UB matrix
   Mantid::Kernel::DblMatrix m_UB;
   // W matrix
   Mantid::Kernel::DblMatrix m_W;
-  // matrix for transforming from intersections to positions in the normalization workspace
+  // matrix for transforming from intersections to positions in the
+  // normalization workspace
   Mantid::Kernel::Matrix<coord_t> m_transformation;
   /// cached X values along dimensions h,k,l. dE
   std::vector<double> m_hX, m_kX, m_lX, m_eX;
