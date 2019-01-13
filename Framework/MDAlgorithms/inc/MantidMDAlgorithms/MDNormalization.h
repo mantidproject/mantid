@@ -45,6 +45,9 @@ private:
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
                               const double theta, const double phi, Kernel::DblMatrix transform,
                               double lowvalue, double highvalue);
+  void calcIntegralsForIntersections(
+      const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
+      size_t sp, std::vector<double> &yValues);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
