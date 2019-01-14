@@ -95,7 +95,7 @@ ContourPreviewPlot::~ContourPreviewPlot() {
 
 MatrixWorkspace_sptr ContourPreviewPlot::getActiveWorkspace() const {
   return m_workspace;
-};
+}
 
 /**
  * Initialize objects after loading the workspace
