@@ -41,10 +41,6 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         self.declareProperty("UseCached", True, direction=Direction.Input,
                              doc="Checks if there are loaded files available. If they are, those files are used.")
 
-        self.declareProperty("MoveWorkspace", defaultValue=False, direction=Direction.Input,
-                             doc="Move the workspace according to the SANSState setting. This might be useful"
-                             "for manual inspection.")
-
         # Beam coordinates if an initial move of the workspace is requested
         enabled_condition = EnabledWhenProperty("MoveWorkspace", PropertyCriterion.IsNotDefault)
         self.declareProperty(FloatArrayProperty(name='BeamCoordinates', values=[]),
@@ -144,17 +140,9 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                                                         parent_alg=self)
         progress.report("Loaded the data.")
 
-        # Centre the workspaces
-        #progress.report("Centring the workspace.")
-        #self._centre(workspaces, state)
-        #progress.report("Finished centring the workspace")
-
-        # Check if a move has been requested and perform it. This can be useful if scientists want to load the data and
-        # have it moved in order to inspect it with other tools
-        move_workspaces = self.getProperty("MoveWorkspace").value
         progress_move = Progress(self, start=0.8, end=1.0, nreports=2)
         progress_move.report("Starting to move the workspaces.")
-        workspaces = self._perform_initial_move(workspaces, state, move_workspaces)
+        self._perform_initial_move(workspaces, state)
         progress_move.report("Finished moving the workspaces.")
 
         # Set output workspaces
@@ -337,59 +325,38 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         number_of_workspaces_name = "NumberOf" + name + "s"
         self.setProperty(number_of_workspaces_name, counter)
 
-    def _centre(self, workspaces, state):
+    def _perform_initial_move(self, workspaces, state):
         move_name = "SANSMove"
         state_dict = state.property_manager
-        move_options = {"SANSState": state_dict,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
 
-        move_alg = create_child_algorithm(self, move_name, **move_options)
-
-        # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
-        for key, workspace_list in list(workspaces.items()):
-            for workspace in workspace_list:
-                move_alg.setProperty("Workspace", workspace)
-                move_alg.execute()
-
-    def _perform_initial_move(self, workspaces, state, perform_move):
-        move_name = "SANSMove"
-        state_dict = state.property_manager
         zero_options = {"SANSState": state_dict,
                         "MoveType": "SetToZero",
                         "Component": ""}
+        zero_alg = create_child_algorithm(self, move_name, **zero_options)
+
         move_options = {"SANSState": state_dict,
                         "MoveType": "InitialMove"}
-
-        zero_alg = create_child_algorithm(self, move_name, **zero_options)
         move_alg = create_child_algorithm(self, move_name, **move_options)
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
-        new_ws = {}
         for key, workspace_list in list(workspaces.items()):
-            new_ws_list = []
             for workspace in workspace_list:
                 zero_alg.setProperty("Workspace", workspace)
                 zero_alg.execute()
-                new_workspace = zero_alg.getProperty("Workspace").value
+                zeroed_workspace = zero_alg.getProperty("Workspace").value
 
-                if perform_move:
-                    # If beam centre was specified then use it
-                    beam_coordinates = self.getProperty("BeamCoordinates").value
-                    if beam_coordinates:
-                        move_alg.setProperty("BeamCoordinates", beam_coordinates)
+                # If beam centre was specified then use it
+                beam_coordinates = self.getProperty("BeamCoordinates").value
+                if beam_coordinates:
+                    move_alg.setProperty("BeamCoordinates", beam_coordinates)
 
-                    # If component was specified then use it
-                    component = self.getProperty("Component").value
-                    if beam_coordinates:
-                        move_alg.setProperty("Component", component)
+                # If component was specified then use it
+                component = self.getProperty("Component").value
+                if beam_coordinates:
+                    move_alg.setProperty("Component", component)
 
-                    move_alg.setProperty("Workspace", new_workspace)
-                    move_alg.execute()
-                    new_workspace = move_alg.getProperty("Workspace").value
-                new_ws_list.append(new_workspace)
-            new_ws[key] = new_ws_list
-        return new_ws
+                move_alg.setProperty("Workspace", zeroed_workspace)
+                move_alg.execute()
 
     def _get_progress_for_file_loading(self, data):
         # Get the number of workspaces which are to be loaded
@@ -399,10 +366,9 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                                                               data.calibration])
         progress_steps = number_of_files_to_load + 1
         # Check if there is a move operation to be performed
-        uses_move = self.getProperty("MoveWorkspace").value
 
         # The partitioning of the progress bar is 80% for loading if there is a move else 100%
-        end = 0.8 if uses_move else 1.0
+        end = 1.0
         progress = Progress(self, start=0.0, end=end, nreports=progress_steps)
         return progress
 

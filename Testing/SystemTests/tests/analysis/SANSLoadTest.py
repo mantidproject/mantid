@@ -206,7 +206,6 @@ class SANSLoadTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", publish_to_cache)
         load_alg.setProperty("UseCached", use_cached)
-        load_alg.setProperty("MoveWorkspace", move_workspace)
         if move_workspace:
             load_alg.setProperty("Component", component)
             load_alg.setProperty("BeamCoordinates", beam_coordinates)
@@ -536,33 +535,6 @@ class SANSLoadTest(unittest.TestCase):
 
         # Cleanup
         remove_all_workspaces_from_ads()
-
-    def test_that_centres_workspace_on_load(self):
-        # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00028827",
-                                               sample_trans="SANS2D00028784",
-                                               sample_direct="SANS2D00028804")
-
-        # Act
-        output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
-                                  "SampleScatterMonitorWorkspace": "sample_monitor_scatter",
-                                  "SampleTransmissionWorkspace": "sample_transmission",
-                                  "SampleDirectWorkspace": "sample_direct"}
-
-        kwargs = {"state": state, "publish_to_cache": False, "use_cached": False, "move_workspace": False,
-                  "output_workspace_names": output_workspace_names}
-
-        load_alg = self._run_load(**kwargs)
-
-        # Assert
-        expected_number_of_workspaces = [1, 1, 1, 0, 0, 0]
-        expected_number_on_ads = 0
-        workspace_type = [EventWorkspace, Workspace2D, Workspace2D, None, None, None]
-        self._do_test_output(load_alg, expected_number_of_workspaces, expected_number_on_ads, workspace_type)
-
-        for workspace_name, _ in output_workspace_names.items():
-            workspace = load_alg.getProperty(workspace_name).value
-            self._check_that_sets_to_zero(workspace, state.move, comp_name=None)
 
 
 class SANSLoadDataRunnerTest(systemtesting.MantidSystemTest):
