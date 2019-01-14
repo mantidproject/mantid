@@ -9,12 +9,7 @@
 #
 from __future__ import (absolute_import)
 
-# 3rdparty imports
-import sys
 from qtpy.QtCore import QObject, Signal
-
-
-# std imports
 
 
 class WriteToSignal(QObject):
@@ -25,8 +20,8 @@ class WriteToSignal(QObject):
 
     def __init__(self, original_out):
         QObject.__init__(self)
-        # If the file descriptor of the stream is -2 then we are running in a no-external-console mode
-        if self.__original_out.fileno() == -2:
+        # If the file descriptor of the stream is < 0 then we are running in a no-external-console mode
+        if self.__original_out.fileno() < 0:
             self.__original_out = None
         else:
             self.__original_out = original_out
@@ -44,7 +39,6 @@ class WriteToSignal(QObject):
 
     def write(self, txt):
         if self.__original_out:
-            # write to the console
             try:
                 self.__original_out.write(txt)
             except IOError:
