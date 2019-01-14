@@ -466,14 +466,14 @@ class ScalingAxesImage(mimage.AxesImage):
         self.stale = True
 
 
-    def _ylim_changed(self, ax):
+    def _limits_changed(self, ax):
         dims = self.unsampled_data.shape
         new_xlim = ax.get_xlim()
         new_ylim = ax.get_ylim()
-        pxmin = int(numpy.floor(float(dims[1])/(self.unsampled_extent[1] - self.unsampled_extent[0])*(new_xlim[0] - self.unsampled_extent[0])))
-        pxmax = int(numpy.ceil(float(dims[1])/(self.unsampled_extent[1] - self.unsampled_extent[0])*(new_xlim[1] - self.unsampled_extent[0])))
-        pxmin = max(0,pxmin)
-        pxmax = min(pxmax,dims[1])
+        pxmin = int(numpy.floor(float(dims[1]) / (self.unsampled_extent[1] - self.unsampled_extent[0]) * (new_xlim[0] - self.unsampled_extent[0])))
+        pxmax = int(numpy.ceil(float(dims[1]) / (self.unsampled_extent[1] - self.unsampled_extent[0]) * (new_xlim[1] - self.unsampled_extent[0])))
+        pxmin = max(0, pxmin)
+        pxmax = min(pxmax, dims[1])
         if pxmax == pxmin:
             if pxmax + 1 < dims[1]:
                 pxmax = pxmax + 1
@@ -481,10 +481,10 @@ class ScalingAxesImage(mimage.AxesImage):
                 pxmin = pxmin - 1
             else:
                 raise ValueError('Cannot calculate x indices.') 
-        pymin = int(numpy.floor(float(dims[0])/(self.unsampled_extent[3] - self.unsampled_extent[2])*(new_ylim[0] - self.unsampled_extent[2])))
-        pymax = int(numpy.ceil(float(dims[0])/(self.unsampled_extent[3] - self.unsampled_extent[2])*(new_ylim[1] - self.unsampled_extent[2])))
-        pymin = max(0,pymin)
-        pymax = min(pymax,dims[0])
+        pymin = int(numpy.floor(float(dims[0]) / (self.unsampled_extent[3] - self.unsampled_extent[2]) * (new_ylim[0] - self.unsampled_extent[2])))
+        pymax = int(numpy.ceil(float(dims[0]) / (self.unsampled_extent[3] - self.unsampled_extent[2]) * (new_ylim[1] - self.unsampled_extent[2])))
+        pymin = max(0, pymin)
+        pymax = min(pymax, dims[0])
         if pymax == pymin:
             if pymax + 1 < dims[0]:
                 pymax = pymax + 1
@@ -493,14 +493,14 @@ class ScalingAxesImage(mimage.AxesImage):
             else:
                 raise ValueError('Cannot calculate y indices.') 
         cropped_data = self.unsampled_data[pymin:pymax, pxmin:pxmax]
-        self.set_data(cropped_data, set_unsampled_data=False)
-        x0 = self.unsampled_extent[0] + pxmin/dims[1]*(self.unsampled_extent[1] - self.unsampled_extent[0]) 
-        x1 = self.unsampled_extent[0] + pxmax/dims[1]*(self.unsampled_extent[1] - self.unsampled_extent[0]) 
-        y0 = self.unsampled_extent[2] + pymin/dims[0]*(self.unsampled_extent[3] - self.unsampled_extent[2])
-        y1 = self.unsampled_extent[2] + pymax/dims[0]*(self.unsampled_extent[3] - self.unsampled_extent[2])
-        ax.set_xlim(x0, x1, emit=False)
-        ax.set_ylim(y0, y1, emit=False)
-        self._update_extent((x0,x1,y0,y1))
+        self.set_data(cropped_data, set_unsampled_data = False)
+        x0 = self.unsampled_extent[0] + pxmin / dims[1] * (self.unsampled_extent[1] - self.unsampled_extent[0]) 
+        x1 = self.unsampled_extent[0] + pxmax / dims[1] * (self.unsampled_extent[1] - self.unsampled_extent[0]) 
+        ax.set_xlim(x0, x1, emit = False)
+        y0 = self.unsampled_extent[2] + pymin / dims[0] * (self.unsampled_extent[3] - self.unsampled_extent[2])
+        y1 = self.unsampled_extent[2] + pymax / dims[0] * (self.unsampled_extent[3] - self.unsampled_extent[2])
+        ax.set_ylim(y0, y1, emit = False)
+        self._update_extent((x0, x1, y0, y1))
 
 
 
@@ -538,7 +538,8 @@ def _imshow(axes, z, cmap=None, norm=None, aspect=None,
     im.set_extent(im.get_extent())
 
     axes.add_image(im)
-    axes.callbacks.connect('ylim_changed', im._ylim_changed)
+    axes.callbacks.connect('xlim_changed', im._limits.changed)
+    axes.callbacks.connect('ylim_changed', im._limits_changed)
     return im
 
 
