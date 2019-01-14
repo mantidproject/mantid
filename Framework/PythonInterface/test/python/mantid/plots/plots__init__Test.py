@@ -47,7 +47,8 @@ class Plots__init__Test(unittest.TestCase):
         self.fig, self.ax = None, None
 
     def test_line2d_plots(self):
-        self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)
+        self.ax.plot(self.ws2d_histo, 'rs', specNum=2, linewidth=6)
+        self.assertEqual('r', self.ax.lines[-1].get_color())
         self.ax.plot(np.arange(10), np.arange(10), 'bo-')
 
     def test_errorbar_plots(self):

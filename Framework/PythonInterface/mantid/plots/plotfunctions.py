@@ -133,7 +133,7 @@ def plot(axes, workspace, *args, **kwargs):
     dimension
     """
     x, y, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
-    return axes.plot(x, y, **kwargs)
+    return axes.plot(x, y, *args, **kwargs)
 
 
 def errorbar(axes, workspace, *args, **kwargs):
