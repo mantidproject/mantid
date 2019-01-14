@@ -10,8 +10,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -113,8 +113,7 @@ void CreateLogPropertyTable::exec() {
   }
 
   // Set up output table.
-  boost::shared_ptr<ITableWorkspace> outputTable =
-      WorkspaceFactory::Instance().createTable();
+  auto outputTable = boost::make_shared<DataObjects::TableWorkspace>();
   // One column for each property.
   for (const auto &propName : propNames)
     outputTable->addColumn("str", propName);

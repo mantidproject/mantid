@@ -72,8 +72,8 @@ class PairingTablePresenter(object):
         self._model.clear_pairs()
         for entry in table:
             pair = MuonPair(pair_name=str(entry[0]),
-                            backward_group_name=str(entry[1]),
-                            forward_group_name=str(entry[2]),
+                            backward_group_name=str(entry[2]),
+                            forward_group_name=str(entry[1]),
                             alpha=float(entry[3]))
             self._model.add_pair(pair)
 
