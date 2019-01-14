@@ -8,6 +8,7 @@ from Muon.GUI.Common.utilities import table_utils
 
 pair_columns = {0: 'pair_name', 1: 'group_1', 2: 'group_2', 3: 'alpha', 4: 'guess_alpha'}
 
+
 class PairingTableView(QtGui.QWidget):
     dataChanged = Signal()
 
