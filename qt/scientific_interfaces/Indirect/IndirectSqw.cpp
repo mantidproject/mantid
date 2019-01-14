@@ -64,17 +64,16 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
                                QString const &)));
 
   m_uiForm.rqwPlot2D->setColourBarVisible(false);
+  m_uiForm.rqwPlot2D->setXAxisLabel("Energy (meV)");
+  m_uiForm.rqwPlot2D->setYAxisLabel("Q (A-1)");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 IndirectSqw::~IndirectSqw() {}
 
 void IndirectSqw::setup() {}
 
 bool IndirectSqw::validate() {
-  double tolerance = 1e-10;
+  double const tolerance = 1e-10;
   UserInputValidator uiv;
 
   // Validate the data selector
@@ -89,7 +88,7 @@ bool IndirectSqw::validate() {
     uiv.checkBins(m_uiForm.spELow->value(), m_uiForm.spEWidth->value(),
                   m_uiForm.spEHigh->value(), tolerance);
 
-  QString errorMessage = uiv.generateErrorMessage();
+  auto const errorMessage = uiv.generateErrorMessage();
 
   // Show an error message if needed
   if (!errorMessage.isEmpty())
@@ -99,25 +98,23 @@ bool IndirectSqw::validate() {
 }
 
 void IndirectSqw::run() {
-  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
-  QString eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
+  auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  auto const sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
+  auto const eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
 
-  QString rebinString = m_uiForm.spQLow->text() + "," +
-                        m_uiForm.spQWidth->text() + "," +
-                        m_uiForm.spQHigh->text();
+  auto const rebinString = m_uiForm.spQLow->text() + "," +
+                           m_uiForm.spQWidth->text() + "," +
+                           m_uiForm.spQHigh->text();
 
   // Rebin in energy
-  bool rebinInEnergy = m_uiForm.ckRebinInEnergy->isChecked();
+  bool const rebinInEnergy = m_uiForm.ckRebinInEnergy->isChecked();
   if (rebinInEnergy) {
-    QString eRebinString = m_uiForm.spELow->text() + "," +
-                           m_uiForm.spEWidth->text() + "," +
-                           m_uiForm.spEHigh->text();
+    auto const eRebinString = m_uiForm.spELow->text() + "," +
+                              m_uiForm.spEWidth->text() + "," +
+                              m_uiForm.spEHigh->text();
 
-    IAlgorithm_sptr energyRebinAlg =
-        AlgorithmManager::Instance().create("Rebin");
+    auto energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
     energyRebinAlg->initialize();
-
     energyRebinAlg->setProperty("InputWorkspace", sampleWsName.toStdString());
     energyRebinAlg->setProperty("OutputWorkspace", eRebinWsName.toStdString());
     energyRebinAlg->setProperty("Params", eRebinString.toStdString());
@@ -125,9 +122,9 @@ void IndirectSqw::run() {
     m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
   }
 
-  QString eFixed = getInstrumentDetails()["Efixed"];
+  auto const eFixed = getInstrumentDetails()["Efixed"];
 
-  IAlgorithm_sptr sqwAlg = AlgorithmManager::Instance().create("SofQW");
+  auto sqwAlg = AlgorithmManager::Instance().create("SofQW");
   sqwAlg->initialize();
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
@@ -146,10 +143,8 @@ void IndirectSqw::run() {
   m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
 
   // Add sample log for S(Q, w) algorithm used
-  IAlgorithm_sptr sampleLogAlg =
-      AlgorithmManager::Instance().create("AddSampleLog");
+  auto sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");
   sampleLogAlg->initialize();
-
   sampleLogAlg->setProperty("LogName", "rebin_type");
   sampleLogAlg->setProperty("LogType", "String");
   sampleLogAlg->setProperty("LogText", "NormalisedPolygon");
@@ -204,10 +199,8 @@ void IndirectSqw::plotRqwContour() {
     convertToSpectrumAxis(sampleName, outputName);
 
     auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
-    if (rqwWorkspace) {
+    if (rqwWorkspace)
       m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
-      m_uiForm.rqwPlot2D->setPlotVisible(true);
-    }
   } else {
     emit showMessageBox("Invalid filename.");
   }

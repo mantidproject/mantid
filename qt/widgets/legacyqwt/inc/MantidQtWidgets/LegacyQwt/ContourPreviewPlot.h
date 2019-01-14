@@ -61,6 +61,9 @@ public:
   bool isPlotVisible() const;
   bool isColourBarVisible() const;
 
+  void setXAxisLabel(QString const &label);
+  void setYAxisLabel(QString const &label);
+
 protected:
   void preDeleteHandle(
       std::string const &workspaceName,

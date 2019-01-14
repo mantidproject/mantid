@@ -98,28 +98,6 @@ MatrixWorkspace_sptr ContourPreviewPlot::getActiveWorkspace() const {
 };
 
 /**
- * Load a colour map from a file
- * @param file :: file to open; empty to ask via a dialog box.
- */
-void ContourPreviewPlot::loadColourMap(QString file) {
-  auto const filename = colourMapFileName(file);
-  if (!filename.isEmpty()) {
-    setCurrentColourMapFile(filename);
-    m_uiForm.colourBar->getColorMap().loadMap(filename);
-    m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
-    m_uiForm.colourBar->updateColorMap();
-
-    this->updateDisplay();
-  }
-}
-
-QString ContourPreviewPlot::colourMapFileName(QString const &filename) {
-  if (filename.isEmpty())
-    return MantidColorMap::chooseColorMap(m_currentColourMapFile, this);
-  return filename;
-}
-
-/**
  * Initialize objects after loading the workspace
  */
 void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const workspace) {
@@ -141,34 +119,6 @@ void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const workspace) {
 
   this->updateDisplay();
   m_uiForm.colourBar->setScale(0);
-}
-
-/**
- * Updates the contour plot
- */
-void ContourPreviewPlot::updateDisplay() {
-  if (m_workspace) {
-    m_data->setRange(m_uiForm.colourBar->getViewRange());
-
-    std::vector<Mantid::coord_t> slicePoint{0, 0};
-    constexpr std::size_t dimX(0);
-    constexpr std::size_t dimY(1);
-    IMDDimension_const_sptr X = m_dimensions[dimX];
-    IMDDimension_const_sptr Y = m_dimensions[dimY];
-    m_data->setSliceParams(dimX, dimY, X, Y, slicePoint);
-
-    double const left{X->getMinimum()};
-    double const top{Y->getMinimum()};
-    double const width{X->getMaximum() - X->getMinimum()};
-    double const height{Y->getMaximum() - Y->getMinimum()};
-    QwtDoubleRect const bounds{left, top, width, height};
-    m_data->setBoundingRect(bounds.normalized());
-
-    m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
-    m_spectrogram->setData(*m_data);
-    m_spectrogram->itemChanged();
-    m_uiForm.plot2D->replot();
-  }
 }
 
 SafeQwtPlot *ContourPreviewPlot::getPlot2D() { return m_uiForm.plot2D; }
@@ -203,6 +153,22 @@ bool ContourPreviewPlot::isPlotVisible() const {
  */
 bool ContourPreviewPlot::isColourBarVisible() const {
   return m_uiForm.colourBar->isVisible();
+}
+
+/**
+ * Sets the label for the x axis
+ * @param label :: the label given to the axis
+ */
+void ContourPreviewPlot::setXAxisLabel(QString const &label) {
+  m_uiForm.lbXAxis->setText(label);
+}
+
+/**
+ * Sets the label for the y axis
+ * @param label :: the label given to the axis
+ */
+void ContourPreviewPlot::setYAxisLabel(QString const &label) {
+  m_uiForm.lbYAxis->setText(label);
 }
 
 /**
@@ -300,6 +266,56 @@ void ContourPreviewPlot::saveSettings() {
   settings.setValue("ColourScale", m_uiForm.colourBar->getScale());
   settings.setValue("PowerScaleExponent", m_uiForm.colourBar->getExponent());
   settings.setValue("TransparentZeros", (m_data->isZerosAsNan() ? 1 : 0));
+}
+
+/**
+ * Load a colour map from a file
+ * @param file :: file to open; empty to ask via a dialog box.
+ */
+void ContourPreviewPlot::loadColourMap(QString file) {
+  auto const filename = colourMapFileName(file);
+  if (!filename.isEmpty()) {
+    setCurrentColourMapFile(filename);
+    m_uiForm.colourBar->getColorMap().loadMap(filename);
+    m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
+    m_uiForm.colourBar->updateColorMap();
+
+    this->updateDisplay();
+  }
+}
+
+QString ContourPreviewPlot::colourMapFileName(QString const &filename) {
+  if (filename.isEmpty())
+    return MantidColorMap::chooseColorMap(m_currentColourMapFile, this);
+  return filename;
+}
+
+/**
+ * Updates the contour plot
+ */
+void ContourPreviewPlot::updateDisplay() {
+  if (m_workspace) {
+    m_data->setRange(m_uiForm.colourBar->getViewRange());
+
+    std::vector<Mantid::coord_t> slicePoint{0, 0};
+    constexpr std::size_t dimX(0);
+    constexpr std::size_t dimY(1);
+    IMDDimension_const_sptr X = m_dimensions[dimX];
+    IMDDimension_const_sptr Y = m_dimensions[dimY];
+    m_data->setSliceParams(dimX, dimY, X, Y, slicePoint);
+
+    double const left{X->getMinimum()};
+    double const top{Y->getMinimum()};
+    double const width{X->getMaximum() - X->getMinimum()};
+    double const height{Y->getMaximum() - Y->getMinimum()};
+    QwtDoubleRect const bounds{left, top, width, height};
+    m_data->setBoundingRect(bounds.normalized());
+
+    m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
+    m_spectrogram->setData(*m_data);
+    m_spectrogram->itemChanged();
+    m_uiForm.plot2D->replot();
+  }
 }
 
 /**
