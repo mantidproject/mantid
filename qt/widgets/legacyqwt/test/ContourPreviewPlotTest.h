@@ -65,7 +65,6 @@ public:
   void
   test_that_a_ContourPreviewPlot_is_instantiated_without_an_active_workspace() {
     TS_ASSERT(!m_contourPlot->getActiveWorkspace());
-    TS_ASSERT_EQUALS(m_contourPlot->getActiveColourMapName().toStdString(), "");
   }
 
   void test_that_getPlot2D_will_get_the_contour_plot() {
