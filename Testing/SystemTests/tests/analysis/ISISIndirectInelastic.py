@@ -85,6 +85,11 @@ import platform
 from six import with_metaclass
 
 
+def currentOSHasGSLv2():
+    """ Check whether the current OS should be running GSLv2 """
+    return platform.linux_distribution()[0] == "ubuntu" or platform.mac_ver()[0] != ''
+
+
 class ISISIndirectInelasticBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
@@ -857,7 +862,7 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         ref_files = ['II.IRISFury.nxs']
         # gsl v2 gives a slightly different result than v1
         # we could do with a better check than this
-        if platform.linux_distribution()[0] == "Ubuntu":
+        if currentOSHasGSLv2():
             ref_files += ['II.IRISFuryFitSeq_gslv2.nxs']
         else:
             ref_files += ['II.IRISFuryFitSeq_gslv1.nxs']
