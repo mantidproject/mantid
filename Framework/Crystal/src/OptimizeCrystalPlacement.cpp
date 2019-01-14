@@ -98,6 +98,12 @@ void OptimizeCrystalPlacement::init() {
                       "FitInfoTable", "FitInfoTable", Direction::Output),
                   "Workspace of Results");
 
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputNormalisedCovarianceMatrixOptX", "CovarianceInfo",
+                      Direction::Output),
+                  "The name of the TableWorkspace in which to store the final "
+                  "covariance matrix");
+
   declareProperty("AdjustSampleOffsets", false,
                   "If true sample offsets will be adjusted to give better "
                   "fits, otherwise they will be fixed as zero(def=true)");
@@ -391,12 +397,6 @@ void OptimizeCrystalPlacement::exec() {
   g_log.notice() << "Output Status=" << OutputStatus << '\n';
 
   //------------------ Fix up Covariance output --------------------
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputNormalisedCovarianceMatrixOptX", "CovarianceInfo",
-                      Direction::Output),
-                  "The name of the TableWorkspace in which to store the final "
-                  "covariance matrix");
-
   ITableWorkspace_sptr NormCov =
       fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
   setProperty("OutputNormalisedCovarianceMatrixOptX",
