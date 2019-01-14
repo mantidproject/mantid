@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 
 class HomeTabView(QtGui.QWidget):
@@ -26,19 +26,12 @@ class HomeTabView(QtGui.QWidget):
         self.setWindowTitle("Home Tab")
         self.resize(500, 100)
 
-        self.splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-
         self.vertical_layout = QtGui.QVBoxLayout()
 
         if self._widget_list:
             for i, widget in enumerate(self._widget_list):
-                self.splitter.addWidget(widget)
-                self.splitter.setCollapsible(i, False)
+                self.vertical_layout.addWidget(widget)
 
-        self.splitter.setHandleWidth(2)
-        self.setStyleSheet("QSplitter::handle {background-color: darkBlue}")
-
-        self.vertical_layout.addWidget(self.splitter)
         self.setLayout(self.vertical_layout)
 
     # for docking

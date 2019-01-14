@@ -126,9 +126,6 @@ class LoadWidgetPresenter(object):
             self.outer = outer  # handle to containing class
 
         def notify_subscribers(self, arg=None):
-            AnalysisDataService.clear()
-            for workspace, run in zip(self.outer._model.workspaces, self.outer._model.runs):
-                workspace['OutputWorkspace'].show(str(run))
 
             Observable.notify_subscribers(self, arg)
 
