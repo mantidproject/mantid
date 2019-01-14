@@ -11,9 +11,9 @@ from __future__ import (absolute_import)
 
 # std imports
 import unittest
-import sys
 
 # 3rdparty
+from mock import patch
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
@@ -31,13 +31,20 @@ class Receiver(QObject):
 class WriteToSignalTest(GuiTest):
 
     def test_connected_receiver_receives_text(self):
-        recv = Receiver()
-        writer = WriteToSignal(sys.stdout)
-        writer.sig_write_received.connect(recv.capture_text)
-        txt = "I expect to see this"
-        writer.write(txt)
-        QCoreApplication.processEvents()
-        self.assertEqual(txt, recv.captured_txt)
+        import sys
+        sys.path.append("c:\\users\\qbr77747\\apps\\miniconda3\\lib\\site-packages")
+        import pydevd
+        pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
+
+        with patch("sys.stdout.fileno") as mock_fileno:
+            recv = Receiver()
+            writer = WriteToSignal(sys.stdout)
+            writer.sig_write_received.connect(recv.capture_text)
+            txt = "I expect to see this"
+            writer.write(txt)
+            QCoreApplication.processEvents()
+            self.assertEqual(txt, recv.captured_txt)
+            mock_fileno.assert_called_once_with()
 
 
 if __name__ == "__main__":

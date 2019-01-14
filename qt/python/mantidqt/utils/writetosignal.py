@@ -21,7 +21,7 @@ class WriteToSignal(QObject):
     def __init__(self, original_out):
         QObject.__init__(self)
         # If the file descriptor of the stream is < 0 then we are running in a no-external-console mode
-        if self.__original_out.fileno() < 0:
+        if original_out.fileno() < 0:
             self.__original_out = None
         else:
             self.__original_out = original_out
