@@ -18,15 +18,15 @@ class WriteToSignal(QObject):
     Qt-signals. Mainly used to communicate
     stdout/stderr across threads"""
 
+    sig_write_received = Signal(str)
+
     def __init__(self, original_out):
         QObject.__init__(self)
         # If the file descriptor of the stream is < 0 then we are running in a no-external-console mode
         if original_out.fileno() < 0:
-            self.__original_out = None
+            self._original_out = None
         else:
-            self.__original_out = original_out
-
-    sig_write_received = Signal(str)
+            self._original_out = original_out
 
     def closed(self):
         return False
@@ -38,9 +38,9 @@ class WriteToSignal(QObject):
         return False
 
     def write(self, txt):
-        if self.__original_out:
+        if self._original_out:
             try:
-                self.__original_out.write(txt)
+                self._original_out.write(txt)
             except IOError as e:
                 self.sig_write_received.emit("Error: Unable to write to the console of the process.\n"
                                              "This error is not related to your script's execution.\n"
