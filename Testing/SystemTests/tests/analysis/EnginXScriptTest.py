@@ -25,11 +25,17 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         simple.mtd.clear()
 
 
-class createCalibrationWholeTest(systemtesting.MantidSystemTest):
+class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         test = EnginX(user="test", vanadium_run="236516",
                       directory="/home/sjenkins/Work/Build-1/ExternalData/Testing/Data/SystemTest")
         test.create_calibration()
+
+    def validate(self):
+        return ("eng_calib", "engggui_calibration_sample.nxs",
+                "engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
+                "engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",)
+
 
 
