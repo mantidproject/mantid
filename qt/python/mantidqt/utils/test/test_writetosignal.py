@@ -9,14 +9,12 @@
 #
 from __future__ import (absolute_import)
 
-# std imports
 import unittest
 
-# 3rdparty
+import sys
 from mock import patch
 from qtpy.QtCore import QCoreApplication, QObject
 
-# local imports
 from mantidqt.utils.qt.test import GuiTest
 from mantidqt.utils.writetosignal import WriteToSignal
 
