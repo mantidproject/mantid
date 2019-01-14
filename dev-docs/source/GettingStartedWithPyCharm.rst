@@ -75,8 +75,8 @@ Disadvantages:
 - Additional setup for each configuration necessary. Thankfully, if the template is edited to have the correct ``EnvFile`` setup, all copies of it will have it too. Copying an already existing configuration also copies the ``EnvFile`` setup.
 
 
-(Old way: if you do not/cannot install the EnvFile extension) Running Files in the Debugger
--------------------------------------------------------------------------------------------
+Running Files in the Debugger without EnvFile extension
+-------------------------------------------------------
 
 Running python code from within PyCharm which depends on the python API, or PyQt for example requires one extra step. Because the source root labelling from the previous section only affects PyCharm searching and not the run configuration, before running the file we must set up the run configuration correctly.
 
