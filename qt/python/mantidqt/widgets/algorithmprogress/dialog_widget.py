@@ -19,6 +19,7 @@ class CancelButton(QPushButton):
     """
     Button that cancels an algorithm
     """
+
     def __init__(self, presenter, algorithm_id):
         """
         Init an instance
@@ -38,8 +39,10 @@ class AlgorithmMonitorDialog(QDialog):
     """
     Displays progress of all running algorithms.
     """
+
     def __init__(self, parent, model):
         super(AlgorithmMonitorDialog, self).__init__(parent)
+        self.parent = parent
         self.tree = QTreeWidget(self)
         self.tree.setColumnCount(3)
         self.tree.setSelectionMode(QTreeWidget.NoSelection)
@@ -66,6 +69,16 @@ class AlgorithmMonitorDialog(QDialog):
 
         self.presenter = AlgorithmProgressDialogPresenter(self, model)
         self.presenter.update_gui()
+
+    def closeEvent(self, *args):
+        """
+        Funnel the closeEvent, triggered when the user presses X,
+        through the same routine as the `Close` button
+        :param args:
+        :return:
+        """
+        self.presenter.close()
+        self.deleteLater()
 
     def update(self, data):
         """
