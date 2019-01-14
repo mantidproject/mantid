@@ -41,9 +41,10 @@ class WriteToSignal(QObject):
         if self.__original_out:
             try:
                 self.__original_out.write(txt)
-            except IOError:
+            except IOError as e:
                 self.sig_write_received.emit("Error: Unable to write to the console of the process.\n"
-                                             "This error is not related to your script's execution.\n\n")
+                                             "This error is not related to your script's execution.\n"
+                                             "Original error: {}\n\n".format(str(e)))
 
         # always write to the message log
         self.sig_write_received.emit(txt)
