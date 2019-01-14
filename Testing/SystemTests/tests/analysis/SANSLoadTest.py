@@ -26,8 +26,6 @@ from sans.state.data import get_data_builder
 from sans.common.file_information import SANSFileInformationFactory
 
 
-
-
 def remove_all_workspaces_from_ads():
     workspaces_on_the_ads = AnalysisDataService.getObjectNames()
     for name in workspaces_on_the_ads:
