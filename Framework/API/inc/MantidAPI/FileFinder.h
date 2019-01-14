@@ -51,11 +51,11 @@ public:
   std::string
   findRun(const std::string &hintstr,
           const std::vector<std::string> &exts = std::vector<std::string>(),
-          const bool overwriteExts = false) const;
+          const bool useExtsOnly = false) const;
   std::vector<std::string>
   findRuns(const std::string &hintstr,
            const std::vector<std::string> &exts = std::vector<std::string>(),
-           const bool overwriteExts = false) const;
+           const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   const Kernel::InstrumentInfo getInstrument(const std::string &hint) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.

@@ -400,7 +400,7 @@ FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
 
 std::string FileFinderImpl::findRun(const std::string &hintstr,
                                     const std::vector<std::string> &exts,
-                                    const bool overwriteExts) const {
+                                    const bool useExtsOnly) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size()
                 << "])\n";
@@ -487,12 +487,12 @@ std::string FileFinderImpl::findRun(const std::string &hintstr,
   if (!extension.empty())
     uniqueExts.push_back(extension);
 
-  // If provided exts are empty, or overwriteExts is false,
+  // If provided exts are empty, or useExtsOnly is false,
   // we want to include facility exts as well
-  if (exts.empty() || !overwriteExts) {
+  getUniqueExtensions(exts, uniqueExts);
+  if (exts.empty() || !useExtsOnly) {
     getUniqueExtensions(extensions, uniqueExts);
   }
-  getUniqueExtensions(exts, uniqueExts);
 
   // determine which archive search facilities to use
   std::vector<IArchiveSearch_sptr> archs = getArchiveSearch(facility);
@@ -543,7 +543,7 @@ void FileFinderImpl::getUniqueExtensions(
  * @param exts :: Vector of allowed file extensions. Optional.
  *                If provided, this provides the only extensions searched for.
  *                If not provided, facility extensions used.
- * @param overwriteExts :: Optional bool. If it's true (and exts is not empty),
+ * @param useExtsOnly :: Optional bool. If it's true (and exts is not empty),
                            search the for the file using exts only.
                            If it's false, use exts AND facility extensions.
  * @return A vector of full paths or empty vector
@@ -553,7 +553,7 @@ void FileFinderImpl::getUniqueExtensions(
 std::vector<std::string>
 FileFinderImpl::findRuns(const std::string &hintstr,
                          const std::vector<std::string> &exts,
-                         const bool overwriteExts) const {
+                         const bool useExtsOnly) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
@@ -611,7 +611,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
         run = std::to_string(irun);
         while (run.size() < nZero)
           run.insert(0, "0");
-        std::string path = findRun(p1.first + run, exts, overwriteExts);
+        std::string path = findRun(p1.first + run, exts, useExtsOnly);
         if (!path.empty()) {
           res.push_back(path);
         } else {
@@ -619,7 +619,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
         }
       }
     } else {
-      std::string path = findRun(*h, exts, overwriteExts);
+      std::string path = findRun(*h, exts, useExtsOnly);
       if (!path.empty()) {
         res.push_back(path);
       } else {

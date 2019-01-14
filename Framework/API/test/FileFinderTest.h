@@ -404,13 +404,13 @@ public:
 
     // This file is .nxs or .RAW
     // returns a .nxs if no extensions passed in
-    const std::vector<std::string> extensions = {".a", ".txt", ".RAW"};
+    const std::vector<std::string> extensions = {".a", ".txt", ".nxs"};
     path = FileFinder::Instance().findRun("MUSR15189", extensions, true);
     std::string actualExtension = "";
     if (!path.empty()) {
       actualExtension = path.substr(path.size() - 4, 4);
     }
-    TS_ASSERT_EQUALS(actualExtension, ".RAW");
+    TS_ASSERT_EQUALS(actualExtension, ".nxs");
   }
 
   void testFindAddFiles() {

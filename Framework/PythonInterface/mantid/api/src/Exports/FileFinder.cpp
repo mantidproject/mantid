@@ -35,12 +35,12 @@ GNU_DIAG_ON("unused-local-typedef")
  * to search for
  * @param exts_list :: A python list containing strings of file extensions to
  * search
- * @param overwriteExts :: bool. If true, use exts_list only. If false, use
+ * @param useExtsOnly :: bool. If true, use exts_list only. If false, use
  * combination of exts_list and facility_exts.
  */
 std::vector<std::string> runFinderProxy(FileFinderImpl &self,
                                         std::string hintstr, list exts_list,
-                                        const bool overwriteExts) {
+                                        const bool useExtsOnly) {
   // Convert python list to c++ vector
   std::vector<std::string> exts;
   for (int i = 0; i < len(exts_list); ++i)
@@ -52,7 +52,7 @@ std::vector<std::string> runFinderProxy(FileFinderImpl &self,
   //   ReleaseGlobalInterpreter does this for us
   Mantid::PythonInterface::ReleaseGlobalInterpreterLock
       releaseGlobalInterpreterLock;
-  return self.findRuns(hintstr, exts, overwriteExts);
+  return self.findRuns(hintstr, exts, useExtsOnly);
 }
 
 void export_FileFinder() {
@@ -65,14 +65,14 @@ void export_FileFinder() {
                "ignoreDirs=True. An empty string is returned otherwise."))
       .def("findRuns", &runFinderProxy,
            (arg("self"), arg("hintstr"), arg("exts_list") = list(),
-            arg("overwriteExts") = false),
+            arg("useExtsOnly") = false),
            "Find a list of files file given a hint. "
            "The hint can be a comma separated list of run numbers and can also "
            "include ranges of runs, e.g. 123-135 or equivalently 123-35"
            "If no instrument prefix is given then the current default is used."
            "exts_list is an optional list containing strings of file "
            "extensions to search."
-           "overwriteExts is an optional bool. If it's true then don't use "
+           "useExtsOnly is an optional bool. If it's true then don't use "
            "facility exts.")
       .def("getCaseSensitive", &FileFinderImpl::getCaseSensitive, (arg("self")),
            "Option to get if file finder should be case sensitive.")

@@ -28,8 +28,8 @@ class FileFinderTest(unittest.TestCase):
 
     def test_that_find_runs_accepts_a_list_of_string_and_a_bool(self):
         try:
-            runs = FileFinder.findRuns("CNCS7860", overwriteExts=True)
-            FileFinder.findRuns("CNCS7860", [".nxs", ".txt"], overwriteExts=True)
+            runs = FileFinder.findRuns("CNCS7860", useExtsOnly=True)
+            FileFinder.findRuns("CNCS7860", [".nxs", ".txt"], useExtsOnly=True)
         except Exception as e:
             if type(e).__name__ == "ArgumentError":
                 self.assertFalse(True, "Expected findRuns to accept a list of strings and a bool as input."
