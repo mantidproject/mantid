@@ -13,14 +13,21 @@ import copy
 from matplotlib import ticker, text, axis  # noqa
 import matplotlib.colors
 import matplotlib.axes
+import matplotlib.cm
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
-from mantid.plots.plotfunctions import plot
 from mantid import plots  # noqa
+
+# Constants set in workbench.plotting.functions but would cause backwards reliability
+SUBPLOT_WSPACE = 0.5
+SUBPLOT_HSPACE = 0.5
 
 
 class PlotsLoader(object):
+    def __init__(self):
+        self.color_bar_remade = False
+
     def load_plots(self, plots_list):
         if plots_list is None:
             return
@@ -32,7 +39,7 @@ class PlotsLoader(object):
                 # Catch all errors in here so it can fail silently-ish
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt(str(e))
-                logger.warning("A plot was unable to be loaded from the save file")
+                logger.warning("A plot was unable to be loaded from the save file. Error: " + str(e))
 
     def make_fig(self, plot_dict, create_plot=True):
         """
@@ -74,9 +81,39 @@ class PlotsLoader(object):
         else:
             return fig
 
-    @staticmethod
-    def plot_func( workspace, axes, creation_arg):
-        plot(workspace=workspace, axes=axes, **creation_arg)
+    def plot_func(self, workspace, axes, creation_arg):
+        """
+        Plot's the graph from the given workspace, axes and creation_args. then returns the function used to create it.
+        :param workspace: mantid.Workspace; Workspace to create the graph from
+        :param axes: matplotlib.Axes; Axes to create the graph on
+        :param creation_arg: The creation arguments that have been used to create the details of the
+        :return: String; The function used to create the plot
+        """
+        # Remove the function kwarg and if it's not found set to "plot
+        function_to_call = creation_arg.pop("function")
+
+        # Handle recreating the cmap objects
+        if "cmap" in creation_arg:
+            creation_arg["cmap"] = getattr(matplotlib.cm, creation_arg["cmap"])
+
+        function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar, "pcolor": axes.pcolor,
+                         # Support for this method is not currently present in mantid so cannot be saved/loaded
+                         # "pcolorfast": pcolorfast,
+                         "pcolormesh": axes.pcolormesh, "imshow": axes.imshow,
+                         "contourf": axes.contourf, "tripcolor": axes.tripcolor, "tricontour": axes.tricontour,
+                         "tricontourf": axes.tricontourf}
+        func = function_dict[function_to_call]
+        # pcm is only needed later but needs to be recieved now
+        pcm = func(workspace, **creation_arg)
+
+        # Plotting is done unless a colorbar needs to be added
+        if function_to_call in ["imshow", "pcolormesh", "pcolor", "pcolorfast"]:
+            fig = axes.get_figure()
+            fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
+            fig.colorbar(pcm, ax=axes, pad=0.06)
+            fig.canvas.draw()
+
+            self.color_bar_remade = True
 
     def plot_extra_lines(self, creation_args, ax):
         """
@@ -97,7 +134,11 @@ class PlotsLoader(object):
         self.restore_fig_properties(fig, dic["properties"])
         axes_list = dic["axes"]
         for index, ax in enumerate(fig.axes):
-            self.restore_fig_axes(ax, axes_list[index])
+            try:
+                self.restore_fig_axes(ax, axes_list[index])
+            except IndexError as e:
+                if not self.color_bar_remade:
+                    raise IndexError(e)
 
     @staticmethod
     def restore_fig_properties(fig, dic):
@@ -139,6 +180,17 @@ class PlotsLoader(object):
         else:
             ax.legend()
             self.update_legend(ax, dic["legend"])
+
+        # Update colorbar if present
+        if self.color_bar_remade and dic["colormap"]["exists"]:
+            if len(ax.images) > 0:
+                colorbar = ax.images[0].colorbar
+            elif len(ax.collections) > 0:
+                colorbar = ax.images[0].colorbar
+            else:
+                raise RuntimeError("self.color_bar_remade set to True whilst no colorbar found")
+
+            self.update_colorbar_from_dict(colorbar, dic["colormap"])
 
     @staticmethod
     def create_text_from_dict(ax, dic):
@@ -250,3 +302,11 @@ class PlotsLoader(object):
 
         if properties["minorTickFormatter"] is "FixedFormatter":
             axis_.set_major_formatter(ticker.FixedLocator(properties["minorTickFormat"]))
+
+    @staticmethod
+    def update_colorbar_from_dict(colorbar, dic):
+        colorbar.vmin = dic["min"]
+        colorbar.vmax = dic["max"]
+
+        # Make sure it displays
+        colorbar.update_ticks()

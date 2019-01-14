@@ -44,7 +44,11 @@ class PlotsSaver(object):
         axes_list = []
         create_list = []
         for ax in fig.axes:
-            create_list.append(ax.creation_args)
+            try:
+                create_list.append(ax.creation_args)
+            except AttributeError:
+                logger.debug("Axis had a axis without creation_args - Common with colorfill")
+                continue
             axes_list.append(self.get_dict_for_axes(ax))
 
         fig_dict = {"creationArguments": create_list,
@@ -53,11 +57,31 @@ class PlotsSaver(object):
                     "properties": self.get_dict_from_fig_properties(fig)}
         return fig_dict
 
+    @staticmethod
+    def get_dict_for_axes_colorbar(ax):
+        colorbar = None
+        cb_dict = {}
+
+        # If an image is present (from imshow)
+        if len(ax.images) > 0:
+            colorbar = ax.images[0].colorbar
+        # If an image is present from pcolor/pcolormesh
+        elif len(ax.collections) > 0:
+            colorbar = ax.collections[0].colorbar
+        else:
+            cb_dict["exists"] = False
+            return cb_dict
+
+        cb_dict["exists"] = True
+        cb_dict["max"] = colorbar.vmax
+        cb_dict["min"] = colorbar.vmin
+
     def get_dict_for_axes(self, ax):
         ax_dict = {"properties": self.get_dict_from_axes_properties(ax),
                    "title": ax.get_title(),
                    "xAxisTitle": ax.get_xlabel(),
-                   "yAxisTitle": ax.get_ylabel()}
+                   "yAxisTitle": ax.get_ylabel(),
+                   "colorbar": self.get_dict_for_axes_colorbar(ax)}
 
         # Get lines from the axes and store it's data
         lines_list = []

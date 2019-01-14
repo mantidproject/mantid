@@ -52,24 +52,11 @@ def plot_decorator(func):
         # Saves saving it on array objects
         if helperfunctions.validate_args(*args, **kwargs):
             # Fill out kwargs with the values of args
-            for index, arg in enumerate(args):
-                if index is 0:
-                    kwargs["workspaces"] = args[0].name()
-                if index is 1:
-                    kwargs["spectrum_nums"] = args[1]
-                if index is 2:
-                    kwargs["wksp_indices"] = args[2]
-                if index is 3:
-                    kwargs["errors"] = args[3]
-                if index is 4:
-                    kwargs["overplot"] = arg[4]
-                # ignore 5 as no need to save the fig object
-                if index is 6:
-                    kwargs["plot_kwargs"] = arg[6]
-            if hasattr(self, "creation_args"):
-                self.creation_args.append(kwargs)
-            else:
-                self.creation_args = [kwargs]
+            kwargs["workspaces"] = args[0].name()
+            kwargs["function"] = func.__name__
+            if "cmap" in kwargs:
+                kwargs["cmap"] = kwargs["cmap"].name
+            self.creation_args.append(kwargs)
         return func_value
     return wrapper
 
@@ -151,6 +138,7 @@ class MantidAxes(Axes):
     def __init__(self, *args, **kwargs):
         super(MantidAxes, self).__init__(*args, **kwargs)
         self.tracked_workspaces = dict()
+        self.creation_args = []
 
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None):
         """
@@ -250,6 +238,7 @@ class MantidAxes(Axes):
         else:
             return Axes.plot(self, *args, **kwargs)
 
+    @plot_decorator
     def scatter(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -274,6 +263,7 @@ class MantidAxes(Axes):
         else:
             return Axes.scatter(self, *args, **kwargs)
 
+    @plot_decorator
     def errorbar(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -327,6 +317,7 @@ class MantidAxes(Axes):
         else:
             return Axes.errorbar(self, *args, **kwargs)
 
+    @plot_decorator
     def pcolor(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -348,6 +339,7 @@ class MantidAxes(Axes):
         """
         return self._pcolor_func('pcolor', *args, **kwargs)
 
+    @plot_decorator
     def pcolorfast(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -369,6 +361,7 @@ class MantidAxes(Axes):
         """
         return self._pcolor_func('pcolorfast', *args, **kwargs)
 
+    @plot_decorator
     def pcolormesh(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -390,6 +383,7 @@ class MantidAxes(Axes):
         """
         return self._pcolor_func('pcolormesh', *args, **kwargs)
 
+    @plot_decorator
     def imshow(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -477,6 +471,7 @@ class MantidAxes(Axes):
             self.set_aspect('auto')
         return artists_new
 
+    @plot_decorator
     def contour(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -528,6 +523,7 @@ class MantidAxes(Axes):
         else:
             return Axes.contourf(self, *args, **kwargs)
 
+    @plot_decorator
     def tripcolor(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -553,6 +549,7 @@ class MantidAxes(Axes):
         else:
             return Axes.tripcolor(self, *args, **kwargs)
 
+    @plot_decorator
     def tricontour(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -578,6 +575,7 @@ class MantidAxes(Axes):
         else:
             return Axes.tricontour(self, *args, **kwargs)
 
+    @plot_decorator
     def tricontourf(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
