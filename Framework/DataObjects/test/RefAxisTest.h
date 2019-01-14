@@ -38,8 +38,8 @@ public:
 
     // Fill them
     Mantid::MantidVec a(25);
-    for (int i = 0; i < a.size(); ++i) {
-      a[i] = i + 0.1;
+    for (size_t i = 0; i < a.size(); ++i) {
+      a[i] = static_cast<double>(i) + 0.1;
     }
     for (int j = 0; j < 5; ++j) {
       m_space->mutableX(j) =
