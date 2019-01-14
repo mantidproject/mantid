@@ -126,6 +126,7 @@ class PairingTablePresenterTest(unittest.TestCase):
     def test_that_remove_group_when_table_is_empty_does_not_throw(self):
         for i in range(3):
             self.presenter.handle_remove_pair_button_clicked()
+        self.view.warning_popup.assert_not_called()
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : Context menu has "add pair" and "remove pair" functionality
@@ -355,6 +356,22 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertNotEqual(self.get_group_1_selector(0).findText("my_group_0"), -1)
         self.assertNotEqual(self.get_group_1_selector(0).findText("my_group_1"), -1)
         self.assertNotEqual(self.get_group_1_selector(0).findText("my_group_2"), -1)
+
+    def test_that_get_index_of_text_returns_correct_index_if_text_exists(self):
+        self.add_three_groups_to_model()
+        self.presenter.handle_add_pair_button_clicked()
+
+        index = self.view.get_index_of_text(self.get_group_1_selector(0), 'my_group_1')
+
+        self.assertEqual(index, 1)
+
+    def test_that_get_index_of_text_returns_0_if_text_does_not_exists(self):
+        self.add_three_groups_to_model()
+        self.presenter.handle_add_pair_button_clicked()
+
+        index = self.view.get_index_of_text(self.get_group_1_selector(0), 'random string')
+
+        self.assertEqual(index, 0)
 
     def test_that_added_groups_appear_in_group_combo_boxes_in_existing_pairs_if_update_called(self):
         self.presenter.handle_add_pair_button_clicked()

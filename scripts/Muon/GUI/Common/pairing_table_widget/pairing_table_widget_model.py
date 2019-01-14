@@ -14,15 +14,15 @@ class PairingTableModel(object):
 
     @property
     def pair_names(self):
-        return self._data.pair_names
+        return list(self._data.pair_names)
 
     @property
     def group_names(self):
-        return self._data.group_names
+        return list(self._data.group_names)
 
     @property
     def group_and_pair_names(self):
-        return self._data.group_names + self._data.pair_names
+        return list(self._data.group_names) + list(self._data.pair_names)
 
     def add_pair(self, pair):
         self._data.add_pair(pair)
