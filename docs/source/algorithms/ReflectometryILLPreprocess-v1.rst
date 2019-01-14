@@ -13,7 +13,8 @@ This algorithm is the first step in the ILL reflectometry reduction workflow. It
 
 #. loads data from disk
 #. merges the numors
-#. determines the peak position and moves the detector correspondingly
+#. determines the peak position
+#. moves the detector
 #. normalizes to a (water) reference (optional)
 #. normalizes to slit sizes (optional)
 #. normalizes to experiment time or monitor counts (optional)
@@ -30,6 +31,7 @@ The algorithm adds the following sample log entries to the *OutputWorkspace*:
 * foreground.centre_workspace_index
 * foreground.last_workspace_index
 * foreground.first_workspace_index
+* theta.at_peak_position : the two theta value in degrees
 
 The workflow diagram below gives an overview of the algorithm:
 

@@ -15,7 +15,7 @@ from mantid.kernel import (CompositeValidator, Direction,
                            IntBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (AddSampleLog, CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
                               Divide, ExtractMonitors, FindReflectometryLines, LoadAndMerge, Minus, mtd,
-                              NormaliseToMonitor, RebinToWorkspace, Scale, Transpose)
+                              NormaliseToMonitor, RebinToWorkspace, Scale, SpecularReflectionPositionCorrect, Transpose)
 import numpy
 import ReflectometryILL_common as common
 
@@ -111,6 +111,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         ws, monWS = self._extractMonitors(ws)
 
         ws = self._peakFitting(ws)
+
+        ws = self._moveDetector(ws)
 
         ws = self._waterCalibration(ws)
 
@@ -338,10 +340,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             loadOption = {'XUnit': 'TimeOfFlight'}
             #if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
             loadOption['BeamCentre'] = 0.0
-            #if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
-            #    loadOption['BeamPositionWorkspace'] = self.getPropertyValue(Prop.BEAM_POS_WS)
-            #if not self.getProperty(Prop.BEAM_ANGLE).isDefault:
-            #    loadOption['BraggAngle'] = str(self.getProperty(Prop.BEAM_ANGLE).value)
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
             ws = LoadAndMerge(Filename=inputFiles,
                               LoaderName='LoadILLReflectometry',
@@ -390,13 +388,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         AddSampleLog(**logargs)
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
-        beamPosIndex = int(numpy.rint(beamPos))
-        if beamPosIndex > 255:
-            beamPosIndex = 255
+        self.beamPosIndex = int(numpy.rint(beamPos))
+        if self.beamPosIndex > 255:
+            self.beamPosIndex = 255
             self.log().warning('Is it a monitor spectrum?')
         sign = self._workspaceIndexDirection(ws)
-        startIndex = beamPosIndex - sign * hws[0]
-        endIndex = beamPosIndex + sign * hws[1]
+        startIndex = self.beamPosIndex - sign * hws[0]
+        endIndex = self.beamPosIndex + sign * hws[1]
         if startIndex > endIndex:
             endIndex, startIndex = startIndex, endIndex
         logargs['LogName'] = common.SampleLogs.FOREGROUND_START
@@ -404,12 +402,35 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         logargs['NumberType'] = 'Int'
         AddSampleLog(**logargs)
         logargs['LogName'] = common.SampleLogs.FOREGROUND_CENTRE
-        logargs['LogText'] = str(beamPosIndex)
+        logargs['LogText'] = str(self.beamPosIndex)
         AddSampleLog(**logargs)
         logargs['LogName'] = common.SampleLogs.FOREGROUND_END
         logargs['LogText'] = str(endIndex)
         AddSampleLog(**logargs)
         return ws
+
+    def _moveDetector(self, ws):
+        detectorMovedWSName = self._names.withSuffix('detector_moved')
+        det = ws.getDetector(self.beamPosIndex)
+        theta = numpy.rad2deg(ws.detectorSignedTwoTheta(det))
+        SpecularReflectionPositionCorrect(InputWorkspace=ws,
+                                          OutputWorkspace=detectorMovedWSName,
+                                          TwoTheta=theta,
+                                          DetectorCorrectionType='RotateAroundSample',
+                                          DetectorComponentName='detector',
+                                          DetectorFacesSample=True,
+                                          PixelSize=0.001195,
+                                          DirectLinePosition=self.beamPosIndex,
+                                          EnableLogging=self._subalgLogging)
+        detectorMovedWS = mtd[detectorMovedWSName]
+        # Add theta to the sample logs of ws.
+        logargs = {'Workspace': detectorMovedWS, 'LogType': 'Number', 'EnableLogging': self._subalgLogging}
+        logargs['LogName'] = 'theta.at_peak_position'
+        logargs['LogText'] = format(theta, '.13f')
+        logargs['NumberType'] = 'Double'
+        AddSampleLog(**logargs)
+        self._cleanup.cleanup(ws)
+        return detectorMovedWS
 
     def _normaliseToFlux(self, detWS, monWS):
         """Normalise ws to monitor counts or counting time."""
