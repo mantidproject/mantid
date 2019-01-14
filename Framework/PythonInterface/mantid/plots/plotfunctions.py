@@ -498,6 +498,8 @@ class ScalingAxesImage(mimage.AxesImage):
         x1 = self.unsampled_extent[0] + pxmax/dims[1]*(self.unsampled_extent[1] - self.unsampled_extent[0]) 
         y0 = self.unsampled_extent[2] + pymin/dims[0]*(self.unsampled_extent[3] - self.unsampled_extent[2])
         y1 = self.unsampled_extent[2] + pymax/dims[0]*(self.unsampled_extent[3] - self.unsampled_extent[2])
+        ax.set_xlim(x0, x1, emit=False)
+        ax.set_ylim(y0, y1, emit=False)
         self._update_extent((x0,x1,y0,y1))
 
 
