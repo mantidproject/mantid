@@ -294,6 +294,11 @@ public:
     auto f = sipCpp->defaultPeakType();
     sipRes = FROM_CSTRING(f.c_str());
 %End
+    QString addPeakFunction(QString);
+    double getPeakCentreOf(QString);
+    void setPeakCentreOf(QString, double);
+    double getPeakHeightOf(QString);
+    void setPeakHeightOf(QString, double);
 
     SIP_PYOBJECT outputName() const;
 %MethodCode

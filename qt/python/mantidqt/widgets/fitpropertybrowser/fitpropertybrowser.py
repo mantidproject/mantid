@@ -11,7 +11,7 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 
 import re
 
-from qtpy.QtCore import Signal
+from qtpy.QtCore import Signal, Slot
 
 from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
@@ -39,6 +39,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.toolbar_state_checker = toolbar_state_checker
         self.tool = None
         self.fit_result_lines = []
+        self.peak_ids = {}
         self.startXChanged.connect(self.move_start_x)
         self.endXChanged.connect(self.move_end_x)
         self.algorithmFinished.connect(self.fitting_done)
@@ -61,6 +62,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_state_checker)
         self.tool.fit_start_x_moved.connect(self.setStartX)
         self.tool.fit_end_x_moved.connect(self.setEndX)
+        self.tool.peak_added.connect(self.peak_added_slot)
+        self.tool.peak_moved.connect(self.peak_moved_slot)
         self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
         super(FitPropertyBrowser, self).show()
         self.canvas.draw()
@@ -99,3 +102,16 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for lin in self.get_lines():
             if lin.get_label().startswith(name):
                 self.fit_result_lines.append(lin)
+
+    @Slot(int, float, float)
+    def peak_added_slot(self, peak_id, centre, height):
+        fun = self.addPeakFunction(self.defaultPeakType())
+        self.setPeakCentreOf(fun, centre)
+        self.setPeakHeightOf(fun, height)
+        self.peak_ids[peak_id] = fun
+
+    @Slot(int, float, float)
+    def peak_moved_slot(self, peak_id, centre, height):
+        fun = self.peak_ids[peak_id]
+        self.setPeakCentreOf(fun, centre)
+        self.setPeakHeightOf(fun, height)

@@ -9,7 +9,7 @@ from qtpy.QtWidgets import QApplication
 
 class VerticalMarker(QObject):
 
-    moved = Signal(float)
+    x_moved = Signal(float)
 
     def __init__(self, canvas, color, x, y0=None, y1=None):
         super(VerticalMarker, self).__init__()
@@ -60,7 +60,7 @@ class VerticalMarker(QObject):
     def mouse_move(self, x, y=None):
         if self.is_moving and x is not None:
             self.x = x
-            self.moved.emit(x)
+            self.x_moved.emit(x)
             return True
         return False
 
@@ -108,11 +108,17 @@ class CentreMarker(VerticalMarker):
         self.x = x
         return True
 
+    def height(self):
+        y0, y1 = self._get_y0_y1()
+        return abs(y1 - y0)
+
 
 class FitInteractiveTool(QObject):
 
     fit_start_x_moved = Signal(float)
     fit_end_x_moved = Signal(float)
+    peak_added = Signal(int, float, float)
+    peak_moved = Signal(int, float, float)
 
     def __init__(self, canvas, toolbar_state_checker):
         super(FitInteractiveTool, self).__init__()
@@ -127,8 +133,8 @@ class FitInteractiveTool(QObject):
         self.fit_start_x = VerticalMarker(canvas, 'green', start_x)
         self.fit_end_x = VerticalMarker(canvas, 'green', end_x)
 
-        self.fit_start_x.moved.connect(self.fit_start_x_moved)
-        self.fit_end_x.moved.connect(self.fit_end_x_moved)
+        self.fit_start_x.x_moved.connect(self.fit_start_x_moved)
+        self.fit_end_x.x_moved.connect(self.fit_end_x_moved)
 
         self.peak_markers = []
 
@@ -197,6 +203,8 @@ class FitInteractiveTool(QObject):
         if event.button == 1:
             x = event.xdata
             y = event.ydata
+            if x is None or y is None:
+                return
             self.fit_start_x.on_click(x, y)
             self.fit_end_x.on_click(x, y)
             for pm in self.peak_markers:
@@ -218,15 +226,33 @@ class FitInteractiveTool(QObject):
             self.fit_end_x.x = x
             self.canvas.draw()
 
+    def _make_peak_id(self):
+        ids = set([pm.peak_id for pm in self.peak_markers])
+        n = 0
+        for i in range(len(ids)):
+            if i in ids:
+                if i > n:
+                    n = i
+            else:
+                return i
+        return n + 1
+
     def add_peak(self, x, y_top, y_bottom=None):
-        self.peak_markers.append(PeakMarker(self.canvas, x, y_top, y_bottom))
+        peak_id = self._make_peak_id()
+        marker = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom)
+        marker.peak_moved.connect(self.peak_moved)
+        self.peak_markers.append(marker)
         self.canvas.draw()
+        self.peak_added.emit(peak_id, x, marker.height())
 
 
 class PeakMarker(QObject):
 
-    def __init__(self, canvas, x, y_top, y_bottom):
+    peak_moved = Signal(int, float, float)
+
+    def __init__(self, canvas, peak_id, x, y_top, y_bottom):
         super(PeakMarker, self).__init__()
+        self.peak_id = peak_id
         self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top)
 
     def redraw(self):
@@ -236,10 +262,20 @@ class PeakMarker(QObject):
         return self.centre_marker.override_cursor(x, y)
 
     def mouse_move(self, x, y):
-        return self.centre_marker.mouse_move(x, y)
+        moved = self.centre_marker.mouse_move(x, y)
+        if moved:
+            self.peak_moved.emit(self.peak_id, x, self.centre_marker.height())
+            return True
+        return False
 
     def on_click(self, x, y):
         self.centre_marker.on_click(x, y)
 
     def stop(self):
         self.centre_marker.stop()
+
+    def centre(self):
+        return self.centre_marker.x
+
+    def height(self):
+        return self.centre_marker.height()

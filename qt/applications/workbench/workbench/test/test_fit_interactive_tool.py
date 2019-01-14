@@ -43,6 +43,10 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
             self.draw_count += 1
         self.fit_browser.canvas.mpl_connect('draw_event', increment)
 
+    def get_canvas(self):
+        pos = self.w._canvas.geometry().center()
+        return self.w.childAt(pos)
+
     def move_marker(self, canvas, marker, pos, dx, try_other_way_if_failed):
         tr = self.fit_browser.tool.ax.get_xaxis_transform()
         x0 = tr.transform((0, 0))[0]
@@ -57,6 +61,21 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
             marker.mouse_move(new_x)
             yield 0.1
             marker.stop()
+
+    def drag_mouse(self, x, y, dx, dy):
+        x_tr = self.fit_browser.tool.ax.get_xaxis_transform()
+        y_tr = self.fit_browser.tool.ax.get_yaxis_transform()
+        x0, _ = x_tr.transform((0, 0))
+        _, y0 = y_tr.transform((0, 0))
+        dx_pxl, _ = x_tr.transform((dx, 0))
+        _, dy_pxl = y_tr.transform((0, dy))
+        dx_pxl -= x0
+        dy_pxl -= y0
+        x_pxl, _ = x_tr.transform((x, 0))
+        _, y_pxl = y_tr.transform((0, y))
+        pos = QPoint(x_pxl, y_pxl)
+        new_pos = pos + QPoint(dx_pxl, dy_pxl)
+        yield drag_mouse(self.get_canvas(), pos, new_pos)
 
     def move_start_x(self, canvas, pos, dx, try_other_way_if_failed=True):
         return self.move_marker(canvas, self.fit_browser.tool.fit_start_x, pos, dx,
@@ -309,10 +328,11 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
 
     def test_add_peak(self):
         yield self.start()
-        self.start_draw_calls_count()
-        self.fit_browser.loadFunction('name=LinearBackground')
         self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
-        self.assertEqual(self.draw_count, 1)
+        self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
+        self.assertEqual(self.fit_browser.getFittingFunction(), 'name=Gaussian,Height=0.2,PeakCentre=1,Sigma=0')
+        yield self.drag_mouse(1.0, 4.2, 0.5, 0.0)
+        self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
 
 
 runTests(TestFitPropertyBrowser)

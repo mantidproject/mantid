@@ -54,6 +54,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <iostream>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -3367,6 +3368,52 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
   } else {
     throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
   }
+}
+
+/**
+ * A specialisation of addFunction to be used in the workbench.
+ * It returns an id of the added function as a string of "f-dot"
+ * indices. This provides function identification that doesn't use
+ * PropertyHandlers and can be used on the python side.
+ * @param fnName :: Name of a function to add.
+ * @return :: An ID string, eg: f0.f2.f1 (There is no dot at the end).
+ */
+QString FitPropertyBrowser::addPeakFunction(const QString &fnName) {
+  return addFunction(fnName.toStdString())->functionPrefix();
+}
+
+PropertyHandler *FitPropertyBrowser::getPeakHandler(const QString &prefix) {
+  if (prefix.isEmpty()) throw std::runtime_error("Peak function prefix cannot be empty");
+  auto const indexList = prefix.split(".");
+  auto const n = indexList.size() - 1;
+  auto handler = getHandler();
+  for(int i = 0; i < n; ++i) {
+    auto const index = indexList[i].mid(1).toInt();
+    handler = handler->getHandler(index);
+  }
+  return handler->getHandler(indexList[n].mid(1).toInt());
+}
+
+void FitPropertyBrowser::setPeakCentreOf(const QString &prefix, double value) {
+  auto handler = getPeakHandler(prefix);
+  handler->setCentre(value);
+  handler->updateParameters();
+}
+
+double FitPropertyBrowser::getPeakCentreOf(const QString &prefix) {
+  auto handler = getPeakHandler(prefix);
+  return handler->centre();
+}
+
+void FitPropertyBrowser::setPeakHeightOf(const QString &prefix, double value) {
+  auto handler = getPeakHandler(prefix);
+  handler->setHeight(value);
+  handler->updateParameters();
+}
+
+double FitPropertyBrowser::getPeakHeightOf(const QString &prefix) {
+  auto handler = getPeakHandler(prefix);
+  return handler->height();
 }
 
 } // namespace MantidWidgets
