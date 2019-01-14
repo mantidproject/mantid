@@ -98,7 +98,7 @@ class InstrumentWidgetView(QtGui.QWidget):
                            'subcontrol-origin: margin;'
                            "padding: 0 3px;"
                            'subcontrol-position: top center;'
-                           'padding-top: -10px;'
+                           'padding-top: 0px;'
                            'padding-bottom: 0px;'
                            "padding-right: 10px;"
                            ' color: grey; }')
