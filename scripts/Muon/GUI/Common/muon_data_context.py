@@ -107,7 +107,7 @@ class MuonDataContext(object):
         return self._loaded_data.num_items() > 0
 
     def is_multi_period(self):
-        return isinstance(self.current_data["OutputWorkspace"], list)
+        return len(self.current_data["OutputWorkspace"]) > 1
 
     @property
     def current_data(self):
@@ -249,7 +249,7 @@ class MuonDataContext(object):
         workspace = self.current_data["OutputWorkspace"]
         directory = get_base_data_directory(self) + get_raw_data_directory(self)
 
-        if isinstance(workspace, list):
+        if len(workspace) > 1:
             # Multi-period data
             for i, single_ws in enumerate(workspace):
                 name = directory + get_raw_data_workspace_name(self) + "_period_" + str(i)
@@ -257,7 +257,7 @@ class MuonDataContext(object):
         else:
             # Single period data
             name = directory + get_raw_data_workspace_name(self)
-            workspace.show(name)
+            workspace[0].show(name)
 
     def show_all_groups(self):
         for group_name in self._groups.keys():
