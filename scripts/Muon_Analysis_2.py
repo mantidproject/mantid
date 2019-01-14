@@ -12,6 +12,8 @@ import sys
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 from mantid.kernel import ConfigServiceImpl
+from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
+
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from save_python import getWidgetIfOpen
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
@@ -20,6 +22,7 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 
+from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 
 Name = "Muon_Analysis_2"
 
@@ -66,20 +69,44 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
+        self.home_tab = HomeTabWidget(self.context)
+        self.setup_tabs()
         self.help_widget = HelpWidget()
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget.load_widget_view)
-        splitter.addWidget(self.grouping_tab_widget.group_tab_view)
+        splitter.addWidget(self.tabs)
         splitter.addWidget(self.help_widget.view)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
 
+        self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab.home_tab_widget.groupingObserver)
+        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.instrumentObserver)
+        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
+            self.load_widget.load_widget.instrumentObserver)
+        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
+
     def closeEvent(self, event):
-        self.load_widget = None
+        print("Muon Analysis Close Event")
+        self.load_widget.load_widget_view = None
+        self.load_widget.load_run_view = None
+        self.load_widget.load_file_view = None
+
+    def setup_tabs(self):
+        """
+        Set up the tabbing structure; the tabs work similarly to conventional
+        web browsers.
+        """
+        self.tabs = DetachableTabWidget(self)
+        self.tabs.addTab(self.home_tab.home_tab_view, 'Home')
+        self.tabs.addTab(self.grouping_tab_widget.group_tab_view, 'Grouping')
 
 
 def qapp():

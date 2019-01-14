@@ -28,14 +28,14 @@ def get_pair_data_workspace_name(context, pair_name):
 
 def get_base_data_directory(context):
     if context.is_multi_period():
-        return context.base_directory + "/" + context._base_run_name() + " Period " + context.period_string + "/"
+        return context.base_directory + "/" + context._base_run_name() + "/"
     else:
         return context.base_directory + "/" + context._base_run_name() + "/"
 
 
 def get_raw_data_directory(context):
     if context.is_multi_period():
-        return context._base_run_name() + " Period " + context.period_string + "; Raw Data/"
+        return context._base_run_name() + "; Raw Data/"
     else:
         return context._base_run_name() + " Raw Data/"
 

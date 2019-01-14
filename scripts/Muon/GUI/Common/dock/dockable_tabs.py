@@ -9,7 +9,6 @@ https://stackoverflow.com/questions/47267195/in-pyqt4-is-it-possible-to-detach-t
 
 class DetachableTabWidget(QtGui.QTabWidget):
     """
-
     The detached tabs are QMainWindow type
     """
 

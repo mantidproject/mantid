@@ -103,6 +103,8 @@ class MuonDataContext(object):
         self._loaded_data = load_data
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
+        self._instrument = ConfigService.getInstrument().name()
+
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
 
@@ -115,9 +117,11 @@ class MuonDataContext(object):
 
     @property
     def instrument(self):
-        ConfigService['default.instrument'] = 'EMU'
-        inst = ConfigService.getInstrument().name()
-        return inst
+        return self._instrument
+
+    @instrument.setter
+    def instrument(self, value):
+        self._instrument = value
 
     @property
     def current_run(self):
