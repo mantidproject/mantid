@@ -78,7 +78,8 @@ protected:
   /// Run the load algorithm with the given file name, output name and spectrum
   /// range
   bool loadFile(const QString &filename, const QString &outputName,
-                const int specMin = -1, const int specMax = -1);
+                const int specMin = -1, const int specMax = -1,
+                bool loadHistory = true);
 
   /// Add a SaveNexusProcessed step to the batch queue
   void addSaveWorkspaceToQueue(const std::string &wsName,

@@ -136,21 +136,21 @@ void IndirectTab::exportPythonScript() {
  * @return If the algorithm was successful
  */
 bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
-                           const int specMin, const int specMax) {
-  Algorithm_sptr load =
-      AlgorithmManager::Instance().createUnmanaged("Load", -1);
+                           const int specMin, const int specMax,
+                           bool loadHistory) {
+  auto load = AlgorithmManager::Instance().createUnmanaged("Load", -1);
   load->initialize();
-
   load->setProperty("Filename", filename.toStdString());
   load->setProperty("OutputWorkspace", outputName.toStdString());
 
   if (specMin != -1)
     load->setPropertyValue("SpectrumMin",
                            boost::lexical_cast<std::string>(specMin));
-
   if (specMax != -1)
     load->setPropertyValue("SpectrumMax",
                            boost::lexical_cast<std::string>(specMax));
+  if (!loadHistory)
+    load->setProperty("LoadHistory", loadHistory);
 
   load->execute();
 
