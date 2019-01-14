@@ -40,15 +40,15 @@ class GroupingTabModel(object):
 
     @property
     def group_names(self):
-        return self._data.groups.keys()
+        return list(self._data.group_names)
 
     @property
     def pair_names(self):
-        return self._data.pairs.keys()
+        return list(self._data.pair_names)
 
     @property
     def group_and_pair_names(self):
-        return self.group_names + self.pair_names
+        return list(self._data.group_names) + list(self._data.pair_names)
 
     def show_all_groups_and_pairs(self):
         self._data.show_all_groups()
