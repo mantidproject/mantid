@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
 from mantid import ConfigService
-from mantid import AnalysisDataService
 
 
 class LoadWidgetPresenter(object):
