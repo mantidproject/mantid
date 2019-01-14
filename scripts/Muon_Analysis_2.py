@@ -73,12 +73,15 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         self.setup_tabs()
         self.help_widget = HelpWidget()
 
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(self.load_widget.load_widget_view)
-        splitter.addWidget(self.tabs)
-        splitter.addWidget(self.help_widget.view)
+        central_widget = QtGui.QWidget()
+        vertical_layout = QtGui.QVBoxLayout()
 
-        self.setCentralWidget(splitter)
+        vertical_layout.addWidget(self.load_widget.load_widget_view)
+        vertical_layout.addWidget(self.tabs)
+        vertical_layout.addWidget(self.help_widget.view)
+        central_widget.setLayout(vertical_layout)
+
+        self.setCentralWidget(central_widget)
         self.setWindowTitle("Muon Analysis version 2")
 
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
