@@ -276,7 +276,6 @@ class DetachableTabWidget(QtGui.QTabWidget):
                 :param event: the current event.
                 """
 
-
                 # If a NonClientAreaMouseMove (173) event immediately follows a Move event
                 if self.lastEvent == QtCore.QEvent.Move and event.type() == 173:
                     # Determine the position of the mouse cursor and emit it with the onDropSignal
