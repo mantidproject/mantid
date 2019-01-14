@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/core/NDArray.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
@@ -26,6 +27,7 @@
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
+
 #include <cstring>
 #include <vector>
 
@@ -294,6 +296,27 @@ PyObject *row(ITableWorkspace &self, int row) {
   }
 
   return result;
+}
+
+/**
+ * Return the C++ types for all columns
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ */
+PyObject *columnTypes(ITableWorkspace &self) {
+  int numCols = static_cast<int>(self.columnCount());
+
+  PyObject *list = PyList_New(numCols);
+
+  for (int col = 0; col < numCols; col++) {
+    Mantid::API::Column_const_sptr column = self.getColumn(col);
+    const std::type_info &typeID = column->get_type_info();
+    if (PyList_SetItem(list, col, FROM_CSTRING(typeID.name()))) {
+      throw std::runtime_error("Error while building list");
+    }
+  }
+
+  return list;
 }
 
 /**
@@ -628,6 +651,9 @@ void export_ITableWorkspace() {
 
       .def("row", &row, (arg("self"), arg("row")),
            "Return all values of a specific row as a dict.")
+
+      .def("columnTypes", &columnTypes, arg("self"),
+           "Return the types of the columns as a list")
 
       // FromSequence must come first since it takes an object parameter
       // Otherwise, FromDict will never be called as object accepts anything

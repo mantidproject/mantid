@@ -58,7 +58,7 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
         # good startup
         p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
-        self.assertEquals(out, b'Hello Mantid\n')
+        self.assertTrue(b'Hello Mantid\n' in out)
 
         # failing script
         with open(self.script, 'a') as f:
