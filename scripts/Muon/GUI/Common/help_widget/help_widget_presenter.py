@@ -16,6 +16,7 @@ class HelpWidgetPresenter(object):
     def handle_help_button_clicked(self):
         self._view.warning_popup("Help is not currently implemented!")
 
+
 class HelpWidget(object):
     def __init__(self):
         self.view = HelpWidgetView()
