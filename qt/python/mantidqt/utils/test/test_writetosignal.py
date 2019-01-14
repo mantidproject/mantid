@@ -31,11 +31,6 @@ class Receiver(QObject):
 class WriteToSignalTest(GuiTest):
 
     def test_connected_receiver_receives_text(self):
-        import sys
-        sys.path.append("c:\\users\\qbr77747\\apps\\miniconda3\\lib\\site-packages")
-        import pydevd
-        pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
-
         with patch("sys.stdout.fileno") as mock_fileno:
             recv = Receiver()
             writer = WriteToSignal(sys.stdout)
