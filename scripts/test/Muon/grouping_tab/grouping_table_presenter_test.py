@@ -14,6 +14,8 @@ if sys.version_info.major > 2:
 else:
     import mock
 
+maximum_number_of_groups = 20
+
 
 class GroupingTablePresenterTest(unittest.TestCase):
 
@@ -69,6 +71,13 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 1)
         self.assertEqual(len(self.model.groups), 1)
 
+    def test_that_add_three_groups_function_adds_three_groups(self):
+        self.add_three_groups_to_table()
+        self.assertEqual(self.view.num_rows(), 3)
+        self.assertEqual(self.view.get_table_item_text(0, 0), "my_group_0")
+        self.assertEqual(self.view.get_table_item_text(1, 0), "my_group_1")
+        self.assertEqual(self.view.get_table_item_text(2, 0), "my_group_2")
+
     def test_that_remove_group_button_removes_group(self):
         self.add_three_groups_to_table()
         self.presenter.handle_remove_group_button_clicked()
@@ -98,14 +107,14 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.model.group_names, ["my_group_1"])
 
     def test_that_cannot_add_more_than_20_rows(self):
-        for i in range(21):
+        for i in range(maximum_number_of_groups + 1):
             self.presenter.handle_add_group_button_clicked()
 
-        self.assertEqual(self.view.num_rows(), 20)
-        self.assertEqual(len(self.model.groups), 20)
+        self.assertEqual(self.view.num_rows(), maximum_number_of_groups)
+        self.assertEqual(len(self.model.groups), maximum_number_of_groups)
 
     def test_that_trying_to_add_a_20th_row_gives_warning_message(self):
-        for i in range(21):
+        for i in range(maximum_number_of_groups + 1):
             self.presenter.handle_add_group_button_clicked()
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
@@ -113,6 +122,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
     def test_that_remove_group_when_table_is_empty_does_not_throw(self):
 
         self.presenter.handle_remove_group_button_clicked()
+        self.assertEqual(self.view.warning_popup.call_count, 0)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Testing context menu
@@ -137,22 +147,18 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertFalse(self.view.add_group_action.isEnabled())
 
     def test_context_menu_remove_grouping_with_no_rows_selected_removes_last_row(self):
-        for i in range(3):
-            # names : group_1, group_2, group_3
-            self.presenter.handle_add_group_button_clicked()
+        self.add_three_groups_to_table()
 
         self.view.contextMenuEvent(0)
         self.view.remove_group_action.triggered.emit(True)
 
         self.assertEqual(len(self.model.groups), 2)
         self.assertEqual(self.view.num_rows(), 2)
-        self.assertEqual(self.view.get_table_item_text(0, 0), "group_1")
-        self.assertEqual(self.view.get_table_item_text(1, 0), "group_2")
+        self.assertEqual(self.view.get_table_item_text(0, 0), "my_group_0")
+        self.assertEqual(self.view.get_table_item_text(1, 0), "my_group_1")
 
     def test_context_menu_remove_grouping_removes_selected_rows(self):
-        for i in range(3):
-            # names : group_1, group_2, group_3
-            self.presenter.handle_add_group_button_clicked()
+        self.add_three_groups_to_table()
         self.view._get_selected_row_indices = mock.Mock(return_value=[0, 2])
 
         self.view.contextMenuEvent(0)
@@ -160,7 +166,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(len(self.model.groups), 1)
         self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(self.view.get_table_item_text(0, 0), "group_2")
+        self.assertEqual(self.view.get_table_item_text(0, 0), "my_group_1")
 
     def test_context_menu_remove_grouping_disabled_if_no_groups_in_table(self):
         self.view.contextMenuEvent(0)
@@ -190,12 +196,10 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
     def test_that_if_invalid_name_given_warning_message_is_shown(self):
         self.add_three_groups_to_table()
-        print(self.view.get_table_contents())
         invalid_names = ["", "@", "name!", "+-"]
 
         for invalid_name in invalid_names:
             self.view.grouping_table.item(0, 0).setText(invalid_name)
-            print(self.view.get_table_contents())
 
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_group_0")
             self.assertIn("my_group_0", self.model.group_names)
@@ -276,6 +280,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
     def test_that_if_detector_list_changed_that_number_of_detectors_updates(self):
         self.presenter.handle_add_group_button_clicked()
+        self.assertEqual(self.view.get_table_item_text(0, 2), "1")
 
         self.view.grouping_table.setCurrentCell(0, 1)
         self.view.grouping_table.item(0, 1).setText("1-10")
