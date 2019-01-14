@@ -63,23 +63,26 @@ private:
   /// The projection vectors
   std::vector<double> m_Q1Basis{1., 0., 0.}, m_Q2Basis{0., 1., 0.},
       m_Q3Basis{0., 0., 1.};
-  // UB matrix
+  /// UB matrix
   Mantid::Kernel::DblMatrix m_UB;
-  // W matrix
+  /// W matrix
   Mantid::Kernel::DblMatrix m_W;
-  // matrix for transforming from intersections to positions in the
-  // normalization workspace
+  /** matrix for transforming from intersections to positions in the
+  normalization workspace */
   Mantid::Kernel::Matrix<coord_t> m_transformation;
   /// cached X values along dimensions h,k,l. dE
   std::vector<double> m_hX, m_kX, m_lX, m_eX;
-
   /// index of h,k,l, dE dimensions in the output workspaces
   size_t m_hIdx, m_kIdx, m_lIdx, m_eIdx;
-
+  /// number of experimentInfo objects
   size_t m_numExptInfos;
+  /// Cached value of incident energy dor direct geometry
   double m_Ei;
+  /// Flag indicating if the input workspace is from diffraction
   bool m_diffraction;
+  /// Flag to accumulate normalization
   bool m_accumulate;
+  /// Flag to indicate that the energy dimension is integrated
   bool m_dEIntegrated;
   /// Sample position
   Kernel::V3D m_samplePos;

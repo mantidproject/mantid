@@ -45,13 +45,18 @@ bool compareMomentum(const std::array<double, 4> &v1,
                      const std::array<double, 4> &v2) {
   return (v1[3] < v2[3]);
 }
+
+// k=sqrt(energyToK * E)
 constexpr double energyToK = 8.0 * M_PI * M_PI *
                              PhysicalConstants::NeutronMass *
                              PhysicalConstants::meV * 1e-20 /
                              (PhysicalConstants::h * PhysicalConstants::h);
+
+// compare absolute values of integers
+static bool abs_compare(int a, int b) { return (std::abs(a) < std::abs(b)); }
 } // namespace
 
-static bool abs_compare(int a, int b) { return (std::abs(a) < std::abs(b)); }
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormalization)
 
@@ -444,6 +449,12 @@ void MDNormalization::exec() {
   }
 }
 
+/**
+ *
+ * @param projection - a vector with 3 elements, containing a
+ *   description of the projection ("1,-1,0" for "[H,-H,0]")
+ * @return string containing the name
+ */
 std::string MDNormalization::QDimensionName(std::vector<double> projection) {
   std::vector<double>::iterator result;
   result = std::max_element(projection.begin(), projection.end(), abs_compare);
@@ -470,6 +481,10 @@ std::string MDNormalization::QDimensionName(std::vector<double> projection) {
   return name.str();
 }
 
+/**
+ * Calculate binning parameters
+ * @return map of parameters to be passed to BinMD (non axis-aligned)
+ */
 std::map<std::string, std::string> MDNormalization::getBinParameters() {
   std::map<std::string, std::string> parameters;
   std::stringstream extents;
@@ -614,6 +629,10 @@ std::map<std::string, std::string> MDNormalization::getBinParameters() {
   return parameters;
 }
 
+/**
+ * Create & cached the normalization workspace
+ * @param dataWS The binned workspace that will be used for the data
+ */
 void MDNormalization::createNormalizationWS(
     const DataObjects::MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
@@ -628,6 +647,11 @@ void MDNormalization::createNormalizationWS(
   }
 }
 
+/**
+ * Runs the BinMD algorithm on the input to provide the output workspace
+ * All slicing algorithm properties are passed along
+ * @return MDHistoWorkspace as a result of the binning
+ */
 DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(
     std::vector<Geometry::SymmetryOperation> symmetryOps) {
   Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
@@ -638,15 +662,19 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(
   std::vector<size_t> qDimensionIndices;
   for (auto so : symmetryOps) {
     // calculate dimensions for binning
-    V3D Q1, Q2, Q3;
-    Q1 = so.transformHKL(V3D(m_Q1Basis[0], m_Q1Basis[1], m_Q1Basis[2]));
-    Q2 = so.transformHKL(V3D(m_Q2Basis[0], m_Q2Basis[1], m_Q2Basis[2]));
-    Q3 = so.transformHKL(V3D(m_Q3Basis[0], m_Q3Basis[1], m_Q3Basis[2]));
+    DblMatrix soMatrix(3, 3);
+    auto v = so.transformHKL(V3D(1, 0, 0));
+    soMatrix.setColumn(0, v);
+    v = so.transformHKL(V3D(0, 1, 0));
+    soMatrix.setColumn(1, v);
+    v = so.transformHKL(V3D(0, 0, 1));
+    soMatrix.setColumn(2, v);
 
+    DblMatrix Qtransform;
     if (m_isRLU) {
-      Q1 = m_UB * Q1;
-      Q2 = m_UB * Q2;
-      Q3 = m_UB * Q3;
+      Qtransform = m_UB * soMatrix * m_W;
+    } else {
+      Qtransform = soMatrix *m_W;
     }
 
     // bin the data
@@ -674,9 +702,9 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(
           basisVector << "Q_sample_x,A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
-          projection[0] = Q1.X();
-          projection[1] = Q1.Y();
-          projection[2] = Q1.Z();
+          projection[0] = Qtransform[0][0];
+          projection[1] = Qtransform[1][0];
+          projection[2] = Qtransform[2][0];
           basisVector << QDimensionName(m_Q1Basis) << ", r.l.u.";
         }
       } else if (value.find("QDimension2") != std::string::npos) {
@@ -686,9 +714,9 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(
           basisVector << "Q_sample_y,A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
-          projection[0] = Q2.X();
-          projection[1] = Q2.Y();
-          projection[2] = Q2.Z();
+          projection[0] = Qtransform[0][1];
+          projection[1] = Qtransform[1][1];
+          projection[2] = Qtransform[2][1];
           basisVector << QDimensionName(m_Q2Basis) << ", r.l.u.";
         }
       } else if (value.find("QDimension3") != std::string::npos) {
@@ -698,9 +726,9 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(
           basisVector << "Q_sample_z,A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
-          projection[0] = Q3.X();
-          projection[1] = Q3.Y();
-          projection[2] = Q3.Z();
+          projection[0] = Qtransform[0][2];
+          projection[1] = Qtransform[1][2];
+          projection[2] = Qtransform[2][2];
           basisVector << QDimensionName(m_Q3Basis) << ", r.l.u.";
         }
       } else if (value.find("DeltaE") != std::string::npos) {
@@ -751,6 +779,14 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(
   return outputMDHWS;
 }
 
+/**
+ * Retrieve logged values from non-HKL dimensions
+ * @param skipNormalization [InOut] Updated to false if any values are outside
+ * range measured by input workspace
+ * @param expInfoIndex current experiment info index
+ * @return A vector of values from other dimensions to be include in normalized
+ * MD position calculation
+ */
 std::vector<coord_t>
 MDNormalization::getValuesFromOtherDimensions(bool &skipNormalization,
                                               uint16_t expInfoIndex) const {
@@ -790,6 +826,10 @@ MDNormalization::getValuesFromOtherDimensions(bool &skipNormalization,
   return otherDimValues;
 }
 
+/**
+ * Stores the X values from each H,K,L, and optionally DeltaE dimension as
+ * member variables
+ */
 void MDNormalization::cacheDimensionXValues() {
   auto &hDim = *m_normWS->getDimension(m_hIdx);
   m_hX.resize(hDim.getNBoundaries());
@@ -808,7 +848,7 @@ void MDNormalization::cacheDimensionXValues() {
     m_lX[i] = lDim.getX(i);
   }
 
-  if (!m_dEIntegrated) {
+  if ((!m_diffraction) && (!m_dEIntegrated)) {
     // NOTE: store k final instead
     auto &eDim = *m_normWS->getDimension(m_eIdx);
     m_eX.resize(eDim.getNBoundaries());
@@ -820,6 +860,13 @@ void MDNormalization::cacheDimensionXValues() {
   }
 }
 
+/**
+ * Computed the normalization for the input workspace. Results are stored in
+ * m_normWS
+ * @param otherValues - values for dimensions other than Q or DeltaE
+ * @param so - symmetry operation
+ * @param expInfoIndex - current experiment info index
+ */
 void MDNormalization::calculateNormalization(
     const std::vector<coord_t> &otherValues, Geometry::SymmetryOperation so,
     uint16_t expInfoIndex) {
@@ -840,7 +887,8 @@ void MDNormalization::calculateNormalization(
   soMatrix.setColumn(1, v);
   v = so.transformHKL(V3D(0, 0, 1));
   soMatrix.setColumn(2, v);
-  DblMatrix Qtransform = R * m_UB * m_W * soMatrix;
+  soMatrix.Invert();
+  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
   Qtransform.Invert();
   const double protonCharge = currentExptInfo.run().getProtonCharge();
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
@@ -994,6 +1042,16 @@ if (m_accumulate) {
 m_accumulate = true;
 }
 
+/**
+ * Calculate the points of intersection for the given detector with cuboid
+ * surrounding the detector position in HKL
+ * @param intersections A list of intersections in HKL space
+ * @param theta Polar angle withd detector
+ * @param phi Azimuthal angle with detector
+ * @param transform Matrix to convert frm Q_lab to HKL (2Pi*R *UB*W*SO)^{-1}
+ * @param lowvalue The lowest momentum or energy transfer for the trajectory
+ * @param highvalue The highest momentum or energy transfer for the trajectory
+ */
 void MDNormalization::calculateIntersections(
     std::vector<std::array<double, 4>> &intersections, const double theta,
     const double phi, Kernel::DblMatrix transform, double lowvalue,
@@ -1130,6 +1188,14 @@ void MDNormalization::calculateIntersections(
   std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
 }
 
+/**
+ * Linearly interpolate between the points in integrFlux at xValues and save the
+ * results in yValues.
+ * @param xValues :: X-values at which to interpolate
+ * @param integrFlux :: A workspace with the spectra to interpolate
+ * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
+ * @param yValues :: A vector to save the results.
+ */
 void MDNormalization::calcIntegralsForIntersections(
     const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
     size_t sp, std::vector<double> &yValues) {
