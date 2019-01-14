@@ -47,7 +47,7 @@ class WriteToSignalTest(GuiTest):
             self.assertEqual(writer._original_out, None)
 
     def test_connected_receiver_receives_text(self):
-        with patch("sys.stdout.fileno") as mock_fileno:
+        with patch("sys.stdout.fileno", return_value=1) as mock_fileno:
             recv = Receiver()
             writer = WriteToSignal(sys.stdout)
             writer.sig_write_received.connect(recv.capture_text)
