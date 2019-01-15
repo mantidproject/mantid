@@ -25,7 +25,6 @@ from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from ui.sans_isis.work_handler import WorkHandler
 
 
-
 class TableModel(object):
     column_name_converter = ["sample_scatter", "sample_scatter_period", "sample_transmission",
                              "sample_transmission_period", "sample_direct", "sample_direct_period",
@@ -285,7 +284,6 @@ class TableIndexModel(object):
         self.tool_tip = ''
         self.file_information = None
         self.file_finding = False
-
 
     # Options column entries
     @property
