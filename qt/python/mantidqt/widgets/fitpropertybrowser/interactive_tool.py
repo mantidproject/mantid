@@ -1,8 +1,10 @@
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
-from qtpy.QtCore import QObject, Signal, Qt
+from qtpy.QtCore import QObject, Signal, Qt, QPoint
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication, QMenu
+
+from mouse_state_machine import StateMachine
 
 
 class VerticalMarker(QObject):
@@ -145,9 +147,10 @@ class FitInteractiveTool(QObject):
         self._cids = []
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_notify_callback))
-        self._cids.append(canvas.mpl_connect('button_press_event', self.on_click))
-        self._cids.append(canvas.mpl_connect('button_release_event', self.on_release))
+        self._cids.append(canvas.mpl_connect('button_press_event', self.button_press_callback))
+        self._cids.append(canvas.mpl_connect('button_release_event', self.button_release_callback))
 
+        self.mouse_state = StateMachine(self)
         self._override_cursor = False
 
     def disconnect(self):
@@ -190,8 +193,15 @@ class FitInteractiveTool(QObject):
             QApplication.setOverrideCursor(cursor)
 
     def motion_notify_callback(self, event):
-        if self.toolbar_state_checker.is_tool_active():
-            return
+        self.mouse_state.motion_notify_callback(event)
+
+    def button_press_callback(self, event):
+        self.mouse_state.button_press_callback(event)
+
+    def button_release_callback(self, event):
+        self.mouse_state.button_release_callback(event)
+
+    def move_markers(self, event):
         x, y = event.xdata, event.ydata
         if x is None or y is None:
             return
@@ -203,18 +213,17 @@ class FitInteractiveTool(QObject):
         if should_redraw:
             self.canvas.draw()
 
-    def on_click(self, event):
-        if event.button == 1:
-            x = event.xdata
-            y = event.ydata
-            if x is None or y is None:
-                return
-            self.fit_start_x.on_click(x, y)
-            self.fit_end_x.on_click(x, y)
-            for pm in self.peak_markers:
-                pm.on_click(x, y)
+    def start_move_markers(self, event):
+        x = event.xdata
+        y = event.ydata
+        if x is None or y is None:
+            return
+        self.fit_start_x.on_click(x, y)
+        self.fit_end_x.on_click(x, y)
+        for pm in self.peak_markers:
+            pm.on_click(x, y)
 
-    def on_release(self, event):
+    def stop_move_markers(self, event):
         self.fit_start_x.stop()
         self.fit_end_x.stop()
         for pm in self.peak_markers:
