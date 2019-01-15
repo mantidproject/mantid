@@ -45,7 +45,7 @@ private:
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues,
                               Geometry::SymmetryOperation so,
-                              uint16_t expInfoIndex);
+                              uint16_t expInfoIndex, size_t soIndex);
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
                               const double theta, const double phi,
                               Kernel::DblMatrix transform, double lowvalue,
@@ -76,6 +76,8 @@ private:
   size_t m_hIdx, m_kIdx, m_lIdx, m_eIdx;
   /// number of experimentInfo objects
   size_t m_numExptInfos;
+  /// number of symmetry operations
+  size_t m_numSymmOps;
   /// Cached value of incident energy dor direct geometry
   double m_Ei;
   /// Flag indicating if the input workspace is from diffraction

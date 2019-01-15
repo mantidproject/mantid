@@ -388,6 +388,7 @@ void MDNormalization::exec() {
   for (auto so : symmetryOps) {
     g_log.debug() << so.identifier() << "\n";
   }
+  m_numSymmOps = symmetryOps.size();
 
   m_isRLU = getProperty("RLU");
   // get the workspaces
@@ -436,8 +437,10 @@ void MDNormalization::exec() {
     cacheDimensionXValues();
 
     if (!skipNormalization) {
+      size_t symmOpsIndex=0;
       for (const auto &so : symmetryOps) {
-        calculateNormalization(otherValues, so, expInfoIndex);
+        calculateNormalization(otherValues, so, expInfoIndex,symmOpsIndex);
+        symmOpsIndex++;
       }
 
     } else {
@@ -867,9 +870,8 @@ void MDNormalization::cacheDimensionXValues() {
  * @param so - symmetry operation
  * @param expInfoIndex - current experiment info index
  */
-void MDNormalization::calculateNormalization(
-    const std::vector<coord_t> &otherValues, Geometry::SymmetryOperation so,
-    uint16_t expInfoIndex) {
+void MDNormalization::calculateNormalization(const std::vector<coord_t> &otherValues, Geometry::SymmetryOperation so,
+    uint16_t expInfoIndex, size_t soIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   std::vector<double> lowValues, highValues;
   auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(
@@ -915,11 +917,12 @@ void MDNormalization::calculateNormalization(
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
 
-  double progStep = 0.7 / static_cast<double>(m_numExptInfos);
-  // TODO: fix progress to account for symmetry operations
+  double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
+  double progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
-      make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
-                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
+      make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
+                                 0.3 + progStep* (1. + progIndex),
+                                 ndets);
 
   bool safe = true;
   if (m_diffraction) {
