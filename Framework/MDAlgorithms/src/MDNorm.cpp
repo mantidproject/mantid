@@ -58,7 +58,7 @@ static bool abs_compare(int a, int b) { return (std::abs(a) < std::abs(b)); }
 
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(MDNormalization)
+DECLARE_ALGORITHM(MDNorm)
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -72,7 +72,7 @@ MDNorm::MDNorm()
       m_dEIntegrated(false), m_samplePos(), m_beamDir(), convention("") {}
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string MDNorm::name() const { return "MDNormalization"; }
+const std::string MDNorm::name() const { return "MDNorm"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int MDNorm::version() const { return 1; }
@@ -195,6 +195,9 @@ void MDNorm::init() {
 
   declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
+                  "A name for the normalized output MDHistoWorkspace.");
+  declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
+                      "OutputDataWorkspace", "", Kernel::Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
@@ -418,13 +421,13 @@ void MDNorm::exec() {
       throw std::invalid_argument("Could not find Ei value in the workspace.");
     }
   }
-  auto outputWS = binInputWS(symmetryOps);
+  auto outputDataWS = binInputWS(symmetryOps);
 
-  createNormalizationWS(*outputWS);
+  createNormalizationWS(*outputDataWS);
   this->setProperty("OutputNormalizationWorkspace", m_normWS);
-  this->setProperty("OutputWorkspace", outputWS);
+  this->setProperty("OutputDataWorkspace", outputDataWS);
 
-  m_numExptInfos = outputWS->getNumExperimentInfo();
+  m_numExptInfos = outputDataWS->getNumExperimentInfo();
   // loop over all experiment infos
   for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
        expInfoIndex++) {
@@ -450,6 +453,15 @@ void MDNorm::exec() {
     // if more than one experiment info, keep accumulating
     m_accumulate = true;
   }
+  IAlgorithm_sptr divideMD = createChildAlgorithm(
+      "DivideMD", 0.99, 1.);
+  divideMD->setProperty("LHSWorkspace",outputDataWS);
+  divideMD->setProperty("RHSWorkspace",m_normWS);
+  divideMD->setPropertyValue("OutputWorkspace",
+                             getPropertyValue("OutputWorkspace"));
+  divideMD->executeAsChildAlg();
+  API::IMDWorkspace_sptr out = divideMD->getProperty("OutputWorkspace");
+  this->setProperty("OutputWorkspace",out);
 }
 
 /**
@@ -689,7 +701,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
     binMD->setPropertyValue("NormalizeBasisVectors", "0");
     binMD->setPropertyValue("OutputWorkspace",
-                            getPropertyValue("OutputWorkspace"));
+                            getPropertyValue("OutputDataWorkspace"));
     // set binning properties
     size_t qindex = 0;
     for (auto const &p : parameters) {
