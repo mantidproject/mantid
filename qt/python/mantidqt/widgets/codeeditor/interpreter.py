@@ -217,10 +217,10 @@ class PythonFileInterpreterPresenter(QObject):
     def req_execute_async(self):
         if self.is_executing:
             return
-        self.is_executing = True
         code_str, self._code_start_offset = self._get_code_for_execution()
         if not code_str:
             return
+        self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
         return self.model.execute_async(code_str, self.view.filename)
