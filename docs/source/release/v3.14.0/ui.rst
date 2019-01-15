@@ -80,5 +80,23 @@ BugFixes
 
 - Fixed issue where an open set of data from ITableWorkspace wouldn't update if the data was changed via python
 - Fixed an issue where MantidPlot would crash when renaming workspaces.
+- Fixed issue with filenames containing spaces that are passed to Mantid when launched from the command line
+
+MantidWorkbench
+---------------
+
+Changes
+#######
+- Colorfill plots with uniform bin widths were made more responsive by resampling to 4K resolution and using :func:`~mantid.plots.MantidAxes.imshow`.
+
+BugFixes
+########
+
+Instrument View
+---------------
+
+Changes
+#######
+ - The miniplot on the pick tab of the instrument view now shows the HKL values for peaks when viewing a summed collection of detectors.
 
 :ref:`Release 3.14.0 <v3.14.0>`

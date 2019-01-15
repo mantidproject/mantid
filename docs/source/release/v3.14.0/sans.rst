@@ -32,6 +32,7 @@ Improved
 * Added a load button to load selected workspaces without processing.
 * Added save_can option to output unsubtracted can and sample workspaces.
 * Autocomplete for Sample shape column in the table.
+* File path to batch file will be added to your directories automatically upon loading
 
 Bug fixes
 #########

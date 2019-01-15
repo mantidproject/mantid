@@ -61,5 +61,15 @@ class EventListTest(unittest.TestCase):
 
         self.assertEquals(left.integrate(-1.,31., True), -10.)
 
+    def test_mask_condition(self):
+        evl = self.createRandomEventList(20)
+
+        tof = evl.getTofs()
+        mask = (tof < 10)
+        evl.maskCondition(mask)
+
+        self.assertEquals(evl.getNumberEvents(), 10)
+        self.assertEquals(evl.getTofMax(), float(9.0))
+
 if __name__ == '__main__':
     unittest.main()

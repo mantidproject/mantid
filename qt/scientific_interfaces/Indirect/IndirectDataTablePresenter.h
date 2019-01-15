@@ -21,7 +21,7 @@ namespace IDA {
 /**
   Presenter for a table of indirect fitting data.
 */
-class DLLExport IndirectDataTablePresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectDataTablePresenter : public QObject {
   Q_OBJECT
 public:
   IndirectDataTablePresenter(IndirectFittingModel *model,
