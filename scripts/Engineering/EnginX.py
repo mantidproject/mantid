@@ -5,8 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import Engineering.EngineeringCalibration
-import Engineering.EngineeringFocus
+import Engineering.EngineeringCalibration as Cal
+# import Engineering.EngineeringFocus as Focus
+
+import os
+
 
 class EnginX:
     def __init__(self, **kwargs):
@@ -14,11 +17,12 @@ class EnginX:
             self.user = kwargs.get("user")
             self.van_run = kwargs.get("vanadium_run")
             if "calibration_directory" in kwargs:
-                "{0}/{1}/EnginX_Mantid/Calibration".format(kwargs.get("calibration_directoy"), self.user)
+                self.calibration_directory = "{0}/{1}/EnginX_Mantid/Calibration".format(
+                    kwargs.get("calibration_directoy"), self.user)
             else:
                 self.calibration_directory = "/home/sjenkins/user/{0}/EnginX_Mantid/Calibration".format(self.user)
             if "focus_directory" in kwargs:
-                "{0}/{1}/EnginX_Mantid/Focus".format(kwargs.get("focus_directoy"), self.user)
+                self.focus_directory = "{0}/{1}/EnginX_Mantid/Focus".format(kwargs.get("focus_directoy"), self.user)
             else:
                 self.focus_directory = "/home/sjenkins/user/{0}/EnginX_Mantid/Focus".format(self.user)
 
@@ -33,6 +37,24 @@ class EnginX:
         van_int_file = van_out + "_precalculated_vanadium_run_integration.nxs"
         van_curves_file = van_out + "_precalculated_vanadium_run_bank_curves.nxs"
         return van_curves_file, van_int_file
+
+    def create_calibration(self, **kwargs):
+        self.calibration_directory
+        self.van_run
+        van_curves_file, van_int_file = self.get_van_names()
+        if "ceria_run" in kwargs:
+            ceria_run = kwargs.get("ceria_run")
+        else:
+            ceria_run = "241391"
+        if "cropped" in kwargs:
+            if kwargs.get("cropped") == "banks":
+                Cal.create_calibration_cropped_file(False, kwargs.get("bank"), kwargs.get("crop_name"),
+                                                    van_curves_file, van_int_file, ceria_run)
+            elif kwargs.get("cropped") == "spectra":
+                Cal.create_calibration_cropped_file(True, kwargs.get("spectra"), kwargs.get("crop_name"),
+                                                    van_curves_file, van_int_file, ceria_run)
+        else:
+            Cal.create_calibration_files(van_curves_file, van_int_file, ceria_run)
 
 
 def _gen_filename(run_number):
