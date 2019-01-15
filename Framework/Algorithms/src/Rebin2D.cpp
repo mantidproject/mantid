@@ -77,7 +77,8 @@ void Rebin2D::init() {
 void Rebin2D::exec() {
   // Information to form input grid
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
+  const NumericAxis *oldAxis2 =
+      dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
   if (!oldAxis2) {
     throw std::invalid_argument(
         "Vertical axis is not a numeric axis, cannot rebin. "
