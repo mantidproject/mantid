@@ -7,8 +7,9 @@
 #ifndef MANTID_ALGORITHMS_REBIN2DTEST_H_
 #define MANTID_ALGORITHMS_REBIN2DTEST_H_
 
-#include "MantidAlgorithms/Rebin2D.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAlgorithms/Rebin2D.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -16,6 +17,7 @@
 
 using Mantid::Algorithms::Rebin2D;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace {
 /**
@@ -193,12 +195,17 @@ public:
     const auto midValue = thetaAxis->getValue(middle);
     thetaAxis->setValue(middle - 1, midValue);
     constexpr bool useFractionalBinning = false;
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
+    MatrixWorkspace_sptr outputWS = runAlgorithm(
+        inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    const auto expectedY = 2. * 9. * 2.;
+    const auto expectedE = std::sqrt(expectedY);
     const auto &Ys = outputWS->y(0);
-    for (size_t j = 0; j < Ys.size(); ++j) {
-      TS_ASSERT(!std::isnan(Ys[j]))
+    const auto &Es = outputWS->e(0);
+    for (size_t i = 0; i < Ys.size(); ++i) {
+      TS_ASSERT(!std::isnan(Ys[i]))
+      TS_ASSERT_DELTA(Ys[i], expectedY, 1e-12)
+      TS_ASSERT_DELTA(Es[i], expectedE, 1e-12)
     }
   }
 
@@ -211,12 +218,19 @@ public:
     const auto midValue = thetaAxis->getValue(middle);
     thetaAxis->setValue(middle - 1, midValue);
     constexpr bool useFractionalBinning = true;
-    MatrixWorkspace_sptr outputWS =
-        runAlgorithm(inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
-    const auto &Ys = outputWS->y(0);
-    for (size_t j = 0; j < Ys.size(); ++j) {
-      TS_ASSERT(!std::isnan(Ys[j]))
+    MatrixWorkspace_sptr outputWS = runAlgorithm(
+        inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
+    const auto &rebinned = *dynamic_cast<RebinnedOutput *>(outputWS.get());
+    TS_ASSERT_EQUALS(rebinned.getNumberHistograms(), 1)
+    const auto expectedY = 2. * 9. * 2.;
+    const auto expectedE = std::sqrt(expectedY);
+    const auto &Fs = rebinned.dataF(0);
+    const auto &Ys = rebinned.y(0);
+    const auto &Es = rebinned.e(0);
+    for (size_t i = 0; i < Ys.size(); ++i) {
+      TS_ASSERT(!std::isnan(Ys[i]))
+      TS_ASSERT_DELTA(Ys[i] * Fs[i], expectedY, 1e-12)
+      TS_ASSERT_DELTA(Es[i] * Fs[i], expectedE, 1e-12)
     }
   }
 
@@ -307,7 +321,8 @@ public:
 
   void test_Use_Fractional_Area() {
     constexpr bool useFractionalArea = true;
-    runAlgorithm(m_inputWS, "100,10,41000", "-0.5,0.5,499.5", useFractionalArea);
+    runAlgorithm(m_inputWS, "100,10,41000", "-0.5,0.5,499.5",
+                 useFractionalArea);
   }
 
 private:
