@@ -7,8 +7,9 @@
 #  This file is part of the mantid package
 #
 #
-from mantid.plots.utility import MantidAxType
 from __future__ import (absolute_import, division, print_function)
+
+from mantid.plots.utility import MantidAxType
 import collections
 import sys
 
