@@ -127,8 +127,8 @@ public:
     double correct_err1[] = {0.003723, 0.002231, 0.002820};
     double correct_err2[] = {0.000796, 0.002043, 0.002671};
 
-    std::vector<double> err_calculated1 = latt.getVecErr(0);
-    std::vector<double> err_calculated2 = latt.getVecErr(1);
+    V3D err_calculated1 = latt.getVecErr(0);
+    V3D err_calculated2 = latt.getVecErr(1);
 
     for (size_t i = 0; i < 3; i++) {
       TS_ASSERT_DELTA(correct_err1[i], err_calculated1[i], 5e-4);

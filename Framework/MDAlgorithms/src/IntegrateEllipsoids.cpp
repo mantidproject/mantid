@@ -245,10 +245,6 @@ void IntegrateEllipsoids::init() {
                   "Only events at most this distance from a peak will be "
                   "considered when integrating");
 
-  declareProperty("SatelliteRegionRadius", .1, mustBePositive,
-                  "Only events at most this distance from a peak will be "
-                  "considered when integrating");
-
   declareProperty(
       "SpecifySize", false,
       "If true, use the following for the major axis sizes, else use 3-sigma");
@@ -260,20 +256,9 @@ void IntegrateEllipsoids::init() {
                   "Half-length of major axis for inner ellipsoidal surface of "
                   "background region");
 
-  declareProperty("BackgroundOuterSize", .19, mustBePositive,
+  declareProperty("BackgroundOuterSize", .23, mustBePositive,
                   "Half-length of major axis for outer ellipsoidal surface of "
                   "background region");
-
-  declareProperty("SatellitePeakSize", .08, mustBePositive,
-                  "Half-length of major axis for satellite peak ellipsoid");
-
-  declareProperty("SatelliteBackgroundInnerSize", .08, mustBePositive,
-                  "Half-length of major axis for inner ellipsoidal surface of "
-                  "satellite background region");
-
-  declareProperty("SatelliteBackgroundOuterSize", .09, mustBePositive,
-                  "Half-length of major axis for outer ellipsoidal surface of "
-                  "satellite background region");
 
   declareProperty(
       make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
@@ -312,6 +297,21 @@ void IntegrateEllipsoids::init() {
                   "If this options is enabled, then the the top 1% of the "
                   "background will be removed"
                   "before the background subtraction.");
+
+  declareProperty("SatelliteRegionRadius", .1, mustBePositive,
+                  "Only events at most this distance from a peak will be "
+                  "considered when integrating");
+
+  declareProperty("SatellitePeakSize", .08, mustBePositive,
+                  "Half-length of major axis for satellite peak ellipsoid");
+
+  declareProperty("SatelliteBackgroundInnerSize", .08, mustBePositive,
+                  "Half-length of major axis for inner ellipsoidal surface of "
+                  "satellite background region");
+
+  declareProperty("SatelliteBackgroundOuterSize", .09, mustBePositive,
+                  "Half-length of major axis for outer ellipsoidal surface of "
+                  "satellite background region");
 }
 
 //---------------------------------------------------------------------
