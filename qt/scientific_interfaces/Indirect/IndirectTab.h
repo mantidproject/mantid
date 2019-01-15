@@ -75,8 +75,7 @@ protected slots:
   virtual void algorithmFinished(bool error);
 
 protected:
-  /// Run the load algorithm with the given file name, output name and spectrum
-  /// range
+  /// Run the load algorithms
   bool loadFile(const QString &filename, const QString &outputName,
                 const int specMin = -1, const int specMax = -1,
                 bool loadHistory = true);

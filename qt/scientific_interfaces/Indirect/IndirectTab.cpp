@@ -30,7 +30,19 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
+
+std::string castToString(int value) {
+  return boost::lexical_cast<std::string>(value);
 }
+
+template <typename Predicate>
+void setPropertyIf(Algorithm_sptr algorithm, std::string const &propName,
+                   std::string const &value, Predicate const &condition) {
+  if (condition)
+    algorithm->setPropertyValue(propName, value);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -138,24 +150,18 @@ void IndirectTab::exportPythonScript() {
 bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
                            const int specMin, const int specMax,
                            bool loadHistory) {
-  auto load = AlgorithmManager::Instance().createUnmanaged("Load", -1);
-  load->initialize();
-  load->setProperty("Filename", filename.toStdString());
-  load->setProperty("OutputWorkspace", outputName.toStdString());
+  const auto algName = loadHistory ? "Load" : "LoadNexusProcessed";
 
-  if (specMin != -1)
-    load->setPropertyValue("SpectrumMin",
-                           boost::lexical_cast<std::string>(specMin));
-  if (specMax != -1)
-    load->setPropertyValue("SpectrumMax",
-                           boost::lexical_cast<std::string>(specMax));
-  if (!loadHistory)
-    load->setProperty("LoadHistory", loadHistory);
+  auto loader = AlgorithmManager::Instance().createUnmanaged(algName, -1);
+  loader->initialize();
+  loader->setProperty("Filename", filename.toStdString());
+  loader->setProperty("OutputWorkspace", outputName.toStdString());
+  setPropertyIf(loader, "SpectrumMin", castToString(specMin), specMin != -1);
+  setPropertyIf(loader, "SpectrumMax", castToString(specMax), specMax != -1);
+  setPropertyIf(loader, "LoadHistory", loadHistory ? "1" : "0", !loadHistory);
+  loader->execute();
 
-  load->execute();
-
-  // If reloading fails we're out of options
-  return load->isExecuted();
+  return loader->isExecuted();
 }
 
 /**
