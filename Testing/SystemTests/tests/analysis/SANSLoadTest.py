@@ -217,47 +217,6 @@ class SANSLoadTest(unittest.TestCase):
         # self.assertTrue(load_alg.isExecuted())
         return load_alg
 
-    def _check_that_sets_to_zero(self, workspace, move_info, comp_name=None):
-        """
-        Check that workspace is centred on SANSLoad.
-        """
-        def _get_components_to_compare(_key, _move_info, _component_names):
-            if _key in _move_info.detectors:
-                _name = _move_info.detectors[_key].detector_name
-                _component_names.append(_name)
-
-        # Get the components to compare
-        if comp_name is None:
-            component_names = list(move_info.monitor_names.values())
-            hab_name = DetectorType.to_string(DetectorType.HAB)
-            lab_name = DetectorType.to_string(DetectorType.LAB),
-            _get_components_to_compare(hab_name, move_info, component_names)
-            _get_components_to_compare(lab_name, move_info, component_names)
-            component_names.append("some-sample-holder")
-        else:
-            component_names = [comp_name]
-
-        # Ensure that the positions on the base instrument and the instrument are the same
-        instrument = workspace.getInstrument()
-        base_instrument = instrument.getBaseInstrument()
-        for component_name in component_names:
-            # Confirm that the positions are the same
-            component = instrument.getComponentByName(component_name)
-            base_component = base_instrument.getComponentByName(component_name)
-
-            # If we are dealing with a monitor which has not been implemented we need to continue
-            if component is None or base_component is None:
-                continue
-
-            position = component.getPos()
-            position_base = base_component.getPos()
-            for index in range(0, 3):
-                self.assertAlmostEquals(position[index], position_base[index], delta=1e-4)
-            rotation = component.getRotation()
-            rotation_base = base_component.getRotation()
-            for index in range(0, 4):
-                self.assertAlmostEquals(rotation[index], rotation_base[index], delta=1e-4)
-
     def test_that_when_transmission_is_event_monitor_is_used(self):
         # Arrange
         state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00028827",

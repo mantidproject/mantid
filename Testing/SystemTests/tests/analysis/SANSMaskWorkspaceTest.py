@@ -50,7 +50,7 @@ def elements_in_range(range_start, range_stop, collection):
 # Tests for the SANSLoad algorithm
 # -----------------------------------------------
 class SANSMaskWorkspaceTest(unittest.TestCase):
-    def _load_workspace(self, state, move_workspace=True):
+    def _load_workspace(self, state):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
         load_alg.setChild(True)
         load_alg.initialize()
@@ -59,7 +59,6 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("MoveWorkspace", move_workspace)
         load_alg.setProperty("SampleScatterWorkspace", "dummy")
         load_alg.setProperty("SampleScatterMonitorWorkspace", "dummy")
 
@@ -294,7 +293,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
@@ -331,7 +330,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         tof_spectra_10_original = workspace.getSpectrum(10).getTofs()
         tof_spectra_11_original = workspace.getSpectrum(11).getTofs()
@@ -376,7 +375,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Is part of LAB
         tof_spectra_23813_original = workspace.getSpectrum(23813).getTofs()
@@ -438,7 +437,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
@@ -476,7 +475,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
@@ -514,7 +513,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
@@ -547,7 +546,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
-        workspace = self._load_workspace(state, move_workspace=False)
+        workspace = self._load_workspace(state)
 
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
