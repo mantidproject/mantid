@@ -338,7 +338,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
             loadOption = {'XUnit': 'TimeOfFlight'}
-            #if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
             loadOption['BeamCentre'] = 0.0
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
             ws = LoadAndMerge(Filename=inputFiles,
@@ -361,9 +360,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         theta = ws.spectrumInfo().twoTheta(mindex) / 2.
         if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
             tableWithBeamPos = self.getProperty(Prop.BEAM_POS_WS).value
-            beamPos = tableWithBeamPos.cell('PeakCentre', 0)
+            self.beamPos = tableWithBeamPos.cell('PeakCentre', 0)
         elif not self.getProperty(Prop.BEAM_CENTRE).isDefault:
-            beamPos = self.getProperty(Prop.BEAM_CENTRE).value
+            self.beamPos = self.getProperty(Prop.BEAM_CENTRE).value
         else:
             # Fit peak position
             peakWSName = self._names.withSuffix('peak')
@@ -379,22 +378,22 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             if not self.getProperty(Prop.END_WS_INDEX).isDefault:
                 args['EndWorkspaceIndex'] = self.getPropertyValue(Prop.END_WS_INDEX).value
             FindReflectometryLines(**args)
-            beamPos = mtd[peakWSName].readY(0)[0]
+            self.beamPos = mtd[peakWSName].readY(0)[0]
         # Add the fractional workspace index of the beam position to the sample logs of ws.
         logargs = {'Workspace': ws, 'LogType': 'Number', 'EnableLogging': self._subalgLogging}
         logargs['LogName'] = 'peak_position'
-        logargs['LogText'] = format(beamPos, '.13f')
+        logargs['LogText'] = format(self.beamPos, '.13f')
         logargs['NumberType'] = 'Double'
         AddSampleLog(**logargs)
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
-        self.beamPosIndex = int(numpy.rint(beamPos))
-        if self.beamPosIndex > 255:
-            self.beamPosIndex = 255
+        beamPosIndex = int(numpy.rint(self.beamPos))
+        if beamPosIndex > 255:
+            beamPosIndex = 255
             self.log().warning('Is it a monitor spectrum?')
         sign = self._workspaceIndexDirection(ws)
-        startIndex = self.beamPosIndex - sign * hws[0]
-        endIndex = self.beamPosIndex + sign * hws[1]
+        startIndex = beamPosIndex - sign * hws[0]
+        endIndex = beamPosIndex + sign * hws[1]
         if startIndex > endIndex:
             endIndex, startIndex = startIndex, endIndex
         logargs['LogName'] = common.SampleLogs.FOREGROUND_START
@@ -402,7 +401,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         logargs['NumberType'] = 'Int'
         AddSampleLog(**logargs)
         logargs['LogName'] = common.SampleLogs.FOREGROUND_CENTRE
-        logargs['LogText'] = str(self.beamPosIndex)
+        logargs['LogText'] = str(beamPosIndex)
         AddSampleLog(**logargs)
         logargs['LogName'] = common.SampleLogs.FOREGROUND_END
         logargs['LogText'] = str(endIndex)
@@ -410,23 +409,28 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return ws
 
     def _moveDetector(self, ws):
-        detectorMovedWSName = self._names.withSuffix('detector_moved')
-        det = ws.getDetector(self.beamPosIndex)
-        theta = numpy.rad2deg(ws.detectorSignedTwoTheta(det))
+        """Perform detector position correction for reflected beams only."""
+        if self.getProperty(Prop.BEAM_ANGLE).isDefault:
+            return ws
+        twoTheta = self.getProperty(Prop.BEAM_ANGLE).value
+        detectorMovedWSName = self._names.withSuffix('detectors_moved')
+        self.instrumentName = ws.run().get('instrument.name').value
         SpecularReflectionPositionCorrect(InputWorkspace=ws,
                                           OutputWorkspace=detectorMovedWSName,
-                                          TwoTheta=theta,
+                                          TwoTheta=twoTheta,
                                           DetectorCorrectionType='RotateAroundSample',
                                           DetectorComponentName='detector',
                                           DetectorFacesSample=True,
-                                          PixelSize=0.001195,
-                                          DirectLinePosition=self.beamPosIndex,
+                                          PixelSize=common.pixelSize(self.instrumentName),
+                                          DirectLinePosition=self.beamPos,
                                           EnableLogging=self._subalgLogging)
         detectorMovedWS = mtd[detectorMovedWSName]
         # Add theta to the sample logs of ws.
-        logargs = {'Workspace': detectorMovedWS, 'LogType': 'Number', 'EnableLogging': self._subalgLogging}
-        logargs['LogName'] = 'theta.at_peak_position'
-        logargs['LogText'] = format(theta, '.13f')
+        logargs = {'Workspace': detectorMovedWS,
+                   'LogType': 'Number',
+                   'EnableLogging': self._subalgLogging}
+        logargs['LogName'] = 'twoTheta.at_direct_peak_position'
+        logargs['LogText'] = format(twoTheta, '.13f')
         logargs['NumberType'] = 'Double'
         AddSampleLog(**logargs)
         self._cleanup.cleanup(ws)
@@ -469,9 +473,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if self.getProperty(Prop.SLIT_NORM).value == SlitNorm.OFF:
             return ws
         r = ws.run()
-        instrumentName = r.get('instrument.name').value
-        slit2width = r.get(common.slitSizeLogEntry(instrumentName, 1))
-        slit3width = r.get(common.slitSizeLogEntry(instrumentName, 2))
+        self.instrumentName = r.get('instrument.name').value
+        slit2width = r.get(common.slitSizeLogEntry(self.instrumentName, 1))
+        slit3width = r.get(common.slitSizeLogEntry(self.instrumentName, 2))
         if slit2width is None or slit3width is None:
             self.log().warning('Slit information not found in sample logs. Slit normalisation disabled.')
             return ws
@@ -527,7 +531,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if self.getProperty(Prop.WATER_REFERENCE).isDefault:
             return ws
         waterWS = self.getProperty(Prop.WATER_REFERENCE).value
-        waterWS, mon = self._extractMonitors(waterWS)
+        detWSName = self._names.withSuffix('water_detectors')
+        ExtractMonitors(InputWorkspace=waterWS,
+                        DetectorWorkspace=detWSName,
+                        EnableLogging=self._subalgLogging)
+        if mtd.doesExist(detWSName) is None:
+            raise RuntimeError('No detectors in the water reference data.')
+        waterWS = mtd[detWSName]
         if waterWS.getNumberHistograms() != ws.getNumberHistograms():
             self.log().error('Water workspace and run do not have the same number of histograms.')
         rebinnedWaterWSName = self._names.withSuffix('water_rebinned')
@@ -540,6 +550,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                               RHSWorkspace=rebinnedWaterWS,
                               OutputWorkspace=calibratedWSName,
                               EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(waterWS)
         self._cleanup.cleanup(rebinnedWaterWS)
         self._cleanup.cleanup(ws)
         return calibratedWS

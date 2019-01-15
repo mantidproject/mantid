@@ -29,6 +29,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        det = outWS.getDetector(122)
+        theta = outWS.detectorTwoTheta(det)
+        self.assertAlmostEquals(theta, 0.057659886309975004, delta=1.e-13)
 
     def testDefaultRunFIGARO(self):
         args = {
@@ -41,6 +44,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        det = outWS.getDetector(122)
+        theta = outWS.detectorTwoTheta(det)
+        self.assertAlmostEquals(theta, 0.03060663990053301, delta=1.e-13)
 
     def testFlatBackgroundSubtraction(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -286,7 +292,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         print(mtd.getObjectNames())
         self.assertEquals(mtd.getObjectNames(), ['outWS_cloned_for_flat_bkg_',
-                                                 'outWS_detector_moved_',
                                                  'outWS_detectors_',
                                                  'outWS_flat_background_',
                                                  'outWS_flat_background_subtracted_',
@@ -295,6 +300,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                                                  'outWS_transposed_clone_',
                                                  'outWS_transposed_flat_background_',
                                                  'outWS_water_calibrated_',
+                                                 'outWS_water_detectors_',
                                                  'outWS_water_rebinned_',
                                                  'peakTable'])
         mtd.clear()
