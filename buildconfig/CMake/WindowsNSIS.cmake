@@ -166,7 +166,7 @@ if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
     execute_process(COMMAND powershell.exe -version 2.0 -noprofile -windowstyle hidden -ExecutionPolicy Bypass ${THIRD_PARTY_DIR}/bin/ps2exe.ps1 -inputFile ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 -outputFile ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} -x64 -runtime2 -noconsole RESULT_VARIABLE _workbench_powershell_return_code OUTPUT_VARIABLE _workbench_powershell_output)
 
     # If the EXE generation failed then display an error and stop the CMAKE generation
-    if ( _workbench_powershell_return_code GREATER 0 )
+    if ( NOT _workbench_powershell_return_code EQUAL 0 )
       message(STATUS ${_workbench_powershell_output})
       message(FATAL_ERROR "Generating the Workbench executable encountered an error.")
     endif ()

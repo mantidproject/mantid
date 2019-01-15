@@ -20,16 +20,16 @@
 namespace Mantid {
 namespace Geometry {
 
-MeshObject::MeshObject(const std::vector<uint16_t> &faces,
+MeshObject::MeshObject(const std::vector<uint32_t> &faces,
                        const std::vector<Kernel::V3D> &vertices,
-                       const Kernel::Material &material)
+                       const Kernel::Material material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(faces),
       m_vertices(vertices), m_material(material) {
 
   initialize();
 }
 
-MeshObject::MeshObject(std::vector<uint16_t> &&faces,
+MeshObject::MeshObject(std::vector<uint32_t> &&faces,
                        std::vector<Kernel::V3D> &&vertices,
                        const Kernel::Material &&material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(std::move(faces)),
@@ -473,6 +473,18 @@ boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
   return m_handler;
 }
 
+void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
+  for (Kernel::V3D &vertex : m_vertices) {
+    vertex.rotate(rotationMatrix);
+  }
+}
+
+void MeshObject::translate(Kernel::V3D translationVector) {
+  for (Kernel::V3D &vertex : m_vertices) {
+    vertex = vertex + translationVector;
+  }
+}
+
 /**
  * Updates the geometry handler if needed
  */
@@ -488,9 +500,7 @@ size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 /**
  * get faces
  */
-std::vector<uint32_t> MeshObject::getTriangles() const {
-  return MeshObjectCommon::getTriangles_uint32(m_triangles);
-}
+std::vector<uint32_t> MeshObject::getTriangles() const { return m_triangles; }
 
 /**
  * get number of points

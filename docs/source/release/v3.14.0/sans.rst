@@ -32,6 +32,7 @@ Improved
 * Added a load button to load selected workspaces without processing.
 * Added save_can option to output unsubtracted can and sample workspaces.
 * Can export table as a csv, which can be re-loaded as a batch file.
+* File path to batch file will be added to your directories automatically upon loading
 
 Bug fixes
 #########

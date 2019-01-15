@@ -16,7 +16,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFitDataPresenter::JumpFitDataPresenter(
-    JumpFitModel *model, IndirectFitDataView *view, QComboBox *cbParameterType,
+    JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
     : IndirectFitDataPresenter(
           model, view,
@@ -38,7 +38,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
           SLOT(setParameterLabel(const QString &)));
   connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateAvailableParameters(QString const &)));
-  connect(cbParameterType, SIGNAL(currentIndexChanged(int)), this,
+  connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
           SIGNAL(dataChanged()));
   connect(cbParameter, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setSingleModelSpectrum(int)));
@@ -196,13 +196,10 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
     m_jumpModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex);
 }
 
-void JumpFitDataPresenter::dialogExecuted(IAddWorkspaceDialog const *dialog,
-                                          QDialog::DialogCode result) {
-  if (result == QDialog::Rejected &&
-      m_jumpModel->numberOfWorkspaces() > m_dataIndex)
+void JumpFitDataPresenter::closeDialog() {
+  if (m_jumpModel->numberOfWorkspaces() > m_dataIndex)
     m_jumpModel->removeWorkspace(m_dataIndex);
-  else
-    IndirectFitDataPresenter::dialogExecuted(dialog, result);
+  IndirectFitDataPresenter::closeDialog();
 }
 
 std::unique_ptr<IAddWorkspaceDialog>

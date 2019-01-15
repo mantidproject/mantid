@@ -20,11 +20,11 @@ import time
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService
-
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
+                                      add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
@@ -337,6 +337,10 @@ class RunTabPresenter(object):
             if not batch_file_path:
                 return
 
+            datasearch_dirs = ConfigService["datasearch.directories"]
+            batch_file_directory, datasearch_dirs = add_dir_to_datasearch(batch_file_path, datasearch_dirs)
+            ConfigService["datasearch.directories"] = datasearch_dirs
+
             if not os.path.exists(batch_file_path):
                 raise RuntimeError(
                     "The batch file path {} does not exist. Make sure a valid batch file path"
@@ -354,6 +358,10 @@ class RunTabPresenter(object):
                 self._add_row_to_table_model(row, index)
             self._table_model.remove_table_entries([len(parsed_rows)])
         except RuntimeError as e:
+            if batch_file_directory:
+                # Remove added directory from datasearch.directories
+                ConfigService["datasearch.directories"] = remove_dir_from_datasearch(batch_file_directory, datasearch_dirs)
+
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 

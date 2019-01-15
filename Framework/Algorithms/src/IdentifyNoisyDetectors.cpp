@@ -8,8 +8,9 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/CompositeValidator.h"
 #include <numeric>
 
@@ -18,6 +19,7 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace HistogramData;
+using namespace DataObjects;
 
 DECLARE_ALGORITHM(IdentifyNoisyDetectors)
 
@@ -55,10 +57,10 @@ void IdentifyNoisyDetectors::exec() {
 
   // Create the output workspace a single value for each spectra.
   MatrixWorkspace_sptr outputWs;
-  outputWs = WorkspaceFactory::Instance().create(inputWS, nHist, 1, 1);
+  outputWs = create<MatrixWorkspace>(*inputWS, Points(1));
 
   MatrixWorkspace_sptr stdDevWs;
-  stdDevWs = WorkspaceFactory::Instance().create(outputWs);
+  stdDevWs = create<MatrixWorkspace>(*outputWs);
 
   progress.report("Integrating...");
 

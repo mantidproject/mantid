@@ -214,3 +214,23 @@ def open_file_dialog(line_edit, filter_text, directory):
     if isinstance(file_name, tuple):
         file_name = file_name[0]
     line_edit.setText(file_name)
+
+
+def get_batch_file_dir_from_path(batch_file_path):
+    path, file = os.path.split(batch_file_path)
+    if path != "" and path[-1] != "/":
+        # Make string inline with other ConfigService paths
+        path += "/"
+    return path
+
+
+def add_dir_to_datasearch(batch_file_path, current_directories):
+    batch_file_directory = get_batch_file_dir_from_path(batch_file_path)
+    if batch_file_directory != "" and batch_file_directory not in current_directories:
+        current_directories = ";".join([current_directories, batch_file_directory])
+    return batch_file_directory, current_directories
+
+
+def remove_dir_from_datasearch(batch_file_path, directories):
+    new_dirs = ";".join([path for path in directories.split(";") if path != batch_file_path])
+    return new_dirs
