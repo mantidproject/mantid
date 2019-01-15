@@ -14,8 +14,8 @@ This algorithm calculates the detection efficiency correction, :math:`\epsilon`,
 .. math::
     :label: efficiency
 
-    \epsilon &= 1-e^{-\rho T \sigma_a (\lambda)} \\
-             &= 1-e^{-\rho_{A} \sigma_a (\lambda)} \\
+    \epsilon &= 1-e^{-\rho T \sigma (\lambda)} \\
+             &= 1-e^{-\rho_{A} \sigma (\lambda)} \\
              &= 1-e^{-\alpha \lambda}
 
 and output correction is given as:
@@ -25,24 +25,31 @@ and output correction is given as:
 
     \frac{1}{\epsilon} = \frac{1}{1-e^{-\alpha \lambda}}
 
-where :math:`\rho` is the number density in :math:`atoms/\AA^3`,
-:math:`T` is a sample thickness given in :math:`cm`,
-:math:`\sigma_a(\lambda)` is the wavelength-dependent absorption cross-section given as 
-:math:`\sigma_a (\lambda) = \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)`,
-in units of :math:`barns` and with :math:`\lambda_{ref}` = 1.7982 :math:`\AA`,
-:math:`\rho_{A}` is the area density (:math:`\rho_{A}=\rho * T`) in units of :math:`atoms*cm/\AA^3`,
-:math:`\alpha = \rho_{A} * \frac{\sigma_a (\lambda_{ref})}{\lambda_{ref}} = \rho * T * \frac{\sigma_a (\lambda_{ref})}{\lambda_{ref}}` in units of :math:`1/\AA`.
-and :math:`\lambda` is in units of :math:`\AA`. 
+where
 
-NOTE: :math:`1 \AA^2 = 10^{8} barns` and :math:`1 \AA = 10^{-8} cm`.
+- :math:`\rho` is the number density in atoms/:math:`\AA^3`
+- :math:`T` is a sample thickness given in cm
+- :math:`\lambda_{ref}` = 1.7982 :math:`\AA`,
+- :math:`\sigma (\lambda)` is the wavelength-dependent cross-section which is either:
+
+    - :math:`\sigma (\lambda) = \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``AttenuationXSection`` where :math:`\sigma_a` is the absorption cross-section in units of barns 
+    - or :math:`\sigma (\lambda) = \sigma_s + \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``TotalXSection`` where :math:`\sigma_s` is the total scattering cross-section in units of barns
+
+- :math:`\rho_{A}` is the area density (:math:`\rho_{A}=\rho * T`) in units of atoms*cm/:math:`\AA^3`,
+- :math:`\alpha = \rho_{A} * \frac{\sigma (\lambda_{ref})}{\lambda_{ref}} = \rho * T * \frac{\sigma (\lambda_{ref})}{\lambda_{ref}}` in units of 1/:math:`\AA`.
+- :math:`\lambda` is in units of :math:`\AA`. 
+
+NOTE: :math:`1 \AA^2 = 10^{8}` barns and :math:`1 \AA = 10^{-8}` cm.
 
 The optional inputs into the algorithm are to input either:
   1. The ``Alpha`` parameter
-  2. The ``Density`` and ``ChemicalFormula`` to calculate the :math:`\sigma_a(\lambda_{ref})` term.
-  3. The ``MeasuredEfficiency``, an optional ``MeasuredEfficiencyWavelength``, and ``ChemicalFormula`` to calculate the :math:`\sigma_a(\lambda_{ref})` term.
+  2. The ``Density`` and ``ChemicalFormula`` to calculate the :math:`\sigma(\lambda_{ref})` term.
+  3. The ``MeasuredEfficiency``, an optional ``MeasuredEfficiencyWavelength``, and ``ChemicalFormula`` to calculate the :math:`\sigma(\lambda_{ref})` term.
 
 The ``MeasuredEfficiency`` is the :math:`\epsilon` term measured at a specific wavelength, ``MeasuredEfficiencyWavelength``. This helps
 if the efficiency has been directly measured experimentally at a given wavelength.
+
+For the ``XSectionType``, if the efficiency correction is applied to a beam monitor to determine the incident spectrum, then the ``AttenuationXSection`` option should be used. This is due to the fact that scatter events do not lead to neutrons that will be in the incident beam. If the efficiency correction is to be used similar to a transmission measurement for an actual sample measurement, such as in :ref:`algm-CalculateSampleTransmission-v1`, then the ``TotalXSection`` should be used to include both types of events.
 
 Usage
 -----
@@ -57,15 +64,18 @@ Usage
                                        NumEvents=10000, NumBanks=1, BankPixelWidth=1)
 
     # Calculate the efficiency correction
-    correction_wksp = CalculateEfficiencyCorrection(InputWorkspace=input_wksp, Alpha=0.5)
+    corr_wksp = CalculateEfficiencyCorrection(InputWorkspace=input_wksp, Alpha=0.5)
+    corr_wksp_with_wave_range = CalculateEfficiencyCorrection(WavelengthRange="0.2,0.01,4.0", Alpha=0.5)
 
     # Apply the efficiency correction to the measured spectrum
     input_wksp = ConvertToPointData(InputWorkspace=input_wksp)
-    output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=correction_wksp)
+    output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp)
+    output_wksp_with_wave_range = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp_with_wave_range)
 
     print('Input workspace: {}'.format(input_wksp.readY(0)[:5]))
-    print('Correction workspace: {}'.format(correction_wksp.readY(0)[:5]))
+    print('Correction workspace: {}'.format(corr_wksp.readY(0)[:5]))
     print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
+    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
 
 Ouptut:
 
@@ -74,6 +84,7 @@ Ouptut:
     Input workspace: [ 38.  38.  38.  38.  38.]
     Correction workspace: [ 10.26463773   9.81128219   9.39826191   9.02042771   8.67347109]
     Output workspace: [ 390.05623383  372.82872321  357.13395265  342.77625306  329.59190131]
+    Output workspace using WavelengthRange: [ 390.05623383  372.82872321  357.13395265  342.77625306  329.59190131]
 
 **Example - Basics of running CalculateEfficiencyCorrection with Density and ChemicalFormula.**
 
@@ -86,17 +97,22 @@ Ouptut:
                                        NumEvents=10000, NumBanks=1, BankPixelWidth=1)
 
     # Calculate the efficiency correction
-    correction_wksp = CalculateEfficiencyCorrection(InputWorkspace=input_wksp,
-                                                    Density=6.11,
-                                                    ChemicalFormula="V")
+    corr_wksp = CalculateEfficiencyCorrection(InputWorkspace=input_wksp,
+                                              Density=6.11,
+                                              ChemicalFormula="V")
+    corr_wksp_with_wave_range = CalculateEfficiencyCorrection(WavelengthRange="0.2,0.01,4.0",
+                                                              Density=6.11,
+                                                              ChemicalFormula="V")
 
     # Apply the efficiency correction to the measured spectrum
     input_wksp = ConvertToPointData(InputWorkspace=input_wksp)
-    output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=correction_wksp)
+    output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp)
+    output_wksp_with_wave_range = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp_with_wave_range)
 
     print('Input workspace: {}'.format(input_wksp.readY(0)[:5]))
-    print('Correction workspace: {}'.format(correction_wksp.readY(0)[:5]))
+    print('Correction workspace: {}'.format(corr_wksp.readY(0)[:5]))
     print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
+    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
 
 Ouptut:
 
@@ -105,6 +121,7 @@ Ouptut:
     Input workspace: [ 38.  38.  38.  38.  38.]
     Correction workspace: [ 24.40910309  23.29738394  22.28449939  21.35783225  20.50682528]
     Output workspace: [ 927.54591732  885.30058981  846.81097679  811.59762534  779.25936055]
+    Output workspace using WavelengthRange: [ 927.54591732  885.30058981  846.81097679  811.59762534  779.25936055]
 
 **Example - Basics of running CalculateEfficiencyCorrection with MeasuredEfficiency and ChemicalFormula.**
 
@@ -117,17 +134,24 @@ Ouptut:
                                        NumEvents=10000, NumBanks=1, BankPixelWidth=1)
 
     # Calculate the efficiency correction
-    correction_wksp = CalculateEfficiencyCorrection(InputWorkspace=input_wksp,
-                                                    MeasuredEfficiency=1e-2,
-                                                    ChemicalFormula="(He3)")
+    corr_wksp = CalculateEfficiencyCorrection(InputWorkspace=input_wksp,
+                                              MeasuredEfficiency=1e-2,
+                                              ChemicalFormula="(He3)")
+
+    corr_wksp_with_wave_range = CalculateEfficiencyCorrection(WavelengthRange="0.2,0.01,4.0",
+                                                              MeasuredEfficiency=1e-2,
+                                                              ChemicalFormula="(He3)")
+
 
     # Apply the efficiency correction to the measured spectrum
     input_wksp = ConvertToPointData(InputWorkspace=input_wksp)
-    output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=correction_wksp)
+    output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp)
+    output_wksp_with_wave_range = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp_with_wave_range)
 
     print('Input workspace: {}'.format(input_wksp.readY(0)[:5]))
-    print('Correction workspace: {}'.format(correction_wksp.readY(0)[:5]))
+    print('Correction workspace: {}'.format(corr_wksp.readY(0)[:5]))
     print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
+    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
 
 Ouptut:
 
@@ -137,6 +161,83 @@ Ouptut:
     Correction workspace: [ 873.27762699  832.68332786  795.69741128  761.85923269  730.78335476]
     Output workspace: [ 33184.54982567  31641.9664586   30236.50162877  28950.65084207
       27769.76748099]
+    Output workspace using WavelengthRange: [ 33184.54982567  31641.9664586   30236.50162877  28950.65084207
+      27769.76748099]
+
+**Example - Basics of running CalculateEfficiencyCorrection with MeasuredEfficiency and ChemicalFormula using the total cross section.**
+
+.. testcode:: ExBasicCalcualteEfficiencyCorrectionWithEfficiency
+
+    # Create an exponentially decaying function in wavelength to simulate measured sample
+    input_wksp = CreateSampleWorkspace(WorkspaceType="Event", Function="User Defined",
+                                       UserDefinedFunction="name=ExpDecay, Height=100, Lifetime=4",
+                                       Xmin=0.2, Xmax=4.0, BinWidth=0.01, XUnit="Wavelength",
+                                       NumEvents=10000, NumBanks=1, BankPixelWidth=1)
+
+    # Calculate the efficiency correction
+    corr_wksp = CalculateEfficiencyCorrection(InputWorkspace=input_wksp,
+                                              MeasuredEfficiency=1e-2,
+                                              ChemicalFormula="(He3)",
+                                              XSectionType="TotalXSection")
+
+    corr_wksp_with_wave_range = CalculateEfficiencyCorrection(WavelengthRange="0.2,0.01,4.0",
+                                                              MeasuredEfficiency=1e-2,
+                                                              ChemicalFormula="(He3)",
+                                                              XSectionType="TotalXSection")
+
+
+    # Apply the efficiency correction to the measured spectrum
+    input_wksp = ConvertToPointData(InputWorkspace=input_wksp)
+    output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp)
+    output_wksp_with_wave_range = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp_with_wave_range)
+
+    print('Input workspace: {}'.format(input_wksp.readY(0)[:5]))
+    print('Correction workspace: {}'.format(corr_wksp.readY(0)[:5]))
+    print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
+    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
+
+Ouptut:
+
+.. testoutput:: ExBasicCalcualteEfficiencyCorrectionWithEfficiency
+
+    Input workspace: [ 38.  38.  38.  38.  38.]
+    Correction workspace: [ 865.7208838   825.85320701  789.49774383  756.20995361  725.61727932]
+    Output workspace: [ 32897.39358441  31382.42186624  30000.91426562  28735.97823706
+      27573.45661411]
+    Output workspace using WavelengthRange: [ 32897.39358441  31382.42186624  30000.91426562  28735.97823706
+      27573.45661411]
+
+The transmission of a sample can be measured as :math:`e^{-\rho T \sigma_t (\lambda)}` where :math:`\sigma_t (\lambda) = \sigma_s + \sigma_a (\lambda)` is the total cross-section. This can be calculatd directly by the :ref:`algm-CalculateSampleTransmission-v1` algorithm. Yet, we can also back out the transmission with the ``CalculateEfficiencyCorrection`` algorithm. The example below shows how:
+
+**Example - Transmission using the CalculateEfficiencyCorrection and CalculateSampleTransmission comparison.**
+
+.. testcode:: ExTransmissionCalcualteEfficiencyCorrection
+
+    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',  
+                                     ChemicalFormula='H2-O')  
+    print('Transmission: {} ...'.format(ws.readY(0)[:3]))  
+     
+    corr_wksp = CalculateEfficiencyCorrection(WavelengthRange="2.0, 0.1, 10.0", 
+                                              Density=0.1, 
+                                              Thickness=0.1, 
+                                              ChemicalFormula="H2-O", 
+                                              XSectionType="TotalXSection") 
+    dataX = corr_wksp.readX(0) 
+    dataY = np.ones(len(corr_wksp.readX(0))) 
+    ones = CreateWorkspace(dataX, dataY, UnitX="Wavelength") 
+    efficiency = Divide(LHSWorkspace=ones, RHSWorkspace=corr_wksp) # 1 + -1 * transmission
+    negative_trans = Minus(LHSWorkspace=efficiency, RHSWorkspace=ones) # -1 * transmission
+    transmission = Multiply(LHSWOrkspace=negative_trans, RHSWorkspace=-1.*ones) 
+    print('Transmission using efficiency correction: {} ...'.format(transmission.readY(0)[:3]))        
+
+Output:
+
+.. testoutput:: ExTransmissionCalcualteEfficiencyCorrection
+
+    Transmission: [ 0.94506317  0.94505148  0.94503979] ...
+    Transmission using efficiency correction: [ 0.9450632   0.94505151  0.94503982] ...
+
+The discrepancies are due to the differenc in :math:`\lambda_{ref}` = 1.7982 :math:`\AA` in ``CalculateEfficiencyCorrection``, consistent with `ReferenceLambda <https://github.com/mantidproject/mantid/blob/32ed0b2cbbe4fbfb230570d5a53032f6101743de/Framework/Kernel/src/NeutronAtom.cpp#L23>`_ where :ref:`algm-CalculateSampleTransmission-v1`  uses :math:`\lambda_{ref}` = 1.798 :math:`\AA`.
 
 **Example - Running CalculateEfficiencyCorrection for incident spectrum.**
 

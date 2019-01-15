@@ -8,7 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.simpleapi import \
-    LoadAscii, DeleteWorkspace, Multiply, ConvertToPointData, CalculateEfficiencyCorrection
+    ConvertToPointData, CalculateEfficiencyCorrection, CreateSampleWorkspace, \
+    DeleteWorkspace, LoadAscii, Multiply
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 
@@ -18,12 +19,15 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
     _input_wksp = "input_wksp"
     _correction_wksp = "correction_wksp"
     _output_wksp = "output_wksp"
+    _wavelengths="0.2,0.01,4.0"
     _alpha = 0.693
     _chemical_formula = "(He3)"
     _number_density = 0.0002336682167635477
     _mass_density = 0.0011702649036052439
-    _efficiency1 = 0.712390781371
-    _efficiency2 = { "Efficiency": 0.74110947758, "Wavelength": 1.95}
+    _efficiency1_forAbsXS = 0.712390781371
+    _efficiency2_forAbsXS = { "Efficiency": 0.74110947758, "Wavelength": 1.95}
+    _efficiency1_forTotalXS = 0.712793729636
+    _efficiency2_forTotalXS = { "Efficiency": 0.741472190178, "Wavelength": 1.95}
     _thickness = 1.0
 
     def setUp(self):
@@ -39,13 +43,12 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
           S. Howells, "On the choice of moderator for a liquids diffractometer on a pulsed neutron source",
           Nucl. Instr. Meth. Phys. Res. 223, 1984, doi:10.1016/0167-5087(84)90256-4
         '''
-        input_wksp = LoadAscii(
-                        Filename="CalculateEfficiencyCorrection_milder_moderator_polyethlyene_300K.txt",
-                        Unit="Wavelength")
-        ConvertToPointData(InputWorkspace=input_wksp, OutputWorkspace=input_wksp)
-        self._input_wksp = input_wksp
+        LoadAscii(OutputWorkspace=self._input_wksp,
+                  Filename="CalculateEfficiencyCorrection_milder_moderator_polyethlyene_300K.txt",
+                  Unit="Wavelength")
+        ConvertToPointData(InputWorkspace=self._input_wksp, OutputWorkspace=self._input_wksp)
 
-    def checkResults(self):
+    def checkResults(self, xsection="AttenuationXSection"):
         Multiply(LHSWorkspace=self._input_wksp,
                  RHSWorkspace=self._correction_wksp,
                  OutputWorkspace=self._output_wksp)
@@ -53,9 +56,43 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
 
         self.assertEqual(output_wksp.getAxis(0).getUnit().unitID(), 'Wavelength')
         self.assertAlmostEqual(output_wksp.readX(0)[79], 0.995)
-        self.assertAlmostEqual(output_wksp.readY(0)[79], 3250.28183501)
+        if xsection == "AttenuationXSection":
+            self.assertAlmostEqual(output_wksp.readY(0)[79], 3250.28183501)
+        if xsection == "TotalXSection":
+            self.assertAlmostEqual(output_wksp.readY(0)[79], 3245.70148939)
 
     # Result tests
+    def testCalculateEfficiencyCorrectionAlphaForEventWksp(self):
+        self._input_wksp = "input_wksp"
+        self._correction_wksp = "correction_wksp"
+        self._output_wksp = "output_wksp"
+
+        # Create an exponentially decaying function in wavelength to simulate
+        # measured sample
+        CreateSampleWorkspace(WorkspaceType="Event", Function="User Defined",
+                              UserDefinedFunction="name=ExpDecay, Height=100, Lifetime=4",
+                              Xmin=0.2, Xmax=4.0, BinWidth=0.01, XUnit="Wavelength",
+                              NumEvents=10000, NumBanks=1, BankPixelWidth=1,
+                              OutputWorkspace=self._input_wksp)
+
+        # Calculate the efficiency correction
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 InputWorkspace=self._input_wksp,
+                                 Alpha=self._alpha,
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        # Apply correction
+        ConvertToPointData(InputWorkspace=self._input_wksp, OutputWorkspace=self._input_wksp)
+        Multiply(LHSWorkspace=self._input_wksp,
+                 RHSWorkspace=self._correction_wksp,
+                 OutputWorkspace=self._output_wksp)
+
+        # Check results
+        output_wksp = AnalysisDataService.retrieve(self._output_wksp)
+        self.assertEqual(output_wksp.getAxis(0).getUnit().unitID(), 'Wavelength')
+        self.assertAlmostEqual(output_wksp.readX(0)[79], 0.995)
+        self.assertAlmostEqual(output_wksp.readY(0)[79], 62.22517501)
 
     def testCalculateEfficiencyCorrectionAlpha(self):
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
@@ -66,63 +103,259 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
 
         self.checkResults()
 
+    def testCalculateEfficiencyCorrectionAlphaWithWaveRange(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 Alpha=self._alpha,
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults()
+
     def testCalculateEfficiencyCorrectionMassDensityAndThickness(self):
-        correction_wksp = "correction_ws"
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
                                  InputWorkspace=self._input_wksp,
                                  ChemicalFormula=self._chemical_formula,
                                  Density=self._mass_density,
                                  Thickness=self._thickness,
-                                 OutputWorkspace=correction_wksp)
+                                 OutputWorkspace=self._correction_wksp)
         self.assertTrue(alg_test.isExecuted())
-        self._correction_wksp = AnalysisDataService.retrieve(correction_wksp)
+
+        self.checkResults()
+
+    def testCalculateEfficiencyCorrectionMassDensityAndThicknessWithWaveRange(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 ChemicalFormula=self._chemical_formula,
+                                 Density=self._mass_density,
+                                 Thickness=self._thickness,
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
 
         self.checkResults()
 
     def testCalculateEfficiencyCorrectionNumberDensityAndThickness(self):
-        correction_wksp = "correction_ws"
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
                                  InputWorkspace=self._input_wksp,
                                  ChemicalFormula=self._chemical_formula,
                                  DensityType="Number Density",
                                  Density=self._number_density,
                                  Thickness=self._thickness,
-                                 OutputWorkspace=correction_wksp)
+                                 OutputWorkspace=self._correction_wksp)
         self.assertTrue(alg_test.isExecuted())
-        self._correction_wksp = AnalysisDataService.retrieve(correction_wksp)
+
+        self.checkResults()
+
+    def testCalculateEfficiencyCorrectionNumberDensityAndThicknessWithWaveRange(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 ChemicalFormula=self._chemical_formula,
+                                 DensityType="Number Density",
+                                 Density=self._number_density,
+                                 Thickness=self._thickness,
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
 
         self.checkResults()
 
     def testCalculateEfficiencyCorrectionEfficiency(self):
-        correction_wksp = "correction_ws"
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
                                  InputWorkspace=self._input_wksp,
                                  ChemicalFormula=self._chemical_formula,
-                                 MeasuredEfficiency=self._efficiency1,
-                                 OutputWorkspace=correction_wksp)
+                                 MeasuredEfficiency=self._efficiency1_forAbsXS,
+                                 OutputWorkspace=self._correction_wksp)
         self.assertTrue(alg_test.isExecuted())
-        self._correction_wksp = AnalysisDataService.retrieve(correction_wksp)
+
+        self.checkResults()
+
+    def testCalculateEfficiencyCorrectionEfficiencyWithWaveRange(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 ChemicalFormula=self._chemical_formula,
+                                 MeasuredEfficiency=self._efficiency1_forAbsXS,
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
 
         self.checkResults()
 
     def testCalculateEfficiencyCorrectionEfficiencyWithWavelength(self):
-        correction_wksp = "correction_ws"
-        efficiency=self._efficiency2['Efficiency']
-        wavelength=self._efficiency2['Wavelength']
+        efficiency=self._efficiency2_forAbsXS['Efficiency']
+        wavelength=self._efficiency2_forAbsXS['Wavelength']
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
                                  InputWorkspace=self._input_wksp,
                                  ChemicalFormula=self._chemical_formula,
                                  MeasuredEfficiency=efficiency,
                                  MeasuredEfficiencyWavelength=wavelength,
-                                 OutputWorkspace=correction_wksp)
+                                 OutputWorkspace=self._correction_wksp)
         self.assertTrue(alg_test.isExecuted())
-        self._correction_wksp = AnalysisDataService.retrieve(correction_wksp)
 
         self.checkResults()
 
+    def testCalculateEfficiencyCorrectionEfficiencyWithWavelengthWithWaveRange(self):
+        efficiency=self._efficiency2_forAbsXS['Efficiency']
+        wavelength=self._efficiency2_forAbsXS['Wavelength']
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 ChemicalFormula=self._chemical_formula,
+                                 MeasuredEfficiency=efficiency,
+                                 MeasuredEfficiencyWavelength=wavelength,
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults()
+
+    def testCalculateEfficiencyCorrectionAlphaWithTotalXS(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 InputWorkspace=self._input_wksp,
+                                 Alpha=self._alpha,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults()
+
+    def testCalculateEfficiencyCorrectionAlphaWithTotalXSWithWaveRange(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 Alpha=self._alpha,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults()
+
+    def testCalculateEfficiencyCorrectionMassDensityAndThicknessWithTotalXS(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 InputWorkspace=self._input_wksp,
+                                 ChemicalFormula=self._chemical_formula,
+                                 Density=self._mass_density,
+                                 Thickness=self._thickness,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults(xsection="TotalXSection")
+
+    def testCalculateEfficiencyCorrectionMassDensityAndThicknessWithTotalXSWithWaveRange(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 ChemicalFormula=self._chemical_formula,
+                                 Density=self._mass_density,
+                                 Thickness=self._thickness,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults(xsection="TotalXSection")
+
+    def testCalculateEfficiencyCorrectionNumberDensityAndThicknessWithTotalXS(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 InputWorkspace=self._input_wksp,
+                                 ChemicalFormula=self._chemical_formula,
+                                 DensityType="Number Density",
+                                 Density=self._number_density,
+                                 Thickness=self._thickness,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults(xsection="TotalXSection")
+
+    def testCalculateEfficiencyCorrectionNumberDensityAndThicknessWithTotalXSWithWaveRange(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 ChemicalFormula=self._chemical_formula,
+                                 DensityType="Number Density",
+                                 Density=self._number_density,
+                                 Thickness=self._thickness,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults(xsection="TotalXSection")
+
+    def testCalculateEfficiencyCorrectionEfficiencyWithTotalXS(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 InputWorkspace=self._input_wksp,
+                                 ChemicalFormula=self._chemical_formula,
+                                 MeasuredEfficiency=self._efficiency1_forTotalXS,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults(xsection="TotalXSection")
+
+    def testCalculateEfficiencyCorrectionEfficiencyWithTotalXSWitWaveRange(self):
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 ChemicalFormula=self._chemical_formula,
+                                 MeasuredEfficiency=self._efficiency1_forTotalXS,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults(xsection="TotalXSection")
+
+    def testCalculateEfficiencyCorrectionEfficiencyWithWavelengthWithTotalXS(self):
+        efficiency=self._efficiency2_forTotalXS['Efficiency']
+        wavelength=self._efficiency2_forTotalXS['Wavelength']
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 InputWorkspace=self._input_wksp,
+                                 ChemicalFormula=self._chemical_formula,
+                                 MeasuredEfficiency=efficiency,
+                                 MeasuredEfficiencyWavelength=wavelength,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults(xsection="TotalXSection")
+
+    def testCalculateEfficiencyCorrectionEfficiencyWithWavelengthWithTotalXSWithWaveRange(self):
+        efficiency=self._efficiency2_forTotalXS['Efficiency']
+        wavelength=self._efficiency2_forTotalXS['Wavelength']
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 ChemicalFormula=self._chemical_formula,
+                                 MeasuredEfficiency=efficiency,
+                                 MeasuredEfficiencyWavelength=wavelength,
+                                 XSectionType="TotalXSection",
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+
+        self.checkResults(xsection="TotalXSection")
+
+    def testCalculateEfficiencyCorretionStoreADSCheck(self):
+        self.cleanup()
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 WavelengthRange=self._wavelengths,
+                                 Alpha=self._alpha,
+                                 OutputWorkspace=self._output_wksp)
+        self.assertTrue(alg_test.isExecuted())
+        self.assertTrue(AnalysisDataService.doesExist(self._output_wksp))
+
     # Invalid checks
-    def testCalculateEfficiencyCorretionInvalidDensity(self):
+    def testCalculateEfficiencyCorretionInvalidStoreADSCheck(self):
+        self.cleanup()
+        corr_wksp = CalculateEfficiencyCorrection(
+                                 WavelengthRange=self._wavelengths,
+                                 Alpha=self._alpha,
+                                 StoreInADS=False)
+        self.assertFalse(AnalysisDataService.doesExist(corr_wksp.name()))
+
+    def testCalculateEfficiencyCorretionInvalidInput(self):
         self.assertRaises(RuntimeError,
+                          CalculateEfficiencyCorrection,
+                          OutputWorkspace=self._output_wksp)
+
+    def testCalculateEfficiencyCorretionInvalidTooManyInputs(self):
+        self.assertRaises(RuntimeError,
+                          CalculateEfficiencyCorrection,
+                          InputWorkspace=self._input_wksp,
+                          WavelengthRange=self._wavelengths,
+                          OutputWorkspace=self._output_wksp)
+
+    def testCalculateEfficiencyCorretionInvalidDensity(self):
+        self.assertRaises(ValueError,
                           CalculateEfficiencyCorrection,
                           InputWorkspace=self._input_wksp,
                           ChemicalFormula=self._chemical_formula,
@@ -175,11 +408,13 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
                           MeasuredEfficiency=1.0,
                           OutputWorkspace=self._output_wksp)
 
-    def cleanUp(self):
+    def cleanup(self):
         if AnalysisDataService.doesExist(self._input_wksp):
             DeleteWorkspace(self._input_wksp)
         if AnalysisDataService.doesExist(self._output_wksp):
             DeleteWorkspace(self._output_wksp)
+        if AnalysisDataService.doesExist(self._correction_wksp):
+            DeleteWorkspace(self._correction_wksp)
 
 
 if __name__ == "__main__":
