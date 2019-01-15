@@ -461,8 +461,10 @@ class ScalingAxesImage(mimage.AxesImage):
         self._extent = xmin, xmax, ymin, ymax = extent
         corners = (xmin, ymin), (xmax, ymax)
         self.axes.update_datalim(corners)
-        self.sticky_edges.x[:] = [xmin, xmax]
-        self.sticky_edges.y[:] = [ymin, ymax]
+        from distutils.version import LooseVersion
+        if LooseVersion(matplotlib.__version__) >= LooseVersion('2.0.0'):
+            self.sticky_edges.x[:] = [xmin, xmax]
+            self.sticky_edges.y[:] = [ymin, ymax]
         self.stale = True
 
 
