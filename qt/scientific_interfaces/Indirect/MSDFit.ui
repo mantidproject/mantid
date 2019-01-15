@@ -15,6 +15,20 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QDockWidget" name="dockWidget">
+     <property name="features">
+      <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+     </property>
+     <property name="allowedAreas">
+      <set>Qt::NoDockWidgetArea</set>
+     </property>
+     <property name="windowTitle">
+      <string>Move me Sam!</string>
+     </property>
+     <widget class="QWidget" name="dockWidgetContents_2"/>
+    </widget>
+   </item>
+   <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -24,12 +38,6 @@
      </property>
      <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataView" name="fitDataView" native="true"/>
      <widget class="QFrame" name="fBottom">
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <property name="leftMargin">
         <number>0</number>
@@ -45,12 +53,6 @@
        </property>
        <item>
         <widget class="QFrame" name="fPlotsAndBrowser">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="leftMargin">
            <number>0</number>
