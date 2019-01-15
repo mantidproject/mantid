@@ -7,7 +7,7 @@ from qtpy.QtGui import QCursor
 from mantid.simpleapi import *
 from mantidqt.utils.qt.test.gui_window_test import *
 
-from workbench.plotting.functions import plot, pcolormesh
+from mantidqt.plotting import plot, pcolormesh
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.test.workbenchtests import runTests
 

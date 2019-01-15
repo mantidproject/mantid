@@ -95,7 +95,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         return self.canvas.figure.get_axes()[0].get_lines()
 
     def fitting_done(self, name):
-        from workbench.plotting.functions import plot
+        from mantidqt.plotting import plot
         name += '_Workspace'
         ws = mtd[name]
         self.clear_fit_result_lines()

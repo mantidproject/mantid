@@ -13,11 +13,12 @@ import copy
 from matplotlib import ticker, text, axis  # noqa
 import matplotlib.colors
 import matplotlib.axes
-import matplotlib.cm
+import matplotlib.cm as cm
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid import plots  # noqa
+from mantidqt.plotting import pcolormesh
 
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 SUBPLOT_WSPACE = 0.5
@@ -65,7 +66,7 @@ class PlotsLoader(object):
         # Make sure that the axes gets it's creation_args as loading doesn't add them
         ax.creation_args = creation_args_copy
 
-        self.plot_func(workspace, ax, creation_args[0][0])
+        self.plot_func(workspace, ax, fig, creation_args[0][0])
 
         # If an overplot is necessary plot onto the same figure
         self.plot_extra_lines(creation_args=creation_args, ax=ax)
@@ -81,11 +82,12 @@ class PlotsLoader(object):
         else:
             return fig
 
-    def plot_func(self, workspace, axes, creation_arg):
+    def plot_func(self, workspace, axes, fig,creation_arg):
         """
         Plot's the graph from the given workspace, axes and creation_args. then returns the function used to create it.
         :param workspace: mantid.Workspace; Workspace to create the graph from
-        :param axes: matplotlib.Axes; Axes to create the graph on
+        :param axes: matplotlib.Axes; Axes to create the graph
+        :param fig: matplotlib.Figure; Figure to add the colormesh to
         :param creation_arg: The creation arguments that have been used to create the details of the
         :return: String; The function used to create the plot
         """
@@ -96,24 +98,21 @@ class PlotsLoader(object):
         if "cmap" in creation_arg:
             creation_arg["cmap"] = getattr(matplotlib.cm, creation_arg["cmap"])
 
-        function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar, "pcolor": axes.pcolor,
+        function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar,
+                         "pcolor": axes.pcolor,
                          # Support for this method is not currently present in mantid so cannot be saved/loaded
                          # "pcolorfast": pcolorfast,
-                         "pcolormesh": axes.pcolormesh, "imshow": axes.imshow,
+                         "pcolormesh": pcolormesh, "imshow": pcolormesh,
                          "contourf": axes.contourf, "tripcolor": axes.tripcolor, "tricontour": axes.tricontour,
                          "tricontourf": axes.tricontourf}
+
         func = function_dict[function_to_call]
-        # pcm is only needed later but needs to be recieved now
-        pcm = func(workspace, **creation_arg)
-
-        # Plotting is done unless a colorbar needs to be added
-        if function_to_call in ["imshow", "pcolormesh", "pcolor", "pcolorfast"]:
-            fig = axes.get_figure()
-            fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
-            fig.colorbar(pcm, ax=axes, pad=0.06)
-            fig.canvas.draw()
-
+        # Plotting is done via an Axes object unless a colorbar needs to be added
+        if function_to_call in ["imshow", "pcolormesh"]:
+            func([workspace], fig)
             self.color_bar_remade = True
+        else:
+            func(workspace, **creation_arg)
 
     def plot_extra_lines(self, creation_args, ax):
         """
@@ -128,7 +127,7 @@ class PlotsLoader(object):
             for ii in range(1, len(creation_args[0])):
                 workspace_name = creation_args[0][ii].pop('workspaces')
                 workspace = ADS.retrieve(workspace_name)
-                self.plot_func(workspace, ax, creation_args[0][ii])
+                self.plot_func(workspace, ax, ax.figure, creation_args[0][ii])
 
     def restore_figure_data(self, fig, dic):
         self.restore_fig_properties(fig, dic["properties"])
@@ -182,15 +181,15 @@ class PlotsLoader(object):
             self.update_legend(ax, dic["legend"])
 
         # Update colorbar if present
-        if self.color_bar_remade and dic["colormap"]["exists"]:
+        if self.color_bar_remade and dic["colorbar"]["exists"]:
             if len(ax.images) > 0:
-                colorbar = ax.images[0].colorbar
+                image = ax.images[0]
             elif len(ax.collections) > 0:
-                colorbar = ax.images[0].colorbar
+                image = ax.images[0]
             else:
                 raise RuntimeError("self.color_bar_remade set to True whilst no colorbar found")
 
-            self.update_colorbar_from_dict(colorbar, dic["colormap"])
+            self.update_colorbar_from_dict(image, dic["colorbar"])
 
     @staticmethod
     def create_text_from_dict(ax, dic):
@@ -304,9 +303,18 @@ class PlotsLoader(object):
             axis_.set_major_formatter(ticker.FixedLocator(properties["minorTickFormat"]))
 
     @staticmethod
-    def update_colorbar_from_dict(colorbar, dic):
-        colorbar.vmin = dic["min"]
-        colorbar.vmax = dic["max"]
+    def update_colorbar_from_dict(image, dic):
+        # colorbar = image.colorbar
+        image.set_clim(*sorted([dic["min"], dic["max"]]))
+        image.set_label(dic["label"])
+        image.set_cmap(cm.get_cmap(dic["cmap"]))
+        image.set_interpolation(dic["interpolation"])
+        #Try and make the cmap line up but sometimes it wont
+        try:
+            image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
+        except AttributeError as e:
+            logger.debug("PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
+                         + str(e))
 
-        # Make sure it displays
-        colorbar.update_ticks()
+        # Redraw
+        image.axes.figure.canvas.draw()

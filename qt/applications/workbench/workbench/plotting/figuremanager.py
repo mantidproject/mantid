@@ -14,7 +14,7 @@ from functools import wraps
 # 3rdparty imports
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
+from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
 from matplotlib._pylab_helpers import Gcf
 from qtpy.QtCore import Qt, QObject
 from qtpy.QtWidgets import QApplication, QLabel
@@ -24,7 +24,7 @@ from six import text_type
 from mantid.api import AnalysisDataServiceObserver
 from mantid.plots import MantidAxes
 from workbench.plotting.figurewindow import FigureWindow
-from workbench.plotting.figuretype import figure_type, FigureType
+from mantidqt.plotting.figuretype import figure_type, FigureType
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from workbench.plotting.qappthreadcall import QAppThreadCall

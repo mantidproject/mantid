@@ -18,7 +18,7 @@ matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 
 # local imports
-from workbench.plotting.figuretype import figure_type, FigureType
+from mantidqt.plotting.figuretype import figure_type, FigureType
 
 
 class FigureTypeTest(TestCase):

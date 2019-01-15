@@ -25,7 +25,8 @@ class PlotsSaverTest(unittest.TestCase):
         self.plots_loader = PlotsLoader()
 
         # Make a figure with a given input with all these values already set
-        self.loader_plot_dict = {u'axes': [{u'legend': {u'exists': False}, u'lines': [{u'alpha': 1,
+        self.loader_plot_dict = {u'axes': [{u'colorbar': {u'exists': False},
+                                            u'legend': {u'exists': False}, u'lines': [{u'alpha': 1,
                                                                                        u'color': u'#1f77b4',
                                                                                        u'label': u'ws1: spec 2',
                                                                                        u'lineIndex': 0,
@@ -77,7 +78,7 @@ class PlotsSaverTest(unittest.TestCase):
                                                                                 u'text': u'text', u'useTeX': False}],
                                             u'title': u'', u'xAxisTitle': u'',
                                             u'yAxisTitle': u''}],
-                                 u'creationArguments': [[{u"workspaces": u"ws1", u"specNum": 2}]],
+                                 u'creationArguments': [[{u"workspaces": u"ws1", u"specNum": 2, u"function": u"plot"}]],
                                  u'label': u'',
                                  u'properties': {u'dpi': 100.0, u'figHeight': 4.8, u'figWidth': 6.4}}
         self.fig = self.plots_loader.make_fig(self.loader_plot_dict, create_plot=False)

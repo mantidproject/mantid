@@ -59,22 +59,27 @@ class PlotsSaver(object):
 
     @staticmethod
     def get_dict_for_axes_colorbar(ax):
-        colorbar = None
+        image = None
         cb_dict = {}
 
         # If an image is present (from imshow)
         if len(ax.images) > 0:
-            colorbar = ax.images[0].colorbar
+            image = ax.images[0]
         # If an image is present from pcolor/pcolormesh
         elif len(ax.collections) > 0:
-            colorbar = ax.collections[0].colorbar
+            image = ax.collections[0]
         else:
             cb_dict["exists"] = False
             return cb_dict
 
         cb_dict["exists"] = True
-        cb_dict["max"] = colorbar.vmax
-        cb_dict["min"] = colorbar.vmin
+        cb_dict["max"] = image.norm.vmax
+        cb_dict["min"] = image.norm.vmin
+        cb_dict["interpolation"] = image._interpolation
+        cb_dict["cmap"] = image.cmap.name
+        cb_dict["label"] = image._label
+
+        return cb_dict
 
     def get_dict_for_axes(self, ax):
         ax_dict = {"properties": self.get_dict_from_axes_properties(ax),

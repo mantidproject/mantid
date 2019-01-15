@@ -19,7 +19,6 @@ except ImportError:
 # third party imports
 from mantid.api import AnalysisDataService, WorkspaceFactory
 # register mantid projection
-import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
@@ -27,8 +26,8 @@ from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 import numpy as np
 
 # local imports
-from workbench.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
-                                          plot, plot_from_names, pcolormesh_from_names)
+from mantidqt.plotting import (can_overplot, current_figure_or_none, figure_title,
+                               plot, plot_from_names, pcolormesh_from_names)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class

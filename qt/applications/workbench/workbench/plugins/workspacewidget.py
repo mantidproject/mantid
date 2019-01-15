@@ -23,7 +23,7 @@ from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDis
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-from workbench.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantidqt.plotting import can_overplot, pcolormesh, plot, plot_from_names
 # local package imports
 from workbench.plugins.base import PluginWidget
 
