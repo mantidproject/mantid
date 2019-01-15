@@ -204,18 +204,16 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
   bc->clearGridBoxesCounter(0);
   pProgress->resetNumSteps(4, 0, 1);
 
-  std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-  start = std::chrono::high_resolution_clock::now();
-
   std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
   MDSpaceBounds<ND> space;
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents;
+
+
+
   const auto& pws{m_OutWSWrapper->pWorkspace()};
   for(size_t ax = 0; ax < ND; ++ ax) {
     space(ax, 0) = pws->getDimension(ax)->getMinimum();
     space(ax, 1) = pws->getDimension(ax)->getMaximum();
-    extents.emplace_back();
-    extents.rbegin()->setExtents(pws->getDimension(ax)->getMinimum(), pws->getDimension(ax)->getMaximum());
   }
 
   pProgress->report(0);
@@ -223,9 +221,9 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
   int nThreads = (this->m_NumThreads == 0); // 1 thread if 0
   if(!nThreads)
     nThreads = this->m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : this->m_NumThreads;
-  EventsDistributor<ND, MDEventType, typename std::vector<MDEventType<ND>>::iterator> distributor(nThreads, mdEvents.size() / nThreads/ 10);
+  EventsDistributor<ND, MDEventType, typename std::vector<MDEventType<ND>>::iterator> distributor(nThreads, mdEvents.size() / nThreads/ 10, bc, space);
 
-  auto root = distributor.distribute(bc, mdEvents, space, extents);
+  auto root = distributor.distribute(mdEvents);
   m_OutWSWrapper->pWorkspace()->setBox(root);
   pProgress->report(3);
   root->calculateGridCaches();
