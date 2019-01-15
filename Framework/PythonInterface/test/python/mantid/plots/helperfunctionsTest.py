@@ -4,17 +4,19 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace,\
-                             ConjoinWorkspaces, AddTimeSeriesLog
+from __future__ import (absolute_import, division, print_function)
+
+from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace, \
+    ConjoinWorkspaces, AddTimeSeriesLog
 from mantid.kernel import config
 import mantid.plots.helperfunctions as funcs
 import mantid.api
 import numpy as np
 import datetime
-from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import matplotlib
+
 matplotlib.use('AGG')
 
 
@@ -48,7 +50,9 @@ def add_md_workspace_with_data(dimensions=2):
                                               NumberOfBins='10,10,10', Names='Dim1,Dim2,Dim3',
                                               Units='MomentumTransfer,EnergyTransfer,EnergyTransfer')
             return func(self, mdws)
+
         return wrapper
+
     return function_wrapper
 
 
@@ -295,11 +299,11 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(z[1], np.array([1, 2, 3, 4]))
 
     def test_get_sample_logs(self):
-        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo,LogName='my_log', FullTime=True)
-        self.assertEquals(x[0],datetime.datetime(2010,1,1,0,0,0))
-        self.assertEquals(x[1],datetime.datetime(2010,1,1,0,30,0))
-        self.assertEquals(x[2],datetime.datetime(2010,1,1,0,50,0))
-        np.testing.assert_allclose(y, np.array([100,15,100.2]))
+        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log', FullTime=True)
+        self.assertEquals(x[0], datetime.datetime(2010, 1, 1, 0, 0, 0))
+        self.assertEquals(x[1], datetime.datetime(2010, 1, 1, 0, 30, 0))
+        self.assertEquals(x[2], datetime.datetime(2010, 1, 1, 0, 50, 0))
+        np.testing.assert_allclose(y, np.array([100, 15, 100.2]))
         self.assertTrue(FullTime)
         self.assertEquals(LogName, 'my_log')
         self.assertEquals(units, '')
