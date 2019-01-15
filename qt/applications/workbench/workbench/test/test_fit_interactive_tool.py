@@ -62,20 +62,15 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
             yield 0.1
             marker.stop()
 
-    def drag_mouse(self, x, y, dx, dy):
-        x_tr = self.fit_browser.tool.ax.get_xaxis_transform()
-        y_tr = self.fit_browser.tool.ax.get_yaxis_transform()
-        x0, _ = x_tr.transform((0, 0))
-        _, y0 = y_tr.transform((0, 0))
-        dx_pxl, _ = x_tr.transform((dx, 0))
-        _, dy_pxl = y_tr.transform((0, dy))
-        dx_pxl -= x0
-        dy_pxl -= y0
-        x_pxl, _ = x_tr.transform((x, 0))
-        _, y_pxl = y_tr.transform((0, y))
-        pos = QPoint(x_pxl, y_pxl)
-        new_pos = pos + QPoint(dx_pxl, dy_pxl)
-        yield drag_mouse(self.get_canvas(), pos, new_pos)
+    def drag_mouse(self, x, y, x1, y1):
+        canvas = self.get_canvas()
+        h = canvas.height()
+        tr = self.fit_browser.tool.get_transform()
+        x1_pxl, y1_pxl = tr.transform_affine((x1, y1))
+        x_pxl, y_pxl = tr.transform_affine((x, y))
+        pos = QPoint(x_pxl, h - y_pxl)
+        new_pos = QPoint(x1_pxl, h - y1_pxl)
+        yield drag_mouse(canvas, pos, new_pos)
 
     def move_start_x(self, canvas, pos, dx, try_other_way_if_failed=True):
         return self.move_marker(canvas, self.fit_browser.tool.fit_start_x, pos, dx,
@@ -331,8 +326,34 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
         self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
         self.assertEqual(self.fit_browser.getFittingFunction(), 'name=Gaussian,Height=0.2,PeakCentre=1,Sigma=0')
-        yield self.drag_mouse(1.0, 4.2, 0.5, 0.0)
+
+    def test_move_peak(self):
+        yield self.start()
+        self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
+        yield self.drag_mouse(1.0, 4.2, 1.5, 4.2)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
+        self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
+        yield self.drag_mouse(1.5, 4.4, 1.2, 4.4)
+        self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
+        self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
+        yield self.drag_mouse(1.5, 4.05, 1.2, 4.05)
+        self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
+        self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
+
+    def test_add_two_peaks(self):
+        yield self.start()
+        self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
+        self.fit_browser.tool.add_peak(1.5, 4.4)
+        self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 4)
+        self.assertEqual(self.fit_browser.getFittingFunction(),
+                         'name=Gaussian,Height=0.2,PeakCentre=1,Sigma=0;'
+                         'name=Gaussian,Height=4.4,PeakCentre=1.5,Sigma=0')
+        yield self.drag_mouse(1.0, 4.3, 0.75, -0.2)
+        # yield self.drag_mouse(1.5, 4.4, -0.75, -0.1)
+        # self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
+        # self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.4, 1)
+        # self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
+        # self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
 
 
 runTests(TestFitPropertyBrowser)

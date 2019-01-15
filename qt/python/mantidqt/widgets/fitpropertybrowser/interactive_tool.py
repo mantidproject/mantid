@@ -46,12 +46,16 @@ class VerticalMarker(QObject):
         x_pixels, _ = self.patch.get_transform().transform((self.x, 0))
         return x_pixels
 
-    def is_above(self, x):
-        x_pixels, _ = self.patch.get_transform().transform((x, 0))
+    def is_above(self, x, y):
+        x_pixels, y_pixels = self.patch.get_transform().transform((x, y))
+        if self.y0 is not None and y < self.y0:
+            return False
+        if self.y1 is not None and y > self.y1:
+            return False
         return abs(self.get_x_in_pixels() - x_pixels) < 3
 
     def on_click(self, x, y):
-        if self.is_above(x):
+        if self.is_above(x, y):
             self.is_moving = True
 
     def stop(self):
@@ -72,7 +76,7 @@ class VerticalMarker(QObject):
             return None
         if self.y1 is not None and y > self.y1:
             return None
-        if self.is_moving or self.is_above(x):
+        if self.is_moving or self.is_above(x, y):
             return self.get_cursor_at_y(y)
         return None
 
@@ -109,8 +113,7 @@ class CentreMarker(VerticalMarker):
         return True
 
     def height(self):
-        y0, y1 = self._get_y0_y1()
-        return abs(y1 - y0)
+        return self.y1 - self.y0
 
 
 class FitInteractiveTool(QObject):
@@ -237,13 +240,16 @@ class FitInteractiveTool(QObject):
                 return i
         return n + 1
 
-    def add_peak(self, x, y_top, y_bottom=None):
+    def add_peak(self, x, y_top, y_bottom=0.0):
         peak_id = self._make_peak_id()
         marker = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom)
         marker.peak_moved.connect(self.peak_moved)
         self.peak_markers.append(marker)
         self.canvas.draw()
         self.peak_added.emit(peak_id, x, marker.height())
+
+    def get_transform(self):
+        return self.fit_start_x.patch.get_transform()
 
 
 class PeakMarker(QObject):
