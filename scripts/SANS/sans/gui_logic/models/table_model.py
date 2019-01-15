@@ -12,16 +12,18 @@ information regarding the custom output name and the information in the options 
 
 from __future__ import (absolute_import, division, print_function)
 
+import functools
 import os
 import re
 
+from mantid.kernel import Logger
 from sans.common.constants import ALL_PERIODS
-from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from sans.common.enums import RowState, SampleShape
-import functools
-from sans.gui_logic.presenter.create_file_information import create_file_information
-from ui.sans_isis.work_handler import WorkHandler
 from sans.common.file_information import SANSFileInformationFactory
+from sans.gui_logic.presenter.create_file_information import create_file_information
+from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
+from ui.sans_isis.work_handler import WorkHandler
+
 
 
 class TableModel(object):
@@ -253,6 +255,7 @@ class TableIndexModel(object):
                  output_name="", user_file="", sample_thickness='', sample_height='', sample_width='',
                  sample_shape='', options_column_string=""):
         super(TableIndexModel, self).__init__()
+        self._sans_logger = Logger("SANS")
         self.id = None
         self.sample_scatter = sample_scatter
         self.sample_scatter_period = sample_scatter_period
@@ -283,6 +286,7 @@ class TableIndexModel(object):
         self.file_information = None
         self.file_finding = False
 
+
     # Options column entries
     @property
     def options_column_model(self):
@@ -301,9 +305,8 @@ class TableIndexModel(object):
     def sample_shape(self, value):
         try:
             self._sample_shape_model = SampleShapeColumnModel(value)
-        except RuntimeError as e:
-            self._sample_shape_model = SampleShapeColumnModel("")
-            raise e
+        except ValueError as e:
+            self._sans_logger.notice("Updating of sample shape failed: {}".format(str(e)))
 
     def update_attribute(self, attribute_name, value):
         setattr(self, attribute_name, value)
@@ -402,7 +405,7 @@ class SampleShapeColumnModel(object):
         try:
             sample_shape = SampleShapeColumnModel.SAMPLE_SHAPES[parsed]
         except KeyError:
-            raise RuntimeError("{} is not a recognised sample shape.".format(sample_shape_string))
+            raise ValueError("{} is not a recognised sample shape.".format(sample_shape_string))
         else:
             return sample_shape
 
