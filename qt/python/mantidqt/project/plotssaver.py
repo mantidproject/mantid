@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from matplotlib import ticker
 import matplotlib.axis
+from matplotlib.image import AxesImage
 
 from mantid import logger
 
@@ -63,10 +64,10 @@ class PlotsSaver(object):
         cb_dict = {}
 
         # If an image is present (from imshow)
-        if len(ax.images) > 0:
+        if len(ax.images) > 0 and isinstance(ax.images[0], AxesImage):
             image = ax.images[0]
         # If an image is present from pcolor/pcolormesh
-        elif len(ax.collections) > 0:
+        elif len(ax.collections) > 0 and isinstance(ax.collections[0], AxesImage):
             image = ax.collections[0]
         else:
             cb_dict["exists"] = False
