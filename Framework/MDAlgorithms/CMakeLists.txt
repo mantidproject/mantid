@@ -71,9 +71,9 @@ set ( SRC_FILES
 	src/LoadSQW2.cpp
 	src/LogarithmMD.cpp
 	src/MDEventWSWrapper.cpp
+	src/MDNorm.cpp
 	src/MDNormDirectSC.cpp
 	src/MDNormSCD.cpp
-	src/MDNormalization.cpp
 	src/MDTransfAxisNames.cpp
 	src/MDTransfFactory.cpp
 	src/MDTransfModQ.cpp
@@ -203,9 +203,9 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadSQW2.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MDEventWSWrapper.h
+	inc/MantidMDAlgorithms/MDNorm.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
-	inc/MantidMDAlgorithms/MDNormalization.h
 	inc/MantidMDAlgorithms/MDTransfAxisNames.h
 	inc/MantidMDAlgorithms/MDTransfFactory.h
 	inc/MantidMDAlgorithms/MDTransfInterface.h
@@ -337,7 +337,6 @@ set ( TEST_FILES
 	MDEventWSWrapperTest.h
 	MDNormDirectSCTest.h
 	MDNormSCDTest.h
-	MDNormalizationTest.h
 	MDResolutionConvolutionFactoryTest.h
 	MDTransfAxisNamesTest.h
 	MDTransfFactoryTest.h

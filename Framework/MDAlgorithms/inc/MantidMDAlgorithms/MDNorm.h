@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MDNORMALIZATION_H_
-#define MANTID_MDALGORITHMS_MDNORMALIZATION_H_
+#ifndef MANTID_MDALGORITHMS_MDNORM_H_
+#define MANTID_MDALGORITHMS_MDNORM_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
@@ -18,9 +18,9 @@ namespace MDAlgorithms {
 /** MDNormalization : Bin single crystal diffraction or direct geometry
  * inelastic data and calculate the corresponding statistical weight
  */
-class MANTID_MDALGORITHMS_DLL MDNormalization : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL MDNorm : public API::Algorithm {
 public:
-  MDNormalization();
+  MDNorm();
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -97,4 +97,4 @@ private:
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif /* MANTID_MDALGORITHMS_MDNORMALIZATION_H_ */
+#endif /* MANTID_MDALGORITHMS_MDNORM_H_ */

@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidMDAlgorithms/MDNormalization.h"
+#include "MantidMDAlgorithms/MDNorm.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -64,7 +64,7 @@ DECLARE_ALGORITHM(MDNormalization)
 /**
  * Constructor
  */
-MDNormalization::MDNormalization()
+MDNorm::MDNorm()
     : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true),
       m_W(3, 3, true), m_transformation(), m_hX(), m_kX(), m_lX(), m_eX(),
       m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0),
@@ -72,18 +72,18 @@ MDNormalization::MDNormalization()
       m_dEIntegrated(false), m_samplePos(), m_beamDir(), convention("") {}
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string MDNormalization::name() const { return "MDNormalization"; }
+const std::string MDNorm::name() const { return "MDNormalization"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MDNormalization::version() const { return 1; }
+int MDNorm::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MDNormalization::category() const {
+const std::string MDNorm::category() const {
   return "MDAlgorithms\\Normalisation";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string MDNormalization::summary() const {
+const std::string MDNorm::summary() const {
   return "Bins multidimensional data and calculate the normalization on the "
          "same grid";
 }
@@ -91,7 +91,7 @@ const std::string MDNormalization::summary() const {
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void MDNormalization::init() {
+void MDNorm::init() {
   declareProperty(make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "An input MDEventWorkspace. Must be in Q_sample frame.");
@@ -203,7 +203,7 @@ void MDNormalization::init() {
 
 //----------------------------------------------------------------------------------------------
 /// Validate the input workspace @see Algorithm::validateInputs
-std::map<std::string, std::string> MDNormalization::validateInputs() {
+std::map<std::string, std::string> MDNorm::validateInputs() {
   std::map<std::string, std::string> errorMessage;
 
   // Check for input workspace frame
@@ -363,7 +363,7 @@ std::map<std::string, std::string> MDNormalization::validateInputs() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void MDNormalization::exec() {
+void MDNorm::exec() {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // symmetry operations
   std::string symOps = this->getProperty("SymmetryOperations");
@@ -458,7 +458,7 @@ void MDNormalization::exec() {
  *   description of the projection ("1,-1,0" for "[H,-H,0]")
  * @return string containing the name
  */
-std::string MDNormalization::QDimensionName(std::vector<double> projection) {
+std::string MDNorm::QDimensionName(std::vector<double> projection) {
   std::vector<double>::iterator result;
   result = std::max_element(projection.begin(), projection.end(), abs_compare);
   std::vector<char> symbol{'H', 'K', 'L'};
@@ -488,7 +488,7 @@ std::string MDNormalization::QDimensionName(std::vector<double> projection) {
  * Calculate binning parameters
  * @return map of parameters to be passed to BinMD (non axis-aligned)
  */
-std::map<std::string, std::string> MDNormalization::getBinParameters() {
+std::map<std::string, std::string> MDNorm::getBinParameters() {
   std::map<std::string, std::string> parameters;
   std::stringstream extents;
   std::stringstream bins;
@@ -636,7 +636,7 @@ std::map<std::string, std::string> MDNormalization::getBinParameters() {
  * Create & cached the normalization workspace
  * @param dataWS The binned workspace that will be used for the data
  */
-void MDNormalization::createNormalizationWS(
+void MDNorm::createNormalizationWS(
     const DataObjects::MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
   boost::shared_ptr<IMDHistoWorkspace> tmp =
@@ -655,7 +655,7 @@ void MDNormalization::createNormalizationWS(
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(
+DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     std::vector<Geometry::SymmetryOperation> symmetryOps) {
   Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
       this->getProperty("TemporaryDataWorkspace");
@@ -791,7 +791,7 @@ DataObjects::MDHistoWorkspace_sptr MDNormalization::binInputWS(
  * MD position calculation
  */
 std::vector<coord_t>
-MDNormalization::getValuesFromOtherDimensions(bool &skipNormalization,
+MDNorm::getValuesFromOtherDimensions(bool &skipNormalization,
                                               uint16_t expInfoIndex) const {
   const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
 
@@ -833,7 +833,7 @@ MDNormalization::getValuesFromOtherDimensions(bool &skipNormalization,
  * Stores the X values from each H,K,L, and optionally DeltaE dimension as
  * member variables
  */
-void MDNormalization::cacheDimensionXValues() {
+void MDNorm::cacheDimensionXValues() {
   auto &hDim = *m_normWS->getDimension(m_hIdx);
   m_hX.resize(hDim.getNBoundaries());
   for (size_t i = 0; i < m_hX.size(); ++i) {
@@ -870,7 +870,7 @@ void MDNormalization::cacheDimensionXValues() {
  * @param so - symmetry operation
  * @param expInfoIndex - current experiment info index
  */
-void MDNormalization::calculateNormalization(const std::vector<coord_t> &otherValues, Geometry::SymmetryOperation so,
+void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, Geometry::SymmetryOperation so,
     uint16_t expInfoIndex, size_t soIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   std::vector<double> lowValues, highValues;
@@ -1055,7 +1055,7 @@ m_accumulate = true;
  * @param lowvalue The lowest momentum or energy transfer for the trajectory
  * @param highvalue The highest momentum or energy transfer for the trajectory
  */
-void MDNormalization::calculateIntersections(
+void MDNorm::calculateIntersections(
     std::vector<std::array<double, 4>> &intersections, const double theta,
     const double phi, Kernel::DblMatrix transform, double lowvalue,
     double highvalue) {
@@ -1199,7 +1199,7 @@ void MDNormalization::calculateIntersections(
  * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
  * @param yValues :: A vector to save the results.
  */
-void MDNormalization::calcIntegralsForIntersections(
+void MDNorm::calcIntegralsForIntersections(
     const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
     size_t sp, std::vector<double> &yValues) {
   assert(xValues.size() == yValues.size());
