@@ -14,7 +14,7 @@ from functools import wraps
 # 3rdparty imports
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
+from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
 from qtpy.QtCore import Qt, QObject
 from qtpy.QtWidgets import QApplication, QLabel

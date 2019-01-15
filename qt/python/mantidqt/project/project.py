@@ -123,7 +123,7 @@ class Project(AnalysisDataServiceObserver):
 
         directory = os.path.dirname(file_name)
 
-        project_loader = ProjectLoader(self.project_file_ext, self.pcolormesh_function)
+        project_loader = ProjectLoader(self.project_file_ext)
         project_loader.load_project(directory)
         self.last_project_location = directory
         self.__saved = True

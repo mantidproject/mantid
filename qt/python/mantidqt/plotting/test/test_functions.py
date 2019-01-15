@@ -19,6 +19,7 @@ except ImportError:
 # third party imports
 from mantid.api import AnalysisDataService, WorkspaceFactory
 # register mantid projection
+import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
@@ -26,13 +27,12 @@ from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 import numpy as np
 
 # local imports
-from mantidqt.plotting import (can_overplot, current_figure_or_none, figure_title,
-                               plot, plot_from_names, pcolormesh_from_names)
+from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
+                                         plot, plot_from_names, pcolormesh_from_names)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
 class FakeWorkspace(object):
-
     def __init__(self, name):
         self._name = name
 
@@ -85,8 +85,8 @@ class FunctionsTest(TestCase):
         with self.assertRaises(AssertionError):
             figure_title([], 5)
 
-    @mock.patch('workbench.plotting.functions.get_spectra_selection')
-    @mock.patch('workbench.plotting.functions.plot')
+    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
+    @mock.patch('mantidqt.plotting.functions.plot')
     def test_plot_from_names_calls_plot(self, get_spectra_selection_mock, plot_mock):
         ws_name = 'test_plot_from_names_calls_plot-1'
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)
@@ -97,12 +97,12 @@ class FunctionsTest(TestCase):
 
         self.assertEqual(1, plot_mock.call_count)
 
-    @mock.patch('workbench.plotting.functions.get_spectra_selection')
+    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
     def test_plot_from_names_produces_single_line_plot_for_valid_name(self, get_spectra_selection_mock):
         self._do_plot_from_names_test(get_spectra_selection_mock, expected_labels=["spec 1"], wksp_indices=[0],
                                       errors=False, overplot=False)
 
-    @mock.patch('workbench.plotting.functions.get_spectra_selection')
+    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
     def test_plot_from_names_produces_single_error_plot_for_valid_name(self, get_spectra_selection_mock):
         fig = self._do_plot_from_names_test(get_spectra_selection_mock,
                                             # matplotlib does not set labels on the lines for error plots
@@ -110,14 +110,14 @@ class FunctionsTest(TestCase):
                                             wksp_indices=[0], errors=True, overplot=False)
         self.assertEqual(1, len(fig.gca().containers))
 
-    @mock.patch('workbench.plotting.functions.get_spectra_selection')
+    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
     def test_plot_from_names_produces_overplot_for_valid_name(self, get_spectra_selection_mock):
         # make first plot
         plot([self._test_ws], wksp_indices=[0])
         self._do_plot_from_names_test(get_spectra_selection_mock, expected_labels=["spec 1", "spec 2"],
                                       wksp_indices=[1], errors=False, overplot=True)
 
-    @mock.patch('workbench.plotting.functions.get_spectra_selection')
+    @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
     def test_plot_from_names_within_existing_figure(self, get_spectra_selection_mock):
         # make existing plot
         fig = plot([self._test_ws], wksp_indices=[0])
@@ -125,7 +125,7 @@ class FunctionsTest(TestCase):
                                       wksp_indices=[1], errors=False, overplot=False,
                                       target_fig=fig)
 
-    @mock.patch('workbench.plotting.functions.pcolormesh')
+    @mock.patch('mantidqt.plotting.functions.pcolormesh')
     def test_pcolormesh_from_names_calls_pcolormesh(self, pcolormesh_mock):
         ws_name = 'test_pcolormesh_from_names_calls_pcolormesh-1'
         AnalysisDataService.Instance().addOrReplace(ws_name, self._test_ws)

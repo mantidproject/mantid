@@ -24,6 +24,7 @@ from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.container import Container
 from matplotlib.projections import register_projection
+from matplotlib.colors import Colormap
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -54,7 +55,7 @@ def plot_decorator(func):
             # Fill out kwargs with the values of args
             kwargs["workspaces"] = args[0].name()
             kwargs["function"] = func.__name__
-            if "cmap" in kwargs:
+            if "cmap" in kwargs and isinstance(kwargs["cmap"], Colormap):
                 kwargs["cmap"] = kwargs["cmap"].name
             self.creation_args.append(kwargs)
         return func_value

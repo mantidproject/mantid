@@ -18,7 +18,7 @@ import matplotlib.cm as cm
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid import plots  # noqa
-from mantidqt.plotting import pcolormesh
+from mantidqt.plotting.functions import pcolormesh
 
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 SUBPLOT_WSPACE = 0.5

@@ -88,7 +88,7 @@ class FigureWindow(QMainWindow):
         if len(names) == 0:
             return
         # local import to avoid circular import with FigureManager
-        from mantidqt.plotting import pcolormesh_from_names, plot_from_names
+        from mantidqt.plotting.functions import pcolormesh_from_names, plot_from_names
 
         fig = self._canvas.figure
         fig_type = figure_type(fig)
