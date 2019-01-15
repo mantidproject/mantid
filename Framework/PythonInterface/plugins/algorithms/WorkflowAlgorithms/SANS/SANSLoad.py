@@ -9,8 +9,7 @@
 """ SANSLoad algorithm which handles loading SANS files"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty,
-                           EnabledWhenProperty, PropertyCriterion)
+from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
 from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         WorkspaceProperty)
 
