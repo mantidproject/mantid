@@ -129,7 +129,7 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
   alg->setProperty("ConvolveMembers", true);
   alg->setProperty("Minimizer", "Levenberg-Marquardt");
   alg->setProperty("MaxIterations", 500);
-  alg->setProperty("OutputWorkspace", "output");
+  alg->setProperty("OutputWorkspace", "OutputResults");
   alg->setLogging(false);
   return alg;
 }

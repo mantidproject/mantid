@@ -335,7 +335,7 @@ public:
     std::string const rangeDelimiter = "_to_";
 
     TS_ASSERT_EQUALS(model->createOutputName(formatString, rangeDelimiter, 0),
-                     "WorkspaceName_s0_Gaussian_Result");
+                     "WorkspaceName_s0_Gaussian_Results");
   }
 
   void
@@ -346,7 +346,7 @@ public:
     std::string const rangeDelimiter = "_to_";
 
     TS_ASSERT_EQUALS(model->createOutputName(formatString, rangeDelimiter, 0),
-                     "Workspace_3456_s0_Gaussian_Result");
+                     "Workspace_3456_s0_Gaussian_Results");
   }
 
   void
@@ -359,13 +359,13 @@ public:
 
     TS_ASSERT_EQUALS(
         model->createOutputName(formatStrings[0], rangeDelimiter, 0),
-        "Workspace_3456_s0_Gaussian_Result");
+        "Workspace_3456_s0_Gaussian_Results");
     TS_ASSERT_EQUALS(
         model->createOutputName(formatStrings[1], rangeDelimiter, 0),
-        "Workspace_3456_f0+s0_MSD_Result");
+        "Workspace_3456_f0+s0_MSD_Results");
     TS_ASSERT_EQUALS(
         model->createOutputName(formatStrings[2], rangeDelimiter, 0),
-        "Workspace_3456_s0_TeixeiraWater_Result");
+        "Workspace_3456_s0_TeixeiraWater_Results");
   }
 
   void
