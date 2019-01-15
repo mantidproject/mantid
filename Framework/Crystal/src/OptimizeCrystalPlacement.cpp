@@ -378,7 +378,7 @@ void OptimizeCrystalPlacement::exec() {
 
   double chisq = fit_alg->getProperty("OutputChi2overDoF");
   g_log.notice() << "Fit finished. Status="
-            << (std::string)fit_alg->getProperty("OutputStatus") << '\n';
+                 << (std::string)fit_alg->getProperty("OutputStatus") << '\n';
 
   setProperty("Chi2overDoF", chisq);
 
