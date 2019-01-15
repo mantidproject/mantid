@@ -94,7 +94,7 @@ void addAlgorithmForRow(Row &row, Batch const &model,
 void addAlgorithmsForGroup(Group &group, Batch const &model,
                            BatchAlgorithmRunner &batchAlgoRunner,
                            bool reprocessFailed, bool processAll) {
-  auto &rows = group.rows();
+  auto &rows = group.mutableRows();
   for (auto &row : rows) {
     if (row && row->requiresProcessing(reprocessFailed) &&
         (processAll || model.isSelected(row.get())))
@@ -143,7 +143,8 @@ void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
 void BatchJobRunner::setUpBatchAlgorithmRunner() {
   m_batchAlgoRunner.clearQueue();
 
-  auto &groups = m_batch.runsTable().reductionJobs().groups();
+  auto &groups =
+      m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups)
     addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner, m_reprocessFailed,
                           m_processAll);

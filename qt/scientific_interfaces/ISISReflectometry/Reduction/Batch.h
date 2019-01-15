@@ -24,7 +24,7 @@ public:
   Experiment const &experiment() const;
   Instrument const &instrument() const;
   RunsTable const &runsTable() const;
-  RunsTable &runsTable();
+  RunsTable &mutableRunsTable();
   Slicing const &slicing() const;
 
   bool hasSelection() const;

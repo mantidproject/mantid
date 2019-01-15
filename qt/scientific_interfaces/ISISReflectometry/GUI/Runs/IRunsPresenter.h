@@ -25,7 +25,7 @@ public:
   virtual ~IRunsPresenter() = default;
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
   virtual RunsTable const &runsTable() const = 0;
-  virtual RunsTable &runsTable() = 0;
+  virtual RunsTable &mutableRunsTable() = 0;
 
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyReductionResumed() = 0;

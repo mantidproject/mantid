@@ -44,7 +44,7 @@ bool Group::allRowsAreValid() const {
 
 std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
 
-std::vector<boost::optional<Row>> &Group::rows() { return m_rows; }
+std::vector<boost::optional<Row>> &Group::mutableRows() { return m_rows; }
 
 void Group::appendRow(boost::optional<Row> const &row) {
   m_rows.emplace_back(row);

@@ -118,7 +118,9 @@ RunsTable const &RunsPresenter::runsTable() const {
   return tablePresenter()->runsTable();
 }
 
-RunsTable &RunsPresenter::runsTable() { return tablePresenter()->runsTable(); }
+RunsTable &RunsPresenter::mutableRunsTable() {
+  return tablePresenter()->mutableRunsTable();
+}
 
 /**
    Used by the view to tell the presenter something has changed

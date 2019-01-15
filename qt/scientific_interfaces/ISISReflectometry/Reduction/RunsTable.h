@@ -24,7 +24,7 @@ public:
 
   double thetaTolerance() const;
   ReductionJobs const &reductionJobs() const;
-  ReductionJobs &reductionJobs();
+  ReductionJobs &mutableReductionJobs();
   std::vector<MantidWidgets::Batch::RowLocation> const &
   selectedRowLocations() const;
 

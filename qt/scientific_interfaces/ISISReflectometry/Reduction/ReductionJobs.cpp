@@ -17,7 +17,7 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs,
                                std::string const &groupName) {
   auto maybeGroupIndex = jobs.indexOfGroupWithName(groupName);
   if (maybeGroupIndex.is_initialized())
-    return jobs.groups()[maybeGroupIndex.get()];
+    return jobs.mutableGroups()[maybeGroupIndex.get()];
   else
     return jobs.appendGroup(Group(groupName));
 } // unnamed
@@ -66,7 +66,7 @@ void ReductionJobs::removeAllGroups() {
   ensureAtLeastOneGroupExists(*this);
 }
 
-std::vector<Group> &ReductionJobs::groups() { return m_groups; }
+std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }
 
 std::vector<Group> const &ReductionJobs::groups() const { return m_groups; }
 
@@ -93,7 +93,7 @@ void removeGroup(ReductionJobs &jobs, int groupIndex) {
 void removeAllRowsAndGroups(ReductionJobs &jobs) { jobs.removeAllGroups(); }
 
 void appendEmptyRow(ReductionJobs &jobs, int groupIndex) {
-  jobs.groups()[groupIndex].appendEmptyRow();
+  jobs.mutableGroups()[groupIndex].appendEmptyRow();
 }
 
 void appendEmptyGroup(ReductionJobs &jobs) {
@@ -105,15 +105,15 @@ void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup) {
 }
 
 void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow) {
-  jobs.groups()[groupIndex].insertRow(boost::none, beforeRow);
+  jobs.mutableGroups()[groupIndex].insertRow(boost::none, beforeRow);
 }
 
 void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
                boost::optional<Row> const &newValue) {
   if (newValue.is_initialized()) {
-    jobs.groups()[groupIndex].updateRow(rowIndex, newValue);
+    jobs.mutableGroups()[groupIndex].updateRow(rowIndex, newValue);
   } else {
-    jobs.groups()[groupIndex].updateRow(rowIndex, boost::none);
+    jobs.mutableGroups()[groupIndex].updateRow(rowIndex, boost::none);
   }
 }
 
@@ -132,12 +132,12 @@ void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
 }
 
 void removeRow(ReductionJobs &jobs, int groupIndex, int rowIndex) {
-  jobs.groups()[groupIndex].removeRow(rowIndex);
+  jobs.mutableGroups()[groupIndex].removeRow(rowIndex);
 }
 
 bool setGroupName(ReductionJobs &jobs, int groupIndex,
                   std::string const &newValue) {
-  auto &group = jobs.groups()[groupIndex];
+  auto &group = jobs.mutableGroups()[groupIndex];
   if (group.name() != newValue) {
     if (newValue.empty() || !jobs.hasGroupWithName(newValue)) {
       group.setName(newValue);

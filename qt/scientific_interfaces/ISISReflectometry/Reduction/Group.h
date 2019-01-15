@@ -37,7 +37,7 @@ public:
 
   boost::optional<Row> const &operator[](int rowIndex) const;
   std::vector<boost::optional<Row>> const &rows() const;
-  std::vector<boost::optional<Row>> &rows();
+  std::vector<boost::optional<Row>> &mutableRows();
 
 private:
   std::string m_name;

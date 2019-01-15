@@ -19,7 +19,7 @@ Instrument const &Batch::instrument() const { return m_instrument; }
 
 RunsTable const &Batch::runsTable() const { return m_runsTable; }
 
-RunsTable &Batch::runsTable() { return m_runsTable; }
+RunsTable &Batch::mutableRunsTable() { return m_runsTable; }
 
 Slicing const &Batch::slicing() const { return m_slicing; }
 

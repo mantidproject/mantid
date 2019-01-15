@@ -35,7 +35,7 @@ void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
 
 RunsTable const &RunsTablePresenter::runsTable() const { return m_model; }
 
-RunsTable &RunsTablePresenter::runsTable() { return m_model; }
+RunsTable &RunsTablePresenter::mutableRunsTable() { return m_model; }
 
 void RunsTablePresenter::mergeAdditionalJobs(
     ReductionJobs const &additionalJobs) {
@@ -45,7 +45,7 @@ void RunsTablePresenter::mergeAdditionalJobs(
   std::cout << "Transfering:" << std::endl;
   prettyPrintModel(additionalJobs);
 
-  mergeJobsInto(m_model.reductionJobs(), additionalJobs,
+  mergeJobsInto(m_model.mutableReductionJobs(), additionalJobs,
                 m_model.thetaTolerance(), m_jobViewUpdater);
 
   std::cout << "After Transfer:" << std::endl;
@@ -58,7 +58,7 @@ void RunsTablePresenter::removeRowsFromModel(
   for (auto row = rows.crbegin(); row != rows.crend(); ++row) {
     auto const groupIndex = groupOf(*row);
     auto const rowIndex = rowOf(*row);
-    removeRow(m_model.reductionJobs(), groupIndex, rowIndex);
+    removeRow(m_model.mutableReductionJobs(), groupIndex, rowIndex);
   }
 }
 
@@ -98,7 +98,7 @@ void RunsTablePresenter::removeGroupsFromModel(
     std::vector<int> const &groupIndicesOrderedLowToHigh) {
   for (auto it = groupIndicesOrderedLowToHigh.crbegin();
        it < groupIndicesOrderedLowToHigh.crend(); ++it)
-    removeGroup(m_model.reductionJobs(), *it);
+    removeGroup(m_model.mutableReductionJobs(), *it);
 }
 
 void RunsTablePresenter::notifyReductionResumed() {
@@ -189,7 +189,7 @@ void RunsTablePresenter::appendRowsToGroupsInView(
 void RunsTablePresenter::appendRowsToGroupsInModel(
     std::vector<int> const &groupIndices) {
   for (auto const &groupIndex : groupIndices)
-    appendEmptyRow(m_model.reductionJobs(), groupIndex);
+    appendEmptyRow(m_model.mutableReductionJobs(), groupIndex);
 }
 
 void RunsTablePresenter::notifyInsertGroupRequested() {
@@ -206,7 +206,7 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
 }
 
 void RunsTablePresenter::appendEmptyGroupInModel() {
-  appendEmptyGroup(m_model.reductionJobs());
+  appendEmptyGroup(m_model.mutableReductionJobs());
 }
 
 void RunsTablePresenter::appendEmptyGroupInView() {
@@ -217,11 +217,11 @@ void RunsTablePresenter::appendEmptyGroupInView() {
 }
 
 void RunsTablePresenter::insertEmptyGroupInModel(int beforeGroup) {
-  insertEmptyGroup(m_model.reductionJobs(), beforeGroup);
+  insertEmptyGroup(m_model.mutableReductionJobs(), beforeGroup);
 }
 
 void RunsTablePresenter::insertEmptyRowInModel(int groupIndex, int beforeRow) {
-  insertEmptyRow(m_model.reductionJobs(), groupIndex, beforeRow);
+  insertEmptyRow(m_model.mutableReductionJobs(), groupIndex, beforeRow);
 }
 
 void RunsTablePresenter::insertEmptyGroupInView(int beforeGroup) {
@@ -287,7 +287,7 @@ void RunsTablePresenter::updateGroupName(
   assertOrThrow(column == 0,
                 "Changed value of cell which should be uneditable");
   auto const groupIndex = groupOf(itemIndex);
-  if (!setGroupName(m_model.reductionJobs(), groupIndex, newValue)) {
+  if (!setGroupName(m_model.mutableReductionJobs(), groupIndex, newValue)) {
     auto cell = m_view->jobs().cellAt(itemIndex, column);
     cell.setContentText(oldValue);
     m_view->jobs().setCellAt(itemIndex, column, cell);
@@ -301,7 +301,7 @@ void RunsTablePresenter::updateRowField(
   auto const rowIndex = rowOf(itemIndex);
   auto rowValidationResult =
       validateRow(m_model.reductionJobs(), cellTextFromViewAt(itemIndex));
-  updateRow(m_model.reductionJobs(), groupIndex, rowIndex,
+  updateRow(m_model.mutableReductionJobs(), groupIndex, rowIndex,
             rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
@@ -352,15 +352,15 @@ void RunsTablePresenter::removeRowsAndGroupsFromModel(
     auto const groupIndex = groupOf(*location);
     if (isRowLocation(*location)) {
       auto const rowIndex = rowOf(*location);
-      removeRow(m_model.reductionJobs(), groupIndex, rowIndex);
+      removeRow(m_model.mutableReductionJobs(), groupIndex, rowIndex);
     } else if (isGroupLocation(*location)) {
-      removeGroup(m_model.reductionJobs(), groupIndex);
+      removeGroup(m_model.mutableReductionJobs(), groupIndex);
     }
   }
 }
 
 void RunsTablePresenter::removeAllRowsAndGroupsFromModel() {
-  removeAllRowsAndGroups(m_model.reductionJobs());
+  removeAllRowsAndGroups(m_model.mutableReductionJobs());
 }
 
 void RunsTablePresenter::removeRowsAndGroupsFromView(

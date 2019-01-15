@@ -27,7 +27,7 @@ public:
   void removeGroup(int index);
   void removeAllGroups();
 
-  std::vector<Group> &groups();
+  std::vector<Group> &mutableGroups();
   std::vector<Group> const &groups() const;
   Group const &operator[](int index) const;
   std::string nextEmptyGroupName();
@@ -67,7 +67,7 @@ void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
     auto maybeGroupIndex = intoHere.indexOfGroupWithName(group.name());
     if (maybeGroupIndex.is_initialized()) {
       auto indexToUpdateAt = maybeGroupIndex.get();
-      auto &intoGroup = intoHere.groups()[indexToUpdateAt];
+      auto &intoGroup = intoHere.mutableGroups()[indexToUpdateAt];
       mergeRowsInto(intoGroup, group, indexToUpdateAt, thetaTolerance,
                     listener);
     } else {

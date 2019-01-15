@@ -25,7 +25,7 @@ ReductionJobs const &RunsTable::reductionJobs() const {
   return m_reductionJobs;
 }
 
-ReductionJobs &RunsTable::reductionJobs() { return m_reductionJobs; }
+ReductionJobs &RunsTable::mutableReductionJobs() { return m_reductionJobs; }
 
 std::vector<RowLocation> const &RunsTable::selectedRowLocations() const {
   return m_selectedRowLocations;

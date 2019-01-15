@@ -32,7 +32,7 @@ public:
   // IRunsTablePresenter overrides
   void acceptMainPresenter(IRunsPresenter *mainPresenter) override;
   RunsTable const &runsTable() const override;
-  RunsTable &runsTable() override;
+  RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
   void instrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;

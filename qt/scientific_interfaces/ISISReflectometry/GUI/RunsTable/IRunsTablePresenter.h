@@ -27,7 +27,7 @@ public:
   virtual ~IRunsTablePresenter() = default;
   virtual void acceptMainPresenter(IRunsPresenter *mainPresenter) = 0;
   virtual RunsTable const &runsTable() const = 0;
-  virtual RunsTable &runsTable() = 0;
+  virtual RunsTable &mutableRunsTable() = 0;
 
   virtual void notifyRowStateChanged() = 0;
 
