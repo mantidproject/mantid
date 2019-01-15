@@ -7,9 +7,13 @@
 #  This file is part of the mantid package
 #
 #
+from mantid.plots.utility import MantidAxType
 from __future__ import (absolute_import, division, print_function)
+import collections
+import sys
 
 import matplotlib
+import matplotlib.collections as mcoll
 import matplotlib.colors
 import matplotlib.dates as mdates
 import matplotlib.image as mimage
@@ -21,10 +25,13 @@ import mantid.kernel
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, get_md_data2d_bin_centers, get_normalization, \
     get_sample_log, get_spectrum, get_uneven_data, get_wksp_index_dist_and_label
+
+# Used for initializing searches of max, min values
+_LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
+
 # ================================================
 # Private 2D Helper functions
 # ================================================
-from mantid.plots.utility import MantidAxType
 
 
 def _setLabels1D(axes, workspace):
@@ -45,7 +52,7 @@ def _setLabels2D(axes, workspace):
     axes.set_ylabel(labels[2])
 
 
-def _get_data_for_plot(axes, kwargs, workspace, with_dy=False, with_dx=False):
+def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x, y, dy) = get_md_data1d(workspace, normalization)
@@ -67,6 +74,26 @@ def _get_data_for_plot(axes, kwargs, workspace, with_dy=False, with_dx=False):
 # ========================================================
 # Plot functions
 # ========================================================
+
+def _plot_impl(axes, workspace, args, kwargs):
+    """
+    Compute data and labels for plot. Used by workspace
+    replacement handlers to recompute data. See plot for
+    argument details
+    """
+    if 'LogName' in kwargs:
+        (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
+        axes.set_ylabel('{0} ({1})'.format(LogName, units))
+        axes.set_xlabel('Time (s)')
+        if FullTime:
+            axes.xaxis_date()
+            axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
+            axes.set_xlabel('Time')
+        kwargs['linestyle'] = 'steps-post'
+    else:
+        x, y, _, _, kwargs = _get_data_for_plot(axes, workspace, kwargs)
+        _setLabels1D(axes, workspace)
+    return x, y, args, kwargs
 
 
 def plot(axes, workspace, *args, **kwargs):
@@ -107,19 +134,7 @@ def plot(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    if 'LogName' in kwargs:
-        (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
-        axes.set_ylabel('{0} ({1})'.format(LogName, units))
-        axes.set_xlabel('Time (s)')
-        if FullTime:
-            axes.xaxis_date()
-            axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
-            axes.set_xlabel('Time')
-        kwargs['linestyle'] = 'steps-post'
-        return axes.plot(x, y, *args, **kwargs)
-
-    x, y, dy, dx, kwargs = _get_data_for_plot(axes, kwargs, workspace)
-    _setLabels1D(axes, workspace)
+    x, y, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
     return axes.plot(x, y, *args, **kwargs)
 
 
@@ -150,7 +165,8 @@ def errorbar(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    x, y, dy, dx, kwargs = _get_data_for_plot(axes, kwargs, workspace, with_dy=True, with_dx=True)
+    x, y, dy, dx, kwargs = _get_data_for_plot(axes, workspace, kwargs,
+                                              with_dy=True, with_dx=True)
     _setLabels1D(axes, workspace)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
@@ -237,6 +253,7 @@ def contourf(axes, workspace, *args, **kwargs):
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
+
     _setLabels2D(axes, workspace)
     return axes.contourf(x, y, z, *args, **kwargs)
 
@@ -254,7 +271,7 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
     :param pcolortype: this keyword allows the plotting to be one of pcolormesh or
         pcolorfast if there is "mesh" or "fast" in the value of the keyword, or
         pcolor by default
-    Note: the return is the pcolor, pcolormesh, or pcolorfast of the last spectrum
+    :return: A list of the pcolor pieces created
     '''
     (x, y, z) = get_uneven_data(workspace, distribution)
     mini = numpy.min([numpy.min(i) for i in z])
@@ -280,11 +297,12 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
     else:
         pcolor = axes.pcolor
 
+    pieces = []
     for xi, yi, zi in zip(x, y, z):
         XX, YY = numpy.meshgrid(xi, yi, indexing='ij')
-        cm = pcolor(XX, YY, zi.reshape(-1, 1), **kwargs)
+        pieces.append(pcolor(XX, YY, zi.reshape(-1, 1), **kwargs))
 
-    return cm
+    return pieces
 
 
 def pcolor(axes, workspace, *args, **kwargs):
@@ -446,6 +464,7 @@ class ScalingAxesImage(mimage.AxesImage):
                 super(ScalingAxesImage, self).set_data(sampled_data)
         return super(ScalingAxesImage,self).draw(renderer)
 
+
 def _imshow(axes, z, cmap=None, norm=None, aspect=None,
             interpolation=None, alpha=None, vmin=None, vmax=None,
             origin=None, extent=None, shape=None, filternorm=1,
@@ -548,7 +567,6 @@ def tripcolor(axes, workspace, *args, **kwargs):
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False)
     _setLabels2D(axes, workspace)
-
     return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
 
 
@@ -628,3 +646,46 @@ def tricontourf(axes, workspace, *args, **kwargs):
     y = y[condition]
     z = z[condition]
     return axes.tricontourf(x, y, z, *args, **kwargs)
+
+
+def update_colorplot_datalimits(axes, mappables):
+    """
+    For an colorplot (imshow, pcolor*) plots update the data limits on the axes
+    to circumvent bugs in matplotlib
+    :param mappables: An iterable of mappable for this axes
+    """
+    # ax.relim in matplotlib < 2.2 doesn't take into account of images
+    # and it doesn't support collections at all as of verison 3 so we'll take
+    # over
+    if not isinstance(mappables, collections.Iterable):
+        mappables = [mappables]
+    xmin_all, xmax_all, ymin_all, ymax_all = _LARGEST, _SMALLEST, _LARGEST, _SMALLEST
+    for mappable in mappables:
+        xmin, xmax, ymin, ymax = get_colorplot_extents(mappable)
+        xmin_all, xmax_all = min(xmin_all, xmin), max(xmax_all, xmax)
+        ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
+
+    axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
+    axes.autoscale()
+
+
+def get_colorplot_extents(mappable):
+    """
+    Return the extent of the given mappable
+    :param mappable: A 2D mappable object
+    :return: (left, right, bottom, top)
+    """
+    if isinstance(mappable, mimage.AxesImage):
+        xmin, xmax, ymin, ymax = mappable.get_extent()
+    elif isinstance(mappable, mcoll.QuadMesh):
+        # coordinates are vertices of the grid
+        coords = mappable._coordinates
+        xmin, ymin = coords[0][0]
+        xmax, ymax = coords[-1][-1]
+    elif isinstance(mappable, mcoll.PolyCollection):
+        xmin, ymin = mappable._paths[0].get_extents().min
+        xmax, ymax = mappable._paths[-1].get_extents().max
+    else:
+        raise ValueError("Unknown mappable type '{}'".format(type(mappable)))
+
+    return xmin, xmax, ymin, ymax

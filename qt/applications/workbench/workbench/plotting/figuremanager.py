@@ -8,6 +8,8 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
+import sys
+from functools import wraps
 
 # 3rdparty imports
 import matplotlib
@@ -19,12 +21,90 @@ from qtpy.QtWidgets import QApplication, QLabel
 from six import text_type
 
 # local imports
+from mantid.api import AnalysisDataServiceObserver
+from mantid.plots import MantidAxes
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.figuretype import figure_type, FigureType
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from workbench.plotting.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+
+
+def _catch_exceptions(func):
+    """
+    Catch all exceptions in method and print a traceback to stderr
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception:
+            sys.stderr.write("Error occurred in handler:\n")
+            import traceback
+            traceback.print_exc()
+
+    return wrapper
+
+
+class FigureManagerADSObserver(AnalysisDataServiceObserver):
+
+    def __init__(self, manager):
+        super(FigureManagerADSObserver, self).__init__()
+        self.window = manager.window
+        self.canvas = manager.canvas
+
+        self.observeClear(True)
+        self.observeDelete(True)
+        self.observeReplace(True)
+
+    @_catch_exceptions
+    def clearHandle(self):
+        """
+        Called when the ADS is deleted all of its workspaces
+        """
+        self.window.close()
+
+    @_catch_exceptions
+    def deleteHandle(self, _, workspace):
+        """
+        Called when the ADS has deleted a workspace. Checks the
+        attached axes for any hold a plot from this workspace. If removing
+        this leaves empty axes then the parent window is triggered for
+        closer
+        :param _: The name of the workspace. Unused
+        :param workspace: A pointer to the workspace
+        """
+        # Find the axes with this workspace reference
+        all_axes = self.canvas.figure.axes
+        if not all_axes:
+            return
+        empty_axes = True
+        for ax in all_axes:
+            if isinstance(ax, MantidAxes):
+                empty_axes = empty_axes & ax.remove_workspace_artists(workspace)
+        if empty_axes:
+            self.window.close()
+        else:
+            self.canvas.draw_idle()
+
+    @_catch_exceptions
+    def replaceHandle(self, _, workspace):
+        """
+        Called when the ADS has replaced a workspace with one of the same name.
+        If this workspace is attached tho this figure then its data is updated
+        :param _: The name of the workspace. Unused
+        :param workspace: A reference to the new workspace
+        """
+        redraw = False
+        for ax in self.canvas.figure.axes:
+            if isinstance(ax, MantidAxes):
+                redraw_this = ax.replace_workspace_artists(workspace)
+            else:
+                continue
+            redraw = redraw | redraw_this
+        if redraw:
+            self.canvas.draw_idle()
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -121,6 +201,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # Register canvas observers
         self._cids = []
         self._cids.append(self.canvas.mpl_connect('button_press_event', self.on_button_press))
+        self._ads_observer = FigureManagerADSObserver(self)
 
         self.window.raise_()
 
@@ -137,6 +218,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if self.window._destroying:
             return
         self.window._destroying = True
+        self._ads_observer.observeAll(False)
+        del self._ads_observer
         for id in self._cids:
             self.canvas.mpl_disconnect(id)
         try:

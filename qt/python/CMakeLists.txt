@@ -69,6 +69,8 @@ endif ()
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
 
+    mantidqt/project/test/test_plotssaver.py
+    mantidqt/project/test/test_plotsloader.py
     mantidqt/project/test/test_project.py
     mantidqt/project/test/test_projectloader.py
     mantidqt/project/test/test_projectsaver.py
@@ -97,7 +99,7 @@ endif ()
 
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
-    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_tableviewmodel.py
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_table_view_model.py
 
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py

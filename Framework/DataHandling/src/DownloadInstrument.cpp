@@ -91,6 +91,12 @@ void DownloadInstrument::init() {
 void DownloadInstrument::exec() {
   StringToStringMap fileMap;
   setProperty("FileDownloadCount", 0);
+
+  // to aid in general debugging, always ask github for what the rate limit
+  // status is. This doesn't count against rate limit.
+  GitHubApiHelper inetHelper;
+  g_log.information(inetHelper.getRateLimitDescription());
+
   try {
     fileMap = processRepository();
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
@@ -117,15 +123,33 @@ void DownloadInstrument::exec() {
 
   for (auto &itMap : fileMap) {
     // download a file
-    doDownloadFile(itMap.first, itMap.second);
     if (boost::algorithm::ends_with(itMap.second, "Facilities.xml")) {
       g_log.notice("A new Facilities.xml file has been downloaded, this will "
                    "take effect next time Mantid is started.");
+    } else {
+      g_log.information() << "Downloading \"" << itMap.second << "\" from \""
+                          << itMap.first << "\"\n";
     }
+    doDownloadFile(itMap.first, itMap.second);
   }
 
   setProperty("FileDownloadCount", static_cast<int>(fileMap.size()));
 }
+
+namespace {
+// Converts a json chunk to a url for the raw file contents.
+std::string getDownloadUrl(Json::Value &contents) {
+  std::string url = contents.get("download_url", "").asString();
+  if (url.empty()) { // guess it from html url
+    url = contents.get("html_url", "").asString();
+    if (url.empty())
+      throw std::runtime_error("Failed to find download link");
+    url = url + "?raw=1";
+  }
+
+  return url;
+}
+} // namespace
 
 DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
@@ -198,8 +222,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     if (filePath.getExtension() != "xml")
       continue;
     std::string sha = serverElement.get("sha", "").asString();
-    std::string htmlUrl =
-        getDownloadableRepoUrl(serverElement.get("html_url", "").asString());
+    std::string downloadUrl = getDownloadUrl(serverElement);
 
     // Find shas
     std::string localSha = getValueOrDefault(localShas, name, "");
@@ -208,14 +231,14 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // this will also catch when file is only present on github (as local sha
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
-      fileMap.emplace(htmlUrl,
+      fileMap.emplace(downloadUrl,
                       filePath.toString()); // ACTION - DOWNLOAD to localPath
     } else if ((!localSha.empty()) && (sha == installSha) &&
                (sha != localSha)) // matches install, but different local
     {
-      fileMap.emplace(
-          htmlUrl,
-          filePath.toString()); // ACTION - DOWNLOAD to localPath and overwrite
+      fileMap.emplace(downloadUrl, filePath.toString()); // ACTION - DOWNLOAD to
+                                                         // localPath and
+                                                         // overwrite
     }
   }
 
@@ -331,15 +354,6 @@ size_t DownloadInstrument::removeOrphanedFiles(
   g_log.debug() << filesToDelete.size() << " Files deleted.\n";
 
   return filesToDelete.size();
-}
-
-/** Converts a github file page to a downloadable url for the file.
- * @param filename a github file page url
- * @returns a downloadable url for the file
- **/
-const std::string
-DownloadInstrument::getDownloadableRepoUrl(const std::string &filename) const {
-  return filename + "?raw=1";
 }
 
 /** Download a url and fetch it inside the local path given.
