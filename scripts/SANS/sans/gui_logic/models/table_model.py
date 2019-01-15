@@ -16,7 +16,6 @@ import functools
 import os
 import re
 
-from mantid.kernel import Logger
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
@@ -254,7 +253,6 @@ class TableIndexModel(object):
                  output_name="", user_file="", sample_thickness='', sample_height='', sample_width='',
                  sample_shape='', options_column_string=""):
         super(TableIndexModel, self).__init__()
-        self._sans_logger = Logger("SANS")
         self.id = None
         self.sample_scatter = sample_scatter
         self.sample_scatter_period = sample_scatter_period
@@ -304,7 +302,7 @@ class TableIndexModel(object):
         try:
             self._sample_shape_model = SampleShapeColumnModel(value)
         except ValueError as e:
-            self._sans_logger.notice("Updating of sample shape failed: {}".format(str(e)))
+            pass
 
     def update_attribute(self, attribute_name, value):
         setattr(self, attribute_name, value)

@@ -84,15 +84,16 @@ class TableModelTest(unittest.TestCase):
         self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
         self.assertEqual(sample_shape_text, "FlatPlate")
 
-    def test_that_incorrect_sample_shape_raises_RuntimeError(self):
+    def test_that_incorrect_sample_shape_reverts_to_previous_sampleshape(self):
         try:
             table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                                 "", "", "", "", "", "", "", "",
-                                                sample_shape="Not a sample shape")
-        except RuntimeError as e:
-            self.assertEqual(str(e), "Not a sample shape is not a recognised sample shape.")
+                                                sample_shape="Disc")
+            table_index_model.sample_shape = "not a sample shape"
+        except Exception as e:
+            self.assertTrue(False, "Did not except incorrect sample shape to raise error")
         else:
-            self.assertFalse(True, "Expected a RuntimeError to be raised.")
+            self.assertEqual("Disc", table_index_model.sample_shape._sample_shape_string)
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
         table_model = TableModel()

@@ -15,31 +15,33 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
+
 from mantid.kernel import Logger, ConfigService
 from mantid.api import (FileFinder)
 
-from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
-from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
-from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
-from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
-from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
+from sans.common.constants import ALL_PERIODS
+from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch)
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
-from sans.user_file.user_file_reader import UserFileReader
-from sans.command_interface.batch_csv_file_parser import BatchCsvParser
-from sans.common.constants import ALL_PERIODS
+from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
-from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
-from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
-from ui.sans_isis.work_handler import WorkHandler
-from ui.sans_isis import SANSSaveOtherWindow
+from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
+from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
+from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
+from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
+from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
+from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
+from sans.sans_batch import SANSCentreFinder
+from sans.user_file.user_file_reader import UserFileReader
+
+from ui.sans_isis import SANSSaveOtherWindow
+from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
+from ui.sans_isis.work_handler import WorkHandler
 
 try:
     import mantidplot
