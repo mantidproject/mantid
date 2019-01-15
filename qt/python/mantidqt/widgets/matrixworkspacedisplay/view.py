@@ -28,7 +28,7 @@ class MatrixWorkspaceTableView(QTableView):
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, _):
         header = self.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
 
