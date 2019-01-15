@@ -7,8 +7,8 @@
 #ifndef MANTID_ALGORITHMS_REBIN2DTEST_H_
 #define MANTID_ALGORITHMS_REBIN2DTEST_H_
 
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAlgorithms/Rebin2D.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -49,7 +49,7 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
       int(nhist), int(nbins), x0, deltax);
 
   // We need something other than a spectrum axis, call this one theta
-  NumericAxis *const thetaAxis = new NumericAxis(nhist + 1);
+  BinEdgeAxis *const thetaAxis = new BinEdgeAxis(nhist + 1);
   for (size_t i = 0; i < nhist + 1; ++i) {
     thetaAxis->setValue(i, -0.5 + static_cast<double>(i));
   }
@@ -259,19 +259,23 @@ public:
   static void destroySuite(Rebin2DTestPerformance *suite) { delete suite; }
 
   Rebin2DTestPerformance() {
+    constexpr bool distribution = false;
+    constexpr bool perf_test = true;
+    constexpr bool small_bins = false;
     m_inputWS = makeInputWS(distribution, perf_test, small_bins);
   }
 
   void test_On_Large_Workspace() {
-    runAlgorithm(m_inputWS, "100,200,41000", "-0.5,2,499.5");
+    runAlgorithm(m_inputWS, "100,10,41000", "-0.5,0.5,499.5");
+  }
+
+  void test_Use_Fractional_Area() {
+    constexpr bool useFractionalArea = true;
+    runAlgorithm(m_inputWS, "100,10,41000", "-0.5,0.5,499.5", useFractionalArea);
   }
 
 private:
   MatrixWorkspace_sptr m_inputWS;
-
-  const bool distribution = false;
-  const bool perf_test = true;
-  const bool small_bins = false;
 };
 
 #endif /* MANTID_ALGORITHMS_REBIN2DTEST_H_ */
