@@ -42,7 +42,6 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                              doc="Checks if there are loaded files available. If they are, those files are used.")
 
         # Beam coordinates if an initial move of the workspace is requested
-        enabled_condition = EnabledWhenProperty("MoveWorkspace", PropertyCriterion.IsNotDefault)
         self.declareProperty(FloatArrayProperty(name='BeamCoordinates', values=[]),
                              doc='The coordinates which is used to position the instrument component(s). '
                                  'If the workspaces should be loaded with an initial move, then this '
@@ -52,8 +51,6 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                              doc='Component that should be moved. '
                                  'If the workspaces should be loaded with an initial move, then this '
                                  'needs to be specified.')
-        self.setPropertySettings("BeamCoordinates", enabled_condition)
-        self.setPropertySettings("Component", enabled_condition)
 
         # ------------
         #  OUTPUT
