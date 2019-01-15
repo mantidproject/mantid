@@ -527,6 +527,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if self.getProperty(Prop.WATER_REFERENCE).isDefault:
             return ws
         waterWS = self.getProperty(Prop.WATER_REFERENCE).value
+        waterWS, mon = self._extractMonitors(waterWS)
         if waterWS.getNumberHistograms() != ws.getNumberHistograms():
             self.log().error('Water workspace and run do not have the same number of histograms.')
         rebinnedWaterWSName = self._names.withSuffix('water_rebinned')

@@ -14,7 +14,7 @@ This algorithm is the first step in the ILL reflectometry reduction workflow. It
 #. loads data from disk
 #. merges the numors
 #. determines the peak position
-#. moves the detector
+#. moves the detector (of name 'detector')
 #. normalizes to a (water) reference (optional)
 #. normalizes to slit sizes (optional)
 #. normalizes to experiment time or monitor counts (optional)
