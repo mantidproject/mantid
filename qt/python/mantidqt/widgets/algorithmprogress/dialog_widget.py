@@ -42,7 +42,6 @@ class AlgorithmMonitorDialog(QDialog):
 
     def __init__(self, parent, model):
         super(AlgorithmMonitorDialog, self).__init__(parent)
-        self.parent = parent
         self.tree = QTreeWidget(self)
         self.tree.setColumnCount(3)
         self.tree.setSelectionMode(QTreeWidget.NoSelection)
@@ -70,7 +69,7 @@ class AlgorithmMonitorDialog(QDialog):
         self.presenter = AlgorithmProgressDialogPresenter(self, model)
         self.presenter.update_gui()
 
-    def closeEvent(self, *args):
+    def closeEvent(self, event):
         """
         Funnel the closeEvent, triggered when the user presses X,
         through the same routine as the `Close` button
@@ -79,6 +78,7 @@ class AlgorithmMonitorDialog(QDialog):
         """
         self.presenter.close()
         self.deleteLater()
+        event.accept()
 
     def update(self, data):
         """
