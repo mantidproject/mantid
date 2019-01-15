@@ -429,7 +429,7 @@ void IntegrateEllipsoids::exec() {
     lattice.setUB(UB);
     lattice.setModUB(modUB);
     modHKL = lattice.getModHKL();
-  
+
     int maxOrder = lattice.getMaxOrder();
     bool CT = lattice.getCrossTerm();
   }
