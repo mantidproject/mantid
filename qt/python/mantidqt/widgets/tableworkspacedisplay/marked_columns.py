@@ -52,9 +52,9 @@ class MarkedColumns:
         self._add(col_index, self.as_y, [self.as_x, self.as_y_err])
 
     def add_y_err(self, err_column):
-        if err_column.error_for_column in self.as_x:
+        if err_column.related_y_column in self.as_x:
             raise ValueError("Trying to add YErr for column marked as X.")
-        elif err_column.error_for_column in self.as_y_err:
+        elif err_column.related_y_column in self.as_y_err:
             raise ValueError("Trying to add YErr for column marked as YErr.")
         # remove all labels for the column index
         len_before_remove = len(self.as_y)
@@ -64,7 +64,7 @@ class MarkedColumns:
         # -> This means that columns have been removed, and the label_index is now _wrong_
         # and has to be decremented to match the new label index correctly
         len_after_remove = len(self.as_y)
-        if err_column.error_for_column > err_column.column and len_after_remove < len_before_remove:
+        if err_column.related_y_column > err_column.column and len_after_remove < len_before_remove:
             err_column.label_index -= (len_before_remove - len_after_remove)
         self.as_y_err.append(err_column)
 
@@ -75,7 +75,7 @@ class MarkedColumns:
         # we can only have 1 Y Err for Y, so iterating and removing's iterator invalidation is not an
         # issue as the code will exit immediately after the removal
         for col in self.as_y_err:
-            if col.error_for_column == col_index:
+            if col.related_y_column == col_index:
                 self.as_y_err.remove(col)
                 break
 
@@ -105,7 +105,7 @@ class MarkedColumns:
             for yerr_col in self.as_y_err:
                 # if found append the YErr's source column - so that the data from the columns
                 # can be retrieved for plotting the errors
-                if yerr_col.error_for_column == col:
+                if yerr_col.related_y_column == col:
                     yerr_for_col[col] = yerr_col.column
 
         return yerr_for_col

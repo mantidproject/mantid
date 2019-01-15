@@ -10,26 +10,29 @@
 
 
 class ErrorColumn:
-    def __init__(self, column, error_for_column, label_index):
+    CANNOT_SET_Y_TO_BE_OWN_YERR_MESSAGE = "Cannot set Y column to be its own YErr"
+    UNHANDLED_COMPARISON_LOGIC_MESSAGE = "Unhandled comparison logic with type {}"
+
+    def __init__(self, column, related_y_column, label_index):
         self.column = column
-        self.error_for_column = error_for_column
-        if self.column == self.error_for_column:
-            raise ValueError("Cannot set Y column to be its own YErr")
+        self.related_y_column = related_y_column
+        if self.column == self.related_y_column:
+            raise ValueError(self.CANNOT_SET_Y_TO_BE_OWN_YERR_MESSAGE)
 
         self.label_index = label_index
 
     def __eq__(self, other):
         if isinstance(other, ErrorColumn):
-            return self.error_for_column == other.error_for_column or self.column == other.column
+            return self.related_y_column == other.related_y_column or self.column == other.column
         elif isinstance(other, int):
             return self.column == other
         else:
-            raise RuntimeError("Unhandled comparison logic with type {}".format(type(other)))
+            raise RuntimeError(self.UNHANDLED_COMPARISON_LOGIC_MESSAGE.format(type(other)))
 
     def __cmp__(self, other):
         if isinstance(other, ErrorColumn):
-            return self.column == other.column or self.error_for_column == other.error_for_column
+            return self.column == other.column or self.related_y_column == other.related_y_column
         elif isinstance(other, int):
             return self.column == other
         else:
-            raise RuntimeError("Unhandled comparison logic with type {}".format(type(other)))
+            raise RuntimeError(self.UNHANDLED_COMPARISON_LOGIC_MESSAGE.format(type(other)))
