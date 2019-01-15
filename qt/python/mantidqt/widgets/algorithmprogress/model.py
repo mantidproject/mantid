@@ -124,6 +124,6 @@ class AlgorithmProgressModel(AlgorithmObserver):
         for observer in self.progress_observers:
             properties = []
             for prop in observer.properties():
-                properties.append([prop.name, str(prop.value), 'Default' if prop.isDefault else ''])
+                properties.append([prop.name, str(prop.valueAsStr), 'Default' if prop.isDefault else ''])
             algorithm_data.append((observer.name(), observer.algorithm, properties))
         return algorithm_data
