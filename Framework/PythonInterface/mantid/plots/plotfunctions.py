@@ -538,7 +538,7 @@ def _imshow(axes, z, cmap=None, norm=None, aspect=None,
     im.set_extent(im.get_extent())
 
     axes.add_image(im)
-    axes.callbacks.connect('xlim_changed', im._limits.changed)
+    axes.callbacks.connect('xlim_changed', im._limits_changed)
     axes.callbacks.connect('ylim_changed', im._limits_changed)
     return im
 
