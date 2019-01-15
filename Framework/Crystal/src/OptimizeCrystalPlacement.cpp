@@ -310,8 +310,8 @@ void OptimizeCrystalPlacement::exec() {
     }
   }
 
-  Instrument_const_sptr instr = peaks->getPeak(0).getInstrument();
-  V3D sampPos = instr->getSample()->getPos();
+  // offset of previous sample position so should start at 0
+  V3D sampPos = V3D(0., 0., 0.);
 
   oss << ",SampleXOffset=" << sampPos.X() << ",SampleYOffset=" << sampPos.Y()
       << ",SampleZOffset=" << sampPos.Z();
@@ -377,7 +377,7 @@ void OptimizeCrystalPlacement::exec() {
   //------------------------- Get/Report  Results ------------------
 
   double chisq = fit_alg->getProperty("OutputChi2overDoF");
-  std::cout << "Fit finished. Status="
+  g_log.notice() << "Fit finished. Status="
             << (std::string)fit_alg->getProperty("OutputStatus") << '\n';
 
   setProperty("Chi2overDoF", chisq);
@@ -449,7 +449,7 @@ void OptimizeCrystalPlacement::exec() {
   UBinv.Invert();
   UBinv /= (2 * M_PI);
   for (int i = 0; i < outPeaks->getNumberPeaks(); ++i) {
-    auto peak = outPeaks->getPeak(i);
+    auto &peak = outPeaks->getPeak(i);
     peak.setSamplePos(peak.getSamplePos() + newSampPos);
     int RunNum = peak.getRunNumber();
     std::string RunNumStr = std::to_string(RunNum);
