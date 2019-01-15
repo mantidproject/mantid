@@ -36,6 +36,7 @@ class MatrixWorkspaceTableView(QTableView):
         header = self.horizontalHeader()
         header.resizeSection(section, header.defaultSectionSize())
 
+
 class MatrixWorkspaceDisplayView(QTabWidget):
     def __init__(self, presenter, parent=None, name=''):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
