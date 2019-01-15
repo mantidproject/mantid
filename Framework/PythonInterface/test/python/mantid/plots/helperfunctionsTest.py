@@ -305,7 +305,7 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertEquals(units, '')
         self.assertEquals(kwargs, {})
 
-        def test_validate_args_success(self):
+    def test_validate_args_success(self):
         ws = CreateSampleWorkspace()
         result = validate_args(ws)
         self.assertEqual(True, result)
