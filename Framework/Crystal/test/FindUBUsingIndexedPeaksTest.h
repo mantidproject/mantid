@@ -124,8 +124,8 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = ws->mutableSample().getOrientedLattice();
 
-    double correct_err1[] = {0.003723, 0.002231, 0.002820};
-    double correct_err2[] = {0.000796, 0.002043, 0.002671};
+    V3D correct_err1 = V3D(0.003723, 0.002231, 0.002820);
+    V3D correct_err2 = V3D(0.000796, 0.002043, 0.002671);
 
     V3D err_calculated1 = latt.getVecErr(0);
     V3D err_calculated2 = latt.getVecErr(1);

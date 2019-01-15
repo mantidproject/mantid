@@ -424,13 +424,15 @@ void IntegrateEllipsoids::exec() {
   Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
                                          ModDim, peak_q_list);
 
-  OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
-  lattice.setUB(UB);
-  lattice.setModUB(modUB);
-  modHKL = lattice.getModHKL();
-
-  int maxOrder = lattice.getMaxOrder();
-  bool CT = lattice.getCrossTerm();
+  if (peak_ws->sample().hasOrientedLattice()) {
+    OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
+    lattice.setUB(UB);
+    lattice.setModUB(modUB);
+    modHKL = lattice.getModHKL();
+  
+    int maxOrder = lattice.getMaxOrder();
+    bool CT = lattice.getCrossTerm();
+  }
 
   Matrix<double> UBinv(UB);
   UBinv.Invert();
