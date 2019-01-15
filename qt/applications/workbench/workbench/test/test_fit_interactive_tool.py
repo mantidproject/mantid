@@ -348,12 +348,12 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertEqual(self.fit_browser.getFittingFunction(),
                          'name=Gaussian,Height=0.2,PeakCentre=1,Sigma=0;'
                          'name=Gaussian,Height=4.4,PeakCentre=1.5,Sigma=0')
-        yield self.drag_mouse(1.0, 4.3, 0.75, -0.2)
-        # yield self.drag_mouse(1.5, 4.4, -0.75, -0.1)
-        # self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
-        # self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.4, 1)
-        # self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
-        # self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
+        yield self.drag_mouse(1.0, 4.295, 1.75, 4.45)
+        yield self.drag_mouse(1.5, 4.395, 0.9, 4.12)
+        self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.75, 1)
+        self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.35, 1)
+        self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f1'), 0.9, 1)
+        self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f1'), 4.12, 1)
 
 
 runTests(TestFitPropertyBrowser)
