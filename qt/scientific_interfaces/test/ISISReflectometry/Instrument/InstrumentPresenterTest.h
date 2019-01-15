@@ -200,6 +200,7 @@ public:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
+    expectNotProcessingOrAutoreducing();
     presenter.reductionPaused();
 
     verifyAndClear();
@@ -209,7 +210,28 @@ public:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
+    expectProcessing();
     presenter.reductionResumed();
+
+    verifyAndClear();
+  }
+
+  void testAllWidgetsAreEnabledWhenAutoreductionPaused() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, enableAll()).Times(1);
+    expectNotProcessingOrAutoreducing();
+    presenter.autoreductionPaused();
+
+    verifyAndClear();
+  }
+
+  void testAllWidgetsAreDisabledWhenAutoreductionResumed() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, disableAll()).Times(1);
+    expectAutoreducing();
+    presenter.autoreductionResumed();
 
     verifyAndClear();
   }
@@ -244,6 +266,28 @@ private:
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
+  }
+
+  void expectProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(1)
+        .WillOnce(Return(true));
+  }
+
+  void expectAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(1)
+        .WillOnce(Return(true));
+  }
+
+  void expectNotProcessingOrAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(1)
+        .WillOnce(Return(false));
   }
 
   void

@@ -77,6 +77,8 @@ void SavePresenter::updateWidgetEnabledState() const {
     m_view->disableAutosaveControls();
     if (shouldAutosave())
       m_view->disableFileFormatAndLocationControls();
+    else
+      m_view->enableFileFormatAndLocationControls();
   } else {
     m_view->enableAutosaveControls();
     m_view->enableFileFormatAndLocationControls();

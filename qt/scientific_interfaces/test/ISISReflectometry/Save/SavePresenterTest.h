@@ -285,31 +285,86 @@ public:
     verifyAndClear();
   }
 
-  void testAnyReductionPaused() {
+  void testControlsEnabledWhenReductionPaused() {
     auto presenter = makePresenter();
     auto workspaceNames = createWorkspaces();
     expectSetWorkspaceListFromADS(workspaceNames);
+    expectNotProcessingOrAutoreducing();
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
     presenter.reductionPaused();
     verifyAndClear();
   }
 
-  void testAnyReductionResumedWithAutosaveOn() {
+  void testAutosaveControlsDisabledWhenReductionResumedWithAutosaveOn() {
     auto presenter = makePresenter();
     enableAutosave(presenter);
+    expectProcessing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
+    presenter.reductionResumed();
+    verifyAndClear();
+  }
+
+  void testFileControlsDisabledWhenReductionResumedWithAutosaveOn() {
+    auto presenter = makePresenter();
+    enableAutosave(presenter);
+    expectProcessing();
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
     presenter.reductionResumed();
     verifyAndClear();
   }
 
-  void testAnyReductionResumedWithAutosaveOff() {
+  void testFileControlsEnabledWhenReductionResumedWithAutosaveOff() {
     auto presenter = makePresenter();
     disableAutosave(presenter);
-    EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(0);
+    expectProcessing();
+    EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
     presenter.reductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutosaveControlsDisabledWhenReductionResumedWithAutosaveOff() {
+    auto presenter = makePresenter();
+    disableAutosave(presenter);
+    expectProcessing();
+    EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
+    presenter.reductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutosaveControlsDisabledWhenAutoreductionResumedWithAutosaveOn() {
+    auto presenter = makePresenter();
+    enableAutosave(presenter);
+    expectAutoreducing();
+    EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
+    presenter.autoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testFileControlsDisabledWhenAutoreductionResumedWithAutosaveOn() {
+    auto presenter = makePresenter();
+    enableAutosave(presenter);
+    expectAutoreducing();
+    EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
+    presenter.autoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testFileControlsEnabledWhenAutoreductionResumedWithAutosaveOff() {
+    auto presenter = makePresenter();
+    disableAutosave(presenter);
+    expectAutoreducing();
+    EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
+    presenter.autoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutosaveControlsDisabledWhenAutoreductionResumedWithAutosaveOff() {
+    auto presenter = makePresenter();
+    disableAutosave(presenter);
+    expectAutoreducing();
+    EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
+    presenter.autoreductionResumed();
     verifyAndClear();
   }
 
@@ -354,6 +409,7 @@ private:
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_asciiSaver));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
     AnalysisDataService::Instance().clear();
   }
 
@@ -459,6 +515,27 @@ private:
     EXPECT_CALL(*m_asciiSaver,
                 save(m_savePath, workspaceNames, logs, fileFormatOptions))
         .Times(1);
+  }
+
+  void expectProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(1)
+        .WillOnce(Return(true));
+  }
+
+  void expectAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(1)
+        .WillOnce(Return(true));
+  }
+
+  void expectNotProcessingOrAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(1)
+        .WillOnce(Return(false));
   }
 
   NiceMock<MockSaveView> m_view;
