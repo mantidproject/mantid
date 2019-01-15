@@ -27,7 +27,7 @@ namespace MDAlgorithms {
  * the ConvToMDEventsWS is in using the spatial index (Morton
  * numbers) for speeding up the procedure.
  */
-class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
+class ConvToMDEventsWSIndexing : public ConvToMDEventsWS, public DataObjects::EventAccessor {
   enum MD_EVENT_TYPE {
     LEAN,
     REGULAR,
@@ -360,7 +360,7 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
 
 #pragma omp parallel for
   for(size_t i = 0; i < mdEvents.size(); ++i)
-    mdEvents[i].retrieveIndex(space);
+    MDEventType<ND>::template AccessFor<ConvToMDEventsWSIndexing>::retrieveIndex(mdEvents[i], space);
 
   pProgress->report(1);
 
@@ -491,7 +491,7 @@ void ConvToMDEventsWSIndexing::EventsDistributor<ND, MDEventType, EventIterator>
     BoxBase* newBox;
     if(std::distance(boxEventStart, eventIt) <= static_cast<int>(splitThreshold) || tsk.maxDepth == 1) {
       for(auto it = boxEventStart; it < eventIt; ++it)
-        it->retrieveCoordinates(tsk.space);
+        MDEventType<ND>::template AccessFor<ConvToMDEventsWSIndexing>::retrieveCoordinates(*it, tsk.space);
       tsk.bc->incBoxesCounter(tsk.level);
       newBox = new Box(tsk.bc.get(), tsk.level, extents, boxEventStart, eventIt);
     } else {

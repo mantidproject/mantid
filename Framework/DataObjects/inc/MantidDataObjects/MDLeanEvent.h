@@ -110,8 +110,19 @@ class MDLeanEvent;
 template <size_t nd>
 void swap(MDLeanEvent<nd>& first, MDLeanEvent<nd>& second);
 
+struct EventAccessor {};
+
 template <size_t nd> class DLLExport MDLeanEvent {
 public:
+  template <class Accessor>
+  struct AccessFor {
+    static std::enable_if<std::is_base_of<EventAccessor, Accessor>::value, void>
+        retrieveCoordinates(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) { event.retrieveCoordinates(space); }
+    static std::enable_if<std::is_base_of<EventAccessor, Accessor>::value, void>
+        retrieveIndex(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) { event.retrieveIndex(space); }
+  };
+  template <class Accessor>
+  friend struct AccessFor;
   /**
    * Additional index type defenitions
    */
@@ -147,6 +158,7 @@ public:
   static MortonT coordinatesToIndex(coord_t* coord, const MDSpaceBounds<nd>& space) {
     return Interleaver<nd, IntT, MortonT>::interleave(md_structure_ws::ConvertCoordinatesToIntegerRange<nd, IntT>(space, coord));
   }
+protected:
   void retrieveIndex(const MDSpaceBounds<nd>& space) {
     index = coordinatesToIndex(center, space);
   }
