@@ -249,7 +249,7 @@ class PythonFileInterpreterPresenter(QObject):
             lineno = exc_stack[-1][1] + self._code_start_offset
         else:
             lineno = -1
-        sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')
+        sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + os.linesep)
         self.view.editor.updateProgressMarker(lineno, True)
         self._finish(success=False, elapsed_time=task_error.elapsed_time)
 
