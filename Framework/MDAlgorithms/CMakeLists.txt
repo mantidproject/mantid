@@ -203,6 +203,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LoadSQW2.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MDEventTreeBuilder.h
 	inc/MantidMDAlgorithms/MDEventWSWrapper.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
