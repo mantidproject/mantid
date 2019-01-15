@@ -1,5 +1,3 @@
-import numpy as np
-
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 from qtpy.QtCore import QObject, Signal, Qt
@@ -114,6 +112,9 @@ class CentreMarker(VerticalMarker):
 
     def height(self):
         return self.y1 - self.y0
+
+    def set_height(self, height):
+        self.y1 = self.y0 + height
 
 
 class FitInteractiveTool(QObject):
@@ -248,6 +249,12 @@ class FitInteractiveTool(QObject):
         self.canvas.draw()
         self.peak_added.emit(peak_id, x, marker.height())
 
+    def update_peak(self, peak_id, centre, height):
+        for pm in self.peak_markers:
+            if pm.peak_id == peak_id:
+                pm.update_peak(centre, height)
+        self.canvas.draw()
+
     def get_transform(self):
         return self.fit_start_x.patch.get_transform()
 
@@ -285,3 +292,7 @@ class PeakMarker(QObject):
 
     def height(self):
         return self.centre_marker.height()
+
+    def update_peak(self, centre, height):
+        self.centre_marker.x = centre
+        self.centre_marker.set_height(height)

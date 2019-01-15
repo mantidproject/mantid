@@ -355,5 +355,18 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f1'), 0.9, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f1'), 4.12, 1)
 
+    def test_update_peaks(self):
+        yield self.start()
+        self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
+        self.fit_browser.tool.add_peak(1.5, 4.4)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(1.23, 4.2) is None)
+        self.assertFalse(self.fit_browser.tool.get_override_cursor(1.5, 4.3) is None)
+        self.start_draw_calls_count()
+        self.fit_browser.setPeakCentreOf('f0', 1.23)
+        self.fit_browser.setPeakHeightOf('f1', 4.22)
+        self.assertEqual(self.draw_count, 4)
+        self.assertFalse(self.fit_browser.tool.get_override_cursor(1.23, 4.2) is None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(1.5, 4.3) is None)
+
 
 runTests(TestFitPropertyBrowser)

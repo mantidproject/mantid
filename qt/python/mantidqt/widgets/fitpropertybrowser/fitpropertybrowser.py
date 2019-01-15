@@ -42,7 +42,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.peak_ids = {}
         self.startXChanged.connect(self.move_start_x)
         self.endXChanged.connect(self.move_end_x)
-        self.algorithmFinished.connect(self.fitting_done)
+        self.algorithmFinished.connect(self.fitting_done_slot)
+        self.changedParameterOf.connect(self.peak_changed_slot)
 
     def closeEvent(self, event):
         self.closing.emit()
@@ -93,7 +94,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     def get_lines(self):
         return self.canvas.figure.get_axes()[0].get_lines()
 
-    def fitting_done(self, name):
+    @Slot(str)
+    def fitting_done_slot(self, name):
         from workbench.plotting.functions import plot
         ws = mtd[name]
         self.clear_fit_result_lines()
@@ -115,3 +117,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         fun = self.peak_ids[peak_id]
         self.setPeakCentreOf(fun, centre)
         self.setPeakHeightOf(fun, height)
+
+    @Slot(str)
+    def peak_changed_slot(self, fun):
+        for peak_id, prefix in self.peak_ids.items():
+            if prefix == fun:
+                self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix))

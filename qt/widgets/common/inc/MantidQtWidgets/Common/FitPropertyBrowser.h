@@ -225,6 +225,11 @@ public:
     emit parameterChanged(f);
   }
 
+  // send parameterChanged signal
+  void sendParameterChanged(const QString &prefix) {
+    emit changedParameterOf(prefix);
+  }
+
   /// Creates and adds the autobackground
   void addAutoBackground();
   bool isAutoBack() const { return m_autoBackground != nullptr; }
@@ -307,6 +312,7 @@ signals:
   void endXChanged(double);
   void xRangeChanged(double, double);
   void parameterChanged(const Mantid::API::IFunction *);
+  void changedParameterOf(const QString &prefix);
   void functionCleared();
   void plotGuess();
   void plotCurrentGuess();

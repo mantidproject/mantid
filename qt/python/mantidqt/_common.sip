@@ -314,5 +314,6 @@ public:
 signals:
     void startXChanged(double);
     void endXChanged(double);
+    void changedParameterOf(const QString &prefix);
     void algorithmFinished(const QString &);
 };
