@@ -184,6 +184,42 @@ public:
     }
   }
 
+  void test_Zero_Area_Bins_NoFractionalBinning() {
+    MatrixWorkspace_sptr inputWS = makeInputWS(false);
+    const auto nhist = inputWS->getNumberHistograms();
+    // Set the vertical 'width' of a single histogram to zero
+    auto thetaAxis = inputWS->getAxis(1);
+    const auto middle = nhist / 2;
+    const auto midValue = thetaAxis->getValue(middle);
+    thetaAxis->setValue(middle - 1, midValue);
+    constexpr bool useFractionalBinning = false;
+    MatrixWorkspace_sptr outputWS =
+        runAlgorithm(inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    const auto &Ys = outputWS->y(0);
+    for (size_t j = 0; j < Ys.size(); ++j) {
+      TS_ASSERT(!std::isnan(Ys[j]))
+    }
+  }
+
+  void test_Zero_Area_Bins_FractionalBinning() {
+    MatrixWorkspace_sptr inputWS = makeInputWS(false);
+    const auto nhist = inputWS->getNumberHistograms();
+    // Set the vertical 'width' of a single histogram to zero
+    auto thetaAxis = inputWS->getAxis(1);
+    const auto middle = nhist / 2;
+    const auto midValue = thetaAxis->getValue(middle);
+    thetaAxis->setValue(middle - 1, midValue);
+    constexpr bool useFractionalBinning = true;
+    MatrixWorkspace_sptr outputWS =
+        runAlgorithm(inputWS, "5.,2.,15.", "-0.5,10.,9.5", useFractionalBinning);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    const auto &Ys = outputWS->y(0);
+    for (size_t j = 0; j < Ys.size(); ++j) {
+      TS_ASSERT(!std::isnan(Ys[j]))
+    }
+  }
+
 private:
   void checkData(MatrixWorkspace_const_sptr outputWS, const size_t nxvalues,
                  const size_t nhist, const bool dist, const bool onAxis1,
@@ -202,8 +238,6 @@ private:
       const auto &y = outputWS->y(i);
       const auto &e = outputWS->e(i);
       for (size_t j = 0; j < nxvalues - 1; ++j) {
-        std::ostringstream os;
-        os << "Bin " << i << "," << j;
         if (onAxis1) {
           if (small_bins) {
 
@@ -224,6 +258,8 @@ private:
           TS_ASSERT_DELTA(y[j], 1.0, epsilon);
           TS_ASSERT_DELTA(e[j], 0.5, epsilon);
         } else {
+          std::ostringstream os;
+          os << "Bin " << i << "," << j;
           TSM_ASSERT_DELTA(os.str(), y[j], 4.0, epsilon);
           TS_ASSERT_DELTA(e[j], 2.0, epsilon);
         }
