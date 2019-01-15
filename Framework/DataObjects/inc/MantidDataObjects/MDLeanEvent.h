@@ -43,91 +43,47 @@ namespace DataObjects {
  *
  * */
 
-
-template <size_t SZ>
-struct MortonIndex {
-};
-
-template <>
-struct MortonIndex<4> {
-  using intType = uint8_t;
-  using type = uint32_t;
-};
-
-template <>
-struct MortonIndex<8> {
-  using intType = uint16_t;
-  using type = uint64_t;
-};
-
-
-template <>
-struct MortonIndex<12> {
-  using intType = uint32_t ;
-  using type = Morton96;
-};
-
-template <>
-struct MortonIndex<16> {
-  using intType = uint32_t;
-  using type = uint128_t;
-};
-
-template <>
-struct MortonIndex<20> {
-  using intType = uint64_t;
-  using type = boost::multiprecision::uint256_t;
-};
-
-template <>
-struct MortonIndex<24> {
-  using intType = uint64_t;
-  using type = boost::multiprecision::uint256_t;
-};
-
-template <>
-struct MortonIndex<28> {
-  using intType = uint64_t;
-  using type = boost::multiprecision::uint256_t;
-};
-
-
-template <>
-struct MortonIndex<32> {
-  using intType = uint64_t;
-  using type = boost::multiprecision::uint256_t;
-};
-
-template <>
-struct MortonIndex<36> {
-  using intType = uint64_t;
-  using type = boost::multiprecision::uint256_t;
-};
-
 template <size_t nd>
 class MDLeanEvent;
 
 template <size_t nd>
 void swap(MDLeanEvent<nd>& first, MDLeanEvent<nd>& second);
 
+/**
+ * Structure to mark the classes, which can switch the
+ * "physical" meaning of the union used in MDLeanEvent
+ * to store coordinates or index. If some class is
+ * derived from EventAccessor, it can call private
+ * retrieve functions throuhg the api described in
+ * MDLeanEvent (struct AccessFor).
+ */
 struct EventAccessor {};
 
 template <size_t nd> class DLLExport MDLeanEvent {
 public:
   template <class Accessor>
+  /**
+   * Internal structure to avoid the direct exposing of retrieve
+   * functions, which change the state of event (switch between
+   * union fields)
+   */
   struct AccessFor {
-    static std::enable_if<std::is_base_of<EventAccessor, Accessor>::value, void>
-        retrieveCoordinates(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) { event.retrieveCoordinates(space); }
-    static std::enable_if<std::is_base_of<EventAccessor, Accessor>::value, void>
-        retrieveIndex(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) { event.retrieveIndex(space); }
+    static typename std::enable_if<std::is_base_of<EventAccessor, Accessor>::value>::type
+    retrieveCoordinates(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) {
+      event.retrieveCoordinates(space);
+    }
+    static typename std::enable_if<std::is_base_of<EventAccessor, Accessor>::value>::type
+    retrieveIndex(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) {
+      event.retrieveIndex(space);
+    }
   };
   template <class Accessor>
   friend struct AccessFor;
   /**
    * Additional index type defenitions
    */
-  using IntT = typename MortonIndex<nd*sizeof(coord_t)>::intType;
-  using MortonT = typename MortonIndex<nd*sizeof(coord_t)>::type;
+  using IntT = typename IndexTypes<nd, coord_t>::IntType;
+  using MortonT = typename IndexTypes<nd, coord_t>::MortonType;
 protected:
   /** The signal (aka weight) from the neutron event.
    * Will be exactly 1.0 unless modified at some point.

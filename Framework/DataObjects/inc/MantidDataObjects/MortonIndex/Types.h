@@ -26,6 +26,11 @@ using AffineND = Eigen::Transform<CoordT, static_cast<int>(ND), Eigen::Affine>;
 
 template <size_t ND> using BinIndices = Eigen::Matrix<size_t, 1, static_cast<int>(ND)>;
 
+
+/**
+ * This class implements the structure of size 96bit, that can be used
+ * as Morton index.
+ */
 #pragma pack(push ,1)
 struct Morton96 {
   uint64_t lower;
@@ -135,4 +140,77 @@ inline std::ostream &operator<<(std::ostream &os, const Morton96 &morton96) {
   return os;
 }
 
+
+
+/**
+ * This structure binds the size of accesible memory to store
+ * the Morton index to the Morton index type. Typically this
+ * size is number_of_dimensions * sizeof(coordinate_type)
+ * @tparam SZ :: the size of accesible memory.
+ */
+template <size_t SZ>
+struct MortonIndex {
+  using type = boost::multiprecision::uint256_t;
+};
+
+template<>
+struct MortonIndex<1> {
+  using type = uint8_t;
+};
+
+template<>
+struct MortonIndex<2> {
+  using type = uint16_t;
+};
+
+template<>
+struct MortonIndex<4> {
+  using type = uint32_t;
+};
+
+template<>
+struct MortonIndex<8> {
+  using type = uint64_t;
+};
+
+template<>
+struct MortonIndex<12> {
+  using type = Morton96;
+};
+
+template<>
+struct MortonIndex<16> {
+  using type = uint128_t;
+};
+
+/**
+ * This structure binds floating point types to
+ * the unsigned integer types of the same width
+ * @tparam FP :: floating point type.
+ */
+template <typename FP>
+struct UnderlyingInt {};
+
+template <>
+struct UnderlyingInt<float> {
+  using type = uint32_t;
+};
+
+template <>
+struct UnderlyingInt<double> {
+  using type = uint64_t;
+};
+
+/**
+ * This structure determines Morton index type and
+ * underlying unsigned integer type for the floating
+ * point coordinate type and number of dimensions
+ * @tparam ND :: number of dimensions
+ * @tparam FP :: floating point type
+ */
+template <size_t ND, typename FP>
+struct IndexTypes {
+  using MortonType = typename MortonIndex<ND*sizeof(FP)>::type;
+  using IntType = typename UnderlyingInt<FP>::type;
+};
 #endif // MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
