@@ -101,9 +101,8 @@ public:
     for (auto &peak : ws->getPeaks()) {
       const V3D mnp = peak.getIntMNP();
       V3D mnpNew = mnp;
-      srand(0);
       if (std::abs(mnp[0]) == 1)
-        mnpNew[1] = rand() % 2;
+        mnpNew[1] = 1;
       peak.setIntMNP(mnpNew);
     }
     FindUBUsingIndexedPeaks alg2;
