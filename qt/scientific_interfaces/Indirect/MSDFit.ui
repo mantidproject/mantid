@@ -32,6 +32,9 @@
         <layout class="QHBoxLayout" name="loPlotArea" stretch="1,1">
          <item>
           <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
+           <property name="allowedAreas">
+            <set>Qt::NoDockWidgetArea</set>
+           </property>
            <widget class="QWidget" name="dockWidgetContents"/>
           </widget>
          </item>

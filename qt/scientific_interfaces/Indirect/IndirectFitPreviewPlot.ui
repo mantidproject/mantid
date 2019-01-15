@@ -25,6 +25,9 @@
      <property name="features">
       <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
      </property>
+     <property name="allowedAreas">
+      <set>Qt::NoDockWidgetArea</set>
+     </property>
      <property name="windowTitle">
       <string>Mini-plots</string>
      </property>
