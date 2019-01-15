@@ -301,7 +301,7 @@ class TableIndexModel(object):
     def sample_shape(self, value):
         try:
             self._sample_shape_model = SampleShapeColumnModel(value)
-        except ValueError as e:
+        except ValueError:
             pass
 
     def update_attribute(self, attribute_name, value):
