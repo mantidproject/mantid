@@ -134,9 +134,7 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
 
   for (size_t i = 0; i < interpolatedWorkspaces.size(); ++i) {
     auto &ws = interpolatedWorkspaces[i];
-    outWS->setSharedX(i, ws->sharedX(0));
-    outWS->setSharedY(i, ws->sharedY(0));
-    outWS->setSharedE(i, ws->sharedE(0));
+    outWS->setHistogram(i, ws->histogram(0));
     axis1->setLabel(i, labels[i]);
   }
 

@@ -254,7 +254,7 @@ private:
     ws->mutableX(0) = xValues.toVector();
     ws->mutableY(0) = yValues.toVector();
     ws->mutableY(0) += bg;
-    ws->mutableE(0) = std::vector<double>(n, 1.0);
+    ws->mutableE(0) = 1.0;
     WorkspaceCreationHelper::addNoise(ws, 0, -0.5, 0.5);
 
     ws->getAxis(0)->setUnit(unit);

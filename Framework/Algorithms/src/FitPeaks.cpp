@@ -2011,17 +2011,8 @@ void FitPeaks::generateCalculatedPeaksWS() {
     return;
   }
 
-  // create a wokspace with same number of input matrix workspace
+  // create a wokspace with same size as in the input matrix workspace
   m_fittedPeakWS = create<Workspace2D>(*m_inputMatrixWS);
-  for (size_t iws = 0; iws < m_fittedPeakWS->getNumberHistograms(); ++iws) {
-    auto &out_vecx = m_fittedPeakWS->mutableX(iws);
-    const auto &in_vecx = m_inputMatrixWS->x(iws);
-    for (size_t j = 0; j < out_vecx.size(); ++j) {
-      out_vecx[j] = in_vecx[j];
-    }
-  }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
