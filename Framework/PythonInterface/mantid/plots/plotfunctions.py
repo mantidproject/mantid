@@ -405,6 +405,33 @@ def _skimage_version():
     return LooseVersion(skimage.__version__) >= LooseVersion('1.4.0')
 
 
+def _get_indices(new_lim, dim, extent):
+    """
+    Get pixel indices associated with new_lim
+    """
+    pmin = int(numpy.floor(float(dim) / (extent[1] - extent[0]) * (new_lim[0] - extent[0])))
+    pmax = int(numpy.ceil(float(dim) / (extent[1] - extent[0]) * (new_lim[1] - extent[0])))
+    pmin = max(0, pmin)
+    pmax = min(pmax, dim)
+    if pmax == pmin:
+        if pmax + 1 < dim:
+            pmax = pmax + 1
+        elif 0 < pmin - 1:
+            pmin = pmin - 1
+        else:
+            raise ValueError('Cannot calculate indices.')
+    return pmin, pmax
+
+
+def _get_extents(pmin, pmax, dim, extent):
+    """
+    Get extents associated with pixel indices pmin and pmax.
+    """
+    x0 = extent[0] + pmin / dim * (extent[1] - extent[0])
+    x1 = extent[0] + pmax / dim * (extent[1] - extent[0])
+    return x0, x1
+
+
 class ScalingAxesImage(mimage.AxesImage):
     def __init__(self, ax,
                  cmap=None,
@@ -453,14 +480,14 @@ class ScalingAxesImage(mimage.AxesImage):
     def _update_extent(self, extent):
         """
         extent is data axes (left, right, bottom, top) for making image plots
-        This updates ax.dataLim, and, if autoscaling, sets viewLim
-        to tightly fit the image, regardless of dataLim.  Autoscaling
-        state is not changed, so following this with ax.autoscale_view
-        will redo the autoscaling in accord with dataLim.
+
+        reimplements AxesImage::set_extent to avoid recursively calling `xlim_updated` or `ylim_updated`
         """
         self._extent = xmin, xmax, ymin, ymax = extent
         corners = (xmin, ymin), (xmax, ymax)
         self.axes.update_datalim(corners)
+        # sticky_edges added in v2.0
+        # https://github.com/matplotlib/matplotlib/pull/7476
         from distutils.version import LooseVersion
         if LooseVersion(matplotlib.__version__) >= LooseVersion('2.0.0'):
             self.sticky_edges.x[:] = [xmin, xmax]
@@ -469,38 +496,19 @@ class ScalingAxesImage(mimage.AxesImage):
 
 
     def _limits_changed(self, ax):
+        """
+        Callback to resample the original data when zooming in.
+        """
         dims = self.unsampled_data.shape
         new_xlim = ax.get_xlim()
+        pxmin, pxmax = _get_indices(new_xlim, dims[1], self.unsampled_extent[0:2])
         new_ylim = ax.get_ylim()
-        pxmin = int(numpy.floor(float(dims[1]) / (self.unsampled_extent[1] - self.unsampled_extent[0]) * (new_xlim[0] - self.unsampled_extent[0])))
-        pxmax = int(numpy.ceil(float(dims[1]) / (self.unsampled_extent[1] - self.unsampled_extent[0]) * (new_xlim[1] - self.unsampled_extent[0])))
-        pxmin = max(0, pxmin)
-        pxmax = min(pxmax, dims[1])
-        if pxmax == pxmin:
-            if pxmax + 1 < dims[1]:
-                pxmax = pxmax + 1
-            elif 0 < pxmin - 1:
-                pxmin = pxmin - 1
-            else:
-                raise ValueError('Cannot calculate x indices.') 
-        pymin = int(numpy.floor(float(dims[0]) / (self.unsampled_extent[3] - self.unsampled_extent[2]) * (new_ylim[0] - self.unsampled_extent[2])))
-        pymax = int(numpy.ceil(float(dims[0]) / (self.unsampled_extent[3] - self.unsampled_extent[2]) * (new_ylim[1] - self.unsampled_extent[2])))
-        pymin = max(0, pymin)
-        pymax = min(pymax, dims[0])
-        if pymax == pymin:
-            if pymax + 1 < dims[0]:
-                pymax = pymax + 1
-            elif 0 < pymin - 1:
-                pymin = pymin - 1
-            else:
-                raise ValueError('Cannot calculate y indices.') 
+        pymin, pymax = _get_indices(new_ylim, dims[0], self.unsampled_extent[2:4])
         cropped_data = self.unsampled_data[pymin:pymax, pxmin:pxmax]
         self.set_data(cropped_data, set_unsampled_data = False)
-        x0 = self.unsampled_extent[0] + pxmin / dims[1] * (self.unsampled_extent[1] - self.unsampled_extent[0]) 
-        x1 = self.unsampled_extent[0] + pxmax / dims[1] * (self.unsampled_extent[1] - self.unsampled_extent[0]) 
+        x0, x1 = _get_extents(pxmin, pxmax, dims[1], self.unsampled_extent[0:2])
         ax.set_xlim(x0, x1, emit = False)
-        y0 = self.unsampled_extent[2] + pymin / dims[0] * (self.unsampled_extent[3] - self.unsampled_extent[2])
-        y1 = self.unsampled_extent[2] + pymax / dims[0] * (self.unsampled_extent[3] - self.unsampled_extent[2])
+        y0, y1 = _get_extents(pymin, pymax, dims[0], self.unsampled_extent[2:4])
         ax.set_ylim(y0, y1, emit = False)
         self._update_extent((x0, x1, y0, y1))
 
