@@ -53,9 +53,9 @@ void swap(MDLeanEvent<nd>& first, MDLeanEvent<nd>& second);
  * Structure to mark the classes, which can switch the
  * "physical" meaning of the union used in MDLeanEvent
  * to store coordinates or index. If some class is
- * derived from EventAccessor, it can call private
- * retrieve functions throuhg the api described in
- * MDLeanEvent (struct AccessFor).
+ * defines the type EventAccessType = EventAccessor,
+ * it can call private retrieve functions throuhg the
+ * api described in MDLeanEvent (struct AccessFor).
  */
 struct EventAccessor {};
 
@@ -68,11 +68,11 @@ public:
    * union fields)
    */
   struct AccessFor {
-    static typename std::enable_if<std::is_base_of<EventAccessor, Accessor>::value>::type
+    static typename std::enable_if<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>::type
     retrieveCoordinates(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) {
       event.retrieveCoordinates(space);
     }
-    static typename std::enable_if<std::is_base_of<EventAccessor, Accessor>::value>::type
+    static typename std::enable_if<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>::type
     retrieveIndex(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) {
       event.retrieveIndex(space);
     }

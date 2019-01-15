@@ -27,7 +27,7 @@ namespace MDAlgorithms {
  * the ConvToMDEventsWS is in using the spatial index (Morton
  * numbers) for speeding up the procedure.
  */
-class ConvToMDEventsWSIndexing : public ConvToMDEventsWS, public DataObjects::EventAccessor {
+class ConvToMDEventsWSIndexing : public ConvToMDEventsWS{
   enum MD_EVENT_TYPE {
     LEAN,
     REGULAR,
@@ -207,7 +207,8 @@ private:
       return MDEventType<ND>(sig, err, run_index, det_id, coord);
     }
   };
-
+public:
+  using EventAccessType = DataObjects::EventAccessor;
 };
 
 /*-------------------------------definitions-------------------------------------*/
