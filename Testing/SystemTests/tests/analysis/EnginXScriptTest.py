@@ -105,7 +105,7 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         simple.mtd.clear()
-        _tear_down_focus()
+        _try_delete(focus_directory)
 
 
 class FocusCropped(systemtesting.MantidSystemTest):
@@ -121,7 +121,7 @@ class FocusCropped(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         simple.mtd.clear()
-        _tear_down_focus()
+        _try_delete(focus_directory)
 
 
 class FocusTextureMode(systemtesting.MantidSystemTest):
@@ -150,7 +150,7 @@ class FocusTextureMode(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         simple.mtd.clear()
-        _tear_down_focus()
+        _try_delete(focus_directory)
 
 
 def _try_delete(path):
@@ -173,6 +173,3 @@ def _setup_focus():
     test.create_calibration(cropped="spectra", spectra="1-20")
     simple.mtd.clear()
 
-
-def _tear_down_focus():
-        _try_delete(focus_directory)
