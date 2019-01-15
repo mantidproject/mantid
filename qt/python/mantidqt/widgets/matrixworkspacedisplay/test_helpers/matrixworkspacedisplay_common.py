@@ -104,6 +104,10 @@ class MockSpectrum:
 class MockWorkspace:
     TEST_NAME = "THISISAtestWORKSPACE"
 
+    NUMBER_OF_ROWS_AND_COLUMNS = 5
+    COLS = NUMBER_OF_ROWS_AND_COLUMNS
+    ROWS = COLS
+
     @staticmethod
     def _return_MockSpectrumInfo():
         return MockSpectrumInfo()
@@ -136,16 +140,17 @@ class MockWorkspace:
 
         self.setCell = Mock()
 
-        self.name = None
+        self.name = Mock(return_value="MOCK_WORKSPACE_TEST")
 
-    def rowCount(self):
-        pass
+        self._column_names = []
+        for i in range(self.COLS):
+            self._column_names.append("col{0}".format(i))
 
-    def columnCount(self):
-        pass
+        self.getColumnNames = Mock(return_value=self._column_names)
+        self.column_count = self.COLS
+        self.columnCount = Mock(return_value=self.column_count)
 
-    def getColumnNames(self):
-        pass
+        self.row_count = self.ROWS
+        self.rowCount = Mock(return_value=self.row_count)
 
-    def column(self, index):
-        pass
+        self.column = Mock(return_value=[1] * self.row_count)

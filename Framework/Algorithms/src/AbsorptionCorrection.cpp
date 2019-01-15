@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AbsorptionCorrection.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -110,7 +111,7 @@ void AbsorptionCorrection::exec() {
   retrieveBaseProperties();
 
   // Create the output workspace
-  MatrixWorkspace_sptr correctionFactors = create<MatrixWorkspace>(*m_inputWS);
+  MatrixWorkspace_sptr correctionFactors = create<HistoWorkspace>(*m_inputWS);
   correctionFactors->setDistribution(
       true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing

@@ -70,6 +70,7 @@ Bugfixes
 - The x-axis labels in the output plots for MSDFit are now correct.
 - An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading
   a reduced file.
+- The output workspace ending with _Results now contains workspaces with corrected names which detail the fit functions used.
 
 
 Data Corrections Interface
