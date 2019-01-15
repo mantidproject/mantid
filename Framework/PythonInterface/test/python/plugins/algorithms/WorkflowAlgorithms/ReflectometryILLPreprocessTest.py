@@ -174,17 +174,17 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i in lowerBkgIndices:
-                numpy.testing.assert_equal(ys, [0.0] * len(lowerBkgIndices))
+                numpy.testing.assert_equal(ys, [0.0] * outWS.blocksize())
             elif i in lowerExclusionIndices:
-                numpy.testing.assert_equal(ys, [-1005.0] * len(lowerExclusionIndices))
+                numpy.testing.assert_equal(ys, [-1005.0] * outWS.blocksize())
             elif i in foregroundIndices:
-                numpy.testing.assert_equal(ys, [995.0] * len(foregroundIndices))
+                numpy.testing.assert_equal(ys, [995.0] * outWS.blocksize())
             elif i in upperExclusionIndices:
-                numpy.testing.assert_equal(ys, [-1005.0] * len(upperExclusionIndices))
+                numpy.testing.assert_equal(ys, [-1005.0] * outWS.blocksize())
             elif i in upperBkgIndices:
-                numpy.testing.assert_equal(ys, [0.0] * len(upperBkgIndices))
+                numpy.testing.assert_equal(ys, [0.0] * outWS.blocksize())
             else:
-                numpy.testing.assert_equal(ys, [-5.0])
+                numpy.testing.assert_equal(ys, [-5.0] * outWS.blocksize())
 
     def testAsymmetricForegroundRanges(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
