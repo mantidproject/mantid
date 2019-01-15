@@ -38,24 +38,20 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS{
   void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) override;
 
 private:
+  //Returns number of workers for parallel parts
+  int numWorkers() {
+    int nThreads = (this->m_NumThreads == 0); // 1 thread if 0
+    if(!nThreads)
+      nThreads = this->m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : this->m_NumThreads;
+    return nThreads;
+  }
+
   template <size_t ND>
   MD_EVENT_TYPE mdEventType();
 
   // Wrapper to have the proper functions, for Nd in range 2 to maxDim
   template <size_t maxDim>
-  void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) {
-    auto ndim = m_OutWSWrapper->nDimensions();
-    if(ndim < 2)
-      throw std::runtime_error("Can't convert to MD workspace with dims " + std::to_string(ndim) + "less than 2");
-    if(ndim > maxDim)
-      return;
-    if(ndim == maxDim) {
-      appendEvents<maxDim>(pProgress, bc);
-      return;
-    }
-    else
-      appendEventsFromInputWS<maxDim - 1>(pProgress, bc);
-  }
+  void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
 
   // Wrapper for ToF events of different types, number of dims, MD event type
   template<typename EventType, size_t ND, template <size_t> class MDEventType>
@@ -63,52 +59,23 @@ private:
 
   // Specialization for ToF events of different types
   template<size_t ND, template <size_t> class MDEventType>
-  void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
-    switch (m_EventWS->getSpectrum(0).getEventType()) {
-    case Mantid::API::TOF:
-      appendEvents<Mantid::Types::Event::TofEvent, ND, MDEventType>(pProgress, bc);
-      break;
-    case Mantid::API::WEIGHTED:
-      appendEvents<Mantid::DataObjects::WeightedEvent, ND, MDEventType>(pProgress, bc);
-      break;
-    case Mantid::API::WEIGHTED_NOTIME:
-      appendEvents<Mantid::DataObjects::WeightedEventNoTime, ND, MDEventType>(pProgress, bc);
-      break;
-    default:
-      throw std::runtime_error("Events in event workspace had an unexpected data type!");
-    }
-  }
+  void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc);
 
   // Specilization for MD event types
   template <size_t ND>
-  void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
-    switch(mdEventType<ND>()) {
-    case LEAN:
-      appendEvents<ND, DataObjects::MDLeanEvent>(pProgress, bc);
-      break;
-    case REGULAR:
-      appendEvents<ND, DataObjects::MDEvent>(pProgress, bc);
-      break;
-    default:
-      throw std::runtime_error("MD events in md event workspace had an unexpected data type!");
-    }
-  }
+  void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc);
 
   template<typename EventType, size_t ND, template <size_t> class MDEventType>
   std::vector<MDEventType<ND>> convertEvents();
 
   template <size_t ND, template <size_t> class MDEventType>
   struct MDEventMaker {
-    static MDEventType<ND> makeMDEvent(const double &sig,
-                                       const double &err,
+    static MDEventType<ND> makeMDEvent(const double &sig, const double &err,
                                        const uint16_t &run_index,
-                                       const uint32_t &det_id,
-                                       coord_t *coord) {
+                                       const uint32_t &det_id, coord_t *coord) {
       return MDEventType<ND>(sig, err, run_index, det_id, coord);
     }
   };
-public:
-  using EventAccessType = DataObjects::EventAccessor;
 };
 
 /*-------------------------------definitions-------------------------------------*/
@@ -116,13 +83,8 @@ public:
 
 template<typename EventType, size_t ND, template <size_t> class MDEventType>
 std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
-  size_t numEvents{0};
-  for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra; ++workspaceIndex) {
-    const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
-    numEvents += el.getNumberEvents();
-  }
   std::vector<MDEventType<ND>> mdEvents;
-  mdEvents.reserve(numEvents);
+  mdEvents.reserve(m_EventWS->getNumberEvents());
 
   const auto& pws{m_OutWSWrapper->pWorkspace()};
   std::array<std::pair<coord_t, coord_t >, ND> bounds;
@@ -193,7 +155,6 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
                       mdEventsForSpectrum.end());
     }
   }
-
   return mdEvents;
 }
 
@@ -202,7 +163,7 @@ template<typename EventType, size_t ND, template <size_t> class MDEventType>
 void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
   bc->clearBoxesCounter(1);
   bc->clearGridBoxesCounter(0);
-  pProgress->resetNumSteps(4, 0, 1);
+  pProgress->resetNumSteps(2, 0, 1);
 
   std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
 
@@ -215,19 +176,67 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
 
   pProgress->report(0);
 
-  int nThreads = (this->m_NumThreads == 0); // 1 thread if 0
-  if(!nThreads)
-    nThreads = this->m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : this->m_NumThreads;
-
+  auto nThreads = numWorkers();
   using EventDistributor = MDEventTreeBuilder<ND, MDEventType, typename std::vector<MDEventType<ND>>::iterator>;
   EventDistributor distributor(nThreads, mdEvents.size() / nThreads/ 10, bc, space);
 
   auto root = distributor.distribute(mdEvents);
   m_OutWSWrapper->pWorkspace()->setBox(root);
-  pProgress->report(3);
   root->calculateGridCaches();
+
+  pProgress->report(1);
 }
 
+
+// Specialization for ToF events of different types
+template<size_t ND, template <size_t> class MDEventType>
+void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+  switch (m_EventWS->getSpectrum(0).getEventType()) {
+  case Mantid::API::TOF:
+    appendEvents<Mantid::Types::Event::TofEvent, ND, MDEventType>(pProgress, bc);
+    break;
+  case Mantid::API::WEIGHTED:
+    appendEvents<Mantid::DataObjects::WeightedEvent, ND, MDEventType>(pProgress, bc);
+    break;
+  case Mantid::API::WEIGHTED_NOTIME:
+    appendEvents<Mantid::DataObjects::WeightedEventNoTime, ND, MDEventType>(pProgress, bc);
+    break;
+  default:
+    throw std::runtime_error("Events in event workspace had an unexpected data type!");
+  }
+}
+
+
+// Specilization for MD event types
+template <size_t ND>
+void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+  switch(mdEventType<ND>()) {
+  case LEAN:
+    appendEvents<ND, DataObjects::MDLeanEvent>(pProgress, bc);
+    break;
+  case REGULAR:
+    appendEvents<ND, DataObjects::MDEvent>(pProgress, bc);
+    break;
+  default:
+    throw std::runtime_error("MD events in md event workspace had an unexpected data type!");
+  }
+}
+
+// Wrapper to have the proper functions, for Nd in range 2 to maxDim
+template <size_t maxDim>
+void ConvToMDEventsWSIndexing::appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+  auto ndim = m_OutWSWrapper->nDimensions();
+  if(ndim < 2)
+    throw std::runtime_error("Can't convert to MD workspace with dims " + std::to_string(ndim) + "less than 2");
+  if(ndim > maxDim)
+    return;
+  if(ndim == maxDim) {
+    appendEvents<maxDim>(pProgress, bc);
+    return;
+  }
+  else
+    appendEventsFromInputWS<maxDim - 1>(pProgress, bc);
+}
 
 
 template <size_t ND>
@@ -258,9 +267,6 @@ ConvToMDEventsWSIndexing::MD_EVENT_TYPE ConvToMDEventsWSIndexing::mdEventType() 
     return LEAN;
   return NONE;
 }
-
-
-
 
 } // namespace MDAlgorithms
 } // namespace Mantid

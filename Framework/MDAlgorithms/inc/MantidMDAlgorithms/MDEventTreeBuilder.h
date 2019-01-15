@@ -32,9 +32,10 @@ class MDEventTreeBuilder {
   using BoxBase = DataObjects::MDBoxBase<MDEvent, ND>;
   using Box = DataObjects::MDBox<MDEvent, ND>;
   using GridBox = DataObjects::MDGridBox<MDEvent, ND>;
+  using EventDistributor = MDEventTreeBuilder<ND, MDEventType, EventIterator>;
 public:
   using EventAccessType = DataObjects::EventAccessor;
-  using IndexCoordinateSwitcher = typename MDEvent::template AccessFor<MDEventTreeBuilder<ND, MDEventType, EventIterator>>;
+  using IndexCoordinateSwitcher = typename MDEvent::template AccessFor<EventDistributor>;
   enum WORKER_TYPE {
     MASTER,
     SLAVE
@@ -61,7 +62,7 @@ public:
 private:
   void retrieveIndex(std::vector<MDEventType<ND>>& mdEvents, const MDSpaceBounds<ND>& space);
   void sortEvents(std::vector<MDEventType<ND>>& mdEvents);
-  void doDistributeEvents(Task &tsk);
+  BoxBase* doDistributeEvents(std::vector<MDEventType<ND>>& mdEvents);
   void distributeEvents(Task& tsk, const WORKER_TYPE& wtp);
   void pushTask(Task&& tsk);
   std::unique_ptr<Task> popTask();
@@ -73,7 +74,7 @@ private:
   std::mutex m_mutex;
   std::atomic<bool> m_masterFinished;
 
-  const MDSpaceBounds<ND> m_space;
+  const MDSpaceBounds<ND>& m_space;
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> m_extents;
   const API::BoxController_sptr &m_bc;
 
@@ -113,36 +114,38 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::
 distribute(std::vector<MDEvent> &mdEvents) {
   retrieveIndex(mdEvents, m_space);
   sortEvents(mdEvents);
-
-
-  if(mdEvents.size() <= m_bc->getSplitThreshold()) {
-    m_bc->incBoxesCounter(0);
-    return new DataObjects::MDBox<MDEvent, ND>(m_bc.get(), 0, m_extents, mdEvents.begin(), mdEvents.end());
-  } else {
-    auto root = new DataObjects::MDGridBox<MDEvent, ND>(m_bc.get(), 0, m_extents);
-    Task tsk{root, mdEvents.begin(), mdEvents.end(), m_mortonMin, m_mortonMax, m_bc->getMaxDepth() + 1, 1};
-    doDistributeEvents(tsk);
-    return root;
-  }
-
+  return doDistributeEvents(mdEvents);
 }
 
 template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
-void MDEventTreeBuilder<ND, MDEventType, EventIterator>::
-doDistributeEvents(MDEventTreeBuilder<ND, MDEventType, EventIterator>::Task &tsk) {
-  if(m_numWorkers == 1)
-    distributeEvents(tsk, SLAVE);
-  else {
-    std::vector<std::thread> workers;
-    workers.emplace_back([this, &tsk]() {
-      distributeEvents(tsk, MASTER);
-      m_masterFinished = true;
-      waitAndLaunchSlave();
-    });
-    for(auto i = 1; i < m_numWorkers; ++i)
-      workers.emplace_back(&MDEventTreeBuilder::waitAndLaunchSlave, this);
-    for(auto& worker: workers)
-      worker.join();
+DataObjects::MDBoxBase<MDEventType<ND>, ND>*
+MDEventTreeBuilder<ND, MDEventType, EventIterator>::
+doDistributeEvents(std::vector<MDEventType<ND>>& mdEvents) {
+  if(mdEvents.size() <= m_bc->getSplitThreshold()) {
+    m_bc->incBoxesCounter(0);
+    return new DataObjects::MDBox<MDEvent, ND>(m_bc.get(), 0, m_extents,
+                                               mdEvents.begin(), mdEvents.end());
+  } else {
+    auto root = new DataObjects::MDGridBox<MDEvent, ND>(m_bc.get(), 0, m_extents);
+    Task tsk{root, mdEvents.begin(), mdEvents.end(),
+             m_mortonMin, m_mortonMax,
+             m_bc->getMaxDepth() + 1, 1};
+
+    if(m_numWorkers == 1)
+      distributeEvents(tsk, SLAVE);
+    else {
+      std::vector<std::thread> workers;
+      workers.emplace_back([this, &tsk]() {
+        distributeEvents(tsk, MASTER);
+        m_masterFinished = true;
+        waitAndLaunchSlave();
+      });
+      for(auto i = 1; i < m_numWorkers; ++i)
+        workers.emplace_back(&MDEventTreeBuilder::waitAndLaunchSlave, this);
+      for(auto& worker: workers)
+        worker.join();
+    }
+    return root;
   }
 }
 
@@ -199,6 +202,10 @@ waitAndLaunchSlave() {
   }
 }
 
+/**
+ * Does actual work on creating tasks in MASTER mode and
+ * executing tasks in SLAVE mode
+ */
 template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
 void MDEventTreeBuilder<ND, MDEventType, EventIterator>::
 distributeEvents(Task& tsk, const WORKER_TYPE& wtp) {
