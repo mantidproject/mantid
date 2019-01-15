@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,redefined-builtin
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
@@ -261,15 +267,13 @@ class BayesQuasi(PythonAlgorithm):
                 nd, xout, yout, eout, yfit, yprob = QLr.qlres(numb, Xv, Yv, Ev, reals, fitOp,
                                                               Xdat, Xb, Yb, Wy, We, dtn, xsc,
                                                               wrks, wrkr, lwrk)
-                logger.information(' Log(prob) : %f %f %f %f' % 
-                                   (yprob[0], yprob[1], yprob[2], yprob[3]))
+                logger.information(' Log(prob) : %f %f %f %f' % (yprob[0], yprob[1], yprob[2], yprob[3]))
             elif prog == 'QLd':
                 workflow_prog.report('Processing Sample number %i' % spectrum)
                 nd, xout, yout, eout, yfit, yprob = QLd.qldata(numb, Xv, Yv, Ev, reals, fitOp,
                                                                Xdat, Xb, Yb, Eb, Wy, We,
                                                                wrks, wrkr, lwrk)
-                logger.information(' Log(prob) : %f %f %f %f' % 
-                                   (yprob[0], yprob[1], yprob[2], yprob[3]))
+                logger.information(' Log(prob) : %f %f %f %f' % (yprob[0], yprob[1], yprob[2], yprob[3]))
             elif prog == 'QSe':
                 workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
                 nd, xout, yout, eout, yfit, yprob = Qse.qlstexp(numb, Xv, Yv, Ev, reals, fitOp,
