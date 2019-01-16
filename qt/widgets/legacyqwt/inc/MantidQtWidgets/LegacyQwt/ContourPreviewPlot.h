@@ -55,8 +55,8 @@ public:
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr const workspace);
   SafeQwtPlot *getPlot2D();
 
-  void setPlotVisible(bool visible);
-  void setColourBarVisible(bool visible);
+  void setPlotVisible(bool const &visible);
+  void setColourBarVisible(bool const &visible);
 
   bool isPlotVisible() const;
   bool isColourBarVisible() const;
@@ -72,7 +72,7 @@ protected:
 private slots:
   void handleColourRangeChanged();
   void handleLoadColourMap();
-  void handleSetTransparentZeros(bool transparent);
+  void handleSetTransparentZeros(bool const &transparent);
 
 private:
   void setupColourBarAndPlot();

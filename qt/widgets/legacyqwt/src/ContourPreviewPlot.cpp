@@ -127,7 +127,7 @@ SafeQwtPlot *ContourPreviewPlot::getPlot2D() { return m_uiForm.plot2D; }
  * Set the plot to be visible or hidden
  * @param visible :: false to hide the plot
  */
-void ContourPreviewPlot::setPlotVisible(bool visible) {
+void ContourPreviewPlot::setPlotVisible(bool const &visible) {
   m_uiForm.plot2D->setVisible(visible);
 }
 
@@ -135,7 +135,7 @@ void ContourPreviewPlot::setPlotVisible(bool visible) {
  * Set the colour bar to be visible or hidden
  * @param visible :: false to hide the colour bar
  */
-void ContourPreviewPlot::setColourBarVisible(bool visible) {
+void ContourPreviewPlot::setColourBarVisible(bool const &visible) {
   m_uiForm.colourBar->setVisible(visible);
 }
 
@@ -190,7 +190,7 @@ void ContourPreviewPlot::handleLoadColourMap() {
  * Set whether to display 0 signal as "transparent" colour.
  * @param transparent :: true if you want zeros to be transparent.
  */
-void ContourPreviewPlot::handleSetTransparentZeros(bool transparent) {
+void ContourPreviewPlot::handleSetTransparentZeros(bool const &transparent) {
   m_data->setZerosAsNan(transparent);
   this->updateDisplay();
 }
