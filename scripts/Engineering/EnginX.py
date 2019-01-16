@@ -54,9 +54,8 @@ def run(calibration_directory, calibration_general, ceria_run, crop_name, crop_o
         create_vanadium(van_run, calibration_directory)
 
     cal_endings = {"banks": ["all_banks", "bank_{}".format(crop_on)],
-                   "sprectra": ["all_banks", "bank_{}".format(crop_name)],
+                   "spectra": ["all_banks", "bank_{}".format(crop_name)],
                    None: ["all_banks", "bank_North", "bank_South"]}
-
     expected_cals = ["ENGINX_{0}_{1}_{2}.prm".format(van_run, ceria_run, i) for i in cal_endings.get(cropped)]
     expected_cals_present = [os.path.isfile(os.path.join(calibration_directory, cal_file)) for cal_file in
                              expected_cals]
@@ -70,7 +69,8 @@ def run(calibration_directory, calibration_general, ceria_run, crop_name, crop_o
         time_period = kwargs.get("time_period", None)
         pre_process(params, time_period, focus_run)
 
-    focus(focus_run, grouping_file, crop_on, calibration_directory, focus_directory, focus_general, cropped, van_run)
+    if focus_run is not None:
+        focus(focus_run, grouping_file, crop_on, calibration_directory, focus_directory, focus_general, cropped, van_run)
 
 
 # create the vanadium run for the run number set of the object

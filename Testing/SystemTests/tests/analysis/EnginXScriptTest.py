@@ -11,7 +11,7 @@ import systemtesting
 import shutil
 import mantid.simpleapi as simple
 from mantid import config
-from Engineering.EnginX import EnginX
+from Engineering.EnginX import main
 
 DIRS = config['datasearch.directories'].split(';')
 
@@ -24,9 +24,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         os.makedirs(cal_directory)
-        test = EnginX(user="test", vanadium_run="236516",
-                      directory=cal_directory)
-        test.create_vanadium()
+        main(vanadium_run="236516", user="test", focus_run=None, force_vanadium=True)
 
     def validate(self):
         return "eng_vanadium_integration", "engggui_vanadium_integration.nxs"
@@ -40,10 +38,7 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         os.makedirs(cal_directory)
-        test = EnginX(user="test", vanadium_run="236516",
-                      directory=cal_directory)
-        test.create_vanadium()
-        test.create_calibration()
+        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory)
 
     def validate(self):
         return ("engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
@@ -59,10 +54,8 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         os.makedirs(cal_directory)
-        test = EnginX(user="test", vanadium_run="236516",
-                      directory=cal_directory)
-        test.create_vanadium()
-        test.create_calibration(cropped="spectra", spectra="1-20")
+        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory,
+             crop_type="spectra", crop_on="1-20")
 
     def validate(self):
         return ("cropped", "engggui_calibration_bank_cropped.nxs",
@@ -73,84 +66,84 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
         _try_delete(cal_directory)
 
 
-class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        os.makedirs(cal_directory)
-        test = EnginX(user="test", vanadium_run="236516",
-                      directory=cal_directory)
-        test.create_vanadium()
-        test.create_calibration(cropped="banks", bank="South")
-
-    def validate(self):
-        return ("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
-                "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs")
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(cal_directory)
-
-
-class FocusBothBanks(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        _setup_focus()
-        test = EnginX(user="test", vanadium_run="236516",
-                      directory=focus_directory)
-        test.focus(run_number="299080")
-
-    def validate(self):
-        return("engg_focus_output_bank_1", "enggui_focusing_output_ws_bank_1.nxs",
-               "engg_focus_output_bank_2", "enggui_focusing_output_ws_bank_2.nxs")
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(focus_directory)
-
-
-class FocusCropped(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        _setup_focus()
-        test = EnginX(user="test", vanadium_run="236516",
-                      directory=focus_directory)
-        test.focus(run_number="299080", cropped="spectra", spectra="1-20")
-
-    def validate(self):
-        return "engg_focus_output", "enggui_focusing_output_ws_bank_cropped.nxs"
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(focus_directory)
-
-
-class FocusTextureMode(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        _setup_focus()
-        csv_file = os.path.join(root_directory, "EnginX.csv")
-        location = os.path.join(focus_directory, "User", "test", "Calibration")
-        shutil.copy2(csv_file, location)
-        csv_file = os.path.join(location, "EnginX.csv")
-        test = EnginX(user="test", vanadium_run="236516",
-                      directory=focus_directory)
-        test.focus(run_number="299080", grouping_file=csv_file)
-        output = "engg_focusing_output_ws_texture_bank_{}{}"
-        group = ""
-
-        for i in range(1, 11):
-            group = group+output.format(i, ",")
-        simple.GroupWorkspaces(InputWorkspaces=group, OutputWorkspace="test")
-
-    def validate(self):
-        outputlist=["engg_focusing_output_ws_texture_bank_{}".format(i) for i in range(1, 11)]
-        filelist=["enggui_texture_Bank_{}.nxs".format(i) for i in range(1, 11)]
-        validation_list = [x for t in zip(*[outputlist, filelist])for x in t]
-        return validation_list
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(focus_directory)
+# class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
+#
+#     def runTest(self):
+#         os.makedirs(cal_directory)
+#         test = EnginX(user="test", vanadium_run="236516",
+#                       directory=cal_directory)
+#         test.create_vanadium()
+#         test.create_calibration(cropped="banks", bank="South")
+#
+#     def validate(self):
+#         return ("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
+#                 "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs")
+#
+#     def cleanup(self):
+#         simple.mtd.clear()
+#         _try_delete(cal_directory)
+#
+#
+# class FocusBothBanks(systemtesting.MantidSystemTest):
+#
+#     def runTest(self):
+#         _setup_focus()
+#         test = EnginX(user="test", vanadium_run="236516",
+#                       directory=focus_directory)
+#         test.focus(run_number="299080")
+#
+#     def validate(self):
+#         return("engg_focus_output_bank_1", "enggui_focusing_output_ws_bank_1.nxs",
+#                "engg_focus_output_bank_2", "enggui_focusing_output_ws_bank_2.nxs")
+#
+#     def cleanup(self):
+#         simple.mtd.clear()
+#         _try_delete(focus_directory)
+#
+#
+# class FocusCropped(systemtesting.MantidSystemTest):
+#
+#     def runTest(self):
+#         _setup_focus()
+#         test = EnginX(user="test", vanadium_run="236516",
+#                       directory=focus_directory)
+#         test.focus(run_number="299080", cropped="spectra", spectra="1-20")
+#
+#     def validate(self):
+#         return "engg_focus_output", "enggui_focusing_output_ws_bank_cropped.nxs"
+#
+#     def cleanup(self):
+#         simple.mtd.clear()
+#         _try_delete(focus_directory)
+#
+#
+# class FocusTextureMode(systemtesting.MantidSystemTest):
+#
+#     def runTest(self):
+#         _setup_focus()
+#         csv_file = os.path.join(root_directory, "EnginX.csv")
+#         location = os.path.join(focus_directory, "User", "test", "Calibration")
+#         shutil.copy2(csv_file, location)
+#         csv_file = os.path.join(location, "EnginX.csv")
+#         test = EnginX(user="test", vanadium_run="236516",
+#                       directory=focus_directory)
+#         test.focus(run_number="299080", grouping_file=csv_file)
+#         output = "engg_focusing_output_ws_texture_bank_{}{}"
+#         group = ""
+#
+#         for i in range(1, 11):
+#             group = group+output.format(i, ",")
+#         simple.GroupWorkspaces(InputWorkspaces=group, OutputWorkspace="test")
+#
+#     def validate(self):
+#         outputlist=["engg_focusing_output_ws_texture_bank_{}".format(i) for i in range(1, 11)]
+#         filelist=["enggui_texture_Bank_{}.nxs".format(i) for i in range(1, 11)]
+#         validation_list = [x for t in zip(*[outputlist, filelist])for x in t]
+#         return validation_list
+#
+#     def cleanup(self):
+#         simple.mtd.clear()
+#         _try_delete(focus_directory)
 
 
 def _try_delete(path):
@@ -164,11 +157,11 @@ def _try_delete(path):
         print ("Could not delete output file at: ", path)
 
 
-def _setup_focus():
-    os.makedirs(focus_directory)
-    test = EnginX(user="test", vanadium_run="236516",
-                  directory=focus_directory)
-    test.create_vanadium()
-    test.create_calibration()
-    test.create_calibration(cropped="spectra", spectra="1-20")
-    simple.mtd.clear()
+# def _setup_focus():
+#     os.makedirs(focus_directory)
+#     test = EnginX(user="test", vanadium_run="236516",
+#                   directory=focus_directory)
+#     test.create_vanadium()
+#     test.create_calibration()
+#     test.create_calibration(cropped="spectra", spectra="1-20")
+#     simple.mtd.clear()
