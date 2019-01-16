@@ -20,7 +20,7 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
                 "SingleCrystalDiffuseReduction_Flux.nxs",
                 "SingleCrystalDiffuseReduction_UB.mat"]
 
-    def runTest(self):              
+    def runTest(self):
         Load(Filename='CORELLI_29782.nxs', OutputWorkspace='data')
         Load(Filename='SingleCrystalDiffuseReduction_SA.nxs', OutputWorkspace='SolidAngle')
         Load(Filename='SingleCrystalDiffuseReduction_Flux.nxs', OutputWorkspace= 'Flux')
