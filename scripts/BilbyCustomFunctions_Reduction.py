@@ -44,7 +44,7 @@ def read_convert_to_float(array_strings):
 
 ###########################################################################################
 
-def FilesListReduce(filename):
+def files_list_reduce(filename):
     """ Creat array of input reduction settings """
     parameters = []
     with open(filename) as csv_file:
@@ -64,7 +64,7 @@ def FilesListReduce(filename):
 # returns list of numbers to be processed
 
 def evaluate_files_list(numbers):
-    """ Needed for FilesToReduce, see below """
+    """ Needed for files_to_reduce, see below """
 
     expanded = []
     for number in numbers.split(","):
@@ -79,7 +79,7 @@ def evaluate_files_list(numbers):
     #######################################################################################
 
 
-def FilesToReduce(parameters, evaluate_files):
+def files_to_reduce(parameters, evaluate_files):
     """ Create list of the files to reduce """
 
     files_to_reduce = []
@@ -117,7 +117,7 @@ def strip_NaNs(output_workspace, base_output_name):
 # GENERAL #############################################################################
 #######################################################################################
 
-def GetPixelSize():  # reads current IDF and get pixelsize from there
+def get_pixel_size():  # reads current IDF and get pixelsize from there
     """ To get pixel size for Bilby detectors from the Bilby_Definition.xml file """
 
     from mantid.api import ExperimentInfo
@@ -137,7 +137,7 @@ def GetPixelSize():  # reads current IDF and get pixelsize from there
 
 #######################################################################################
 
-def ReadCSV(filename):
+def read_csv(filename):
     """ Read cvs... """
 
     parameters = []
@@ -150,7 +150,7 @@ def ReadCSV(filename):
 
 #######################################################################################
 
-def AttenuationCorrection(att_pos, data_before_May_2016):
+def attenuation_correction(att_pos, data_before_May_2016):
     """ Bilby has four attenuators; before May 2016 there were only two.
      Value of the attenuators are hard coded here and being used for the I(Q) scaling in Q1D """
 
@@ -232,7 +232,7 @@ def wavelengh_slices(wavelength_intervals, binning_wavelength_ini, wav_delta):
 # FOR TUBE ADJUSTMENT #################################################################
 #######################################################################################
 
-def CorrectionTubesShift(ws_to_correct, path_to_shifts_file):
+def correction_tubes_shift(ws_to_correct, path_to_shifts_file):
     """ This function moves each tube and then rear panels as a whole as per numbers recorded in the path_to_shifts_file csv file.
           The values in the file are obtained from fitting of a few data sets collected using different masks.
           It is a very good idea do not change the file. """
@@ -240,28 +240,28 @@ def CorrectionTubesShift(ws_to_correct, path_to_shifts_file):
     shifts = []
     # shall be precisely sevel lines; shifts for rear left, rear right, left, right, top, bottom curtains
     #  [calculated from 296_Cd_lines_setup1 file] + value for symmetrical shift for entire rear panels
-    shifts = ReadCSV(
+    shifts = read_csv(
         path_to_shifts_file)
-    pixelsize = GetPixelSize()
+    pixelsize = get_pixel_size()
 
-    CorrectElementOneStripe("BackDetectorLeft", pixelsize, shifts[0], ws_to_correct)
-    CorrectElementOneStripe("BackDetectorRight", pixelsize, shifts[1], ws_to_correct)
-    CorrectElementOneStripe("CurtainLeft", pixelsize, shifts[2], ws_to_correct)
-    CorrectElementOneStripe("CurtainRight", pixelsize, shifts[3], ws_to_correct)
-    CorrectElementOneStripe("CurtainTop", pixelsize, shifts[4], ws_to_correct)
-    CorrectElementOneStripe("CurtainBottom", pixelsize, shifts[5], ws_to_correct)
-    MoveRearPanels(shifts[6][0], pixelsize, ws_to_correct)
+    correct_element_one_stripe("BackDetectorLeft", pixelsize, shifts[0], ws_to_correct)
+    correct_element_one_stripe("BackDetectorRight", pixelsize, shifts[1], ws_to_correct)
+    correct_element_one_stripe("CurtainLeft", pixelsize, shifts[2], ws_to_correct)
+    correct_element_one_stripe("CurtainRight", pixelsize, shifts[3], ws_to_correct)
+    correct_element_one_stripe("CurtainTop", pixelsize, shifts[4], ws_to_correct)
+    correct_element_one_stripe("CurtainBottom", pixelsize, shifts[5], ws_to_correct)
+    move_rear_panels(shifts[6][0], pixelsize, ws_to_correct)
 
-    CorrectionBasedOnExperiment(ws_to_correct)
+    correction_based_on_experiment(ws_to_correct)
 
     return
 
 
 #######################################################################################
 
-def CorrectElementOneStripe(panel, pixelsize, shift,
-                            ws):  # sutable for one Cd stripe correction and for the stripes on BorAl mask on left curtain
-    """ Technical for CorrectionTubesShift """
+def correct_element_one_stripe(panel, pixelsize, shift,
+                               ws):  # sutable for one Cd stripe correction and for the stripes on BorAl mask on left curtain
+    """ Technical for correction_tubes_shift """
 
     eightpack = ['eight_pack1', 'eight_pack2', 'eight_pack3', 'eight_pack4', 'eight_pack5']
     tube = ['tube1', 'tube2', 'tube3', 'tube4', 'tube5', 'tube6', 'tube7', 'tube8']
@@ -290,9 +290,9 @@ def CorrectElementOneStripe(panel, pixelsize, shift,
 
 #######################################################################################
 
-def MoveRearPanels(shift, pixelsize,
-                   ws):  # moves only rear left and rear right, each on shift; +1 to the right panel to make them symmetrical
-    """ Technical for CorrectionTubesShift """
+def move_rear_panels(shift, pixelsize,
+                     ws):  # moves only rear left and rear right, each on shift; +1 to the right panel to make them symmetrical
+    """ Technical for correction_tubes_shift """
 
     panel = "BackDetectorLeft"
     direction = 1.0
@@ -307,7 +307,7 @@ def MoveRearPanels(shift, pixelsize,
 
 #######################################################################################
 
-def CorrectionBasedOnExperiment(ws_to_correct):
+def correction_based_on_experiment(ws_to_correct):
     """ The function to move curtains, based on fits/analysis of a massive set of AgBeh and liquid crystals data.
           Laser tracker has not picked up these imperfections.
          Added on October, 6th, 2016 """
@@ -324,7 +324,7 @@ def CorrectionBasedOnExperiment(ws_to_correct):
 
 #######################################################################################
 
-def DetShift_before2016(ws_to_correct):
+def det_shift_before_2016(ws_to_correct):
     """ Final detectors' alignement has been done using laser tracker in January, 2016.
      To correct data collected before that, some extra shift hardcoded here, shall be applied """
 
@@ -338,6 +338,6 @@ def DetShift_before2016(ws_to_correct):
     MoveInstrumentComponent(ws_to_correct, 'CurtainTop', X=0, Y=shift_curtainu, Z=0)
     MoveInstrumentComponent(ws_to_correct, 'CurtainBottom', X=0, Y=shift_curtaind, Z=0)
 
-    CorrectionBasedOnExperiment(ws_to_correct)
+    correction_based_on_experiment(ws_to_correct)
 
 #######################################################################################

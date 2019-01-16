@@ -45,9 +45,9 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
     blocked_beam = True  # False
 
     # Reading parameters from the reduction settings file
-    reduction_settings_list = BilbyCustomFunctions_Reduction.FilesListReduce(red_settings)  # read entire file
-    current_reduction_settings = BilbyCustomFunctions_Reduction.FilesToReduce(reduction_settings_list,
-                                                                              index_reduction_settings[
+    reduction_settings_list = BilbyCustomFunctions_Reduction.files_list_reduce(red_settings)  # read entire file
+    current_reduction_settings = BilbyCustomFunctions_Reduction.files_to_reduce(reduction_settings_list,
+                                                                                index_reduction_settings[
                                                                                   0])  # take only one line, # index_reduction_settings
 
     # Read input csv file and define / create a folder for the output data
@@ -135,8 +135,8 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
 
     ######################################
     # Calling function to read given csv file
-    parameters = BilbyCustomFunctions_Reduction.FilesListReduce(csv_files_to_reduce_list)
-    files_to_reduce = BilbyCustomFunctions_Reduction.FilesToReduce(parameters, index_files_to_reduce)
+    parameters = BilbyCustomFunctions_Reduction.files_list_reduce(csv_files_to_reduce_list)
+    files_to_reduce = BilbyCustomFunctions_Reduction.files_to_reduce(parameters, index_files_to_reduce)
     if len(files_to_reduce) == 0:
         raise ValueError('Please check index_files_to_reduce; chosen one does not exist')
 
@@ -213,24 +213,24 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
         # scaling: attenuation
         att_pos = float(ws_tranSam.run().getProperty("att_pos").value)
 
-        scale = BilbyCustomFunctions_Reduction.AttenuationCorrection(att_pos, data_before_May_2016)
+        scale = BilbyCustomFunctions_Reduction.attenuation_correction(att_pos, data_before_May_2016)
         print("scale, aka attenuation factor {}".format(scale))
 
         thickness = current_file["thickness [cm]"]
 
         # Cd / Al masks shift
         if correct_tubes_shift:
-            BilbyCustomFunctions_Reduction.CorrectionTubesShift(ws_sam, path_tube_shift_correction)
+            BilbyCustomFunctions_Reduction.correction_tubes_shift(ws_sam, path_tube_shift_correction)
 
         if data_before_2016:
-            BilbyCustomFunctions_Reduction.DetShift_before2016(ws_sam)
+            BilbyCustomFunctions_Reduction.det_shift_before_2016(ws_sam)
 
             # Blocked beam
         if blocked_beam:
             ws_blocked_beam = current_file["BlockedBeam"] + '.tar'
             ws_blk = mantid_api.LoadBBY(ws_blocked_beam)
             if correct_tubes_shift:
-                BilbyCustomFunctions_Reduction.CorrectionTubesShift(ws_blk, path_tube_shift_correction)
+                BilbyCustomFunctions_Reduction.correction_tubes_shift(ws_blk, path_tube_shift_correction)
         else:
             ws_blk = None
 
