@@ -32,6 +32,7 @@ Improved
 * Added a load button to load selected workspaces without processing.
 * Added save_can option to output unsubtracted can and sample workspaces.
 * Autocomplete for Sample shape column in the table.
+* Can export table as a csv, which can be re-loaded as a batch file.
 * File path to batch file will be added to your directories automatically upon loading
 
 Bug fixes
@@ -42,6 +43,7 @@ Bug fixes
 * The GUI no longer hangs whilst searching the archive for files.
 * Updated the options and units displayed in wavelength and momentum range combo boxes.
 * Fixed a bug which crashed the beam centre finder if a phi mask was set.
+* Fixed occasional crash when entering data into table.
 * Removed option to process in non-compatibility mode to avoid calculation issues
 
 Improvements

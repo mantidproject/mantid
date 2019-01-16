@@ -57,6 +57,17 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.resize(600, 400)
         self.show()
 
+        header = self.horizontalHeader()
+        header.sectionDoubleClicked.connect(self.handle_double_click)
+
+    def resizeEvent(self, _):
+        header = self.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Interactive)
+
+    def handle_double_click(self, section):
+        header = self.horizontalHeader()
+        header.resizeSection(section, header.defaultSectionSize())
+
     def keyPressEvent(self, event):
         if event.matches(QKeySequence.Copy):
             self.presenter.action_keypress_copy()

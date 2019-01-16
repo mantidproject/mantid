@@ -36,7 +36,9 @@ PyCharm should be opened using ``pycharm.bat`` which can be found in the build d
        <Mantid Source Directory>/scripts
        <Mantid Source Directory>/external/src/ThirdParty/lib
 
-   The first folder can be replaced with the folder that contains your code, if you aren't writing code in ``scripts/``. In the Mantid build directory add the following as source folders;
+   The first folder can be replaced with the folder that contains your code, if you aren't writing code in ``scripts/``.
+
+   Additionally, in the Mantid build directory add the following as source folders:
 
    .. code-block:: sh
 
@@ -46,8 +48,35 @@ PyCharm should be opened using ``pycharm.bat`` which can be found in the build d
 
 NOTE : In some cases, imports in the code will still be highlighted red when they come from folders within the ``script/`` folder, or from other folders entirely. To fix this simply add the relevant folder that contains the module you are importing in the same fashion as step 3 above.
 
-Running Files in the Debugger
------------------------------
+Running Files in the Debugger with EnvFile extension
+----------------------------------------------------
+
+4. Install the EnvFile plugin by Borys Pierov. The plugin can be installed in multiple ways:
+
+   a) Open Settings(CTRL + SHIFT + S), to go Plugins and search for ``EnvFile``. Install and restart PyCharm.
+   b) Go to the plugin's `webpage <https://plugins.jetbrains.com/plugin/7861-envfile>`_, download and install it.
+
+5. To edit the configurations go to Run->Run... and select Edit Configurations. Notice that there is now a ``EnvFile`` tab under the configuration's name.
+   - Note that you have to do that for each configuration, or you can change the template configuration, and all configuration that use that template will have the EnvFile setup.
+6. Open the ``EnvFile`` tab, check ``Enable EnvFile`` and ``Substitute Environmental Variables (...)`` - this allows setting up the third-party paths dynamically.
+7. Click the ``+`` (plus) on the right side, select the ``pycharm.env`` file in the root of the **build** directory.
+
+For running the Workbench continue onto :ref:`Workbench`, and follow the instructions to set up the *Script Path* and *Working Directory*.
+
+Advantages of this approach:
+
+- You can have multiple instances of PyCharm running with environment configuration for separate repositories. This is otherwise not possible, as all PyCharm instances seem to share a parent process and environment. (as is the case of 11/01/2019, it might change in the future)
+- This makes possible switching projects for multiple repositories via the File > Open Recent ... menu, as when the new project is opened its environment won't be poluted with environment variables from the last one.
+
+  - This can cause errors when the external dependencies aren't quite the same between all the repositories, as some packages might be missing, or be different versions.
+
+Disadvantages:
+
+- Additional setup for each configuration necessary. Thankfully, if the template is edited to have the correct ``EnvFile`` setup, all copies of it will have it too. Copying an already existing configuration also copies the ``EnvFile`` setup.
+
+
+Running Files in the Debugger without EnvFile extension
+-------------------------------------------------------
 
 Running python code from within PyCharm which depends on the python API, or PyQt for example requires one extra step. Because the source root labelling from the previous section only affects PyCharm searching and not the run configuration, before running the file we must set up the run configuration correctly.
 

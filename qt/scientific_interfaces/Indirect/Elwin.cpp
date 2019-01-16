@@ -423,7 +423,7 @@ void Elwin::setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws) {
 /**
  * Handles a new set of input files being entered.
  *
- * Updates preview seletcion combo box.
+ * Updates preview selection combo box.
  */
 void Elwin::newInputFiles() {
   // Clear the existing list of files
@@ -456,24 +456,22 @@ void Elwin::newInputFiles() {
  * @param index Index of the new selected file
  */
 void Elwin::newPreviewFileSelected(int index) {
-  QString wsName = m_uiForm.cbPreviewFile->itemText(index);
-  QString filename = m_uiForm.cbPreviewFile->itemData(index).toString();
+  auto const workspaceName = m_uiForm.cbPreviewFile->itemText(index);
+  auto const filename = m_uiForm.cbPreviewFile->itemData(index).toString();
 
-  // Ignore empty filenames (can happen when new files are loaded and the widget
-  // is being populated)
-  if (filename.isEmpty())
-    return;
+  if (!filename.isEmpty()) {
+    auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
 
-  if (!loadFile(filename, wsName)) {
-    g_log.error("Failed to load input workspace.");
-    return;
+    if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
+      auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+      int const numHist =
+          static_cast<int>(workspace->getNumberHistograms()) - 1;
+
+      m_uiForm.spPreviewSpec->setMaximum(numHist);
+      m_uiForm.spPreviewSpec->setValue(0);
+    } else
+      g_log.error("Failed to load input workspace.");
   }
-
-  auto const ws = getADSMatrixWorkspace(wsName.toStdString());
-  int const numHist = static_cast<int>(ws->getNumberHistograms()) - 1;
-
-  m_uiForm.spPreviewSpec->setMaximum(numHist);
-  m_uiForm.spPreviewSpec->setValue(0);
 }
 
 /**

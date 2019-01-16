@@ -12,16 +12,18 @@ for presenting and generating the reduction settings.
 
 from __future__ import (absolute_import, division, print_function)
 
-import os
 import copy
+import csv
+import os
+import sys
 import time
 
-from mantid.kernel import Logger, ConfigService
 from mantid.api import (FileFinder)
+from mantid.kernel import Logger, ConfigService
 
+from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
-from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -95,6 +97,9 @@ class RunTabPresenter(object):
 
         def on_load_clicked(self):
             self._presenter.on_load_clicked()
+
+        def on_export_table_clicked(self):
+            self._presenter.on_export_table_clicked()
 
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
@@ -559,6 +564,41 @@ class RunTabPresenter(object):
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box("Warning", "Process halted", str(e))
 
+    def on_export_table_clicked(self):
+        non_empty_rows = self.get_row_indices()
+        if len(non_empty_rows) == 0:
+            self.sans_logger.notice("Cannot export table as it is empty.")
+            return
+
+        # Python 2 and 3 take input in different modes for writing lists to csv files
+        if sys.version_info[0] == 2:
+            open_type = 'wb'
+        else:
+            open_type = 'w'
+
+        try:
+            self._view.disable_buttons()
+
+            default_filename = self._table_model.batch_file
+            filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
+
+            if filename:
+                self.sans_logger.notice("Starting export of table.")
+                if filename[-4:] != '.csv':
+                    filename += '.csv'
+
+                with open(filename, open_type) as outfile:
+                    # Pass filewriting object rather than filename to make testing easier
+                    writer = csv.writer(outfile)
+                    self._export_table(writer, non_empty_rows)
+                    self.sans_logger.notice("Table exporting finished.")
+
+            self._view.enable_buttons()
+        except Exception as e:
+            self._view.enable_buttons()
+            self.sans_logger.error("Export halted due to : {}".format(str(e)))
+            self.display_warning_box("Warning", "Export halted", str(e))
+
     def on_multiperiod_changed(self, show_periods):
         if show_periods:
             self._view.show_period_columns()
@@ -567,6 +607,10 @@ class RunTabPresenter(object):
 
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
+
+    def display_save_file_box(self, title, default_path, file_filter):
+        filename = self._view.display_save_file_box(title, default_path, file_filter)
+        return filename
 
     def notify_progress(self, row, out_shift_factors, out_scale_factors):
         self.increment_progress()
@@ -1137,6 +1181,40 @@ class RunTabPresenter(object):
 
     def get_cell_value(self, row, column):
         return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
+
+    def _export_table(self, filewriter, rows):
+        """
+        Take the current table model, and create a comma delimited csv file
+        :param filewriter: File object to be written to
+        :param rows: list of indices for non-empty rows
+        :return: Nothing
+        """
+        for row in rows:
+                table_row = self._table_model.get_table_entry(row).to_batch_list()
+                batch_file_row = self._create_batch_entry_from_row(table_row)
+                filewriter.writerow(batch_file_row)
+
+    @staticmethod
+    def _create_batch_entry_from_row(row):
+        batch_file_keywords = ["sample_sans",
+                               "output_as",
+                               "sample_trans",
+                               "sample_direct_beam",
+                               "can_sans",
+                               "can_trans",
+                               "can_direct_beam",
+                               "user_file"]
+
+        loop_range = min(len(row), len(batch_file_keywords))
+        new_row = [''] * (2 * loop_range)
+
+        for i in range(loop_range):
+            key = batch_file_keywords[i]
+            value = row[i]
+            new_row[2*i] = key
+            new_row[2*i + 1] = value
+
+        return new_row
 
     # ------------------------------------------------------------------------------------------------------------------
     # Settings

@@ -19,8 +19,8 @@ import re
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
-from sans.gui_logic.presenter.create_file_information import create_file_information
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
+from sans.gui_logic.presenter.create_file_information import create_file_information
 from ui.sans_isis.work_handler import WorkHandler
 
 
@@ -323,6 +323,28 @@ class TableIndexModel(object):
                 self.sample_height, self.sample_width,
                 self.sample_shape.get_sample_shape_string(),
                 self.options_column_model.get_options_string()]
+
+    def to_batch_list(self):
+        """
+        :return: a list of data in the order as would typically appear
+        in a batch file
+        """
+        return_list = [self.sample_scatter, self.output_name, self.sample_transmission,
+                       self.sample_direct, self.can_scatter, self.can_transmission,
+                       self.can_direct, self.user_file]
+        return_list = list(map(str, return_list))
+        return_list = list(map(str.strip, return_list))
+        return return_list
+
+    def _convert_sample_shape_to_string(self, shape):
+        if isinstance(shape, str):
+            # TODO temporary fix to shape already being a str
+            # find out where this is being converted as we are trying to convert twice
+            return shape
+        if shape:
+            return SampleShape.to_string(shape)
+        else:
+            return ''
 
     def isMultiPeriod(self):
         return any((self.sample_scatter_period, self.sample_transmission_period, self.sample_direct_period,
