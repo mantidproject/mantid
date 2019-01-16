@@ -75,7 +75,7 @@ def _save_out(output, run_number, bank_id, output_dir, join_string, focus_gen):
     filename = path.join(output_dir, join_string.format(run_number, bank_id))
     hdf5_name = path.join(output_dir, run_number + ".hdf5")
     if not unicode(bank_id).isnumeric():
-        bank_id = 0;
+        bank_id = 0
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=filename + ".dat", SplitFiles=False,
                           StartAtBankNumber=bank_id)
     simple.SaveGSS(InputWorkspace=output, Filename=filename + ".gss", SplitFiles=False, Bank=bank_id)

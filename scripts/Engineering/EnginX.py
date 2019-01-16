@@ -99,4 +99,3 @@ class EnginX:
 
 def _gen_filename(run_number):
     return "ENGINX" + ("0" * (8 - len(run_number))) + run_number
-

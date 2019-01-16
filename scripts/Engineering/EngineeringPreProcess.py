@@ -13,8 +13,8 @@ def rebin_time(run, bin_param):
     simple.Rebin(InputWorkspace=wsname, Params=bin_param, OutputWorkspace="engg_preproc_time_ws")
 
 
-def rebin_pulse(run, bin_param, n_periods):
-    _n_periods = n_periods  # currently unused to match implementation in gui
+def rebin_pulse(run, bin_param): # , #n_periods): currently unused to match implementation in gui
+
     wsname = _load_ws_to_process(run)
     simple.RebinByPulseTimes(InputWorkspace=wsname, Params=bin_param, OutputWorkspace="engg_preproc_pulse_ws")
 

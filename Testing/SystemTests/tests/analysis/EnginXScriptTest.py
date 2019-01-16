@@ -172,4 +172,3 @@ def _setup_focus():
     test.create_calibration()
     test.create_calibration(cropped="spectra", spectra="1-20")
     simple.mtd.clear()
-

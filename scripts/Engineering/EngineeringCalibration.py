@@ -92,7 +92,7 @@ def save_calibration(ceria_run, van_run, ext, cal_dir, bank_names, difcs, zeros,
     if name == "all_banks":
         template_file = None
     elif name == "bank_South":
-        template_file = "template_ENGINX_241391_236516_South_bank.prm";
+        template_file = "template_ENGINX_241391_236516_South_bank.prm"
     else:
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
     Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difc=difcs, tzero=zeros,
@@ -104,13 +104,10 @@ def save_calibration(ceria_run, van_run, ext, cal_dir, bank_names, difcs, zeros,
 def create_params_table(difc, tzero):
 
     param_table = simple.CreateEmptyTableWorkspace(OutputWorkspace="engg_calibration_banks_parameters")
-    param_table.addColumn("int", "bankid");
-    param_table.addColumn("double", "difc");
-    param_table.addColumn("double", "difa");
-    param_table.addColumn("double", "tzero");
+    param_table.addColumn("int", "bankid")
+    param_table.addColumn("double", "difc")
+    param_table.addColumn("double", "difa")
+    param_table.addColumn("double", "tzero")
     for i in range(len(difc)):
         next_row = {"bankid": i, "difc": difc[i], "difa": 0, "tzero": tzero[i]}
         param_table.addRow(next_row)
-
-
-
