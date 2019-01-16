@@ -119,6 +119,8 @@ Improvements
   Plot Current Preview.
 - The sample logs are now copied over properly for the result workspace in the ResNorm tab.
 - Sqw files can now be loaded as Vanadium in the ResNorm interface.
+- In the Quasi interface, fit. 3 and diff. 3 are now stored in the fit workspaces. The probabilities for 3 peaks is now 
+  available in the probability workspace.
 
 Bugfixes
 ########
