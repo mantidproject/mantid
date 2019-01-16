@@ -336,6 +336,12 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
         for key, workspace_list in list(workspaces.items()):
+            if SANSDataType.to_string(key) in ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect"):
+                is_trans = True
+            else:
+                is_trans = False
+            move_alg.setProperty("IsTransmissionWorkspace", is_trans)
+
             for workspace in workspace_list:
                 zero_alg.setProperty("Workspace", workspace)
                 zero_alg.execute()
@@ -346,12 +352,8 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                 if beam_coordinates:
                     move_alg.setProperty("BeamCoordinates", beam_coordinates)
 
-                component = self.getProperty("Component").value
-                if not component:
-                    component = "LAB"
-
                 # ZOOM and LARMOR only have LAB, SANS2D and LOQ move both at once.
-                move_alg.setProperty("Component", component)
+                move_alg.setProperty("Component", "LAB")
                 move_alg.setProperty("Workspace", zeroed_workspace)
                 move_alg.execute()
 

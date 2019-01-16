@@ -14,7 +14,8 @@ from abc import (ABCMeta, abstractmethod)
 from sans.state.move import StateMove
 from sans.common.enums import (SANSInstrument, CanonicalCoordinates, DetectorType)
 from sans.common.general_functions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
-                                           quaternion_to_angle_and_axis, sanitise_instrument_name)
+                                           quaternion_to_angle_and_axis, sanitise_instrument_name,
+                                           convert_bank_name_to_detector_type_isis)
 
 
 # -------------------------------------------------
@@ -525,7 +526,6 @@ class SANSMoveLOQ(SANSMove):
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
         # For LOQ we only have to coordinates
         assert len(coordinates) == 2
-
         if not is_transmission_workspace:
             # First move the sample holder
             move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
