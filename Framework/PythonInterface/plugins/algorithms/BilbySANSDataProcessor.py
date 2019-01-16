@@ -180,7 +180,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         # -- Validation --
         sam_histograms = ws_sam.getNumberHistograms()
         if sam_histograms <= 0:
-            inputs["InputWorkspace"] = "hast to contain at least one spectrum"
+            inputs["InputWorkspace"] = "has to contain at least one spectrum"
         elif not ws_sam.isHistogramData():
             inputs["InputWorkspace"] = "has to be a histogram"
 
@@ -194,7 +194,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                 inputs["BlockedBeamWorkspace"] = "each spectrum must contain only one y value"
 
         if ws_emp.getNumberHistograms() != 1:
-            inputs["EmptyBeamSpectrumShapeWorkspace"] = "hast to contain only one spectrum"
+            inputs["EmptyBeamSpectrumShapeWorkspace"] = "has to contain only one spectrum"
         elif not ws_emp.isHistogramData():
             inputs["EmptyBeamSpectrumShapeWorkspace"] = "has to be a histogram"
 
@@ -208,7 +208,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
         tran_histograms = ws_tranSam.getNumberHistograms()
         if tran_histograms <= 0:
-            inputs["TransmissionWorkspace"] = "hast to contain at least one spectrum"
+            inputs["TransmissionWorkspace"] = "has to contain at least one spectrum"
         elif not ws_tranSam.isHistogramData():
             inputs["TransmissionWorkspace"] = "has to be a histogram"
 
@@ -287,7 +287,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
             ws_tranEmp = self._convert_units(ws_tranEmp, "Wavelength")
 
         # -- Transmission --
-        # Intuitively one would think rebin for NVS data is not needed, but it does;
+        # Intuitively one would think rebin for NVS data is not needed, but it is required;
         # not perfect match in binning leads to error like "not matching intervals for calculate_transmission"
 
         ws_sam = self._rebin(ws_sam, binning_wavelength, preserveevents=False)
@@ -332,7 +332,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         pixeladj = ws_sen
 
         ws_tran = self._emp_shape_adjustment(ws_tran,
-                                             ws_emp)  # swap arrays; ws_emp is always be shorter or equal to ws_tran
+                                             ws_emp)  # swap arrays; ws_emp will always be shorter or equal to ws_tran
         wavelengthadj = self._multiply(ws_emp, ws_tran)
 
         # calculate the wide angle correction for sample transmission
