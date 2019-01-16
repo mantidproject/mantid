@@ -112,7 +112,8 @@ For diffraction measurements a sample code is found below:
 
 The output would look like:
 
-.. figure:: /images/SingleCrystalDiffuseReduction_corelli_single_sym.png
+.. figure:: /images/MDNorm_elastic_sym.png
+
 
 Here is a sample code for inelastic data:
 
