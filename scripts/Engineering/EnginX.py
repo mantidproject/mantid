@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 import Engineering.EngineeringCalibration as Cal
 import Engineering.EngineeringFocus as Focus
-
+import Engineering.EngineeringPreProcess as PreProcess
 import os
 
 
@@ -72,14 +72,22 @@ class EnginX:
                                      self.focus_directory, grouping_file, self.focus_general)
         elif "cropped" in kwargs:
             if kwargs.get("cropped") == "banks":
-                Focus.focus_cropped(False, False, kwargs.get("bank"), van_curves_file, van_int_file, run_no,
+                Focus.focus_cropped(False, kwargs.get("bank"), van_curves_file, van_int_file, run_no,
                                     self.focus_directory, self.focus_general)
             elif kwargs.get("cropped") == "spectra":
-                Focus.focus_cropped(True, False, kwargs.get("spectra"), van_curves_file, van_int_file, run_no,
+                Focus.focus_cropped(True, kwargs.get("spectra"), van_curves_file, van_int_file, run_no,
                                     self.focus_directory, self.focus_general)
         else:
             Focus.focus_whole(van_curves_file, van_int_file, run_no,
                               self.focus_directory, self.focus_general)
+
+    def pre_process(self, **kwargs):
+        run = kwargs.get("run")
+        params = kwargs.get("time_bin")
+        if "time_period" in kwargs:
+            PreProcess.rebin_pulse(run, params, kwargs.get("time_period"))
+        else:
+            PreProcess.rebin_time(run, params)
 
     def _get_van_names(self):
         van_file = _gen_filename(self.van_run)
