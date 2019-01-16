@@ -42,7 +42,8 @@ Bug fixes
 * Updated the options and units displayed in wavelength and momentum range combo boxes.
 * Fixed a bug which crashed the beam centre finder if a phi mask was set.
 * Fixed occasional crash when entering data into table.
-* Removed option to process in non-compatibility mode to avoid calculation issues
+* Removed option to process in non-compatibility mode to avoid calculation issues.
+* Default name for added runs has correct number of digits.
 
 Improvements
 ############
