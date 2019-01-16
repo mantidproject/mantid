@@ -510,20 +510,20 @@ void RunsTablePresenter::notifyRowStateChanged() {
       auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
 
       switch (row->state()) {
-      case State::NOT_STARTED:
-      case State::STARTING: // fall through
+      case State::ITEM_NOT_STARTED:
+      case State::ITEM_STARTING: // fall through
         clearStateCellStyling(rowPath);
         break;
-      case State::RUNNING:
+      case State::ITEM_RUNNING:
         showCellsAsRunningStateInView(rowPath);
         break;
-      case State::SUCCESS:
+      case State::ITEM_COMPLETE:
         showCellsAsCompletedStateInView(rowPath);
         break;
-      case State::ERROR:
+      case State::ITEM_ERROR:
         showCellsAsErrorStateInView(rowPath, row->message());
         break;
-      case State::WARNING:
+      case State::ITEM_WARNING:
         showCellsAsWarningStateInView(rowPath, row->message());
         break;
       };

@@ -15,7 +15,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-enum class State { NOT_STARTED, STARTING, RUNNING, SUCCESS, ERROR, WARNING };
+enum class State {
+  ITEM_NOT_STARTED,
+  ITEM_STARTING,
+  ITEM_RUNNING,
+  ITEM_COMPLETE,
+  ITEM_ERROR,
+  ITEM_WARNING
+};
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL ItemState {
 public:

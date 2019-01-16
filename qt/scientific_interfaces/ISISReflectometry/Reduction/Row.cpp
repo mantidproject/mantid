@@ -75,14 +75,14 @@ std::string Row::message() const { return m_itemState.message(); }
 
 bool Row::requiresProcessing(bool reprocessFailed) const {
   switch (state()) {
-  case State::NOT_STARTED:
+  case State::ITEM_NOT_STARTED:
     return true;
-  case State::STARTING:
-  case State::RUNNING: // fall through
-  case State::SUCCESS: // fall through
-  case State::WARNING: // fall through
+  case State::ITEM_STARTING:
+  case State::ITEM_RUNNING:  // fall through
+  case State::ITEM_COMPLETE: // fall through
+  case State::ITEM_WARNING:  // fall through
     return false;
-  case State::ERROR:
+  case State::ITEM_ERROR:
     return reprocessFailed;
     // Don't include default so that the compiler warns if a value is not
     // handled

@@ -10,7 +10,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ItemState::ItemState()
-    : m_state(State::NOT_STARTED), m_message(boost::none), m_progress(0.0),
+    : m_state(State::ITEM_NOT_STARTED), m_message(boost::none), m_progress(0.0),
       m_mutex() {}
 
 ItemState::ItemState(ItemState const &rhs)
@@ -43,28 +43,28 @@ void ItemState::setProgress(double progress, std::string const &message) {
 
 void ItemState::setStarting() {
   std::unique_lock<std::mutex> lock(m_mutex);
-  m_state = State::STARTING;
+  m_state = State::ITEM_STARTING;
 }
 
 void ItemState::setRunning() {
   std::unique_lock<std::mutex> lock(m_mutex);
-  m_state = State::RUNNING;
+  m_state = State::ITEM_RUNNING;
 }
 
 void ItemState::setSuccess() {
   std::unique_lock<std::mutex> lock(m_mutex);
-  m_state = State::SUCCESS;
+  m_state = State::ITEM_COMPLETE;
 }
 
 void ItemState::setWarning(std::string const &message) {
   std::unique_lock<std::mutex> lock(m_mutex);
-  m_state = State::WARNING;
+  m_state = State::ITEM_WARNING;
   m_message = message;
 }
 
 void ItemState::setError(std::string const &message) {
   std::unique_lock<std::mutex> lock(m_mutex);
-  m_state = State::ERROR;
+  m_state = State::ITEM_ERROR;
   m_message = message;
 }
 } // namespace CustomInterfaces
