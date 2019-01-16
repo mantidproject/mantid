@@ -14,6 +14,14 @@ from mantid.kernel import Direction, FloatArrayProperty, FloatBoundedValidator, 
 from mantid.api import IMaskWorkspace
 
 
+SOURCE_APERTURE_RADIUS = 20.0
+SOURCE_APERTURE_RADIUS_MAX = 40.0
+SAMPLE_APERTURE_RADIUS_MAX = 40.0
+SAMPLE_APERTURE_RADIUS = 6.25
+NUMBER_OF_BINS = 10
+NUMBER_OF_SPECTRA = 1
+DELTA_WAVELENGTH = 0.1
+
 class BilbySANSDataProcessor(DataProcessorAlgorithm):
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
@@ -84,7 +92,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         self.declareProperty(name='PolynomialOrder',
                              defaultValue='3',
                              doc='Used only for Polynomial function, but needed as an input parameter anyway')
-
+DELTA_WAVELENGTH
         self.declareProperty(name='ScalingFactor',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
@@ -361,31 +369,29 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
             qxy = self._multiply(qxy, f)
             self.setProperty("OutputWorkspace", qxy)
         else:
-            deltar = 5.0  # Virtual ring width on the detector (mm). Hardcoded. Not sure it is a good way to go.
-
             if (ws_sam.run().getProperty("source_aperture").value):
                 sourceapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
-                if sourceapertureradius > 40.0:
-                    sourceapertureradius = 20.0
+                if sourceapertureradius > SOURCE_APERTURE_RADIUS_MAX:
+                    sourceapertureradius = SOURCE_APERTURE_RADIUS
                     print("sourceapertureradius value cannot be retrieved; generic value of 20mm taken")
             else:
-                sourceapertureradius = 20.0  # radius in mm
+                sourceapertureradius = SOURCE_APERTURE_RADIUS  # radius in mm
                 print("sourceapertureradius value cannot be retrieved; generic value of 20mm taken")
 
             if (ws_sam.run().getProperty("sample_aperture").value):
                 sampleapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
-                if sampleapertureradius > 40.0:
-                    sampleapertureradius = 6.25
+                if sampleapertureradius > SAMPLE_APERTURE_RADIUS_MAX:
+                    sampleapertureradius = SAMPLE_APERTURE_RADIUS
                     print("sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken")
             else:
-                sampleapertureradius = 6.25  # radius in mm
+                sampleapertureradius = SAMPLE_APERTURE_RADIUS  # radius in mm
                 print("sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken")
 
                 # creating empty array for SigmaModerator
             # SigmaModerator is a mandatory parameter for ISIS, but not needed for the reactor facility
-            number_of_bins = 10
-            number_of_spectra = 1
-            delta_wavelength = 0.1
+            number_of_bins = NUMBER_OF_BINS
+            number_of_spectra = NUMBER_OF_SPECTRA
+            delta_wavelength = DELTA_WAVELENGTH
 
             data_x = np.zeros(number_of_bins + 1)
             data_y = np.zeros(number_of_bins)
@@ -402,7 +408,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
             # Call TOFSANSResolutionByPixel
             ws_sam = self._multiply(ws_sam, f)
-            qresolution = self._tofsansresolutionbypixel(ws_sam, deltar, sampleapertureradius, sourceapertureradius,
+            qresolution = self._tofsansresolutionbypixel(ws_sam, sampleapertureradius, sourceapertureradius,
                                                          sigmamoderator, real_l1, account_for_gravity, extralength)
 
             # Call Q1D, now with resolution
@@ -481,18 +487,13 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         return alg.getProperty("OutputWorkspace").value
 
     def _mask_to_roi(self, ws_mask):
-        # invert mask and then extract "masked" detectors in order to get ROI
-        # BUG in Mantid forces us to use AnalysisDataService
-        alg = AlgorithmManager.create("InvertMask")
-        alg.initialize()
+        alg = self.createChildAlgorithm("InvertMask")
         alg.setProperty("InputWorkspace", ws_mask)
-        alg.setPropertyValue("OutputWorkspace", "_ws")
         alg.execute()
-        ws_tranmskinv = AnalysisDataService.retrieve("_ws")
+        ws_tranmskinv = alg.getProperty("OutputWorkspace").value
         alg = self.createChildAlgorithm("ExtractMask")
         alg.setProperty("InputWorkspace", ws_tranmskinv)
         alg.execute()
-        AnalysisDataService.remove("_ws")
         return alg.getProperty("DetectorList").value
 
     def _calculate_transmission(self, ws_tranSam, ws_tranEmp, ws_tranroi, fitmethod, polynomialorder, binning):
@@ -532,8 +533,8 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _tofsansresolutionbypixel(self, ws_sam, deltar, sampleapertureradius, sourceapertureradius, sigmamoderator,
-                                  collimationlength, accountforgravity, extralength):
+    def _tofsansresolutionbypixel(self, ws_sam, sampleapertureradius, sourceapertureradius, sigmamoderator,
+                                  collimationlength, accountforgravity, extralength, deltar=5.0):
         alg = self.createChildAlgorithm("TOFSANSResolutionByPixel")
         alg.setProperty("InputWorkspace", ws_sam)
         alg.setProperty("DeltaR", deltar)

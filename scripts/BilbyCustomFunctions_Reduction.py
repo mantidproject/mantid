@@ -12,6 +12,9 @@ import sys
 from mantid.simpleapi import MoveInstrumentComponent, CropWorkspace
 
 
+attenuation_correction_pre_2016 = {1.0: 0.007655, 3.0: 1.0, 5.0: 0.005886}
+attenuation_correction_post_2016 = {1.0: 1.0, 2.0: 0.00955, 3.0: 0.005886, 4.0: 0.00290, 5.0: 0.00062}
+
 #######################################################################################
 # REDUCTION ###########################################################################
 #######################################################################################
@@ -160,24 +163,9 @@ def attenuation_correction(att_pos, data_before_May_2016):
             print(
                 "Wrong attenuators value; Either data have been collected after May, 2016, or something is wrong with hdf file")
             sys.exit()
-        if att_pos == 1.0:
-            scale = 0.007655  # att 130
-        elif att_pos == 3.0:
-            scale = 1.0
-        elif att_pos == 5.0:
-            scale = 0.005886  # att 170
+        scale = attenuation_correction_pre_2016[att_pos]
     else:
-        if att_pos == 1.0:
-            scale = 1.0
-        elif att_pos == 2.0:
-            scale = 0.00955
-        elif att_pos == 3.0:
-            scale = 0.005886
-        elif att_pos == 4.0:
-            scale = 0.00290
-        elif att_pos == 5.0:
-            scale = 0.00062
-
+        scale = attenuation_correction_post_2016[att_pos]
     return scale
 
 
