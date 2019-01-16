@@ -16,13 +16,13 @@ class EnginX:
         if kwargs:
             self.user = kwargs.get("user")
             self.van_run = kwargs.get("vanadium_run")
-            if "output_directory" in kwargs:
+            if "directory" in kwargs:
 
-                self.calibration_directory = os.path.join(kwargs.get("output_directory"), "User", self.user,
+                self.calibration_directory = os.path.join(kwargs.get("directory"), "User", self.user,
                                                           "Calibration")
-                self.calibration_general = os.path.join(kwargs.get("output_directory"), "Calibration")
-                self.focus_directory = os.path.join(kwargs.get("output_directory"), "User", self.user, "Focus")
-                self.focus_general = os.path.join(kwargs.get("output_directory"), "Focus")
+                self.calibration_general = os.path.join(kwargs.get("directory"), "Calibration")
+                self.focus_directory = os.path.join(kwargs.get("directory"), "User", self.user, "Focus")
+                self.focus_general = os.path.join(kwargs.get("directory"), "Focus")
             else:
                 root = os.path.abspath(os.sep)
                 if root == "/":
