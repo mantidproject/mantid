@@ -359,8 +359,11 @@ class BayesQuasi(PythonAlgorithm):
             yProb = np.append(yProb, yPr1)
             yProb = np.append(yProb, yPr2)
             yProb = np.append(yProb, yPr3)
+
+            prob_axis_names = '0 Peak, 1 Peak, 2 Peak, 3 Peak'
             s_api.CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
-                                  Nspec=4, UnitX='MomentumTransfer')
+                                  Nspec=4, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
+                                  VerticalAxisValues=prob_axis_names)
             outWS = self.C2Fw(fname)
         elif self._program == 'QSe':
             comp_prog.report('Running C2Se')
