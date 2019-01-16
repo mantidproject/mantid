@@ -12,10 +12,12 @@ from os import path
 import csv
 
 
+# focus a whole run with no cropping
 def focus_whole(van_curves, van_int, run_number, focus_dir, focus_gen):
     ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
     van_integrated_ws = simple.Load(Filename=van_int)
     van_curves_ws = simple.Load(Filename=van_curves)
+    # loop through both banks, focus and save them
     for i in range(1, 3):
         output_ws = "engg_focus_output_bank_{}".format(i)
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
@@ -25,12 +27,15 @@ def focus_whole(van_curves, van_int, run_number, focus_dir, focus_gen):
     print("done")
 
 
+# focus a partial run, cropping either on banks or on specific spectra
 def focus_cropped(use_spectra, crop_on, van_curves, van_int, run_number, focus_dir, focus_gen):
     ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
     van_integrated_ws = simple.Load(Filename=van_int)
     van_curves_ws = simple.Load(Filename=van_curves)
     output_ws = "engg_focus_output{0}{1}"
+    # check whether to crop on bank or spectra
     if not use_spectra:
+        # get the bank to crop on, focus and save it out
         bank = {"North": "1",
                 "South": "2"}
         output_ws = output_ws.format("_bank_", bank.get(crop_on))
@@ -39,6 +44,7 @@ def focus_cropped(use_spectra, crop_on, van_curves, van_int, run_number, focus_d
                          Bank=bank.get(crop_on))
         _save_out(output_ws, run_number, crop_on, focus_dir, "ENGINX_{}_{}", focus_gen)
     else:
+        # crop on the spectra passed in, focus and save it out
         output_ws = output_ws.format("", "")
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws,
@@ -46,15 +52,18 @@ def focus_cropped(use_spectra, crop_on, van_curves, van_int, run_number, focus_d
         _save_out(output_ws, run_number, "cropped", focus_dir, "ENGINX_{}_bank_{}", focus_gen)
 
 
+# perform a texture mode focusing using the grouping csv file
 def focus_texture_mode(van_curves, van_int, run_number, focus_dir, dg_file, focus_gen):
     van_curves_ws, van_integrated_ws, ws_to_focus = _prepare_focus(run_number, van_curves, van_int)
     banks = {}
+    # read the csv file to work out the banks
     with open(dg_file) as grouping_file:
         group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
 
         for row in group_reader:
             banks.update({row[0]: ','.join(row[1:])})
 
+    # loop through the banks described in the csv, focusing and saing them out
     for bank in banks:
         output_ws = "engg_focusing_output_ws_texture_bank_{}"
         output_ws = output_ws.format(bank)
@@ -64,6 +73,7 @@ def focus_texture_mode(van_curves, van_int, run_number, focus_dir, dg_file, focu
         _save_out(output_ws, run_number, bank, focus_dir, "ENGINX_{}_texture_{}", focus_gen)
 
 
+# perform some universal setup for focusing
 def _prepare_focus(run_number, van_curves, van_int):
     ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
     van_integrated_ws = simple.Load(Filename=van_int)
@@ -71,17 +81,21 @@ def _prepare_focus(run_number, van_curves, van_int):
     return van_curves_ws, van_integrated_ws, ws_to_focus
 
 
+# save out the files required for the focus
 def _save_out(output, run_number, bank_id, output_dir, join_string, focus_gen):
+    # work out where to save the files
     filename = path.join(output_dir, join_string.format(run_number, bank_id))
     hdf5_name = path.join(output_dir, run_number + ".hdf5")
     if not unicode(bank_id).isnumeric():
         bank_id = 0
+    # save the files out to the user directory
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=filename + ".dat", SplitFiles=False,
                           StartAtBankNumber=bank_id)
     simple.SaveGSS(InputWorkspace=output, Filename=filename + ".gss", SplitFiles=False, Bank=bank_id)
     simple.SaveOpenGenieAscii(InputWorkspace=output, Filename=filename + ".his", OpenGenieFormat="ENGIN-X Format")
     simple.SaveNexus(InputWorkspace=output, Filename=filename + ".nxs")
     simple.ExportSampleLogsToHDF5(InputWorkspace=output, Filename=hdf5_name, Blacklist="bankid")
+    # copy the files to the general directory
     copy2(filename+".dat", focus_gen)
     copy2(filename + ".gss", focus_gen)
     copy2(filename + ".his", focus_gen)
@@ -89,6 +103,7 @@ def _save_out(output, run_number, bank_id, output_dir, join_string, focus_gen):
     copy2(hdf5_name, focus_gen)
 
 
+# remove commented rows from the csv file
 def _decomment_csv(csvfile):
     for row in csvfile:
         raw = row.split('#')[0].strip()

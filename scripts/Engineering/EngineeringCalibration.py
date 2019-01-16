@@ -11,6 +11,7 @@ from shutil import copy2
 import os
 
 
+# create and save the vanadium workspaces for the run passed in
 def create_vanadium_workspaces(vanadium_run, curve_van, int_van):
     van_name = "eng_vanadium_ws"
     simple.Load(vanadium_run, OutputWorkspace=van_name)
@@ -22,27 +23,32 @@ def create_vanadium_workspaces(vanadium_run, curve_van, int_van):
     simple.DeleteWorkspace(van_name)
 
 
+# create and save a cropped calibration file
 def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, curve_van, int_van, ceria_run, cal_dir,
                                     van_run, cal_gen):
     van_curves_ws, van_integrated_ws = load_van_files(curve_van, int_van)
     ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
     param_tbl_name = None
     bank = None
+    # check which cropping method to use
     if use_spectrum_number:
         if crop_name is None:
             param_tbl_name = "cropped"
         else:
             param_tbl_name = crop_name
+        # run the calibration cropping on spectrum number
         output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
                                       VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=str(spec_nos),
                                       FittedPeaks=param_tbl_name,
                                       OutputParametersTableName=param_tbl_name)
+        # get the values needed for saving out the .prm files
         difc = [output.DIFC]
         tzero = [output.TZERO]
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [param_tbl_name], difc, tzero, "all_banks", cal_gen)
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [param_tbl_name], difc, tzero,
                          "bank_{}".format(param_tbl_name), cal_gen)
     else:
+        # work out which bank number to crop on, then calibrate
         if spec_nos.lower() == "north":
             param_tbl_name = "engg_calibration_bank_1"
             bank = 1
@@ -52,14 +58,17 @@ def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, cu
         output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
                                       VanCurvesWorkspace=van_curves_ws, Bank=str(bank), FittedPeaks=param_tbl_name,
                                       OutputParametersTableName=param_tbl_name)
+        # get the values needed for saving out the .prm files
         difc = [output.DIFC]
         tzero = [output.TZERO]
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "all_banks",cal_gen)
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "bank_{}".format(spec_nos),
                          cal_gen)
+    # create the table workspace containing the parameters
     create_params_table(difc, tzero)
 
 
+# create the calibration files for an uncropped run
 def create_calibration_files(curve_van, int_van, ceria_run, cal_dir, van_run, cal_gen):
     van_curves_ws, van_integrated_ws = load_van_files(curve_van, int_van)
     ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
@@ -67,42 +76,51 @@ def create_calibration_files(curve_van, int_van, ceria_run, cal_dir, van_run, ca
     tzeros = []
     banks = 3
     bank_names = ["North", "South"]
+    # loop through the banks, calibrating both
     for i in range(1, banks):
         param_tbl_name = "engg_calibration_bank_{}".format(i)
         print(param_tbl_name)
         output = simple.EnggCalibrate(InputWorkspace=ceria_ws, VanIntegrationWorkspace=van_integrated_ws,
                                       VanCurvesWorkspace=van_curves_ws, Bank=str(i), FittedPeaks=param_tbl_name,
                                       OutputParametersTableName=param_tbl_name)
+        # add the needed outputs to a list
         difcs.append(output.DIFC)
         tzeros.append(output.TZERO)
+        # save out the ones needed for this loop
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [bank_names[i-1]], [difcs[i-1]], [tzeros[i-1]],
                          "bank_{}".format(bank_names[i-1]), cal_gen)
+    # save out the total version, then create the table of params
     save_calibration(ceria_run, van_run, ".prm", cal_dir, bank_names, difcs, tzeros, "all_banks", cal_gen)
     create_params_table(difcs, tzeros)
 
 
+# load the vanadium files passed in
 def load_van_files(curves_van, ints_van):
     van_curves_ws = simple.Load(curves_van, OutputWorkspace="curves_van")
     van_integrated_ws = simple.Load(ints_van, OutputWorkspace="int_van")
     return van_curves_ws, van_integrated_ws
 
 
+# save the calibration data
 def save_calibration(ceria_run, van_run, ext, cal_dir, bank_names, difcs, zeros, name, cal_gen):
     gsas_iparm_fname = os.path.join(cal_dir, "ENGINX_"+van_run+"_"+ceria_run+"_"+name+ext)
+    # work out what template to use
     if name == "all_banks":
         template_file = None
     elif name == "bank_South":
         template_file = "template_ENGINX_241391_236516_South_bank.prm"
     else:
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
+    # write out the param file to the users directory
     Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difc=difcs, tzero=zeros,
                                         ceria_run=ceria_run, vanadium_run=van_run,
                                         template_file=template_file)
+    # copy the param file to the general directory
     copy2(gsas_iparm_fname, cal_gen)
 
 
+# create the params table from the output from the calibration
 def create_params_table(difc, tzero):
-
     param_table = simple.CreateEmptyTableWorkspace(OutputWorkspace="engg_calibration_banks_parameters")
     param_table.addColumn("int", "bankid")
     param_table.addColumn("double", "difc")
