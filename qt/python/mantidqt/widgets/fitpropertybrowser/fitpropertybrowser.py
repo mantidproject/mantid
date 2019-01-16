@@ -123,3 +123,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for peak_id, prefix in self.peak_ids.items():
             if prefix == fun:
                 self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix))
+
+    @Slot()
+    def show_canvas_context_menu(self):
+        if self.tool is not None:
+            print(self.registeredPeaks())
+            self.tool.show_context_menu()

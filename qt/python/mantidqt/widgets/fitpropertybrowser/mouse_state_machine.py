@@ -42,7 +42,8 @@ class MoveMarkersState(object):
         self._next = self
 
     def button_press_callback(self, event):
-        self.tool.start_move_markers(event)
+        if event.button == 1:
+            self.tool.start_move_markers(event)
 
     def motion_notify_callback(self, event):
         self.tool.move_markers(event)
@@ -50,16 +51,13 @@ class MoveMarkersState(object):
     def button_release_callback(self, event):
         if event.button == 1:
             self.tool.stop_move_markers(event)
-        elif event.button == 3:
-            menu = QMenu()
-            menu.addAction("Add peak", lambda: self._set_next(AddPeakState(self.machine)))
-            menu.exec_(QCursor.pos())
 
     def transition(self):
         return self._next
 
-    def _set_next(self, state):
-        self._next = state
+    def _add_peak(self):
+        self._next = AddPeakState(self.machine)
+        self.tool.add_peak_dialog()
 
 
 class AddPeakState(object):

@@ -294,6 +294,7 @@ public:
     auto f = sipCpp->defaultPeakType();
     sipRes = FROM_CSTRING(f.c_str());
 %End
+    QStringList registeredPeaks() const;
     QString addPeakFunction(QString);
     double getPeakCentreOf(QString);
     void setPeakCentreOf(QString, double);

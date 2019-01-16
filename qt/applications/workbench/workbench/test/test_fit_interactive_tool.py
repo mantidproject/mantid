@@ -2,7 +2,8 @@ from __future__ import print_function
 import unittest
 
 from qtpy.QtCore import QPoint
-from qtpy.QtGui import QCursor
+from qtpy.QtGui import QCursor, QContextMenuEvent
+from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import *
 from mantidqt.utils.qt.test.gui_window_test import *
@@ -57,7 +58,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         pos1 = canvas.mapFromGlobal(QCursor.pos())
         if try_other_way_if_failed and pos1 != new_pos:
             new_x = marker.x + dx
-            marker.on_click(pos.x())
+            marker.button_press_callback(pos.x())
             marker.mouse_move(new_x)
             yield 0.1
             marker.stop()
@@ -71,6 +72,19 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         pos = QPoint(x_pxl, h - y_pxl)
         new_pos = QPoint(x1_pxl, h - y1_pxl)
         yield drag_mouse(canvas, pos, new_pos)
+
+    def mouse_click(self, x, y):
+        canvas = self.get_canvas()
+        h = canvas.height()
+        tr = self.fit_browser.tool.get_transform()
+        x_pxl, y_pxl = tr.transform_affine((x, y))
+        pos = QPoint(x_pxl, h - y_pxl)
+        yield mouse_click(canvas, pos)
+
+    def context_menu(self):
+        canvas = self.get_canvas()
+        QApplication.instance().postEvent(canvas, QContextMenuEvent(2, QPoint()))
+        yield self.wait_for_popup()
 
     def move_start_x(self, canvas, pos, dx, try_other_way_if_failed=True):
         return self.move_marker(canvas, self.fit_browser.tool.fit_start_x, pos, dx,
@@ -367,6 +381,23 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertEqual(self.draw_count, 4)
         self.assertFalse(self.fit_browser.tool.get_override_cursor(1.23, 4.2) is None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(1.5, 4.3) is None)
+
+    def test_context_menu_no_crash(self):
+        yield self.start(fit=False)
+        yield self.context_menu()
+
+    def test_add_peak_context_menu(self):
+        yield self.start()
+        yield self.context_menu()
+        menu = self.get_active_popup_widget()
+        action = find_action_with_text(menu, 'Add peak')
+        trigger_action(action)
+        yield
+        menu.close()
+        yield self.mouse_click(1.0, 4.2)
+        self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
+        self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.0, 1)
+        self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 4.2, 1)
 
 
 runTests(TestFitPropertyBrowser)

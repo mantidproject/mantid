@@ -1,6 +1,6 @@
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
-from qtpy.QtCore import QObject, Signal, Qt, QPoint
+from qtpy.QtCore import QObject, Signal, Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QApplication, QMenu
 
@@ -250,6 +250,10 @@ class FitInteractiveTool(QObject):
                 return i
         return n + 1
 
+    def add_peak_dialog(self):
+        print ('Add peak dialog')
+        self.mouse_state.transition_to('add_peak')
+
     def add_peak(self, x, y_top, y_bottom=0.0):
         peak_id = self._make_peak_id()
         marker = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom)
@@ -266,6 +270,12 @@ class FitInteractiveTool(QObject):
 
     def get_transform(self):
         return self.fit_start_x.patch.get_transform()
+
+    def show_context_menu(self):
+        if not self.toolbar_state_checker.is_tool_active():
+            menu = QMenu()
+            menu.addAction("Add peak", self.add_peak_dialog)
+            menu.exec_(QCursor.pos())
 
 
 class PeakMarker(QObject):

@@ -16,6 +16,7 @@ import weakref
 # 3rdparty imports
 from qtpy.QtCore import QEvent, Signal
 from qtpy.QtWidgets import QMainWindow
+from qtpy.QtGui import QContextMenuEvent, QMouseEvent
 
 # local imports
 from .figuretype import figure_type, FigureType
@@ -26,11 +27,13 @@ class FigureWindow(QMainWindow):
     activated = Signal()
     closing = Signal()
     visibility_changed = Signal()
+    show_context_menu = Signal()
 
     def __init__(self, canvas, parent=None):
         QMainWindow.__init__(self, parent=parent)
         # attributes
         self._canvas = weakref.proxy(canvas)
+        canvas.installEventFilter(self)
 
         self.setAcceptDrops(True)
 
@@ -73,6 +76,12 @@ class FigureWindow(QMainWindow):
         """
         self._plot_on_here(event.mimeData().text().split('\n'))
         QMainWindow.dropEvent(self, event)
+
+    def eventFilter(self, obj, event):
+        if weakref.proxy(obj) == self._canvas:
+            if isinstance(event, QContextMenuEvent):
+                self.show_context_menu.emit()
+        return QMainWindow.eventFilter(self, obj, event)
 
     # private api
 

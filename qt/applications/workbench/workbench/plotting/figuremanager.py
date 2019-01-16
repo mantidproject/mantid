@@ -104,6 +104,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateChecker(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
+        self.window.show_context_menu.connect(self.fit_browser.show_canvas_context_menu, Qt.QueuedConnection)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
         self.fit_browser.hide()

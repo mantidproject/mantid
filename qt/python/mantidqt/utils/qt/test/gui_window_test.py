@@ -39,6 +39,15 @@ def drag_mouse(widget, from_pos, to_pos):
     yield 0.1
 
 
+def mouse_click(widget, pos, button=Qt.LeftButton):
+    QTest.mouseMove(widget, pos)
+    yield
+    QTest.mousePress(widget, button, Qt.NoModifier, pos)
+    yield
+    QTest.mouseRelease(widget, button, Qt.NoModifier, pos)
+    yield 0.1
+
+
 class GuiTestBase(object):
 
     def _call_test_method(self, w):
