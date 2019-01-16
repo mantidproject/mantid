@@ -784,7 +784,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Crop to only the selected peak region
         cropped = CropWorkspace(InputWorkspace=subtracted,
                                 StartWorkspaceIndex=max(0, int(peak_range[0])),
-                                EndWorkspaceIndex=min(int(peak_range[1]), self.number_of_pixels_x-1),
+                                EndWorkspaceIndex=min(int(peak_range[1]-1), self.number_of_pixels_x-1),
                                 OutputWorkspace="%s_cropped" % str(subtracted))
 
         if rebin_to_ws is not None:
