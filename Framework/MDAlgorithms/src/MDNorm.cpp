@@ -37,9 +37,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
-using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
 
 namespace {
+using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
 bool compareMomentum(const std::array<double, 4> &v1,
                      const std::array<double, 4> &v2) {
@@ -879,6 +879,7 @@ void MDNorm::cacheDimensionXValues() {
  * @param otherValues - values for dimensions other than Q or DeltaE
  * @param so - symmetry operation
  * @param expInfoIndex - current experiment info index
+ * @param soIndex - the index of symmetry operation (for progress purposes)
  */
 void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
                                     Geometry::SymmetryOperation so,
