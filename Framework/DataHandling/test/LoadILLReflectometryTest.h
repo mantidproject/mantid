@@ -49,6 +49,10 @@ private:
     // check the sum of all detector counts against Nexus file entry detsum
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("PSD.detsum"),
                      detCounts(output))
+    // spectrum number starts with 0
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), 0)
+    // detector IDs start with 0
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getDetectorIDs(), 0)
   }
 
   static double detCounts(MatrixWorkspace_sptr output) {

@@ -588,10 +588,12 @@ void LoadILLReflectometry::loadData(
   if (!xVals.empty()) {
     HistogramData::BinEdges binEdges(xVals);
     // write data
+    specnum_t spectrumNumber = 0;
     for (size_t j = 0; j < m_numberOfHistograms; ++j) {
       const int *data_p = &data(0, static_cast<int>(j), 0);
       const HistogramData::Counts counts(data_p, data_p + m_numberOfChannels);
       m_localWorkspace->setHistogram(j, binEdges, std::move(counts));
+      m_localWorkspace->getSpectrum(j).setSpectrumNo(spectrumNumber);
       progress.report();
       for (size_t im = 0; im < nb_monitors; ++im) {
         const int *monitor_p = monitorsData[im].data();
@@ -601,6 +603,7 @@ void LoadILLReflectometry::loadData(
                                        std::move(counts));
         progress.report();
       }
+      ++spectrumNumber;
     }
   } else
     g_log.debug("Vector of x values is empty");
