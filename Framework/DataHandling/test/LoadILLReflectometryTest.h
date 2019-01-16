@@ -52,7 +52,8 @@ private:
     // spectrum number starts with 0
     TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), 0)
     // detector IDs start with 0
-    TS_ASSERT_EQUALS(output->getSpectrum(0).getDetectorIDs(), 0)
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getDetectorIDs(),
+                     std::set<Mantid::detid_t>{0})
   }
 
   static double detCounts(MatrixWorkspace_sptr output) {
