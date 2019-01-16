@@ -20,7 +20,6 @@ Data reduction
 --------------
 
 #. Open ``Interfaces`` > ``SANS`` > ``SANS v2``
-#. Set ``Instrument`` to ``LOQ``
 #. Choose ``Load User File``; from the ISIS sample data in the ``loqdemo`` folder, choose ``Maskfile.txt``
 #. Choose ``Load Batch File``; from the ISIS sample data in the `loqdemo` folder, choose ``batch_mode_reduction.csv``
 #. In the ``Settings`` tab:
