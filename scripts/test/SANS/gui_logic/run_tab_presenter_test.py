@@ -885,6 +885,54 @@ class RunTabPresenterTest(unittest.TestCase):
             "Expected reset_row_state to have been called 7 times. Called {} times.".format(
                 presenter._table_model.reset_row_state.call_count))
 
+    def test_that_table_not_exported_if_table_is_empty(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter._export_table = mock.MagicMock()
+
+        presenter.on_export_table_clicked()
+        self.assertEqual(presenter._export_table.call_count, 0,
+                         "_export table should not have been called."
+                         " It was called {} times.".format(presenter._export_table.call_count))
+
+    def test_row_created_for_batch_file_correctly(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        test_row = ["SANS2D00022025", "another_file", "SANS2D00022052", "SANS2D00022022",
+                    "", "", "", "a_user_file.txt"]
+
+        expected_list = ["sample_sans", "SANS2D00022025", "output_as", "another_file",
+                         "sample_trans", "SANS2D00022052", "sample_direct_beam", "SANS2D00022022",
+                         "can_sans", "", "can_trans", "", "can_direct_beam", "",
+                         "user_file", "a_user_file.txt"]
+
+        actual_list = presenter._create_batch_entry_from_row(test_row)
+
+        self.assertEqual(actual_list, expected_list)
+
+    def test_buttons_enabled_after_export_table_fails(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 2])
+        presenter._view.enable_buttons = mock.MagicMock()
+        # Mock error throw on disable buttons so export fails
+        presenter._view.disable_buttons = mock.MagicMock(side_effect=RuntimeError("A test exception"))
+        try:
+            presenter.on_export_table_clicked()
+        except Exception as e:
+            self.assertTrue(False, "Exceptions should have been caught in the method. "
+                                   "Exception thrown is {}".format(str(e)))
+        else:
+            self.assertEqual(presenter._view.enable_buttons.call_count, 1,
+                             "Expected enable buttons to be called once, "
+                             "was called {} times.".format(presenter._view.enable_buttons.call_count))
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():
