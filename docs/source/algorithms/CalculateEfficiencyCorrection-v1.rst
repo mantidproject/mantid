@@ -8,7 +8,6 @@
 
 Description
 -----------
-
 This algorithm calculates the detection efficiency correction, :math:`\epsilon`, defined by:
 
 .. math::
@@ -46,8 +45,12 @@ The optional inputs into the algorithm are to input either:
   2. The ``Density`` and ``ChemicalFormula`` to calculate the :math:`\sigma(\lambda_{ref})` term.
   3. The ``MeasuredEfficiency``, an optional ``MeasuredEfficiencyWavelength``, and ``ChemicalFormula`` to calculate the :math:`\sigma(\lambda_{ref})` term.
 
-The ``MeasuredEfficiency`` is the :math:`\epsilon` term measured at a specific wavelength, ``MeasuredEfficiencyWavelength``. This helps
-if the efficiency has been directly measured experimentally at a given wavelength.
+The ``MeasuredEfficiency`` is the :math:`\epsilon` term measured at a specific wavelength, :math:`\lambda_{\epsilon}`, which is specified by ``MeasuredEfficiencyWavelength``. This helps
+if the efficiency has been directly measured experimentally at a given wavelength. This will calculate the
+:math:`\rho * T` term, where it will be either:
+
+- :math:`\rho * T = - ln(1-\epsilon) \frac{1}{ \frac{\lambda_{\epsilon} \sigma (\lambda_{ref})}{\lambda_{ref}}}` for ``XSectionType`` == ``AttenuationXSection``
+- :math:`\rho * T = - ln(1-\epsilon) \frac{1}{ \sigma_s + \frac{\lambda_{\epsilon} \sigma (\lambda_{ref})}{\lambda_{ref}}}` for ``XSectionType`` == ``TotalXSection``
 
 For the ``XSectionType``, if the efficiency correction is applied to a beam monitor to determine the incident spectrum, then the ``AttenuationXSection`` option should be used. This is due to the fact that scatter events do not lead to neutrons that will be in the incident beam. If the efficiency correction is to be used similar to a transmission measurement for an actual sample measurement, such as in :ref:`algm-CalculateSampleTransmission-v1`, then the ``TotalXSection`` should be used to include both types of events.
 

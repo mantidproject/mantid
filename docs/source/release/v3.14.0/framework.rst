@@ -64,7 +64,7 @@ New Algorithms
 - :ref:`MaskBinsIf <algm-MaskBinsIf>` is an algorithm to mask bins according to criteria specified as a muparser expression.
 - :ref:`MaskNonOverlappingBins <algm-MaskNonOverlappingBins>` masks the bins that do not overlap with another workspace.
 - :ref:`ParallaxCorrection <algm-ParallaxCorrection>` will perform a geometric correction for the so-called parallax effect in tube based SANS detectors.
-- :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate an detection efficiency correction with mulitple and flexible inputs for calculation.
+- :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate a detection efficiency correction with multiple and flexible inputs for calculation.
 
 Improvements
 ############

@@ -54,106 +54,103 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
         self.declareProperty(
             MatrixWorkspaceProperty('OutputWorkspace', '',
                                     direction=Direction.Output),
-            doc="Outputs the efficiency correction which can be applied by multiplying \
-                 the OutputWorkspace to the workspace that requires the correction.")
+            doc="Output workspace for the efficiency correction. \
+                 This can be applied by multiplying the OutputWorkspace \
+                 to the workspace that requires the correction.")
 
         self.declareProperty(
             name='ChemicalFormula', defaultValue='None',
             validator=StringMandatoryValidator(),
-            doc='Sample chemical formula used to determine :math:`\\sigma (\\lambda_{ref})` term.')
+            doc='Sample chemical formula used to determine cross-section term.')
 
         self.declareProperty(
             name='DensityType', defaultValue = 'Mass Density',
             validator=StringListValidator(['Mass Density', 'Number Density']),
-            doc = 'Use of Mass density or Number density')
+            doc = 'Use of Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
 
         self.declareProperty(
             name='Density',
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3), :math:`\\rho`. \
-                 Default=0.0')
+            doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3).')
 
         self.declareProperty(
             name='Thickness',
             defaultValue=1.0,
             validator=FloatBoundedValidator(0.0),
-            doc='Sample thickness (cm), :math:`T`. Default value=1.0')
+            doc='Sample thickness (cm).')
 
         self.declareProperty(
             name='MeasuredEfficiency',
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0, 1.0),
-            doc="Directly input the efficiency, :math:`\\epsilon`, measured at \
-                 MeasuredEfficiencyWavelength, :math:`\\lambda_{\\epsilon}`, to determine :math:`\\rho * T`, where \
-                 :math:`\\rho * T = - ln(1-\\epsilon) \\frac{1}{ \\frac{\\lambda_{\\epsilon} \\sigma (\\lambda_{ref})}{\\lambda_{ref}}}` \
-                 term for XSectionType == AttenuationXSection and \
-                 :math:`\\rho * T = - ln(1-\\epsilon) \\frac{1} \
-                    { \\sigma_s + \\frac{\\lambda_{\\epsilon} \\sigma (\\lambda_{ref})}{\\lambda_{ref}}}` \
-                 for XSectionType == TotalXSection \
-                 with :math:`\\lambda_{ref} =` 1.7982. Default=0.0")
+            doc="Directly input the efficiency measured at MeasuredEfficiencyWavelength. \
+                 This is used to determine a Density*Thickness term.")
 
         self.declareProperty(
             name='MeasuredEfficiencyWavelength',
             defaultValue=1.7982,
             validator=FloatBoundedValidator(0.0),
-            doc="The wavelength, :math:`\\lambda_{\\epsilon}`, at which the \
-                 MeasuredEfficiency, :math:`\\epsilon`, was measured. Default=1.7982")
+            doc="The wavelength at which the MeasuredEfficiency was measured.")
 
         self.declareProperty(
-            name='Alpha',
-            defaultValue=0.0,
-            doc="Directly input :math:`\\alpha`, where \
-                 :math:`\\alpha = \\rho * T * \\sigma (\\lambda_{ref}) / \\lambda_{ref}`, \
-                 where :math:`\\lambda_{ref} =` 1.7982. XSectionType has no effect. Default=0.0")
+            name='Alpha', defaultValue=0.0,
+            doc="Directly input the alpha term in exponential to multiply by the wavelength. \
+                 XSectionType has no effect if this is used.")
 
         self.declareProperty(
             name='XSectionType',
             defaultValue="AttenuationXSection",
             validator=StringListValidator(['AttenuationXSection', 'TotalXSection']),
-            doc = 'Use either the absorption cross section (for monitor-type correction) or, \
-                   the total cross section (for transmission-type correction) in Alpha term. \
-                   Default=AttenuationXSection')
+            doc = 'Use either the absorption  or total cross section in exponential term. \
+                   The absorption cross section is for monitor-type corrections and \
+                   the total cross section is for transmission-type corrections' )
 
     def validateInputs(self):
         issues = dict()
 
-        if self.getProperty('InputWorkspace').isDefault and self.getProperty('WavelengthRange').isDefault:
+        # Check the inputs for wavelength
+        isInWSDefault = self.getProperty('InputWorkspace').isDefault
+        isWlRangeDefault = self.getProperty('WavelengthRange').isDefault
+
+        if isInWSDefault and isWlRangeDefault:
             issues['InputWorkspace'] = "Must select either InputWorkspace and WavelengthRange as input"
             issues['WavelengthRange'] = "Must select either InputWorkspace and WavelengthRange as input"
 
-        if not self.getProperty('InputWorkspace').isDefault and not self.getProperty('WavelengthRange').isDefault:
+        if isInWSDefault and isWlRangeDefault:
             issues['InputWorkspace'] = "Cannot select both InputWorkspace and WavelengthRange as input"
             issues['WavelengthRange'] = "Cannot select both InputWorkspace and WavelengthRange as input"
 
-        if not self.getProperty('Density').isDefault:
-            if self.getProperty('ChemicalFormula').isDefault:
+        # Check the different inputs for the exponential term
+        isDensityDefault = self.getProperty('Density').isDefault
+        isFormulaDefault = self.getProperty('ChemicalFormula').isDefault
+        isEffDefault     = self.getProperty('MeasuredEfficiency').isDefault
+        isAlphaDefault   = self.getProperty('Alpha').isDefault
+
+        if not isDensityDefault:
+            if isFormulaDefault:
                 issues['ChemicalFormula'] = "Must specify the ChemicalFormula with Density"
 
-        if not self.getProperty('MeasuredEfficiency').isDefault:
-            if self.getProperty('ChemicalFormula').isDefault:
+        if not isEffDefault:
+            if isFormulaDefault:
                 issues['ChemicalFormula'] = "Must specify the ChemicalFormula with MeasuredEfficiency"
 
-        if not self.getProperty('MeasuredEfficiency').isDefault:
-            if self.getProperty('ChemicalFormula').isDefault:
-                issues['ChemicalFormula'] = "Must specify the ChemicalFormula with MeasuredEfficiency"
-
-        if not self.getProperty('MeasuredEfficiency').isDefault and not self.getProperty('Density').isDefault:
+        if not isEffDefault and not isDensityDefault:
             issues['MeasuredEfficiency'] = "Cannot select both MeasuredEfficiency and Density as input"
             issues['Density'] = "Cannot select both MeasuredEfficiency and Density as input"
 
-        if not self.getProperty('Alpha').isDefault and not self.getProperty('Density').isDefault:
+        if not isAlphaDefault and not isDensityDefault:
             issues['Alpha'] = "Cannot select both Alpha and Density as input"
             issues['Density'] = "Cannot select both Alpha and Density as input"
 
-        if not self.getProperty('MeasuredEfficiency').isDefault and not self.getProperty('Alpha').isDefault:
+        if not isEffDefault and not isAlphaDefault:
             issues['MeasuredEfficiency'] = "Cannot select both MeasuredEfficiency and Alpha as input"
             issues['Alpha'] = "Cannot select both MeasuredEfficiency and Alpha as input"
 
         return issues
 
     def _setup(self):
-        self._input_ws = self.getPropertyValue('InputWorkspace')
+        self._input_ws = self.getProperty('InputWorkspace').value
         self._bin_params = self.getPropertyValue('WavelengthRange')
         self._output_ws = self.getProperty('OutputWorkspace').valueAsStr
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')

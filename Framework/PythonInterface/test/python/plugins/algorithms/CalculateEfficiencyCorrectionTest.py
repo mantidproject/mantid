@@ -8,8 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.simpleapi import \
-    ConvertToPointData, CalculateEfficiencyCorrection, CreateSampleWorkspace, \
-    DeleteWorkspace, LoadAscii, Multiply
+    CalculateEfficiencyCorrection, CloneWorkspace, ConvertToPointData, \
+    CreateSampleWorkspace, DeleteWorkspace, LoadAscii, Multiply
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 
@@ -48,7 +48,9 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
                   Unit="Wavelength")
         ConvertToPointData(InputWorkspace=self._input_wksp, OutputWorkspace=self._input_wksp)
 
-    def checkResults(self, xsection="AttenuationXSection"):
+    def checkResults(self, eventCheck=False, xsection="AttenuationXSection"):
+        # Check results
+
         Multiply(LHSWorkspace=self._input_wksp,
                  RHSWorkspace=self._correction_wksp,
                  OutputWorkspace=self._output_wksp)
@@ -56,10 +58,13 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
 
         self.assertEqual(output_wksp.getAxis(0).getUnit().unitID(), 'Wavelength')
         self.assertAlmostEqual(output_wksp.readX(0)[79], 0.995)
-        if xsection == "AttenuationXSection":
-            self.assertAlmostEqual(output_wksp.readY(0)[79], 3250.28183501)
-        if xsection == "TotalXSection":
-            self.assertAlmostEqual(output_wksp.readY(0)[79], 3245.70148939)
+        if eventCheck:
+            self.assertAlmostEqual(output_wksp.readY(0)[79], 62.22517501)
+        else:
+            if xsection == "AttenuationXSection":
+                self.assertAlmostEqual(output_wksp.readY(0)[79], 3250.28183501)
+            if xsection == "TotalXSection":
+                self.assertAlmostEqual(output_wksp.readY(0)[79], 3245.70148939)
 
     # Result tests
     def testCalculateEfficiencyCorrectionAlphaForEventWksp(self):
@@ -81,18 +86,29 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
                                  Alpha=self._alpha,
                                  OutputWorkspace=self._correction_wksp)
         self.assertTrue(alg_test.isExecuted())
-
-        # Apply correction
         ConvertToPointData(InputWorkspace=self._input_wksp, OutputWorkspace=self._input_wksp)
-        Multiply(LHSWorkspace=self._input_wksp,
-                 RHSWorkspace=self._correction_wksp,
-                 OutputWorkspace=self._output_wksp)
+        self.checkResults(eventCheck=True)
 
-        # Check results
-        output_wksp = AnalysisDataService.retrieve(self._output_wksp)
-        self.assertEqual(output_wksp.getAxis(0).getUnit().unitID(), 'Wavelength')
-        self.assertAlmostEqual(output_wksp.readX(0)[79], 0.995)
-        self.assertAlmostEqual(output_wksp.readY(0)[79], 62.22517501)
+    def testCalculateEfficiencyCorrectionAlphaForEventWkspInputWkspNotInADS(self):
+        self.cleanup()
+
+        # Create an exponentially decaying function in wavelength to simulate
+        # measured sample
+        tmp_wksp = CreateSampleWorkspace(WorkspaceType="Event", Function="User Defined",
+                                         UserDefinedFunction="name=ExpDecay, Height=100, Lifetime=4",
+                                         Xmin=0.2, Xmax=4.0, BinWidth=0.01, XUnit="Wavelength",
+                                         NumEvents=10000, NumBanks=1, BankPixelWidth=1,
+                                         OutputWorkspace=self._input_wksp, StoreInADS=False)
+
+        # Calculate the efficiency correction
+        alg_test = run_algorithm("CalculateEfficiencyCorrection",
+                                 InputWorkspace=tmp_wksp,
+                                 Alpha=self._alpha,
+                                 OutputWorkspace=self._correction_wksp)
+        self.assertTrue(alg_test.isExecuted())
+        CloneWorkspace(InputWorkspace=tmp_wksp, OutputWorkspace=self._input_wksp)
+        ConvertToPointData(InputWorkspace=self._input_wksp, OutputWorkspace=self._input_wksp)
+        self.checkResults(eventCheck=True)
 
     def testCalculateEfficiencyCorrectionAlpha(self):
         alg_test = run_algorithm("CalculateEfficiencyCorrection",
@@ -109,7 +125,6 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
                                  Alpha=self._alpha,
                                  OutputWorkspace=self._correction_wksp)
         self.assertTrue(alg_test.isExecuted())
-
         self.checkResults()
 
     def testCalculateEfficiencyCorrectionMassDensityAndThickness(self):
