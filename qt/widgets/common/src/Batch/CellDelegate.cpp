@@ -58,7 +58,6 @@ bool CellDelegate::eventFilter(QObject *object, QEvent *event) {
   }
   return QStyledItemDelegate::eventFilter(editor, event);
 }
-
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
