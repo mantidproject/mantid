@@ -17,11 +17,24 @@ class EnginX:
             self.user = kwargs.get("user")
             self.van_run = kwargs.get("vanadium_run")
             if "output_directory" in kwargs:
-                location = "{0}/{1}/{2}"
-                self.calibration_directory = location.format(kwargs.get("output_directory"), self.user, "Calibration")
-                self.focus_directory = location.format(kwargs.get("output_directory"), self.user, "Focus")
+
+                self.calibration_directory = os.path.join(kwargs.get("output_directory"), "User", self.user,
+                                                          "Calibration")
+                self.calibration_general = os.path.join(kwargs.get("output_directory"), "Calibration")
+                self.focus_directory = os.path.join(kwargs.get("output_directory"), "User", self.user, "Focus")
+                self.focus_general = os.path.join(kwargs.get("output_directory"), "Focus")
             else:
-                raise KeyError("You must set an output_directory")
+                root = os.path.abspath(os.sep)
+                if root == "/":
+                    self.calibration_directory = os.path.expanduser("~/EnginX_Mantid/User/"+self.user+"/Calibration")
+                    self.calibration_general = os.path.expanduser("~/EnginX_Mantid/Calibration")
+                    self.focus_directory = os.path.expanduser("~/EnginX_Mantid/User/"+self.user+"/Focus")
+                    self.focus_general = os.path.expanduser("~/EnginX_Mantid/Focus")
+                else:
+                    self.calibration_directory = os.path.join(root, "EnginX_Mantid", "User", self.user, "Calibration")
+                    self.calibration_general = os.path.join(root, "EnginX_Mantid", "Calibration")
+                    self.focus_directory = os.path.join(root, "EnginX_Mantid", "User", self.user, "Focus")
+                    self.focus_general = os.path.join(root, "EnginX_Mantid", "Focus")
 
     def create_vanadium(self):
         van_file = _gen_filename(self.van_run)
@@ -38,14 +51,14 @@ class EnginX:
             if kwargs.get("cropped") == "banks":
                 Cal.create_calibration_cropped_file(False, kwargs.get("bank"), kwargs.get("crop_name"),
                                                     van_curves_file, van_int_file, ceria_run, self.calibration_directory
-                                                    , self.van_run)
+                                                    , self.van_run, self.calibration_general)
             elif kwargs.get("cropped") == "spectra":
                 Cal.create_calibration_cropped_file(True, kwargs.get("spectra"), kwargs.get("crop_name"),
                                                     van_curves_file, van_int_file, ceria_run, self.calibration_directory
-                                                    , self.van_run)
+                                                    , self.van_run, self.calibration_general)
         else:
             Cal.create_calibration_files(van_curves_file, van_int_file, ceria_run, self.calibration_directory,
-                                         self.van_run)
+                                         self.van_run, self.calibration_general)
 
     def focus(self, **kwargs):
         if "run_number" in kwargs:
@@ -56,17 +69,17 @@ class EnginX:
         if "grouping_file" in kwargs:
             grouping_file = os.path.join(self.calibration_directory, kwargs.get("grouping_file"))
             Focus.focus_texture_mode(van_curves_file, van_int_file, run_no,
-                                     self.focus_directory, grouping_file)
+                                     self.focus_directory, grouping_file, self.focus_general)
         elif "cropped" in kwargs:
             if kwargs.get("cropped") == "banks":
                 Focus.focus_cropped(False, False, kwargs.get("bank"), van_curves_file, van_int_file, run_no,
-                                    self.focus_directory)
+                                    self.focus_directory, self.focus_general)
             elif kwargs.get("cropped") == "spectra":
                 Focus.focus_cropped(True, False, kwargs.get("spectra"), van_curves_file, van_int_file, run_no,
-                                    self.focus_directory)
+                                    self.focus_directory, self.focus_general)
         else:
             Focus.focus_whole(van_curves_file, van_int_file, run_no,
-                              self.focus_directory)
+                              self.focus_directory, self.focus_general)
 
     def _get_van_names(self):
         van_file = _gen_filename(self.van_run)
