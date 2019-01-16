@@ -64,38 +64,6 @@ TMDE(MDGridBox)::MDGridBox(
   initGridBox();
 }
 
-/**
- * contructor for explicit creation of MDGridBox with known
- * events in it
- * @param bc :: shared pointer to the BoxController, owned by workspace
- * @param depth :: recursive split depth
- * @param extentsVector :: size of the box
- * @param begin :: iterator to start
- * @param end :: iterator before end (not included)
- */
-template <typename MDE, size_t nd>
-//template <typename EventIterator> //can be done for every collection
-MDGridBox<MDE, nd>::MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,
-                              const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-                              &extentsVector, EventIterator begin, EventIterator end) :
-    MDBoxBase<MDE, nd>(bc, depth, 0, extentsVector), split(), splitCumul(),
-    m_SubBoxSize(), numBoxes(0), m_Children(), diagonalSquared(0.f),
-    nPoints(0) {
-  initGridBox();
-  double volume = 1;
-  double diagSq = 0;
-  for(size_t x = 0; x < nd; ++x) {
-    auto sz = extentsVector[x].getSize();
-    volume *= sz;
-    diagSq += sz*sz;
-  }
-  MDBoxBase<MDE, nd>::m_inverseVolume = static_cast<coord_t >(1.0/volume);
-  diagonalSquared = static_cast<coord_t >(diagSq);
-  nPoints = std::distance(begin, end);
-  MDBoxBase<MDE, nd>::calcCaches(begin, end);
-}
-
-
 /// common part of MDGridBox contstructor;
 template <typename MDE, size_t nd> size_t MDGridBox<MDE, nd>::initGridBox() {
   if (!this->m_BoxController)
