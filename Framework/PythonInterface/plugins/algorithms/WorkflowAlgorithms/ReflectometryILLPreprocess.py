@@ -389,7 +389,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         hws = self._foregroundWidths()
         self.beamPosIndex = int(numpy.rint(self.beamPos))
         if self.beamPosIndex > 255:
-            beamPosIndex = 255
+            self.beamPosIndex = 255
             self.self.log().warning('Is it a monitor spectrum?')
         sign = self._workspaceIndexDirection(ws)
         startIndex = self.beamPosIndex - sign * hws[0]
