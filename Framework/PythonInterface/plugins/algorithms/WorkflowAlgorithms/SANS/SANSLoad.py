@@ -346,20 +346,13 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                 if beam_coordinates:
                     move_alg.setProperty("BeamCoordinates", beam_coordinates)
 
-                # If component was specified then use it
-                # TODO check if system tests pass when both components are moved
-                # If they are, remove the commented out lines
-                #component = self.getProperty("Component").value
-                #if beam_coordinates:
-                #move_alg.setProperty("Component", component)
+                component = self.getProperty("Component").value
+                if not component:
+                    component = "LAB"
 
-                # Move the HAB
-                move_alg.setProperty("Component", "HAB")
+                # ZOOM and LARMOR only have LAB, SANS2D and LOQ move both at once.
+                move_alg.setProperty("Component", component)
                 move_alg.setProperty("Workspace", zeroed_workspace)
-                move_alg.execute()
-
-                # Move the LAB
-                move_alg.setProperty("Component", "LAB")
                 move_alg.execute()
 
     def _get_progress_for_file_loading(self, data):
