@@ -56,7 +56,6 @@ constexpr double energyToK = 8.0 * M_PI * M_PI *
 static bool abs_compare(int a, int b) { return (std::abs(a) < std::abs(b)); }
 } // namespace
 
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNorm)
 
@@ -440,9 +439,9 @@ void MDNorm::exec() {
     cacheDimensionXValues();
 
     if (!skipNormalization) {
-      size_t symmOpsIndex=0;
+      size_t symmOpsIndex = 0;
       for (const auto &so : symmetryOps) {
-        calculateNormalization(otherValues, so, expInfoIndex,symmOpsIndex);
+        calculateNormalization(otherValues, so, expInfoIndex, symmOpsIndex);
         symmOpsIndex++;
       }
 
@@ -453,15 +452,14 @@ void MDNorm::exec() {
     // if more than one experiment info, keep accumulating
     m_accumulate = true;
   }
-  IAlgorithm_sptr divideMD = createChildAlgorithm(
-      "DivideMD", 0.99, 1.);
-  divideMD->setProperty("LHSWorkspace",outputDataWS);
-  divideMD->setProperty("RHSWorkspace",m_normWS);
+  IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", 0.99, 1.);
+  divideMD->setProperty("LHSWorkspace", outputDataWS);
+  divideMD->setProperty("RHSWorkspace", m_normWS);
   divideMD->setPropertyValue("OutputWorkspace",
                              getPropertyValue("OutputWorkspace"));
   divideMD->executeAsChildAlg();
   API::IMDWorkspace_sptr out = divideMD->getProperty("OutputWorkspace");
-  this->setProperty("OutputWorkspace",out);
+  this->setProperty("OutputWorkspace", out);
 }
 
 /**
@@ -667,8 +665,8 @@ void MDNorm::createNormalizationWS(
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
-    std::vector<Geometry::SymmetryOperation> symmetryOps) {
+DataObjects::MDHistoWorkspace_sptr
+MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
   Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
       this->getProperty("TemporaryDataWorkspace");
   Mantid::API::Workspace_sptr outputWS;
@@ -689,7 +687,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     if (m_isRLU) {
       Qtransform = m_UB * soMatrix * m_W;
     } else {
-      Qtransform = soMatrix *m_W;
+      Qtransform = soMatrix * m_W;
     }
 
     // bin the data
@@ -804,7 +802,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
  */
 std::vector<coord_t>
 MDNorm::getValuesFromOtherDimensions(bool &skipNormalization,
-                                              uint16_t expInfoIndex) const {
+                                     uint16_t expInfoIndex) const {
   const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
 
   std::vector<coord_t> otherDimValues;
@@ -882,8 +880,9 @@ void MDNorm::cacheDimensionXValues() {
  * @param so - symmetry operation
  * @param expInfoIndex - current experiment info index
  */
-void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, Geometry::SymmetryOperation so,
-    uint16_t expInfoIndex, size_t soIndex) {
+void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
+                                    Geometry::SymmetryOperation so,
+                                    uint16_t expInfoIndex, size_t soIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   std::vector<double> lowValues, highValues;
   auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(
@@ -933,8 +932,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, Geo
   double progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
       make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
-                                 0.3 + progStep* (1. + progIndex),
-                                 ndets);
+                                 0.3 + progStep * (1. + progIndex), ndets);
 
   bool safe = true;
   if (m_diffraction) {
