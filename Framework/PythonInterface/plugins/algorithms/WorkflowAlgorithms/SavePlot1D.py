@@ -155,8 +155,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 (traces, xlabel, ylabel) = self.toScatterAndLabels(wksp, spectraNames)
                 for spectrum in traces:
                     fig.append_trace(spectrum, i+1, 1)
-                fig['layout']['xaxis%d' % (i+1)].update(title=xlabel)
-                fig['layout']['yaxis%d' % (i+1)].update(title=ylabel)
+                fig['layout']['xaxis%d' % (i+1)].update(title={'text':xlabel})
+                fig['layout']['yaxis%d' % (i+1)].update(title={'text':ylabel})
                 if len(spectraNames) > 0:  # remove the used spectra names
                     spectraNames = spectraNames[len(traces):]
             fig['layout'].update(margin={'r':0,'t':0})
@@ -164,8 +164,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp,
                                                                spectraNames)
 
-            layout = go.Layout(yaxis={'title': ylabel},
-                               xaxis={'title': xlabel},
+            layout = go.Layout(yaxis={'title': {'text':ylabel}},
+                               xaxis={'title': {'text':xlabel}},
                                margin={'l':40,'r':0,'t':0,'b':40})
 
             fig = go.Figure(data=traces, layout=layout)
@@ -201,7 +201,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
             data.append(go.Scatter(x=x, y=y, name=label, visible=visible))
 
-        (xlabel, ylabel) = self.getAxesLabels(wksp, utf8=True)
+        (xlabel, ylabel) = self.getAxesLabels(wksp, utf8=False)
 
         return (data, xlabel, ylabel)
 

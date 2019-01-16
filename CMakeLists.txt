@@ -415,7 +415,7 @@ if ( ENABLE_CPACK )
                                            "python-six,"
                                            "python-matplotlib,"
                                            "python-scipy,"
-                                           "python-skimage"
+                                           "python-skimage,"
                                            "python-pycifrw (>= 4.2.1),"
                                            "python-yaml,"
                                            "python-qtawesome,"

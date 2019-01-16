@@ -16,12 +16,14 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/EstimatePolynomial.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -36,6 +38,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::Histogram;
 using namespace std;
@@ -1873,8 +1876,10 @@ FitPeaks::createMatrixWorkspace(const std::vector<double> &vec_x,
   size_t size = vec_x.size();
   size_t ysize = vec_y.size();
 
-  MatrixWorkspace_sptr matrix_ws =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, size, ysize);
+  HistogramBuilder builder;
+  builder.setX(std::move(size));
+  builder.setY(std::move(ysize));
+  MatrixWorkspace_sptr matrix_ws = create<Workspace2D>(1, builder.build());
 
   auto &dataX = matrix_ws->mutableX(0);
   auto &dataY = matrix_ws->mutableY(0);
@@ -1894,8 +1899,8 @@ void FitPeaks::generateOutputPeakPositionWS() {
   // create output workspace for peak positions: can be partial spectra to input
   // workspace
   size_t num_hist = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
-  m_outputPeakPositionWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", num_hist, m_numPeaksToFit, m_numPeaksToFit);
+  m_outputPeakPositionWorkspace =
+      create<Workspace2D>(num_hist, Points(m_numPeaksToFit));
   // set default
   for (size_t wi = 0; wi < num_hist; ++wi) {
     // convert to workspace index of input data workspace
@@ -1973,8 +1978,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
     param_vec.emplace_back(m_bkgdFunction->parameterName(iparam));
 
   // parameter value table
-  m_fittedParamTable =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_fittedParamTable = boost::make_shared<TableWorkspace>();
   setupParameterTableWorkspace(m_fittedParamTable, param_vec, true);
 
   // for error workspace
@@ -1986,8 +1990,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
     m_fitErrorTable = nullptr;
   } else {
     // create table and set up parameter table
-    m_fitErrorTable =
-        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    m_fitErrorTable = boost::make_shared<TableWorkspace>();
     setupParameterTableWorkspace(m_fitErrorTable, param_vec, false);
   }
 
@@ -2008,7 +2011,7 @@ void FitPeaks::generateCalculatedPeaksWS() {
   }
 
   // create a wokspace with same number of input matrix workspace
-  m_fittedPeakWS = API::WorkspaceFactory::Instance().create(m_inputMatrixWS);
+  m_fittedPeakWS = create<Workspace2D>(*m_inputMatrixWS);
   for (size_t iws = 0; iws < m_fittedPeakWS->getNumberHistograms(); ++iws) {
     auto out_vecx = m_fittedPeakWS->histogram(iws).x();
     auto in_vecx = m_inputMatrixWS->histogram(iws).x();

@@ -52,11 +52,13 @@ from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
+from mantidqt.project.project import Project  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
 
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
+from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -137,6 +139,7 @@ class MainWindow(QMainWindow):
 
         # -- instance attributes --
         self.setWindowTitle("Mantid Workbench")
+        self.setObjectName("Mantid Workbench")
 
         # widgets
         self.messagedisplay = None
@@ -163,6 +166,9 @@ class MainWindow(QMainWindow):
 
         # Layout
         self.setDockOptions(self.DOCKOPTIONS)
+
+        # Project
+        self.project = None
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -207,6 +213,9 @@ class MainWindow(QMainWindow):
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
 
+        # Set up the project object
+        self.project = Project(GlobalFigureManager)
+
         # uses default configuration as necessary
         self.readSettings(CONF)
 
@@ -238,26 +247,29 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         # --- general application menu options --
         # file menu
-        action_open = create_action(self, "Open",
+        action_open = create_action(self, "Open Script",
                                     on_triggered=self.open_file,
                                     shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut,
-                                    icon_name="fa.folder-open")
-        action_save = create_action(self, "Save",
-                                    on_triggered=self.save_file,
-                                    shortcut="Ctrl+S",
-                                    shortcut_context=Qt.ApplicationShortcut,
-                                    icon_name="fa.save")
+                                    shortcut_context=Qt.ApplicationShortcut)
+        action_load_project = create_action(self, "Open Project",
+                                            on_triggered=self.load_project)
+        action_save_script = create_action(self, "Save Script",
+                                           on_triggered=self.save_script,
+                                           shortcut="Ctrl+S",
+                                           shortcut_context=Qt.ApplicationShortcut)
+        action_save_project = create_action(self, "Save Project",
+                                            on_triggered=self.save_project)
+        action_save_project_as = create_action(self, "Save Project as...",
+                                               on_triggered=self.save_project_as)
+
         action_manage_directories = create_action(self, "Manage User Directories",
-                                                  on_triggered=self.open_manage_directories,
-                                                  icon_name="fa.folder")
+                                                  on_triggered=self.open_manage_directories)
 
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut,
-                                    icon_name="fa.power-off")
-        self.file_menu_actions = [action_open, action_save, action_manage_directories, None, action_quit]
-
+                                    shortcut_context=Qt.ApplicationShortcut)
+        self.file_menu_actions = [action_open, action_load_project, None, action_save_script, action_save_project,
+                                  action_save_project_as, None, action_manage_directories, None, action_quit]
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
                                                on_triggered=self.prep_window_for_reset,
@@ -401,6 +413,14 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
+        # Check whether or not to save project
+        if not self.project.saved:
+            # Offer save
+            if self.project.offer_save(self):
+                # Cancel has been clicked
+                event.ignore()
+                return
+
         # Close editors
         if self.editor.app_closing():
             self.writeSettings(CONF)  # write current window information to global settings object
@@ -428,9 +448,17 @@ class MainWindow(QMainWindow):
             return
         self.editor.open_file_in_new_tab(filepath)
 
-    def save_file(self):
-        # todo: how should this interact with project saving and workspaces when they are implemented?
+    def save_script(self):
         self.editor.save_current_file()
+
+    def save_project(self):
+        self.project.save()
+
+    def save_project_as(self):
+        self.project.save_as()
+
+    def load_project(self):
+        self.project.load()
 
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()

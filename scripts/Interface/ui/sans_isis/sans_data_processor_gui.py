@@ -14,7 +14,7 @@ from abc import ABCMeta, abstractmethod
 from inspect import isclass
 
 from six import with_metaclass
-from qtpy.QtWidgets import (QListWidgetItem, QMainWindow, QMessageBox)  # noqa
+from qtpy.QtWidgets import (QListWidgetItem, QMainWindow, QMessageBox, QFileDialog)  # noqa
 from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
 
@@ -307,6 +307,8 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.load_button.clicked.connect(self._load_clicked)
 
+        self.export_table_button.clicked.connect(self._export_table_clicked)
+
         self.help_button.clicked.connect(self._on_help_button_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -460,6 +462,9 @@ class SANSDataProcessorGui(QMainWindow,
     def _load_clicked(self):
         self._call_settings_listeners(lambda listener: listener.on_load_clicked())
 
+    def _export_table_clicked(self):
+        self._call_settings_listeners(lambda listener: listener.on_export_table_clicked())
+
     def _processing_finished(self):
         """
         Clean up
@@ -553,6 +558,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.user_file_button.setEnabled(False)
         self.manage_directories_button.setEnabled(False)
         self.load_button.setEnabled(False)
+        self.export_table_button.setEnabled(False)
 
     def enable_buttons(self):
         self.process_selected_button.setEnabled(True)
@@ -561,6 +567,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.user_file_button.setEnabled(True)
         self.manage_directories_button.setEnabled(True)
         self.load_button.setEnabled(True)
+        self.export_table_button.setEnabled(True)
 
     def disable_process_buttons(self):
         self.process_selected_button.setEnabled(False)
@@ -586,6 +593,10 @@ class SANSDataProcessorGui(QMainWindow,
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setEscapeButton(QMessageBox.Ok)
         msg.exec_()
+
+    def display_save_file_box(self, title, default_path, file_filter):
+        filename = QFileDialog.getSaveFileName(self, title, default_path, filter=file_filter)
+        return filename
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())

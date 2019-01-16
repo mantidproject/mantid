@@ -202,12 +202,12 @@ def use_imshow(ws):
 
     x = ws.dataX(0)
     difference = np.diff(x)
-    if not np.all(np.isclose(difference, difference[0])):
+    if not np.all(np.isclose(difference[:-1], difference[0])):
         return False
 
     y = ws.getAxis(1).extractValues()
     difference = np.diff(y)
-    if not np.all(np.isclose(difference, difference[0])):
+    if not np.all(np.isclose(difference[:-1], difference[0])):
         return False
 
     return True
@@ -236,7 +236,7 @@ def pcolormesh(workspaces, fig=None):
             ws = workspaces[subplot_idx]
             ax.set_title(ws.name())
             if use_imshow(ws):
-                pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto')
+                pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
             else:
                 pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
             for lbl in ax.get_xticklabels():

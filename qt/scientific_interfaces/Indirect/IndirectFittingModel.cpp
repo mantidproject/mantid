@@ -384,7 +384,8 @@ std::string
 IndirectFittingModel::createOutputName(const std::string &formatString,
                                        const std::string &rangeDelimiter,
                                        std::size_t dataIndex) const {
-  return createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
+  return createDisplayName(formatString, rangeDelimiter, dataIndex) +
+         "_Results";
 }
 
 bool IndirectFittingModel::isMultiFit() const {
