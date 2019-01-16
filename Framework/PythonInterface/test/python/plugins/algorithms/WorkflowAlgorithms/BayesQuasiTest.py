@@ -152,7 +152,7 @@ if platform.system() == "Windows":
             for i in range (group.getNumberOfEntries()):
                 sub_ws = group.getItem(i)
                 self.assertTrue(isinstance(sub_ws, MatrixWorkspace))
-                self.assertEqual(sub_ws.getNumberHistograms(), 5)
+                self.assertEqual(sub_ws.getNumberHistograms(), 7)
                 self.assertEquals(sub_ws.getAxis(0).getUnit().unitID(), 'DeltaE')
 
 
