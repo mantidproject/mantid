@@ -4,15 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-# flake8: noqa
 
 import numpy as np
 from mantid.api import MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory
-from mantid.api import AnalysisDataService, AlgorithmManager
 from mantid.kernel import Direction, FloatArrayProperty, FloatBoundedValidator, FloatArrayMandatoryValidator, Logger
 from mantid.api import IMaskWorkspace
-
 
 SOURCE_APERTURE_RADIUS = 20.0
 SOURCE_APERTURE_RADIUS_MAX = 40.0
@@ -21,6 +18,7 @@ SAMPLE_APERTURE_RADIUS = 6.25
 NUMBER_OF_BINS = 10
 NUMBER_OF_SPECTRA = 1
 DELTA_WAVELENGTH = 0.1
+
 
 class BilbySANSDataProcessor(DataProcessorAlgorithm):
     def __init__(self):
@@ -92,7 +90,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         self.declareProperty(name='PolynomialOrder',
                              defaultValue='3',
                              doc='Used only for Polynomial function, but needed as an input parameter anyway')
-DELTA_WAVELENGTH
+
         self.declareProperty(name='ScalingFactor',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
@@ -179,12 +177,6 @@ DELTA_WAVELENGTH
         ws_tranEmp = self.getProperty("TransmissionEmptyBeamWorkspace").value
         ws_tranMsk = self.getProperty("TransmissionMaskingWorkspace").value
 
-        scale = self.getProperty("ScalingFactor").value
-        thickness = self.getProperty("SampleThickness").value
-
-        radiuscut = self.getProperty("RadiusCut").value
-        wavecut = self.getProperty("WaveCut").value
-
         # -- Validation --
         sam_histograms = ws_sam.getNumberHistograms()
         if sam_histograms <= 0:
@@ -227,6 +219,18 @@ DELTA_WAVELENGTH
 
         if ws_tranMsk:
             isinstance(ws_tranMsk, IMaskWorkspace)
+
+        inputs = self.check_geometry_and_cuts(inputs)
+
+        return inputs
+
+    def check_geometry_and_cuts(self, inputs):
+
+        scale = self.getProperty("ScalingFactor").value
+        thickness = self.getProperty("SampleThickness").value
+
+        radiuscut = self.getProperty("RadiusCut").value
+        wavecut = self.getProperty("WaveCut").value
 
         if scale <= 0.0:
             inputs["ScalingFactor"] = "has to be greater than zero"
@@ -417,28 +421,35 @@ DELTA_WAVELENGTH
 
             self.setProperty("OutputWorkspace", q1d)  # set output, file 1D pattern
 
+
     def _get_time_span(self, ws):
         run = ws.getRun()
         duration = run.endTime() - run.starme()
         return float(duration.total_microseconds())
 
+
     def _get_bm_counts(self, ws):
         return float(ws.run().getProperty("bm_counts").value)
+
 
     def _get_frame_count(self, ws):
         return float(ws.run().getProperty("frame_count").value)
 
+
     def _get_period(self, ws):
         return float(ws.run().getProperty("period").value)
 
+
     def _get_l1(self, ws):
         return float(ws.run().getProperty("L1").value)
+
 
     def _apply_mask(self, ws, mask):
         alg = self.createChildAlgorithm("MaskDetectors")
         alg.setProperty("Workspace", ws)
         alg.setProperty("MaskedWorkspace", mask)
         alg.execute()
+
 
     def _convert_units(self, ws, unit):
         alg = self.createChildAlgorithm("ConvertUnits")
@@ -447,6 +458,7 @@ DELTA_WAVELENGTH
         alg.execute()
 
         return alg.getProperty("OutputWorkspace").value
+
 
     def _rebin(self, ws, binning, preserveevents):
         alg = self.createChildAlgorithm("Rebin")
@@ -457,6 +469,7 @@ DELTA_WAVELENGTH
 
         return alg.getProperty("OutputWorkspace").value
 
+
     def _multiply(self, a, b):
         alg = self.createChildAlgorithm("Multiply")
         alg.setProperty("LHSWorkspace", a)
@@ -464,6 +477,7 @@ DELTA_WAVELENGTH
         alg.execute()
 
         return alg.getProperty("OutputWorkspace").value
+
 
     def _scale_mult(self, ws_input, factor, operation):
         alg = self.createChildAlgorithm("Scale")
@@ -473,6 +487,7 @@ DELTA_WAVELENGTH
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
+
     def _subtract(self, a, b):
         alg = self.createChildAlgorithm("Minus")
         alg.setProperty("LHSWorkspace", a)
@@ -480,11 +495,13 @@ DELTA_WAVELENGTH
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
+
     def _single_valued_ws(self, value):
         alg = self.createChildAlgorithm("CreateSingleValuedWorkspace")
         alg.setProperty("DataValue", value)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
+
 
     def _mask_to_roi(self, ws_mask):
         alg = self.createChildAlgorithm("InvertMask")
@@ -495,6 +512,7 @@ DELTA_WAVELENGTH
         alg.setProperty("InputWorkspace", ws_tranmskinv)
         alg.execute()
         return alg.getProperty("DetectorList").value
+
 
     def _calculate_transmission(self, ws_tranSam, ws_tranEmp, ws_tranroi, fitmethod, polynomialorder, binning):
         alg = self.createChildAlgorithm("CalculateTransmission")
@@ -508,12 +526,14 @@ DELTA_WAVELENGTH
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
+
     def _wide_angle_correction(self, ws_sam, ws_tranSam):
         alg = self.createChildAlgorithm("SANSWideAngleCorrection")
         alg.setProperty("SampleData", ws_sam)
         alg.setProperty("TransmissionData", ws_tranSam)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
+
 
     def _emp_shape_adjustment(self, ws_emp, ws_tran):
         if ws_emp.getNumberHistograms() != 1:
@@ -533,6 +553,7 @@ DELTA_WAVELENGTH
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
+
     def _tofsansresolutionbypixel(self, ws_sam, sampleapertureradius, sourceapertureradius, sigmamoderator,
                                   collimationlength, accountforgravity, extralength, deltar=5.0):
         alg = self.createChildAlgorithm("TOFSANSResolutionByPixel")
@@ -547,6 +568,7 @@ DELTA_WAVELENGTH
 
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
+
 
     def _q1d(self, ws_sam, binning_q, pixeladj, wavelengthadj, wavepixeladj, accountforgravity, solidangleweighting,
              radiuscut, wavecut, extralength, qresolution):
@@ -571,6 +593,7 @@ DELTA_WAVELENGTH
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
+
     def _qxy(self, ws_sam, q_max, q_delta, pixeladj, wavelengthadj, accountforgravity, solidangleweighting,
              extralength):
         alg = self.createChildAlgorithm("Qxy")
@@ -588,6 +611,7 @@ DELTA_WAVELENGTH
             alg.setProperty("WavelengthAdj", wavelengthadj)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
+
 
     def _create_empty_ws(self, data_x, data_y, number_of_spectra, unitx):
         # empty output workspace in case 2D reduction is not happening
