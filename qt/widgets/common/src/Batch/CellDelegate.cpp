@@ -51,7 +51,7 @@ bool CellDelegate::eventFilter(QObject *object, QEvent *event) {
     return false;
   if (event->type() == QEvent::KeyPress) {
     QKeyEvent *keyPress = static_cast<QKeyEvent *>(event);
-    if (keyPress->key() == Qt::Key_Return) {
+    if (keyPress->key() == Qt::Key_Return || keyPress->key() == Qt::Key_Enter) {
       emit commitData(editor);
       return false;
     }

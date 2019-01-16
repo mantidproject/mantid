@@ -461,13 +461,15 @@ void JobTreeView::appendAndEditAtChildRow() {
 
 void JobTreeView::appendAndEditAtRowBelow() {
   auto current = currentIndex();
-  auto const below = findOrMakeCellBelow(fromFilteredModel(current));
-  auto index = below.first;
-  auto isNew = below.second;
+  if (current != m_mainModel.index(-1,-1)) {
+    auto const below = findOrMakeCellBelow(fromFilteredModel(current));
+    auto index = below.first;
+    auto isNew = below.second;
 
-  if (isNew)
-    m_notifyee->notifyRowInserted(rowLocation().atIndex(mapToMainModel(index)));
-  editAt(index);
+    if (isNew)
+      m_notifyee->notifyRowInserted(rowLocation().atIndex(mapToMainModel(index)));
+    editAt(index);
+  }
 }
 
 void JobTreeView::editAtRowAbove() {
@@ -483,7 +485,7 @@ void JobTreeView::enableFiltering() {
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
   switch (event->key()) {
-  case Qt::Key_Return: {
+  case Qt::Key_Return: case Qt::Key_Enter: {
     if (event->modifiers() & Qt::ControlModifier) {
       appendAndEditAtChildRow();
     } else if (event->modifiers() & Qt::ShiftModifier) {
