@@ -25,4 +25,7 @@ from __future__ import (absolute_import, division,
 ###############################################################################
 # Load the C++ library and register the C++ class exports
 ###############################################################################
-from . import _curvefitting
+from ..kernel import _shared_cextension
+
+with _shared_cextension():
+    from . import _curvefitting

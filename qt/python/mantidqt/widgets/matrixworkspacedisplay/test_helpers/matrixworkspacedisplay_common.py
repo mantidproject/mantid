@@ -104,6 +104,10 @@ class MockSpectrum:
 class MockWorkspace:
     TEST_NAME = "THISISAtestWORKSPACE"
 
+    NUMBER_OF_ROWS_AND_COLUMNS = 5
+    COLS = NUMBER_OF_ROWS_AND_COLUMNS
+    ROWS = COLS
+
     @staticmethod
     def _return_MockSpectrumInfo():
         return MockSpectrumInfo()
@@ -125,10 +129,28 @@ class MockWorkspace:
         self.maskedBinsIndices = None
         self.isCommonBins = Mock(return_value=True)
 
+        self.column_types = ["int", "float", "string", "v3d", "bool"]
+        self.columnTypes = Mock(return_value=self.column_types)
+
         self.mock_spectrum = MockSpectrum()
         self.getSpectrum = Mock(return_value=self.mock_spectrum)
 
         self.mock_axis = MockMantidAxis()
         self.getAxis = Mock(return_value=self.mock_axis)
 
-        self.name = None
+        self.setCell = Mock()
+
+        self.name = Mock(return_value="MOCK_WORKSPACE_TEST")
+
+        self._column_names = []
+        for i in range(self.COLS):
+            self._column_names.append("col{0}".format(i))
+
+        self.getColumnNames = Mock(return_value=self._column_names)
+        self.column_count = self.COLS
+        self.columnCount = Mock(return_value=self.column_count)
+
+        self.row_count = self.ROWS
+        self.rowCount = Mock(return_value=self.row_count)
+
+        self.column = Mock(return_value=[1] * self.row_count)

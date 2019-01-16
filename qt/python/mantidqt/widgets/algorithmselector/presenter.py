@@ -33,6 +33,9 @@ class IAlgorithmSelectorView(object):
     def populate_ui(self, data):
         raise NotImplementedError('Method has to be implemented in a subclass')
 
+    def refresh(self):
+        raise NotImplementedError('Method has to be implemented in a subclass')
+
     def get_selected_algorithm(self):
         raise NotImplementedError('Method has to be implemented in a subclass')
 
@@ -50,5 +53,8 @@ class AlgorithmSelectorPresenter(object):
     def __init__(self, view, include_hidden):
         self.view = view
         self.model = AlgorithmSelectorModel(self, include_hidden)
+        self.refresh()
+
+    def refresh(self):
         algorithm_data = self.model.get_algorithm_data()
         self.view.populate_ui(algorithm_data)

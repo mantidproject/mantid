@@ -7,9 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import DeprecatedAlgorithmChecker
+from mantid.api import DeprecatedAlgorithmChecker, FrameworkManagerImpl
+
 
 class DeprecatedAlgorithmCheckerTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
 
     def test_constructor_throws_for_non_existant_algorithm(self):
         self.assertRaises(RuntimeError, DeprecatedAlgorithmChecker, "A_Very_Silly_Alg_Name",-1)

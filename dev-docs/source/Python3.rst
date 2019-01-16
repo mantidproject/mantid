@@ -12,28 +12,12 @@ migration strategy for Mantid.
 Building Against Python 3
 #########################
 
-This is currently only possible on a Linux system with a pre-installed version of python 3. You need
-to install some additional packages as shown below:
-
-.. code-block:: sh
-
-   apt-get install python3-sip-dev python3-pyqt4  python3-numpy  python3-scipy  python3-sphinx \
-     python3-sphinx-bootstrap-theme  python3-dateutil python3-matplotlib ipython3-qtconsole \
-     python3-h5py python3-yaml
-
-or on fedora, with slightly different package names
-
-.. code-block:: sh
-
-   dnf install python3-sip-devel python3-PyQt4-devel python3-numpy python3-scipy python3-sphinx \
-     python3-sphinx-theme-bootstrap python3-dateutil python3-matplotlib python3-ipython-gui \
-     boost-python3-devel python3-h5py python3-yaml
-
-then set ``-DPYTHON_EXECUTABLE=/usr/bin/python3`` when running cmake before building.
+This is currently only possible on a Linux system with a pre-installed version of python 3 and you will need to have
+the latest version of the `mantid-developer` package installed. Once installed run cmake as standard but with the additional option ``-DPYTHON_EXECUTABLE=/usr/bin/python3``. Please note that
+reconfiguring an existing Python 2 build is not supported - a build in a fresh build directory is required.
 
 .. warning::
-   If any of these packages are installed via pip, this could cause conflicts.
-   Install as described here only.
+   Do not install python packages via ``pip``. Install packages only from the system repositories.
 
 Supporting Python 2 and 3
 #########################

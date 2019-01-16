@@ -5,13 +5,14 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateCarpenterSampleCorrection.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
@@ -23,7 +24,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CalculateCarpenterSampleCorrection) // Register the class
                                                       // into the algorithm
                                                       // factory
-
+using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
 using Mantid::DataObjects::EventWorkspace;
@@ -149,9 +150,7 @@ void CalculateCarpenterSampleCorrection::exec() {
       coeff3 = sampleMaterial.totalScatterXSection(LAMBDA_REF);
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, coeff3, 0.0, coeff3,
-                        coeff1);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, coeff3, 0.0, coeff3, coeff1);
     auto shape = boost::shared_ptr<IObject>(
         inputWksp->sample().getShape().cloneWithMaterial(
             Material("SetInMultipleScattering", neutron, coeff2)));
@@ -416,8 +415,7 @@ void CalculateCarpenterSampleCorrection::calculate_ms_correction(
 
 MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::createOutputWorkspace(
     const MatrixWorkspace_sptr &inputWksp, const std::string ylabel) const {
-  MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(inputWksp);
+  MatrixWorkspace_sptr outputWS = create<HistoWorkspace>(*inputWksp);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);

@@ -396,8 +396,8 @@ public:
 #endif
     Poco::File file(path);
     TS_ASSERT(file.exists());
-    std::string path2 = fileFinder.getFullPath(
-        "IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+    std::string path2 =
+        fileFinder.getFullPath("UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File file2(path2);
     TS_ASSERT(file2.exists());
 
@@ -407,11 +407,11 @@ public:
     Poco::File fileOn(pathOn);
 
     std::string pathOn2 = FileFinder::Instance().getFullPath(
-        "IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+        "unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn2(pathOn2);
 
     std::string pathOn3 = FileFinder::Instance().getFullPath(
-        "IDFs_for_UNIT_TESTING/IDF_for_UNiT_TESTiNG.xMl");
+        "unit_testing/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn3(pathOn3);
 
     std::string pathOn4 = FileFinder::Instance().getFullPath("CSp78173.Raw");

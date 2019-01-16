@@ -12,6 +12,12 @@ or by importing them into MantidPlot.
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 """
 from __future__ import (absolute_import, division, print_function)
+# == for testing conda build of mantid-framework ==========
+import os
+if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
+    # conda build of mantid-framework sometimes require importing matplotlib before mantid
+    import matplotlib
+# =========================================================
 from six import PY3
 import datetime
 import difflib
@@ -22,7 +28,6 @@ from mantid.api import FrameworkManager
 from mantid.kernel import config, MemoryStats
 from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
 import numpy
-import os
 import platform
 import re
 import shutil
@@ -617,16 +622,34 @@ class TestScript(object):
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
     def asString(self, clean=False):
-        code = "import sys\n" + \
-               ("sys.path.append('%s')\n" % TESTING_FRAMEWORK_DIR) + \
-               ("sys.path.append('%s')\n" % self._test_dir) + \
-               ("from %s import %s\n" % (self._modname, self._test_cls_name)) + \
-               ("systest = %s()\n" % self._test_cls_name) + \
-               ("if %r:\n" % self._exclude_in_pr_builds) + \
-               ("    systest.excludeInPullRequests = lambda: False\n")
+        code = """
+# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
+# Remove this when everything is switched to qtpy
+import sip
+try:
+    sip.setapi('QString', 2)
+    sip.setapi('QVariant', 2)
+    sip.setapi('QDate', 2)
+    sip.setapi('QDateTime', 2)
+    sip.setapi('QTextStream', 2)
+    sip.setapi('QTime', 2)
+    sip.setapi('QUrl', 2)
+except AttributeError:
+    # PyQt < v4.6
+    pass
+
+import sys
+for p in ('{test_framework}', '{test_dir}'):
+    sys.path.append(p)
+from {test_modname} import {test_cls}
+systest = {test_cls}()
+if {exclude_in_pr}:
+    systest.excludeInPullRequests = lambda: False
+""".format(test_framework=TESTING_FRAMEWORK_DIR, test_dir=self._test_dir, test_modname=self._modname,
+           test_cls=self._test_cls_name, exclude_in_pr=self._exclude_in_pr_builds)
         if (not clean):
             code += "systest.execute()\n" + \
-                    ("exitcode = systest.returnValidationCode(%i)\n" % TestRunner.VALIDATION_FAIL_CODE)
+                    "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
         else:
             code += "exitcode = 0\n"
         code += "systest.cleanup()\nsys.exit(exitcode)\n"

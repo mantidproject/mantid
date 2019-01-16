@@ -105,6 +105,8 @@ public:
   /// Get function parameter names
   QStringList getParameterNames() const;
 
+  /// Load function
+  void loadFunction(const QString &funcString);
   /// Create a new function
   PropertyHandler *addFunction(const std::string &fnName);
 
@@ -176,6 +178,8 @@ public:
   double endX() const;
   /// Set the end X
   void setEndX(double end) override;
+  /// Set both start and end X
+  void setXRange(double start, double end);
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString &lv = "");
   /// Get LogValue
@@ -201,11 +205,12 @@ public:
   /// Returns true if the function is ready for a fit
   bool isFitEnabled() const;
 
+  /// Enable/disable the Fit buttons;
+  virtual void setFitEnabled(bool enable);
+
   /// Display a tip
   void setTip(const QString &txt);
 
-  /// return groupMember
-  // const std::string groupMember() const {return m_groupMember;};
   /// alter text of Plot Guess
   void setTextPlotGuess(const QString text);
 
@@ -259,6 +264,11 @@ public:
   /// Allow or disallow sequential fits (depending on whether other conditions
   /// are met)
   void allowSequentialFits(bool allow) override;
+
+  // Methods intended for testing only
+
+  int sizeOfFunctionsGroup() const;
+  void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
 public slots:
   virtual void fit();
   virtual void sequentialFit();
@@ -276,7 +286,8 @@ signals:
   void currentChanged() const;
   void functionRemoved();
   void algorithmFinished(const QString &);
-  void workspaceIndexChanged(int i);
+  void workspaceIndexChanged(int index);
+  void updatePlotSpectrum(int index);
   void workspaceNameChanged(const QString &);
 
   void wsChangePPAssign(const QString &);
@@ -510,8 +521,7 @@ protected:
 private:
   ///
   QPushButton *createFitMenuButton(QWidget *w);
-  /// load and save function
-  void loadFunction(const QString &funcString);
+  /// save function
   void saveFunction(const QString &fnName);
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr) const;
@@ -520,14 +530,14 @@ private:
 
   /// disable undo when the function changes
   void disableUndo();
-  /// Enable/disable the Fit button;
-  virtual void setFitEnabled(bool yes);
   /// Create a string property and set some settings
   QtProperty *addStringProperty(const QString &name) const;
   void setStringPropertyValue(QtProperty *prop, const QString &value) const;
   QString getStringPropertyValue(QtProperty *prop) const;
   /// Check that the properties match the function
   void checkFunction();
+  /// Return the nearest allowed workspace index.
+  int getAllowedIndex(int currentIndex) const;
 
   void setCurrentFunction(Mantid::API::IFunction_const_sptr f) const;
 
@@ -589,9 +599,6 @@ private:
   /// Default background name
   std::string m_defaultBackground;
 
-  /// The current function index
-  int m_index_;
-
   /// Shows if the PeakPickerTool is on
   bool m_peakToolOn;
 
@@ -607,11 +614,6 @@ private:
   /// The autobackground handler
   PropertyHandler *m_autoBackground;
 
-  /// if isWorkspaceAGroup() is true m_groupMember keeps name of the
-  /// MatrixWorkspace
-  /// fitted with theFunction()
-  // std::string m_groupMember;
-
   /// Log names
   QStringList m_logs;
 
@@ -626,6 +628,14 @@ private:
 
   /// Should the data be normalised before fitting?
   bool m_shouldBeNormalised;
+
+  /// If non-empty it contains references to the spectra
+  /// allowed to be fitted in this browser:
+  ///   keys are workspace names,
+  ///   values are lists of workspace indices
+  QMap<QString, QList<int>> m_allowedSpectra;
+  /// Store workspace index to revert to in case validation fails
+  int m_oldWorkspaceIndex;
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;

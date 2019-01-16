@@ -359,7 +359,7 @@ void InstrumentRenderer::resetColors() {
   std::function<bool(size_t)> isMasked;
   if (maskWS) {
     isMasked = [&detInfo, &detectorIDs, &maskWS](size_t index) {
-      return maskWS->isMasked(detectorIDs[index]) && detInfo.isMasked(index);
+      return maskWS->isMasked(detectorIDs[index]) || detInfo.isMasked(index);
     };
   } else {
     isMasked = [&detInfo](size_t index) { return detInfo.isMasked(index); };

@@ -19,8 +19,6 @@ The variables entering the criteria are reserved as follows:
 - dx : the error on the bin center
 - s : the value of spectrum axis, which has to be SpectraAxis or NumericAxis.
 
-Note that it preserves the data in the masked bins, just flags them as masked.
-
 Usage
 -----
 

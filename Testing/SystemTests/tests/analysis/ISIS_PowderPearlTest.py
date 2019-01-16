@@ -124,7 +124,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
 
     def validate(self):
-        self.tolerance = 1e-10  # Required for difference in spline data between operating systems
+        self.tolerance = 5e-9  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):

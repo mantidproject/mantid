@@ -15,8 +15,8 @@
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
     <filelocation>
-      <prefix regex="\\\\isis\\inst\$"></prefix>
-      <windows replacement=""></windows>
+      <prefix regex="\\\\isis(?:\.cclrc\.ac\.uk)?\\inst\$"></prefix>
+      <windows replacement="\\\\isis.cclrc.ac.uk\\inst$"></windows>
       <linux replacement="/archive"></linux>
       <mac replacement="/archive"></mac>
     </filelocation>
@@ -849,12 +849,12 @@
   <instrument name="Bilby">
     <technique>Small Angle Scattering</technique>
   </instrument>
-  
+
   <instrument name="EMUau">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
-  
+
 </facility>
 
 <!-- HZB -->
@@ -915,6 +915,13 @@
     </livedata>
   </instrument>
 
+</facility>
+<!--  ESS  -->
+<facility name="ESS" FileExtensions=".nxs,.hdf5">
+ <timezone>Europe/Copenhagen</timezone>
+  <instrument name="LOKI">
+    <technique>Small Angle Scattering</technique>
+  </instrument>
 </facility>
 
 </facilities>

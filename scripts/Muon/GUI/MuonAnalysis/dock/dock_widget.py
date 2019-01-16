@@ -75,9 +75,9 @@ class DockWidget(QtGui.QWidget):
         self.label.updateContext()
         self.context_example.updateContext()
 
-    def loadFromContext(self, context):
-        self.label.loadFromContext(context)
-        self.context_example.loadFromContext(context)
+    def loadFromContext(self):
+        self.label.loadFromContext()
+        self.context_example.loadFromContext()
 
     # needed for docking
     @property

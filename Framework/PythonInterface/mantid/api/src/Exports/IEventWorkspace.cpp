@@ -45,6 +45,12 @@ void export_IEventWorkspace() {
       .def("getTofMax", &IEventWorkspace::getTofMax, args("self"),
            "Returns the maximum TOF value (in microseconds) held by the "
            ":class:`~mantid.api.Workspace`")
+      .def("getPulseTimeMin", &IEventWorkspace::getPulseTimeMin, args("self"),
+           "Returns the minimum pulse time held by the "
+           ":class:`~mantid.api.Workspace`")
+      .def("getPulseTimeMax", &IEventWorkspace::getPulseTimeMax, args("self"),
+           "Returns the maximum pulse time held by the "
+           ":class:`~mantid.api.Workspace`")
       .def("getEventList", &deprecatedGetEventList,
            return_internal_reference<>(), args("self", "workspace_index"),
            "Return the :class:`~mantid.api.IEventList` managing the events at "

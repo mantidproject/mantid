@@ -59,7 +59,7 @@ det_fit_range = namedtuple('det_fit_range', 'start, stop, use_fit')
 # --- DET
 @serializable_enum("reduction_mode", "rescale", "shift", "rescale_fit", "shift_fit", "correction_x", "correction_y",
                    "correction_z", "correction_rotation", "correction_radius", "correction_translation",
-                   "correction_x_tilt", "correction_y_tilt", "merge_range")
+                   "correction_x_tilt", "correction_y_tilt", "merge_range", "instrument")
 class DetectorId(object):
     pass
 

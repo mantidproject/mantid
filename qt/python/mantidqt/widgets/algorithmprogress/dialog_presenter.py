@@ -13,9 +13,13 @@ class AlgorithmProgressDialogPresenter(AlgorithmProgressPresenterBase):
     """
     Presents progress reports on algorithms.
     """
+
     def __init__(self, view, model):
         super(AlgorithmProgressDialogPresenter, self).__init__()
-        view.close_button.clicked.connect(self.close)
+        # connect the close button to the closeEvent of the window
+        # so that pressing the X button, and pressing `Close` go through
+        # the same routine, and properly call the presenter's close()
+        view.close_button.clicked.connect(view.close)
         self.view = view
         self.model = model
         self.model.add_presenter(self)
@@ -60,7 +64,7 @@ class AlgorithmProgressDialogPresenter(AlgorithmProgressPresenterBase):
         """
         self.model.remove_presenter(self)
         self.progress_bars.clear()
-        self.view.close()
+        self.view.parent().clear_dialog()
 
     def cancel_algorithm(self, algorithm_id):
         """

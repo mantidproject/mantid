@@ -443,7 +443,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
  * @param numBanks :: number of rectangular banks
  * @param numPixels :: each bank will be numPixels*numPixels
  * @param numBins :: each spectrum will have this # of bins
- * @return The EventWorkspace
+ * @return The Workspace2D
  */
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
