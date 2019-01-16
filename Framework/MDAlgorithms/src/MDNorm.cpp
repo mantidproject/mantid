@@ -998,12 +998,9 @@ for (int64_t i = 0; i < ndets; i++) {
     const auto &prevIntSec = *(it - 1);
     // the full vector isn't used so compute only what is necessary
     double delta, eps;
-    size_t offset =
-        0; // we skip the 4th dimension in intersection for diffraction
     if (m_diffraction) {
       delta = curIntSec[3] - prevIntSec[3];
       eps = 1e-7;
-      offset = 1;
     } else {
       delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
               energyToK;
@@ -1011,9 +1008,8 @@ for (int64_t i = 0; i < ndets; i++) {
     }
     if (delta < eps)
       continue; // Assume zero contribution if difference is small
-
     // Average between two intersections for final position
-    std::transform(curIntSec.data(), curIntSec.data() + vmdDims - offset,
+    std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
                    prevIntSec.data(), pos.begin(),
                    [](const double rhs, const double lhs) {
                      return static_cast<coord_t>(0.5 * (rhs + lhs));
@@ -1035,7 +1031,6 @@ for (int64_t i = 0; i < ndets; i++) {
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))
       continue;
-
     Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
                              std::plus<signal_t>());
   }
