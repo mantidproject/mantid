@@ -148,7 +148,7 @@ Output:
    reflected00 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        BeamCentre=peakX,
-       BeamAngle=beamAngle,
+       BraggAngle=twoTheta,
        **settings
    )
 
