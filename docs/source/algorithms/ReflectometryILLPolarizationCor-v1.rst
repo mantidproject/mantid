@@ -52,6 +52,7 @@ Usage
    # For reflected angle calibration:
    directLogs = SampleLogs(direct)
    peakX = directLogs.peak_position
+   twoTheta = directLogs.twoTheta
 
    directFgd = ReflectometryILLSumForeground(direct)
    
@@ -59,6 +60,7 @@ Usage
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        BeamCentre=peakX,
+       BraggAngle=twoTheta,
        **settings
    )
    

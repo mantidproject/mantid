@@ -387,13 +387,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         AddSampleLog(**logargs)
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
-        beamPosIndex = int(numpy.rint(self.beamPos))
-        if beamPosIndex > 255:
+        self.beamPosIndex = int(numpy.rint(self.beamPos))
+        if self.beamPosIndex > 255:
             beamPosIndex = 255
-            self.log().warning('Is it a monitor spectrum?')
+            self.self.log().warning('Is it a monitor spectrum?')
         sign = self._workspaceIndexDirection(ws)
-        startIndex = beamPosIndex - sign * hws[0]
-        endIndex = beamPosIndex + sign * hws[1]
+        startIndex = self.beamPosIndex - sign * hws[0]
+        endIndex = self.beamPosIndex + sign * hws[1]
         if startIndex > endIndex:
             endIndex, startIndex = startIndex, endIndex
         logargs['LogName'] = common.SampleLogs.FOREGROUND_START
@@ -401,7 +401,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         logargs['NumberType'] = 'Int'
         AddSampleLog(**logargs)
         logargs['LogName'] = common.SampleLogs.FOREGROUND_CENTRE
-        logargs['LogText'] = str(beamPosIndex)
+        logargs['LogText'] = str(self.beamPosIndex)
         AddSampleLog(**logargs)
         logargs['LogName'] = common.SampleLogs.FOREGROUND_END
         logargs['LogText'] = str(endIndex)
@@ -410,9 +410,23 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _moveDetector(self, ws):
         """Perform detector position correction for reflected beams only."""
+        # Write twoTheta to sample logs
+        # Add theta to the sample logs of ws.
+        if not self.getProperty(Prop.BEAM_ANGLE).isDefault:
+            twoTheta = self.getProperty(Prop.BEAM_ANGLE).value
+        else:
+            spectrum_info = ws.spectrumInfo()
+            twoTheta = numpy.rad2deg(spectrum_info.twoTheta(self.beamPosIndex))
+        logargs = {'Workspace': ws,
+                   'LogType': 'Number',
+                   'EnableLogging': self._subalgLogging}
+        logargs['LogName'] = 'twoTheta'
+        logargs['LogText'] = format(twoTheta, '.13f')
+        logargs['NumberType'] = 'Double'
+        AddSampleLog(**logargs)
         if self.getProperty(Prop.BEAM_ANGLE).isDefault:
             return ws
-        twoTheta = self.getProperty(Prop.BEAM_ANGLE).value
+        # Move detector
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
         self.instrumentName = ws.run().get('instrument.name').value
         SpecularReflectionPositionCorrect(InputWorkspace=ws,
@@ -425,14 +439,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                           DirectLinePosition=self.beamPos,
                                           EnableLogging=self._subalgLogging)
         detectorMovedWS = mtd[detectorMovedWSName]
-        # Add theta to the sample logs of ws.
-        logargs = {'Workspace': detectorMovedWS,
-                   'LogType': 'Number',
-                   'EnableLogging': self._subalgLogging}
-        logargs['LogName'] = 'twoTheta.at_direct_peak_position'
-        logargs['LogText'] = format(twoTheta, '.13f')
-        logargs['NumberType'] = 'Double'
-        AddSampleLog(**logargs)
         self._cleanup.cleanup(ws)
         return detectorMovedWS
 
