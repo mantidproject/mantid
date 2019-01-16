@@ -471,7 +471,8 @@ class BASISReduction(PythonAlgorithm):
                                       OutputWorkspace=mon_ws)
             sapi.Rebin(InputWorkspace=mon_ws,
                        OutputWorkspace=mon_ws,
-                       Params='10')
+                       Params='10',  # 10 microseconds TOF bin width
+                       PreserveEvents=False)
             sapi.ConvertUnits(InputWorkspace=mon_ws,
                               OutputWorkspace=mon_ws,
                               Target='Wavelength')
