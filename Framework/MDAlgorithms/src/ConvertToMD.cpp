@@ -134,11 +134,37 @@ int ConvertToMD::version() const { return 1; }
 std::map<std::string, std::string> ConvertToMD::validateInputs() {
   std::map<std::string, std::string> result;
 
+  const std::string treeBuilderType = this->getProperty("ConverterType");
+  const bool topLevelSplittingChecked = this->getProperty("TopLevelSplitting");
+  std::vector<int> split_into = this->getProperty("SplitInto");
   const std::string filename = this->getProperty("Filename");
   const bool fileBackEnd = this->getProperty("FileBackEnd");
 
   if (fileBackEnd && filename.empty()) {
     result["Filename"] = "Filename must be given if FileBackEnd is required.";
+  }
+
+  if(treeBuilderType.find("indexed") != std::string::npos) {
+    if (fileBackEnd)
+      result["ConverterType"] += "No file back end implemented "
+                                 "for indexed version of algorithm. ";
+
+    if (topLevelSplittingChecked)
+      result["ConverterType"] += "The usage of top level splitting is "
+                                 "not possible for indexed version of algorithm. ";
+
+    bool validSplitInfo = !split_into.empty();
+    if (validSplitInfo) {
+      const int &n = split_into[0];
+      validSplitInfo &= (n > 1 && ((n & (n - 1)) == 0));
+      if (validSplitInfo)
+        validSplitInfo &= std::all_of(split_into.begin(), split_into.end(),
+                                      [&n](int i) { return i == n; });
+    }
+    if (!validSplitInfo)
+      result["ConverterType"] += "The split parameter should be the same for"
+                                 " all dimensions and be equal the power of 2 for"
+                                 " indexed version of algorithm. ";
   }
 
   std::vector<double> minVals = this->getProperty("MinValues");
