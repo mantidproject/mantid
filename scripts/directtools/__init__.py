@@ -53,19 +53,17 @@ def _configurematplotlib(params):
 
 def _chooseylabel(workspace, axes):
     """Set the correct y label for profile axes."""
-    yUnit = workspace.YUnitLabel()
-    if yUnit == "X''(Q,E)":
+    yUnitLabel = workspace.YUnitLabel()
+    if yUnitLabel == "X''(Q,E)":
         axes.set_ylabel(r"$\chi''(Q,E)$")
-    elif yUnit == 'g^{neutron}(E) (arb. units)':
+    elif yUnitLabel == 'g^{neutron}(E) (arb. units)':
         axes.set_ylabel(r'$g(E)$')
-    elif yUnit == 'g(E) (states/cm^-1)':
+    elif yUnitLabel == 'g(E) (states/cm^-1)':
         axes.set_ylabel('$g(E)$ (states/cm$^{-1}$)')
-    elif yUnit == 'g(E) (states/meV)':
+    elif yUnitLabel == 'g(E) (states/meV)':
         axes.set_ylabel('$g(E)$ (states/meV)')
-    elif yUnit == 'Intensity':
-        axes.set_ylabel('$S(Q,E)$')
     else:
-        axes.set_ylabel(yUnit)
+        axes.set_ylabel('$S(Q,E)$')
 
 
 def _cutCentreAndWidth(line):
@@ -232,7 +230,8 @@ def _plotfirsthistograms(workspaces, labels, style, xscale, yscale):
         axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
-    _horizontalLineAtZero(axes)
+    if axes.get_yscale() == 'linear':
+        _horizontalLineAtZero(axes)
     _chooseylabel(workspaces[0], axes)
     return figure, axes
 
@@ -421,7 +420,7 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     if doTranspose:
         outWS = Transpose(outWS, OutputWorkspace=outputName, EnableLogging=False)
         DeleteWorkspace('__transposed_SofQW_', EnableLogging=False)
-    outWS.setYUnitLabel("X''(Q,E)")
+    outWS.setYUnitLabel("Dynamic susceptibility")
     return outWS
 
 

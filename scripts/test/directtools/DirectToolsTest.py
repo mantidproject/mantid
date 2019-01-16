@@ -13,19 +13,15 @@ matplotlib.use('AGG')
 
 import directtools
 from mantid.api import mtd
-from mantid.simpleapi import (CreateSampleWorkspace, CreateWorkspace, DirectILLCollectData, DirectILLReduction,
-                              LoadILLTOF)
+from mantid.simpleapi import (AddSampleLog, ComputeIncoherentDOS, ConvertSpectrumAxis, CreateSampleWorkspace, CreateWorkspace,
+                              DirectILLCollectData, DirectILLReduction, LoadILLTOF, MoveInstrumentComponent, SetInstrumentParameter)
 import numpy
 import numpy.testing
 import testhelpers
 import unittest
 
 
-class DirectTest(unittest.TestCase):
-
-    def __init__(self):
-        super(DirectTest, self).__init__(self)
-        self._workspace = LoadILLTOF('ILL/IN4/084446.nxs')
+class DirectToolsTest(unittest.TestCase):
 
     def tearDown(self):
         mtd.clear()
@@ -81,14 +77,14 @@ class DirectTest(unittest.TestCase):
         ys = numpy.array([1, 1])
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='DeltaE', StoreInADS=False)
         wsOut = directtools.dynamicsusceptibility(ws, 100.)
-        self.assertEqual(wsOut.YUnit(), 'Dynamic susceptibility')
+        self.assertEqual(wsOut.YUnitLabel(), 'Dynamic susceptibility')
         xs = numpy.array([0, 1, 0, 1])
         ys = numpy.array([1, 1])
         vertX = numpy.array([-1, 1])
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2, UnitX='MomentumTransfer', VerticalAxisUnit='DeltaE', VerticalAxisValues=vertX,
                              StoreInADS=False)
         wsOut = directtools.dynamicsusceptibility(ws, 100.)
-        self.assertEqual(wsOut.YUnit(), 'Dynamic susceptibility')
+        self.assertEqual(wsOut.YUnitLabel(), 'Dynamic susceptibility')
 
     def test_dynamicsusceptibility_removesingularity(self):
         xs = numpy.array([-0.7, -0.4, -0.1, 0.2, 0.5])
@@ -150,16 +146,18 @@ class DirectTest(unittest.TestCase):
         self.assertEqual(cMax, ys[1, -1])
 
     def test_plotconstE_nonListArgsExecutes(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': self._workspace,
+            'workspaces': workspace,
             'E' : 13.,
             'dE' : 1.5
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
 
     def test_plotconstE_wsListExecutes(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': [self._workspace, self._workspace],
+            'workspaces': [workspace, workspace],
             'E' : 13.,
             'dE' : 1.5,
             'style' : 'l'
@@ -167,8 +165,9 @@ class DirectTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
 
     def test_plotconstE_EListExecutes(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': self._workspace,
+            'workspaces': workspace,
             'E' : [13., 23.],
             'dE' : 1.5,
             'style' : 'm'
@@ -176,8 +175,9 @@ class DirectTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
 
     def test_plotconstE_dEListExecutes(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': self._workspace,
+            'workspaces': workspace,
             'E' : 13.,
             'dE' : [1.5, 15.],
             'style' : 'lm'
@@ -185,8 +185,9 @@ class DirectTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
 
     def test_plotconstE_loglog(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': self._workspace,
+            'workspaces': workspace,
             'E' : 13.,
             'dE' : 1.5,
             'xscale': 'log',
@@ -197,16 +198,18 @@ class DirectTest(unittest.TestCase):
         self.assertEquals(axes.get_yscale(), 'log')
 
     def test_plotconstQ_nonListArgsExecutes(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': self._workspace,
+            'workspaces': workspace,
             'Q' : 523.,
             'dQ' : 42.
         }
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
     def test_plotconstQ_wsListExecutes(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': [self._workspace, self._workspace],
+            'workspaces': [workspace, workspace],
             'Q' : 523.,
             'dQ' : 42.,
             'style' : 'l'
@@ -214,8 +217,9 @@ class DirectTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
     def test_plotconstQ_QListExecutes(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': self._workspace,
+            'workspaces': workspace,
             'Q' : [472., 623.],
             'dQ' : 42.,
             'style' : 'm'
@@ -223,8 +227,9 @@ class DirectTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
     def test_plotconstQ_dQListExecutes(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': self._workspace,
+            'workspaces': workspace,
             'Q' : 523.,
             'dQ' : [17., 2.],
             'style' : 'ml'
@@ -232,8 +237,9 @@ class DirectTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
 
     def test_plotconstQ_loglog(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
-            'workspaces': self._workspace,
+            'workspaces': workspace,
             'Q' : 523.,
             'dQ' : 17.,
             'xscale': 'log',
@@ -265,9 +271,10 @@ class DirectTest(unittest.TestCase):
         self.assertEquals(lineDataQ[1][indexE], lineDataE[1][indexQ])
 
     def test_plotcuts_keepCutWorkspaces(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
             'direction' : 'Vertical',
-            'workspaces' : self._workspace,
+            'workspaces' : workspace,
             'cuts' : 500.,
             'widths': 10.,
             'quantity': 'TOF',
@@ -280,9 +287,10 @@ class DirectTest(unittest.TestCase):
         self.assertEquals(mtd.size(), 1)
 
     def test_plotcuts_doNotKeepCutWorkspaces(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
             'direction' : 'Vertical',
-            'workspaces' : self._workspace,
+            'workspaces' : workspace,
             'cuts' : 500.,
             'widths': 10.,
             'quantity': 'TOF',
@@ -295,9 +303,10 @@ class DirectTest(unittest.TestCase):
         self.assertEquals(mtd.size(), 0)
 
     def test_plotcuts_loglog(self):
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
         kwargs = {
             'direction' : 'Vertical',
-            'workspaces' : self._workspace,
+            'workspaces' : workspace,
             'cuts' : 500.,
             'widths': 10.,
             'quantity': 'TOF',
@@ -352,14 +361,35 @@ class DirectTest(unittest.TestCase):
         self.assertEquals(axes.get_xscale(), 'log')
         self.assertEquals(axes.get_yscale(), 'log')
 
-    def test_plotDOS(self):
-        self.assertTrue(False)
+    def test_plotDOS_PlotSingle(self):
+        ws = CreateSampleWorkspace(NumBanks=1, XUnit='DeltaE', XMin=-12., XMax=12., BinWidth=0.2, StoreInADS=False)
+        MoveInstrumentComponent(ws, 'bank1', X=-0.5, StoreInADS=False)
+        ws = ConvertSpectrumAxis(ws, 'Theta', 'Direct', 14., StoreInADS=False)
+        SetInstrumentParameter(ws, ParameterName='deltaE-mode', Value='direct', StoreInADS=False)
+        AddSampleLog(ws, LogName='Ei', LogText=str(14.), LogType='Number', LogUnit='meV', StoreInADS=False)
+        stw = ComputeIncoherentDOS(ws, StoreInADS=False)
+        kwargs = {'workspaces': stw}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotDOS, **kwargs)
+        self.assertEquals(axes.get_xlabel(), u'Energy transfer ($meV$)')
+        self.assertEquals(axes.get_ylabel(), u'$g(E)$')
+
+    def test_plotDOS_PlotMultiple(self):
+        ws = CreateSampleWorkspace(NumBanks=1, XUnit='DeltaE', XMin=-12., XMax=12., BinWidth=0.2, StoreInADS=False)
+        MoveInstrumentComponent(ws, 'bank1', X=-0.5, StoreInADS=False)
+        ws = ConvertSpectrumAxis(ws, 'Theta', 'Direct', 14., StoreInADS=False)
+        SetInstrumentParameter(ws, ParameterName='deltaE-mode', Value='direct', StoreInADS=False)
+        AddSampleLog(ws, LogName='Ei', LogText=str(14.), LogType='Number', LogUnit='meV', StoreInADS=False)
+        stw = ComputeIncoherentDOS(ws)
+        kwargs = {'workspaces': [stw, 'stw']}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotDOS, **kwargs)
+        self.assertEquals(axes.get_xlabel(), u'Energy transfer ($meV$)')
+        self.assertEquals(axes.get_ylabel(), u'$g(E)$')
 
     def test_plotSofQW(self):
-        mtd.addOrReplace('ws', self._workspace)
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', OutputWorkspace='ws')
         kwargs = {'workspace': 'ws'}
         testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
-        kwargs = {'workspace': self._workspace}
+        kwargs = {'workspace': workspace}
         testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
 
     def test_subplots(self):
@@ -381,7 +411,8 @@ class DirectTest(unittest.TestCase):
         self.assertEqual(qMax, xs[-2])
 
     def test_wsreport(self):
-        kwargs = {'workspace': self._workspace}
+        workspace = LoadILLTOF('ILL/IN4/084446.nxs', StoreInADS=False)
+        kwargs = {'workspace': workspace}
         testhelpers.assertRaisesNothing(self, directtools.wsreport, **kwargs)
 
     def test_SampleLogs(self):
