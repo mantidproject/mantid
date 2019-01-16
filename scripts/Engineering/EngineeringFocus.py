@@ -58,7 +58,6 @@ def focus_texture_mode(van_curves, van_int, run_number, focus_dir, dg_file, focu
     for bank in banks:
         output_ws = "engg_focusing_output_ws_texture_bank_{}"
         output_ws = output_ws.format(bank)
-        print(banks.get(bank))
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
                          SpectrumNumbers=banks.get(bank))
@@ -75,6 +74,8 @@ def _prepare_focus(run_number, van_curves, van_int):
 def _save_out(output, run_number, bank_id, output_dir, join_string, focus_gen):
     filename = path.join(output_dir, join_string.format(run_number, bank_id))
     hdf5_name = path.join(output_dir, run_number + ".hdf5")
+    if not unicode(bank_id).isnumeric():
+        bank_id = 0;
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=filename + ".dat", SplitFiles=False,
                           StartAtBankNumber=bank_id)
     simple.SaveGSS(InputWorkspace=output, Filename=filename + ".gss", SplitFiles=False, Bank=bank_id)
