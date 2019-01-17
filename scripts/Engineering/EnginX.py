@@ -7,8 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as simple
 import Engineering.EnggUtils as Utils
-import Engineering.EngineeringFocus as Focus
 import os
+import csv
 from shutil import copy2
 
 
@@ -221,39 +221,138 @@ def focus(run_no, grouping_file, crop_on,calibration_directory, focus_directory,
     # if a grouping file is passed in then focus in texture mode
     if grouping_file is not None:
         grouping_file = os.path.join(calibration_directory,grouping_file)
-        Focus.focus_texture_mode(van_curves_file, van_int_file, run_no,
-                                 focus_directory, grouping_file, focus_general)
+        focus_texture_mode(van_curves_file, van_int_file, run_no,
+                           focus_directory, grouping_file, focus_general)
     # if no texture mode was passed in check if the file should be cropped, and if so what cropping method to use
     elif cropped is not None:
         if cropped == "banks":
-            Focus.focus_cropped(False, crop_on, van_curves_file, van_int_file, run_no,
-                                focus_directory, focus_general)
-        elif cropped == "spectra":
-            Focus.focus_cropped(True, crop_on, van_curves_file, van_int_file, run_no,
-                                focus_directory, focus_general)
-    else:
-        Focus.focus_whole(van_curves_file, van_int_file, run_no,
+            focus_cropped(False, crop_on, van_curves_file, van_int_file, run_no,
                           focus_directory, focus_general)
+        elif cropped == "spectra":
+            focus_cropped(True, crop_on, van_curves_file, van_int_file, run_no,
+                          focus_directory, focus_general)
+    else:
+        focus_whole(van_curves_file, van_int_file, run_no,
+                    focus_directory, focus_general)
+
+
+# focus a whole run with no cropping
+def focus_whole(van_curves, van_int, run_number, focus_dir, focus_gen):
+    ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
+    van_integrated_ws = simple.Load(Filename=van_int)
+    van_curves_ws = simple.Load(Filename=van_curves)
+    # loop through both banks, focus and save them
+    for i in range(1, 3):
+        output_ws = "engg_focus_output_bank_{}".format(i)
+        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
+                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
+                         Bank=str(i))
+        _save_out(output_ws, run_number, str(i), focus_dir, "ENGINX_{}_{}", focus_gen)
+    print("done")
+
+
+# focus a partial run, cropping either on banks or on specific spectra
+def focus_cropped(use_spectra, crop_on, van_curves, van_int, run_number, focus_dir, focus_gen):
+    ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
+    van_integrated_ws = simple.Load(Filename=van_int)
+    van_curves_ws = simple.Load(Filename=van_curves)
+    output_ws = "engg_focus_output{0}{1}"
+    # check whether to crop on bank or spectra
+    if not use_spectra:
+        # get the bank to crop on, focus and save it out
+        bank = {"North": "1",
+                "South": "2"}
+        output_ws = output_ws.format("_bank_", bank.get(crop_on))
+        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
+                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
+                         Bank=bank.get(crop_on))
+        _save_out(output_ws, run_number, crop_on, focus_dir, "ENGINX_{}_{}", focus_gen)
+    else:
+        # crop on the spectra passed in, focus and save it out
+        output_ws = output_ws.format("", "")
+        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
+                         VanIntegrationWorkspace=van_integrated_ws,
+                         VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=crop_on)
+        _save_out(output_ws, run_number, "cropped", focus_dir, "ENGINX_{}_bank_{}", focus_gen)
+
+
+# perform a texture mode focusing using the grouping csv file
+def focus_texture_mode(van_curves, van_int, run_number, focus_dir, dg_file, focus_gen):
+    van_curves_ws, van_integrated_ws, ws_to_focus = _prepare_focus(run_number, van_curves, van_int)
+    banks = {}
+    # read the csv file to work out the banks
+    with open(dg_file) as grouping_file:
+        group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
+
+        for row in group_reader:
+            banks.update({row[0]: ','.join(row[1:])})
+
+    # loop through the banks described in the csv, focusing and saing them out
+    for bank in banks:
+        output_ws = "engg_focusing_output_ws_texture_bank_{}"
+        output_ws = output_ws.format(bank)
+        simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
+                         VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
+                         SpectrumNumbers=banks.get(bank))
+        _save_out(output_ws, run_number, bank, focus_dir, "ENGINX_{}_texture_{}", focus_gen)
+
+
+# perform some universal setup for focusing
+def _prepare_focus(run_number, van_curves, van_int):
+    ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
+    van_integrated_ws = simple.Load(Filename=van_int)
+    van_curves_ws = simple.Load(Filename=van_curves)
+    return van_curves_ws, van_integrated_ws, ws_to_focus
+
+
+# save out the files required for the focus
+def _save_out(output, run_number, bank_id, output_dir, join_string, focus_gen):
+    # work out where to save the files
+    filename = os.path.join(output_dir, join_string.format(run_number, bank_id))
+    hdf5_name = os.path.join(output_dir, run_number + ".hdf5")
+    if not unicode(bank_id).isnumeric():
+        bank_id = 0
+    # save the files out to the user directory
+    simple.SaveFocusedXYE(InputWorkspace=output, Filename=filename + ".dat", SplitFiles=False,
+                          StartAtBankNumber=bank_id)
+    simple.SaveGSS(InputWorkspace=output, Filename=filename + ".gss", SplitFiles=False, Bank=bank_id)
+    simple.SaveOpenGenieAscii(InputWorkspace=output, Filename=filename + ".his", OpenGenieFormat="ENGIN-X Format")
+    simple.SaveNexus(InputWorkspace=output, Filename=filename + ".nxs")
+    simple.ExportSampleLogsToHDF5(InputWorkspace=output, Filename=hdf5_name, Blacklist="bankid")
+    # copy the files to the general directory
+    copy2(filename+".dat", focus_gen)
+    copy2(filename + ".gss", focus_gen)
+    copy2(filename + ".his", focus_gen)
+    copy2(filename + ".nxs", focus_gen)
+    copy2(hdf5_name, focus_gen)
+
+
+# remove commented rows from the csv file
+def _decomment_csv(csvfile):
+    for row in csvfile:
+        raw = row.split('#')[0].strip()
+        if raw:
+            yield raw
 
 
 # pre_process the run passed in, usign the rebin parameters passed in
 def pre_process(params, time_period, focus_run):
     # rebin based on pulse if a time period is sent in, otherwise just do a normal rebin
     wsname = "engg_preproc_input_ws"
-    simple.Load(Filename=run, OutputWorkspace=wsname)
+    simple.Load(Filename=focus_run, OutputWorkspace=wsname)
     if time_period is not None:
-        rebin_pulse(focus_run, params, time_period, wsname)
+        rebin_pulse(params, time_period, wsname)
     else:
-        rebin_time(focus_run, params, wsname)
+        rebin_time(params, wsname)
 
 
-def rebin_time(run, bin_param, wsname):
+def rebin_time(bin_param, wsname):
     output = "engg_preproc_time_ws"
     simple.Rebin(InputWorkspace=wsname, Params=bin_param, OutputWorkspace=output)
     return output
 
 
-def rebin_pulse(run, bin_param, wsname):  # , #n_periods): currently unused to match implementation in gui
+def rebin_pulse(bin_param, wsname):  # , #n_periods): currently unused to match implementation in gui
     output = "engg_preproc_pulse_ws"
     simple.RebinByPulseTimes(InputWorkspace=wsname, Params=bin_param, OutputWorkspace=output)
     return output
