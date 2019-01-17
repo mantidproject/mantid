@@ -30,6 +30,9 @@ set ( SRC_FILES
 	IndirectFitDataPresenter.cpp
 	IndirectFitDataView.cpp
 	IndirectFitOutput.cpp
+	IndirectFitOutputOptionsModel.cpp
+	IndirectFitOutputOptionsPresenter.cpp
+	IndirectFitOutputOptionsView.cpp
 	IndirectFitPlotModel.cpp
 	IndirectFitPlotPresenter.cpp
 	IndirectFitPlotView.cpp
@@ -102,6 +105,9 @@ set ( INC_FILES
 	IndirectFitDataPresenter.h
 	IndirectFitDataView.h
 	IndirectFitOutput.h
+	IndirectFitOutputOptionsModel.h
+	IndirectFitOutputOptionsPresenter.h
+	IndirectFitOutputOptionsView.h
 	IndirectFitPlotModel.h
 	IndirectFitPlotPresenter.h
 	IndirectFitPlotView.h
@@ -166,6 +172,8 @@ set ( MOC_FILES
     IndirectFitAnalysisTab.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
+	IndirectFitOutputOptionsPresenter.h
+	IndirectFitOutputOptionsView.h
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
     IndirectLoadILL.h
@@ -216,6 +224,7 @@ set ( UI_FILES
    IndirectDataReduction.ui
    IndirectDiffractionReduction.ui
    IndirectFitDataView.ui
+   IndirectFitOutputOptions.ui
    IndirectFitPreviewPlot.ui
    IndirectLoadILL.ui
    IndirectMolDyn.ui
