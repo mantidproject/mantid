@@ -48,7 +48,6 @@ void removeGroup(ReductionJobs &jobs, int groupIndex);
 bool setGroupName(ReductionJobs &jobs, int groupIndex,
                   std::string const &newValue);
 std::string groupName(ReductionJobs const &jobs, int groupIndex);
-void prettyPrintModel(ReductionJobs const &jobs);
 
 void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
                        double thetaTolerance, std::string const &groupName);

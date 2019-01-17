@@ -15,26 +15,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 namespace {
-// TODO: these don't seem to work for spin boxes - is there another way to set
-// the backround colour?gg
+// Changing the palette for spin boxes doesn't work but we can
+// change the background colour with a style sheet. This also changes
+// the font slightly on Ubuntu so there may be a better way to do this,
+// but it's not a big issue so this should be fine for now.
 void showAsInvalid(QDoubleSpinBox &spinBox) {
-  /// TODO This works but also changes the font
   spinBox.setStyleSheet("QDoubleSpinBox { background-color: #ffb8ad; }");
-
-  /// This doesn't work
-  // auto palette = spinBox.palette();
-  // palette.setColor(spinBox.backgroundRole(), QColor("#ffb8ad"));
-  // spinBox.setAutoFillBackground(true);
-  // parent->setPalette(palette);
 }
 
-void showAsValid(QDoubleSpinBox &spinBox) {
-  spinBox.setStyleSheet("");
-  // auto palette = spinBox.palette();
-  // palette.setColor(spinBox.foregroundRole(), Qt::transparent);
-  // spinBox.setAutoFillBackground(false);
-  // spinBox.setPalette(palette);
-}
+void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
 } // namespace
 
 /** Constructor
@@ -43,8 +32,8 @@ void showAsValid(QDoubleSpinBox &spinBox) {
  * @param parent :: [input] The parent of this widget
  */
 ExperimentView::ExperimentView(
-    Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent) {
-  UNUSED_ARG(parent);
+    Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
+    : QWidget(parent) {
   initLayout();
   registerSettingsWidgets(algorithmForTooltips);
 }

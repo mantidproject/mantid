@@ -13,10 +13,7 @@ namespace CustomInterfaces {
 /** Constructor
  * @param parent :: [input] The parent of this widget
  */
-EventView::EventView(QWidget *parent) {
-  UNUSED_ARG(parent);
-  initLayout();
-}
+EventView::EventView(QWidget *parent) : QWidget(parent) { initLayout(); }
 
 void EventView::subscribe(EventViewSubscriber *notifyee) {
   m_notifyee = notifyee;
