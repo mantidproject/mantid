@@ -23,6 +23,11 @@ public:
     ON_CALL(*this, getReductionType()).WillByDefault(testing::Return("Normal"));
     ON_CALL(*this, getPolarizationCorrectionType())
         .WillByDefault(testing::Return("None"));
+    ON_CALL(*this, getFloodCorrectionType())
+        .WillByDefault(testing::Return("Workspace"));
+    ON_CALL(*this, getDebugOption()).WillByDefault(testing::Return(false));
+    ON_CALL(*this, getIncludePartialBins())
+        .WillByDefault(testing::Return(false));
   }
   MOCK_METHOD1(subscribe, void(ExperimentViewSubscriber *));
   MOCK_METHOD1(createStitchHints,
@@ -35,6 +40,12 @@ public:
   MOCK_METHOD1(setReductionType, void(std::string const &));
   MOCK_METHOD0(enableReductionType, void());
   MOCK_METHOD0(disableReductionType, void());
+  MOCK_CONST_METHOD0(getIncludePartialBins, bool());
+  MOCK_METHOD1(setIncludePartialBins, void(bool));
+  MOCK_METHOD0(enableIncludePartialBins, void());
+  MOCK_METHOD0(disableIncludePartialBins, void());
+  MOCK_CONST_METHOD0(getDebugOption, bool());
+  MOCK_METHOD1(setDebugOption, void(bool));
   MOCK_CONST_METHOD0(getPerAngleOptions,
                      std::vector<std::array<std::string, 8>>());
   MOCK_METHOD2(showPerAngleOptionsAsInvalid, void(int row, int column));
@@ -46,6 +57,8 @@ public:
   MOCK_METHOD0(disablePolarizationCorrections, void());
   MOCK_METHOD0(enablePolarizationCorrectionInputs, void());
   MOCK_METHOD0(disablePolarizationCorrectionInputs, void());
+  MOCK_METHOD0(enableFloodCorrectionInputs, void());
+  MOCK_METHOD0(disableFloodCorrectionInputs, void());
   MOCK_CONST_METHOD0(getTransmissionStartOverlap, double());
   MOCK_METHOD1(setTransmissionStartOverlap, void(double));
   MOCK_CONST_METHOD0(getTransmissionEndOverlap, double());
@@ -62,6 +75,10 @@ public:
   MOCK_METHOD1(setCAp, void(double));
   MOCK_CONST_METHOD0(getCPp, double());
   MOCK_METHOD1(setCPp, void(double));
+  MOCK_CONST_METHOD0(getFloodCorrectionType, std::string());
+  MOCK_METHOD1(setFloodCorrectionType, void(std::string const &));
+  MOCK_CONST_METHOD0(getFloodWorkspace, std::string());
+  MOCK_METHOD1(setFloodWorkspace, void(std::string const &));
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_METHOD1(setStitchOptions, void(std::string const &));
   MOCK_METHOD2(showOptionLoadErrors,

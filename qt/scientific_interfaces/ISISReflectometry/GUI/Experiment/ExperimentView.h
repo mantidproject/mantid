@@ -40,6 +40,16 @@ public:
 
   std::string getReductionType() const override;
   void setReductionType(std::string const &reductionType) override;
+  void enableReductionType() override;
+  void disableReductionType() override;
+
+  bool getIncludePartialBins() const override;
+  void setIncludePartialBins(bool enable) override;
+  void enableIncludePartialBins() override;
+  void disableIncludePartialBins() override;
+
+  bool getDebugOption() const override;
+  void setDebugOption(bool enable) override;
 
   std::vector<std::array<std::string, 8>> getPerAngleOptions() const override;
   void showPerAngleOptionsAsInvalid(int row, int column) override;
@@ -66,6 +76,11 @@ public:
   double getCPp() const override;
   void setCPp(double cPp) override;
 
+  std::string getFloodCorrectionType() const override;
+  void setFloodCorrectionType(std::string const &correction) override;
+  std::string getFloodWorkspace() const override;
+  void setFloodWorkspace(std::string const &workspace) override;
+
   std::string getStitchOptions() const override;
   void setStitchOptions(std::string const &stitchOptions) override;
 
@@ -79,16 +94,17 @@ public:
   void disableAll() override;
   void enableAll() override;
 
-  void enableReductionType() override;
-  void disableReductionType() override;
-
   void enablePolarizationCorrections() override;
   void disablePolarizationCorrections() override;
   void enablePolarizationCorrectionInputs() override;
   void disablePolarizationCorrectionInputs() override;
 
+  void enableFloodCorrectionInputs() override;
+  void disableFloodCorrectionInputs() override;
+
   void addPerThetaDefaultsRow() override;
   void removePerThetaDefaultsRow(int rowIndex) override;
+
 public slots:
   /// Adds another row to the per-angle options table
   void summationTypeChanged(int reductionTypeIndex);
@@ -107,6 +123,7 @@ private:
   /// Initialise the interface
   void initLayout();
   void initOptionsTable();
+  void initFloodControls();
   void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void setToolTipAsPropertyDocumentation(QWidget &widget,

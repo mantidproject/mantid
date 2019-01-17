@@ -10,6 +10,7 @@ set ( REDUCTION_SRC_FILES
 
     DetectorCorrections.cpp
     Experiment.cpp
+    FloodCorrections.cpp
     Instrument.cpp
     MonitorCorrections.cpp
     PolarizationCorrections.cpp
@@ -35,6 +36,7 @@ set ( REDUCTION_INC_FILES
     AnalysisMode.h
     DetectorCorrections.h
     Experiment.h
+    FloodCorrections.h
     Instrument.h
     MonitorCorrections.h
     PolarizationCorrections.h

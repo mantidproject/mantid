@@ -83,6 +83,8 @@ void ExperimentView::initLayout() {
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this,
           SLOT(onRemovePerThetaDefaultsRequested()));
   initOptionsTable();
+  initFloodControls();
+
   auto blacklist =
       std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
   MantidWidgets::AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
@@ -128,6 +130,11 @@ void ExperimentView::initOptionsTable() {
 
   const int padding = 2;
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
+}
+
+void ExperimentView::initFloodControls() {
+  m_ui.floodWorkspaceWsSelector->setOptional(true);
+  m_ui.floodWorkspaceWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
 
 void ExperimentView::connectSettingsChange(QLineEdit &edit) {
@@ -180,6 +187,11 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
+  registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
+                        alg);
+  registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
+  registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
+  registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
 void ExperimentView::summationTypeChanged(int reductionTypeIndex) {
@@ -193,6 +205,14 @@ void ExperimentView::enableReductionType() {
 
 void ExperimentView::disableReductionType() {
   m_ui.reductionTypeComboBox->setEnabled(false);
+}
+
+void ExperimentView::enableIncludePartialBins() {
+  m_ui.includePartialBinsCheckBox->setEnabled(true);
+}
+
+void ExperimentView::disableIncludePartialBins() {
+  m_ui.includePartialBinsCheckBox->setEnabled(false);
 }
 
 template <typename Widget>
@@ -335,6 +355,16 @@ void ExperimentView::disablePolarizationCorrectionInputs() {
   m_ui.CPpEdit->setEnabled(false);
 }
 
+void ExperimentView::enableFloodCorrectionInputs() {
+  m_ui.floodWorkspaceWsSelector->setEnabled(true);
+  m_ui.floodWorkspaceWsSelectorLabel->setEnabled(true);
+}
+
+void ExperimentView::disableFloodCorrectionInputs() {
+  m_ui.floodWorkspaceWsSelector->setEnabled(false);
+  m_ui.floodWorkspaceWsSelectorLabel->setEnabled(false);
+}
+
 void ExperimentView::onPerAngleDefaultsChanged(int row, int column) {
   m_notifyee->notifyPerAngleDefaultsChanged(row, column);
 }
@@ -448,6 +478,22 @@ double ExperimentView::getCPp() const { return m_ui.CPpEdit->value(); }
 
 void ExperimentView::setCPp(double cPp) { m_ui.CPpEdit->setValue(cPp); }
 
+std::string ExperimentView::getFloodCorrectionType() const {
+  return getText(*m_ui.floodCorComboBox);
+}
+
+void ExperimentView::setFloodCorrectionType(std::string const &type) {
+  setSelected(*m_ui.floodCorComboBox, type);
+}
+
+std::string ExperimentView::getFloodWorkspace() const {
+  return getText(*m_ui.floodWorkspaceWsSelector);
+}
+
+void ExperimentView::setFloodWorkspace(std::string const &workspace) {
+  setSelected(*m_ui.floodWorkspaceWsSelector, workspace);
+}
+
 std::string ExperimentView::getAnalysisMode() const {
   return getText(*m_ui.analysisModeComboBox);
 }
@@ -466,6 +512,22 @@ void ExperimentView::setSummationType(std::string const &summationType) {
 
 std::string ExperimentView::getReductionType() const {
   return getText(*m_ui.reductionTypeComboBox);
+}
+
+bool ExperimentView::getIncludePartialBins() const {
+  return m_ui.includePartialBinsCheckBox->isChecked();
+}
+
+void ExperimentView::setIncludePartialBins(bool enable) {
+  setChecked(*m_ui.includePartialBinsCheckBox, enable);
+}
+
+bool ExperimentView::getDebugOption() const {
+  return m_ui.debugCheckBox->isChecked();
+}
+
+void ExperimentView::setDebugOption(bool enable) {
+  setChecked(*m_ui.debugCheckBox, enable);
 }
 
 void ExperimentView::setReductionType(std::string const &reductionType) {
