@@ -399,5 +399,21 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.0, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 4.2, 1)
 
+    def test_select_peak_type_context_menu(self):
+        yield self.start()
+        yield self.context_menu()
+        menu = self.get_active_popup_widget()
+        action = find_action_with_text(menu, 'Select peak type')
+        trigger_action(action)
+        yield self.wait_for_modal()
+        dlg = self.get_active_modal_widget()
+        dlg.setTextValue('Lorentzian')
+        dlg.accept()
+        yield self.mouse_click(1.25, 4.4)
+        self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
+        self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.25, 1)
+        self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 4.4, 1)
+        self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=Lorentzian'))
+
 
 runTests(TestFitPropertyBrowser)

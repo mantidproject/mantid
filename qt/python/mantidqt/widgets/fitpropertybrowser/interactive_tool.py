@@ -2,7 +2,7 @@ from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 from qtpy.QtCore import QObject, Signal, Qt
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QApplication, QMenu
+from qtpy.QtWidgets import QApplication, QMenu, QInputDialog
 
 from mouse_state_machine import StateMachine
 
@@ -134,8 +134,9 @@ class FitInteractiveTool(QObject):
     fit_end_x_moved = Signal(float)
     peak_added = Signal(int, float, float)
     peak_moved = Signal(int, float, float)
+    peak_type_changed = Signal(str)
 
-    def __init__(self, canvas, toolbar_state_checker):
+    def __init__(self, canvas, toolbar_state_checker, current_peak_type):
         super(FitInteractiveTool, self).__init__()
         self.canvas = canvas
         self.toolbar_state_checker = toolbar_state_checker
@@ -153,6 +154,8 @@ class FitInteractiveTool(QObject):
 
         self.peak_markers = []
         self.selected_peak = None
+        self.peak_names = []
+        self.current_peak_type = current_peak_type
 
         self._cids = []
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
@@ -266,8 +269,15 @@ class FitInteractiveTool(QObject):
                 return i
         return n + 1
 
-    def add_peak_dialog(self):
+    def add_default_peak(self):
         self.mouse_state.transition_to('add_peak')
+
+    def add_peak_dialog(self):
+        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select peak function', self.peak_names,
+                                             self.peak_names.index(self.current_peak_type), False)
+        if selected_name[1]:
+            self.peak_type_changed.emit(selected_name[0])
+            self.mouse_state.transition_to('add_peak')
 
     def add_peak(self, x, y_top, y_bottom=0.0):
         peak_id = self._make_peak_id()
@@ -296,10 +306,13 @@ class FitInteractiveTool(QObject):
     def get_transform(self):
         return self.fit_start_x.patch.get_transform()
 
-    def show_context_menu(self):
+    def show_context_menu(self, peak_names, current_peak_type):
+        self.peak_names = peak_names
+        self.current_peak_type = current_peak_type
         if not self.toolbar_state_checker.is_tool_active():
             menu = QMenu()
-            menu.addAction("Add peak", self.add_peak_dialog)
+            menu.addAction("Add peak", self.add_default_peak)
+            menu.addAction("Select peak type", self.add_peak_dialog)
             menu.exec_(QCursor.pos())
 
 

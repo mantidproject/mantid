@@ -44,6 +44,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.endXChanged.connect(self.move_end_x)
         self.algorithmFinished.connect(self.fitting_done_slot)
         self.changedParameterOf.connect(self.peak_changed_slot)
+        self.setFeatures(self.DockWidgetMovable)
 
     def closeEvent(self, event):
         self.closing.emit()
@@ -60,11 +61,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             allowed_spectra[name] = spec_list
         for name, spec_list in allowed_spectra.items():
             self.addAllowedSpectra(name, spec_list)
-        self.tool = FitInteractiveTool(self.canvas, self.toolbar_state_checker)
+        self.tool = FitInteractiveTool(self.canvas, self.toolbar_state_checker,
+                                       current_peak_type=self.defaultPeakType())
         self.tool.fit_start_x_moved.connect(self.setStartX)
         self.tool.fit_end_x_moved.connect(self.setEndX)
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
+        self.tool.peak_type_changed.connect(self.setDefaultPeakType)
         self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
         super(FitPropertyBrowser, self).show()
         self.canvas.draw()
@@ -127,5 +130,4 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     @Slot()
     def show_canvas_context_menu(self):
         if self.tool is not None:
-            print(self.registeredPeaks())
-            self.tool.show_context_menu()
+            self.tool.show_context_menu(peak_names=self.registeredPeaks(), current_peak_type=self.defaultPeakType())
