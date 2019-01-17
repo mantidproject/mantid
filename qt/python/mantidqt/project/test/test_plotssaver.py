@@ -8,6 +8,7 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import sys
 import unittest
 
 from mantid.api import AnalysisDataService as ADS
@@ -38,18 +39,21 @@ class PlotsSaverTest(unittest.TestCase):
                                                                                            u'faceColor': u'#1f77b4',
                                                                                            u'markerSize': 6.0,
                                                                                            u'markerType': u'None',
-                                                                                           u'zOrder': 2}}],
+                                                                                           u'zOrder': 2},
+                                                                                       u'errorbars': {
+                                                                                           u'exists': False
+                                                                                       }}],
                                  u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
                                                  u'frameOn': True, u'visible': True,
                                                  u'xAxisProperties': {u'fontSize': 10.0,
                                                                       u'gridStyle': {u'gridOn': False},
                                                                       u'majorTickFormat': None,
-                                                                      u'majorTickFormatter': 'ScalarFormatter',
-                                                                      u'majorTickLocator': 'AutoLocator',
+                                                                      u'majorTickFormatter': u'ScalarFormatter',
+                                                                      u'majorTickLocator': u'AutoLocator',
                                                                       u'majorTickLocatorValues': None,
                                                                       u'minorTickFormat': None,
-                                                                      u'minorTickFormatter': 'NullFormatter',
-                                                                      u'minorTickLocator': 'NullLocator',
+                                                                      u'minorTickFormatter': u'NullFormatter',
+                                                                      u'minorTickLocator': u'NullLocator',
                                                                       u'minorTickLocatorValues': None,
                                                                       u'position': u'Bottom',
                                                                       u'visible': True},
@@ -57,12 +61,12 @@ class PlotsSaverTest(unittest.TestCase):
                                                  u'yAxisProperties': {u'fontSize': 10.0,
                                                                       u'gridStyle': {u'gridOn': False},
                                                                       u'majorTickFormat': None,
-                                                                      u'majorTickFormatter': 'ScalarFormatter',
-                                                                      u'majorTickLocator': 'AutoLocator',
+                                                                      u'majorTickFormatter': u'ScalarFormatter',
+                                                                      u'majorTickLocator': u'AutoLocator',
                                                                       u'majorTickLocatorValues': None,
                                                                       u'minorTickFormat': None,
-                                                                      u'minorTickFormatter': 'NullFormatter',
-                                                                      u'minorTickLocator': 'NullLocator',
+                                                                      u'minorTickFormatter': u'NullFormatter',
+                                                                      u'minorTickLocator': u'NullLocator',
                                                                       u'minorTickLocatorValues': None,
                                                                       u'position': u'Left',
                                                                       u'visible': True},
@@ -95,13 +99,16 @@ class PlotsSaverTest(unittest.TestCase):
         self.assertEqual(return_value, [])
 
     def test_get_dict_from_fig(self):
-        self.fig.axes[0].creation_args = [{u"specNum": 2}]
+        self.fig.axes[0].creation_args = [{u"specNum": 2, "function": "plot"}]
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
+
+        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot"}]]
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
 
     def test_get_dict_from_axes(self):
+        self.plot_saver.figure_creation_args = [{"function": "plot"}]
         return_value = self.plot_saver.get_dict_for_axes(self.fig.axes[0])
 
         expected_value = self.loader_plot_dict["axes"][0]
@@ -118,6 +125,7 @@ class PlotsSaverTest(unittest.TestCase):
         self.assertDictEqual(return_value, expected_value)
 
     def test_get_dict_from_axis_properties(self):
+
         return_value = self.plot_saver.get_dict_from_axis_properties(self.fig.axes[0].xaxis)
 
         expected_value = self.loader_plot_dict["axes"][0]["properties"]["xAxisProperties"]
@@ -132,6 +140,7 @@ class PlotsSaverTest(unittest.TestCase):
         self.assertDictEqual(return_value, expected_value)
 
     def test_get_dict_from_line(self):
+        self.plot_saver.figure_creation_args = [{"function": "plot"}]
         line = self.fig.axes[0].lines[0]
         return_value = self.plot_saver.get_dict_from_line(line, 0)
 

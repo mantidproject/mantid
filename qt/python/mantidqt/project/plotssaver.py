@@ -11,6 +11,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from matplotlib import ticker
 import matplotlib.axis
 from matplotlib.image import AxesImage
+from matplotlib.collections import LineCollection
 
 from mantid import logger
 
@@ -24,6 +25,9 @@ except ImportError:
 
 
 class PlotsSaver(object):
+    def __init__(self):
+        self.figure_creation_args = {}
+
     def save_plots(self, plot_dict):
         # if arguement is none return empty dictionary
         if plot_dict is None:
@@ -47,6 +51,7 @@ class PlotsSaver(object):
         for ax in fig.axes:
             try:
                 create_list.append(ax.creation_args)
+                self.figure_creation_args = ax.creation_args
             except AttributeError:
                 logger.debug("Axis had a axis without creation_args - Common with colorfill")
                 continue
@@ -202,10 +207,21 @@ class PlotsSaver(object):
                      "color": to_hex(line.get_color()),
                      "lineWidth": line.get_linewidth(),
                      "lineStyle": line.get_linestyle(),
-                     "markerStyle": self.get_dict_from_marker_style(line)}
+                     "markerStyle": self.get_dict_from_marker_style(line),
+                     "errorbars": self.get_dict_for_errorbars(line)}
         if line_dict["alpha"] is None:
             line_dict["alpha"] = 1
         return line_dict
+
+    def get_dict_for_errorbars(self, line):
+        if self.figure_creation_args[0]["function"] == "errorbar":
+            return {"exists": True,
+                    "dashCapStyle": line.get_dash_capstyle(),
+                    "dashJoinStyle": line.get_dash_joinstyle(),
+                    "solidCapStyle": line.get_solid_capstyle(),
+                    "solidJoinStyle": line.get_solid_joinstyle()}
+        else:
+            return {"exists": False}
 
     @staticmethod
     def get_dict_from_marker_style(line):

@@ -225,6 +225,13 @@ class PlotsLoader(object):
         current_line.set_markersize(marker_style["markerSize"])
         current_line.set_zorder(marker_style["zOrder"])
 
+        errorbar_style = line["errorbars"]
+        if errorbar_style["exists"]:
+            current_line.set_dash_capstyle(errorbar_style["dashCapStyle"])
+            current_line.set_dash_joinstyle(errorbar_style["dashJoinStyle"])
+            current_line.set_solid_capstyle(errorbar_style["solidCapStyle"])
+            current_line.set_solid_joinstyle(errorbar_style["solidJoinStyle"])
+
     @staticmethod
     def update_legend(ax, legend):
         if not legend["exists"]:
