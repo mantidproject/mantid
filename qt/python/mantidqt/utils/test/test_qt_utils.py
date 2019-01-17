@@ -60,7 +60,7 @@ class CreateActionTest(GuiTest):
         self.assertEqual("Ctrl+S", action.shortcut())
 
     def test_multiple_shortcuts_are_set_if_given(self):
-        expected_shortcuts = ["Ctrl+S", "Ctrl+W"]
+        expected_shortcuts = ("Ctrl+S", "Ctrl+W")
         action = create_action(None, "Test Action", shortcut=expected_shortcuts)
         for expected, actual in zip(expected_shortcuts, action.shortcuts()):
             self.assertEqual(expected, actual.toString())
