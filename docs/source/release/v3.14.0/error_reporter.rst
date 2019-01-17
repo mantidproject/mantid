@@ -19,4 +19,4 @@ New Features
 Bugfixes
 ========
 
-* An issue causing the window to fail to display on python 3 was fixed
+* An issue causing the window to fail to display with python3 version of mantid was fixed
