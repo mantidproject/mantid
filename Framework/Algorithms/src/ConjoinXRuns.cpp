@@ -153,7 +153,9 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       issues[INPUT_WORKSPACE_PROPERTY] +=
           "Workspace " + ws->getName() + " is not a point-data\n";
     } else {
-      if (!ws->isCommonBins()) {
+      try {
+        ws->blocksize();
+      } catch (std::length_error &) {
         issues[INPUT_WORKSPACE_PROPERTY] +=
             "Workspace " + ws->getName() +
             " has different number of points per histogram\n";
