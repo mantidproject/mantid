@@ -45,12 +45,9 @@ The steps to make the Bilby data reduction work are listed below:
 
 .. testcode:: BilbyReductionExample
 
-    from BilbyReductionScript import run_bilby_reduction
-    output_workspace, transmission_fit = run_bilby_reduction(reduction_settings_file='mantid_reduction_settings_example.csv',
-                                                             reduction_settings_index='0',
-                                                             file_index='0',
-                                                             tube_shift_correction_file='shift_assembled.csv',
-                                                             save_files=False)
+    from BilbyReductionScript import RunBilbyReduction
+    run_bilby_reduction = RunBilbyReduction('mantid_reduction_settings_example.csv', '0', '0', 'shift_assembled.csv', False)
+    output_workspace, transmission_fit = run_bilby_reduction.run_bilby_reduction()
 
 .. testoutput::  BilbyReductionExample
 

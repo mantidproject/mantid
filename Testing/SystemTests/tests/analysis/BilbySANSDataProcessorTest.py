@@ -7,7 +7,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import systemtesting
-from BilbyReductionScript import run_bilby_reduction
+from BilbyReductionScript import RunBilbyReduction
 
 
 class BilbySANSDataProcessorTest(systemtesting.MantidSystemTest):
@@ -16,8 +16,9 @@ class BilbySANSDataProcessorTest(systemtesting.MantidSystemTest):
         self.tolerance = 1e-6
 
     def runTest(self):
-        run_bilby_reduction('mantid_reduction_settings_example.csv', '0', '0', 'shift_assembled.csv', False)
-
+        run_bilby_reduction = RunBilbyReduction('mantid_reduction_settings_example.csv', '0', '0', 'shift_assembled.csv', False)
+        run_bilby_reduction.run_bilby_reduction()
+    
     def validate(self):
         self.disableChecking.append('Instrument')
         return 'BBY0019749_1D_2.0_18.0_AgBeh', 'BilbyReductionExampleOutput.nxs'
