@@ -15,11 +15,41 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
       m_outputOptions(new Ui::IndirectFitOutputOptions) {
   m_outputOptions->setupUi(this);
 
-  // connect(m_selector->cbMaskSpectrum, SIGNAL(currentIndexChanged(int)), this,
-  //        SLOT(enableMaskLineEdit(int)));
+  connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this,
+          SIGNAL(plotClicked()));
+  connect(m_outputOptions->pbSave, SIGNAL(clicked()), this,
+          SIGNAL(saveClicked()));
 }
 
 IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() {}
+
+void IndirectFitOutputOptionsView::setAsPlotting(bool plotting) {
+  setButtonText(m_outputOptions->pbPlot, plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void IndirectFitOutputOptionsView::setButtonText(QPushButton *button,
+                                                 QString const &text) {
+  button->setText(text);
+}
+
+void IndirectFitOutputOptionsView::setButtonsEnabled(bool enable) {
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void IndirectFitOutputOptionsView::setPlotEnabled(bool enable) {
+  m_outputOptions->pbPlot->setEnabled(enable);
+  m_outputOptions->cbPlotType->setEnabled(enable);
+}
+
+void IndirectFitOutputOptionsView::setSaveEnabled(bool enable) {
+  m_outputOptions->pbSave->setEnabled(enable);
+}
+
+std::string IndirectFitOutputOptionsView::getPlotType() const {
+  return m_outputOptions->cbPlotType->currentText().toStdString();
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

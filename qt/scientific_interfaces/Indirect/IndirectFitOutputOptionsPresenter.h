@@ -23,6 +23,9 @@ public:
                                     IndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
 
+private slots:
+  void plotResult();
+
 private:
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
   std::unique_ptr<IndirectFitOutputOptionsView> m_view;
