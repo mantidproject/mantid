@@ -7,4 +7,20 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
 
+#include "DllConfig.h"
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
+
+class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsModel {
+public:
+  IndirectFitOutputOptionsModel();
+  ~IndirectFitOutputOptionsModel() = default;
+};
+
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt
+
 #endif

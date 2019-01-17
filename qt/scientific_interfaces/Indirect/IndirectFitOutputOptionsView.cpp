@@ -5,3 +5,22 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsView.h"
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
+
+IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
+    : API::MantidWidget(parent),
+      m_outputOptions(new Ui::IndirectFitOutputOptions) {
+  m_outputOptions->setupUi(this);
+
+  // connect(m_selector->cbMaskSpectrum, SIGNAL(currentIndexChanged(int)), this,
+  //        SLOT(enableMaskLineEdit(int)));
+}
+
+IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() {}
+
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt

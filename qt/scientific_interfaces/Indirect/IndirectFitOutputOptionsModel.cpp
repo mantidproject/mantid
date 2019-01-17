@@ -5,3 +5,13 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsModel.h"
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
+
+IndirectFitOutputOptionsModel::IndirectFitOutputOptionsModel() {}
+
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt
