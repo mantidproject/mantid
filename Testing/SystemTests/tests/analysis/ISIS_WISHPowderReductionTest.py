@@ -58,6 +58,7 @@ class WISHPowderReductionTest(MantidSystemTest):
         self.clearWorkspaces()
 
     def validate(self):
+        self.tolerence = 1.e-8
         validation_files = []
         for panel in [x for x in panels if x < 6]:
             validation_files = validation_files + \
@@ -93,6 +94,7 @@ class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
         self.clearWorkspaces()
 
     def validate(self):
+        self.tolerence = 1.e-8
         validation_files = []
         for panel in [x for x in panels if x < 6]:
             validation_files = validation_files + ["w40503-{0}_{1}foc".format(panel, linked_panels.get(panel)),
@@ -124,6 +126,7 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
         wish_test.create_vanadium_run(19612, 19618, panels)
 
     def validate(self):
+        self.tolerence = 1.e-8
         validation_files = []
         for panel in [x for x in panels if x < 6]:
             validation_files = validation_files + ["w19612-{}foc".format(panel),
