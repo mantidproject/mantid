@@ -31,10 +31,8 @@ using namespace MantidQt::MantidWidgets;
  */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
                                      RunsTableViewFactory makeRunsTableView)
-    : m_presenter(nullptr), m_calculator(new SlitCalculator(this)),
-      m_tableView(makeRunsTableView()) {
-
-  UNUSED_ARG(parent);
+    : MantidWidget(parent), m_presenter(nullptr),
+      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()) {
   initLayout();
 }
 void QtReflRunsTabView::loginFailed(std::string const &fullError) {

@@ -9,7 +9,6 @@
 #include "IEventView.h"
 #include "Parse.h"
 #include <boost/algorithm/string.hpp>
-#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -110,7 +109,6 @@ void EventPresenter::setSlicingFromView() {
 }
 
 void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
-  std::cout << m_slicing << std::endl;
   m_view->disableSliceType(m_sliceType);
   m_view->enableSliceType(newSliceType);
   m_sliceType = newSliceType;
