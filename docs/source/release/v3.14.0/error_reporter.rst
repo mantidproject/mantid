@@ -15,3 +15,8 @@ New Features
 ============
 
 * The error reporter now accepts free text of up to 3200 characters in a free text box
+
+Bugfixes
+========
+
+* An issue causing the window to fail to display on python 3 was fixed
