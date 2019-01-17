@@ -66,17 +66,6 @@ void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
     }
   }
 }
-
-// std::ostream &operator<<(std::ostream &os, Group const &group) {
-//  os << "  Group (name: " << group.name() << ")\n";
-//  for (auto &&row : group.rows()) {
-//    if (row.is_initialized())
-//      os << "    " << row.get() << '\n';
-//    else
-//      os << "    Row (invalid)\n";
-//  }
-//  return os;
-//}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_GROUP_H_
