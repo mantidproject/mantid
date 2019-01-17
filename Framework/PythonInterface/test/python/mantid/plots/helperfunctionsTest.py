@@ -542,7 +542,7 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertEqual(99.0, data[-1][-1])
 
     @add_md_workspace_with_data(dimensions=3)
-    def test_get_md_data2d_bin_bounds_raises_AssertionException(self, mdws):
+    def test_get_md_data2d_bin_bounds_raises_AssertionException_too_many_dims(self, mdws):
         self.assertRaises(AssertionError, funcs.get_md_data2d_bin_bounds, mdws, False)
 
 
