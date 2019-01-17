@@ -449,7 +449,7 @@ void OptimizeCrystalPlacement::exec() {
   UBinv.Invert();
   UBinv /= (2 * M_PI);
   for (int i = 0; i < outPeaks->getNumberPeaks(); ++i) {
-    auto peak = outPeaks->getPeak(i);
+    auto &peak = outPeaks->getPeak(i);
     peak.setSamplePos(peak.getSamplePos() + newSampPos);
     int RunNum = peak.getRunNumber();
     std::string RunNumStr = std::to_string(RunNum);
