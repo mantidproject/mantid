@@ -27,10 +27,8 @@ using namespace MantidQt::MantidWidgets;
  * @param makeRunsTableView :: The factory for the RunsTableView.
  */
 RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
-    : m_notifyee(nullptr), m_calculator(new SlitCalculator(this)),
-      m_tableView(makeRunsTableView()) {
-
-  UNUSED_ARG(parent);
+    : MantidWidget(parent), m_notifyee(nullptr),
+      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()) {
   initLayout();
 }
 void RunsView::loginFailed(std::string const &fullError) {

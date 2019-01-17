@@ -48,12 +48,6 @@ private:
   ReductionOptionsMap m_reductionOptions;
 };
 
-// std::ostream &operator<<(std::ostream &os, Row const &row) {
-//  auto runNumbers = boost::join(row.runNumbers(), "+");
-//  os << "Row (runs: " << runNumbers << ", theta: " << row.theta() << ")";
-//  return os;
-//}
-
 MANTIDQT_ISISREFLECTOMETRY_DLL Row mergedRow(Row const &rowA, Row const &rowB);
 } // namespace CustomInterfaces
 } // namespace MantidQt
