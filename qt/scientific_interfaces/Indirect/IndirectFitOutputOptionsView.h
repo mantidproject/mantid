@@ -25,7 +25,17 @@ public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
   virtual ~IndirectFitOutputOptionsView() override;
 
+  void setAsPlotting(bool plotting);
+
+  std::string getPlotType() const;
+
 private:
+  void setButtonText(QPushButton *button, QString const &text);
+
+  void setButtonsEnabled(bool enable);
+  void setPlotEnabled(bool enable);
+  void setSaveEnabled(bool enable);
+
   std::unique_ptr<Ui::IndirectFitOutputOptions> m_outputOptions;
 };
 

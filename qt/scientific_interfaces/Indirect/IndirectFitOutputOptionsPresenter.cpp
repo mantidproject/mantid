@@ -13,11 +13,18 @@ namespace IDA {
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
     IndirectFitOutputOptionsModel *model, IndirectFitOutputOptionsView *view)
     : QObject(nullptr), m_model(model), m_view(view) {
-  // connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
-  //        this, SLOT(updateSpectraList(const std::string &)));
+
+  connect(m_view.get(), SIGNAL(plotClicked()), this, SLOT(plotResult()));
+  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveResult()));
 }
 
 IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() {}
+
+void IndirectFitOutputOptionsPresenter::plotResult() {
+  m_view->setAsPlotting(true);
+  m_model->plotResult(m_view->getPlotType());
+  m_view->setAsPlotting(false);
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

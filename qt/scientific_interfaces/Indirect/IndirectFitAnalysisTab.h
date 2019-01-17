@@ -9,6 +9,7 @@
 
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
+#include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionPresenter.h"
@@ -38,6 +39,7 @@ public:
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IIndirectFitPlotView *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
+  void setOutputOptionsView(IndirectFitOutputOptionsView *view);
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
 
@@ -234,6 +236,7 @@ private:
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
+  std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
 
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };

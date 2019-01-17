@@ -38,6 +38,7 @@ MSDFit::MSDFit(QWidget *parent)
       m_msdFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
+  setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 }
 

@@ -17,6 +17,19 @@ class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsModel {
 public:
   IndirectFitOutputOptionsModel();
   ~IndirectFitOutputOptionsModel() = default;
+
+  void plotResult(std::string const &plotType);
+
+private:
+  void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
+  void plotParameter(Mantid::API::WorkspaceGroup_sptr workspaces,
+                     std::string const &parameter);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
+                     std::string const &parameterToPlot);
+  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
+                    std::string const &parameterToPlot);
+  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
 };
 
 } // namespace IDA
