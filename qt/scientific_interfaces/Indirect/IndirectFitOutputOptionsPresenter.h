@@ -7,4 +7,29 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSPRESENTER_H_
 
+#include "IndirectFitOutputOptionsModel.h"
+#include "IndirectFitOutputOptionsView.h"
+
+#include "DllConfig.h"
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
+
+class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsPresenter : public QObject {
+  Q_OBJECT
+public:
+  IndirectFitOutputOptionsPresenter(IndirectFitOutputOptionsModel *model,
+                                    IndirectFitOutputOptionsView *view);
+  ~IndirectFitOutputOptionsPresenter() override;
+
+private:
+  std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
+  std::unique_ptr<IndirectFitOutputOptionsView> m_view;
+};
+
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt
+
 #endif
