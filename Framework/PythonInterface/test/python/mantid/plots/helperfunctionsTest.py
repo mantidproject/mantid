@@ -382,7 +382,7 @@ class HelperFunctionsTest(unittest.TestCase):
         axis = MantidAxType.SPECTRUM
         res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis)
         self.assertEqual(0, res_workspace_index)
-        self.assertEqual(None, res_spectrum_number)
+        self.assertEqual(0, res_spectrum_number)
 
     def test_get_wksp_index_and_spec_num_1_histogram_axis_bin(self):
         """
