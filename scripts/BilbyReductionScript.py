@@ -4,7 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-# flake8: noqa
 
 import mantid.simpleapi as mantid_api
 import os
@@ -104,8 +103,9 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
     # Transmission fit parameters
     transmission_fit_ini = current_reduction_settings[0]["transmission_fit"]
     if (transmission_fit_ini != "Linear") and (transmission_fit_ini != "Log") and (
-        transmission_fit_ini != "Polynomial"):
-        raise ValueError("Check value of transmission_fit; it can be only \"Linear\", \"Log\" or \"Polynomial\","
+            transmission_fit_ini != "Polynomial"):
+        raise ValueError("Check value of transmission_fit; it can be only"
+                         " \"Linear\", \"Log\" or \"Polynomial\","
                          " first letter is mandatory capital")
 
     PolynomialOrder = current_reduction_settings[0]["PolynomialOrder"]
@@ -121,7 +121,8 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
     reduce_2D = BilbyCustomFunctions_Reduction.string_boolean(reduce_2D_input)
     if reduce_2D:
         print(
-        "2D reduction is performing. Q interval and number of points are taking into account; Q-binning intervals are ignored.")
+            "2D reduction is performing. Q interval and number of points are taking into account;"
+            " Q-binning intervals are ignored.")
         try:
             # for 2D Q-binning is not intuitive, hence only number of points is needed
             number_data_points_2D = float(current_reduction_settings[0][
