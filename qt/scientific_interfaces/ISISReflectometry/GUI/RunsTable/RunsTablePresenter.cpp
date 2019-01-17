@@ -39,17 +39,8 @@ RunsTable &RunsTablePresenter::mutableRunsTable() { return m_model; }
 
 void RunsTablePresenter::mergeAdditionalJobs(
     ReductionJobs const &additionalJobs) {
-  std::cout << "Before Transfer:" << std::endl;
-  prettyPrintModel(m_model.reductionJobs());
-
-  std::cout << "Transfering:" << std::endl;
-  prettyPrintModel(additionalJobs);
-
   mergeJobsInto(m_model.mutableReductionJobs(), additionalJobs,
                 m_model.thetaTolerance(), m_jobViewUpdater);
-
-  std::cout << "After Transfer:" << std::endl;
-  prettyPrintModel(m_model.reductionJobs());
 }
 
 void RunsTablePresenter::removeRowsFromModel(

@@ -152,14 +152,6 @@ std::string groupName(ReductionJobs const &jobs, int groupIndex) {
   return jobs[groupIndex].name();
 }
 
-void prettyPrintModel(ReductionJobs const & /*jobs*/) {
-  std::cout << "ReductionJobs:\n";
-  //  for (auto &&group : jobs.groups()) {
-  //    std::cout << group;
-  //  }
-  std::cout << std::endl;
-}
-
 Group const &ReductionJobs::operator[](int index) const {
   return m_groups[index];
 }
