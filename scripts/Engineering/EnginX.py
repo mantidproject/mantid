@@ -32,9 +32,9 @@ def main(vanadium_run, user, focus_run, **kwargs):
         return
     root = os.path.abspath(os.sep)
     if root == "/":
-        path= os.path.expanduser("~/EnginX_Mantid")
+        path = os.path.expanduser("~/EnginX_Mantid")
     else:
-        path= os.path.join(root, "EnginX_Mantid")
+        path = os.path.join(root, "EnginX_Mantid")
     directory = kwargs.get("directory", path)
     user_dir = os.path.join(directory, "User", user)
     calibration_directory = os.path.join(user_dir, "Calibration")
@@ -65,13 +65,12 @@ def run(calibration_directory, calibration_general, ceria_run, crop_name, crop_o
         create_calibration(cropped, crop_on, crop_name, ceria_run, calibration_directory, van_run,
                            calibration_general)
 
-    if do_pre_process:
-        params = kwargs.get("params")
-        time_period = kwargs.get("time_period", None)
-        pre_process(params, time_period, focus_run)
+    params = kwargs.get("params", None)
+    time_period = kwargs.get("time_period", None)
 
     if focus_run is not None:
-        focus(focus_run, grouping_file, crop_on, calibration_directory, focus_directory, focus_general, cropped, van_run)
+        focus(focus_run, grouping_file, crop_on, calibration_directory, focus_directory, focus_general, cropped,
+              van_run, do_pre_process, params, time_period)
 
 
 # create the vanadium run for the run number set of the object
@@ -96,15 +95,15 @@ def create_calibration(cropped, crop_on, crop_name, ceria_run, calibration_direc
     if cropped is not None:
         if cropped == "banks":
             create_calibration_cropped_file(False, crop_on, crop_name,
-                                                van_curves_file, van_int_file, ceria_run,calibration_directory,
-                                                van_run, calibration_general)
+                                            van_curves_file, van_int_file, ceria_run, calibration_directory,
+                                            van_run, calibration_general)
         elif cropped == "spectra":
             create_calibration_cropped_file(True, crop_on, crop_name,
-                                                van_curves_file, van_int_file, ceria_run,calibration_directory,
-                                                van_run, calibration_general)
+                                            van_curves_file, van_int_file, ceria_run, calibration_directory,
+                                            van_run, calibration_general)
     else:
         create_calibration_files(van_curves_file, van_int_file, ceria_run, calibration_directory, van_run,
-                                     calibration_general)
+                                 calibration_general)
 
 
 # create and save a cropped calibration file
@@ -145,7 +144,7 @@ def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, cu
         # get the values needed for saving out the .prm files
         difc = [output.DIFC]
         tzero = [output.TZERO]
-        save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "all_banks",cal_gen)
+        save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "all_banks", cal_gen)
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "bank_{}".format(spec_nos),
                          cal_gen)
     # create the table workspace containing the parameters
@@ -216,31 +215,32 @@ def create_params_table(difc, tzero):
 
 
 # focus the run passed in useing the vanadium set on the object
-def focus(run_no, grouping_file, crop_on,calibration_directory, focus_directory, focus_general, cropped, van_run):
+def focus(run_no, grouping_file, crop_on, calibration_directory, focus_directory, focus_general, cropped, van_run,
+          do_pre_process, params, time_period):
+    print(do_pre_process)
     van_curves_file, van_int_file = _get_van_names(van_run, calibration_directory)
     # if a grouping file is passed in then focus in texture mode
     if grouping_file is not None:
-        grouping_file = os.path.join(calibration_directory,grouping_file)
+        grouping_file = os.path.join(calibration_directory, grouping_file)
         focus_texture_mode(van_curves_file, van_int_file, run_no,
-                           focus_directory, grouping_file, focus_general)
+                           focus_directory, grouping_file, focus_general, do_pre_process, params, time_period)
     # if no texture mode was passed in check if the file should be cropped, and if so what cropping method to use
     elif cropped is not None:
         if cropped == "banks":
             focus_cropped(False, crop_on, van_curves_file, van_int_file, run_no,
-                          focus_directory, focus_general)
+                          focus_directory, focus_general, do_pre_process, params, time_period)
         elif cropped == "spectra":
             focus_cropped(True, crop_on, van_curves_file, van_int_file, run_no,
-                          focus_directory, focus_general)
+                          focus_directory, focus_general, do_pre_process, params, time_period)
     else:
         focus_whole(van_curves_file, van_int_file, run_no,
-                    focus_directory, focus_general)
+                    focus_directory, focus_general, do_pre_process, params, time_period)
 
 
 # focus a whole run with no cropping
-def focus_whole(van_curves, van_int, run_number, focus_dir, focus_gen):
-    ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
-    van_integrated_ws = simple.Load(Filename=van_int)
-    van_curves_ws = simple.Load(Filename=van_curves)
+def focus_whole(van_curves, van_int, run_number, focus_dir, focus_gen, do_pre_process, params, time_period):
+    van_curves_ws, van_integrated_ws, ws_to_focus = _prepare_focus(run_number, van_curves, van_int, do_pre_process,
+                                                                   params, time_period)
     # loop through both banks, focus and save them
     for i in range(1, 3):
         output_ws = "engg_focus_output_bank_{}".format(i)
@@ -252,10 +252,10 @@ def focus_whole(van_curves, van_int, run_number, focus_dir, focus_gen):
 
 
 # focus a partial run, cropping either on banks or on specific spectra
-def focus_cropped(use_spectra, crop_on, van_curves, van_int, run_number, focus_dir, focus_gen):
-    ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
-    van_integrated_ws = simple.Load(Filename=van_int)
-    van_curves_ws = simple.Load(Filename=van_curves)
+def focus_cropped(use_spectra, crop_on, van_curves, van_int, run_number, focus_dir, focus_gen, do_pre_process, params,
+                  time_period):
+    van_curves_ws, van_integrated_ws, ws_to_focus = _prepare_focus(run_number, van_curves, van_int, do_pre_process,
+                                                                   params, time_period)
     output_ws = "engg_focus_output{0}{1}"
     # check whether to crop on bank or spectra
     if not use_spectra:
@@ -277,8 +277,10 @@ def focus_cropped(use_spectra, crop_on, van_curves, van_int, run_number, focus_d
 
 
 # perform a texture mode focusing using the grouping csv file
-def focus_texture_mode(van_curves, van_int, run_number, focus_dir, dg_file, focus_gen):
-    van_curves_ws, van_integrated_ws, ws_to_focus = _prepare_focus(run_number, van_curves, van_int)
+def focus_texture_mode(van_curves, van_int, run_number, focus_dir, dg_file, focus_gen, do_pre_process, params,
+                       time_period):
+    van_curves_ws, van_integrated_ws, ws_to_focus = _prepare_focus(run_number, van_curves, van_int, do_pre_process,
+                                                                   params, time_period)
     banks = {}
     # read the csv file to work out the banks
     with open(dg_file) as grouping_file:
@@ -298,10 +300,12 @@ def focus_texture_mode(van_curves, van_int, run_number, focus_dir, dg_file, focu
 
 
 # perform some universal setup for focusing
-def _prepare_focus(run_number, van_curves, van_int):
-    ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
-    van_integrated_ws = simple.Load(Filename=van_int)
-    van_curves_ws = simple.Load(Filename=van_curves)
+def _prepare_focus(run_number, van_curves, van_int, do_pre_process, params, time_period):
+    van_curves_ws, van_integrated_ws = load_van_files(van_curves, van_int)
+    if do_pre_process:
+        ws_to_focus = pre_process(params, time_period, _gen_filename(run_number))
+    else:
+        ws_to_focus = simple.Load(Filename="ENGINX" + run_number, OutputWorkspace="engg_focus_input")
     return van_curves_ws, van_integrated_ws, ws_to_focus
 
 
@@ -341,21 +345,22 @@ def pre_process(params, time_period, focus_run):
     wsname = "engg_preproc_input_ws"
     simple.Load(Filename=focus_run, OutputWorkspace=wsname)
     if time_period is not None:
-        rebin_pulse(params, time_period, wsname)
+        return rebin_pulse(params, time_period, wsname)
     else:
-        rebin_time(params, wsname)
+        return rebin_time(params, wsname)
 
 
 def rebin_time(bin_param, wsname):
-    output = "engg_preproc_time_ws"
-    simple.Rebin(InputWorkspace=wsname, Params=bin_param, OutputWorkspace=output)
-    return output
+    output = "engg_focus_input_ws"
+    ws = simple.Rebin(InputWorkspace=wsname, Params=bin_param, OutputWorkspace=output)
+    return ws
 
 
-def rebin_pulse(bin_param, wsname):  # , #n_periods): currently unused to match implementation in gui
-    output = "engg_preproc_pulse_ws"
-    simple.RebinByPulseTimes(InputWorkspace=wsname, Params=bin_param, OutputWorkspace=output)
-    return output
+def rebin_pulse(bin_param,time_period, wsname):
+    print(time_period)  # time period unused to match gui, print to prevent warnings
+    output = "engg_focus_input_ws"
+    ws = simple.RebinByPulseTimes(InputWorkspace=wsname, Params=bin_param, OutputWorkspace=output)
+    return ws
 
 
 # generate the names of the vanadium workspaces from the vanadium set on the object
@@ -370,4 +375,3 @@ def _get_van_names(van_run, calibration_directory):
 # generate the file name based of just having a run number
 def _gen_filename(run_number):
     return "ENGINX" + ("0" * (8 - len(run_number))) + run_number
-
