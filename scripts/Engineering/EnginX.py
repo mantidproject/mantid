@@ -8,7 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as simple
 import Engineering.EnggUtils as Utils
 import Engineering.EngineeringFocus as Focus
-import Engineering.EngineeringPreProcess as PreProcess
 import os
 from shutil import copy2
 
@@ -240,10 +239,24 @@ def focus(run_no, grouping_file, crop_on,calibration_directory, focus_directory,
 # pre_process the run passed in, usign the rebin parameters passed in
 def pre_process(params, time_period, focus_run):
     # rebin based on pulse if a time period is sent in, otherwise just do a normal rebin
+    wsname = "engg_preproc_input_ws"
+    simple.Load(Filename=run, OutputWorkspace=wsname)
     if time_period is not None:
-        PreProcess.rebin_pulse(focus_run, params, time_period)
+        rebin_pulse(focus_run, params, time_period, wsname)
     else:
-        PreProcess.rebin_time(focus_run, params)
+        rebin_time(focus_run, params, wsname)
+
+
+def rebin_time(run, bin_param, wsname):
+    output = "engg_preproc_time_ws"
+    simple.Rebin(InputWorkspace=wsname, Params=bin_param, OutputWorkspace=output)
+    return output
+
+
+def rebin_pulse(run, bin_param, wsname):  # , #n_periods): currently unused to match implementation in gui
+    output = "engg_preproc_pulse_ws"
+    simple.RebinByPulseTimes(InputWorkspace=wsname, Params=bin_param, OutputWorkspace=output)
+    return output
 
 
 # generate the names of the vanadium workspaces from the vanadium set on the object
