@@ -14,8 +14,7 @@ from abc import (ABCMeta, abstractmethod)
 from sans.state.move import StateMove
 from sans.common.enums import (SANSInstrument, CanonicalCoordinates, DetectorType)
 from sans.common.general_functions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
-                                           quaternion_to_angle_and_axis, sanitise_instrument_name,
-                                           convert_bank_name_to_detector_type_isis)
+                                           quaternion_to_angle_and_axis, sanitise_instrument_name)
 
 
 # -------------------------------------------------
