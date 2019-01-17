@@ -49,7 +49,7 @@ public:
   std::vector<IArchiveSearch_sptr>
   getArchiveSearch(const Kernel::FacilityInfo &facility) const;
   std::string findRun(const std::string &hintstr,
-                      const std::vector<std::string> &exts,
+                      const std::vector<std::string> &exts = {},
                       const bool useExtsOnly = false) const;
   std::vector<std::string> findRuns(const std::string &hintstr,
                                     const std::vector<std::string> &exts = {},
