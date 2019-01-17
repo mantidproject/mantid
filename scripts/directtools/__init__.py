@@ -598,7 +598,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
 def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'):
     """Plot density of state workspaces.
 
-    Plots the first histograms given DOS workspaces.
+    Plots the first histograms from given DOS workspaces.
 
     :param workspaces: a single workspace or a list thereof
     :type workspaces: str, :class:`mantid.api.MatrixWorkspace` or a :class:`list` thereof
