@@ -7,16 +7,19 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace, \
-    ConjoinWorkspaces, AddTimeSeriesLog
-from mantid.kernel import config
-import mantid.plots.helperfunctions as funcs
-import mantid.api
-import numpy as np
 import datetime
-
 import unittest
+
 import matplotlib
+import numpy as np
+from mock import Mock
+
+import mantid.api
+import mantid.plots.helperfunctions as funcs
+from mantid.kernel import config
+from mantid.plots.utility import MantidAxType
+from mantid.simpleapi import AddTimeSeriesLog, ConjoinWorkspaces, CreateMDHistoWorkspace, CreateSampleWorkspace, \
+    CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace
 
 matplotlib.use('AGG')
 
@@ -312,28 +315,28 @@ class HelperFunctionsTest(unittest.TestCase):
 
     def test_validate_args_success(self):
         ws = CreateSampleWorkspace()
-        result = validate_args(ws)
+        result = funcs.validate_args(ws)
         self.assertEqual(True, result)
 
     def test_get_distribution(self):
         ws = CreateSampleWorkspace()
-        result = get_distribution(ws)
+        result = funcs.get_distribution(ws)
         self.assertEqual((False, {}), result)
 
     def test_get_distribution_from_kwargs(self):
         ws = CreateSampleWorkspace()
-        result = get_distribution(ws, distribution=True)
+        result = funcs.get_distribution(ws, distribution=True)
         self.assertEqual((True, {}), result)
-        result = get_distribution(ws, distribution=False)
+        result = funcs.get_distribution(ws, distribution=False)
         self.assertEqual((False, {}), result)
 
     def test_points_from_boundaries_raise_length_less_than_2(self):
         arr = np.array([1])
-        self.assertRaises(ValueError, points_from_boundaries, arr)
+        self.assertRaises(ValueError, funcs.points_from_boundaries, arr)
 
-    def test_points_from_boundaries_raise_not_numpy_array(self):
+    def test_points_from_boundaries_raise_not_np_array(self):
         arr = [1, 2, 3, 4]
-        self.assertRaises(AssertionError, points_from_boundaries, arr)
+        self.assertRaises(AssertionError, funcs.points_from_boundaries, arr)
 
     def test_dim2array(self):
         class MockIMDDimension:
@@ -343,7 +346,7 @@ class HelperFunctionsTest(unittest.TestCase):
                 self.getNBins = Mock(return_value=3)
 
         mock_dimension = MockIMDDimension()
-        result = _dim2array(mock_dimension)
+        result = funcs._dim2array(mock_dimension)
         self.assertTrue(np.array_equal([1., 4., 7., 10.], result))
 
     def test_get_wksp_index_and_spec_num_with_specNum_axis_spectrum(self):
@@ -354,7 +357,7 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.SPECTRUM
-        res_workspace_index, res_spectrum_number, res_kwargs = _get_wksp_index_and_spec_num(ws, axis, specNum=3)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis, specNum=3)
         self.assertEqual(2, res_workspace_index)
         self.assertEqual(3, res_spectrum_number)
 
@@ -366,7 +369,7 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.BIN
-        res_workspace_index, res_spectrum_number, res_kwargs = _get_wksp_index_and_spec_num(ws, axis, specNum=3)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis, specNum=3)
         self.assertEqual(2, res_workspace_index)
         self.assertEqual(3, res_spectrum_number)
 
@@ -377,7 +380,7 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSingleValuedWorkspace()
         axis = MantidAxType.SPECTRUM
-        res_workspace_index, res_spectrum_number, res_kwargs = _get_wksp_index_and_spec_num(ws, axis)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis)
         self.assertEqual(0, res_workspace_index)
         self.assertEqual(None, res_spectrum_number)
 
@@ -388,7 +391,7 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSingleValuedWorkspace()
         axis = MantidAxType.BIN
-        res_workspace_index, res_spectrum_number, res_kwargs = _get_wksp_index_and_spec_num(ws, axis)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis)
         self.assertEqual(0, res_workspace_index)
         self.assertEqual(None, res_spectrum_number)
 
@@ -400,7 +403,7 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.BIN
-        res_workspace_index, res_spectrum_number, res_kwargs = _get_wksp_index_and_spec_num(ws, axis, wkspIndex=5)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis, wkspIndex=5)
         self.assertEqual(5, res_workspace_index)
         self.assertEqual(None, res_spectrum_number)
 
@@ -412,7 +415,7 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.SPECTRUM
-        res_workspace_index, res_spectrum_number, res_kwargs = _get_wksp_index_and_spec_num(ws, axis, wkspIndex=5)
+        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis, wkspIndex=5)
         self.assertEqual(5, res_workspace_index)
         self.assertEqual(6, res_spectrum_number)
 
@@ -424,7 +427,7 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.SPECTRUM  # doesn't matter for this test
-        self.assertRaises(RuntimeError, _get_wksp_index_and_spec_num, ws, axis, wkspIndex=5, specNum=3)
+        self.assertRaises(RuntimeError, funcs._get_wksp_index_and_spec_num, ws, axis, wkspIndex=5, specNum=3)
 
     def test_get_wksp_index_and_spec_num_error_with_none(self):
         """
@@ -434,32 +437,31 @@ class HelperFunctionsTest(unittest.TestCase):
         """
         ws = CreateSampleWorkspace()
         axis = MantidAxType.SPECTRUM  # doesn't matter for this test
-        self.assertRaises(RuntimeError, _get_wksp_index_and_spec_num, ws, axis)
+        self.assertRaises(RuntimeError, funcs._get_wksp_index_and_spec_num, ws, axis)
 
-    def test_get_wksp_index_dist_and_label(self):
+    def test_get_wksp_index_dist_and_label_for_bins(self):
         """
         Tests that the workspace index, distribution and label are correctly retrieved.
 
         The label changes depending on the axis.
         """
         ws = CreateSampleWorkspace()
-        axis = MantidAxType.SPECTRUM
-        res_workspace_index, res_distribution, res_kwargs = get_wksp_index_dist_and_label(ws, axis, wkspIndex=1)
-
-        self.assertEqual(1, res_workspace_index)
-        self.assertEqual(False, res_distribution)
-        self.assertEqual(res_kwargs['label'], 'ws: spec 2')
-
         axis = MantidAxType.BIN
-        res_workspace_index, res_distribution, res_kwargs = get_wksp_index_dist_and_label(ws, axis, wkspIndex=1)
+        res_workspace_index, res_distribution, res_kwargs = funcs.get_wksp_index_dist_and_label(ws, axis, wkspIndex=1)
 
         self.assertEqual(1, res_workspace_index)
         self.assertEqual(False, res_distribution)
         self.assertEqual(res_kwargs['label'], 'ws: bin 1')
 
+        res_workspace_index, res_distribution, res_kwargs = funcs.get_wksp_index_dist_and_label(ws, axis, wkspIndex=0)
+
+        self.assertEqual(0, res_workspace_index)
+        self.assertEqual(False, res_distribution)
+        self.assertEqual(res_kwargs['label'], 'ws: bin 0')
+
     @add_md_workspace_with_data
     def test_get_md_data_no_error(self, mdws):
-        dim_arrays, data, err = get_md_data(mdws, normalization=None)
+        dim_arrays, data, err = funcs.get_md_data(mdws, normalization=None)
         self.assertEqual(11, len(dim_arrays[0]))
         self.assertEqual(-3, dim_arrays[0][0])
         self.assertEqual(3, dim_arrays[0][-1])
@@ -476,7 +478,7 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_md_workspace_with_data
     def test_get_md_data_with_error(self, mdws):
-        dim_arrays, data, err = get_md_data(mdws, normalization=None, withError=True)
+        dim_arrays, data, err = funcs.get_md_data(mdws, normalization=None, withError=True)
         self.assertEqual(11, len(dim_arrays[0]))
         self.assertEqual(-3, dim_arrays[0][0])
         self.assertEqual(3, dim_arrays[0][-1])
@@ -495,38 +497,38 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_no_dy_dx(self, ws):
-        x, y, dy, dx = get_spectrum(ws, 3, distribution=False, withDy=False, withDx=False)
-        self.assertTrue(numpy.array_equal([13.5, 14.5, 15.5], x))
-        self.assertTrue(numpy.array_equal([10.0, 11.0, 12.0], y))
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, distribution=False, withDy=False, withDx=False)
+        self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
+        self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
         self.assertIsNone(dy)
         self.assertIsNone(dx)
 
     @add_workspace_with_data
     def test_get_spectrum_with_dy_dx(self, ws):
-        x, y, dy, dx = get_spectrum(ws, 3, distribution=False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, distribution=False, withDy=True, withDx=True)
 
-        self.assertTrue(numpy.array_equal([13.5, 14.5, 15.5], x))
-        self.assertTrue(numpy.array_equal([10.0, 11.0, 12.0], y))
-        self.assertTrue(numpy.array_equal([10.0, 11.0, 12.0], dy))
-        self.assertTrue(numpy.array_equal([10.0, 11.0, 12.0], dx))
+        self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
+        self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
+        self.assertTrue(np.array_equal([10.0, 11.0, 12.0], dy))
+        self.assertTrue(np.array_equal([10.0, 11.0, 12.0], dx))
 
     @add_workspace_with_data
     def test_get_bins_no_dy(self, ws):
-        x, y, dy, dx = get_bins(ws, 1, withDy=False)
-        self.assertTrue(numpy.array_equal([0, 1, 2, 3], x))
-        self.assertTrue(numpy.array_equal([2.0, 5.0, 8.0, 11.0], y))
+        x, y, dy, dx = funcs.get_bins(ws, 1, withDy=False)
+        self.assertTrue(np.array_equal([0, 1, 2, 3], x))
+        self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], y))
         self.assertIsNone(dy)
 
     @add_workspace_with_data
     def test_get_bins_with_dy(self, ws):
-        x, y, dy, dx = get_bins(ws, 1, withDy=True)
-        self.assertTrue(numpy.array_equal([0, 1, 2, 3], x))
-        self.assertTrue(numpy.array_equal([2.0, 5.0, 8.0, 11.0], y))
-        self.assertTrue(numpy.array_equal([2.0, 5.0, 8.0, 11.0], dy))
+        x, y, dy, dx = funcs.get_bins(ws, 1, withDy=True)
+        self.assertTrue(np.array_equal([0, 1, 2, 3], x))
+        self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], y))
+        self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], dy))
 
     @add_md_workspace_with_data()
     def test_get_md_data2d_bin_bounds(self, mdws):
-        coord1, coord2, data = get_md_data2d_bin_bounds(mdws, False)
+        coord1, coord2, data = funcs.get_md_data2d_bin_bounds(mdws, False)
         self.assertEqual(11, len(coord1))
         self.assertEqual(-3, coord1[0])
         self.assertEqual(3, coord1[-1])
@@ -541,7 +543,7 @@ class HelperFunctionsTest(unittest.TestCase):
 
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_raises_AssertionException(self, mdws):
-        self.assertRaises(AssertionError, get_md_data2d_bin_bounds, mdws, False)
+        self.assertRaises(AssertionError, funcs.get_md_data2d_bin_bounds, mdws, False)
 
 
 if __name__ == '__main__':
