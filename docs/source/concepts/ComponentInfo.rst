@@ -9,7 +9,28 @@ ComponentInfo
 
 Introduction
 ------------
-``ComponentInfo`` provides faster and simpler access to instrument/beamline geometry as required by Mantid :ref:`Algorithms <Algorithm>` than was possible using :ref:`Instrument`. ``ComponentInfo`` and :ref:`DetectorInfo` are designed as full replacements to :ref:`Instrument`. At the time of writing, `ComponentInfo` is incomplete.
+``ComponentInfo`` provides faster and simpler access to instrument/beamline geometry as required by Mantid :ref:`Algorithms <Algorithm>` than was possible using :ref:`Instrument`. ``ComponentInfo`` and :ref:`DetectorInfo` are designed as full replacements to :ref:`Instrument`. 
 
-Until complete, :ref:`Instrument Access Layers <InstrumentAccessLayers>` provides the best details on how `ComponentInfo` can be used in it's current state of implementation.
+:ref:`Instrument Access Layers <InstrumentAccessLayers>` provides details on how `DetectorInfo` interacts with other geometry access layers.
+
+Python Interface
+----------------
+
+Examples of using ``ComponentInfo`` in python
+
+Print indices of detectors in "bank1" that are masked
+
+.. code-block:: python 
+
+  from mantid.simpleapi import CreateSampleWorkspace
+  from mantid.geometry import ComponentInfo, ComponentInfoPythonIterator
+  from mantid.geometry import DetectorInfo, DetectorInfoPythonIterator
+
+  ws = CreateSampleWorkspace()
+  comp_info = ws.componentInfo()
+  det_info = ws.detectorInfo()
+  bank_index compinfo.indexOfAny('bank1')
+  for det_index in compinfo.detectorsInSubtree(bank_index):
+      if det_info.isMasked(int(det_index)):
+          print('Masked detector of bank1, ', det_index)
 
