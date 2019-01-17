@@ -11,7 +11,7 @@ class VerticalMarker(QObject):
 
     x_moved = Signal(float)
 
-    def __init__(self, canvas, color, x, y0=None, y1=None):
+    def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5):
         super(VerticalMarker, self).__init__()
         self.ax = canvas.figure.get_axes()[0]
         self.x = x
@@ -19,7 +19,8 @@ class VerticalMarker(QObject):
         self.y1 = y1
         y0, y1 = self._get_y0_y1()
         path = Path([(x, y0), (x, y1)], [Path.MOVETO, Path.LINETO])
-        self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=5, linewidth=2.0, animated=True)
+        self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
+                               linewidth=line_width, animated=True)
         self.ax.add_patch(self.patch)
         self.is_moving = False
 
@@ -54,11 +55,10 @@ class VerticalMarker(QObject):
             return False
         return abs(self.get_x_in_pixels() - x_pixels) < 3
 
-    def on_click(self, x, y):
-        if self.is_above(x, y):
-            self.is_moving = True
+    def mouse_move_start(self, x, y):
+        self.is_moving = self.is_above(x, y)
 
-    def stop(self):
+    def mouse_move_stop(self):
         self.is_moving = False
 
     def mouse_move(self, x, y=None):
@@ -83,8 +83,11 @@ class VerticalMarker(QObject):
 
 class CentreMarker(VerticalMarker):
 
+    selected_color = 'red'
+    deselected_color = 'grey'
+
     def __init__(self, canvas, x, y0, y1):
-        VerticalMarker.__init__(self, canvas, 'red', x, y0, y1)
+        VerticalMarker.__init__(self, canvas, self.selected_color, x, y0, y1)
         self.is_at_top = False
 
     def _is_at_top(self, y):
@@ -92,17 +95,17 @@ class CentreMarker(VerticalMarker):
         _, y_pixels = self.patch.get_transform().transform((0, y))
         return abs(y1_pixels - y_pixels) < 10
 
-    def on_click(self, x, y):
-        VerticalMarker.on_click(self, x, y)
-        self.is_at_top = self._is_at_top(y)
-
-    def stop(self):
-        VerticalMarker.stop(self)
-        self.is_at_top = False
-
     def get_cursor_at_y(self, y):
         is_at_top = self.is_at_top if self.is_moving else self._is_at_top(y)
         return QCursor(Qt.SizeAllCursor) if is_at_top else VerticalMarker.get_cursor_at_y(self, y)
+
+    def mouse_move_start(self, x, y):
+        VerticalMarker.mouse_move_start(self, x, y)
+        self.is_at_top = self._is_at_top(y)
+
+    def mouse_move_stop(self):
+        VerticalMarker.mouse_move_stop(self)
+        self.is_at_top = False
 
     def mouse_move(self, x, y=None):
         if not self.is_moving:
@@ -117,6 +120,12 @@ class CentreMarker(VerticalMarker):
 
     def set_height(self, height):
         self.y1 = self.y0 + height
+
+    def select(self):
+        self.patch.set_edgecolor(self.selected_color)
+
+    def deselect(self):
+        self.patch.set_edgecolor(self.deselected_color)
 
 
 class FitInteractiveTool(QObject):
@@ -143,6 +152,7 @@ class FitInteractiveTool(QObject):
         self.fit_end_x.x_moved.connect(self.fit_end_x_moved)
 
         self.peak_markers = []
+        self.selected_peak = None
 
         self._cids = []
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
@@ -218,16 +228,22 @@ class FitInteractiveTool(QObject):
         y = event.ydata
         if x is None or y is None:
             return
-        self.fit_start_x.on_click(x, y)
-        self.fit_end_x.on_click(x, y)
+        self.fit_start_x.mouse_move_start(x, y)
+        self.fit_end_x.mouse_move_start(x, y)
+        selected_peak = None
         for pm in self.peak_markers:
-            pm.on_click(x, y)
+            pm.mouse_move_start(x, y)
+            if pm.is_moving:
+                selected_peak = pm
+        if selected_peak is not None:
+            self.select_peak(selected_peak)
+            self.canvas.draw()
 
     def stop_move_markers(self, event):
-        self.fit_start_x.stop()
-        self.fit_end_x.stop()
+        self.fit_start_x.mouse_move_stop()
+        self.fit_end_x.mouse_move_stop()
         for pm in self.peak_markers:
-            pm.stop()
+            pm.mouse_move_stop()
 
     def move_start_x(self, x):
         if x is not None:
@@ -251,22 +267,31 @@ class FitInteractiveTool(QObject):
         return n + 1
 
     def add_peak_dialog(self):
-        print ('Add peak dialog')
         self.mouse_state.transition_to('add_peak')
 
     def add_peak(self, x, y_top, y_bottom=0.0):
         peak_id = self._make_peak_id()
-        marker = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom)
-        marker.peak_moved.connect(self.peak_moved)
-        self.peak_markers.append(marker)
+        peak = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom)
+        peak.peak_moved.connect(self.peak_moved)
+        self.peak_markers.append(peak)
+        self.select_peak(peak)
         self.canvas.draw()
-        self.peak_added.emit(peak_id, x, marker.height())
+        self.peak_added.emit(peak_id, x, peak.height())
 
     def update_peak(self, peak_id, centre, height):
         for pm in self.peak_markers:
             if pm.peak_id == peak_id:
                 pm.update_peak(centre, height)
         self.canvas.draw()
+
+    def select_peak(self, peak):
+        self.selected_peak = None
+        for pm in self.peak_markers:
+            if peak == pm:
+                pm.select()
+                self.selected_peak = peak
+            else:
+                pm.deselect()
 
     def get_transform(self):
         return self.fit_start_x.patch.get_transform()
@@ -286,12 +311,19 @@ class PeakMarker(QObject):
         super(PeakMarker, self).__init__()
         self.peak_id = peak_id
         self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top)
+        self.is_selected = True
 
     def redraw(self):
         self.centre_marker.redraw()
 
     def override_cursor(self, x, y):
         return self.centre_marker.override_cursor(x, y)
+
+    def mouse_move_start(self, x, y):
+        self.centre_marker.mouse_move_start(x, y)
+
+    def mouse_move_stop(self):
+        self.centre_marker.mouse_move_stop()
 
     def mouse_move(self, x, y):
         moved = self.centre_marker.mouse_move(x, y)
@@ -300,11 +332,9 @@ class PeakMarker(QObject):
             return True
         return False
 
-    def on_click(self, x, y):
-        self.centre_marker.on_click(x, y)
-
-    def stop(self):
-        self.centre_marker.stop()
+    @property
+    def is_moving(self):
+        return self.centre_marker.is_moving
 
     def centre(self):
         return self.centre_marker.x
@@ -315,3 +345,11 @@ class PeakMarker(QObject):
     def update_peak(self, centre, height):
         self.centre_marker.x = centre
         self.centre_marker.set_height(height)
+
+    def select(self):
+        self.centre_marker.select()
+        self.is_selected = True
+
+    def deselect(self):
+        self.centre_marker.deselect()
+        self.is_selected = False
