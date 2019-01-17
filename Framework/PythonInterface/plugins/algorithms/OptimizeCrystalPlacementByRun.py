@@ -30,7 +30,7 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "The name of the peaks workspace that will be optimized.")
         self.declareProperty("Tolerance", 0.15, "Tolerance of indexing of peaks.")
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+        self.declareProperty("OutputWorkspace", "", 
                              "The name of the peaks workspace that will be created.")
 
     def PyExec(self):
@@ -63,8 +63,7 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
         OptimizeCrystalPlacement(PeaksWorkspace=ws_group, ModifiedPeaksWorkspace=ws_group, AdjustSampleOffsets=True, 
             MaxSamplePositionChangeMeters=0.005,MaxIndexingError=tolerance)
         
-        CloneWorkspace(InputWorkspace=str(minR),OutputWorkspace=ws_append)
-        AnalysisDataService.remove(str(minR))
+        RenameWorkspace(InputWorkspace=str(minR),OutputWorkspace=ws_append)
         for run in range(minR+1, maxR):
             if AnalysisDataService.doesExist(str(run)):
                 CombinePeaksWorkspaces(LHSWorkspace=ws_append, RHSWorkspace=str(run),OutputWorkspace=ws_append)
