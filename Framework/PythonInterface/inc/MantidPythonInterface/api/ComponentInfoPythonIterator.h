@@ -23,8 +23,8 @@ namespace PythonInterface {
 
 /** ComponentInfoPythonIterator
 
-ComponentInfoPythonIterator is used to expose ComponentInfoIterator to the Python
-side. 
+ComponentInfoPythonIterator is used to expose ComponentInfoIterator to the
+Python side.
 */
 
 class ComponentInfoPythonIterator {
