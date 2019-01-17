@@ -753,7 +753,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                              XPixelMax=int(background_range[1]),
                              YPixelMin=low_res_min,
                              YPixelMax=low_res_max,
-                             ErrorWeighting = True,
+                             ErrorWeighting = False,
                              SumPixels=True, NormalizeSum=True)
 
             signal = RefRoi(InputWorkspace=workspace, IntegrateY=True,
