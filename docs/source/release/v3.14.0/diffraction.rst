@@ -94,6 +94,6 @@ Engineering Diffraction
 New
 ###
 
-- Scripts added that produce the same results as the engineering gui, this is to allow use with autoreduction. scripts can be accessed in the same manner as Powder scripts, by importing the EnginX object and then calling functions on it.
+- Scripts added that produce the same results as the engineering gui, this is to allow use with autoreduction.
 
 :ref:`Release 3.14.0 <v3.14.0>`
