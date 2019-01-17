@@ -39,16 +39,7 @@ ReductionJobs const &RunsTablePresenter::reductionJobs() const {
 
 void RunsTablePresenter::mergeAdditionalJobs(
     ReductionJobs const &additionalJobs) {
-  std::cout << "Before Transfer:" << std::endl;
-  prettyPrintModel(m_model);
-
-  std::cout << "Transfering:" << std::endl;
-  prettyPrintModel(additionalJobs);
-
   mergeJobsInto(m_model, additionalJobs, m_thetaTolerance, m_jobViewUpdater);
-
-  std::cout << "After Transfer:" << std::endl;
-  prettyPrintModel(m_model);
 }
 
 void RunsTablePresenter::removeRowsFromModel(

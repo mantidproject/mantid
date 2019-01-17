@@ -16,8 +16,7 @@ namespace CustomInterfaces {
 /** Constructor
  * @param parent :: The parent of this view
  */
-SaveView::SaveView(QWidget *parent) : m_notifyee(nullptr) {
-  UNUSED_ARG(parent);
+SaveView::SaveView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr) {
   initLayout();
 }
 
