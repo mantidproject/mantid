@@ -102,6 +102,7 @@ private:
   int m_numAnnuli;         ///< The number of annuli
   double m_deltaR; ///< radius of the cylindrical sample in m / The number of
   /// annuli
+  bool m_useSampleShape;
 };
 
 } // namespace Algorithms

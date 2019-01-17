@@ -133,7 +133,7 @@ void AbsorptionCorrection::exec() {
 
   std::ostringstream message;
   message << "Numerical integration performed every " << m_xStep
-          << " wavelength points\n";
+          << " wavelength points";
   g_log.information(message.str());
   message.str("");
 

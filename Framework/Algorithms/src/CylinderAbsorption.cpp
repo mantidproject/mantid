@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -23,14 +24,15 @@ using namespace API;
 
 CylinderAbsorption::CylinderAbsorption()
     : AbsorptionCorrection(), m_cylHeight(0.0), m_cylRadius(0.0),
-      m_numSlices(0), m_sliceThickness(0), m_numAnnuli(0), m_deltaR(0) {}
+      m_numSlices(0), m_sliceThickness(0), m_numAnnuli(0), m_deltaR(0),
+      m_useSampleShape(false) {}
 
 void CylinderAbsorption::defineProperties() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("CylinderSampleHeight", -1.0, mustBePositive,
+  declareProperty("CylinderSampleHeight", EMPTY_DBL(), mustBePositive,
                   "The height of the cylindrical sample in centimetres");
-  declareProperty("CylinderSampleRadius", -1.0, mustBePositive,
+  declareProperty("CylinderSampleRadius", EMPTY_DBL(), mustBePositive,
                   "The radius of the cylindrical sample in centimetres");
 
   auto positiveInt = boost::make_shared<BoundedValidator<int>>();
@@ -45,12 +47,84 @@ void CylinderAbsorption::defineProperties() {
       "calculation");
 }
 
+namespace { // anonymous
+            /*
+ * <type name="userShape"> <cylinder id="sample-shape">
+ *    <centre-of-bottom-base x="0" y="-0.03485" z="0"/>
+ *    <axis x="0" y="1" z="0"/>
+ *    <height val="0.0697"/>
+ *    <radius val="0.00315"/>
+ * </cylinder> </type>
+ */
+// to simplify other code, return values in cm
+double getParameterFromXml(const std::string &xml,
+                           const std::string &paramName) {
+  const std::string error =
+      "Failed to find parameter \"" + paramName + "\" in shape xml";
+  auto start = xml.find(paramName);
+  if (start == std::string::npos) {
+    throw std::runtime_error(error);
+  }
+  start += paramName.size();
+  start = xml.find("val=\"", start);
+  if (start == std::string::npos) {
+    throw std::runtime_error(error);
+  }
+  start += std::string("val=\"").size();
+  auto end = xml.find("\"", start);
+  if (end == std::string::npos) {
+    throw std::runtime_error(error);
+  }
+
+  // return a value in cm when the xml is in m
+  return 100. * boost::lexical_cast<double>(xml.substr(start, end - start));
+}
+
+// returns an empty string if anything is wrong
+std::string getSampleXml(const Geometry::IObject &sampleShape) {
+  if (!sampleShape.hasValidShape())
+    return std::string();
+  if (sampleShape.shape() !=
+      Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
+    return std::string();
+  const auto csgshape = dynamic_cast<const CSGObject *>(&sampleShape);
+  const std::string shapeXml = csgshape->getShapeXML();
+  return shapeXml;
+}
+} // anonymous namespace
+
 /// Fetch the properties and set the appropriate member variables
 void CylinderAbsorption::retrieveProperties() {
   m_cylHeight = getProperty("CylinderSampleHeight"); // in cm
   m_cylRadius = getProperty("CylinderSampleRadius"); // in cm
+
+  // this declares that at least part of the built-in sample geometry should be
+  // ignored and use the supplied parameters instead
+  m_useSampleShape = (isEmpty(m_cylHeight) && isEmpty(m_cylRadius));
+
+  // get the missing parameters from the sample shape
+  const auto &sampleShape = m_inputWS->sample().getShape();
+  std::string shapeXml = getSampleXml(sampleShape);
+  if (!shapeXml.empty()) {
+    g_log.information(shapeXml);
+    if (isEmpty(m_cylHeight))
+      m_cylHeight = getParameterFromXml(shapeXml, "height");
+    if (isEmpty(m_cylRadius))
+      m_cylRadius = getParameterFromXml(shapeXml, "radius");
+  } else {
+    g_log.notice("Did not get shape xml");
+  }
   m_cylHeight *= 0.01;                               // now in m
   m_cylRadius *= 0.01;                               // now in m
+
+  g_log.information() << "Creating cylinder with radius=" << m_cylRadius
+                      << "m, height=" << m_cylHeight << "m\n";
+  if (isEmpty(m_cylHeight) || isEmpty(m_cylRadius)) {
+    throw std::runtime_error(
+        "Need to specify both height and radius of cylinder");
+  }
+  if (m_cylHeight == 0. || m_cylRadius == 0.)
+    throw std::runtime_error("Failed to specify height and radius of cylinder");
 
   m_numSlices = getProperty("NumberOfSlices");
   m_sliceThickness = m_cylHeight / m_numSlices;
@@ -78,6 +152,9 @@ void CylinderAbsorption::retrieveProperties() {
 }
 
 std::string CylinderAbsorption::sampleXML() {
+  if (m_useSampleShape)
+    return std::string();
+
   // Get the sample position, which is typically the origin but we should be
   // generic
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
