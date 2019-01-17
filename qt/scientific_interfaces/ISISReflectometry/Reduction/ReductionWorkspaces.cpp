@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReductionWorkspaces.h"
 #include "../Map.h"
 
@@ -79,9 +85,9 @@ std::string transmissionWorkspacesCombined(
   }
 }
 
-ReductionWorkspaces workspaceNamesForUnsliced(
-    std::vector<std::string> const &summedRunNumbers,
-    std::pair<std::string, std::string> const &transmissionRuns) {
+ReductionWorkspaces
+workspaceNames(std::vector<std::string> const &summedRunNumbers,
+               std::pair<std::string, std::string> const &transmissionRuns) {
 
   auto tofWorkspaces =
       map(summedRunNumbers, [](std::string const &runNumber) -> std::string {
@@ -102,7 +108,7 @@ ReductionWorkspaces workspaceNamesForUnsliced(
       std::move(iVsQ), std::move(iVsQBinned));
 }
 
-std::string postprocessedWorkspaceNameForUnsliced(
+std::string postprocessedWorkspaceName(
     std::vector<std::vector<std::string> const *> const &summedRunNumbers) {
   auto summedRunList =
       map(summedRunNumbers,

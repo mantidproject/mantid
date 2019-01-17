@@ -46,25 +46,23 @@ set ( TEST_FILES
   test/MuonAnalysisFitFunctionPresenterTest.h
   test/MuonAnalysisHelperTest.h
   test/MuonAnalysisResultTableCreatorTest.h
-  test/ReflDataProcessorPresenterTest.h
-  test/ReflEventPresenterTest.h
-  test/ReflEventTabPresenterTest.h
-  test/ReflMainWindowPresenterTest.h
   test/ReflNexusMeasurementItemSourceTest.h
-  test/ReflRunsTabPresenterTest.h
-  test/ReflSaveTabPresenterTest.h
-  test/ReflSettingsPresenterTest.h
-  test/ReflSettingsTabPresenterTest.h
   test/RunMapTest.h
   test/UserInputValidatorTest.h
 
   test/ISISReflectometry/Reduction/GroupTest.h
   test/ISISReflectometry/Reduction/ValidateRowTest.h
+  test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
   test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
-  test/ISISReflectometry/Presenters/BatchPresenterGroupDeletionTest.h
-  test/ISISReflectometry/Presenters/BatchPresenterGroupInsertionTest.h
-  test/ISISReflectometry/Presenters/BatchPresenterRowInsertionTest.h
-  test/ISISReflectometry/Presenters/BatchPresenterRowDeletionTest.h
+  test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
+  test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
+  test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
+  test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
+  test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
+  test/ISISReflectometry/Event/EventPresenterTest.h
+  test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
+  test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
+  test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest

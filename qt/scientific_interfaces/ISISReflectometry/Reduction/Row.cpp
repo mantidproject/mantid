@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Row.h"
 #include "../Map.h"
 #include <boost/algorithm/string.hpp>
@@ -6,13 +12,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-template <typename ReducedWorkspaceNames>
-Row<ReducedWorkspaceNames>::Row(
-    std::vector<std::string> runNumbers, double theta,
-    std::pair<std::string, std::string> transmissionRuns,
-    boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
-    ReductionOptionsMap reductionOptions,
-    ReducedWorkspaceNames reducedWorkspaceNames)
+Row::Row(std::vector<std::string> runNumbers, double theta,
+         std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
+         boost::optional<double> scaleFactor,
+         ReductionOptionsMap reductionOptions,
+         ReductionWorkspaces reducedWorkspaceNames)
     : m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)),
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_transmissionRuns(std::move(transmissionRuns)),
@@ -21,69 +25,40 @@ Row<ReducedWorkspaceNames>::Row(
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
-template <typename ReducedWorkspaceNames>
-std::vector<std::string> const &Row<ReducedWorkspaceNames>::runNumbers() const {
-  return m_runNumbers;
-}
+std::vector<std::string> const &Row::runNumbers() const { return m_runNumbers; }
 
-template <typename ReducedWorkspaceNames>
 std::pair<std::string, std::string> const &
-Row<ReducedWorkspaceNames>::transmissionWorkspaceNames() const {
+Row::transmissionWorkspaceNames() const {
   return m_transmissionRuns;
 }
 
-template <typename ReducedWorkspaceNames>
-double Row<ReducedWorkspaceNames>::theta() const {
-  return m_theta;
-}
+double Row::theta() const { return m_theta; }
 
-template <typename ReducedWorkspaceNames>
-boost::optional<RangeInQ> const &Row<ReducedWorkspaceNames>::qRange() const {
-  return m_qRange;
-}
+RangeInQ const &Row::qRange() const { return m_qRange; }
 
-template <typename ReducedWorkspaceNames>
-boost::optional<double> Row<ReducedWorkspaceNames>::scaleFactor() const {
-  return m_scaleFactor;
-}
+boost::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
 
-template <typename ReducedWorkspaceNames>
-ReductionOptionsMap const &
-Row<ReducedWorkspaceNames>::reductionOptions() const {
+ReductionOptionsMap const &Row::reductionOptions() const {
   return m_reductionOptions;
 }
 
-template <typename ReducedWorkspaceNames>
-ReducedWorkspaceNames const &
-Row<ReducedWorkspaceNames>::reducedWorkspaceNames() const {
+ReductionWorkspaces const &Row::reducedWorkspaceNames() const {
   return m_reducedWorkspaceNames;
 }
 
-boost::optional<UnslicedRow>
-unslice(boost::optional<SlicedRow> const &row,
-        WorkspaceNamesFactory const &workspaceNamesFactory) {
-  return map(row, [&](SlicedRow const &row) -> UnslicedRow {
-    return UnslicedRow(
-        row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
-        row.qRange(), row.scaleFactor(), row.reductionOptions(),
-        workspaceNamesFactory.makeNames<typename UnslicedRow::WorkspaceNames>(
-            row.runNumbers(), row.transmissionWorkspaceNames()));
-  });
+Row Row::withExtraRunNumbers(
+    std::vector<std::string> const &extraRunNumbers) const {
+  auto newRunNumbers = std::vector<std::string>();
+  newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
+  boost::range::set_union(m_runNumbers, extraRunNumbers,
+                          std::back_inserter(newRunNumbers));
+  auto wsNames = workspaceNames(newRunNumbers, transmissionWorkspaceNames());
+  return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
+             scaleFactor(), reductionOptions(), wsNames);
 }
 
-boost::optional<SlicedRow>
-slice(boost::optional<UnslicedRow> const &row,
-      WorkspaceNamesFactory const &workspaceNamesFactory) {
-  return map(row, [&](UnslicedRow const &row) -> SlicedRow {
-    return SlicedRow(
-        row.runNumbers(), row.theta(), row.transmissionWorkspaceNames(),
-        row.qRange(), row.scaleFactor(), row.reductionOptions(),
-        workspaceNamesFactory.makeNames<typename SlicedRow::WorkspaceNames>(
-            row.runNumbers(), row.transmissionWorkspaceNames()));
-  });
+Row mergedRow(Row const &rowA, Row const &rowB) {
+  return rowA.withExtraRunNumbers(rowB.runNumbers());
 }
-
-template class Row<SlicedReductionWorkspaces>;
-template class Row<ReductionWorkspaces>;
 } // namespace CustomInterfaces
 } // namespace MantidQt

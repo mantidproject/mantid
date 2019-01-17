@@ -7,7 +7,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 
-#include "Views/IBatchView.h"
+#include "DllConfig.h"
+#include "GUI/RunsTable/IRunsTableView.h"
+#include "MantidQtWidgets/Common/ProgressableView.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
@@ -36,13 +38,13 @@ IReflRunsTabView is the base view class for the Reflectometry Interface. It
 contains no QT specific functionality as that should be handled by a subclass.
 */
 
-class DLLExport IReflRunsTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IReflRunsTabView
+    : public MantidQt::MantidWidgets::ProgressableView {
 public:
-  IReflRunsTabView(){};
-  virtual ~IReflRunsTabView(){};
+  virtual ~IReflRunsTabView() = default;
 
   virtual void subscribe(IReflRunsTabPresenter *presenter) = 0;
-  virtual std::vector<IBatchView *> const &tableViews() const = 0;
+  virtual IRunsTableView *table() const = 0;
 
   // Connect the model
   virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
@@ -50,11 +52,6 @@ public:
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  int defaultInstrumentIndex) = 0;
-  virtual void setTableCommands(
-      std::vector<std::unique_ptr<DataProcessor::Command>> tableCommands) = 0;
-  virtual void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessor::Command>> rowCommands) = 0;
-  virtual void clearCommands() = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;
@@ -70,7 +67,6 @@ public:
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
-  virtual int getSelectedGroup() const = 0;
 
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -81,6 +77,10 @@ public:
   // Timer methods
   virtual void startTimer(const int millisecs) = 0;
   virtual void stopTimer() = 0;
+  virtual void loginFailed(std::string const &fullError) = 0;
+
+  virtual void noActiveICatSessions() = 0;
+  virtual void missingRunsToTransfer() = 0;
 
   // Start an ICAT search
   virtual void startIcatSearch() = 0;

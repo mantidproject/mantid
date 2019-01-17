@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>RelMainWindowWidget</class>
- <widget class="QMainWindow" name="RelMainWindowWidget">
+ <class>ReflMainWindowWidget</class>
+ <widget class="QMainWindow" name="ReflMainWindowWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,10 +13,23 @@
   <property name="windowTitle">
    <string>ISIS Reflectometry</string>
   </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="mainTab"/>
+     <widget class="QTabWidget" name="mainTabs">
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::West</enum>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QPushButton" name="helpButton">
@@ -45,6 +58,34 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>975</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuReflectometry">
+    <property name="title">
+     <string>Batch</string>
+    </property>
+    <addaction name="newBatch"/>
+    <addaction name="loadBatch"/>
+   </widget>
+   <addaction name="menuReflectometry"/>
+  </widget>
+  <action name="newBatch">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="loadBatch">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

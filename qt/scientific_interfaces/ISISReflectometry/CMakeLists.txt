@@ -1,44 +1,40 @@
+FUNCTION(PREPEND var prefix)
+   SET(listVar "")
+   FOREACH(f ${ARGN})
+      LIST(APPEND listVar "${prefix}/${f}")
+   ENDFOREACH(f)
+   SET(${var} ${listVar} PARENT_SCOPE)
+ENDFUNCTION(PREPEND)
+
+add_subdirectory(GUI)
+add_subdirectory(Reduction)
+
+message(${GUI_SRC_FILES})
+
 set ( SRC_FILES
-    Reduction/Group.cpp
-    Reduction/RangeInQ.cpp
-    Reduction/ReductionWorkspaces.cpp
-    Reduction/Row.cpp
-    Reduction/SlicedReductionWorkspaces.cpp
-    Reduction/ReductionJobs.cpp
-    Reduction/ValidateRow.cpp
-    Presenters/BatchPresenter.cpp
-    Presenters/BatchPresenterFactory.cpp
-    Presenters/RegexRowFilter.cpp
-    Presenters/RowLocation.cpp
-    Views/BatchView.cpp
+    ${GUI_SRC_FILES}
+    ${REDUCTION_SRC_FILES}
     MeasurementItem.cpp
     InstrumentOptionDefaults.cpp
     InstrumentParameters.cpp
     ExperimentOptionDefaults.cpp
-    QtReflEventTabView.cpp
-    QtReflEventView.cpp
     QtReflMainWindowView.cpp
+    QtReflBatchView.cpp
     QtReflRunsTabView.cpp
     QtReflSaveTabView.cpp
-    QtReflSettingsTabView.cpp
-    QtReflSettingsView.cpp
     ReflCatalogSearcher.cpp
     ReflAsciiSaver.cpp
     IReflAsciiSaver.cpp
     ReflAutoreduction.cpp
-    ReflDataProcessorPresenter.cpp
-    ReflEventPresenter.cpp
-    ReflEventTabPresenter.cpp
     ReflFromStdStringMap.cpp
-    ReflGenericDataProcessorPresenterFactory.cpp
     ReflMainWindowPresenter.cpp
+    ReflBatchPresenter.cpp
     ReflNexusMeasurementItemSource.cpp
     ReflRunsTabPresenter.cpp
     ReflSaveTabPresenter.cpp
     ReflSearchModel.cpp
-    ReflSettingsPresenter.cpp
-    ReflSettingsTabPresenter.cpp
     ReflTableSchema.cpp
+    Parse.cpp
     TransferResults.cpp
     GetInstrumentParameter.cpp
 )
@@ -46,55 +42,39 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
+    ${GUI_INC_FILES}
+    ${REDUCTION_INC_FILES}
     DllConfig.h
-    Views/IBatchView.h
-    Views/BatchView.h
-    Presenters/RegexRowFilter.h
-    Presenters/RowLocation.h
-    Presenters/BatchPresenter.h
-    Presenters/BatchPresenterFactory.h
     InstrumentParameters.h
-    IReflEventPresenter.h
-    IReflEventTabPresenter.h
-    IReflEventView.h
     IReflMainWindowPresenter.h
+    IReflBatchPresenter.h
     IReflMainWindowView.h
+    IReflBatchView.h
+    IReflMessageHandler.h
     IReflRunsTabPresenter.h
     IReflRunsTabView.h
     IReflSaveTabPresenter.h
     IReflSaveTabView.h
     IReflSearcher.h
-    IReflSettingsPresenter.h
-    IReflSettingsTabPresenter.h
-    IReflSettingsView.h
     MeasurementItem.h
     PrecompiledHeader.h
-    QtReflEventTabView.h
-    QtReflEventView.h
     QtReflMainWindowView.h
+    QtReflBatchView.h
     QtReflRunsTabView.h
     QtReflSaveTabView.h
-    QtReflSettingsTabView.h
-    QtReflSettingsView.h
     QWidgetGroup.h
     ReflAutoreduction.h
     ReflCatalogSearcher.h
     ReflAsciiSaver.h
     IReflAsciiSaver.h
-    ReflDataProcessorMainPresenter.h
-    ReflDataProcessorPresenter.h
-    ReflEventPresenter.h
-    ReflEventTabPresenter.h
     ReflFromStdStringMap.h
-    ReflGenericDataProcessorPresenterFactory.h
     ReflMainWindowPresenter.h
+    ReflBatchPresenter.h
     ReflMeasurementItemSource.h
     ReflNexusMeasurementItemSource.h
     ReflRunsTabPresenter.h
     ReflSaveTabPresenter.h
     ReflSearchModel.h
-    ReflSettingsPresenter.h
-    ReflSettingsTabPresenter.h
     ReflTableSchema.h
     TransferResults.h
     GetInstrumentParameter.h
@@ -104,28 +84,23 @@ set ( INC_FILES
 )
 
 set ( MOC_FILES
+    ${GUI_MOC_FILES}
     ReflSearchModel.h
-    QtReflEventTabView.h
-    QtReflEventView.h
     QtReflRunsTabView.h
     QtReflSaveTabView.h
-    QtReflSettingsTabView.h
-    QtReflSettingsView.h
     QtReflMainWindowView.h
-    Views/BatchView.h
+    QtReflBatchView.h
 )
 
 set ( UI_FILES
-   ReflEventTabWidget.ui
-   ReflEventWidget.ui
+   ${GUI_UI_FILES}
    ReflMainWindowWidget.ui
+   ReflBatchWidget.ui
    ReflRunsTabWidget.ui
    ReflSaveTabWidget.ui
-   ReflSettingsTabWidget.ui
-   ReflSettingsWidget.ui
    ReflWindow.ui
-   Views/BatchView.ui
 )
+
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
   QT_VERSION 4

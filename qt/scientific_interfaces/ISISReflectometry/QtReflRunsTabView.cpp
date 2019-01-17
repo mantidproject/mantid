@@ -15,10 +15,9 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
-#include "ReflGenericDataProcessorPresenterFactory.h"
 #include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
-#include "Views/BatchView.h"
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,24 +27,24 @@ using namespace MantidQt::MantidWidgets;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  * @param parent :: The parent of this view
- * @param makeBatchView :: The factory for the BatchViews.
+ * @param makeRunsTableView :: The factory for the RunsTableView.
  */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
-                                     BatchViewFactory makeBatchView)
-    : m_presenter(nullptr), m_calculator(new SlitCalculator(this)),
-      m_tableViews(), m_makeBatchView(std::move(makeBatchView)) {
-
-  UNUSED_ARG(parent);
+                                     RunsTableViewFactory makeRunsTableView)
+    : MantidWidget(parent), m_presenter(nullptr),
+      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()) {
   initLayout();
+}
+void QtReflRunsTabView::loginFailed(std::string const &fullError) {
+  QMessageBox::critical(this, QString::fromStdString(fullError),
+                        "Login Failed!");
 }
 
 void QtReflRunsTabView::subscribe(IReflRunsTabPresenter *presenter) {
   m_presenter = presenter;
 }
 
-std::vector<IBatchView *> const &QtReflRunsTabView::tableViews() const {
-  return m_tableViews;
-}
+IRunsTableView *QtReflRunsTabView::table() const { return m_tableView; }
 
 /**
 Initialise the Interface
@@ -58,28 +57,18 @@ void QtReflRunsTabView::initLayout() {
   // Expand the process runs column at the expense of the search column
   ui.splitterTables->setStretchFactor(0, 0);
   ui.splitterTables->setStretchFactor(1, 1);
-
-  auto *batchView1 = m_makeBatchView();
-  ui.toolbox->addItem(batchView1, "Group 1");
-  m_tableViews.emplace_back(batchView1);
-
-  auto *batchView2 = m_makeBatchView();
-  ui.toolbox->addItem(batchView2, "Group 2");
-  m_tableViews.emplace_back(batchView2);
+  ui.tablePane->layout()->addWidget(m_tableView);
 
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
   m_monitorAlgoRunner =
       boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
-  connect(ui.tableSearchResults,
-          SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(showSearchContextMenu(const QPoint &)));
+  connect(ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)),
+          this, SLOT(showSearchContextMenu(const QPoint &)));
   // Synchronize the slit calculator
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
-  // Selected group changed
-  connect(ui.toolbox, SIGNAL(currentChanged(int)), this, SLOT(groupChanged()));
 
   // Synchronize the instrument selection widgets
   // Processing table in group 1
@@ -104,56 +93,15 @@ void QtReflRunsTabView::initLayout() {
   //        SLOT(instrumentChanged(int)));
 }
 
-/**
- * Add a command (action) to a menu
- * @param menu : [input] The menu where actions will be added
- * @param command : [input] The command (action) to add
- */
-void QtReflRunsTabView::addToMenu(QMenu *menu,
-                                  DataProcessor::Command_uptr command) {
-
-  m_commands.push_back(
-      Mantid::Kernel::make_unique<QtCommandAdapter>(menu, std::move(command)));
+void QtReflRunsTabView::noActiveICatSessions() {
+  QMessageBox::information(
+      this, "Login Failed",
+      "Error Logging in: Please press 'Search' to try again.");
 }
 
-/**
- * Adds actions to the "Reflectometry" menu
- * @param tableCommands : [input] The list of commands to add to the
- * "Reflectometry" menu
- */
-void QtReflRunsTabView::setTableCommands(
-    std::vector<DataProcessor::Command_uptr> tableCommands) {
-
-  for (auto &command : tableCommands) {
-    addToMenu(ui.menuTable, std::move(command));
-  }
-
-  // Slit calculator
-  QAction *slitCalc = ui.menuTable->addAction(
-      QIcon(QString::fromStdString(":/param_range_btn.png")),
-      QString("Slit Calculator"));
-  connect(slitCalc, SIGNAL(triggered()), this, SLOT(slitCalculatorTriggered()));
-}
-
-/**
- * Adds actions to the "Edit" menu
- * @param rowCommands : [input] The list of commands to add to the "Edit" menu
- */
-void QtReflRunsTabView::setRowCommands(
-    std::vector<DataProcessor::Command_uptr> rowCommands) {
-
-  for (auto &command : rowCommands) {
-    addToMenu(ui.menuRows, std::move(command));
-  }
-}
-
-/**
- * Clears all the actions (commands)
- */
-void QtReflRunsTabView::clearCommands() {
-  ui.menuRows->clear();
-  ui.menuTable->clear();
-  m_commands.clear();
+void QtReflRunsTabView::missingRunsToTransfer() {
+  QMessageBox::critical(this, "No runs selected",
+                        "Error: Please select at least one run to transfer.");
 }
 
 /**
@@ -451,20 +399,6 @@ Get the string the user wants to search for.
 */
 std::string QtReflRunsTabView::getSearchString() const {
   return ui.textSearch->text().toStdString();
-}
-
-/**
- * @return the selected group
- */
-int QtReflRunsTabView::getSelectedGroup() const {
-  return ui.toolbox->currentIndex();
-}
-
-/** This is slot is triggered when the selected group changes.
- *
- */
-void QtReflRunsTabView::groupChanged() {
-  m_presenter->notify(IReflRunsTabPresenter::GroupChangedFlag);
 }
 
 void MantidQt::CustomInterfaces::QtReflRunsTabView::on_buttonMonitor_clicked() {

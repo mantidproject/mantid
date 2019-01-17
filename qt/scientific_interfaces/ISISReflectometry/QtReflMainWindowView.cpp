@@ -6,152 +6,95 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtReflMainWindowView.h"
 #include "MantidKernel/make_unique.h"
-#include "Presenters/BatchPresenter.h"
-#include "QtReflEventTabView.h"
-#include "QtReflRunsTabView.h"
-#include "QtReflSaveTabView.h"
-#include "QtReflSettingsTabView.h"
-#include "ReflAsciiSaver.h"
-#include "ReflMainWindowPresenter.h"
-#include "ReflRunsTabPresenter.h"
-#include "ReflSaveTabPresenter.h"
+#include "QtReflBatchView.h"
 
 #include <QMessageBox>
+#include <QToolButton>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 DECLARE_SUBWINDOW(QtReflMainWindowView)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
-    : UserSubWindow(parent) {}
+    : UserSubWindow(parent), m_notifyee(NULL) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-QtReflMainWindowView::~QtReflMainWindowView() {}
+IReflBatchView *QtReflMainWindowView::newBatch() {
+  auto index = m_ui.mainTabs->count();
+  auto *newTab = new QtReflBatchView(this);
+  m_ui.mainTabs->addTab(newTab, QString("Batch ") + QString::number(index));
+  m_batchViews.emplace_back(newTab);
+  return newTab;
+}
+
+void QtReflMainWindowView::removeBatch(int batchIndex) {
+  m_batchViews.erase(m_batchViews.begin() + batchIndex);
+  m_ui.mainTabs->removeTab(batchIndex);
+}
+
+std::vector<IReflBatchView *> QtReflMainWindowView::batches() const {
+  return m_batchViews;
+}
 
 /**
 Initialise the Interface
 */
 void QtReflMainWindowView::initLayout() {
   m_ui.setupUi(this);
-
-  // Create the tabs
-  auto runsPresenter = createRunsTab();
-  auto eventPresenter = createEventTab();
-  auto settingsPresenter = createSettingsTab();
-  auto savePresenter = createSaveTab();
-
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
+  connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
+          SLOT(onTabCloseRequested(int)));
+  connect(m_ui.newBatch, SIGNAL(triggered(bool)), this,
+          SLOT(onNewBatchRequested(bool)));
 
-  // Create the presenter
-  m_presenter = Mantid::Kernel::make_unique<ReflMainWindowPresenter>(
-      this, std::move(runsPresenter), eventPresenter, settingsPresenter,
-      std::move(savePresenter));
-}
-
-void QtReflMainWindowView::helpPressed() {
-  m_presenter->notify(IReflMainWindowPresenter::Flag::HelpPressed);
-}
-
-int indexOfElseFirst(std::string const &instrument,
-                     std::vector<std::string> const &instruments) {
-  auto it = std::find(instruments.cbegin(), instruments.cend(), instrument);
-  if (it != instruments.cend())
-    return static_cast<int>(std::distance(instruments.cbegin(), it));
-  else
-    return 0;
-}
-
-int defaultInstrumentFromConfig(std::vector<std::string> const &instruments) {
-  return indexOfElseFirst(
-      Mantid::Kernel::ConfigService::Instance().getString("default.instrument"),
-      instruments);
-}
-
-/** Creates the 'Runs' tab and returns a pointer to its presenter
- * @return :: A pointer to the presenter managing the 'Runs' tab
- */
-std::unique_ptr<IReflRunsTabPresenter> QtReflMainWindowView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
-  auto defaultInstrumentIndex = defaultInstrumentFromConfig(instruments);
 
-  auto *runsTab = new QtReflRunsTabView(this, BatchViewFactory(instruments));
-  m_ui.mainTab->addTab(runsTab, QString("Runs"));
-  connect(runsTab, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-          SIGNAL(runAsPythonScript(const QString &, bool)));
+  auto thetaTolerance = 0.01;
+  auto makeRunsTablePresenter =
+      RunsTablePresenterFactory(instruments, thetaTolerance);
+  auto defaultInstrumentIndex = 0;
+  // TODO: Look this up properly by comparing the default instrument to the
+  // values in the list;
+  auto searcher = boost::shared_ptr<IReflSearcher>();
+  auto messageHandler = this;
 
-  auto workspaceNamesFactory = WorkspaceNamesFactory(Slicing());
-  auto runsTabPresenter = Mantid::Kernel::make_unique<ReflRunsTabPresenter>(
-      runsTab, runsTab,
-      BatchPresenterFactory(instruments, 0.01, workspaceNamesFactory),
-      workspaceNamesFactory, 0.01, instruments, defaultInstrumentIndex);
+  auto makeRunsPresenter = RunsPresenterFactory(
+      std::move(makeRunsTablePresenter), thetaTolerance, instruments,
+      defaultInstrumentIndex, messageHandler, searcher);
 
-  return std::move(runsTabPresenter);
+  auto makeEventPresenter = EventPresenterFactory();
+  auto makeSaveSettingsPresenter = SavePresenterFactory();
+  auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
+  auto makeInstrumentPresenter = InstrumentPresenterFactory();
+
+  auto makeReflBatchPresenter = ReflBatchPresenterFactory(
+      std::move(makeRunsPresenter), std::move(makeEventPresenter),
+      std::move(makeExperimentPresenter), std::move(makeInstrumentPresenter),
+      std::move(makeSaveSettingsPresenter));
+
+  // Create the presenter
+  m_presenter =
+      ReflMainWindowPresenter(this, std::move(makeReflBatchPresenter));
+  subscribe(&m_presenter.get());
+
+  m_presenter.get().notifyNewBatchRequested();
+  m_presenter.get().notifyNewBatchRequested();
 }
 
-/** Creates the 'Event Handling' tab and returns a pointer to its presenter
- * @return :: A pointer to the presenter managing the 'Event Handling' tab
- */
-IReflEventTabPresenter *QtReflMainWindowView::createEventTab() {
-
-  QtReflEventTabView *eventTab = new QtReflEventTabView(this);
-  m_ui.mainTab->addTab(eventTab, QString("Event Handling"));
-
-  return eventTab->getPresenter();
+void QtReflMainWindowView::onTabCloseRequested(int tabIndex) {
+  m_ui.mainTabs->removeTab(tabIndex);
 }
 
-/** Creates the 'Settings' tab and returns a pointer to its presenter
- * @return :: A pointer to the presenter managing the 'Settings' tab
- */
-IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
-
-  QtReflSettingsTabView *settingsTab = new QtReflSettingsTabView(this);
-  m_ui.mainTab->addTab(settingsTab, QString("Settings"));
-
-  return settingsTab->getPresenter();
+void QtReflMainWindowView::onNewBatchRequested(bool) {
+  m_notifyee->notifyNewBatchRequested();
 }
 
-/** Creates the 'Save ASCII' tab and returns a pointer to its presenter
- * @return :: A pointer to the presenter managing the 'Save ASCII' tab
- */
-std::unique_ptr<IReflSaveTabPresenter> QtReflMainWindowView::createSaveTab() {
-  auto saveTabView = Mantid::Kernel::make_unique<QtReflSaveTabView>(this);
-  m_ui.mainTab->addTab(saveTabView.get(), QString("Save ASCII"));
-
-  auto saver = Mantid::Kernel::make_unique<ReflAsciiSaver>();
-  return Mantid::Kernel::make_unique<ReflSaveTabPresenter>(
-      std::move(saver), std::move(saveTabView));
+void QtReflMainWindowView::subscribe(ReflMainWindowSubscriber *notifyee) {
+  m_notifyee = notifyee;
 }
 
-/**
-Show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflMainWindowView::giveUserCritical(const std::string &prompt,
-                                            const std::string &title) {
-  QMessageBox::critical(this, QString::fromStdString(title),
-                        QString::fromStdString(prompt), QMessageBox::Ok,
-                        QMessageBox::Ok);
-}
-
-/**
-Show an information dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflMainWindowView::giveUserInfo(const std::string &prompt,
-                                        const std::string &title) {
-  QMessageBox::information(this, QString::fromStdString(title),
-                           QString::fromStdString(prompt), QMessageBox::Ok,
-                           QMessageBox::Ok);
-}
+void QtReflMainWindowView::helpPressed() { m_notifyee->notifyHelpPressed(); }
 
 /**
 Runs python code
@@ -170,13 +113,26 @@ Handles attempt to close main window
 * @param event : [input] The close event
 */
 void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
-
   // Close only if reduction has been paused
-  if (!m_presenter->isProcessing()) {
+  if (!m_presenter.get().isProcessing()) {
     event->accept();
   } else {
     event->ignore();
   }
+}
+
+void QtReflMainWindowView::giveUserCritical(const std::string &prompt,
+                                            const std::string &title) {
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+void QtReflMainWindowView::giveUserInfo(const std::string &prompt,
+                                        const std::string &title) {
+  QMessageBox::information(this, QString::fromStdString(title),
+                           QString::fromStdString(prompt), QMessageBox::Ok,
+                           QMessageBox::Ok);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

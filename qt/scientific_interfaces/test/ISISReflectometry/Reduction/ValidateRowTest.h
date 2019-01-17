@@ -1,5 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
 #define MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
+#include "../../../ISISReflectometry/Parse.h"
 #include "../../../ISISReflectometry/Reduction/ValidateRow.h"
 #include <cxxtest/TestSuite.h>
 
@@ -12,6 +19,8 @@ public:
   static ValidateRowTest *createSuite() { return new ValidateRowTest(); }
   static void destroySuite(ValidateRowTest *suite) { delete suite; }
   static auto constexpr TOLERANCE = 0.000001;
+
+  void test() {}
 
   void testParsesTriviallyValidDoubles() {
     TS_ASSERT_DELTA(1.0, parseDouble("1.0").get(), TOLERANCE);

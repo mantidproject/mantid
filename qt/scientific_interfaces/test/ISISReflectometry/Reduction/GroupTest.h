@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_GROUPTEST_H_
 #define MANTID_CUSTOMINTERFACES_GROUPTEST_H_
 #include "../../../ISISReflectometry/Reduction/Group.h"
@@ -18,16 +24,16 @@ public:
   }
 
   void testConstructorSetsGroupName() {
-    auto slicedGroup = UnslicedGroup("Group1", {});
-    TS_ASSERT_EQUALS("Group1", slicedGroup.name());
+    auto group = Group("Group1", {});
+    TS_ASSERT_EQUALS("Group1", group.name());
   }
 
   void testCanAddEmptyRowToGroup() {
-    auto slicedGroup = UnslicedGroup("Group1", {});
-    auto run = UnslicedRow({"000000", "000002"}, 0.02, {"", ""},
-                           RangeInQ(0, 1, 10), 1.2, {}, workspaceNames());
-    slicedGroup.appendRow(run);
-    TS_ASSERT_EQUALS(run.runNumbers(), slicedGroup[0].get().runNumbers());
+    auto group = Group("Group1", {});
+    auto run = Row({"000000", "000002"}, 0.02, {"", ""},
+                   RangeInQ(0.0, 1.0, 10.0), 1.2, {}, workspaceNames());
+    group.appendRow(run);
+    TS_ASSERT_EQUALS(run.runNumbers(), group[0].get().runNumbers());
   }
 };
 #endif // MANTID_CUSTOMINTERFACES_GROUPTEST_H_

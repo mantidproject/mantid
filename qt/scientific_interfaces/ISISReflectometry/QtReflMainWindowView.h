@@ -7,8 +7,11 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
 
+#include "IReflMainWindowPresenter.h"
 #include "IReflMainWindowView.h"
+#include "IReflMessageHandler.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ReflMainWindowPresenter.h"
 #include "ui_ReflMainWindowWidget.h"
 
 #include <QCloseEvent>
@@ -16,61 +19,49 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IReflEventTabPresenter;
-class IReflMainWindowPresenter;
-class IReflRunsTabPresenter;
-class IReflSettingsTabPresenter;
-class IReflSaveTabPresenter;
-
 /** @class ReflMainWindowView
 
 ReflMainWindowView is the concrete main window view implementing the
 functionality defined by the interface IReflMainWindowView
 */
 class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
-                             public IReflMainWindowView {
+                             public IReflMainWindowView,
+                             public IReflMessageHandler {
   Q_OBJECT
 public:
-  /// Constructor
   explicit QtReflMainWindowView(QWidget *parent = nullptr);
-  /// Destructor
-  ~QtReflMainWindowView() override;
-  /// Name of the interface
-  static std::string name() { return "ISIS Reflectometry"; }
-  /// This interface's categories.
-  static QString categoryInfo() { return "Reflectometry"; }
+  void subscribe(ReflMainWindowSubscriber *notifyee) override;
 
-  /// Dialog to show an error message
-  void giveUserCritical(const std::string &prompt,
-                        const std::string &title) override;
-  /// Dialog to show information
-  void giveUserInfo(const std::string &prompt,
-                    const std::string &title) override;
-  /// Run a python algorithm
+  static std::string name() { return "ISIS Reflectometry"; }
+  static QString categoryInfo() { return "Reflectometry"; }
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
-  /// Close window handler
+  virtual std::vector<IReflBatchView *> batches() const override;
+
   void closeEvent(QCloseEvent *event) override;
+
+  IReflBatchView *newBatch() override;
+  void removeBatch(int batchIndex) override;
+
+  void giveUserCritical(const std::string &prompt,
+                        const std::string &title) override;
+  void giveUserInfo(const std::string &prompt,
+                    const std::string &title) override;
 
 public slots:
   void helpPressed();
+  void onTabCloseRequested(int tabIndex);
+  void onNewBatchRequested(bool);
 
 private:
   /// Initializes the interface
   void initLayout() override;
-  /// Creates the 'Runs' tab
-  std::unique_ptr<IReflRunsTabPresenter> createRunsTab();
-  /// Creates the 'Event Handling' tab
-  IReflEventTabPresenter *createEventTab();
-  /// Creates the 'Settings' tab
-  IReflSettingsTabPresenter *createSettingsTab();
-  /// Creates the 'Save ASCII' tab
-  std::unique_ptr<IReflSaveTabPresenter> createSaveTab();
-
   /// Interface definition with widgets for the main interface window
-  Ui::RelMainWindowWidget m_ui;
+  Ui::ReflMainWindowWidget m_ui;
   /// The presenter handling this view
-  std::unique_ptr<IReflMainWindowPresenter> m_presenter;
+  ReflMainWindowSubscriber *m_notifyee;
+  boost::optional<ReflMainWindowPresenter> m_presenter;
+  std::vector<IReflBatchView *> m_batchViews;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

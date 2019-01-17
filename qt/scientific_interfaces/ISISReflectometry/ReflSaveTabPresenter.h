@@ -10,6 +10,7 @@
 #include "DllConfig.h"
 #include "IReflAsciiSaver.h"
 #include "IReflSaveTabPresenter.h"
+#include "IReflSaveTabView.h"
 #include <MantidKernel/ConfigPropertyObserver.h>
 #include <boost/optional.hpp>
 #include <memory>
@@ -19,10 +20,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// Forward decs
-class IReflMainWindowPresenter;
-class IReflSaveTabView;
-
 /** @class ReflSaveTabPresenter
 
 ReflSaveTabPresenter is a presenter class for the tab 'Save ASCII' in the
@@ -31,13 +28,10 @@ ISIS Reflectometry Interface.
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSaveTabPresenter
     : public IReflSaveTabPresenter {
 public:
-  /// Constructor
-  ReflSaveTabPresenter(std::unique_ptr<IReflAsciiSaver> saver,
-                       std::unique_ptr<IReflSaveTabView> view);
-  /// Destructor
-  ~ReflSaveTabPresenter() override;
+  ReflSaveTabPresenter(IReflSaveTabView *view,
+                       std::unique_ptr<IReflAsciiSaver> saver);
   /// Accept a main presenter
-  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void notify(IReflSaveTabPresenter::Flag flag) override;
   void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
@@ -78,10 +72,10 @@ private:
   bool shouldAutosave() const;
 
   /// The view
-  std::unique_ptr<IReflSaveTabView> m_view;
+  IReflSaveTabView *m_view;
   std::unique_ptr<IReflAsciiSaver> m_saver;
   /// The main presenter
-  IReflMainWindowPresenter *m_mainPresenter;
+  IReflBatchPresenter *m_mainPresenter;
   bool m_shouldAutosave;
 };
 } // namespace CustomInterfaces

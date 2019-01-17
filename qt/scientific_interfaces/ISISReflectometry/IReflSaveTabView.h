@@ -8,13 +8,12 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H
 
 #include "DllConfig.h"
+#include "IReflSaveTabPresenter.h"
 #include <string>
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-class IReflSaveTabPresenter;
 
 /** @class IReflSaveTabView
 
@@ -25,10 +24,7 @@ be handled by a subclass.
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IReflSaveTabView {
 public:
-  /// Constructor
-  IReflSaveTabView(){};
-  /// Destructor
-  virtual ~IReflSaveTabView(){};
+  virtual ~IReflSaveTabView() = default;
   virtual void subscribe(IReflSaveTabPresenter *presenter) = 0;
 
   virtual std::string getSavePath() const = 0;
@@ -55,10 +51,13 @@ public:
 
   virtual void enableFileFormatAndLocationControls() = 0;
   virtual void disableFileFormatAndLocationControls() = 0;
-  virtual void giveUserCritical(const std::string &prompt,
-                                const std::string &title) = 0;
-  virtual void giveUserInfo(const std::string &prompt,
-                            const std::string &title) = 0;
+
+  virtual void invalidRegex() = 0;
+  virtual void errorInvalidSaveDirectory() = 0;
+  virtual void warnInvalidSaveDirectory() = 0;
+  virtual void noWorkspacesSelected() = 0;
+  virtual void cannotSaveWorkspaces() = 0;
+  virtual void cannotSaveWorkspaces(std::string const &fullError) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
