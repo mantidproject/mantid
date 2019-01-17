@@ -8,18 +8,18 @@
 #define MANTID_ISISREFLECTOMETRY_REFLBATCHPRESENTER_H
 
 #include "DllConfig.h"
+#include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
+#include "GUI/Save/ISavePresenter.h"
 #include "IReflBatchPresenter.h"
+#include "IReflRunsTabPresenter.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class IReflBatchView;
-class IReflRunsTabPresenter;
-class IEventPresenter;
-class IReflSaveTabPresenter;
 
 /** @class ReflBatchPresenter
 
@@ -35,7 +35,7 @@ public:
                      std::unique_ptr<IEventPresenter> eventPresenter,
                      std::unique_ptr<IExperimentPresenter> experimentPresenter,
                      std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-                     std::unique_ptr<IReflSaveTabPresenter> savePresenter);
+                     std::unique_ptr<ISavePresenter> savePresenter);
 
   /// Returns values passed for 'Transmission run(s)'
   MantidWidgets::DataProcessor::OptionsQMap
@@ -74,7 +74,7 @@ private:
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   /// The presenter of tab 'Save ASCII'
-  std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
+  std::unique_ptr<ISavePresenter> m_savePresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

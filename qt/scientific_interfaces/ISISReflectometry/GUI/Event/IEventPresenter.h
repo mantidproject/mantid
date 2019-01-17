@@ -19,12 +19,9 @@ IReflEventPresenter is an interface which defines the functions that need
 to be implemented by a concrete 'Event' presenter
 */
 
-enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
-
 class IEventPresenter {
 public:
   virtual ~IEventPresenter() = default;
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
 };

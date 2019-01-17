@@ -8,7 +8,6 @@
 #define MANTID_ISISREFLECTOMETRY_REFLRUNSPRESENTERFACTORY_H
 #include "../General/IReflSearcher.h"
 #include "DllConfig.h"
-#include "GUI/Event/IEventPresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IReflRunsTabPresenter.h"
 #include "IReflRunsTabView.h"

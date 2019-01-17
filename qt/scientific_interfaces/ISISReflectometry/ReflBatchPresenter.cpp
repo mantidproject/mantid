@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflBatchPresenter.h"
 #include "GUI/Event/IEventPresenter.h"
+#include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
+#include "GUI/Save/ISavePresenter.h"
 #include "IReflBatchView.h"
 #include "IReflRunsTabPresenter.h"
-#include "IReflSaveTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -33,7 +34,7 @@ ReflBatchPresenter::ReflBatchPresenter(
     std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-    std::unique_ptr<IReflSaveTabPresenter> savePresenter)
+    std::unique_ptr<ISavePresenter> savePresenter)
     : m_view(view), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
@@ -42,8 +43,6 @@ ReflBatchPresenter::ReflBatchPresenter(
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
-  m_savePresenter->acceptMainPresenter(this);
-  m_eventPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);

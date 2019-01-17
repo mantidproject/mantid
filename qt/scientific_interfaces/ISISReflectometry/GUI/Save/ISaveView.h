@@ -4,28 +4,39 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
+#define MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
 
-#include "DllConfig.h"
-#include "IReflSaveTabPresenter.h"
+#include "../../DllConfig.h"
 #include <string>
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflSaveTabView
+class MANTIDQT_ISISREFLECTOMETRY_DLL SaveViewSubscriber {
+public:
+  virtual void notifyPopulateWorkspaceList() = 0;
+  virtual void notifyFilterWorkspaceList() = 0;
+  virtual void notifyPopulateParametersList() = 0;
+  virtual void notifySaveSelectedWorkspaces() = 0;
+  virtual void notifySuggestSaveDir() = 0;
+  virtual void notifyAutosaveDisabled() = 0;
+  virtual void notifyAutosaveEnabled() = 0;
+  virtual void notifySavePathChanged() = 0;
+};
 
-IReflSaveTabView is the base view class for the tab "Save ASCII" in the
+/** @class ISaveView
+
+ISaveView is the base view class for the tab "Save ASCII" in the
 Reflectometry Interface. It contains no QT specific functionality as that should
 be handled by a subclass.
 */
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IReflSaveTabView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ISaveView {
 public:
-  virtual ~IReflSaveTabView() = default;
-  virtual void subscribe(IReflSaveTabPresenter *presenter) = 0;
+  virtual ~ISaveView() = default;
+  virtual void subscribe(SaveViewSubscriber *notifyee) = 0;
 
   virtual std::string getSavePath() const = 0;
   virtual void setSavePath(const std::string &path) const = 0;
@@ -52,7 +63,8 @@ public:
   virtual void enableFileFormatAndLocationControls() = 0;
   virtual void disableFileFormatAndLocationControls() = 0;
 
-  virtual void invalidRegex() = 0;
+  virtual void showFilterEditValid() = 0;
+  virtual void showFilterEditInvalid() = 0;
   virtual void errorInvalidSaveDirectory() = 0;
   virtual void warnInvalidSaveDirectory() = 0;
   virtual void noWorkspacesSelected() = 0;
@@ -61,4 +73,4 @@ public:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H */

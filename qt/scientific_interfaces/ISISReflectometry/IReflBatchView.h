@@ -10,8 +10,8 @@
 #include "GUI/Event/IEventView.h"
 #include "GUI/Experiment/IExperimentView.h"
 #include "GUI/Instrument/IInstrumentView.h"
+#include "GUI/Save/ISaveView.h"
 #include "IReflRunsTabView.h"
-#include "IReflSaveTabView.h"
 #include <string>
 
 namespace MantidQt {
@@ -28,7 +28,7 @@ class IReflBatchView {
 public:
   virtual IReflRunsTabView *runs() const = 0;
   virtual IEventView *eventHandling() const = 0;
-  virtual IReflSaveTabView *save() const = 0;
+  virtual ISaveView *save() const = 0;
   virtual IExperimentView *experiment() const = 0;
   virtual IInstrumentView *instrument() const = 0;
   virtual ~IReflBatchView() = default;

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLASCIISAVER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLASCIISAVER_H
+#include "DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <string>
@@ -15,7 +16,7 @@ namespace CustomInterfaces {
 
 enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos };
 
-class FileFormatOptions {
+class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
   FileFormatOptions(NamedFormat format, std::string const &prefix,
                     bool includeTitle, std::string const &separator,
@@ -42,6 +43,19 @@ public:
 private:
   std::string m_path;
 };
+
+inline bool operator==(const FileFormatOptions &lhs,
+                       const FileFormatOptions &rhs) {
+  return lhs.format() == rhs.format() &&
+         lhs.shouldIncludeTitle() == rhs.shouldIncludeTitle() &&
+         lhs.shouldIncludeQResolution() == rhs.shouldIncludeQResolution() &&
+         lhs.separator() == rhs.separator() && lhs.prefix() == rhs.prefix();
+}
+
+inline bool operator!=(const FileFormatOptions &lhs,
+                       const FileFormatOptions &rhs) {
+  return !(lhs == rhs);
+}
 
 class InvalidWorkspaceName : public std::runtime_error {
 public:
