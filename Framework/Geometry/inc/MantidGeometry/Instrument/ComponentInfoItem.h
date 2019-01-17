@@ -42,7 +42,8 @@ public:
   Kernel::V3D scaleFactor() const {
     return m_componentInfo->scaleFactor(m_index);
   }
-  const std::string &name() const { return m_componentInfo->name(m_index); }
+  std::string name() const { return m_componentInfo->name(m_index); }
+  size_t index() const { return m_index; }
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.

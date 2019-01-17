@@ -44,6 +44,8 @@ set ( EXPORT_FILES
   src/Exports/DetectorInfoIterator.cpp
   src/Exports/DetectorInfoPythonIterator.cpp
   src/Exports/ComponentInfo.cpp
+  src/Exports/ComponentInfoItem.cpp
+  src/Exports/ComponentInfoPythonIterator.cpp
 )
 
 #############################################################################################

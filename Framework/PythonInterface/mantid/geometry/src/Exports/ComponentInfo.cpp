@@ -8,6 +8,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/api/ComponentInfoPythonIterator.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
@@ -19,9 +20,16 @@
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
+using Mantid::PythonInterface::ComponentInfoPythonIterator;
 using namespace Mantid::PythonInterface::Converters;
 using namespace Mantid::PythonInterface::Policies;
 using namespace boost::python;
+
+namespace {
+ComponentInfoPythonIterator make_pyiterator(ComponentInfo &componentInfo) {
+  return ComponentInfoPythonIterator(componentInfo);
+}
+} // namespace
 
 // Function pointers to help resolve ambiguity
 Mantid::Kernel::V3D (ComponentInfo::*position)(const size_t) const =
@@ -39,6 +47,8 @@ void (ComponentInfo::*setRotation)(const size_t, const Mantid::Kernel::Quat &) =
 // Export ComponentInfo
 void export_ComponentInfo() {
   class_<ComponentInfo, boost::noncopyable>("ComponentInfo", no_init)
+
+      .def("__iter__", make_pyiterator)
 
       .def("__len__", &ComponentInfo::size, arg("self"),
            "Returns the number of components.")

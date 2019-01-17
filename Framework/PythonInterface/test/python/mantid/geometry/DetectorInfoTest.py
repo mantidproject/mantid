@@ -133,6 +133,9 @@ class DetectorInfoTest(unittest.TestCase):
         expected_iterations = len(info) 
         actual_iterations = len(list(iter(info)))
         self.assertEquals(expected_iterations, actual_iterations)
+        it = iter(info)
+        self.assertEquals(next(it).index, 0)
+        self.assertEquals(next(it).index, 1)
 
     def test_iterator_for_monitors(self):
         info = self._ws.detectorInfo()

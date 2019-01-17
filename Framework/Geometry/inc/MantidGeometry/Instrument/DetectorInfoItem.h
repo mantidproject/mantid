@@ -57,6 +57,8 @@ public:
 
   size_t infoSize() const { return m_detectorInfo->size(); }
 
+  size_t index() const { return m_index; }
+
   DetectorInfoItem(T &detectorInfo, const size_t index)
       : m_detectorInfo(&detectorInfo), m_index(index) {}
 
