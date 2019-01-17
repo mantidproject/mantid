@@ -74,6 +74,7 @@ Bugfixes
 - The output workspace ending with _Results now contains workspaces with corrected names which detail the fit functions used.
 - Selecting multiple data using the All Spectra checkbox without first selected a sample file used to cause an unexpected error.
   This is now prevented. Meaningful error messages are also displayed when a sample or resolution file are not selected.
+- In the Elwin interface, the errors are now propagated correctly through to the workspace with extension _elt.
 
 
 Data Corrections Interface
