@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from PyQt4 import QtGui, QtCore
-import ui_errorreport
+import ErrorReporter.ui_errorreport as ui_errorreport
 from PyQt4.QtCore import pyqtSignal
 from mantidqtpython import MantidQt
 
