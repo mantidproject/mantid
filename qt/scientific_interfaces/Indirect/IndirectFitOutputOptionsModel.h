@@ -27,23 +27,26 @@ public:
   ~IndirectFitOutputOptionsModel() = default;
 
   void setActivePlotWorkspace(Mantid::API::WorkspaceGroup_sptr workspace);
+  void setActiveParameters(std::vector<std::string> const &parameters);
 
   void plotResult(std::string const &plotType);
+  void saveResult() const;
+
+	bool plotWorkspaceIsPlottable() const;
 
 private:
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
   void plotParameter(Mantid::API::WorkspaceGroup_sptr workspaces,
                      std::string const &parameter);
-  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
-                     std::string const &parameterToPlot);
+  void plotWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+                     std::string const &parameter = "");
+  void plotSpectra(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::string const &parameterToPlot);
-  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
+
 
   Mantid::API::WorkspaceGroup_sptr m_plotWorkspace;
-  std::vector<std::string> m_fitParameters;
-  std::string m_parameter;
+  std::vector<std::string> m_parameters;
   // std::unique_ptr<IndirectFitAnalysisTab> m_tab;
 };
 

@@ -191,7 +191,6 @@ protected slots:
   void updateFitBrowserParameterValues();
 
   void updateResultOptions();
-  void saveResult();
 
 private slots:
   void updatePlotGuess();

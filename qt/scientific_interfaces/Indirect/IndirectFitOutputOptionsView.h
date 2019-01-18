@@ -27,15 +27,18 @@ public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
   ~IndirectFitOutputOptionsView() override;
 
-  void setAsPlotting(bool plotting);
-
+	void clearPlotTypes();
   void
-  setAvailablePlotParameters(std::vector<std::string> const &parameterNames);
+  setAvailablePlotTypes(std::vector<std::string> const &parameterNames);
+  void setPlotTypeIndex(int index);
+  std::string getSelectedPlotType() const;
+
+	void setPlotText(QString const &text);
+  void setSaveText(QString const &text);
 
   void setPlotEnabled(bool enable);
   void setSaveEnabled(bool enable);
 
-  std::string getPlotType() const;
   void displayWarning(std::string const &message);
 
 signals:
@@ -47,10 +50,6 @@ private slots:
   void emitSaveClicked();
 
 private:
-  void clearPlotComboBox();
-  void setButtonText(QPushButton *button, QString const &text);
-  void setButtonsEnabled(bool enable);
-
   std::unique_ptr<Ui::IndirectFitOutputOptions> m_outputOptions;
 };
 

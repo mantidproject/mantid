@@ -116,7 +116,6 @@ public:
   Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
                                             std::size_t spectrum) const;
 
-  void saveResult() const;
   void cleanFailedRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm);
   void cleanFailedSingleRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm,
                             std::size_t index);

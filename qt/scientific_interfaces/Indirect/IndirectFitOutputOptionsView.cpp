@@ -27,34 +27,31 @@ void IndirectFitOutputOptionsView::emitPlotClicked() { emit plotClicked(); }
 
 void IndirectFitOutputOptionsView::emitSaveClicked() { emit saveClicked(); }
 
-void IndirectFitOutputOptionsView::setAsPlotting(bool plotting) {
-  setButtonText(m_outputOptions->pbPlot, plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
-void IndirectFitOutputOptionsView::setAvailablePlotParameters(
-    std::vector<std::string> const &parameterNames) {
-  clearPlotComboBox();
-  if (!parameterNames.empty()) {
-    m_outputOptions->cbPlotType->addItem("All");
-    for (auto const &name : parameterNames)
-      m_outputOptions->cbPlotType->addItem(QString::fromStdString(name));
-    m_outputOptions->cbPlotType->setCurrentIndex(0);
-  }
-}
-
-void IndirectFitOutputOptionsView::clearPlotComboBox() {
+void IndirectFitOutputOptionsView::clearPlotTypes() {
   m_outputOptions->cbPlotType->clear();
 }
 
-void IndirectFitOutputOptionsView::setButtonText(QPushButton *button,
-                                                 QString const &text) {
-  button->setText(text);
+void IndirectFitOutputOptionsView::setAvailablePlotTypes(
+    std::vector<std::string> const &parameterNames) {
+  m_outputOptions->cbPlotType->addItem("All");
+  for (auto const &name : parameterNames)
+    m_outputOptions->cbPlotType->addItem(QString::fromStdString(name));
 }
 
-void IndirectFitOutputOptionsView::setButtonsEnabled(bool enable) {
-  setPlotEnabled(enable);
-  setSaveEnabled(enable);
+void IndirectFitOutputOptionsView::setPlotTypeIndex(int index) {
+  m_outputOptions->cbPlotType->setCurrentIndex(index);
+}
+
+std::string IndirectFitOutputOptionsView::getSelectedPlotType() const {
+  return m_outputOptions->cbPlotType->currentText().toStdString();
+}
+
+void IndirectFitOutputOptionsView::setPlotText(QString const &text) {
+  m_outputOptions->pbPlot->setText(text);
+}
+
+void IndirectFitOutputOptionsView::setSaveText(QString const &text) {
+  m_outputOptions->pbSave->setText(text);
 }
 
 void IndirectFitOutputOptionsView::setPlotEnabled(bool enable) {
@@ -64,10 +61,6 @@ void IndirectFitOutputOptionsView::setPlotEnabled(bool enable) {
 
 void IndirectFitOutputOptionsView::setSaveEnabled(bool enable) {
   m_outputOptions->pbSave->setEnabled(enable);
-}
-
-std::string IndirectFitOutputOptionsView::getPlotType() const {
-  return m_outputOptions->cbPlotType->currentText().toStdString();
 }
 
 void IndirectFitOutputOptionsView::displayWarning(std::string const &message) {

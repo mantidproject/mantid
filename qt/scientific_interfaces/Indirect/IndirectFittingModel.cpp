@@ -199,15 +199,6 @@ void addInputDataToSimultaneousFit(
                                   counter);
 }
 
-IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
-                                            const std::string &filename) {
-  IAlgorithm_sptr saveAlg =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
-  saveAlg->setProperty("InputWorkspace", workspace);
-  saveAlg->setProperty("Filename", filename);
-  return saveAlg;
-}
-
 template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
   Map newMap(mapA);
   newMap.insert(std::begin(mapB), std::end(mapB));
@@ -722,17 +713,6 @@ IndirectFittingModel::getResultLocation(std::size_t index,
   if (m_previousModelSelected && m_fitOutput && m_fittingData.size() > index)
     return m_fitOutput->getResultLocation(m_fittingData[index].get(), spectrum);
   return boost::none;
-}
-
-void IndirectFittingModel::saveResult() const {
-  const auto resultWorkspace = getResultWorkspace();
-
-  if (resultWorkspace) {
-    const auto filename = Mantid::Kernel::ConfigService::Instance().getString(
-                              "defaultsave.directory") +
-                          resultWorkspace->getName() + ".nxs";
-    saveNexusProcessedAlgorithm(resultWorkspace, filename)->execute();
-  }
 }
 
 WorkspaceGroup_sptr IndirectFittingModel::getResultWorkspace() const {
