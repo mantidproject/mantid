@@ -55,6 +55,24 @@ bool isGroupPlottable(WorkspaceGroup_sptr workspaceGroup) {
     return false;
 }
 
+std::string cropParameterName(std::string const &name,
+                              std::string const &delimiter) {
+  auto const cropIndex = name.rfind(delimiter);
+  if (cropIndex != std::string::npos)
+    return name.substr(cropIndex + 1, name.size());
+  return name;
+}
+
+std::vector<std::string>
+cropParameterNamesBy(std::vector<std::string> const &names,
+                     std::string const &delimiter) {
+  std::vector<std::string> parameterNames;
+  parameterNames.reserve(names.size());
+  for (auto const &name : names)
+    parameterNames.emplace_back(cropParameterName(name, delimiter));
+  return parameterNames;
+}
+
 void updateParameters(
     IFunction_sptr function,
     std::unordered_map<std::string, ParameterValue> const &parameters) {
@@ -134,8 +152,6 @@ void IndirectFitAnalysisTab::setup() {
           SLOT(setModelFitFunction()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SIGNAL(functionChanged()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(updatePlotOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateResultOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
@@ -761,13 +777,10 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
-  enableFitAnalysisButtons(true);
-  enablePlotResult(error);
-  //setSaveResultEnabled(!error);
+  enableFitAnalysisButtons(true, !error);
   updateParameterValues();
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
-  updatePlotOptions();
 
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
@@ -929,7 +942,7 @@ void IndirectFitAnalysisTab::singleFit() {
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
   if (validate()) {
-    enableFitAnalysisButtons(false);
+    enableFitAnalysisButtons(false, false);
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }
@@ -940,7 +953,7 @@ void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
  */
 void IndirectFitAnalysisTab::executeFit() {
   if (validate()) {
-    enableFitAnalysisButtons(false);
+    enableFitAnalysisButtons(false, false);
     runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
   }
 }
@@ -966,14 +979,16 @@ bool IndirectFitAnalysisTab::validate() {
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void IndirectFitAnalysisTab::run() {
-  enableFitAnalysisButtons(false);
+  enableFitAnalysisButtons(false, false);
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 
-void IndirectFitAnalysisTab::enableFitAnalysisButtons(bool enable) {
+void IndirectFitAnalysisTab::enableFitAnalysisButtons(bool enable,
+                                                      bool enableOutOptions) {
   setRunIsRunning(!enable);
   setFitSingleSpectrumIsFitting(!enable);
   m_fitPropertyBrowser->setFitEnabled(enable);
+  enableOutputOptions(enableOutOptions);
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
@@ -1029,58 +1044,15 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
           SLOT(fitAlgorithmComplete(bool)));
 }
 
-/**
- * Updates the specified combo box, with the available plot options.
- *
- * @param cbPlotType  The combo box.
- */
-void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
-  setPlotOptions(cbPlotType, getFitParameterNames());
-}
-
-void IndirectFitAnalysisTab::enablePlotResult(bool error) {
-  //if (!error)
-  //  setPlotResultEnabled(isGroupPlottable(getResultWorkspace()));
-  //else
-  //  setPlotResultEnabled(!error);
-}
-
-/**
- * Fills the specified combo box, with the specified parameters.
- *
- * @param cbPlotType  The combo box.
- * @param parameters  The parameters.
- */
-void IndirectFitAnalysisTab::setPlotOptions(
-    QComboBox *cbPlotType, const std::vector<std::string> &parameters) const {
-  cbPlotType->clear();
-  QSet<QString> plotOptions;
-
-  for (const auto &parameter : parameters) {
-    auto plotOption = QString::fromStdString(parameter);
-    auto index = plotOption.lastIndexOf(".");
-    if (index >= 0)
-      plotOption = plotOption.remove(0, index + 1);
-    plotOptions << plotOption;
+void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
+  if (enable) {
+    m_outOptionsPresenter->setPlotWorkspace(getResultWorkspace());
+    m_outOptionsPresenter->setPlotParameters(
+        cropParameterNamesBy(getFitParameterNames(), "."));
   }
-  setPlotOptions(cbPlotType, plotOptions);
-}
-
-/**
- * Fills the specified combo box, with the specified options.
- *
- * @param cbPlotType  The combo box.
- * @param parameters  The options.
- */
-void IndirectFitAnalysisTab::setPlotOptions(
-    QComboBox *cbPlotType, const QSet<QString> &options) const {
-  cbPlotType->clear();
-
-  QStringList plotList;
-  if (!options.isEmpty())
-    plotList << "All";
-  plotList.append(options.toList());
-  cbPlotType->addItems(plotList);
+  m_outOptionsPresenter->setPlotEnabled(enable &&
+                                        isGroupPlottable(getResultWorkspace()));
+  m_outOptionsPresenter->setSaveEnabled(enable);
 }
 
 /**
@@ -1090,8 +1062,10 @@ void IndirectFitAnalysisTab::setPlotOptions(
 void IndirectFitAnalysisTab::updateResultOptions() {
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
                                                      getSelectedSpectrum());
-  //setPlotResultEnabled(isFit);
-  //setSaveResultEnabled(isFit);
+  if (isFit)
+    m_outOptionsPresenter->setPlotWorkspace(getResultWorkspace());
+  m_outOptionsPresenter->setPlotEnabled(isFit);
+  m_outOptionsPresenter->setSaveEnabled(isFit);
 }
 
 } // namespace IDA

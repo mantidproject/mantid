@@ -95,10 +95,6 @@ void JumpFit::updateModelFitTypeString() {
   m_jumpFittingModel->setFitType(selectedFitType().toStdString());
 }
 
-//void JumpFit::updatePlotOptions() {
-//  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-//}
-
 void JumpFit::runClicked() { runTab(); }
 
 void JumpFit::setRunIsRunning(bool running) {

@@ -35,7 +35,6 @@ public:
 
 protected slots:
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
-  //void updatePlotOptions() override;
   void fitFunctionChanged();
   void customBoolUpdated(const QString &key, bool value);
   void runClicked();

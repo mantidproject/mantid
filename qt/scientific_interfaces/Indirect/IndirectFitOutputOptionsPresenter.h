@@ -7,9 +7,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSPRESENTER_H_
 
-#include "IndirectFitAnalysisTab.h"
 #include "IndirectFitOutputOptionsModel.h"
 #include "IndirectFitOutputOptionsView.h"
+
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "DllConfig.h"
 
@@ -27,6 +28,12 @@ public:
   //                                  IndirectFitOutputOptionsView *view);
   IndirectFitOutputOptionsPresenter(IndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
+
+  void setPlotWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
+  void setPlotParameters(std::vector<std::string> const &parameterNames);
+
+  void setPlotEnabled(bool enable);
+  void setSaveEnabled(bool enable);
 
 private slots:
   void plotResult();

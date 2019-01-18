@@ -118,10 +118,6 @@ std::string IqtFit::fitTypeString() const {
   return "";
 }
 
-//void IqtFit::updatePlotOptions() {
-//  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-//}
-
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   fitAlgorithm->setProperty("ExtractMembers",
                             boolSettingValue("ExtractMembers"));

@@ -7,8 +7,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
 
-#include "IndirectFitAnalysisTab.h"
-
 #include "DllConfig.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -24,17 +22,13 @@ namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsModel {
 public:
-  //IndirectFitOutputOptionsModel(std::unique_ptr<IndirectFitAnalysisTab> tab);
-	IndirectFitOutputOptionsModel();
+  // IndirectFitOutputOptionsModel(std::unique_ptr<IndirectFitAnalysisTab> tab);
+  IndirectFitOutputOptionsModel();
   ~IndirectFitOutputOptionsModel() = default;
 
   void setActivePlotWorkspace(Mantid::API::WorkspaceGroup_sptr workspace);
 
   void plotResult(std::string const &plotType);
-
-signals:
-  void plotSpectrum(std::string const &name, std::size_t const &index,
-                    bool errorBars);
 
 private:
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
@@ -49,7 +43,8 @@ private:
 
   Mantid::API::WorkspaceGroup_sptr m_plotWorkspace;
   std::vector<std::string> m_fitParameters;
-  //std::unique_ptr<IndirectFitAnalysisTab> m_tab;
+  std::string m_parameter;
+  // std::unique_ptr<IndirectFitAnalysisTab> m_tab;
 };
 
 } // namespace IDA

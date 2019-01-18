@@ -136,18 +136,6 @@ protected:
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  void updatePlotOptions(QComboBox *cbPlotType);
-  void enablePlotResult(bool error);
-
-  void setPlotOptions(QComboBox *cbPlotType,
-                      const std::vector<std::string> &parameters) const;
-
-  void setPlotOptions(QComboBox *cbPlotType,
-                      const QSet<QString> &options) const;
-
-  //virtual void setPlotResultEnabled(bool enabled) = 0;
-  //virtual void setSaveResultEnabled(bool enabled) = 0;
-
   virtual void setRunIsRunning(bool running) = 0;
   virtual void setFitSingleSpectrumIsFitting(bool fitting) = 0;
 
@@ -202,8 +190,6 @@ protected slots:
       const std::unordered_map<std::string, ParameterValue> &parameters);
   void updateFitBrowserParameterValues();
 
-  virtual void updatePlotOptions() = 0;
-
   void updateResultOptions();
   void saveResult();
 
@@ -226,7 +212,8 @@ private:
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   std::vector<std::string> getFitParameterNames() const;
 
-  void enableFitAnalysisButtons(bool enable);
+  void enableFitAnalysisButtons(bool enable, bool enableOutOptions);
+  void enableOutputOptions(bool enable);
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;

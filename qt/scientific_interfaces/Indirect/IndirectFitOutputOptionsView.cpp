@@ -16,16 +16,35 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
   m_outputOptions->setupUi(this);
 
   connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this,
-          SIGNAL(plotClicked()));
+          SLOT(emitPlotClicked()));
   connect(m_outputOptions->pbSave, SIGNAL(clicked()), this,
-          SIGNAL(saveClicked()));
+          SLOT(emitSaveClicked()));
 }
 
 IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() {}
 
+void IndirectFitOutputOptionsView::emitPlotClicked() { emit plotClicked(); }
+
+void IndirectFitOutputOptionsView::emitSaveClicked() { emit saveClicked(); }
+
 void IndirectFitOutputOptionsView::setAsPlotting(bool plotting) {
   setButtonText(m_outputOptions->pbPlot, plotting ? "Plotting..." : "Plot");
   setButtonsEnabled(!plotting);
+}
+
+void IndirectFitOutputOptionsView::setAvailablePlotParameters(
+    std::vector<std::string> const &parameterNames) {
+  clearPlotComboBox();
+  if (!parameterNames.empty()) {
+    m_outputOptions->cbPlotType->addItem("All");
+    for (auto const &name : parameterNames)
+      m_outputOptions->cbPlotType->addItem(QString::fromStdString(name));
+    m_outputOptions->cbPlotType->setCurrentIndex(0);
+  }
+}
+
+void IndirectFitOutputOptionsView::clearPlotComboBox() {
+  m_outputOptions->cbPlotType->clear();
 }
 
 void IndirectFitOutputOptionsView::setButtonText(QPushButton *button,

@@ -6,6 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsPresenter.h"
 
+#include "IndirectFitOutputOptionsModel.h"
+#include "IndirectFitOutputOptionsView.h"
+
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -32,6 +37,24 @@ IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
 }
 
 IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() {}
+
+void IndirectFitOutputOptionsPresenter::setPlotWorkspace(
+    WorkspaceGroup_sptr workspace) {
+  m_model->setActivePlotWorkspace(workspace);
+}
+
+void IndirectFitOutputOptionsPresenter::setPlotParameters(
+    std::vector<std::string> const &parameterNames) {
+  m_view->setAvailablePlotParameters(parameterNames);
+}
+
+void IndirectFitOutputOptionsPresenter::setPlotEnabled(bool enable) {
+  m_view->setPlotEnabled(enable);
+}
+
+void IndirectFitOutputOptionsPresenter::setSaveEnabled(bool enable) {
+  m_view->setSaveEnabled(enable);
+}
 
 void IndirectFitOutputOptionsPresenter::plotResult() {
   m_view->setAsPlotting(true);

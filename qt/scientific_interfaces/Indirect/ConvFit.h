@@ -27,7 +27,6 @@ public:
 protected slots:
   void setModelResolution(const QString &resolutionName);
   void runClicked();
-  //void updatePlotOptions() override;
   void fitFunctionChanged();
 
 protected:

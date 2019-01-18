@@ -26,7 +26,6 @@ public:
   void setupFitTab() override;
 
 protected slots:
-  //void updatePlotOptions() override;
   void updateModelFitTypeString();
   void runClicked();
 
