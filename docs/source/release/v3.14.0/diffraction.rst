@@ -31,6 +31,11 @@ Improvements
 Single Crystal Diffraction
 --------------------------
 
+New Algorithms
+##############
+
+- The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal diffraction measurements.
+
 Improvements
 ############
 
