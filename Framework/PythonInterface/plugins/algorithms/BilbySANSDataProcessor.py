@@ -421,35 +421,28 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
             self.setProperty("OutputWorkspace", q1d)  # set output, file 1D pattern
 
-
     def _get_time_span(self, ws):
         run = ws.getRun()
         duration = run.endTime() - run.starme()
         return float(duration.total_microseconds())
 
-
     def _get_bm_counts(self, ws):
         return float(ws.run().getProperty("bm_counts").value)
-
 
     def _get_frame_count(self, ws):
         return float(ws.run().getProperty("frame_count").value)
 
-
     def _get_period(self, ws):
         return float(ws.run().getProperty("period").value)
 
-
     def _get_l1(self, ws):
         return float(ws.run().getProperty("L1").value)
-
 
     def _apply_mask(self, ws, mask):
         alg = self.createChildAlgorithm("MaskDetectors")
         alg.setProperty("Workspace", ws)
         alg.setProperty("MaskedWorkspace", mask)
         alg.execute()
-
 
     def _convert_units(self, ws, unit):
         alg = self.createChildAlgorithm("ConvertUnits")
@@ -458,7 +451,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
 
         return alg.getProperty("OutputWorkspace").value
-
 
     def _rebin(self, ws, binning, preserveevents):
         alg = self.createChildAlgorithm("Rebin")
@@ -469,7 +461,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
         return alg.getProperty("OutputWorkspace").value
 
-
     def _multiply(self, a, b):
         alg = self.createChildAlgorithm("Multiply")
         alg.setProperty("LHSWorkspace", a)
@@ -477,7 +468,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
 
         return alg.getProperty("OutputWorkspace").value
-
 
     def _scale_mult(self, ws_input, factor, operation):
         alg = self.createChildAlgorithm("Scale")
@@ -487,7 +477,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-
     def _subtract(self, a, b):
         alg = self.createChildAlgorithm("Minus")
         alg.setProperty("LHSWorkspace", a)
@@ -495,13 +484,11 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-
     def _single_valued_ws(self, value):
         alg = self.createChildAlgorithm("CreateSingleValuedWorkspace")
         alg.setProperty("DataValue", value)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
-
 
     def _mask_to_roi(self, ws_mask):
         alg = self.createChildAlgorithm("InvertMask")
@@ -512,7 +499,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.setProperty("InputWorkspace", ws_tranmskinv)
         alg.execute()
         return alg.getProperty("DetectorList").value
-
 
     def _calculate_transmission(self, ws_tranSam, ws_tranEmp, ws_tranroi, fitmethod, polynomialorder, binning):
         alg = self.createChildAlgorithm("CalculateTransmission")
@@ -526,14 +512,12 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-
     def _wide_angle_correction(self, ws_sam, ws_tranSam):
         alg = self.createChildAlgorithm("SANSWideAngleCorrection")
         alg.setProperty("SampleData", ws_sam)
         alg.setProperty("TransmissionData", ws_tranSam)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
-
 
     def _emp_shape_adjustment(self, ws_emp, ws_tran):
         if ws_emp.getNumberHistograms() != 1:
@@ -553,7 +537,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-
     def _tofsansresolutionbypixel(self, ws_sam, sampleapertureradius, sourceapertureradius, sigmamoderator,
                                   collimationlength, accountforgravity, extralength, deltar=5.0):
         alg = self.createChildAlgorithm("TOFSANSResolutionByPixel")
@@ -568,7 +551,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
-
 
     def _q1d(self, ws_sam, binning_q, pixeladj, wavelengthadj, wavepixeladj, accountforgravity, solidangleweighting,
              radiuscut, wavecut, extralength, qresolution):
@@ -593,7 +575,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-
     def _qxy(self, ws_sam, q_max, q_delta, pixeladj, wavelengthadj, accountforgravity, solidangleweighting,
              extralength):
         alg = self.createChildAlgorithm("Qxy")
@@ -611,7 +592,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
             alg.setProperty("WavelengthAdj", wavelengthadj)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
-
 
     def _create_empty_ws(self, data_x, data_y, number_of_spectra, unitx):
         # empty output workspace in case 2D reduction is not happening

@@ -11,9 +11,9 @@ from itertools import product
 import sys
 from mantid.simpleapi import MoveInstrumentComponent, CropWorkspace
 
-
 attenuation_correction_pre_2016 = {1.0: 0.007655, 3.0: 1.0, 5.0: 0.005886}
 attenuation_correction_post_2016 = {1.0: 1.0, 2.0: 0.00955, 3.0: 0.005886, 4.0: 0.00290, 5.0: 0.00062}
+
 
 #######################################################################################
 # REDUCTION ###########################################################################
@@ -194,8 +194,8 @@ def wavelengh_slices(wavelength_intervals, binning_wavelength_ini, wav_delta):
         else:  # if reminder is greater than 0, to trancate the maximum wavelength in the range
             n = math.floor((wav2 - wav1) / wav_delta)
             max_wave_length = wav1 + n * wav_delta
-            print ('WARNING: because of your set-up, maximum wavelength to consider for'
-                   ' partial reduction is only %4.2f' % max_wave_length)
+            print('WARNING: because of your set-up, maximum wavelength to consider for'
+                  ' partial reduction is only %4.2f' % max_wave_length)
 
         # number of wavelength range intervals
         n = int(n)
