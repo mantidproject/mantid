@@ -29,9 +29,17 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
-        det = outWS.getDetector(122)
-        theta = outWS.detectorTwoTheta(det)
-        self.assertAlmostEquals(theta, 0.057659886309975004, delta=1.e-13)
+
+        det122 = outWS.getDetector(122)
+        twoTheta122 = outWS.detectorTwoTheta(det122)
+        self.assertAlmostEquals(twoTheta122, 0.057659886309975004, delta=1.e-13)
+
+        twoTheta = outWS.run().getLogData("TwoTheta").value
+        self.assertAlmostEquals(twoTheta, 1.5371900428796, delta=1.e-13)
+
+        peakPosition = outWS.run().getLogData("foreground.centre_workspace_index").value
+        twoTheta2 = numpy.rad2deg(outWS.spectrumInfo().twoTheta(peakPosition))
+        self.assertAlmostEquals(twoTheta2, twoTheta, delta=1.e-13)
 
     def testDefaultRunFIGARO(self):
         args = {
@@ -44,9 +52,10 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
-        det = outWS.getDetector(122)
-        theta = outWS.detectorTwoTheta(det)
-        self.assertAlmostEquals(theta, 0.03060663990053301, delta=1.e-13)
+
+        det122 = outWS.getDetector(122)
+        twoTheta122 = outWS.detectorTwoTheta(det122)
+        self.assertAlmostEquals(twoTheta122, 0.03060663990053301, delta=1.e-13)
 
     def testFlatBackgroundSubtraction(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
