@@ -277,7 +277,7 @@ public:
   // Methods intended for interfacing with the workbench fitting tools
 
   void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
-  QString addPeakFunction(const QString &fnName);
+  QString addFunction(const QString &fnName);
   PropertyHandler *getPeakHandler(const QString &prefix);
   void setPeakCentreOf(const QString &prefix, double value);
   double getPeakCentreOf(const QString &prefix);

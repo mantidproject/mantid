@@ -299,7 +299,9 @@ public:
     sipCpp->setDefaultPeakType(TO_CSTRING(a0));
 %End
     QStringList registeredPeaks() const;
-    QString addPeakFunction(QString);
+    QStringList registeredBackgrounds() const;
+    QStringList registeredOthers() const;
+    QString addFunction(QString);
     double getPeakCentreOf(QString);
     void setPeakCentreOf(QString, double);
     double getPeakHeightOf(QString);

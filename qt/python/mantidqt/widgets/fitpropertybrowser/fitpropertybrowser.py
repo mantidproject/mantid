@@ -68,6 +68,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
         self.tool.peak_type_changed.connect(self.setDefaultPeakType)
+        self.tool.add_background_requested.connect(self.add_function_slot)
+        self.tool.add_other_requested.connect(self.add_function_slot)
         self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
         super(FitPropertyBrowser, self).show()
         self.canvas.draw()
@@ -110,7 +112,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot(int, float, float)
     def peak_added_slot(self, peak_id, centre, height):
-        fun = self.addPeakFunction(self.defaultPeakType())
+        fun = self.addFunction(self.defaultPeakType())
         self.setPeakCentreOf(fun, centre)
         self.setPeakHeightOf(fun, height)
         self.peak_ids[peak_id] = fun
@@ -127,7 +129,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             if prefix == fun:
                 self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix))
 
+    @Slot(str)
+    def add_function_slot(self, funName):
+        fun = self.addFunction(funName)
+
     @Slot()
     def show_canvas_context_menu(self):
         if self.tool is not None:
-            self.tool.show_context_menu(peak_names=self.registeredPeaks(), current_peak_type=self.defaultPeakType())
+            self.tool.show_context_menu(peak_names=self.registeredPeaks(),
+                                        current_peak_type=self.defaultPeakType(),
+                                        background_names=self.registeredBackgrounds(),
+                                        other_names=self.registeredOthers())

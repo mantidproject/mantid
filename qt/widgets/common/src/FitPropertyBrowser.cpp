@@ -3378,7 +3378,7 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
  * @param fnName :: Name of a function to add.
  * @return :: An ID string, eg: f0.f2.f1 (There is no dot at the end).
  */
-QString FitPropertyBrowser::addPeakFunction(const QString &fnName) {
+QString FitPropertyBrowser::addFunction(const QString &fnName) {
   return addFunction(fnName.toStdString())->functionPrefix();
 }
 

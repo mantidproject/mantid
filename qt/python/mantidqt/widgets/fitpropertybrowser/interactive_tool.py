@@ -135,6 +135,10 @@ class FitInteractiveTool(QObject):
     peak_added = Signal(int, float, float)
     peak_moved = Signal(int, float, float)
     peak_type_changed = Signal(str)
+    add_background_requested = Signal(str)
+    add_other_requested = Signal(str)
+
+    default_background = 'LinearBackground'
 
     def __init__(self, canvas, toolbar_state_checker, current_peak_type):
         super(FitInteractiveTool, self).__init__()
@@ -156,6 +160,8 @@ class FitInteractiveTool(QObject):
         self.selected_peak = None
         self.peak_names = []
         self.current_peak_type = current_peak_type
+        self.background_names = []
+        self.other_names = []
 
         self._cids = []
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
@@ -279,6 +285,20 @@ class FitInteractiveTool(QObject):
             self.peak_type_changed.emit(selected_name[0])
             self.mouse_state.transition_to('add_peak')
 
+    def add_background_dialog(self):
+        current_index = self.background_names.index(self.default_background)
+        if current_index < 0:
+            current_index = 0
+        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select background function', self.background_names,
+                                             current_index, False)
+        if selected_name[1]:
+            self.add_background_requested.emit(selected_name[0])
+
+    def add_other_dialog(self):
+        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select function', self.other_names, 0, False)
+        if selected_name[1]:
+            self.add_other_requested.emit(selected_name[0])
+
     def add_peak(self, x, y_top, y_bottom=0.0):
         peak_id = self._make_peak_id()
         peak = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom)
@@ -306,13 +326,17 @@ class FitInteractiveTool(QObject):
     def get_transform(self):
         return self.fit_start_x.patch.get_transform()
 
-    def show_context_menu(self, peak_names, current_peak_type):
+    def show_context_menu(self, peak_names, current_peak_type, background_names, other_names):
         self.peak_names = peak_names
         self.current_peak_type = current_peak_type
+        self.background_names = background_names
+        self.other_names = other_names
         if not self.toolbar_state_checker.is_tool_active():
             menu = QMenu()
             menu.addAction("Add peak", self.add_default_peak)
             menu.addAction("Select peak type", self.add_peak_dialog)
+            menu.addAction("Add background", self.add_background_dialog)
+            menu.addAction("Add other function", self.add_other_dialog)
             menu.exec_(QCursor.pos())
 
 

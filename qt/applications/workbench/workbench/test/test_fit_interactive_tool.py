@@ -415,5 +415,33 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 4.4, 1)
         self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=Lorentzian'))
 
+    def test_add_background_context_menu(self):
+        yield self.start()
+        yield self.context_menu()
+        menu = self.get_active_popup_widget()
+        action = find_action_with_text(menu, 'Add background')
+        trigger_action(action)
+        yield self.wait_for_modal()
+        dlg = self.get_active_modal_widget()
+        dlg.setTextValue('Polynomial')
+        dlg.accept()
+        yield self.wait_for_true(lambda: self.fit_browser.sizeOfFunctionsGroup() == 3)
+        self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
+        self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=Polynomial'))
+
+    def test_add_other_context_menu(self):
+        yield self.start()
+        yield self.context_menu()
+        menu = self.get_active_popup_widget()
+        action = find_action_with_text(menu, 'Add other function')
+        trigger_action(action)
+        yield self.wait_for_modal()
+        dlg = self.get_active_modal_widget()
+        dlg.setTextValue('ExpDecay')
+        dlg.accept()
+        yield self.wait_for_true(lambda: self.fit_browser.sizeOfFunctionsGroup() == 3)
+        self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
+        self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=ExpDecay'))
+
 
 runTests(TestFitPropertyBrowser)
