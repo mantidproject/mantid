@@ -10,9 +10,22 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+// IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
+//    std::unique_ptr<IndirectFitAnalysisTab> tab,
+//    IndirectFitOutputOptionsView *view)
+//    : QObject(nullptr), m_view(view) {
+//
+//  m_model = Mantid::Kernel::make_unique<IndirectFitOutputOptionsModel>(tab);
+//
+//  connect(m_view.get(), SIGNAL(plotClicked()), this, SLOT(plotResult()));
+//  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveResult()));
+//}
+
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
-    IndirectFitOutputOptionsModel *model, IndirectFitOutputOptionsView *view)
-    : QObject(nullptr), m_model(model), m_view(view) {
+    IndirectFitOutputOptionsView *view)
+    : QObject(nullptr), m_view(view) {
+
+  m_model = std::make_unique<IndirectFitOutputOptionsModel>();
 
   connect(m_view.get(), SIGNAL(plotClicked()), this, SLOT(plotResult()));
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveResult()));
@@ -22,8 +35,17 @@ IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() {}
 
 void IndirectFitOutputOptionsPresenter::plotResult() {
   m_view->setAsPlotting(true);
-  m_model->plotResult(m_view->getPlotType());
+  try {
+    m_model->plotResult(m_view->getPlotType());
+  } catch (std::runtime_error const &ex) {
+    displayWarning(ex.what());
+  }
   m_view->setAsPlotting(false);
+}
+
+void IndirectFitOutputOptionsPresenter::displayWarning(
+    std::string const &message) {
+  m_view->displayWarning(message);
 }
 
 } // namespace IDA

@@ -23,21 +23,17 @@ public:
   MSDFit(QWidget *parent = nullptr);
 
 protected slots:
-  void plotClicked();
   void runClicked();
-  void updatePlotOptions() override;
+  //void updatePlotOptions() override;
   void updateModelFitTypeString();
 
 protected:
   void setRunIsRunning(bool running) override;
   void setFitSingleSpectrumIsFitting(bool fitting) override;
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
 
 private:
   void setupFitTab() override;
 
-  void setPlotResultIsPlotting(bool plotting);
   void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);

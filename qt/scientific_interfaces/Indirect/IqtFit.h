@@ -35,17 +35,14 @@ public:
 
 protected slots:
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
-  void updatePlotOptions() override;
+  //void updatePlotOptions() override;
   void fitFunctionChanged();
   void customBoolUpdated(const QString &key, bool value);
-  void plotResult();
   void runClicked();
 
 protected:
   void setRunIsRunning(bool running) override;
   void setFitSingleSpectrumIsFitting(bool fitting) override;
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
 
 private:
   void setConstrainIntensitiesEnabled(bool enabled);
@@ -53,7 +50,6 @@ private:
 
   void setupFitTab() override;
 
-  void setPlotResultIsPlotting(bool plotting);
   void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);

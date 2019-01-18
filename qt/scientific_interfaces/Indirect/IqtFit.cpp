@@ -70,8 +70,6 @@ void IqtFit::setupFitTab() {
   setBackgroundOptions({"None", "FlatBackground"});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotResult()));
-  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
 
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
   connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
@@ -120,9 +118,9 @@ std::string IqtFit::fitTypeString() const {
   return "";
 }
 
-void IqtFit::updatePlotOptions() {
-  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-}
+//void IqtFit::updatePlotOptions() {
+//  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
+//}
 
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   fitAlgorithm->setProperty("ExtractMembers",
@@ -131,12 +129,6 @@ void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IqtFit::runClicked() { runTab(); }
-
-void IqtFit::plotResult() {
-  setPlotResultIsPlotting(true);
-  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
-  setPlotResultIsPlotting(false);
-}
 
 void IqtFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
@@ -149,15 +141,8 @@ void IqtFit::setFitSingleSpectrumIsFitting(bool fitting) {
   setButtonsEnabled(!fitting);
 }
 
-void IqtFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
 void IqtFit::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
   setFitSingleSpectrumEnabled(enabled);
 }
 
@@ -165,17 +150,8 @@ void IqtFit::setRunEnabled(bool enabled) {
   m_uiForm->pbRun->setEnabled(enabled);
 }
 
-void IqtFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
 void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
   m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-}
-
-void IqtFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
 }
 
 } // namespace IDA

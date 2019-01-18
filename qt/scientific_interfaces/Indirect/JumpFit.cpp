@@ -69,8 +69,6 @@ void JumpFit::setupFitTab() {
 
   // Handle plotting and saving
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
-  connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
   connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
@@ -97,17 +95,11 @@ void JumpFit::updateModelFitTypeString() {
   m_jumpFittingModel->setFitType(selectedFitType().toStdString());
 }
 
-void JumpFit::updatePlotOptions() {
-  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-}
+//void JumpFit::updatePlotOptions() {
+//  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
+//}
 
 void JumpFit::runClicked() { runTab(); }
-
-void JumpFit::plotClicked() {
-  setPlotResultIsPlotting(true);
-  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
-  setPlotResultIsPlotting(false);
-}
 
 void JumpFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
@@ -120,15 +112,8 @@ void JumpFit::setFitSingleSpectrumIsFitting(bool fitting) {
   setButtonsEnabled(!fitting);
 }
 
-void JumpFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
 void JumpFit::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
   setFitSingleSpectrumEnabled(enabled);
 }
 
@@ -136,17 +121,8 @@ void JumpFit::setRunEnabled(bool enabled) {
   m_uiForm->pbRun->setEnabled(enabled);
 }
 
-void JumpFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
 void JumpFit::setFitSingleSpectrumEnabled(bool enabled) {
   m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-}
-
-void JumpFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
 }
 
 } // namespace IDA

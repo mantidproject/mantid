@@ -13,6 +13,8 @@
 
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
+#include <QMessageBox>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -28,6 +30,7 @@ public:
   void setAsPlotting(bool plotting);
 
   std::string getPlotType() const;
+  void displayWarning(std::string const &message);
 
 private:
   void setButtonText(QPushButton *button, QString const &text);
