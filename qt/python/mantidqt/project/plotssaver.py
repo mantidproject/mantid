@@ -11,7 +11,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from matplotlib import ticker
 import matplotlib.axis
 from matplotlib.image import AxesImage
-from matplotlib.collections import LineCollection
 
 from mantid import logger
 

@@ -99,12 +99,9 @@ class PlotsLoader(object):
             creation_arg["cmap"] = getattr(matplotlib.cm, creation_arg["cmap"])
 
         function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar,
-                         "pcolor": axes.pcolor,
-                         # Support for this method is not currently present in mantid so cannot be saved/loaded
-                         # "pcolorfast": pcolorfast,
-                         "pcolormesh": pcolormesh, "imshow": pcolormesh,
-                         "contourf": axes.contourf, "tripcolor": axes.tripcolor, "tricontour": axes.tricontour,
-                         "tricontourf": axes.tricontourf}
+                         "pcolor": axes.pcolor, "pcolorfast": axes.pcolorfast,"pcolormesh": pcolormesh,
+                         "imshow": pcolormesh, "contour": axes.contour, "contourf": axes.contourf,
+                         "tripcolor": axes.tripcolor, "tricontour": axes.tricontour, "tricontourf": axes.tricontourf}
 
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
