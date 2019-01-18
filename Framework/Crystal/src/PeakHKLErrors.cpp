@@ -200,10 +200,10 @@ PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
     pmapSv = instSave->getParameterMap();
     hasParameterMap = true;
     if (!instSave->isParametrized()) {
-  
+
       boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
       auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
-  
+
       instChange = Pinsta;
       IComponent_const_sptr sample = instChange->getSample();
       sampPos = sample->getRelativePos();

@@ -158,7 +158,6 @@ private:
   mutable bool hasParameterMap = false;
   mutable Kernel::V3D sampPos;
   mutable boost::shared_ptr<const Geometry::ParameterMap> pmapSv;
-
 };
 } // namespace Crystal
 } // namespace Mantid
