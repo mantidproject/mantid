@@ -558,9 +558,7 @@ protected:
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
-  void invalidateCommonBinsFlag() {
-    m_isCommonBinsFlagValid.store(false);
-  }
+  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
   void updateCachedDetectorGrouping(const size_t index) const override;
 
