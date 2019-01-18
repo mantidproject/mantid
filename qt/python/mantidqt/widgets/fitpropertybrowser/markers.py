@@ -1,6 +1,6 @@
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
-from qtpy.QtCore import QObject, Signal, Qt
+from qtpy.QtCore import Qt, QObject, Signal, Slot
 from qtpy.QtGui import QCursor
 
 
@@ -8,7 +8,7 @@ class VerticalMarker(QObject):
 
     x_moved = Signal(float)
 
-    def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5):
+    def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5, line_style='-'):
         super(VerticalMarker, self).__init__()
         self.ax = canvas.figure.get_axes()[0]
         self.x = x
@@ -17,7 +17,7 @@ class VerticalMarker(QObject):
         y0, y1 = self._get_y0_y1()
         path = Path([(x, y0), (x, y1)], [Path.MOVETO, Path.LINETO])
         self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
-                               linewidth=line_width, animated=True)
+                               linewidth=line_width, linestyle=line_style, animated=True)
         self.ax.add_patch(self.patch)
         self.is_moving = False
 
@@ -125,34 +125,80 @@ class CentreMarker(VerticalMarker):
         self.patch.set_edgecolor(self.deselected_color)
 
 
+class WidthMarker(VerticalMarker):
+
+    def __init__(self, canvas, x):
+        VerticalMarker.__init__(self, canvas, 'red', x, line_style='--')
+
+
 class PeakMarker(QObject):
 
     peak_moved = Signal(int, float, float)
+    fwhm_changed = Signal(int, float)
 
-    def __init__(self, canvas, peak_id, x, y_top, y_bottom):
+    def __init__(self, canvas, peak_id, x, y_top, y_bottom, fwhm):
         super(PeakMarker, self).__init__()
         self.peak_id = peak_id
         self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top)
+        self.left_width = WidthMarker(canvas, x - fwhm / 2)
+        self.right_width = WidthMarker(canvas, x + fwhm / 2)
         self.is_selected = True
 
     def redraw(self):
         self.centre_marker.redraw()
+        if self.is_selected:
+            self.left_width.redraw()
+            self.right_width.redraw()
 
     def override_cursor(self, x, y):
-        return self.centre_marker.override_cursor(x, y)
+        cursor = self.centre_marker.override_cursor(x, y)
+        if self.is_selected:
+            if cursor is None:
+                cursor = self.left_width.override_cursor(x, y)
+            if cursor is None:
+                cursor = self.right_width.override_cursor(x, y)
+        return cursor
 
     def mouse_move_start(self, x, y):
         self.centre_marker.mouse_move_start(x, y)
+        if self.centre_marker.is_moving:
+            self.left_width.is_moving = True
+            self.right_width.is_moving = True
+        else:
+            self.left_width.mouse_move_start(x, y)
+            self.right_width.mouse_move_start(x, y)
 
     def mouse_move_stop(self):
+        if self.centre_marker.is_moving:
+            self.left_width.is_moving = False
+            self.right_width.is_moving = False
+        else:
+            self.left_width.mouse_move_stop()
+            self.right_width.mouse_move_stop()
         self.centre_marker.mouse_move_stop()
 
     def mouse_move(self, x, y):
         moved = self.centre_marker.mouse_move(x, y)
         if moved:
+            dx = (self.right_width.x - self.left_width.x) / 2
+            self.left_width.mouse_move(x - dx, y)
+            self.right_width.mouse_move(x + dx, y)
             self.peak_moved.emit(self.peak_id, x, self.centre_marker.height())
-            return True
-        return False
+        else:
+            moved = self.left_width.mouse_move(x, y)
+            if moved:
+                self.right_width.x = 2 * self.centre_marker.x - x
+            else:
+                moved = self.right_width.mouse_move(x, y)
+                if moved:
+                    self.left_width.x = 2 * self.centre_marker.x - x
+            if self.left_width.x > self.right_width.x:
+                tmp = self.right_width.x
+                self.right_width.x = self.left_width.x
+                self.left_width.x = tmp
+            if moved:
+                self.fwhm_changed.emit(self.peak_id, self.fwhm())
+        return moved
 
     @property
     def is_moving(self):
@@ -164,9 +210,15 @@ class PeakMarker(QObject):
     def height(self):
         return self.centre_marker.height()
 
-    def update_peak(self, centre, height):
+    def fwhm(self):
+        return self.right_width.x - self.left_width.x
+
+    def update_peak(self, centre, height, fwhm):
         self.centre_marker.x = centre
         self.centre_marker.set_height(height)
+        dx = fwhm / 2
+        self.left_width.x = centre - dx
+        self.right_width.x = centre + dx
 
     def select(self):
         self.centre_marker.select()

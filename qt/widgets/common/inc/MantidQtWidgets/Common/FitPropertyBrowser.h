@@ -283,6 +283,8 @@ public:
   double getPeakCentreOf(const QString &prefix);
   void setPeakHeightOf(const QString &prefix, double value);
   double getPeakHeightOf(const QString &prefix);
+  void setPeakFwhmOf(const QString &prefix, double value);
+  double getPeakFwhmOf(const QString &prefix);
 
 public slots:
   virtual void fit();

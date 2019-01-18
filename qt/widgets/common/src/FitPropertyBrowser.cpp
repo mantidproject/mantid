@@ -3416,5 +3416,18 @@ double FitPropertyBrowser::getPeakHeightOf(const QString &prefix) {
   return handler->height();
 }
 
+void FitPropertyBrowser::setPeakFwhmOf(
+    const QString &prefix, double value) {
+  auto handler = getPeakHandler(prefix);
+  handler->setFwhm(value);
+  handler->updateParameters();
+}
+
+double FitPropertyBrowser::getPeakFwhmOf(
+    const QString &prefix) {
+  auto handler = getPeakHandler(prefix);
+  return handler->fwhm();
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

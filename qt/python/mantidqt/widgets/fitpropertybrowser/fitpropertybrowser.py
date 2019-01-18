@@ -67,6 +67,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.tool.fit_end_x_moved.connect(self.setEndX)
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
+        self.tool.peak_fwhm_changed.connect(self.peak_fwhm_changed_slot)
         self.tool.peak_type_changed.connect(self.setDefaultPeakType)
         self.tool.add_background_requested.connect(self.add_function_slot)
         self.tool.add_other_requested.connect(self.add_function_slot)
@@ -110,11 +111,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             if lin.get_label().startswith(name):
                 self.fit_result_lines.append(lin)
 
-    @Slot(int, float, float)
-    def peak_added_slot(self, peak_id, centre, height):
+    @Slot(int, float, float, float)
+    def peak_added_slot(self, peak_id, centre, height, fwhm):
         fun = self.addFunction(self.defaultPeakType())
         self.setPeakCentreOf(fun, centre)
         self.setPeakHeightOf(fun, height)
+        self.setPeakFwhmOf(fun, fwhm)
         self.peak_ids[peak_id] = fun
 
     @Slot(int, float, float)
@@ -123,11 +125,18 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.setPeakCentreOf(fun, centre)
         self.setPeakHeightOf(fun, height)
 
+    @Slot(int, float)
+    def peak_fwhm_changed_slot(self, peak_id, fwhm):
+        fun = self.peak_ids[peak_id]
+        self.setPeakFwhmOf(fun, fwhm)
+
     @Slot(str)
     def peak_changed_slot(self, fun):
         for peak_id, prefix in self.peak_ids.items():
             if prefix == fun:
-                self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix))
+                self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix),
+                                      self.getPeakHeightOf(prefix),
+                                      self.getPeakFwhmOf(prefix))
 
     @Slot(str)
     def add_function_slot(self, funName):

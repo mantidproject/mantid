@@ -306,6 +306,8 @@ public:
     void setPeakCentreOf(QString, double);
     double getPeakHeightOf(QString);
     void setPeakHeightOf(QString, double);
+    double getPeakFwhmOf(QString);
+    void setPeakFwhmOf(QString, double);
 
     SIP_PYOBJECT outputName() const;
 %MethodCode

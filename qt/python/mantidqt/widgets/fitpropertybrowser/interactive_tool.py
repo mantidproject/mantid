@@ -1,4 +1,4 @@
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Signal, Slot
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QApplication, QMenu, QInputDialog
 
@@ -10,8 +10,9 @@ class FitInteractiveTool(QObject):
 
     fit_start_x_moved = Signal(float)
     fit_end_x_moved = Signal(float)
-    peak_added = Signal(int, float, float)
+    peak_added = Signal(int, float, float, float)
     peak_moved = Signal(int, float, float)
+    peak_fwhm_changed = Signal(int, float)
     peak_type_changed = Signal(str)
     add_background_requested = Signal(str)
     add_other_requested = Signal(str)
@@ -38,6 +39,7 @@ class FitInteractiveTool(QObject):
         self.selected_peak = None
         self.peak_names = []
         self.current_peak_type = current_peak_type
+        self.fwhm = dx
         self.background_names = []
         self.other_names = []
 
@@ -179,17 +181,18 @@ class FitInteractiveTool(QObject):
 
     def add_peak(self, x, y_top, y_bottom=0.0):
         peak_id = self._make_peak_id()
-        peak = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom)
+        peak = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom, fwhm=self.fwhm)
         peak.peak_moved.connect(self.peak_moved)
+        peak.fwhm_changed.connect(self.peak_fwhm_changed_slot)
         self.peak_markers.append(peak)
         self.select_peak(peak)
         self.canvas.draw()
-        self.peak_added.emit(peak_id, x, peak.height())
+        self.peak_added.emit(peak_id, x, peak.height(), peak.fwhm())
 
-    def update_peak(self, peak_id, centre, height):
+    def update_peak(self, peak_id, centre, height, fwhm):
         for pm in self.peak_markers:
             if pm.peak_id == peak_id:
-                pm.update_peak(centre, height)
+                pm.update_peak(centre, height, fwhm)
         self.canvas.draw()
 
     def select_peak(self, peak):
@@ -200,6 +203,11 @@ class FitInteractiveTool(QObject):
                 self.selected_peak = peak
             else:
                 pm.deselect()
+
+    @Slot(int, float)
+    def peak_fwhm_changed_slot(self, peak_id, fwhm):
+        self.fwhm = fwhm
+        self.peak_fwhm_changed.emit(peak_id, fwhm)
 
     def get_transform(self):
         return self.fit_start_x.patch.get_transform()
