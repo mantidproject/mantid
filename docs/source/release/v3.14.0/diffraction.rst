@@ -25,6 +25,7 @@ Improvements
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
+- New TOPAZ instrument geometry for 2019 run cycle
 
 
 Single Crystal Diffraction
