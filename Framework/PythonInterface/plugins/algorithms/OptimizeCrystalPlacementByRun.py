@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 
-from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
+from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 from mantid import mtd
@@ -30,7 +30,7 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "The name of the peaks workspace that will be optimized.")
         self.declareProperty("Tolerance", 0.15, "Tolerance of indexing of peaks.")
-        self.declareProperty("OutputWorkspace", "", 
+        self.declareProperty("OutputWorkspace", "",
                              "The name of the peaks workspace that will be created.")
 
     def PyExec(self):
@@ -47,11 +47,10 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
         minR = int(stats.column('RunNumber')[stat_col.index('Minimum')])
         maxR = int(stats.column('RunNumber')[stat_col.index('Maximum')]) + 1
         AnalysisDataService.remove(stats.getName())
-        
         group = []
         for run in range(minR, maxR):
-            FilterPeaks(InputWorkspace=ws, OutputWorkspace=str(run), FilterVariable='RunNumber', 
-                FilterValue=run, Operator='=')
+            FilterPeaks(InputWorkspace=ws, OutputWorkspace=str(run), FilterVariable='RunNumber',
+                        FilterValue=run, Operator='=')
             run = mtd[str(run)]
             peaks = run.getNumberPeaks()
             if peaks == 0:
@@ -59,10 +58,8 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
             else:
                 group.append(str(run))
         GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=ws_group)
-        
-        OptimizeCrystalPlacement(PeaksWorkspace=ws_group, ModifiedPeaksWorkspace=ws_group, AdjustSampleOffsets=True, 
-            MaxSamplePositionChangeMeters=0.005,MaxIndexingError=tolerance)
-        
+        OptimizeCrystalPlacement(PeaksWorkspace=ws_group, ModifiedPeaksWorkspace=ws_group, AdjustSampleOffsets=True,
+                                 MaxSamplePositionChangeMeters=0.005,MaxIndexingError=tolerance)
         RenameWorkspace(InputWorkspace=str(minR),OutputWorkspace=ws_append)
         for run in range(minR+1, maxR):
             if AnalysisDataService.doesExist(str(run)):
@@ -72,7 +69,6 @@ class OptimizeCrystalPlacementByRun(PythonAlgorithm):
         num,err=IndexPeaks(PeaksWorkspace=ws_append,Tolerance=tolerance)
         logger.notice('After Optimization Number indexed: %s error: %s\n'%(num, err))
         AnalysisDataService.remove(ws_group)
-    
         self.setProperty("OutputWorkspace", ws_append)
 
 
