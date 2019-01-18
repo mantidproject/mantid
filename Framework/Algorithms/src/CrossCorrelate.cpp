@@ -175,12 +175,14 @@ void CrossCorrelate::exec() {
   // Now copy the other spectra
   bool is_distrib = inputWS->isDistribution();
 
-  std::vector<double> XX(npoints);
-  for (int i = 0; i < npoints; ++i) {
-    XX[i] = static_cast<double>(i - nY + 2);
+  {
+    std::vector<double> XX(npoints);
+    for (int i = 0; i < npoints; ++i) {
+      XX[i] = static_cast<double>(i - nY + 2);
+    }
+    out->mutableX(0) = std::move(XX);
   }
   // Initialise the progress reporting object
-  out->mutableX(0) = XX;
   m_progress = make_unique<Progress>(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
