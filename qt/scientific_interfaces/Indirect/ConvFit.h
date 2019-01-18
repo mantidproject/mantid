@@ -27,22 +27,17 @@ public:
 protected slots:
   void setModelResolution(const QString &resolutionName);
   void runClicked();
-  void saveClicked();
-  void plotClicked();
-  void updatePlotOptions() override;
+  //void updatePlotOptions() override;
   void fitFunctionChanged();
 
 protected:
   void setRunIsRunning(bool running) override;
   void setFitSingleSpectrumIsFitting(bool fitting) override;
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
 
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
-  void setPlotResultIsPlotting(bool plotting);
   void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);

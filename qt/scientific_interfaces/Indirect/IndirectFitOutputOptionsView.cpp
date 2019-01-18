@@ -51,6 +51,11 @@ std::string IndirectFitOutputOptionsView::getPlotType() const {
   return m_outputOptions->cbPlotType->currentText().toStdString();
 }
 
+void IndirectFitOutputOptionsView::displayWarning(std::string const &message) {
+  QMessageBox::warning(parentWidget(), "MantidPlot - Warning",
+                       QString::fromStdString(message));
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

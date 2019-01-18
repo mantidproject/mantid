@@ -309,10 +309,11 @@ void IndirectFitAnalysisTab::setSpectrumSelectionView(
 
 void IndirectFitAnalysisTab::setOutputOptionsView(
     IndirectFitOutputOptionsView *view) {
+  // m_outOptionsPresenter =
+  //    Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(this,
+  //                                                                   view);
   m_outOptionsPresenter =
-      Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(
-          Mantid::Kernel::make_unique<IndirectFitOutputOptionsModel>().get(),
-          view);
+      Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(
@@ -762,7 +763,7 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   enableFitAnalysisButtons(true);
   enablePlotResult(error);
-  setSaveResultEnabled(!error);
+  //setSaveResultEnabled(!error);
   updateParameterValues();
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
@@ -892,78 +893,30 @@ void IndirectFitAnalysisTab::updatePlotGuess() {
 void IndirectFitAnalysisTab::saveResult() { m_fittingModel->saveResult(); }
 
 /**
- * Plots the result workspace with the specified name, using the specified
- * plot type. Plot type can either be 'None', 'All' or the name of a
- * parameter. In the case of 'None', nothing will be plotted. In the case of
- * 'All', everything will be plotted. In the case of a parameter name, only
- * the spectra created from that parameter will be plotted.
- *
- * @param plotType    The plot type specifying what to plot.
+ * Plots a spectrum with the specified index in a workspace
+ * @workspaceName :: the workspace containing the spectrum to plot
+ * @index :: the index in the workspace
+ * @errorBars :: true if you want error bars to be plotted
  */
-void IndirectFitAnalysisTab::plotResult(const QString &plotType) {
-  const auto resultWorkspaces = m_fittingModel->getResultWorkspace();
-  if (resultWorkspaces) {
-    if (plotType.compare("All") == 0)
-      plotAll(resultWorkspaces);
-    else
-      plotParameter(resultWorkspaces, plotType.toStdString());
-  }
+void IndirectFitAnalysisTab::plotSpectrum(std::string const &workspaceName,
+                                          std::size_t const &index,
+                                          bool errorBars) {
+  IndirectTab::plotSpectrum(QString::fromStdString(workspaceName),
+                            static_cast<int>(index), errorBars);
 }
 
-void IndirectFitAnalysisTab::plotAll(
-    Mantid::API::WorkspaceGroup_sptr workspaces) {
-  for (auto const &workspace : *workspaces)
-    plotAll(convertToMatrixWorkspace(workspace));
+/**
+ * Gets the Result workspace from a fit
+ */
+WorkspaceGroup_sptr IndirectFitAnalysisTab::getResultWorkspace() const {
+  return m_fittingModel->getResultWorkspace();
 }
 
-void IndirectFitAnalysisTab::plotParameter(
-    Mantid::API::WorkspaceGroup_sptr workspaces, std::string const &parameter) {
-  for (auto const &workspace : *workspaces)
-    plotParameter(convertToMatrixWorkspace(workspace), parameter);
-}
-
-void IndirectFitAnalysisTab::plotAll(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
-  auto const numberOfDataPoints = workspace->blocksize();
-  if (numberOfDataPoints > 1)
-    plotSpectrum(workspace);
-  else
-    showMessageBox(
-        "The plotting of data in one of the result workspaces failed:\n\n "
-        "Workspace has only one data point");
-}
-
-void IndirectFitAnalysisTab::plotParameter(
-    Mantid::API::MatrixWorkspace_sptr workspace,
-    const std::string &parameterToPlot) {
-  auto const numberOfDataPoints = workspace->blocksize();
-  if (numberOfDataPoints > 1)
-    plotSpectrum(workspace, parameterToPlot);
-  else
-    showMessageBox(
-        "The plotting of data in one of the result workspaces failed:\n\n "
-        "Workspace has only one data point");
-}
-
-void IndirectFitAnalysisTab::plotSpectrum(
-    Mantid::API::MatrixWorkspace_sptr workspace,
-    const std::string &parameterToPlot) {
-  const auto name = QString::fromStdString(workspace->getName());
-  const auto labels = IndirectTab::extractAxisLabels(workspace, 1);
-  for (const auto &parameter : m_fittingModel->getFitParameterNames()) {
-    if (boost::contains(parameter, parameterToPlot)) {
-      auto it = labels.find(parameter);
-      if (it != labels.end())
-        IndirectTab::plotSpectrum(name, static_cast<int>(it->second), true);
-    }
-  }
-}
-
-void IndirectFitAnalysisTab::plotSpectrum(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
-  const auto name = QString::fromStdString(workspace->getName());
-  for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-    IndirectTab::plotSpectrum(name, static_cast<int>(i), true);
+/**
+ * Gets the names of the Fit Parameters
+ */
+std::vector<std::string> IndirectFitAnalysisTab::getFitParameterNames() const {
+  return m_fittingModel->getFitParameterNames();
 }
 
 /**
@@ -1082,15 +1035,14 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
  * @param cbPlotType  The combo box.
  */
 void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
-  setPlotOptions(cbPlotType, m_fittingModel->getFitParameterNames());
+  setPlotOptions(cbPlotType, getFitParameterNames());
 }
 
 void IndirectFitAnalysisTab::enablePlotResult(bool error) {
-  if (!error)
-    setPlotResultEnabled(
-        isGroupPlottable(m_fittingModel->getResultWorkspace()));
-  else
-    setPlotResultEnabled(!error);
+  //if (!error)
+  //  setPlotResultEnabled(isGroupPlottable(getResultWorkspace()));
+  //else
+  //  setPlotResultEnabled(!error);
 }
 
 /**
@@ -1138,8 +1090,8 @@ void IndirectFitAnalysisTab::setPlotOptions(
 void IndirectFitAnalysisTab::updateResultOptions() {
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
                                                      getSelectedSpectrum());
-  setPlotResultEnabled(isFit);
-  setSaveResultEnabled(isFit);
+  //setPlotResultEnabled(isFit);
+  //setSaveResultEnabled(isFit);
 }
 
 } // namespace IDA

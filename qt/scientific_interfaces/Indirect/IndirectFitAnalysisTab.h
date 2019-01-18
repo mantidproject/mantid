@@ -10,6 +10,7 @@
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
+#include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionPresenter.h"
@@ -114,6 +115,9 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
+  void plotSpectrum(std::string const &workspaceName, std::size_t const &index,
+                    bool errorBars);
+
 public slots:
   void setBrowserWorkspace() override;
 
@@ -126,16 +130,6 @@ protected:
   void setResolutionFBSuffices(const QStringList &suffices);
 
   void run() override;
-  void plotResult(const QString &plotType);
-  void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
-  void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
-                     const std::string &parameter);
-  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
-                     const std::string &parameter);
-  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const std::string &parameterToPlot);
 
   void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -151,8 +145,8 @@ protected:
   void setPlotOptions(QComboBox *cbPlotType,
                       const QSet<QString> &options) const;
 
-  virtual void setPlotResultEnabled(bool enabled) = 0;
-  virtual void setSaveResultEnabled(bool enabled) = 0;
+  //virtual void setPlotResultEnabled(bool enabled) = 0;
+  //virtual void setSaveResultEnabled(bool enabled) = 0;
 
   virtual void setRunIsRunning(bool running) = 0;
   virtual void setFitSingleSpectrumIsFitting(bool fitting) = 0;
@@ -228,6 +222,9 @@ private:
   void connectFitBrowserAndPlotPresenter();
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
+
+  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
+  std::vector<std::string> getFitParameterNames() const;
 
   void enableFitAnalysisButtons(bool enable);
 
