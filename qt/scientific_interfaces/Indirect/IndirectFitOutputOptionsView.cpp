@@ -34,16 +34,16 @@ void IndirectFitOutputOptionsView::setAsPlotting(bool plotting) {
 
 void IndirectFitOutputOptionsView::setAvailablePlotParameters(
     std::vector<std::string> const &parameterNames) {
-  clearPlotComboBox();
-  if (!parameterNames.empty()) {
-    m_outputOptions->cbPlotType->addItem("All");
-    for (auto const &name : parameterNames)
-      m_outputOptions->cbPlotType->addItem(QString::fromStdString(name));
-    m_outputOptions->cbPlotType->setCurrentIndex(0);
-  }
+  m_outputOptions->cbPlotType->addItem("All");
+  for (auto const &name : parameterNames)
+    m_outputOptions->cbPlotType->addItem(QString::fromStdString(name));
 }
 
-void IndirectFitOutputOptionsView::clearPlotComboBox() {
+void IndirectFitOutputOptionsView::setSelectedParameterIndex(int index) {
+  m_outputOptions->cbPlotType->setCurrentIndex(index);
+}
+
+void IndirectFitOutputOptionsView::clearPlotParameters() {
   m_outputOptions->cbPlotType->clear();
 }
 

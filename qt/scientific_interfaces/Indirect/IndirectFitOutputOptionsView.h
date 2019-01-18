@@ -31,6 +31,8 @@ public:
 
   void
   setAvailablePlotParameters(std::vector<std::string> const &parameterNames);
+  void setSelectedParameterIndex(int index);
+  void clearPlotParameters();
 
   void setPlotEnabled(bool enable);
   void setSaveEnabled(bool enable);
@@ -47,7 +49,6 @@ private slots:
   void emitSaveClicked();
 
 private:
-  void clearPlotComboBox();
   void setButtonText(QPushButton *button, QString const &text);
   void setButtonsEnabled(bool enable);
 
