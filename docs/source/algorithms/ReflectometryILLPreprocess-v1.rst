@@ -11,10 +11,10 @@ Description
 
 This algorithm is the first step in the ILL reflectometry reduction workflow. It:
 
-#. loads data from disk
+#. loads data from disk by using LoadAndMerge <algm-LoadAndMerge> for :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` and :ref:`MergeRuns <algm-MergeRuns>`
 #. merges the numors
-#. determines the peak position
-#. moves the detector (of name 'detector')
+#. determines the peak position by using :ref:`FindReflectometryLines <algm-FindReflectometryLines>`
+#. moves the detector (of name 'detector') by using :ref:`SpecularReflectionPositionCorrect <algm-SpecularReflectionPositionCorrect>`
 #. normalizes to a (water) reference (optional)
 #. normalizes to slit sizes (optional)
 #. normalizes to experiment time or monitor counts (optional)
@@ -27,7 +27,7 @@ The *OutputWorkspace* can be further fed to :ref:`ReflectometryILLSumForeground 
 
 The algorithm adds the following sample log entries to the *OutputWorkspace*:
 
-* peak_position : the peak position used to define the :math:`\theta` angles (detector positions)
+* peak_position : the peak position (workspace index) used to define the :math:`\theta` angles (detector positions)
 * foreground.centre_workspace_index
 * foreground.last_workspace_index
 * foreground.first_workspace_index

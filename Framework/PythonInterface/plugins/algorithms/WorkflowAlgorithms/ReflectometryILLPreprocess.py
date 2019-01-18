@@ -423,6 +423,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         logargs['LogName'] = 'twoTheta'
         logargs['LogText'] = format(twoTheta, '.13f')
         logargs['NumberType'] = 'Double'
+        logargs['LogUnit'] = 'Degrees'
         AddSampleLog(**logargs)
         if self.getProperty(Prop.BEAM_ANGLE).isDefault:
             return ws
