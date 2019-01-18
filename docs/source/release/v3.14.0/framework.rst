@@ -65,6 +65,7 @@ New Algorithms
 - :ref:`MaskNonOverlappingBins <algm-MaskNonOverlappingBins>` masks the bins that do not overlap with another workspace.
 - :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` loads or adds to a sample environment from a .stl file, as well as allowing setting the material of the environment to load.
 - :ref:`ParallaxCorrection <algm-ParallaxCorrection>` will perform a geometric correction for the so-called parallax effect in tube based SANS detectors.
+- :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate a detection efficiency correction with multiple and flexible inputs for calculation.
 
 Improvements
 ############
