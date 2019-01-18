@@ -273,8 +273,12 @@ public:
     void init();
     SIP_PYOBJECT getFittingFunction() const;
 %MethodCode
-    auto f = sipCpp->getFittingFunction();
-    sipRes = FROM_CSTRING(f->asString().c_str());
+    try {
+      auto f = sipCpp->getFittingFunction();
+      sipRes = FROM_CSTRING(f->asString().c_str());
+    } catch (std::out_of_range&) {
+      sipRes = FROM_CSTRING("");
+    }
 %End
     int sizeOfFunctionsGroup() const;
     void loadFunction(QString funStr);
@@ -288,6 +292,7 @@ public:
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+    void setTextPlotGuess(const QString);
 
     SIP_PYOBJECT defaultPeakType() const;
 %MethodCode
@@ -309,6 +314,12 @@ public:
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
 
+    SIP_PYOBJECT workspaceName() const;
+%MethodCode
+    auto f = sipCpp->workspaceName();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
+
     SIP_PYOBJECT outputName() const;
 %MethodCode
     auto f = sipCpp->outputName();
@@ -328,4 +339,5 @@ signals:
     void changedParameterOf(const QString &prefix);
     void algorithmFinished(const QString &);
     void removeFitCurves();
+    void plotGuess();
 };

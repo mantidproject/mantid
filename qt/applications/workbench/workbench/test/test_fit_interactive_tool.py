@@ -3,7 +3,6 @@ import unittest
 
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QCursor, QContextMenuEvent
-from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import *
 from mantidqt.utils.qt.test.gui_window_test import *
@@ -470,6 +469,25 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(lambda: self.fit_browser.sizeOfFunctionsGroup() == 3)
         self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
         self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=ExpDecay'))
+
+    def test_plot_guess_doesnt_crash_without_function(self):
+        yield self.start()
+        action = find_action_with_text(self.fit_browser, 'Plot Guess')
+        trigger_action(action)
+
+    def test_plot_guess_doesnt_crash_without_workspace(self):
+        yield self.start()
+        DeleteWorkspace('ws')
+        # self.fit_browser.loadFunction('name=LinearBackground')
+        action = find_action_with_text(self.fit_browser, 'Plot Guess')
+        trigger_action(action)
+
+    def test_plot_guess(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground')
+        action = find_action_with_text(self.fit_browser, 'Plot Guess')
+        trigger_action(action)
+        trigger_action(action)
 
 
 runTests(TestFitPropertyBrowser)

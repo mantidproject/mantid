@@ -13,7 +13,7 @@ import re
 
 from qtpy.QtCore import Qt, Signal, Slot
 
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, EvaluateFunction
 from mantidqt.utils.qt import import_qt
 from .interactive_tool import FitInteractiveTool
 
@@ -39,12 +39,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.toolbar_state_checker = toolbar_state_checker
         self.tool = None
         self.fit_result_lines = []
+        self.guess_line = None
         self.peak_ids = {}
         self.startXChanged.connect(self.move_start_x)
         self.endXChanged.connect(self.move_end_x)
         self.algorithmFinished.connect(self.fitting_done_slot)
         self.changedParameterOf.connect(self.peak_changed_slot)
         self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
+        self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.setFeatures(self.DockWidgetMovable)
 
     def closeEvent(self, event):
@@ -148,8 +150,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                       self.getPeakFwhmOf(prefix))
 
     @Slot(str)
-    def add_function_slot(self, funName):
-        self.addFunction(funName)
+    def add_function_slot(self, fun_name):
+        self.addFunction(fun_name)
 
     @Slot()
     def show_canvas_context_menu(self):
@@ -158,3 +160,35 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                                         current_peak_type=self.defaultPeakType(),
                                         background_names=self.registeredBackgrounds(),
                                         other_names=self.registeredOthers())
+
+    @Slot()
+    def plot_guess_slot(self):
+        if self.guess_line is None:
+            self.plot_guess()
+        else:
+            self.remove_guess()
+
+    def plot_guess(self):
+        from workbench.plotting.functions import plot
+        fun = self.getFittingFunction()
+        ws_name = self.workspaceName()
+        if fun == '' or ws_name == '':
+            return
+        ws_index = self.workspaceIndex()
+        out_ws_name = '{}guess'.format(ws_name)
+        EvaluateFunction(fun, ws_name, WorkspaceIndex=ws_index, OutputWorkspace=out_ws_name)
+        plot([mtd[out_ws_name]], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
+        out_ws_name += ':'
+        for lin in self.get_lines():
+            if lin.get_label().startswith(out_ws_name):
+                self.guess_line = lin
+                self.setTextPlotGuess('Remove Guess')
+        self.canvas.draw()
+
+    def remove_guess(self):
+        if self.guess_line is None:
+            return
+        self.guess_line.remove()
+        self.guess_line = None
+        self.setTextPlotGuess('Plot Guess')
+        self.canvas.draw()
