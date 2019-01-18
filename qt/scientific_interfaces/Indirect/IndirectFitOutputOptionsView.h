@@ -25,19 +25,31 @@ class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsView
 
 public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
-  virtual ~IndirectFitOutputOptionsView() override;
+  ~IndirectFitOutputOptionsView() override;
 
   void setAsPlotting(bool plotting);
+
+  void
+  setAvailablePlotParameters(std::vector<std::string> const &parameterNames);
+
+  void setPlotEnabled(bool enable);
+  void setSaveEnabled(bool enable);
 
   std::string getPlotType() const;
   void displayWarning(std::string const &message);
 
-private:
-  void setButtonText(QPushButton *button, QString const &text);
+signals:
+  void plotClicked();
+  void saveClicked();
 
+private slots:
+  void emitPlotClicked();
+  void emitSaveClicked();
+
+private:
+  void clearPlotComboBox();
+  void setButtonText(QPushButton *button, QString const &text);
   void setButtonsEnabled(bool enable);
-  void setPlotEnabled(bool enable);
-  void setSaveEnabled(bool enable);
 
   std::unique_ptr<Ui::IndirectFitOutputOptions> m_outputOptions;
 };

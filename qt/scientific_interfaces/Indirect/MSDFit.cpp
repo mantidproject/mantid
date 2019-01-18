@@ -63,10 +63,6 @@ void MSDFit::updateModelFitTypeString() {
   m_msdFittingModel->setFitType(selectedFitType().toStdString());
 }
 
-//void MSDFit::updatePlotOptions() {
-//  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-//}
-
 void MSDFit::runClicked() { runTab(); }
 
 void MSDFit::setRunIsRunning(bool running) {

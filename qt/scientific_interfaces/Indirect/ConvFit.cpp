@@ -135,10 +135,6 @@ void ConvFit::setModelResolution(const QString &resolutionName) {
   setModelFitFunction();
 }
 
-//void ConvFit::updatePlotOptions() {
-//  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-//}
-
 void ConvFit::fitFunctionChanged() {
   m_convFittingModel->setFitTypeString(fitTypeString());
 }

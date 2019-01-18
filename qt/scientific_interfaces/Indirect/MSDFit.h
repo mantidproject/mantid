@@ -24,7 +24,6 @@ public:
 
 protected slots:
   void runClicked();
-  //void updatePlotOptions() override;
   void updateModelFitTypeString();
 
 protected:
