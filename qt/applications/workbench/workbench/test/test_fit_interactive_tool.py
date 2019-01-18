@@ -268,6 +268,12 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.fit()
         yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
         self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
+        self.start_draw_calls_count()
+        action_clear_curves = find_action_with_text(self.fit_browser, 'Clear fit curves')
+        trigger_action(action_clear_curves)
+        yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 0)
+        self.assertEqual(len(self.fit_browser.fit_result_lines), 0)
+        self.assertGreaterEqual(self.draw_count, 1)
 
     def start_emu(self):
         res1 = Load(r'emu00006473.nxs', OutputWorkspace='ws1')

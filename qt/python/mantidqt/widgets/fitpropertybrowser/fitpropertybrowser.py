@@ -11,7 +11,7 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 
 import re
 
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import Qt, Signal, Slot
 
 from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
@@ -44,6 +44,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.endXChanged.connect(self.move_end_x)
         self.algorithmFinished.connect(self.fitting_done_slot)
         self.changedParameterOf.connect(self.peak_changed_slot)
+        self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
         self.setFeatures(self.DockWidgetMovable)
 
     def closeEvent(self, event):
@@ -73,6 +74,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.tool.add_other_requested.connect(self.add_function_slot)
         self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
         super(FitPropertyBrowser, self).show()
+        self.setPeakToolOn(True)
         self.canvas.draw()
 
     def hide(self):
@@ -83,6 +85,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             self.tool = None
             self.canvas.draw()
         super(FitPropertyBrowser, self).hide()
+        self.setPeakToolOn(False)
 
     def move_start_x(self, xd):
         if self.tool is not None:
@@ -99,6 +102,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def get_lines(self):
         return self.canvas.figure.get_axes()[0].get_lines()
+
+    @Slot()
+    def clear_fit_result_lines_slot(self):
+        self.clear_fit_result_lines()
+        if self.tool is not None:
+            self.canvas.draw()
 
     @Slot(str)
     def fitting_done_slot(self, name):
@@ -140,7 +149,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot(str)
     def add_function_slot(self, funName):
-        fun = self.addFunction(funName)
+        self.addFunction(funName)
 
     @Slot()
     def show_canvas_context_menu(self):

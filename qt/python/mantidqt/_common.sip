@@ -320,9 +320,12 @@ public:
     sipCpp->setOutputName(TO_CSTRING(a0));
 %End
 
+    void setPeakToolOn(bool on);
+
 signals:
     void startXChanged(double);
     void endXChanged(double);
     void changedParameterOf(const QString &prefix);
     void algorithmFinished(const QString &);
+    void removeFitCurves();
 };
