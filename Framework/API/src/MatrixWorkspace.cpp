@@ -961,15 +961,15 @@ bool MatrixWorkspace::isHistogramData() const {
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
-  std::lock_guard<std::mutex> lock(m_commonBinsMutex);
-  if (m_isCommonBinsFlag) {
-    return *m_isCommonBinsFlag;
+  const bool isFlagValid{m_isCommonBinsFlagValid.exchange(true)};
+  if (isFlagValid) {
+    return m_isCommonBinsFlag;
   }
   m_isCommonBinsFlag = true;
   const size_t numHist = this->getNumberHistograms();
   // there being only one or zero histograms is accepted as not being an error
   if (numHist <= 1) {
-    return *m_isCommonBinsFlag;
+    return m_isCommonBinsFlag;
   }
 
   // First check if the x-axis shares a common ptr.
@@ -982,8 +982,8 @@ bool MatrixWorkspace::isCommonBins() const {
   }
 
   // If true, we may return here.
-  if (*m_isCommonBinsFlag) {
-    return *m_isCommonBinsFlag;
+  if (m_isCommonBinsFlag) {
+    return m_isCommonBinsFlag;
   }
 
   m_isCommonBinsFlag = true;
@@ -997,7 +997,7 @@ bool MatrixWorkspace::isCommonBins() const {
   }
 
   // Check that the values of each histogram are identical.
-  if (*m_isCommonBinsFlag) {
+  if (m_isCommonBinsFlag) {
     const size_t numBins = x(0).size();
     const size_t lastSpec = numHist - 1;
     for (size_t i = 0; i < lastSpec; ++i) {
@@ -1021,7 +1021,7 @@ bool MatrixWorkspace::isCommonBins() const {
       }
     }
   }
-  return *m_isCommonBinsFlag;
+  return m_isCommonBinsFlag;
 }
 
 /** Called by the algorithm MaskBins to mask a single bin for the first time,

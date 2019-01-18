@@ -559,8 +559,7 @@ protected:
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
   void invalidateCommonBinsFlag() {
-    std::lock_guard<std::mutex> lock(m_commonBinsMutex);
-    m_isCommonBinsFlag = boost::none;
+    m_isCommonBinsFlagValid.store(false);
   }
 
   void updateCachedDetectorGrouping(const size_t index) const override;
@@ -595,9 +594,10 @@ private:
   /// A text label for use when plotting spectra
   std::string m_YUnitLabel;
 
-  /// Flag indicating whether the data has common bins. Empty by default
-  mutable boost::optional<bool> m_isCommonBinsFlag{boost::none};
-  mutable std::mutex m_commonBinsMutex{};
+  /// Flag indicating if the common bins flag is in a valid state
+  mutable std::atomic<bool> m_isCommonBinsFlagValid{false};
+  /// Flag indicating whether the data has common bins
+  mutable bool m_isCommonBinsFlag{false};
 
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
