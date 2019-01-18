@@ -28,10 +28,8 @@ namespace IDA {
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
     IndirectFitOutputOptionsView *view)
-    : QObject(nullptr), m_view(view) {
-
-  m_model = std::make_unique<IndirectFitOutputOptionsModel>();
-
+    : QObject(nullptr),
+      m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
   connect(m_view.get(), SIGNAL(plotClicked()), this, SLOT(plotResult()));
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveResult()));
 }
@@ -45,29 +43,56 @@ void IndirectFitOutputOptionsPresenter::setPlotWorkspace(
 
 void IndirectFitOutputOptionsPresenter::setPlotParameters(
     std::vector<std::string> const &parameterNames) {
-  m_view->clearPlotParameters();
+  m_view->clearPlotTypes();
   if (!parameterNames.empty()) {
-    m_view->setAvailablePlotParameters(parameterNames);
-    m_view->setSelectedParameterIndex(0);
+    m_view->setAvailablePlotTypes(parameterNames);
+    m_view->setPlotTypeIndex(0);
   }
+  m_model->setActiveParameters(parameterNames);
 }
 
 void IndirectFitOutputOptionsPresenter::setPlotEnabled(bool enable) {
   m_view->setPlotEnabled(enable);
 }
 
-void IndirectFitOutputOptionsPresenter::setSaveEnabled(bool enable) {
-  m_view->setSaveEnabled(enable);
-}
-
 void IndirectFitOutputOptionsPresenter::plotResult() {
-  m_view->setAsPlotting(true);
+  setPlotting(true);
   try {
-    m_model->plotResult(m_view->getPlotType());
+    m_model->plotResult(m_view->getSelectedPlotType());
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }
-  m_view->setAsPlotting(false);
+  setPlotting(false);
+}
+
+void IndirectFitOutputOptionsPresenter::saveResult() {
+  setSaving(true);
+  try {
+    m_model->saveResult();
+  } catch (std::runtime_error const &ex) {
+    displayWarning(ex.what());
+  }
+  setSaving(false);
+}
+
+void IndirectFitOutputOptionsPresenter::setPlotting(bool plotting) {
+  m_view->setPlotText(plotting ? "Plotting..." : "Plot");
+  setPlotEnabled(!plotting);
+  setSaveEnabled(!plotting);
+}
+
+void IndirectFitOutputOptionsPresenter::setSaving(bool saving) {
+  m_view->setSaveText(saving ? "Saving..." : "Save Result");
+  setPlotEnabled(!saving);
+  setSaveEnabled(!saving);
+}
+
+void IndirectFitOutputOptionsPresenter::setPlotEnabled(bool enable) {
+  m_view->setPlotEnabled(enable && m_model->plotWorkspaceIsPlottable());
+}
+
+void IndirectFitOutputOptionsPresenter::setSaveEnabled(bool enable) {
+  m_view->setSaveEnabled(enable);
 }
 
 void IndirectFitOutputOptionsPresenter::displayWarning(

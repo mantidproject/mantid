@@ -37,9 +37,13 @@ public:
 
 private slots:
   void plotResult();
+  void saveResult();
 
 private:
-  void displayWarning(std::string const &message);
+  void setPlotting(bool plotting);
+  void setSaving(bool saving);
+	
+	void displayWarning(std::string const &message);
 
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
   std::unique_ptr<IndirectFitOutputOptionsView> m_view;

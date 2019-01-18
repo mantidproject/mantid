@@ -14,13 +14,12 @@ using namespace Mantid::API;
 
 namespace {
 
-MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+std::string noWorkspaceErrorMessage() {
+  return "This process has failed:\n\n No workspace found";
 }
 
-std::string oneDataPointErrorMessage() {
-  return "The plotting of data in one of the result workspaces failed:\n\n "
-         "Workspace has only one data point";
+MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 std::unordered_map<std::string, std::size_t> extractAxisLabels(Axis *axis) {
@@ -42,6 +41,33 @@ extractAxisLabels(MatrixWorkspace_const_sptr workspace,
   else
     return std::unordered_map<std::string, std::size_t>();
 }
+
+IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
+                                            std::string const &filename) {
+  auto saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
+  saveAlg->setProperty("InputWorkspace", workspace);
+  saveAlg->setProperty("Filename", filename);
+  return saveAlg;
+}
+
+void saveWorkspace(WorkspaceGroup_sptr resultWorkspace) {
+  auto const filename = Mantid::Kernel::ConfigService::Instance().getString(
+                            "defaultsave.directory") +
+                        resultWorkspace->getName() + ".nxs";
+  saveNexusProcessedAlgorithm(resultWorkspace, filename)->execute();
+}
+
+bool workspaceIsPlottable(MatrixWorkspace_sptr workspace) {
+  return workspace->y(0).size() > 1;
+}
+
+bool containsPlottableWorkspace(WorkspaceGroup_sptr group) {
+  for (auto const &workspace : *group)
+    if (workspaceIsPlottable(convertToMatrixWorkspace(workspace)))
+      return true;
+  return false;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -59,47 +85,53 @@ void IndirectFitOutputOptionsModel::setActivePlotWorkspace(
   m_plotWorkspace = workspace;
 }
 
+void IndirectFitOutputOptionsModel::setActiveParameters(
+    std::vector<std::string> const &parameters) {
+  m_parameters = parameters;
+}
+
 void IndirectFitOutputOptionsModel::plotResult(std::string const &plotType) {
   if (m_plotWorkspace) {
     if (plotType == "All")
       plotAll(m_plotWorkspace);
     else
       plotParameter(m_plotWorkspace, plotType);
-  }
+  } else
+    throw std::runtime_error(noWorkspaceErrorMessage());
 }
 
 void IndirectFitOutputOptionsModel::plotAll(WorkspaceGroup_sptr workspaces) {
   for (auto const &workspace : *workspaces)
-    plotAll(convertToMatrixWorkspace(workspace));
+    plotWorkspace(convertToMatrixWorkspace(workspace));
 }
 
 void IndirectFitOutputOptionsModel::plotParameter(
     WorkspaceGroup_sptr workspaces, std::string const &parameter) {
   for (auto const &workspace : *workspaces)
-    plotParameter(convertToMatrixWorkspace(workspace), parameter);
+    plotWorkspace(convertToMatrixWorkspace(workspace), parameter);
 }
 
-void IndirectFitOutputOptionsModel::plotAll(MatrixWorkspace_sptr workspace) {
-  auto const numberOfDataPoints = workspace->blocksize();
-  if (numberOfDataPoints > 1)
-    plotSpectrum(workspace);
-  else
-    throw std::runtime_error(oneDataPointErrorMessage());
+void IndirectFitOutputOptionsModel::plotWorkspace(
+    MatrixWorkspace_sptr workspace, std::string const &parameter) {
+  if (workspaceIsPlottable(workspace)) {
+    if (parameter.empty())
+      plotSpectra(workspace);
+    else
+      plotSpectrum(workspace, parameter);
+  }
 }
 
-void IndirectFitOutputOptionsModel::plotParameter(
-    MatrixWorkspace_sptr workspace, std::string const &parameterToPlot) {
-  auto const numberOfDataPoints = workspace->blocksize();
-  if (numberOfDataPoints > 1)
-    plotSpectrum(workspace, parameterToPlot);
-  else
-    throw std::runtime_error(oneDataPointErrorMessage());
+void IndirectFitOutputOptionsModel::plotSpectra(
+    MatrixWorkspace_sptr workspace) {
+  for (auto index = 0u; index < workspace->getNumberHistograms(); ++index)
+    break;
+  // m_tab->plotSpectrum(workspace->getName(), index, true);
 }
 
 void IndirectFitOutputOptionsModel::plotSpectrum(
     MatrixWorkspace_sptr workspace, std::string const &parameterToPlot) {
   auto const labels = extractAxisLabels(workspace, 1);
-  for (auto const &parameter : m_fitParameters) {
+  for (auto const &parameter : m_parameters) {
     if (parameter == parameterToPlot) {
       auto const param = labels.find(parameter);
       if (param != labels.end())
@@ -109,11 +141,17 @@ void IndirectFitOutputOptionsModel::plotSpectrum(
   }
 }
 
-void IndirectFitOutputOptionsModel::plotSpectrum(
-    MatrixWorkspace_sptr workspace) {
-  for (auto index = 0u; index < workspace->getNumberHistograms(); ++index)
-    break;
-  // m_tab->plotSpectrum(workspace->getName(), index, true);
+void IndirectFitOutputOptionsModel::saveResult() const {
+  if (m_plotWorkspace)
+    saveWorkspace(m_plotWorkspace);
+  else
+    throw std::runtime_error(noWorkspaceErrorMessage());
+}
+
+bool IndirectFitOutputOptionsModel::plotWorkspaceIsPlottable() const {
+  if (m_plotWorkspace)
+    return containsPlottableWorkspace(m_plotWorkspace);
+  return false;
 }
 
 } // namespace IDA

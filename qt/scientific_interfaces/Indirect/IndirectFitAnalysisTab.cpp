@@ -29,32 +29,6 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
-MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-}
-
-std::size_t numberOfColumns(Workspace_sptr workspace) {
-  return convertToMatrixWorkspace(workspace)->y(0).size();
-}
-
-bool isWorkspacePlottable(Workspace_sptr workspace) {
-  return numberOfColumns(workspace) > 1;
-}
-
-bool containsPlottableWorkspace(WorkspaceGroup_sptr workspaceGroup) {
-  for (auto const &workspace : *workspaceGroup)
-    if (isWorkspacePlottable(workspace))
-      return true;
-  return false;
-}
-
-bool isGroupPlottable(WorkspaceGroup_sptr workspaceGroup) {
-  if (workspaceGroup)
-    return containsPlottableWorkspace(workspaceGroup);
-  else
-    return false;
-}
-
 std::string cropParameterName(std::string const &name,
                               std::string const &delimiter) {
   auto const cropIndex = name.rfind(delimiter);
@@ -901,11 +875,6 @@ void IndirectFitAnalysisTab::updatePlotGuess() {
 }
 
 /**
- * Saves the result workspace in the default save directory.
- */
-void IndirectFitAnalysisTab::saveResult() { m_fittingModel->saveResult(); }
-
-/**
  * Plots a spectrum with the specified index in a workspace
  * @workspaceName :: the workspace containing the spectrum to plot
  * @index :: the index in the workspace
@@ -1050,8 +1019,7 @@ void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
     m_outOptionsPresenter->setPlotParameters(
         cropParameterNamesBy(getFitParameterNames(), "."));
   }
-  m_outOptionsPresenter->setPlotEnabled(enable &&
-                                        isGroupPlottable(getResultWorkspace()));
+  m_outOptionsPresenter->setPlotEnabled(enable);
   m_outOptionsPresenter->setSaveEnabled(enable);
 }
 
