@@ -837,10 +837,12 @@ public:
 
   void doHistoryCopyOnGroupsTest(const std::string &inputWSName,
                                  const std::string &outputWSName) {
+    using Mantid::Types::Core::DateAndTime;
     const auto group =
         boost::dynamic_pointer_cast<WorkspaceGroup>(makeWorkspaceGroup(
             inputWSName, inputWSName + "_1," + inputWSName + "_2"));
-    const auto execDate{Mantid::Types::Core::DateAndTime::getCurrentTime()};
+    const DateAndTime execDate{
+        Mantid::Types::Core::DateAndTime::getCurrentTime()};
     for (auto &item : *group) {
       item->history().addHistory(boost::make_shared<AlgorithmHistory>(
           "Load", 1, "49ea7cb9-6172-4e5c-acf5-c3edccd0bb27", execDate));
