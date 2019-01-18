@@ -45,7 +45,11 @@ void IndirectFitOutputOptionsPresenter::setPlotWorkspace(
 
 void IndirectFitOutputOptionsPresenter::setPlotParameters(
     std::vector<std::string> const &parameterNames) {
-  m_view->setAvailablePlotParameters(parameterNames);
+  m_view->clearPlotParameters();
+  if (!parameterNames.empty()) {
+    m_view->setAvailablePlotParameters(parameterNames);
+    m_view->setSelectedParameterIndex(0);
+  }
 }
 
 void IndirectFitOutputOptionsPresenter::setPlotEnabled(bool enable) {
