@@ -35,9 +35,7 @@ double SN(const Mantid::Geometry::IPeak &p) {
   return p.getIntensity() / p.getSigmaIntensity();
 }
 
-double RUN(const Mantid::Geometry::IPeak &p) {
-  return p.getRunNumber();
-}
+double RUN(const Mantid::Geometry::IPeak &p) { return p.getRunNumber(); }
 } // namespace
 
 namespace Mantid {
@@ -70,7 +68,7 @@ void FilterPeaks::init() {
 
   std::vector<std::string> filters{"h+k+l",        "h^2+k^2+l^2", "Intensity",
                                    "Signal/Noise", "QMod",        "Wavelength",
-                                   "DSpacing",     "TOF", "RunNumber"};
+                                   "DSpacing",     "TOF",         "RunNumber"};
   declareProperty("FilterVariable", "",
                   boost::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
