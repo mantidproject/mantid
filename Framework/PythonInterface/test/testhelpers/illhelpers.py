@@ -349,7 +349,7 @@ def refl_create_beam_position_ws(beamPosWSName, referenceWS, detectorAngle, beam
 def refl_preprocess(outputWSName, ws, beamPosWS):
     args = {
         'InputWorkspace': ws,
-        'BeamPositionWorkspace': beamPosWS,
+        'DirectBeamPosition': beamPosWS,
         'OutputWorkspace': outputWSName,
     }
     alg = create_algorithm('ReflectometryILLPreprocess', **args)

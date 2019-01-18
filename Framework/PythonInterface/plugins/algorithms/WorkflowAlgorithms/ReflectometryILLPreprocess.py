@@ -23,7 +23,7 @@ import ReflectometryILL_common as common
 class Prop:
     BEAM_ANGLE = 'BraggAngle'
     BEAM_CENTRE = 'BeamCentre'
-    BEAM_POS_WS = 'BeamPositionWorkspace'
+    BEAM_POS_WS = 'DirectBeamPosition'
     BKG_METHOD = 'FlatBackground'
     CLEANUP = 'Cleanup'
     FLUX_NORM_METHOD = 'FluxNormalisation'

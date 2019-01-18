@@ -284,7 +284,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         table.addRow((3.0,))
         args = {
             'InputWorkspace': ws,
-            'BeamPositionWorkspace': 'peakTable',
+            'DirectBeamPosition': 'peakTable',
             'OutputWorkspace': outWSName,
             'Cleanup': 'Cleanup OFF',
             'WaterWorkspace': ws,
