@@ -127,6 +127,7 @@ def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, cu
         # get the values needed for saving out the .prm files
         difc = [output.DIFC]
         tzero = [output.TZERO]
+        difa = [output.DIFA]
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [param_tbl_name], difc, tzero, "all_banks", cal_gen)
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [param_tbl_name], difc, tzero,
                          "bank_{}".format(param_tbl_name), cal_gen)
@@ -144,11 +145,12 @@ def create_calibration_cropped_file(use_spectrum_number, spec_nos, crop_name, cu
         # get the values needed for saving out the .prm files
         difc = [output.DIFC]
         tzero = [output.TZERO]
+        difa = [output.DIFA]
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "all_banks", cal_gen)
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [spec_nos], difc, tzero, "bank_{}".format(spec_nos),
                          cal_gen)
     # create the table workspace containing the parameters
-    create_params_table(difc, tzero)
+    create_params_table(difc, tzero, difa)
 
 
 # create the calibration files for an uncropped run
@@ -157,6 +159,7 @@ def create_calibration_files(curve_van, int_van, ceria_run, cal_dir, van_run, ca
     ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
     difcs = []
     tzeros = []
+    difa = []
     banks = 3
     bank_names = ["North", "South"]
     # loop through the banks, calibrating both
@@ -169,12 +172,13 @@ def create_calibration_files(curve_van, int_van, ceria_run, cal_dir, van_run, ca
         # add the needed outputs to a list
         difcs.append(output.DIFC)
         tzeros.append(output.TZERO)
+        difa.append(output.DIFA)
         # save out the ones needed for this loop
         save_calibration(ceria_run, van_run, ".prm", cal_dir, [bank_names[i-1]], [difcs[i-1]], [tzeros[i-1]],
                          "bank_{}".format(bank_names[i-1]), cal_gen)
     # save out the total version, then create the table of params
     save_calibration(ceria_run, van_run, ".prm", cal_dir, bank_names, difcs, tzeros, "all_banks", cal_gen)
-    create_params_table(difcs, tzeros)
+    create_params_table(difcs, tzeros, difa)
 
 
 # load the vanadium files passed in
@@ -203,14 +207,14 @@ def save_calibration(ceria_run, van_run, ext, cal_dir, bank_names, difcs, zeros,
 
 
 # create the params table from the output from the calibration
-def create_params_table(difc, tzero):
+def create_params_table(difc, tzero, difa):
     param_table = simple.CreateEmptyTableWorkspace(OutputWorkspace="engg_calibration_banks_parameters")
     param_table.addColumn("int", "bankid")
     param_table.addColumn("double", "difc")
     param_table.addColumn("double", "difa")
     param_table.addColumn("double", "tzero")
     for i in range(len(difc)):
-        next_row = {"bankid": i, "difc": difc[i], "difa": 0, "tzero": tzero[i]}
+        next_row = {"bankid": i, "difc": difc[i], "difa": difa[i], "tzero": tzero[i]}
         param_table.addRow(next_row)
 
 
