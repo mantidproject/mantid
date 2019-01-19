@@ -31,20 +31,15 @@ protected slots:
 
 protected:
   void setRunIsRunning(bool running) override;
-  void setFitSingleSpectrumIsFitting(bool fitting) override;
+  void setRunEnabled(bool enable) override;
 
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
-
   std::string fitTypeString() const;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;
-
   // ShortHand Naming for fit functions
   QHash<QString, std::string> m_fitStrings;
   ConvFitModel *m_convFittingModel;

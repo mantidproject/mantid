@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsPresenter.h"
 
-#include "IndirectFitOutputOptionsModel.h"
-#include "IndirectFitOutputOptionsView.h"
+#include "IndirectFitAnalysisTab.h"
 
 using namespace Mantid::API;
 
@@ -15,21 +14,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-// IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
-//    std::unique_ptr<IndirectFitAnalysisTab> tab,
-//    IndirectFitOutputOptionsView *view)
-//    : QObject(nullptr), m_view(view) {
-//
-//  m_model = Mantid::Kernel::make_unique<IndirectFitOutputOptionsModel>(tab);
-//
-//  connect(m_view.get(), SIGNAL(plotClicked()), this, SLOT(plotResult()));
-//  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveResult()));
-//}
-
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
     IndirectFitOutputOptionsView *view)
-    : QObject(nullptr), m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
+    : QObject(nullptr),
+      m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
   connect(m_view.get(), SIGNAL(plotClicked()), this, SLOT(plotResult()));
+  connect(m_view.get(), SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveResult()));
 }
 
@@ -44,10 +34,10 @@ void IndirectFitOutputOptionsPresenter::setPlotParameters(
     std::vector<std::string> const &parameterNames) {
   m_view->clearPlotTypes();
   if (!parameterNames.empty()) {
-    m_view->setAvailablePlotTypes(parameterNames);
+    m_view->setAvailablePlotTypes(
+        m_model->formatParameterNames(parameterNames));
     m_view->setPlotTypeIndex(0);
   }
-  m_model->setActiveParameters(parameterNames);
 }
 
 void IndirectFitOutputOptionsPresenter::plotResult() {
@@ -57,7 +47,6 @@ void IndirectFitOutputOptionsPresenter::plotResult() {
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }
-  setPlotting(false);
 }
 
 void IndirectFitOutputOptionsPresenter::saveResult() {
@@ -88,6 +77,15 @@ void IndirectFitOutputOptionsPresenter::setPlotEnabled(bool enable) {
 
 void IndirectFitOutputOptionsPresenter::setSaveEnabled(bool enable) {
   m_view->setSaveEnabled(enable);
+}
+
+void IndirectFitOutputOptionsPresenter::clearSpectraToPlot() {
+  m_model->clearSpectraToPlot();
+}
+
+std::vector<SpectrumToPlot>
+IndirectFitOutputOptionsPresenter::getSpectraToPlot() const {
+  return m_model->getSpectraToPlot();
 }
 
 void IndirectFitOutputOptionsPresenter::displayWarning(

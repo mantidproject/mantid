@@ -10,7 +10,6 @@
 #include "ui_IndirectFitOutputOptions.h"
 
 #include "DllConfig.h"
-
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QMessageBox>
@@ -27,13 +26,12 @@ public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
   ~IndirectFitOutputOptionsView() override;
 
-	void clearPlotTypes();
-  void
-  setAvailablePlotTypes(std::vector<std::string> const &parameterNames);
+  void clearPlotTypes();
+  void setAvailablePlotTypes(std::vector<std::string> const &parameterNames);
   void setPlotTypeIndex(int index);
   std::string getSelectedPlotType() const;
 
-	void setPlotText(QString const &text);
+  void setPlotText(QString const &text);
   void setSaveText(QString const &text);
 
   void setPlotEnabled(bool enable);

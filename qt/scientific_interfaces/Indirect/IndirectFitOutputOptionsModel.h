@@ -8,46 +8,51 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
 
 #include "DllConfig.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/PythonRunner.h"
 
 #include <boost/pointer_cast.hpp>
-
-#include "IndirectTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+using SpectrumToPlot = std::pair<std::string, std::size_t>;
+
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsModel {
 public:
-  // IndirectFitOutputOptionsModel(std::unique_ptr<IndirectFitAnalysisTab> tab);
   IndirectFitOutputOptionsModel();
   ~IndirectFitOutputOptionsModel() = default;
 
   void setActivePlotWorkspace(Mantid::API::WorkspaceGroup_sptr workspace);
-  void setActiveParameters(std::vector<std::string> const &parameters);
+
+  bool plotWorkspaceIsPlottable() const;
+
+  void clearSpectraToPlot();
+  std::vector<SpectrumToPlot> getSpectraToPlot() const;
 
   void plotResult(std::string const &plotType);
   void saveResult() const;
 
-	bool plotWorkspaceIsPlottable() const;
+  std::vector<std::string>
+  formatParameterNames(std::vector<std::string> const &parameterNames) const;
 
 private:
-  void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
-  void plotParameter(Mantid::API::WorkspaceGroup_sptr workspaces,
+  void plotResult(std::string const &plotType,
+                  Mantid::API::WorkspaceGroup_sptr resultGroup);
+  void plotAll(Mantid::API::WorkspaceGroup_sptr resultGroup);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotAllSpectra(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotParameter(Mantid::API::WorkspaceGroup_sptr resultGroup,
                      std::string const &parameter);
-  void plotWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                     std::string const &parameter = "");
-  void plotSpectra(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
-                    std::string const &parameterToPlot);
+  void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
+                     std::string const &parameter);
+  void plotParameterSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
+                             std::string const &parameter);
 
-
-  Mantid::API::WorkspaceGroup_sptr m_plotWorkspace;
-  std::vector<std::string> m_parameters;
-  // std::unique_ptr<IndirectFitAnalysisTab> m_tab;
+  Mantid::API::WorkspaceGroup_sptr m_resultGroup;
+  std::vector<SpectrumToPlot> m_spectraToPlot;
 };
 
 } // namespace IDA

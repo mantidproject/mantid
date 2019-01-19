@@ -248,6 +248,15 @@ void IndirectFitPlotPresenter::enableAllDataSelection() {
   m_view->enableFitRangeSelection(true);
 }
 
+void IndirectFitPlotPresenter::setFitSingleSpectrumIsFitting(bool fitting) {
+  m_view->setFitSingleSpectrumText(fitting ? "Fitting..."
+                                           : "Fit Single Spectrum");
+}
+
+void IndirectFitPlotPresenter::setFitSingleSpectrumEnabled(bool enable) {
+  m_view->setFitSingleSpectrumEnabled(enable);
+}
+
 void IndirectFitPlotPresenter::updatePlots() {
   const auto result = m_model->getResultWorkspace();
   if (result)
