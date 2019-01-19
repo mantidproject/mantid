@@ -67,26 +67,10 @@ void MSDFit::runClicked() { runTab(); }
 
 void MSDFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
 }
 
-void MSDFit::setFitSingleSpectrumIsFitting(bool fitting) {
-  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
-      fitting ? "Fitting..." : "Fit Single Spectrum");
-  setButtonsEnabled(!fitting);
-}
-
-void MSDFit::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setFitSingleSpectrumEnabled(enabled);
-}
-
-void MSDFit::setRunEnabled(bool enabled) {
-  m_uiForm->pbRun->setEnabled(enabled);
-}
-
-void MSDFit::setFitSingleSpectrumEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+void MSDFit::setRunEnabled(bool enable) {
+  m_uiForm->pbRun->setEnabled(enable);
 }
 
 } // namespace IDA

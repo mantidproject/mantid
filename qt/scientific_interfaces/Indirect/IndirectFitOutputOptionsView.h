@@ -10,7 +10,6 @@
 #include "ui_IndirectFitOutputOptions.h"
 
 #include "DllConfig.h"
-
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QMessageBox>

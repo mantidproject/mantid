@@ -41,17 +41,13 @@ protected slots:
 
 protected:
   void setRunIsRunning(bool running) override;
-  void setFitSingleSpectrumIsFitting(bool fitting) override;
+  void setRunEnabled(bool enable) override;
 
 private:
   void setConstrainIntensitiesEnabled(bool enabled);
   std::string fitTypeString() const;
 
   void setupFitTab() override;
-
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
 
   IqtFitModel *m_iqtFittingModel;
   std::unique_ptr<Ui::IqtFit> m_uiForm;

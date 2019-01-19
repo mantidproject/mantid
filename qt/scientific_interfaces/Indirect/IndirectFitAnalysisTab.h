@@ -33,7 +33,6 @@ class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  /// Constructor
   IndirectFitAnalysisTab(IndirectFittingModel *model,
                          QWidget *parent = nullptr);
 
@@ -115,9 +114,6 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
-  void plotSpectrum(std::string const &workspaceName, std::size_t const &index,
-                    bool errorBars);
-
 public slots:
   void setBrowserWorkspace() override;
 
@@ -137,7 +133,7 @@ protected:
   virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   virtual void setRunIsRunning(bool running) = 0;
-  virtual void setFitSingleSpectrumIsFitting(bool fitting) = 0;
+  virtual void setRunEnabled(bool enable) = 0;
 
 signals:
   void functionChanged();
@@ -194,6 +190,7 @@ protected slots:
 
 private slots:
   void updatePlotGuess();
+  void plotSelectedSpectra();
 
 private:
   /// Overidden by child class.
@@ -208,10 +205,14 @@ private:
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
 
+  void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
+  void plotSpectrum(std::string const &workspaceName, std::size_t const &index,
+                    bool errorBars);
+
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   std::vector<std::string> getFitParameterNames() const;
 
-  void enableFitAnalysisButtons(bool enable, bool enableOutOptions);
+  void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;

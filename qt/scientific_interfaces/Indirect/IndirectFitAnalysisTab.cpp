@@ -13,9 +13,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-
 #include "MantidKernel/make_unique.h"
-
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -28,24 +26,6 @@ using namespace Mantid::API;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
-
-std::string cropParameterName(std::string const &name,
-                              std::string const &delimiter) {
-  auto const cropIndex = name.rfind(delimiter);
-  if (cropIndex != std::string::npos)
-    return name.substr(cropIndex + 1, name.size());
-  return name;
-}
-
-std::vector<std::string>
-cropParameterNamesBy(std::vector<std::string> const &names,
-                     std::string const &delimiter) {
-  std::vector<std::string> parameterNames;
-  parameterNames.reserve(names.size());
-  for (auto const &name : names)
-    parameterNames.emplace_back(cropParameterName(name, delimiter));
-  return parameterNames;
-}
 
 void updateParameters(
     IFunction_sptr function,
@@ -76,11 +56,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/**
- * Constructor.
- *
- * @param parent :: the parent widget (an IndirectDataAnalysis object).
- */
 IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model,
                                                QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
@@ -147,6 +122,9 @@ void IndirectFitAnalysisTab::setup() {
           SLOT(updateResultOptions()));
   connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
           SLOT(updateAvailableFitTypes()));
+
+  connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this,
+          SLOT(plotSelectedSpectra()));
 
   connectDataAndSpectrumPresenters();
   connectDataAndPlotPresenters();
@@ -299,9 +277,6 @@ void IndirectFitAnalysisTab::setSpectrumSelectionView(
 
 void IndirectFitAnalysisTab::setOutputOptionsView(
     IndirectFitOutputOptionsView *view) {
-  // m_outOptionsPresenter =
-  //    Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(this,
-  //                                                                   view);
   m_outOptionsPresenter =
       Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
@@ -751,7 +726,10 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
-  enableFitAnalysisButtons(true, !error);
+  setRunIsRunning(false);
+  m_plotPresenter->setFitSingleSpectrumIsFitting(false);
+  enableFitButtons(true);
+  enableOutputOptions(!error);
   updateParameterValues();
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
@@ -875,6 +853,27 @@ void IndirectFitAnalysisTab::updatePlotGuess() {
 }
 
 /**
+ * Plots the spectra corresponding to the selected parameters
+ */
+void IndirectFitAnalysisTab::plotSelectedSpectra() {
+  enableFitButtons(false);
+  plotSelectedSpectra(m_outOptionsPresenter->getSpectraToPlot());
+  enableFitButtons(true);
+  m_outOptionsPresenter->setPlotting(false);
+}
+
+/**
+ * Plots the spectra corresponding to the selected parameters
+ * @param spectra :: a vector of spectra to plot from a group workspace
+ */
+void IndirectFitAnalysisTab::plotSelectedSpectra(
+    std::vector<SpectrumToPlot> const &spectra) {
+  for (auto const &spectrum : spectra)
+    plotSpectrum(spectrum.first, spectrum.second, true);
+  m_outOptionsPresenter->clearSpectraToPlot();
+}
+
+/**
  * Plots a spectrum with the specified index in a workspace
  * @workspaceName :: the workspace containing the spectrum to plot
  * @index :: the index in the workspace
@@ -911,7 +910,9 @@ void IndirectFitAnalysisTab::singleFit() {
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
   if (validate()) {
-    enableFitAnalysisButtons(false, false);
+    m_plotPresenter->setFitSingleSpectrumIsFitting(true);
+    enableFitButtons(false);
+    enableOutputOptions(false);
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }
@@ -922,7 +923,9 @@ void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
  */
 void IndirectFitAnalysisTab::executeFit() {
   if (validate()) {
-    enableFitAnalysisButtons(false, false);
+    setRunIsRunning(true);
+    enableFitButtons(false);
+    enableOutputOptions(false);
     runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
   }
 }
@@ -948,16 +951,25 @@ bool IndirectFitAnalysisTab::validate() {
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void IndirectFitAnalysisTab::run() {
-  enableFitAnalysisButtons(false, false);
+  setRunIsRunning(true);
+  enableFitButtons(false);
+  enableOutputOptions(false);
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 
-void IndirectFitAnalysisTab::enableFitAnalysisButtons(bool enable,
-                                                      bool enableOutOptions) {
-  setRunIsRunning(!enable);
-  setFitSingleSpectrumIsFitting(!enable);
+void IndirectFitAnalysisTab::enableFitButtons(bool enable) {
+  setRunEnabled(enable);
+  m_plotPresenter->setFitSingleSpectrumEnabled(enable);
   m_fitPropertyBrowser->setFitEnabled(enable);
-  enableOutputOptions(enableOutOptions);
+}
+
+void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
+  if (enable) {
+    m_outOptionsPresenter->setPlotWorkspace(getResultWorkspace());
+    m_outOptionsPresenter->setPlotParameters(getFitParameterNames());
+  }
+  m_outOptionsPresenter->setPlotEnabled(enable);
+  m_outOptionsPresenter->setSaveEnabled(enable);
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
@@ -1011,16 +1023,6 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(fitAlgorithmComplete(bool)));
-}
-
-void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
-  if (enable) {
-    m_outOptionsPresenter->setPlotWorkspace(getResultWorkspace());
-    m_outOptionsPresenter->setPlotParameters(
-        cropParameterNamesBy(getFitParameterNames(), "."));
-  }
-  m_outOptionsPresenter->setPlotEnabled(enable);
-  m_outOptionsPresenter->setSaveEnabled(enable);
 }
 
 /**
