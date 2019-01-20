@@ -27,6 +27,15 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
 void updateParameters(
     IFunction_sptr function,
     std::unordered_map<std::string, ParameterValue> const &parameters) {
@@ -887,6 +896,13 @@ void IndirectFitAnalysisTab::plotSpectrum(std::string const &workspaceName,
 }
 
 /**
+ * Gets the name used for the base of the result workspaces
+ */
+std::string IndirectFitAnalysisTab::getOutputBasename() const {
+  return m_fittingModel->getOutputBasename();
+}
+
+/**
  * Gets the Result workspace from a fit
  */
 WorkspaceGroup_sptr IndirectFitAnalysisTab::getResultWorkspace() const {
@@ -965,11 +981,20 @@ void IndirectFitAnalysisTab::enableFitButtons(bool enable) {
 
 void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
   if (enable) {
-    m_outOptionsPresenter->setPlotWorkspace(getResultWorkspace());
+    m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
     m_outOptionsPresenter->setPlotParameters(getFitParameterNames());
   }
   m_outOptionsPresenter->setPlotEnabled(enable);
   m_outOptionsPresenter->setSaveEnabled(enable);
+
+  auto const pdfName = getOutputBasename() + "_PDFs";
+  if (doesExistInADS(pdfName)) {
+    m_outOptionsPresenter->setPDFWorkspace(getADSGroupWorkspace(pdfName));
+    m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(true);
+  } else {
+    m_outOptionsPresenter->removePDFWorkspace();
+    m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(false);
+  }
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
@@ -1033,7 +1058,7 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
                                                      getSelectedSpectrum());
   if (isFit)
-    m_outOptionsPresenter->setPlotWorkspace(getResultWorkspace());
+    m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
   m_outOptionsPresenter->setPlotEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }

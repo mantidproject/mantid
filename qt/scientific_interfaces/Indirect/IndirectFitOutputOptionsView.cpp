@@ -15,6 +15,9 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
       m_outputOptions(new Ui::IndirectFitOutputOptions) {
   m_outputOptions->setupUi(this);
 
+  connect(m_outputOptions->cbGroupWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
+          SLOT(emitGroupWorkspaceChanged(QString const &)));
+
   connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this,
           SLOT(emitPlotClicked()));
   connect(m_outputOptions->pbSave, SIGNAL(clicked()), this,
@@ -23,9 +26,31 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
 
 IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() {}
 
+void IndirectFitOutputOptionsView::emitGroupWorkspaceChanged(
+    QString const &group) {
+  emit groupWorkspaceChanged(group.toStdString());
+}
+
 void IndirectFitOutputOptionsView::emitPlotClicked() { emit plotClicked(); }
 
 void IndirectFitOutputOptionsView::emitSaveClicked() { emit saveClicked(); }
+
+void IndirectFitOutputOptionsView::setGroupWorkspaceComboBoxVisible(
+    bool visible) {
+  m_outputOptions->cbGroupWorkspace->setVisible(visible);
+}
+
+void IndirectFitOutputOptionsView::setWorkspaceComboBoxVisible(bool visible) {
+  m_outputOptions->cbWorkspace->setVisible(visible);
+}
+
+void IndirectFitOutputOptionsView::setGroupWorkspaceIndex(int index) {
+  m_outputOptions->cbGroupWorkspace->setCurrentIndex(index);
+}
+
+void IndirectFitOutputOptionsView::setWorkspaceIndex(int index) {
+  m_outputOptions->cbWorkspace->setCurrentIndex(index);
+}
 
 void IndirectFitOutputOptionsView::clearPlotTypes() {
   m_outputOptions->cbPlotType->clear();

@@ -24,40 +24,39 @@ MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
-std::string cropFromEndTo(std::string const &str,
-                          std::string const &delimiter) {
-  auto const cropIndex = str.rfind(delimiter);
-  if (cropIndex != std::string::npos)
-    return str.substr(cropIndex + 1, str.size());
-  return str;
-}
-
-std::vector<std::string>
-cropParameterNamesBy(std::vector<std::string> const &names,
-                     std::string const &delimiter) {
-  std::vector<std::string> parameterNames;
-  parameterNames.reserve(names.size());
-  for (auto const &name : names)
-    parameterNames.emplace_back(cropFromEndTo(name, delimiter));
-  return parameterNames;
-}
-
-std::unordered_map<std::string, std::size_t> extractAndCropLabels(Axis *axis) {
+std::unordered_map<std::string, std::size_t> extractAxisLabels(Axis *axis) {
   auto const *textAxis = boost::static_pointer_cast<TextAxis>(axis);
   std::unordered_map<std::string, std::size_t> labels;
 
   for (auto i = 0u; i < textAxis->length(); ++i)
-    labels[cropFromEndTo(textAxis->label(i), ".")] = i;
+    labels[textAxis->label(i)] = i;
   return labels;
 }
 
 std::unordered_map<std::string, std::size_t>
-extractAndCropAxisLabels(MatrixWorkspace_const_sptr workspace,
-                         std::size_t const &axisIndex) {
+extractAxisLabels(MatrixWorkspace_const_sptr workspace,
+                  std::size_t const &axisIndex) {
   auto const axis = workspace->getAxis(axisIndex);
   if (axis->isText())
-    return extractAndCropLabels(axis);
+    return extractAxisLabels(axis);
   return std::unordered_map<std::string, std::size_t>();
+}
+
+std::vector<std::string> extractParameterNames(Axis *axis) {
+  auto const *textAxis = boost::static_pointer_cast<TextAxis>(axis);
+  std::vector<std::string> parameters;
+
+  for (auto i = 0u; i < textAxis->length(); ++i)
+    parameters.emplace_back(textAxis->label(i));
+  return parameters;
+}
+
+std::vector<std::string>
+extractParameterNames(MatrixWorkspace_const_sptr workspace) {
+  auto const axis = workspace->getAxis(1);
+  if (axis->isText())
+    return extractParameterNames(axis);
+  return std::vector<std::string>();
 }
 
 IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
@@ -95,14 +94,26 @@ namespace IDA {
 IndirectFitOutputOptionsModel::IndirectFitOutputOptionsModel()
     : m_resultGroup(), m_spectraToPlot() {}
 
-void IndirectFitOutputOptionsModel::setActivePlotWorkspace(
-    WorkspaceGroup_sptr workspace) {
-  m_resultGroup = workspace;
+void IndirectFitOutputOptionsModel::setResultWorkspace(
+    WorkspaceGroup_sptr group) {
+  m_resultGroup = group;
 }
 
-bool IndirectFitOutputOptionsModel::plotWorkspaceIsPlottable() const {
+void IndirectFitOutputOptionsModel::setPDFWorkspace(WorkspaceGroup_sptr group) {
+  m_pdfGroup = group;
+}
+
+void IndirectFitOutputOptionsModel::removePDFWorkspace() { m_pdfGroup.reset(); }
+
+bool IndirectFitOutputOptionsModel::isResultGroupPlottable() const {
   if (m_resultGroup)
     return containsPlottableWorkspace(m_resultGroup);
+  return false;
+}
+
+bool IndirectFitOutputOptionsModel::isPDFGroupPlottable() const {
+  if (m_pdfGroup)
+    return containsPlottableWorkspace(m_pdfGroup);
   return false;
 }
 
@@ -162,7 +173,7 @@ void IndirectFitOutputOptionsModel::plotParameter(
 
 void IndirectFitOutputOptionsModel::plotParameterSpectrum(
     MatrixWorkspace_sptr workspace, std::string const &parameter) {
-  auto const parameters = extractAndCropAxisLabels(workspace, 1);
+  auto const parameters = extractAxisLabels(workspace, 1);
   auto const iter = parameters.find(parameter);
   if (iter != parameters.end()) {
     auto const plotInfo = std::make_pair(workspace->getName(), iter->second);
@@ -177,9 +188,12 @@ void IndirectFitOutputOptionsModel::saveResult() const {
     throw std::runtime_error(noWorkspaceErrorMessage("saving"));
 }
 
-std::vector<std::string> IndirectFitOutputOptionsModel::formatParameterNames(
-    std::vector<std::string> const &parameterNames) const {
-  return cropParameterNamesBy(parameterNames, ".");
+std::vector<std::string>
+IndirectFitOutputOptionsModel::getActiveWorkspaceParameters() const {
+  if (m_activeGroup)
+    return extractParameterNames(
+        convertToMatrixWorkspace(m_activeGroup->getItem(0)));
+  return std::vector<std::string>();
 }
 
 } // namespace IDA

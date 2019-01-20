@@ -25,6 +25,13 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+std::string cutLastOf(std::string const &str, std::string const &delimiter) {
+  auto const cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(0, cutIndex);
+  return str;
+}
+
 bool equivalentWorkspaces(MatrixWorkspace_const_sptr lhs,
                           MatrixWorkspace_const_sptr rhs) {
   if (!lhs || !rhs)
@@ -822,6 +829,10 @@ IndirectFittingModel::createSingleFitOutputName(const std::string &formatString,
                                                 std::size_t index,
                                                 std::size_t spectrum) const {
   return m_fittingData[index]->displayName(formatString, spectrum);
+}
+
+std::string IndirectFittingModel::getOutputBasename() const {
+  return cutLastOf(sequentialFitOutputName(),"_Results");
 }
 
 void IndirectFittingModel::cleanFailedRun(IAlgorithm_sptr fittingAlgorithm) {

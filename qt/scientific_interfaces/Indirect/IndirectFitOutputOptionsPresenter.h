@@ -25,8 +25,13 @@ public:
   IndirectFitOutputOptionsPresenter(IndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
 
-  void setPlotWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
+  void setMultiWorkspaceOptionsVisible(bool visible);
+
+  void setResultWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
+  void setPDFWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
   void setPlotParameters(std::vector<std::string> const &parameterNames);
+
+  void removePDFWorkspace(); 
 
   void setPlotting(bool plotting);
   void setPlotEnabled(bool enable);
@@ -39,6 +44,7 @@ signals:
   void plotSpectra();
 
 private slots:
+  void setWorkspacePlotOptions(std::string const &group);
   void plotResult();
   void saveResult();
 
