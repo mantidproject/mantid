@@ -26,6 +26,11 @@ public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
   ~IndirectFitOutputOptionsView() override;
 
+  void setGroupWorkspaceComboBoxVisible(bool visible);
+  void setWorkspaceComboBoxVisible(bool visible);
+  void setGroupWorkspaceIndex(int index);
+  void setWorkspaceIndex(int index);
+
   void clearPlotTypes();
   void setAvailablePlotTypes(std::vector<std::string> const &parameterNames);
   void setPlotTypeIndex(int index);
@@ -40,10 +45,12 @@ public:
   void displayWarning(std::string const &message);
 
 signals:
+  void groupWorkspaceChanged(std::string const &group);
   void plotClicked();
   void saveClicked();
 
 private slots:
+  void emitGroupWorkspaceChanged(QString const &group);
   void emitPlotClicked();
   void emitSaveClicked();
 

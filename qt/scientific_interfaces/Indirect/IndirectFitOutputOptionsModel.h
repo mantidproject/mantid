@@ -20,14 +20,29 @@ namespace IDA {
 
 using SpectrumToPlot = std::pair<std::string, std::size_t>;
 
+// struct PlotWorkspaces {
+//  PlotWorkspaces() : m_resultGroup(), m_pdfGroup() {}
+//  PlotWorkspaces(Mantid::API::WorkspaceGroup_sptr resultGroup,
+//                 Mantid::API::WorkspaceGroup_sptr pdfGroup)
+//      : m_resultGroup(resultGroup), m_pdfGroup(pdfGroup) {}
+//
+// private:
+//  Mantid::API::WorkspaceGroup_sptr m_resultGroup;
+//  Mantid::API::WorkspaceGroup_sptr m_pdfGroup;
+//};
+
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsModel {
 public:
   IndirectFitOutputOptionsModel();
   ~IndirectFitOutputOptionsModel() = default;
 
-  void setActivePlotWorkspace(Mantid::API::WorkspaceGroup_sptr workspace);
+  void setResultWorkspace(Mantid::API::WorkspaceGroup_sptr group);
+  void setPDFWorkspace(Mantid::API::WorkspaceGroup_sptr group);
 
-  bool plotWorkspaceIsPlottable() const;
+  void removePDFWorkspace();
+
+  bool isResultGroupPlottable() const;
+  bool isPDFGroupPlottable() const;
 
   void clearSpectraToPlot();
   std::vector<SpectrumToPlot> getSpectraToPlot() const;
@@ -35,8 +50,7 @@ public:
   void plotResult(std::string const &plotType);
   void saveResult() const;
 
-  std::vector<std::string>
-  formatParameterNames(std::vector<std::string> const &parameterNames) const;
+  std::vector<std::string> getActiveWorkspaceParameters() const;
 
 private:
   void plotResult(std::string const &plotType,
@@ -52,6 +66,8 @@ private:
                              std::string const &parameter);
 
   Mantid::API::WorkspaceGroup_sptr m_resultGroup;
+  Mantid::API::WorkspaceGroup_sptr m_pdfGroup;
+  Mantid::API::WorkspaceGroup_sptr m_activeGroup;
   std::vector<SpectrumToPlot> m_spectraToPlot;
 };
 

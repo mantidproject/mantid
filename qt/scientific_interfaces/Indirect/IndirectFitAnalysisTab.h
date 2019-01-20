@@ -209,6 +209,7 @@ private:
   void plotSpectrum(std::string const &workspaceName, std::size_t const &index,
                     bool errorBars);
 
+  std::string getOutputBasename() const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   std::vector<std::string> getFitParameterNames() const;
 
