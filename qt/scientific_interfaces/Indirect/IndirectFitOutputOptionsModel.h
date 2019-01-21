@@ -27,6 +27,8 @@ public:
 
   void setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace);
   void setPDFWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace);
+  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
+  Mantid::API::WorkspaceGroup_sptr getPDFWorkspace() const;
 
   void removePDFWorkspace();
 
