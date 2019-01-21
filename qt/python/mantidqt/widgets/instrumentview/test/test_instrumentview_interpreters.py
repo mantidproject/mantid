@@ -12,32 +12,71 @@ import unittest
 
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.project.decoderfactory import DecoderFactory
-from mantidqt.widgets.instrumentview.io import Encoder, Decoder
+from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder, InstrumentViewDecoder
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from mantid.simpleapi import CreateSampleWorkspace
+from mantidqt.utils.qt.test import GuiTest
 
 
-class InstrumentViewEncoderTest(unittest.TestCase):
+INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
+                        u'tabs': {u'maskTab':
+                                      {u'activeType':
+                                           {u'roiOn': False, u'groupingOn': False, u'maskingOn': True},
+                                       u'activeTools': {u'ellipseButton': False, u'moveButton': True,
+                                                        u'pointerButton': False, u'ringRectangleButton': False,
+                                                        u'freeDrawButton': False, u'ringEllipseButton': False},
+                                       u'maskWorkspaceSaved': False},
+                                  u'renderTab': {u'displayWireframe': False, u'displayLighting': False,
+                                                 u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': True,
+                                                 u'colorBar': {u'max': u'40', u'scaleType': 0, u'power': u'2',
+                                                               u'min': u'40'},
+                                                 u'showLabels': True, u'flipView': False, u'displayDetectorsOnly': True,
+                                                 u'displayAxes': False, u'axesView': 0, u'showRows': True,
+                                                 u'useOpenGL': True, u'showRelativeIntensity': False},
+                                  u'treeTab': {u'expandedItems': []},
+                                  u'pickTab': {u'freeDraw': False, u'ringEllipse': False, u'edit': False,
+                                               u'tube': False, u'peakSelect': False, u'zoom': False, u'one': True,
+                                               u'ringRectangle': False, u'peak': False, u'ellipse': False,
+                                               u'rectangle': False}}, u'surfaceType': 0,
+                        u'actor': {u'binMasks': [], u'fileName': u'viridis'},
+                        u'energyTransfer': [0.0, 20000.0],
+                        u'surface': {u'shapes': [], u'alignmentInfo': [], u'backgroundColor': {u'blue': 0,
+                                                                                               u'alpha': 255,
+                                                                                               u'green': 0,
+                                                                                               u'red': 0}},
+                        u'currentTab': 0}
+
+
+class InstrumentViewEncoderTest(GuiTest):
     def setUp(self):
-        self.encoder = Encoder()
+        self.encoder = InstrumentViewEncoder()
+        ws = CreateSampleWorkspace()
+        self.instrumentView = InstrumentViewPresenter(ws)
 
     def test_encoder_is_in_encoder_factory(self):
         # Shows that the decoder has been registered on import of something from mantidqt.widget.instrumentview
         found_encoder = EncoderFactory.find_encoder("InstrumentView")
-        self.assertIs(Encoder, found_encoder)
+        self.assertIs(InstrumentViewEncoder, found_encoder)
 
     def test_encoder_encode_function_returns_none_when_obj_is_none(self):
-        return_value = self.encoder.encode(None)
-        self.assertIs(None, return_value)
+        self.assertIs(None, self.encoder.encode(None))
+
+    def test_encoder_encodes_a_dict_similar_to_set_dict(self):
+        self.assertDictEqual(self.encoder.encode(self.instrumentView.view), INSTRUMENT_VIEW_DICT)
 
 
-class InstrumentViewDecoderTest(unittest.TestCase):
+class InstrumentViewDecoderTest(GuiTest):
     def setUp(self):
-        self.decoder = Decoder()
+        self.decoder = InstrumentViewDecoder()
 
     def test_decoder_is_in_decoder_factory(self):
         # Shows that the decoder has been registered on import of something from mantidqt.widget.instrumentview
         found_decoder = DecoderFactory.find_decoder("InstrumentView")
-        self.assertIs(Decoder, found_decoder)
+        self.assertIs(InstrumentViewDecoder, found_decoder)
 
     def test_decoder_decode_function_returns_none_when_obj_is_none(self):
-        return_value = self.decoder.decode(None)
-        self.assertIs(None, return_value)
+        self.assertIs(None, self.decoder.decode(None))
+
+    def test_nothing_is_thrown_when_decoding(self):
+        CreateSampleWorkspace(OutputWorkspace="ws")
+        self.decoder.decode(INSTRUMENT_VIEW_DICT)

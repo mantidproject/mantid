@@ -8,11 +8,12 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+
 from mantid.api import AnalysisDataService as ADS
+from mantidqt.utils.qt import import_qt
 
 # local imports
-from mantidqt.utils.qt import import_qt
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 
 # Import widget from C++ wrappers
 _InstrumentWidgetEncoder = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
@@ -32,22 +33,29 @@ class InstrumentViewDecoder(InstrumentViewAttributes):
         super(InstrumentViewDecoder, self).__init__()
         self.widget_decoder = _InstrumentWidgetDecoder()
 
-    def decode(self, obj_dic, project_path):
+    def decode(self, obj_dic, project_path=None):
         """
 
         :param obj_dic:
         :param project_path:
         :return:
         """
+        load_mask = True
+
         if obj_dic is None:
             return None
+
+        if project_path is None:
+            project_path = ""
+            load_mask = False
+
         # Make the widget
         ws = ADS.retrieve(obj_dic["workspaceName"])
         instrument_view_presenter = InstrumentViewPresenter(ws)
         instrument_widget = instrument_view_presenter.view.cpp_widget
 
         #  Then 'decode' set the values from the dictionary
-        self.widget_decoder.decode(obj_dic, instrument_widget, project_path)
+        self.widget_decoder.decode(obj_dic, instrument_widget, project_path, load_mask)
 
         # Show the end result
         return instrument_view_presenter.view
@@ -63,10 +71,17 @@ class InstrumentViewEncoder(InstrumentViewAttributes):
         self.widget_encoder = _InstrumentWidgetEncoder()
 
     def encode(self, obj, project_path=None):
-        if obj is None or project_path is None:
+        save_mask = True
+
+        if obj is None:
             return None
+
+        if project_path is None:
+            project_path = ""
+            save_mask = False
+
         instrument_widget = obj.layout().itemAt(0).widget()
-        encoded_instrumentview = self.widget_encoder.encode(instrument_widget, project_path)
+        encoded_instrumentview = self.widget_encoder.encode(instrument_widget, project_path, save_mask)
 
         # A color is passed to python as a QColor for certain objects and it needs to be fixed
         r, g, b, a = encoded_instrumentview["surface"]["backgroundColor"].getRgb()

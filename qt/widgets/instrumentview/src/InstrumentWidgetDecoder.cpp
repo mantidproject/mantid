@@ -34,12 +34,14 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 InstrumentWidgetDecoder::InstrumentWidgetDecoder()
-    : m_projectPath(""), m_workspaceName("") {}
+    : m_projectPath(""), m_workspaceName(""), m_loadMask(true) {}
 
 void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map,
                                      InstrumentWidget &obj,
-                                     const QString &projectPath) {
+                                     const QString &projectPath,
+                                     const bool loadMask) {
   m_projectPath = projectPath;
+  m_loadMask = loadMask;
 
   m_workspaceName = map[QString("workspaceName")].toString();
 
@@ -89,7 +91,7 @@ void InstrumentWidgetDecoder::decodeMaskTab(const QMap<QString, QVariant> &map,
   // Load the masks applied to view but not saved to a workspace (But also
   // including those saved to the workspace)
   const auto success = map["maskWorkspaceSaved"].toBool();
-  if (success) {
+  if (success && m_loadMask) {
     const auto wsName = map["maskWorkspaceName"].toString().toStdString();
     obj->loadMaskViewFromProject(wsName);
   }

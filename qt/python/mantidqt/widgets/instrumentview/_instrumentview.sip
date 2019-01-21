@@ -44,5 +44,6 @@ public:
   InstrumentWidgetDecoder();
   void decode(const QMap<QString, QVariant> &map,
               InstrumentWidget &obj,
-              const QString &projectPath) /ReleaseGIL/;
+              const QString &projectPath,
+              const bool loadMask = true) /ReleaseGIL/;
 };

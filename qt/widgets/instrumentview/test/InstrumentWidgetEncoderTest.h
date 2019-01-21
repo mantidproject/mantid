@@ -67,6 +67,7 @@ public:
     m_app = new QApplication(argc, argv);
 
     qRegisterMetaType<std::string>("StdString");
+    qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 
     return true;
   }

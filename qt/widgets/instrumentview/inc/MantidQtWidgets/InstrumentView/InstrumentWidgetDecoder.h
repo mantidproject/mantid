@@ -33,7 +33,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetDecoder : public QObjec
 public:
   InstrumentWidgetDecoder();
   void decode(const QMap<QString, QVariant> &map, InstrumentWidget &obj,
-              const QString &projectPath);
+              const QString &projectPath, const bool loadMask = true);
 
 signals:
   void shapeCreated();
@@ -72,6 +72,7 @@ protected:
 
   QString m_projectPath;
   QString m_workspaceName;
+  bool m_loadMask;
 };
 
 } // namespace MantidWidgets
