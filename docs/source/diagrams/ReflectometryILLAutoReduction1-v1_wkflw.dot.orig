@@ -1,0 +1,86 @@
+digraph ReflectometryILLPreprocess {
+<<<<<<< Updated upstream
+  label = "ReflectometryILLAutoReduction"
+=======
+  label = "ReflectometryILLAutoReduction pre-processing"
+>>>>>>> Stashed changes
+  $global_style
+
+  subgraph params {
+    $param_style
+<<<<<<< Updated upstream
+    beamCentre    [label="BeamCentre"]
+    braggAngle    [label="BraggAngle"]
+    directRun     [label="DirectRun"]
+    reflectedRun  [label="ReflectedRun"]
+=======
+    beamCentre      [label="BeamCentre"]
+    braggAngle      [label="BraggAngle"]
+    directRun       [label="DirectRun"]
+    reflectedRun    [label="ReflectedRun"]
+    preDirect       [label="Pre-processed direct beam"]
+    preReflected    [label="Pre-processed reflected beam"]
+>>>>>>> Stashed changes
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    preProcessDirect                [label="ReflectometryILLPreProcess"]
+    preProcessReflected             [label="ReflectometryILLPreProcess"]
+<<<<<<< Updated upstream
+    sumForegroundDirect             [label="ReflectometryILLSumForeground"]
+    sumForegroundReflected          [label="ReflectometryILLSumForeground"]
+=======
+    updateBraggAngle                [label="BraggAngle from direct run"]
+    updateBeamCentre                [label="BeamCentre from direct run"]
+>>>>>>> Stashed changes
+  }
+
+  subgraph decisions {
+    $decision_style
+<<<<<<< Updated upstream
+    updateBraggAngle    [label="Update BraggAngle?"]
+    updateBeamCentre    [label="Update BeamCentre?"]
+    userGivenBraggAngle [label="User provides BraggAngle"]
+    userGivenBeamCentre [label="User provides BeamCentre"]
+=======
+    userGivenBraggAngle [label="User provides BraggAngle?"]
+    userGivenBeamCentre [label="User provides BeamCentre?"]
+>>>>>>> Stashed changes
+  }
+
+  userGivenBraggAngle             -> braggAngle [label="Yes"]
+  userGivenBeamCentre             -> beamCentre [label="Yes"]
+<<<<<<< Updated upstream
+=======
+ 
+  userGivenBraggAngle             -> updateBraggAngle [label="No"]
+  userGivenBeamCentre             -> updateBeamCentre [label="No"]
+>>>>>>> Stashed changes
+
+  braggAngle                      -> preProcessDirect
+  beamCentre                      -> preProcessDirect
+  directRun                       -> preProcessDirect
+
+<<<<<<< Updated upstream
+  preProcessDirect                -> updateBraggAngle [label="Yes"]
+  preProcessDirect                -> updateBeamCentre [label="Yes"]
+=======
+  preProcessDirect                -> updateBraggAngle
+  preProcessDirect                -> updateBeamCentre
+>>>>>>> Stashed changes
+  updateBraggAngle                -> braggAngle
+  updateBeamCentre                -> beamCentre
+
+  braggAngle                      -> preProcessReflected
+  beamCentre                      -> preProcessReflected
+  reflectedRun                    -> preProcessReflected
+
+<<<<<<< Updated upstream
+  preProcessDirect                -> sumForegroundDirect
+  preProcessReflected             -> sumForegroundReflected
+=======
+  preProcessDirect                -> preDirect
+  preProcessReflected             -> preReflected
+>>>>>>> Stashed changes
+}
