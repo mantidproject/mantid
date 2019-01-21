@@ -25,6 +25,13 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+std::string cutLastOf(std::string const &str, std::string const &delimiter) {
+  auto const cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(0, cutIndex);
+  return str;
+}
+
 bool equivalentWorkspaces(MatrixWorkspace_const_sptr lhs,
                           MatrixWorkspace_const_sptr rhs) {
   if (!lhs || !rhs)
@@ -197,15 +204,6 @@ void addInputDataToSimultaneousFit(
   for (auto i = 0u; i < fittingData.size(); ++i)
     addInputDataToSimultaneousFit(fitAlgorithm, fittingData[i], range, exclude,
                                   counter);
-}
-
-IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
-                                            const std::string &filename) {
-  IAlgorithm_sptr saveAlg =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
-  saveAlg->setProperty("InputWorkspace", workspace);
-  saveAlg->setProperty("Filename", filename);
-  return saveAlg;
 }
 
 template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
@@ -724,17 +722,6 @@ IndirectFittingModel::getResultLocation(std::size_t index,
   return boost::none;
 }
 
-void IndirectFittingModel::saveResult() const {
-  const auto resultWorkspace = getResultWorkspace();
-
-  if (resultWorkspace) {
-    const auto filename = Mantid::Kernel::ConfigService::Instance().getString(
-                              "defaultsave.directory") +
-                          resultWorkspace->getName() + ".nxs";
-    saveNexusProcessedAlgorithm(resultWorkspace, filename)->execute();
-  }
-}
-
 WorkspaceGroup_sptr IndirectFittingModel::getResultWorkspace() const {
   return m_fitOutput->getLastResultWorkspace();
 }
@@ -842,6 +829,10 @@ IndirectFittingModel::createSingleFitOutputName(const std::string &formatString,
                                                 std::size_t index,
                                                 std::size_t spectrum) const {
   return m_fittingData[index]->displayName(formatString, spectrum);
+}
+
+std::string IndirectFittingModel::getOutputBasename() const {
+  return cutLastOf(sequentialFitOutputName(),"_Results");
 }
 
 void IndirectFittingModel::cleanFailedRun(IAlgorithm_sptr fittingAlgorithm) {

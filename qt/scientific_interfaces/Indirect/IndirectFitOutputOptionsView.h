@@ -10,7 +10,6 @@
 #include "ui_IndirectFitOutputOptions.h"
 
 #include "DllConfig.h"
-
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QMessageBox>
@@ -27,31 +26,35 @@ public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
   ~IndirectFitOutputOptionsView() override;
 
-  void setAsPlotting(bool plotting);
+  void setGroupWorkspaceComboBoxVisible(bool visible);
+  void setWorkspaceComboBoxVisible(bool visible);
+  void setGroupWorkspaceIndex(int index);
+  void setWorkspaceIndex(int index);
 
-  void
-  setAvailablePlotParameters(std::vector<std::string> const &parameterNames);
-  void setSelectedParameterIndex(int index);
-  void clearPlotParameters();
+  void clearPlotTypes();
+  void setAvailablePlotTypes(std::vector<std::string> const &parameterNames);
+  void setPlotTypeIndex(int index);
+  std::string getSelectedPlotType() const;
+
+	void setPlotText(QString const &text);
+  void setSaveText(QString const &text);
 
   void setPlotEnabled(bool enable);
   void setSaveEnabled(bool enable);
 
-  std::string getPlotType() const;
   void displayWarning(std::string const &message);
 
 signals:
+  void groupWorkspaceChanged(std::string const &group);
   void plotClicked();
   void saveClicked();
 
 private slots:
+  void emitGroupWorkspaceChanged(QString const &group);
   void emitPlotClicked();
   void emitSaveClicked();
 
 private:
-  void setButtonText(QPushButton *button, QString const &text);
-  void setButtonsEnabled(bool enable);
-
   std::unique_ptr<Ui::IndirectFitOutputOptions> m_outputOptions;
 };
 

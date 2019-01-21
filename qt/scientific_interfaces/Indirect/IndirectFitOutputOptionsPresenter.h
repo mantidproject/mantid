@@ -10,9 +10,8 @@
 #include "IndirectFitOutputOptionsModel.h"
 #include "IndirectFitOutputOptionsView.h"
 
-#include "MantidAPI/WorkspaceGroup.h"
-
 #include "DllConfig.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QObject>
 
@@ -23,22 +22,35 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsPresenter : public QObject {
   Q_OBJECT
 public:
-  // IndirectFitOutputOptionsPresenter(std::unique_ptr<IndirectFitAnalysisTab>
-  // tab,
-  //                                  IndirectFitOutputOptionsView *view);
   IndirectFitOutputOptionsPresenter(IndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
 
-  void setPlotWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
+  void setMultiWorkspaceOptionsVisible(bool visible);
+
+  void setResultWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
+  void setPDFWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
   void setPlotParameters(std::vector<std::string> const &parameterNames);
 
+  void removePDFWorkspace(); 
+
+  void setPlotting(bool plotting);
   void setPlotEnabled(bool enable);
   void setSaveEnabled(bool enable);
 
+  void clearSpectraToPlot();
+  std::vector<SpectrumToPlot> getSpectraToPlot() const;
+
+signals:
+  void plotSpectra();
+
 private slots:
+  void setWorkspacePlotOptions(std::string const &group);
   void plotResult();
+  void saveResult();
 
 private:
+  void setSaving(bool saving);
+
   void displayWarning(std::string const &message);
 
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;

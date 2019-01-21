@@ -28,14 +28,10 @@ protected slots:
 
 protected:
   void setRunIsRunning(bool running) override;
-  void setFitSingleSpectrumIsFitting(bool fitting) override;
+  void setRunEnabled(bool enable) override;
 
 private:
-  void setupFitTab() override;
-
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
+  void setupFitTab() override; 
 
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::MSDFit> m_uiForm;

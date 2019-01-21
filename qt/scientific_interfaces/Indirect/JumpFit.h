@@ -31,17 +31,13 @@ protected slots:
 
 protected:
   void setRunIsRunning(bool running) override;
-  void setFitSingleSpectrumIsFitting(bool fitting) override;
+  void setRunEnabled(bool enable) override;
 
 private slots:
   void updateAvailableFitTypes();
 
 private:
   void addFunctions(std::vector<std::string> const &functions);
-
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
 
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
