@@ -23,7 +23,6 @@ Mask detectors at some distance from the source
 .. code-block:: python 
 
   from mantid.simpleapi import CreateSampleWorkspace
-  from mantid.geometry import DetectorInfo, DetectorInfoPythonIterator
 
   # Test workspace with instrument
   ws = CreateSampleWorkspace()
@@ -37,7 +36,6 @@ Print detectors with scattering angle
 .. code-block:: python 
 
   from mantid.simpleapi import CreateSampleWorkspace
-  from mantid.geometry import DetectorInfo, DetectorInfoPythonIterator
 
   # Test workspace with instrument
   ws = CreateSampleWorkspace()

@@ -23,8 +23,6 @@ Print indices of detectors in "bank1" that are masked
 .. code-block:: python 
 
   from mantid.simpleapi import CreateSampleWorkspace
-  from mantid.geometry import ComponentInfo, ComponentInfoPythonIterator
-  from mantid.geometry import DetectorInfo, DetectorInfoPythonIterator
 
   ws = CreateSampleWorkspace()
   comp_info = ws.componentInfo()
