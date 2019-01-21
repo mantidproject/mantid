@@ -1,7 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_context import MuonContext
 
+mev_conversion_factor = 1000000
 
 class HomeRunInfoWidgetModel(object):
 
@@ -27,7 +34,7 @@ class HomeRunInfoWidgetModel(object):
         total = 0
         for i in range(workspace.getNumberHistograms()):
             total += sum(workspace.dataY(i))
-        return total / 1000000
+        return total / mev_conversion_factor
 
     def get_average_temperature(self):
         # TODO : This implementation does not match the one in the C++ code
