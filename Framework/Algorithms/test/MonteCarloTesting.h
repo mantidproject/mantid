@@ -14,9 +14,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-
 #include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
 
@@ -105,7 +103,7 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   }
   auto can = boost::make_shared<Container>(canShape);
   auto environment =
-      Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Container", can);
+      std::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume
   auto sampleCell = ComponentCreationHelper::createCappedCylinder(
       innerRadius, height, centre, upAxis, "sample");
@@ -118,7 +116,7 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   // Sample object
   Sample testSample;
   testSample.setShape(sampleCell);
-  testSample.setEnvironment(environment.release());
+  testSample.setEnvironment(std::move(environment));
   return testSample;
 }
 

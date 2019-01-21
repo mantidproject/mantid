@@ -90,6 +90,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                              "TOF/wavelength range to use with detector binning")
         self.declareProperty("UseWLTimeAxis", False,
                              doc="For const-Q, if true, wavelength will be used as the time axis, otherwise TOF is used")
+        self.declareProperty("ErrorWeightedBackground", True,
+                             doc="If true, use an error weighted average for the background estimate")
         self.declareProperty("CutTimeAxis", True,
                              doc="If true, the TOF/wavelength dimension will be cropped according to the TimeAxisRange property")
         self.declareProperty("RoundUpPixel", True, doc="If True, round up pixel position of the specular reflectivity")
@@ -696,6 +698,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         """
         logger.warning("Processing %s" % str(workspace))
         use_wl_cut = self.getProperty("UseWLTimeAxis").value
+        error_weighted_bck = self.getProperty("ErrorWeightedBackground").value
         constant_q_binning = self.getProperty("ConstantQBinning").value
         tof_step = self.getProperty("TimeAxisStep").value
 
@@ -753,7 +756,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                              XPixelMax=int(background_range[1]),
                              YPixelMin=low_res_min,
                              YPixelMax=low_res_max,
-                             ErrorWeighting = True,
+                             ErrorWeighting = error_weighted_bck,
                              SumPixels=True, NormalizeSum=True)
 
             signal = RefRoi(InputWorkspace=workspace, IntegrateY=True,

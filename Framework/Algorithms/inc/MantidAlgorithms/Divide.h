@@ -4,12 +4,9 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_DIVIDE_H_
-#define MANTID_ALGORITHM_DIVIDE_H_
+#ifndef MANTID_ALGORITHMS_DIVIDE_H_
+#define MANTID_ALGORITHMS_DIVIDE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
 
 namespace Mantid {
@@ -21,8 +18,8 @@ the init() & exec()  methods.
 
 Required Properties:
 <UL>
-<LI> InputWorkspace1 - The name of the workspace </LI>
-<LI> InputWorkspace2 - The name of the workspace </LI>
+<LI> LHSWorkspace - The name of the workspace </LI>
+<LI> RHSWorkspace - The name of the workspace </LI>
 <LI> OutputWorkspace - The name of the workspace in which to store the division
 data </LI>
 </UL>
@@ -50,14 +47,14 @@ private:
   void init() override;
   void exec() override;
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const MantidVec &rhsY,
-                              const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override;
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const double rhsY,
-                              const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const HistogramData::Histogram &rhs,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const double rhsY, const double rhsE,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override;
   void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
                       const API::MatrixWorkspace_const_sptr rhs,
                       API::MatrixWorkspace_sptr out) override;
@@ -86,4 +83,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_DIVIDE_H_*/
+#endif /*MANTID_ALGORITHMS_DIVIDE_H_*/

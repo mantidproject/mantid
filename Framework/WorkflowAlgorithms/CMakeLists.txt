@@ -86,6 +86,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	AlignAndFocusPowderTest.h
 	ExtractQENSMembersTest.h
 	IMuonAsymmetryCalculatorTest.h
 	LoadEventAndCompressTest.h
