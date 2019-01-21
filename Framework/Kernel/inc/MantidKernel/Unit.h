@@ -661,15 +661,16 @@ private:
 
 //=================================================================================================
 
-MANTID_KERNEL_DLL double timeConversionFloat(std::string input_unit, std::string output_unit);
+MANTID_KERNEL_DLL double timeConversionFloat(std::string input_unit,
+                                             std::string output_unit);
 
 template <typename T>
-void timeConversionVector(std::vector<T>& vec, std::string input_unit, std::string output_unit) {
+void timeConversionVector(std::vector<T> &vec, std::string input_unit,
+                          std::string output_unit) {
   double factor = timeConversionFloat(input_unit, output_unit);
-  if (factor != 1.0) {
-    for (auto &value : vec)
-      value *= static_cast<T>(factor);
-  }
+  if (factor != 1.0)
+    std::transform(vec.begin(), vec.end(), vec.begin(),
+                   [&factor](T x) -> T { return x * static_cast<T>(factor); });
 }
 
 } // namespace Units

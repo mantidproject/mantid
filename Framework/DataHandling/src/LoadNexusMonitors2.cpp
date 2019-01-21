@@ -682,24 +682,27 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
   std::string tof_units, event_time_zero_units;
 
   // read in the data
-  auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
+  auto event_index =
+      NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
 
   file.openData("event_time_offset"); // time of flight
-  MantidVec time_of_flight = NeXus::NeXusIOHelper::readNexusVector<double>(file);
+  MantidVec time_of_flight =
+      NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", tof_units);
-  Kernel::Units::timeConversionVector(time_of_flight, tof_units,"microseconds");
+  Kernel::Units::timeConversionVector(time_of_flight, tof_units,
+                                      "microseconds");
   file.closeData();
 
   file.openData("event_time_zero"); // pulse time
   MantidVec seconds = NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", event_time_zero_units);
-  Kernel::Units::timeConversionVector(seconds, event_time_zero_units,"seconds");
+  Kernel::Units::timeConversionVector(seconds, event_time_zero_units,
+                                      "seconds");
   Mantid::Types::Core::DateAndTime pulsetime_offset;
   {
     std::string startTime;
     file.getAttr("offset", startTime);
     pulsetime_offset = createFromSanitizedISO8601(startTime);
-
   }
   file.closeData();
 

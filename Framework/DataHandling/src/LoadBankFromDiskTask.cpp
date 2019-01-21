@@ -9,8 +9,8 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidNexus/NexusIOHelper.h"
 
 namespace Mantid {
@@ -87,8 +87,11 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
 std::vector<uint64_t>
 LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
   // Get the event_index (a list of size of # of pulses giving the index in
-  // the event list for that pulse) as a uint64 vector
-  auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
+  // the event list for that pulse) as a uint64 vector.
+  // The Nexus standard does not specify if this is to be 32-bit or 64-bit
+  // integers, so we use the NeXusIOHelper to do the conversion on the fly.
+  auto event_index =
+      NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
 
   // Look for the sign that the bank is empty
   if (event_index.size() == 1) {
@@ -272,11 +275,12 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   }
 
   // std::vector<float> float_vec;
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart, m_loadSize);
+  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart,
+                                                        m_loadSize);
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds
-  Kernel::Units::timeConversionVector(vec, tof_unit,"microseconds");
+  Kernel::Units::timeConversionVector(vec, tof_unit, "microseconds");
   std::copy(vec.begin(), vec.end(), event_time_of_flight.get());
 
   return event_time_of_flight;

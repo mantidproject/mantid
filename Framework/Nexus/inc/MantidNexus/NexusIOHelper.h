@@ -47,7 +47,8 @@ namespace {
     throw std::runtime_error("Unknown type in Nexus file");                    \
   }
 
-std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file, std::string entry) {
+std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file,
+                                                     std::string entry) {
   std::pair<::NeXus::Info, bool> info_and_close;
   info_and_close.second = false;
   if (!file.isDataSetOpen()) {
@@ -68,7 +69,8 @@ void callGetData(::NeXus::File &file, std::vector<T> &buf, bool close_file) {
 
 /// Use the getSlab function to read the buffer and close file if needed
 template <typename T>
-void callGetSlab(::NeXus::File &file, std::vector<T> &buf, const std::vector<int64_t> &start,
+void callGetSlab(::NeXus::File &file, std::vector<T> &buf,
+                 const std::vector<int64_t> &start,
                  const std::vector<int64_t> &size, bool close_file) {
   file.getSlab(buf.data(), start, size);
   if (close_file)
@@ -76,12 +78,12 @@ void callGetSlab(::NeXus::File &file, std::vector<T> &buf, const std::vector<int
 }
 
 /** Templated function to read any type of data and store it into another vector
-* type. If the two types are the same, the conversion is skipped.
-*/
+ * type. If the two types are the same, the conversion is skipped.
+ */
 template <typename T, typename U>
 std::vector<T> readNexusAnyVector(::NeXus::File &file, size_t size,
                                   bool close_file) {
-  if (std::is_same<T,U>::value) {
+  if (std::is_same<T, U>::value) {
     std::vector<T> buf(size);
     callGetData(file, buf, close_file);
     return buf;
@@ -90,19 +92,19 @@ std::vector<T> readNexusAnyVector(::NeXus::File &file, size_t size,
     std::vector<T> vec(size);
     callGetData(file, buf, close_file);
     std::transform(buf.begin(), buf.end(), vec.begin(),
-                   [](U a) { return static_cast<T>(a); });
+                   [](U a) -> T { return static_cast<T>(a); });
     return vec;
   }
 }
 
 /** Templated function to read any type of slab and store it into another vector
-* type. If the two types are the same, the conversion is skipped.
-*/
+ * type. If the two types are the same, the conversion is skipped.
+ */
 template <typename T, typename U>
 std::vector<T>
 readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
                  const std::vector<int64_t> &size, bool close_file) {
-  if (std::is_same<T,U>::value) {
+  if (std::is_same<T, U>::value) {
     std::vector<T> buf(size[0]);
     callGetSlab(file, buf, start, size, close_file);
     return buf;
@@ -111,7 +113,7 @@ readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
     std::vector<T> vec(size[0]);
     callGetSlab(file, buf, start, size, close_file);
     std::transform(buf.begin(), buf.end(), vec.begin(),
-                   [](U a) { return static_cast<T>(a); });
+                   [](U a) -> T { return static_cast<T>(a); });
     return vec;
   }
 }
@@ -119,30 +121,31 @@ readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
 } // end of anonymous namespace
 
 /** Opens the data group if needed, finds the data type, computes the data size,
-* and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
-*/
+ * and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
+ */
 template <typename T>
 std::vector<T> readNexusVector(::NeXus::File &file, std::string entry = "") {
   auto info_and_close = checkIfOpenAndGetInfo(file, entry);
   auto dims = (info_and_close.first).dims;
-  auto total_size = std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<>());
-  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVector, file,
-                             total_size, info_and_close.second);
+  auto total_size =
+      std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<>());
+  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVector,
+                             file, total_size, info_and_close.second);
 }
 
 /** Opens the data group if needed, finds the data type, and calls
-* readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
-*/
+ * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
+ */
 template <typename T>
 std::vector<T> readNexusSlab(::NeXus::File &file, std::string entry,
                              const std::vector<int64_t> &start,
                              const std::vector<int64_t> &size) {
   auto info_and_close = checkIfOpenAndGetInfo(file, entry);
-  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnySlab, file, start, size,
-                             info_and_close.second);
+  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnySlab,
+                             file, start, size, info_and_close.second);
 }
 
-} // namespace NeXusHelper
+} // namespace NeXusIOHelper
 } // namespace NeXus
 } // namespace Mantid
 
