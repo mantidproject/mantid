@@ -215,6 +215,7 @@ private:
 
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
+	void setPDFWorkspace(std::string const &workspaceName);
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;

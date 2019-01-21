@@ -27,11 +27,15 @@ public:
 
   void setMultiWorkspaceOptionsVisible(bool visible);
 
-  void setResultWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
-  void setPDFWorkspace(Mantid::API ::WorkspaceGroup_sptr workspace);
-  void setPlotParameters(std::vector<std::string> const &parameterNames);
+  void setResultWorkspace(Mantid::API ::WorkspaceGroup_sptr groupWorkspace);
+  void setPDFWorkspace(Mantid::API ::WorkspaceGroup_sptr groupWorkspace);
+  void setPlotWorkspaces();
+  void setPlotTypes(std::string const &selectedGroup);
 
-  void removePDFWorkspace(); 
+  void removePDFWorkspace();
+
+  bool isResultGroupPlottable();
+  bool isPDFGroupPlottable();
 
   void setPlotting(bool plotting);
   void setPlotEnabled(bool enable);
@@ -44,11 +48,12 @@ signals:
   void plotSpectra();
 
 private slots:
-  void setWorkspacePlotOptions(std::string const &group);
+  void setAvailablePlotOptions(std::string const &selectedGroup);
   void plotResult();
   void saveResult();
 
 private:
+  void plotResult(std::string const &selectedGroup);
   void setSaving(bool saving);
 
   void displayWarning(std::string const &message);

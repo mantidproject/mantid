@@ -973,28 +973,50 @@ void IndirectFitAnalysisTab::run() {
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 
+/**
+ * Enables or disables the 'Run', 'Fit Single Spectrum' and other related
+ * buttons
+ * @param enable :: true to enable buttons
+ */
 void IndirectFitAnalysisTab::enableFitButtons(bool enable) {
   setRunEnabled(enable);
   m_plotPresenter->setFitSingleSpectrumEnabled(enable);
   m_fitPropertyBrowser->setFitEnabled(enable);
 }
 
+/**
+ * Enables or disables the output options. It also sets the current result and
+ * PDF workspaces to be plotted
+ * @param enable :: true to enable buttons
+ */
 void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
   if (enable) {
     m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
-    m_outOptionsPresenter->setPlotParameters(getFitParameterNames());
-  }
-  m_outOptionsPresenter->setPlotEnabled(enable);
-  m_outOptionsPresenter->setSaveEnabled(enable);
+    setPDFWorkspace(getOutputBasename() + "_PDFs");
+    m_outOptionsPresenter->setPlotTypes("Result Group");
+  } else
+    m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
 
-  auto const pdfName = getOutputBasename() + "_PDFs";
-  if (doesExistInADS(pdfName)) {
-    m_outOptionsPresenter->setPDFWorkspace(getADSGroupWorkspace(pdfName));
-    m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(true);
-  } else {
+  m_outOptionsPresenter->setPlotEnabled(
+      enable && m_outOptionsPresenter->isResultGroupPlottable());
+  m_outOptionsPresenter->setSaveEnabled(enable);
+}
+
+/**
+ * Sets the active PDF workspace within the output options if one exists for the
+ * current run
+ * @param workspaceName :: the name of the PDF workspace if it exists
+ */
+void IndirectFitAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
+  auto const fabMinimizer = m_fitPropertyBrowser->minimizer() == "FABADA";
+  auto const enablePDFOptions = doesExistInADS(workspaceName) && fabMinimizer;
+
+  if (enablePDFOptions) {
+    m_outOptionsPresenter->setPDFWorkspace(getADSGroupWorkspace(workspaceName));
+    m_outOptionsPresenter->setPlotWorkspaces();
+  } else
     m_outOptionsPresenter->removePDFWorkspace();
-    m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(false);
-  }
+  m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enablePDFOptions);
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(

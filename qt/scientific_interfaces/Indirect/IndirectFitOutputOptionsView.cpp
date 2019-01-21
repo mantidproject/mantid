@@ -15,7 +15,8 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
       m_outputOptions(new Ui::IndirectFitOutputOptions) {
   m_outputOptions->setupUi(this);
 
-  connect(m_outputOptions->cbGroupWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
+  connect(m_outputOptions->cbGroupWorkspace,
+          SIGNAL(currentIndexChanged(QString const &)), this,
           SLOT(emitGroupWorkspaceChanged(QString const &)));
 
   connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this,
@@ -44,16 +45,18 @@ void IndirectFitOutputOptionsView::setWorkspaceComboBoxVisible(bool visible) {
   m_outputOptions->cbWorkspace->setVisible(visible);
 }
 
-void IndirectFitOutputOptionsView::setGroupWorkspaceIndex(int index) {
-  m_outputOptions->cbGroupWorkspace->setCurrentIndex(index);
-}
-
-void IndirectFitOutputOptionsView::setWorkspaceIndex(int index) {
-  m_outputOptions->cbWorkspace->setCurrentIndex(index);
+void IndirectFitOutputOptionsView::clearPlotWorkspaces() {
+  m_outputOptions->cbWorkspace->clear();
 }
 
 void IndirectFitOutputOptionsView::clearPlotTypes() {
   m_outputOptions->cbPlotType->clear();
+}
+
+void IndirectFitOutputOptionsView::setAvailablePlotWorkspaces(
+    std::vector<std::string> const &workspaceNames) {
+  for (auto const &name : workspaceNames)
+    m_outputOptions->cbWorkspace->addItem(QString::fromStdString(name));
 }
 
 void IndirectFitOutputOptionsView::setAvailablePlotTypes(
@@ -63,8 +66,24 @@ void IndirectFitOutputOptionsView::setAvailablePlotTypes(
     m_outputOptions->cbPlotType->addItem(QString::fromStdString(name));
 }
 
+void IndirectFitOutputOptionsView::setPlotGroupWorkspaceIndex(int index) {
+  m_outputOptions->cbGroupWorkspace->setCurrentIndex(index);
+}
+
+void IndirectFitOutputOptionsView::setPlotWorkspacesIndex(int index) {
+  m_outputOptions->cbWorkspace->setCurrentIndex(index);
+}
+
 void IndirectFitOutputOptionsView::setPlotTypeIndex(int index) {
   m_outputOptions->cbPlotType->setCurrentIndex(index);
+}
+
+std::string IndirectFitOutputOptionsView::getSelectedGroupWorkspace() const {
+  return m_outputOptions->cbGroupWorkspace->currentText().toStdString();
+}
+
+std::string IndirectFitOutputOptionsView::getSelectedWorkspace() const {
+  return m_outputOptions->cbWorkspace->currentText().toStdString();
 }
 
 std::string IndirectFitOutputOptionsView::getSelectedPlotType() const {
@@ -77,6 +96,11 @@ void IndirectFitOutputOptionsView::setPlotText(QString const &text) {
 
 void IndirectFitOutputOptionsView::setSaveText(QString const &text) {
   m_outputOptions->pbSave->setText(text);
+}
+
+void IndirectFitOutputOptionsView::setPlotExtraOptionsEnabled(bool enable) {
+  m_outputOptions->cbGroupWorkspace->setEnabled(enable);
+  m_outputOptions->cbWorkspace->setEnabled(enable);
 }
 
 void IndirectFitOutputOptionsView::setPlotEnabled(bool enable) {
