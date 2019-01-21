@@ -101,9 +101,18 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         for lin in self.fit_result_lines:
             lin.remove()
         self.fit_result_lines = []
+        self.update_legend()
 
     def get_lines(self):
-        return self.canvas.figure.get_axes()[0].get_lines()
+        return self.get_axes().get_lines()
+
+    def get_axes(self):
+        return self.canvas.figure.get_axes()[0]
+
+    def update_legend(self):
+        axes = self.get_axes()
+        if axes.legend_ is not None:
+            axes.legend()
 
     @Slot()
     def clear_fit_result_lines_slot(self):
@@ -190,5 +199,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             return
         self.guess_line.remove()
         self.guess_line = None
+        self.update_legend()
         self.setTextPlotGuess('Plot Guess')
         self.canvas.draw()
