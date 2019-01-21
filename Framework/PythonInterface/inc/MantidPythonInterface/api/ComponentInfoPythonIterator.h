@@ -33,7 +33,7 @@ public:
       : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()),
         m_firstOrDone(true) {}
 
-  const ComponentInfoItem<ComponentInfo> &next() {
+  ComponentInfoItem<ComponentInfo> next() {
     if (!m_firstOrDone)
       ++m_begin;
     else

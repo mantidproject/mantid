@@ -20,9 +20,9 @@ via a random access iterator.
 */
 template <typename T, template <typename> class InfoItem>
 class InfoIteratorBase
-    : public boost::iterator_facade<InfoIteratorBase<T, InfoItem>,
-                                    InfoItem<T> &,
-                                    boost::random_access_traversal_tag> {
+    : public boost::iterator_facade<InfoIteratorBase<T, InfoItem>, InfoItem<T>,
+                                    boost::random_access_traversal_tag,
+                                    InfoItem<T>> {
 
 public:
   InfoIteratorBase(T &info, const size_t index) : m_item(info, index) {}
@@ -59,14 +59,14 @@ private:
     return getIndex() == other.getIndex();
   }
 
-  InfoItem<T> &dereference() const { return m_item; }
+  InfoItem<T> dereference() const { return m_item; }
 
   uint64_t distance_to(const InfoIteratorBase<T, InfoItem> &other) const {
     return static_cast<uint64_t>(other.getIndex()) -
            static_cast<uint64_t>(getIndex());
   }
 
-  mutable InfoItem<T> m_item;
+  InfoItem<T> m_item;
 };
 } // namespace Geometry
 } // namespace Mantid

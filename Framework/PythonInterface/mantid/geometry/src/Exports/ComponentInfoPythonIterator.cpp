@@ -5,9 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/ComponentInfoPythonIterator.h"
-
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include <boost/python/class.hpp>
-#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/module.hpp>
 
@@ -23,8 +22,7 @@ void export_ComponentInfoPythonIterator() {
 #ifdef IS_PY3K
       .def("__next__", &ComponentInfoPythonIterator::next)
 #else
-      .def("next", &ComponentInfoPythonIterator::next,
-           return_value_policy<copy_const_reference>())
+      .def("next", &ComponentInfoPythonIterator::next)
 #endif
       ;
   /*

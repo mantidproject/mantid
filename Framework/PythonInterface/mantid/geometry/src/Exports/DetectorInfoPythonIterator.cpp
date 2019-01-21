@@ -7,7 +7,6 @@
 #include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 #include <boost/python/class.hpp>
-#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/module.hpp>
 
@@ -23,8 +22,7 @@ void export_DetectorInfoPythonIterator() {
 #ifdef IS_PY3K
       .def("__next__", &DetectorInfoPythonIterator::next)
 #else
-      .def("next", &DetectorInfoPythonIterator::next,
-           return_value_policy<copy_const_reference>())
+      .def("next", &DetectorInfoPythonIterator::next)
 #endif
       ;
   /*
