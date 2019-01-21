@@ -596,6 +596,8 @@ private:
   mutable std::atomic<bool> m_isCommonBinsFlagValid{false};
   /// Flag indicating whether the data has common bins
   mutable bool m_isCommonBinsFlag{false};
+  /// A mutex protecting the update of m_isCommonBinsFlag.
+  mutable std::mutex m_isCommonBinsMutex;
 
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;

@@ -961,6 +961,7 @@ bool MatrixWorkspace::isHistogramData() const {
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
+  std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
   const bool isFlagValid{m_isCommonBinsFlagValid.exchange(true)};
   if (isFlagValid) {
     return m_isCommonBinsFlag;
