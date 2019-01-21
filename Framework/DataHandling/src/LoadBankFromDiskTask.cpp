@@ -274,7 +274,10 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     m_loadError = true;
   }
 
-  // std::vector<float> float_vec;
+  // The Nexus standard does not specify if event_time_offset should be float or
+  // integer, so we use the NeXusIOHelper to perform the conversion to float on
+  // the fly. If the data field already contains floats, the conversion is
+  // skipped.
   auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart,
                                                         m_loadSize);
   file.getAttr("units", tof_unit);
