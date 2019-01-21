@@ -21,7 +21,7 @@ IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
   setMultiWorkspaceOptionsVisible(false);
 
   connect(m_view.get(), SIGNAL(groupWorkspaceChanged(std::string const &)),
-          this, SLOT(setWorkspacePlotOptions(std::string const &)));
+          this, SLOT(setAvailablePlotOptions(std::string const &)));
 
   connect(m_view.get(), SIGNAL(plotClicked()), this, SLOT(plotResult()));
   connect(m_view.get(), SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
@@ -33,34 +33,42 @@ IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() {}
 void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(
     bool visible) {
   m_view->setGroupWorkspaceComboBoxVisible(visible);
-  m_view->setGroupWorkspaceIndex(0);
+  m_view->setPlotGroupWorkspaceIndex(0);
   m_view->setWorkspaceComboBoxVisible(false);
 }
 
-void IndirectFitOutputOptionsPresenter::setWorkspacePlotOptions(
-    std::string const &group) {
-  if (group == "Result Workspace") {
-    m_view->setWorkspaceComboBoxVisible(false);
-    m_view->setPlotEnabled(true);
-  } else if (group == "PDF Workspace") {
-    m_view->setWorkspaceComboBoxVisible(true);
-    m_view->setPlotEnabled(true);
-  }
+void IndirectFitOutputOptionsPresenter::setAvailablePlotOptions(
+    std::string const &selectedGroup) {
+  auto const resultSelected = m_model->isResultGroupSelected(selectedGroup);
+  setPlotTypes(selectedGroup);
+  m_view->setWorkspaceComboBoxVisible(!resultSelected);
+  m_view->setPlotEnabled(resultSelected ? isResultGroupPlottable()
+                                        : isPDFGroupPlottable());
 }
 
 void IndirectFitOutputOptionsPresenter::setResultWorkspace(
-    WorkspaceGroup_sptr workspace) {
-  m_model->setResultWorkspace(workspace);
+    WorkspaceGroup_sptr groupWorkspace) {
+  m_model->setResultWorkspace(groupWorkspace);
 }
 
 void IndirectFitOutputOptionsPresenter::setPDFWorkspace(
-    WorkspaceGroup_sptr workspace) {
-  m_model->setPDFWorkspace(workspace);
+    WorkspaceGroup_sptr groupWorkspace) {
+  m_model->setPDFWorkspace(groupWorkspace);
 }
 
-void IndirectFitOutputOptionsPresenter::setPlotParameters(
-    std::vector<std::string> const &parameterNames) {
+void IndirectFitOutputOptionsPresenter::setPlotWorkspaces() {
+  m_view->clearPlotWorkspaces();
+  auto const workspaceNames = m_model->getPDFWorkspaceNames();
+  if (!workspaceNames.empty()) {
+    m_view->setAvailablePlotWorkspaces(workspaceNames);
+    m_view->setPlotWorkspacesIndex(0);
+  }
+}
+
+void IndirectFitOutputOptionsPresenter::setPlotTypes(
+    std::string const &selectedGroup) {
   m_view->clearPlotTypes();
+  auto const parameterNames = m_model->getWorkspaceParameters(selectedGroup);
   if (!parameterNames.empty()) {
     m_view->setAvailablePlotTypes(parameterNames);
     m_view->setPlotTypeIndex(0);
@@ -74,10 +82,19 @@ void IndirectFitOutputOptionsPresenter::removePDFWorkspace() {
 void IndirectFitOutputOptionsPresenter::plotResult() {
   setPlotting(true);
   try {
-    m_model->plotResult(m_view->getSelectedPlotType());
+    plotResult(m_view->getSelectedGroupWorkspace());
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }
+}
+
+void IndirectFitOutputOptionsPresenter::plotResult(
+    std::string const &selectedGroup) {
+  if (m_model->isResultGroupSelected(selectedGroup))
+    m_model->plotResult(m_view->getSelectedPlotType());
+  else
+    m_model->plotPDF(m_view->getSelectedWorkspace(),
+                     m_view->getSelectedPlotType());
 }
 
 void IndirectFitOutputOptionsPresenter::saveResult() {
@@ -90,8 +107,17 @@ void IndirectFitOutputOptionsPresenter::saveResult() {
   setSaving(false);
 }
 
+bool IndirectFitOutputOptionsPresenter::isResultGroupPlottable() {
+  return m_model->isResultGroupPlottable();
+}
+
+bool IndirectFitOutputOptionsPresenter::isPDFGroupPlottable() {
+  return m_model->isPDFGroupPlottable();
+}
+
 void IndirectFitOutputOptionsPresenter::setPlotting(bool plotting) {
   m_view->setPlotText(plotting ? "Plotting..." : "Plot");
+  m_view->setPlotExtraOptionsEnabled(!plotting);
   setPlotEnabled(!plotting);
   setSaveEnabled(!plotting);
 }
@@ -103,7 +129,7 @@ void IndirectFitOutputOptionsPresenter::setSaving(bool saving) {
 }
 
 void IndirectFitOutputOptionsPresenter::setPlotEnabled(bool enable) {
-  m_view->setPlotEnabled(enable && m_model->isResultGroupPlottable());
+  m_view->setPlotEnabled(enable);
 }
 
 void IndirectFitOutputOptionsPresenter::setSaveEnabled(bool enable) {

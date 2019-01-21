@@ -28,17 +28,25 @@ public:
 
   void setGroupWorkspaceComboBoxVisible(bool visible);
   void setWorkspaceComboBoxVisible(bool visible);
-  void setGroupWorkspaceIndex(int index);
-  void setWorkspaceIndex(int index);
 
+  void clearPlotWorkspaces();
   void clearPlotTypes();
+  void
+  setAvailablePlotWorkspaces(std::vector<std::string> const &workspaceNames);
   void setAvailablePlotTypes(std::vector<std::string> const &parameterNames);
+
+  void setPlotGroupWorkspaceIndex(int index);
+  void setPlotWorkspacesIndex(int index);
   void setPlotTypeIndex(int index);
+
+  std::string getSelectedGroupWorkspace() const;
+  std::string getSelectedWorkspace() const;
   std::string getSelectedPlotType() const;
 
-	void setPlotText(QString const &text);
+  void setPlotText(QString const &text);
   void setSaveText(QString const &text);
 
+	void setPlotExtraOptionsEnabled(bool enable);
   void setPlotEnabled(bool enable);
   void setSaveEnabled(bool enable);
 
