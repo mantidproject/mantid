@@ -162,6 +162,24 @@ public:
     auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
 
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
+    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
+                     (150 * 150) + 2) // Two monitors
+  }
+
+  void test_load_event_nexus_v20_ess_integration_2018() {
+    const std::string file = "V20_ESSIntegration_2018-12-13_0942.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 43277);
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
                      (300 * 300) + 2) // Two monitors
