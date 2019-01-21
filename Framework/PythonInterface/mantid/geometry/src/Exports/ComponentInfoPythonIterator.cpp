@@ -20,15 +20,13 @@ void export_ComponentInfoPythonIterator() {
   // Export to Python
   class_<ComponentInfoPythonIterator>("ComponentInfoPythonIterator", no_init)
       .def("__iter__", objects::identity_function())
-      .def(
-#if PY_VERSION_HEX >= 0x03000000
-          "__next__"
+#ifdef IS_PY3K
+      .def("__next__", &ComponentInfoPythonIterator::next)
 #else
-          "next"
+      .def("next", &ComponentInfoPythonIterator::next,
+           return_value_policy<copy_const_reference>())
 #endif
-          ,
-          &ComponentInfoPythonIterator::next,
-          return_value_policy<copy_const_reference>());
+      ;
   /*
    Return value policy for next is to copy the const reference. Copy by value is
    essential for python 2.0 compatibility because items (DetectorInfoItem) will
