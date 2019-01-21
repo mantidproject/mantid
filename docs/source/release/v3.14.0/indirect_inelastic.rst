@@ -51,6 +51,7 @@ Improvements
 - The results of a fit in MSDFit, IqtFit, ConvFit and F(Q)Fit are now plotted with error bars.
 - The AddWorkspace windows (opened from the Multiple Input tab) now stay open after adding a workspace to the data table. This 
   is found on the MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit interfaces.
+- It is now possible to load a Nexus file without it's history on the Elwin interface by unchecking the Load History checkbox.
 
 
 Bugfixes

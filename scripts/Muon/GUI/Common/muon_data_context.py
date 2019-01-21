@@ -7,19 +7,19 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import Muon.GUI.Common.load_utils as load_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_file_utils import format_run_for_file
-from Muon.GUI.Common.run_string_utils import run_list_to_string
-from Muon.Gui.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
+from Muon.GUI.Common.utilities.muon_file_utils import format_run_for_file
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_raw_data_directory, get_group_data_directory,
                                                          get_pair_data_directory)
 
-from Muon.Gui.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data
+from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data
 
 from collections import OrderedDict
 

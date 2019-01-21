@@ -356,6 +356,16 @@ QGroupBox::title {
                </widget>
               </item>
               <item>
+               <widget class="QPushButton" name="export_table_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export the current table as a csv file. This can then be re-loaded at a later date.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Export Table</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <spacer name="horizontalSpacer_3">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>

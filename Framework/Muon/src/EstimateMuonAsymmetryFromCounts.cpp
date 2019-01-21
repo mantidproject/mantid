@@ -197,7 +197,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->setHistogram(
         specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     if (extraData) {
-      unnormWS->mutableX(specNum) = outputWS->x(specNum);
+      unnormWS->setSharedX(specNum, outputWS->sharedX(specNum));
       unnormWS->mutableY(specNum) = outputWS->y(specNum);
       unnormWS->mutableE(specNum) = outputWS->e(specNum);
     }

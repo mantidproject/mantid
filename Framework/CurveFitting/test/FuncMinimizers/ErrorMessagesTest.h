@@ -277,8 +277,8 @@ private:
     size_t nbins = x.size();
     auto ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
-    ws->dataX(0) = x;
-    ws->dataY(0) = y;
+    ws->mutableX(0) = x;
+    ws->mutableY(0) = y;
     return ws;
   }
 };
