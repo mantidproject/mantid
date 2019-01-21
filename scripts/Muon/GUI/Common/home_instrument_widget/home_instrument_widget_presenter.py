@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
@@ -189,9 +195,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             dead_times = self._model.get_dead_time_table().toDict()['dead-time']
             dead_time_text = self.dead_time_from_data_text(dead_times)
             self._view.set_dead_time_label(dead_time_text)
-        except ValueError as e:
+        except ValueError as error:
             self._handle_selected_table_is_invalid()
-            self._view.warning_popup(e.args[0])
+            self._view.warning_popup(error.args[0])
 
     def _handle_selected_table_is_invalid(self):
         self._model.set_dead_time_to_none()

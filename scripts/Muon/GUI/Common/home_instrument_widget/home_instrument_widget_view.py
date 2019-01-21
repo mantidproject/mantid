@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # -*- coding: utf8 -*-
 from __future__ import (absolute_import, division, print_function)
 
@@ -6,6 +12,7 @@ from PyQt4.QtCore import pyqtSignal as Signal
 
 from Muon.GUI.Common.muon_file_utils import allowed_instruments
 from Muon.GUI.Common.run_string_utils import valid_float_regex
+from Muon.GUI.Common.message_box import warning
 
 
 class InstrumentWidgetView(QtGui.QWidget):
@@ -18,10 +25,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self._button_height = 40
         self._cached_instrument = ["None", "None"]
-
-        self._button = QtGui.QMessageBox.Ok
-        self._message_box = QtGui.QMessageBox("Error in substitution", "ERROR !", QtGui.QMessageBox.Warning,
-                                              self._button, 0, 0)  # QtGui.QMessageBox()
 
         self.setup_interface()
         self.apply_to_all_hidden(True)
@@ -144,8 +147,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.firstgooddata_checkbox.setChecked(1)
 
     def warning_popup(self, message):
-        self._message_box.setText(message)
-        self._message_box.open()
+        warning(message, parent=self)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Instrument selection
