@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDIRECTFITTINGMODELTEST_H_
 #define MANTID_INDIRECTFITTINGMODELTEST_H_
 
@@ -694,11 +700,6 @@ public:
   void test_that_getResultLocation_returns_a_location_for_the_output_data() {
     auto const model = getModelWithFitOutputData();
     TS_ASSERT(model->getResultLocation(0, 0));
-  }
-
-  void test_that_saveResult_does_not_throw_when_saving_data_from_a_fit() {
-    auto const model = getModelWithFitOutputData();
-    TS_ASSERT_THROWS_NOTHING(model->saveResult());
   }
 
   void

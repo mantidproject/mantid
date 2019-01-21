@@ -6,6 +6,7 @@ set ( TEST_FILES
   IndirectDataTablePresenterTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
+  IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputTest.h
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h

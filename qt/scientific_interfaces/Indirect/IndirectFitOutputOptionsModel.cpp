@@ -16,8 +16,7 @@ using namespace Mantid::API;
 namespace {
 
 std::string noWorkspaceErrorMessage(std::string const &process) {
-  return "The " + process +
-         " of the result workspace failed:\n\n No workspace found";
+  return "The " + process + " of a workspace failed:\n\n No workspace found";
 }
 
 MatrixWorkspace_const_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
@@ -96,7 +95,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitOutputOptionsModel::IndirectFitOutputOptionsModel()
-    : m_resultGroup(), m_spectraToPlot() {}
+    : m_resultGroup(), m_pdfGroup(), m_spectraToPlot() {}
 
 void IndirectFitOutputOptionsModel::setResultWorkspace(
     WorkspaceGroup_sptr groupWorkspace) {
@@ -106,6 +105,14 @@ void IndirectFitOutputOptionsModel::setResultWorkspace(
 void IndirectFitOutputOptionsModel::setPDFWorkspace(
     WorkspaceGroup_sptr groupWorkspace) {
   m_pdfGroup = groupWorkspace;
+}
+
+WorkspaceGroup_sptr IndirectFitOutputOptionsModel::getResultWorkspace() const {
+  return m_resultGroup;
+}
+
+WorkspaceGroup_sptr IndirectFitOutputOptionsModel::getPDFWorkspace() const {
+  return m_pdfGroup;
 }
 
 void IndirectFitOutputOptionsModel::removePDFWorkspace() { m_pdfGroup.reset(); }
