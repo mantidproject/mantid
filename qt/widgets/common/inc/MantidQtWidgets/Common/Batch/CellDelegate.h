@@ -25,6 +25,7 @@ public:
                         QStandardItemModel const &mainModel);
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override;
+
 private:
   QTreeView const &m_view;
   FilteredTreeModel const &m_filteredModel;
