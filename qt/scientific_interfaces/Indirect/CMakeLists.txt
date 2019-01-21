@@ -172,8 +172,8 @@ set ( MOC_FILES
     IndirectFitAnalysisTab.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
-	IndirectFitOutputOptionsPresenter.h
-	IndirectFitOutputOptionsView.h
+    IndirectFitOutputOptionsPresenter.h
+    IndirectFitOutputOptionsView.h
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
     IndirectLoadILL.h
