@@ -4,6 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, print_function)
 from PyQt4 import QtGui, QtCore
 import ErrorReporter.ui_errorreport as ui_errorreport
 from PyQt4.QtCore import pyqtSignal
