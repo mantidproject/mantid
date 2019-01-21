@@ -20,8 +20,6 @@ namespace Geometry {
  */
 template <typename T> class ComponentInfoItem {
 public:
-  size_t infoSize() const { return m_componentInfo->size(); }
-
   ComponentInfoItem(T &componentInfo, const size_t index)
       : m_componentInfo(&componentInfo), m_index(index) {}
 

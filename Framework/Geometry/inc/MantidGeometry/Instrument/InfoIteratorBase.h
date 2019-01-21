@@ -25,7 +25,19 @@ class InfoIteratorBase
                                     InfoItem<T>> {
 
 public:
-  InfoIteratorBase(T &info, const size_t index) : m_item(info, index) {}
+  /**
+   * Constructor for base iterator
+   * @param info : Info object (T) to provide iterator ontop of.
+   * @param index : start point of iterator
+   * @param totalSize : Represents maximum length of info. i.e. total number of
+   * items that can be iterated over.
+   */
+  InfoIteratorBase(T &info, const size_t index, const size_t totalSize)
+      : m_item(info, index), m_totalSize(totalSize) {
+    if (index > totalSize)
+      throw std::invalid_argument(
+          "Iterator start point cannot be greater than maximum size");
+  }
 
 private:
   // Allow boost iterator access
@@ -35,12 +47,12 @@ private:
     m_item.m_index =
         delta < 0 ? std::max(static_cast<uint64_t>(0),
                              static_cast<uint64_t>(m_item.m_index) + delta)
-                  : std::min(m_item.infoSize(),
+                  : std::min(m_totalSize,
                              m_item.m_index + static_cast<size_t>(delta));
   }
 
   void increment() {
-    if (m_item.m_index < m_item.infoSize()) {
+    if (m_item.m_index < m_totalSize) {
       ++m_item.m_index;
     }
   }
@@ -67,6 +79,7 @@ private:
   }
 
   InfoItem<T> m_item;
+  size_t m_totalSize;
 };
 } // namespace Geometry
 } // namespace Mantid

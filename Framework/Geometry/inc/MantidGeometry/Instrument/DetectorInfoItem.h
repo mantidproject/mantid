@@ -55,8 +55,6 @@ public:
 
   double l2() const { return m_detectorInfo->l2(m_index); }
 
-  size_t infoSize() const { return m_detectorInfo->size(); }
-
   size_t index() const { return m_index; }
 
   DetectorInfoItem(T &detectorInfo, const size_t index)

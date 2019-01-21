@@ -63,7 +63,7 @@ public:
     // Iterator starts at component index 0 (detectors usually) and finishes at
     // root.
     auto componentInfo = create_component_info_object();
-    ComponentInfoConstIt it(*componentInfo, 0);
+    ComponentInfoConstIt it(*componentInfo, 0, componentInfo->size());
     TS_ASSERT(it->isDetector());
     std::advance(it, componentInfo->size() - 1);
     TS_ASSERT(!it->isDetector()); // Root is not a detector
