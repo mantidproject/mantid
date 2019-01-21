@@ -63,10 +63,9 @@ class TableModelTest(unittest.TestCase):
     def test_that_sample_shape_can_be_parsed(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
-                                            sample_shape="  flat Plate  ")
-        sample_shape_column_model = table_index_model.sample_shape
-        sample_shape_enum = sample_shape_column_model.get_sample_shape()
-        sample_shape_text = sample_shape_column_model.get_sample_shape_string()
+                                            sample_shape="  flatPlate  ")
+        sample_shape_enum = table_index_model.sample_shape
+        sample_shape_text = table_index_model.sample_shape_string
 
         self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
         self.assertEqual(sample_shape_text, "FlatPlate")
@@ -77,9 +76,8 @@ class TableModelTest(unittest.TestCase):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
                                             sample_shape=SampleShape.FlatPlate)
-        sample_shape_column_model = table_index_model.sample_shape
-        sample_shape_enum = sample_shape_column_model.get_sample_shape()
-        sample_shape_text = sample_shape_column_model.get_sample_shape_string()
+        sample_shape_enum = table_index_model.sample_shape
+        sample_shape_text = table_index_model.sample_shape_string
 
         self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
         self.assertEqual(sample_shape_text, "FlatPlate")
@@ -93,7 +91,30 @@ class TableModelTest(unittest.TestCase):
         except Exception as e:
             self.assertTrue(False, "Did not except incorrect sample shape to raise error")
         else:
-            self.assertEqual("Disc", table_index_model.sample_shape._sample_shape_string)
+            self.assertEqual("Disc", table_index_model.sample_shape_string)
+
+    def test_that_empty_string_is_acceptable_sample_shape(self):
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
+                                            sample_shape="Disc")
+        table_index_model.sample_shape = ""
+
+        sample_shape_enum = table_index_model.sample_shape
+        sample_shape_text = table_index_model.sample_shape_string
+
+        self.assertEqual(sample_shape_enum, "")
+        self.assertEqual(sample_shape_text, "")
+
+    def test_that_table_model_completes_partial_sample_shape(self):
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
+                                            sample_shape="cylind")
+
+        sample_shape_enum = table_index_model.sample_shape
+        sample_shape_text = table_index_model.sample_shape_string
+
+        self.assertEqual(sample_shape_enum, SampleShape.Cylinder)
+        self.assertEqual(sample_shape_text, "Cylinder")
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
         table_model = TableModel()
