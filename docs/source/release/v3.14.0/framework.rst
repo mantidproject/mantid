@@ -138,6 +138,7 @@ New
    UsageService.setApplicationName('myapp')
    FrameworkManager.Instance()
 
+- `FileFinder.findRuns` now optionally accepts a list of file extensions to search, called **exts**, and an boolean flag **useExtsOnly**. If this flag is True, FileFinder will search for the passed in extensions ONLY. If it is False, it will search for passed in extensions and then facility extensions.
 
 Improvements
 ############
