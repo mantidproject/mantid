@@ -276,6 +276,8 @@ class TableIndexModel(object):
         self.output_name = output_name
 
         self.options_column_model = options_column_string
+        self.sample_shape_model = SampleShapeColumnModel()
+        self.sample_shape = sample_shape
 
         self.row_state = RowState.Unprocessed
 
@@ -294,15 +296,16 @@ class TableIndexModel(object):
 
     # Sample shape
     @property
+    def sample_shape_string(self):
+        return self.sample_shape_model.sample_shape_string
+
+    @property
     def sample_shape(self):
-        return self._sample_shape_model
+        return self.sample_shape_model.sample_shape
 
     @sample_shape.setter
     def sample_shape(self, value):
-        try:
-            self._sample_shape_model = SampleShapeColumnModel(value)
-        except ValueError:
-            pass
+        self.sample_shape_model(value)
 
     def update_attribute(self, attribute_name, value):
         setattr(self, attribute_name, value)
@@ -321,7 +324,7 @@ class TableIndexModel(object):
                 self._string_period(self.can_transmission_period), self.can_direct,
                 self._string_period(self.can_direct_period), self.output_name, self.user_file, self.sample_thickness,
                 self.sample_height, self.sample_width,
-                self.sample_shape.get_sample_shape_string(),
+                self.sample_shape_string,
                 self.options_column_model.get_options_string()]
 
     def to_batch_list(self):
@@ -336,16 +339,6 @@ class TableIndexModel(object):
         return_list = list(map(str.strip, return_list))
         return return_list
 
-    def _convert_sample_shape_to_string(self, shape):
-        if isinstance(shape, str):
-            # TODO temporary fix to shape already being a str
-            # find out where this is being converted as we are trying to convert twice
-            return shape
-        if shape:
-            return SampleShape.to_string(shape)
-        else:
-            return ''
-
     def isMultiPeriod(self):
         return any((self.sample_scatter_period, self.sample_transmission_period, self.sample_direct_period,
                     self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
@@ -356,82 +349,6 @@ class TableIndexModel(object):
 
     def _string_period(self, _tag):
         return "" if _tag == ALL_PERIODS else str(_tag)
-
-
-class SampleShapeColumnModel(object):
-    SAMPLE_SHAPES = {"cylinder": SampleShape.Cylinder,
-                     "disc": SampleShape.Disc,
-                     "flatplate": SampleShape.FlatPlate}
-
-    SAMPLE_SHAPE_LIST = [SampleShape.Cylinder, SampleShape.Disc,
-                         SampleShape.FlatPlate]
-
-    def __init__(self, sample_shape_string):
-        self._sample_shape_string = sample_shape_string
-        self._sample_shape = self._get_sample_shape(self._sample_shape_string)
-
-    @staticmethod
-    def get_hint_strategy():
-        return BasicHintStrategy({"Cylinder": "",
-                                  "Disc": "",
-                                  "FlatPlate": ""})
-
-    def get_sample_shape(self):
-        return self._sample_shape
-
-    def get_sample_shape_string(self):
-        if isinstance(self._sample_shape, str):
-            return self._sample_shape
-        if self._sample_shape:
-            return SampleShape.to_string(self._sample_shape)
-        else:
-            return ''
-
-    @staticmethod
-    def _parse_string(sample_shape_string):
-        """
-        Parses the sample_shape string, which must contain one of:
-        "Disc", "Cylinder", "FlatPlate"
-        :param sample_shape_string:  the string in the sample shape column
-        :return: A lower case string without whitespace
-        """
-        parsed = ""
-        sample_shape_string_no_whitespace = sample_shape_string.strip()  # Remove trailing and leading whitespace
-        sample_shape_string_no_whitespace = "".join(sample_shape_string_no_whitespace.split())
-        sample_shape_string_no_whitespace = sample_shape_string_no_whitespace.replace('"', '')
-        sample_shape_string_no_whitespace = sample_shape_string_no_whitespace.replace("'", '')
-
-        if not sample_shape_string_no_whitespace:
-            return parsed
-        else:
-            return sample_shape_string_no_whitespace.lower()
-
-    def _get_sample_shape(self, sample_shape_string):
-        """
-        Convert the input string to a SampleShape enum
-        :param sample_shape_string: string input to the sample shape column.
-                                    If input from a batch file this will already be a SampleShape enum
-        :return: SampleShape enum (Disc, Cylinder, FlatPlate) or None
-        """
-        if sample_shape_string in SampleShapeColumnModel.SAMPLE_SHAPE_LIST:
-            return sample_shape_string
-
-        parsed = self._parse_string(sample_shape_string)
-        if parsed == "":
-            return None
-
-        try:
-            sample_shape = SampleShapeColumnModel.SAMPLE_SHAPES[parsed]
-        except KeyError:
-            raise ValueError("{} is not a recognised sample shape.".format(sample_shape_string))
-        else:
-            return sample_shape
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return self.__dict__ != other.__dict__
 
 
 class OptionsColumnModel(object):
@@ -516,6 +433,50 @@ class OptionsColumnModel(object):
                 conversion_functions = permissible_properties[key]
                 options.update({key: conversion_functions(value)})
         return options
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return self.__dict__ != other.__dict__
+
+
+class SampleShapeColumnModel(object):
+    SAMPLE_SHAPES = ["cylinder", "disc", "flatplate"]
+    SAMPLE_SHAPES_DICT = {"cylinder": "Cylinder",
+                          "disc": "Disc",
+                          "flatplate": "FlatPlate"}
+
+    def __init__(self):
+        self.sample_shape = ""
+        self.sample_shape_string = ""
+
+    def __call__(self, original_value):
+        self._get_sample_shape(original_value)
+
+    def _get_sample_shape(self, original_value):
+        try:
+            original_value = SampleShape.to_string(original_value)
+        except RuntimeError as e:
+            if not isinstance(original_value, str):
+                raise ValueError(str(e))
+
+        value = original_value.strip().lower()
+        if value == "":
+            self.sample_shape = ""
+            self.sample_shape_string = ""
+        else:
+            for shape in SampleShapeColumnModel.SAMPLE_SHAPES:
+                if shape.startwith(value):
+                    shape_enum_string = SampleShapeColumnModel.SAMPLE_SHAPES_DICT[shape]
+                    self.sample_shape = SampleShape.from_string(shape_enum_string)
+                    self.sample_shape_string = shape_enum_string
+
+    @staticmethod
+    def get_hint_strategy():
+        return BasicHintStrategy({"Cylinder": "",
+                                  "Disc": "",
+                                  "FlatPlate": ""})
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
