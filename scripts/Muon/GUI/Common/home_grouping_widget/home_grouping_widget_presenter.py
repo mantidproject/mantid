@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
@@ -80,10 +86,10 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         subtracted = [i for i in subtracted if i not in summed]
 
         n_periods = self._model.number_of_periods()
-        bad_periods = [p for p in summed if (p > n_periods) or p == 0] + [p for p in subtracted if
-                                                                          (p > n_periods) or p == 0]
+        bad_periods = [period for period in summed if (period > n_periods) or period == 0] +\
+                      [period for period in subtracted if(period > n_periods) or period == 0]
         if len(bad_periods) > 0:
-            self._view.warning_popup("The following periods are invalid : " + ",".join([str(p) for p in bad_periods]))
+            self._view.warning_popup("The following periods are invalid : " + ",".join([str(period) for period in bad_periods]))
 
         summed = [p for p in summed if (p <= n_periods) and p > 0]
         subtracted = [p for p in subtracted if (p <= n_periods) and p > 0]
