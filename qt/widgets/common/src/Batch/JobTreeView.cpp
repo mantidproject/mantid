@@ -461,6 +461,8 @@ void JobTreeView::appendAndEditAtChildRow() {
 
 void JobTreeView::appendAndEditAtRowBelow() {
   auto current = currentIndex();
+  setCurrentIndex(QModelIndex());
+  setCurrentIndex(current);
   auto const below = findOrMakeCellBelow(fromFilteredModel(current));
   auto index = below.first;
   auto isNew = below.second;

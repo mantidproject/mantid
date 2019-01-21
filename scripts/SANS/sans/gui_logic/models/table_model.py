@@ -272,7 +272,6 @@ class TableIndexModel(object):
         self.sample_thickness = sample_thickness
         self.sample_height = sample_height
         self.sample_width = sample_width
-        self.sample_shape = sample_shape
         self.output_name = output_name
 
         self.options_column_model = options_column_string
@@ -467,7 +466,7 @@ class SampleShapeColumnModel(object):
             self.sample_shape_string = ""
         else:
             for shape in SampleShapeColumnModel.SAMPLE_SHAPES:
-                if shape.startwith(value):
+                if shape.startswith(value):
                     shape_enum_string = SampleShapeColumnModel.SAMPLE_SHAPES_DICT[shape]
                     self.sample_shape = SampleShape.from_string(shape_enum_string)
                     self.sample_shape_string = shape_enum_string
