@@ -141,12 +141,13 @@ void InstrumentWidgetDecoder::decodeColorBar(const QMap<QString, QVariant> &map,
 
 void InstrumentWidgetDecoder::decodeTreeTab(const QMap<QString, QVariant> &map,
                                             InstrumentWidgetTreeTab *obj) {
-  obj->selectComponentByName(map[QString("selectedComponent")].toString());
-
   auto names = map[QString("expandedItems")].toList();
-  for (auto &name : names) {
-    auto index = obj->m_instrumentTree->findComponentByName(name.toString());
-    obj->m_instrumentTree->setExpanded(index, true);
+  if (names.size() > 0) {
+    for (auto &name : names) {
+      auto index = obj->m_instrumentTree->findComponentByName(name.toString());
+      obj->m_instrumentTree->setExpanded(index, true);
+    }
+    obj->selectComponentByName(map[QString("selectedComponent")].toString());
   }
 }
 
