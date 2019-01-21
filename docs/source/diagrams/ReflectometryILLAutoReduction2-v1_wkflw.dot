@@ -1,0 +1,55 @@
+digraph ReflectometryILLPreprocess {
+  label = "ReflectometryILLAutoReduction finalizing"
+  $global_style
+
+  subgraph params {
+    $param_style
+    output            [label="OutputWorkspace"]
+    summationType     [label="SummationType"]
+    polEffFile        [label="Polarization efficiency file"]
+    preDirect         [label="Pre-processed direct beam"]
+    preReflected      [label="Pre-processed reflected beam"]
+    nextAngle         [label="Next angle"]
+    nextReflectedRun  [label="Next reflected run"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    convertToQ                      [label="ReflectometryILLConvertToQ"]
+    polarizationCorrectionDirect    [label="ReflectometryILLPolarizationCor"]
+    polarizationCorrectionReflected [label="ReflectometryILLPolarizationCor"]
+    sumForegroundDirect             [label="ReflectometryILLSumForeground"]
+    sumForegroundReflected          [label="ReflectometryILLSumForeground"]
+    scale                           [label="Scale"]
+    stitch                          [label="Stitch1DMany"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    isPolarizedDirect    [label="Perform polarization corrections?"]
+    isPolarizedReflected [label="Perform polarization corrections?"]
+    readyForStitch       [label="All angles processed?"]
+    allReflAngles        [label="All reflected beams of single angle processed?"]
+  }
+
+  preDirect                       -> sumForegroundDirect
+  preReflected                    -> sumForegroundReflected
+  sumForegroundDirect             -> isPolarizedDirect
+  sumForegroundReflected          -> isPolarizedReflected
+  isPolarizedDirect               -> polarizationCorrectionDirect    [label="Yes"]
+  isPolarizedReflected            -> allReflAngles                   [label="Yes"]
+  polEffFile                      -> polarizationCorrectionDirect
+  polEffFile                      -> polarizationCorrectionReflected
+  allReflAngles                   -> polarizationCorrectionReflected [label="Yes"]
+  allReflAngles                   -> nextReflectedRun                [label="No"]
+  polarizationCorrectionDirect    -> convertToQ
+  polarizationCorrectionReflected -> convertToQ
+  isPolarizedDirect               -> convertToQ                      [label="No"]
+  isPolarizedReflected            -> convertToQ                      [label="No"]
+  summationType                   -> convertToQ
+  convertToQ                      -> readyForStitch
+  readyForStitch                  -> stitch                          [label="Yes"]
+  readyForStitch                  -> nextAngle                       [label="No"]
+  stitch                          -> scale
+  scale                           -> output
+}

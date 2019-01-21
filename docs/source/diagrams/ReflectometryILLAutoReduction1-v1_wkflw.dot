@@ -1,0 +1,50 @@
+digraph ReflectometryILLPreprocess {
+  label = "ReflectometryILLAutoReduction pre-processing"
+  $global_style
+
+  subgraph params {
+    $param_style
+    beamCentre      [label="BeamCentre"]
+    braggAngle      [label="BraggAngle"]
+    directRun       [label="DirectRun"]
+    reflectedRun    [label="ReflectedRun"]
+    preDirect       [label="Pre-processed direct beam"]
+    preReflected    [label="Pre-processed reflected beam"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    preProcessDirect                [label="ReflectometryILLPreProcess"]
+    preProcessReflected             [label="ReflectometryILLPreProcess"]
+    updateBraggAngle                [label="BraggAngle from direct run"]
+    updateBeamCentre                [label="BeamCentre from direct run"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    userGivenBraggAngle [label="User provides BraggAngle?"]
+    userGivenBeamCentre [label="User provides BeamCentre?"]
+  }
+
+  userGivenBraggAngle             -> braggAngle [label="Yes"]
+  userGivenBeamCentre             -> beamCentre [label="Yes"]
+ 
+  userGivenBraggAngle             -> updateBraggAngle [label="No"]
+  userGivenBeamCentre             -> updateBeamCentre [label="No"]
+
+  braggAngle                      -> preProcessDirect
+  beamCentre                      -> preProcessDirect
+  directRun                       -> preProcessDirect
+
+  preProcessDirect                -> updateBraggAngle
+  preProcessDirect                -> updateBeamCentre
+  updateBraggAngle                -> braggAngle
+  updateBeamCentre                -> beamCentre
+
+  braggAngle                      -> preProcessReflected
+  beamCentre                      -> preProcessReflected
+  reflectedRun                    -> preProcessReflected
+
+  preProcessDirect                -> preDirect
+  preProcessReflected             -> preReflected
+}
