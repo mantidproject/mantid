@@ -59,7 +59,12 @@ class PairingTablePresenter(object):
             if not self.validate_alpha(changed_item):
                 update_model = False
             else:
-                self._view.pairing_table.item(row, col).setText(str(round(float(changed_item), 3)))
+                self._view.pairing_table.blockSignals(True)
+                rounded_item = '{:.3f}'.format(float(changed_item)) if '{:.3f}'.format(float(changed_item)) != '0.000'\
+                    else '{:.3g}'.format(float(changed_item))
+
+                self._view.pairing_table.item(row, col).setText(rounded_item)
+                self._view.pairing_table.blockSignals(False)
 
         if update_model:
             self.update_model_from_view()
@@ -153,7 +158,7 @@ class PairingTablePresenter(object):
         return True
 
     def validate_alpha(self, alpha_text):
-        if not re.match(valid_alpha_regex, alpha_text) or float(alpha_text) < 0.0:
+        if not re.match(valid_alpha_regex, alpha_text) or float(alpha_text) <= 0.0:
             self._view.warning_popup("Alpha must be > 0")
             return False
         return True

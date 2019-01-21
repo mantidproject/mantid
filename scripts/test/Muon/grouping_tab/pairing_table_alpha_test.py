@@ -106,11 +106,20 @@ class AlphaTest(unittest.TestCase):
 
         self.assertEqual(self.view.get_table_item_text(0, 3), "1.124")
 
+    def test_that_alpha_values_stored_to_three_decimal_places_when_rounding_down(self):
+        self.presenter.handle_add_pair_button_clicked()
+
+        self.view.pairing_table.setCurrentCell(0, 3)
+        # test that rounds correctly
+        self.view.pairing_table.item(0, 3).setText("1.1244")
+
+        self.assertEqual(self.view.get_table_item_text(0, 3), "1.124")
+
     def test_that_valid_alpha_values_are_added_correctly(self):
         self.presenter.handle_add_pair_button_clicked()
 
-        valid_inputs = ["1.0", "0.0", "12", ".123", "0.00001", "0.0005"]
-        expected_output = ["1.0", "0.0", "12.0", "0.123", "0.0", "0.001"]
+        valid_inputs = ["1.0", "12", ".123", "0.00001", "0.0005"]
+        expected_output = ["1.0", "12.0", "0.123", "1e-05", "0.001"]
 
         for valid_alpha, expected_alpha in iter(zip(valid_inputs, expected_output)):
             self.view.pairing_table.setCurrentCell(0, 3)
