@@ -21,7 +21,7 @@ root_directory = os.path.join(DIRS[0], "ENGINX")
 cal_directory = os.path.join(root_directory, "cal")
 focus_directory = os.path.join(root_directory, "focus")
 param_deltas = [0, 50, 0, 20]
-cal_deltas = [0, 2, 0.1, 1e-3, 1e-4, 50, 10, 10, 500, 1, 1, 50, 2, 5, 1, 2]
+cal_deltas = [0, 2, 20, 10, 10, 50, 5e3, 10, 1e6, 1, 200, 50, 5e2, 5, 20, 2]
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
