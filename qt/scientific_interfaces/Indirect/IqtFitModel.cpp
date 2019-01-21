@@ -108,8 +108,8 @@ bool hasConstrainableIntensities(IFunction_sptr function) {
 }
 
 double computeTauApproximation(MatrixWorkspace_sptr workspace) {
-  const auto x = workspace->x(0);
-  const auto y = workspace->y(0);
+  const auto &x = workspace->x(0);
+  const auto &y = workspace->y(0);
 
   if (x.size() > 4)
     return -x[4] / log(y[4]);

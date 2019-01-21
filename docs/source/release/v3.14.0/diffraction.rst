@@ -25,10 +25,16 @@ Improvements
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
+- New TOPAZ instrument geometry for 2019 run cycle
 
 
 Single Crystal Diffraction
 --------------------------
+
+New Algorithms
+##############
+
+- The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal diffraction measurements.
 
 Improvements
 ############
@@ -53,7 +59,7 @@ Bugfixes
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` does not have duplicate peak numbers when saving PeaksWorkspaces with more than one RunNumber.
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now loads the calibration from the peaks file correctly.
 
-- :ref:`OptimizeCrystalPlacement <algm-OptimizeCrystalPlacement>` now updates the sample location used by peaks.  Previously, the sample was effectively left unmoved. Default for indexing tolerance was lowered to 0.15.
+- :ref:`OptimizeCrystalPlacement <algm-OptimizeCrystalPlacement>` now updates the sample location used by peaks.  Previously, the sample was effectively left unmoved. Default for indexing tolerance was lowered to 0.15 and can now be called more than once without error.
 
 Powder Diffraction
 ------------------
