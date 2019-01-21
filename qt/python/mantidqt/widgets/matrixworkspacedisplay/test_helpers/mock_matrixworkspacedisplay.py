@@ -32,8 +32,8 @@ class MockQItemRange(object):
 
 
 class MockQSelectionModel:
-    def __init__(self):
-        self.hasSelection = Mock()
+    def __init__(self, has_selection=True):
+        self.hasSelection = Mock(return_value=has_selection)
         self.selectedRows = None
         self.selectedColumns = None
         self.currentIndex = None

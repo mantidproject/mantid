@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -9,13 +9,16 @@
 
 import unittest
 
-from os.path import isdir
-from shutil import rmtree
-import tempfile
+import matplotlib
+matplotlib.use('AGG')
 
-from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.project import projectloader, projectsaver
+from os.path import isdir  # noqa
+from shutil import rmtree  # noqa
+import tempfile  # noqa
+
+from mantid.api import AnalysisDataService as ADS  # noqa
+from mantid.simpleapi import CreateSampleWorkspace  # noqa
+from mantidqt.project import projectloader, projectsaver  # noqa
 
 
 project_file_ext = ".mtdproj"

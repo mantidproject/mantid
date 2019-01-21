@@ -176,8 +176,6 @@ void StripVanadiumPeaks::exec() {
         }
       }
 
-      // Save the output
-      outputWS->mutableY(k) = outY;
     } // if the spectrum is to be changed.
     progress.report();
   } // each spectrum

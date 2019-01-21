@@ -48,6 +48,10 @@ Improvements
 - Fit and Fit Sequential in the Fit combobox above the FitPropertyBrowser are now disabled while fitting is taking place.
 - The option to choose which workspace index to Plot Spectrum for and from which output workspace is now given in Elwin.
 - ConvFit now allows the loading of Dave ASCII files which end with '_sqw.dave'.
+- The results of a fit in MSDFit, IqtFit, ConvFit and F(Q)Fit are now plotted with error bars.
+- The AddWorkspace windows (opened from the Multiple Input tab) now stay open after adding a workspace to the data table. This 
+  is found on the MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit interfaces.
+- It is now possible to load a Nexus file without it's history on the Elwin interface by unchecking the Load History checkbox.
 
 
 Bugfixes
@@ -67,6 +71,7 @@ Bugfixes
 - The x-axis labels in the output plots for MSDFit are now correct.
 - An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading
   a reduced file.
+- The output workspace ending with _Results now contains workspaces with corrected names which detail the fit functions used.
 
 
 Data Corrections Interface

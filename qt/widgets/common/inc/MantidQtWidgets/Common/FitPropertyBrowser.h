@@ -536,6 +536,8 @@ private:
   QString getStringPropertyValue(QtProperty *prop) const;
   /// Check that the properties match the function
   void checkFunction();
+  /// Return the nearest allowed workspace index.
+  int getAllowedIndex(int currentIndex) const;
 
   void setCurrentFunction(Mantid::API::IFunction_const_sptr f) const;
 

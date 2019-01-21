@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -19,15 +19,24 @@ from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorks
 from mantid.api import AnalysisDataService as ADS
 from mantidqt.project.project import Project
 
-if sys.version_info.major == 3:
+if sys.version_info.major >= 3:
+    # Python 3 and above
     from unittest import mock
 else:
+    # Python 2
     import mock
+
+
+class FakeGlobalFigureManager(object):
+    def add_observer(self, *unused):
+        pass
 
 
 class ProjectTest(unittest.TestCase):
     def setUp(self):
-        self.project = Project()
+        self.fgfm = FakeGlobalFigureManager()
+        self.fgfm.figs = []
+        self.project = Project(self.fgfm)
 
     def tearDown(self):
         ADS.clear()

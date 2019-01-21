@@ -84,7 +84,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def clear_fit_result_lines(self):
         for lin in self.fit_result_lines:
-            lin.remove()
+            try:
+                lin.remove()
+            except ValueError:
+                # workspace replacement could invalidate these references
+                pass
         self.fit_result_lines = []
 
     def get_lines(self):

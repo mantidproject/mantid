@@ -13,17 +13,20 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
-
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using std::size_t;
 
 namespace Mantid {
@@ -105,7 +108,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
     } else if (this->name() == "Minus") {
       // x - workspace = x + (workspace * -1)
       MatrixWorkspace_sptr minusOne =
-          WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
+          create<WorkspaceSingleValue>(1, Points(1));
       minusOne->dataY(0)[0] = -1.0;
       minusOne->dataE(0)[0] = 0.0;
 
@@ -234,7 +237,7 @@ void BinaryOperation::exec() {
     //   (b) it has been, but it's not the correct dimensions
     if ((m_out != m_lhs && m_out != m_rhs) ||
         (m_out == m_rhs && (m_lhs->size() > m_rhs->size()))) {
-      m_out = WorkspaceFactory::Instance().create(m_lhs);
+      m_out = create<HistoWorkspace>(*m_lhs);
     }
   }
 

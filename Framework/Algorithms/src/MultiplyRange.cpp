@@ -9,7 +9,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultiplyRange.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -20,6 +23,8 @@ DECLARE_ALGORITHM(MultiplyRange)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
+using namespace HistogramData;
 
 void MultiplyRange::init() {
   // Declare an input workspace property.
@@ -69,7 +74,7 @@ void MultiplyRange::exec() {
   // Only create the output workspace if it's different to the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
     setProperty("OutputWorkspace", outputWS);
   }
 

@@ -58,6 +58,7 @@ from mantidqt.project.project import Project  # noqa
 plugins.setup_library_paths()
 
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
+from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -213,7 +214,7 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project object
-        self.project = Project()
+        self.project = Project(GlobalFigureManager)
 
         # uses default configuration as necessary
         self.readSettings(CONF)
