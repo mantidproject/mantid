@@ -61,7 +61,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def setup_interface(self):
         self.setObjectName("InstrumentWidget")
-        # self.resize(500, 100)
 
         self.setup_instrument_row()
         self.setup_time_zero_row()

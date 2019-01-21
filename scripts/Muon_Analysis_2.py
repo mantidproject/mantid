@@ -15,9 +15,6 @@ from mantid.kernel import ConfigServiceImpl
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 
 from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
-from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
-from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
 from save_python import getWidgetIfOpen
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 import Muon.GUI.Common.message_box as message_box
@@ -69,7 +66,7 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
-        self.home_tab = HomeTabWidget(self.context)
+        self.home_tab = HomeTabWidget(self.context, self)
         self.setup_tabs()
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -83,12 +80,6 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(self.load_widget.load_widget.instrumentObserver)
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)
 
-    def closeEvent(self, event):
-        print("Muon Analysis Close Event")
-        self.load_widget.load_widget_view = None
-        self.load_widget.load_run_view = None
-        self.load_widget.load_file_view = None
-
     def setup_tabs(self):
         """
         Set up the tabbing structure; the tabs work similarly to conventional
@@ -97,57 +88,6 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTab(self.home_tab.home_tab_view, 'Home')
         # self.tabs.addTab(self.group_tab_view, 'Grouping')
-
-
-class MuonAnalysis2Gui(QtGui.QMainWindow):
-
-    def __init__(self, parent=None):
-        super(MuonAnalysis2Gui, self).__init__(parent)
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
-
-        self.add_table_workspace()
-
-        self._context = MuonContext(Name)
-
-        self.loadWidget = DummyLabelWidget(self._context, LoadText, self)
-        self.dockWidget = DockWidget(self._context, self)
-
-        self.helpWidget = DummyLabelWidget(self._context, HelpText, self)
-
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(self.loadWidget.widget)
-        splitter.addWidget(self.dockWidget.widget)
-        splitter.addWidget(self.helpWidget.widget)
-
-        self.setCentralWidget(splitter)
-        self.setWindowTitle(Name)
-
-        self.dockWidget.setUpdateContext(self.update)
-
-    def saveToProject(self):
-        return self._context.save()
-
-    def update(self):
-        # update load
-        self.loadWidget.updateContext()
-        self.dockWidget.updateContext()
-        self.helpWidget.updateContext()
-
-        self.dockWidget.loadFromContext()
-
-    def loadFromContext(self, project):
-        self._context.loadFromProject(project)
-        self.loadWidget.loadFromContext()
-        self.dockWidget.loadFromContext()
-        self.helpWidget.loadFromContext()
-
-    # cancel algs if window is closed
-    def closeEvent(self, event):
-        self.dockWidget.closeEvent(event)
-        global muonGUI
-        muonGUI.deleteLater()
-        muonGUI = None
-
 
 def qapp():
     if QtGui.QApplication.instance():
