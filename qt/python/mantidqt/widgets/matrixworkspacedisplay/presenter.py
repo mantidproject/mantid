@@ -12,6 +12,7 @@ from __future__ import absolute_import, division, print_function
 from mantid.plots.utility import MantidAxType
 from mantidqt.widgets.common.table_copying import copy_bin_values, copy_cells, copy_spectrum_values, \
     show_no_selection_to_copy_toast
+from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
@@ -23,7 +24,7 @@ class MatrixWorkspaceDisplay(object):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None, ads_observer=None):
         """
         Creates a display for the provided workspace.
 
@@ -40,11 +41,33 @@ class MatrixWorkspaceDisplay(object):
                                                                  self.model.get_name())
 
         self.plot = plot
+
+        if ads_observer:
+            self.ads_observer = ads_observer
+        else:
+            self.ads_observer = WorkspaceDisplayADSObserver(self)
+
         self.setup_tables()
 
         self.view.set_context_menu_actions(self.view.table_y)
         self.view.set_context_menu_actions(self.view.table_x)
         self.view.set_context_menu_actions(self.view.table_e)
+
+    def close(self, workspace_name):
+        if self.model.workspace_equals(workspace_name):
+            # if the observer is not cleared here then the C++ object is never freed,
+            # and observers keep getting created, and triggering on ADS events
+            self.ads_observer = None
+            self.view.close_later()
+
+    def force_close(self):
+        self.ads_observer = None
+        self.view.close_later()
+
+    def replace_workspace(self, workspace_name, workspace):
+        if self.model.workspace_equals(workspace_name):
+            self.model = MatrixWorkspaceDisplayModel(workspace)
+            self.view.get_active_tab().viewport().update()
 
     @classmethod
     def supports(cls, ws):

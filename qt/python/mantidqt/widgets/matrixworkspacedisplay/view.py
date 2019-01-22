@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
 
@@ -28,7 +28,9 @@ class MatrixWorkspaceTableView(QTableView):
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
 
-    def resizeEvent(self, _):
+    def resizeEvent(self, event):
+        super(MatrixWorkspaceTableView, self).resizeEvent(event)
+
         header = self.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
 
@@ -38,6 +40,8 @@ class MatrixWorkspaceTableView(QTableView):
 
 
 class MatrixWorkspaceDisplayView(QTabWidget):
+    close_signal = Signal()
+
     def __init__(self, presenter, parent=None, name=''):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
@@ -64,8 +68,26 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.table_x = self.add_table("X values")
         self.table_e = self.add_table("E values")
 
+        self.close_signal.connect(self._run_close)
+
         self.resize(600, 400)
         self.show()
+
+    def close_later(self):
+        """
+        Emits a close signal to the main GUI thread that triggers the built-in close method.
+
+        This function can be called from outside the main GUI thread. It is currently
+        used to close the window when the relevant workspace is deleted.
+
+        When the signal is emitted, the execution returns to the GUI thread, and thus
+        GUI code can be executed.
+        """
+        self.close_signal.emit()
+
+    @Slot()
+    def _run_close(self):
+        self.close()
 
     def add_table(self, label):
         tab = MatrixWorkspaceTableView(self)
@@ -78,6 +100,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         if event.matches(QKeySequence.Copy):
             self.presenter.action_keypress_copy(self.tabs[self.currentIndex()])
         super(MatrixWorkspaceDisplayView, self).keyPressEvent(event)
+
+    def get_active_tab(self):
+        return self.tabs[self.active_tab_index]
 
     def set_scroll_position_on_new_focused_tab(self, new_tab_index):
         """
