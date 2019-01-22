@@ -16,7 +16,7 @@ from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder
 
 class EncoderFactoryTest(unittest.TestCase):
     def setUp(self):
-        EncoderFactory.register_encoder(InstrumentViewEncoder)
+        EncoderFactory.register_encoder(InstrumentViewEncoder())
 
     def test_find_encoder_can_find_an_encoder(self):
         self.assertNotEqual(None, EncoderFactory.find_encoder("InstrumentView"))

@@ -17,7 +17,7 @@ class DecoderFactory(object):
         for decoder in cls.decoder_list:
             if tag in decoder.tags:
                 return decoder()
-        raise ValueError("Unable to find decoder for tag: " + tag)
+        raise ValueError("Unable to find decoder for tag: " + tag + " Please add the decoder for: " + tag)
 
     @classmethod
     def register_decoder(cls, decoder):

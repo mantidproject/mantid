@@ -47,6 +47,8 @@ class ProjectSaver(object):
         plots_to_save_list = PlotsSaver().save_plots(plots_to_save)
 
         # Save interfaces
+        if interfaces_to_save is None:
+            interfaces_to_save = []
         interfaces = []
         for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
@@ -86,6 +88,6 @@ class ProjectWriter(object):
         file_path = os.path.join(self.directory, (os.path.basename(self.directory) + self.project_file_ext))
         try:
             with open(file_path, "w+") as f:
-                dump(obj=to_save_dict, fp=f, indent=2)
+                dump(obj=to_save_dict, fp=f)
         except Exception:
             logger.warning("JSON project file unable to be opened/written to")
