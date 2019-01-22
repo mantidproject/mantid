@@ -24,6 +24,10 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 boost::optional<std::size_t>
 getFirstInCategory(CompositeFunction_const_sptr composite,
                    const std::string &category) {
@@ -553,7 +557,10 @@ void ConvFitModel::removeWorkspace(std::size_t index) {
 }
 
 void ConvFitModel::setResolution(const std::string &name, std::size_t index) {
-  setResolution(getADSMatrixWorkspace(name), index);
+  if (!name.empty() && doesExistInADS(name))
+    setResolution(getADSMatrixWorkspace(name), index);
+  else
+    throw std::runtime_error("A valid resolution file needs to be selected.");
 }
 
 void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
