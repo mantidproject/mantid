@@ -114,4 +114,4 @@ add_subdirectory ( test )  # Note: No tests yet for many remote algorithms...
 # Installation settings
 ###########################################################################
 
-install ( TARGETS RemoteAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS RemoteAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

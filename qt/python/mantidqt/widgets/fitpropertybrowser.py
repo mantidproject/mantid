@@ -84,14 +84,18 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def clear_fit_result_lines(self):
         for lin in self.fit_result_lines:
-            lin.remove()
+            try:
+                lin.remove()
+            except ValueError:
+                # workspace replacement could invalidate these references
+                pass
         self.fit_result_lines = []
 
     def get_lines(self):
         return self.canvas.figure.get_axes()[0].get_lines()
 
     def fitting_done(self, name):
-        from workbench.plotting.functions import plot
+        from mantidqt.plotting.functions import plot
         name += '_Workspace'
         ws = mtd[name]
         self.clear_fit_result_lines()

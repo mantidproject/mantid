@@ -557,10 +557,10 @@ private:
     fun.function(domain, y);
     for (size_t i = 0; i < nSpec; ++i) {
       auto x = static_cast<const FunctionDomain1DVector &>(domain.getDomain(i));
-      ws->dataX(i) = x.toVector();
+      ws->mutableX(i) = x.toVector();
       auto n = x.size();
       auto from = y.getPointerToCalculated(i * n);
-      ws->dataY(i).assign(from, from + n);
+      ws->mutableY(i).assign(from, from + n);
     }
     return ws;
   }

@@ -14,23 +14,21 @@ our custom window.
 # std imports
 import collections
 import math
+import numpy as np
 
 # 3rd party imports
-from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.kernel import Logger
-import matplotlib.pyplot as plt
-
 try:
     from matplotlib.cm import viridis as DEFAULT_CMAP
 except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
 from mantid.py3compat import is_text_string
-from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 from matplotlib.gridspec import GridSpec
-import numpy as np
 
 # local imports
-from .figuretype import figure_type, FigureType
+from mantid.api import AnalysisDataService, MatrixWorkspace
+from mantid.kernel import Logger
+from mantidqt.plotting.figuretype import figure_type, FigureType
+from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -72,6 +70,7 @@ def current_figure_or_none():
 
     :return: An active figure or None
     """
+    import matplotlib.pyplot as plt
     if len(plt.get_fignums()) > 0:
         return plt.gcf()
     else:
@@ -144,6 +143,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param plot_kwargs: Arguments that will be passed onto the plot function
     :return: The figure containing the plots
     """
+    import matplotlib.pyplot as plt
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices)
@@ -343,6 +343,7 @@ def _create_subplots(nplots, fig=None):
     :param fig: An optional figure. It is cleared before plotting the new contents
     :return: A 2-tuple of (fig, axes)
     """
+    import matplotlib.pyplot as plt
     square_side_len = int(math.ceil(math.sqrt(nplots)))
     nrows, ncols = square_side_len, square_side_len
     if square_side_len * square_side_len != nplots:
