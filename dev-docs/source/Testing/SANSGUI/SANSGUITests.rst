@@ -27,17 +27,18 @@ Data reduction
     - Click ``Display Mask``
     - This should give an instrument view with a circle at the centre
 #. In the ``Runs`` tab
-	- Click ``Process``
+	- Click ``Process All``
 	- After some seconds the rows should turn green
 	- In the Main window there should be a series of new workspaces; 3 group workspaces and 4 2D workspaces
 	- Change the first column of the first row to 74045; click process
 	- The row should turn blue; hovering over the row should give an error message
+	- Change the first column of the first row back to 74044
 	- Change the ``Reduction`` button to 2D
 	- Check the ``Plot Results`` box
-	- Click ``Process``
+	- Click ``Process All``
 	- A plot window will open; initially empty, then with a red line
 	- Change ``Reduction`` back to 1D
-	- Click ``Process``
+	- Click ``Process All``
 	- In the plot you should end up with a red and a black line plotted
 	- Check the ``Multi-period`` box
 	- 6 additional rows should appear in the table
@@ -47,10 +48,10 @@ Data reduction
 	- Set ``Reduction Type`` to ``Merged``
 	- Return to the ``Runs`` tab
 	- Ensure ``Plot results`` is checked
-	- Click ``Process``
+	- Click ``Process All``
 	- This should result in a plot with three lines
 #. In the ``Beam centre`` tab
-	- Click 
+	- Click Run
 	- A plot should appear after some seconds, with 4 lines
 	- The 4 lines should gradually get closer together
 	- This will run for some time, probably minutes
@@ -63,7 +64,7 @@ Data reduction
 		- Remove all rows
 		- Reload the batch file as before
 		- Change the first column of both rows to ``LOQ74044-add``
-		- Click ``Process``
+		- Click ``Process All``
 		- This should now process as before
 #. In the ``Diagnostic Page`` tab
 	- For run choose ``Browse`` and load the ``LOQ74044.nxs`` file
