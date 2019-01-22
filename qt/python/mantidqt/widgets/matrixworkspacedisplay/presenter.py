@@ -10,6 +10,7 @@
 from __future__ import absolute_import, division, print_function
 
 from mantid.plots.utility import MantidAxType
+from mantidqt.widgets.common.observing_presenter import ObservingPresenter
 from mantidqt.widgets.common.table_copying import copy_bin_values, copy_cells, copy_spectrum_values, \
     show_no_selection_to_copy_toast
 from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
@@ -18,7 +19,7 @@ from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
 
-class MatrixWorkspaceDisplay(object):
+class MatrixWorkspaceDisplay(ObservingPresenter):
     NO_SELECTION_MESSAGE = "No selection"
     COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
@@ -52,17 +53,6 @@ class MatrixWorkspaceDisplay(object):
         self.view.set_context_menu_actions(self.view.table_y)
         self.view.set_context_menu_actions(self.view.table_x)
         self.view.set_context_menu_actions(self.view.table_e)
-
-    def close(self, workspace_name):
-        if self.model.workspace_equals(workspace_name):
-            # if the observer is not cleared here then the C++ object is never freed,
-            # and observers keep getting created, and triggering on ADS events
-            self.ads_observer = None
-            self.view.close_later()
-
-    def force_close(self):
-        self.ads_observer = None
-        self.view.close_later()
 
     def replace_workspace(self, workspace_name, workspace):
         if self.model.workspace_equals(workspace_name):

@@ -63,6 +63,17 @@ class MockQTableView:
         self.selectionModel = Mock(return_value=self.mock_selection_model)
 
 
+class MockViewport:
+    def __init__(self):
+        self.update = Mock()
+
+
+class MockQTab:
+    def __init__(self):
+        self.mock_viewport = MockViewport()
+        self.viewport = Mock(return_value=self.mock_viewport)
+
+
 class MockMatrixWorkspaceDisplayView:
 
     def __init__(self):
@@ -73,6 +84,8 @@ class MockMatrixWorkspaceDisplayView:
         self.set_model = Mock()
         self.ask_confirmation = None
         self.close_later = Mock()
+        self.mock_tab = MockQTab()
+        self.get_active_tab = Mock(return_value=self.mock_tab)
 
 
 class MockMatrixWorkspaceDisplayModel:

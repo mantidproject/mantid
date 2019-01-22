@@ -19,10 +19,12 @@ from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMe
                             QStyledItemDelegate, QTableWidget)
 
 import mantidqt.icons
+from mantidqt.widgets.common.observing_view import ObservingView
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 
 
 class PreciseDoubleFactory(QItemEditorFactory):
+
     def __init__(self):
         QItemEditorFactory.__init__(self)
 
@@ -36,9 +38,9 @@ class PreciseDoubleFactory(QItemEditorFactory):
         return widget
 
 
-class TableWorkspaceDisplayView(QTableWidget):
-    close_signal = Signal()
+class TableWorkspaceDisplayView(QTableWidget, ObservingView):
     repaint_signal = Signal()
+    close_signal = Signal()
 
     def __init__(self, presenter, parent=None, name=''):
         super(TableWorkspaceDisplayView, self).__init__(parent)
@@ -57,8 +59,8 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
 
-        self.close_signal.connect(self._run_close)
         self.repaint_signal.connect(self._run_repaint)
+        self.close_signal.connect(self._run_close)
 
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
@@ -66,28 +68,16 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.resize(600, 400)
         self.show()
 
-    def close_later(self):
-        """
-        Emits a close signal to the main GUI thread that triggers the built-in close method.
-
-        This function can be called from outside the main GUI thread. It is currently
-        used to close the window when the relevant workspace is deleted.
-
-        When the signal is emitted, the execution returns to the GUI thread, and thus
-        GUI code can be executed.
-        """
-        self.close_signal.emit()
-
     def repaint_later(self):
         self.repaint_signal.emit()
 
     @Slot()
-    def _run_close(self):
-        self.close()
-
-    @Slot()
     def _run_repaint(self):
         self.viewport().update()
+
+    @Slot()
+    def _run_close(self):
+        self.close()
 
     def resizeEvent(self, _):
         header = self.horizontalHeader()

@@ -140,7 +140,7 @@ class MockWorkspace:
 
         self.setCell = Mock()
 
-        self.name = Mock(return_value="MOCK_WORKSPACE_TEST")
+        self.name = Mock(return_value=self.TEST_NAME)
 
         self._column_names = []
         for i in range(self.COLS):

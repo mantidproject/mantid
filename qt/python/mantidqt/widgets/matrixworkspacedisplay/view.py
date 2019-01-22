@@ -17,6 +17,7 @@ from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
 
 import mantidqt.icons
+from mantidqt.widgets.common.observing_view import ObservingView
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 
 
@@ -39,7 +40,7 @@ class MatrixWorkspaceTableView(QTableView):
         header.resizeSection(section, header.defaultSectionSize())
 
 
-class MatrixWorkspaceDisplayView(QTabWidget):
+class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
     close_signal = Signal()
 
     def __init__(self, presenter, parent=None, name=''):
@@ -73,20 +74,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.resize(600, 400)
         self.show()
 
-    def close_later(self):
-        """
-        Emits a close signal to the main GUI thread that triggers the built-in close method.
-
-        This function can be called from outside the main GUI thread. It is currently
-        used to close the window when the relevant workspace is deleted.
-
-        When the signal is emitted, the execution returns to the GUI thread, and thus
-        GUI code can be executed.
-        """
-        self.close_signal.emit()
-
     @Slot()
     def _run_close(self):
+        self.presenter.clear_observer()
         self.close()
 
     def add_table(self, label):

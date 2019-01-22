@@ -25,7 +25,8 @@ def with_mock_presenter(func):
     def wrapper(self, *args):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+        mock_observer = Mock()
+        presenter = MatrixWorkspaceDisplay(ws, view=view, ads_observer=mock_observer)
         return func(self, ws, view, presenter, *args)
 
     return wrapper
@@ -312,9 +313,46 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_plot)
 
     @with_mock_presenter
+    def test_close_incorrect_workspace(self, ws, view, presenter):
+        presenter.close(ws.TEST_NAME + "123")
+        self.assertNotCalled(view.close_later)
+        self.assertIsNotNone(presenter.ads_observer)
+
+    @with_mock_presenter
     def test_close(self, ws, view, presenter):
-        presenter.close()
+        presenter.close(ws.TEST_NAME)
         view.close_later.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter
+    def test_force_close_even_with_incorrect_name(self, _, view, presenter):
+        # window always closes, regardless of the workspace
+        presenter.force_close()
+        view.close_later.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter
+    def test_force_close(self, _, view, presenter):
+        presenter.force_close()
+        view.close_later.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter
+    def test_replace_incorrect_workspace(self, ws, view, presenter):
+        presenter.replace_workspace(ws.TEST_NAME + "123", ws)
+        self.assertNotCalled(view.get_active_tab)
+        self.assertNotCalled(view.mock_tab.viewport)
+        self.assertNotCalled(view.mock_tab.mock_viewport.update)
+
+    @with_mock_presenter
+    def test_replace(self, ws, view, presenter):
+        # patch this out after the constructor of the presenter has finished,
+        # so that we reset any calls it might have made
+        presenter.replace_workspace(ws.TEST_NAME, ws)
+
+        view.get_active_tab.assert_called_once_with()
+        view.mock_tab.viewport.assert_called_once_with()
+        view.mock_tab.mock_viewport.update.assert_called_once_with()
 
 
 if __name__ == '__main__':

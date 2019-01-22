@@ -33,22 +33,20 @@ def _catch_exceptions(func):
 
 class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
 
-    def __init__(self, workspace_display):
+    def __init__(self, workspace_display, observe_replace=True):
         super(WorkspaceDisplayADSObserver, self).__init__()
         self.window = workspace_display
 
         self.observeClear(True)
         self.observeDelete(True)
-        self.observeReplace(True)
+        self.observeReplace(observe_replace)
         # self.observeRename(True) # todo add
-        # self.observeUnGroup(True)
 
     @_catch_exceptions
     def clearHandle(self):
         """
         Called when the ADS is deleted all of its workspaces
         """
-        print("Triggered clearHandle")
         self.window.force_close()
 
     @_catch_exceptions
@@ -61,7 +59,6 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
         :param _: The name of the workspace. Unused
         :param __: A pointer to the workspace. Unused
         """
-        print("Triggered deleteHandle for {}".format(name))
         self.window.close(name)
 
     @_catch_exceptions
@@ -72,5 +69,4 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
         :param _: The name of the workspace. Unused
         :param workspace: A reference to the new workspace
         """
-        print("Triggered replaceHandle")
         self.window.replace_workspace(name, workspace)

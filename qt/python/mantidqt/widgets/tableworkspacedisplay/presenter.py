@@ -18,13 +18,14 @@ from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
 from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
 from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
+from mantidqt.widgets.common.observing_presenter import ObservingPresenter
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
 from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
-class TableWorkspaceDisplay(object):
+class TableWorkspaceDisplay(ObservingPresenter):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
     TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
@@ -81,20 +82,8 @@ class TableWorkspaceDisplay(object):
         """
         return TableWorkspaceDisplayModel.supports(ws)
 
-    def close(self, workspace_name):
-        if self.model.workspace_equals(workspace_name):
-            # if the observer is not cleared here then the C++ object is never freed,
-            # and observers keep getting created, and triggering on ADS events
-            self.ads_observer = None
-            self.view.close_later()
-
-    def force_close(self):
-        self.ads_observer = None
-        self.view.close_later()
-
     def replace_workspace(self, workspace_name, workspace):
         if self.model.workspace_equals(workspace_name):
-            print("TableWorkspace replaced.")
             self.model = TableWorkspaceDisplayModel(workspace)
             self.load_data(self.view)
             self.view.repaint_later()
