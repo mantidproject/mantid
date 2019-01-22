@@ -18,5 +18,5 @@ class DecoderFactoryTest(unittest.TestCase):
     def setUp(self):
         DecoderFactory.register_decoder(InstrumentViewEncoder)
 
-    def test_find_encoder_can_find_an_encoder(self):
+    def test_find_decoder_can_find_an_decoder(self):
         self.assertNotEqual(None, DecoderFactory.find_decoder("InstrumentView"))

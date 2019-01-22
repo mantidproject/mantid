@@ -121,8 +121,7 @@ endif ()
   set ( PYUNITTEST_RUN_SERIAL ON )
   set ( PYUNITTEST_QT_API pyqt5 )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-    mantidqt_qt5 ${PYTHON_TEST_FILES}
-    mantidqt_qt5 ${PYTHON_WIDGET_INTERPRETER_TESTS}
+    mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_INTERPRETER_TESTS}
   )
   # The jupyterconsole test segfaults on Python 3 and Qt 4
   # despite the code functioning in a normal usage.
