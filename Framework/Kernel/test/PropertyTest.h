@@ -11,6 +11,7 @@
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHistory.h"
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 
@@ -21,6 +22,7 @@ public:
       : Property(name, typeid(int)) {}
   PropertyHelper *clone() const override { return new PropertyHelper(*this); }
   std::string value() const override { return "Nothing"; }
+  Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
   std::string setDataItem(const boost::shared_ptr<DataItem>) override {

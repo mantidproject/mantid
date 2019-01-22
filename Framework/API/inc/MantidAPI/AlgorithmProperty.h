@@ -64,6 +64,8 @@ public:
   }
   /// Return the algorithm as string
   std::string value() const override;
+  /// Create a Json::Value from the algorithm value
+  Json::Value valueAsJson() const override;
   /// Get the default
   std::string getDefault() const override;
   /// Sets the value of the algorithm

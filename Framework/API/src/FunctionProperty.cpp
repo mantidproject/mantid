@@ -8,6 +8,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/PropertyHistory.h"
 
+#include <json/value.h>
+
 namespace Mantid {
 namespace API {
 /** Constructor.
@@ -60,6 +62,14 @@ std::string FunctionProperty::value() const {
     return m_value->asString();
   else
     return getDefault();
+}
+
+/**
+ * @return A Json::Value object encoding the string representation of the
+ * function
+ */
+Json::Value FunctionProperty::valueAsJson() const {
+  return Json::Value(value());
 }
 
 /** Get the value the property was initialised with -its default value

@@ -10,7 +10,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/PropertyWithValueJSONDecoder.h"
+#include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <json/json.h>
@@ -330,7 +330,7 @@ void PropertyManager::setProperties(
     // Set it
     targetPropertyManager->setPropertyValue(propFilename, value);
   }
-  const auto memberNames{jsonValue.getMemberNames()};
+  const auto memberNames = jsonValue.getMemberNames();
   for (::Json::ArrayIndex i = 0; i < jsonValue.size(); i++) {
     const auto &propName = memberNames[i];
     if ((propFilename == propName) ||
@@ -562,7 +562,7 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
     }
     if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) &&
         is_enabled) {
-      jsonMap[p->name()] = p->value();
+      jsonMap[p->name()] = p->valueAsJson();
     }
   }
 
@@ -670,6 +670,16 @@ void PropertyManager::removeProperty(const std::string &name,
 void PropertyManager::clear() {
   m_orderedProperties.clear();
   m_properties.clear();
+}
+
+//-----------------------------------------------------------------------------------------------
+/**
+ * Creates a Json::Value of type objectValue to store the properties
+ * @param propMgr A reference to a
+ * @return A new Json::Value of type objectValue
+ */
+Json::Value encodeAsJson(const PropertyManager &propMgr) {
+  return propMgr.asJson(true);
 }
 
 } // namespace Kernel

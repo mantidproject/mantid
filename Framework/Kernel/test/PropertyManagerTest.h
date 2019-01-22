@@ -68,15 +68,12 @@ public:
 class PropertyManagerTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
-    manager = new PropertyManagerHelper;
-    std::unique_ptr<Property> p =
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("aProp", 1);
+    manager = std::make_unique<PropertyManagerHelper>();
+    auto p = Mantid::Kernel::make_unique<PropertyWithValue<int>>("aProp", 1);
     manager->declareProperty(std::move(p));
     manager->declareProperty("anotherProp", 1.11);
     manager->declareProperty("yetAnotherProp", "itsValue");
   }
-
-  void tearDown() override { delete manager; }
 
   void testConstructor() {
     PropertyManagerHelper mgr;
@@ -283,8 +280,8 @@ public:
 
     const std::string jsonString =
         R"({"APROP":"equation=12+3","anotherProp":"1.3,2.5"})";
-    auto ignored{std::unordered_set<std::string>()};
-    auto createMissing{true};
+    std::unordered_set<std::string> ignored;
+    const bool createMissing{true};
     TS_ASSERT_THROWS_NOTHING(
         mgr.setProperties(jsonString, ignored, createMissing));
     TS_ASSERT_EQUALS("equation=12+3",
@@ -448,10 +445,10 @@ public:
             "Semaphor", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
-                      "{\"Crossing\":\"42\",\"Semaphor\":\"1\"}\n");
+                      "{\"Crossing\":42,\"Semaphor\":true}\n");
     mgr.setProperty("Semaphor", false);
     TSM_ASSERT_EQUALS("Hide not enabled", mgr.asString(true),
-                      "{\"Semaphor\":\"0\"}\n");
+                      "{\"Semaphor\":false}\n");
   }
 
   void test_asString() {
@@ -467,7 +464,7 @@ public:
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
-                      "{\"Prop1\":\"10\",\"Prop2\":\"15\"}\n");
+                      "{\"Prop1\":10,\"Prop2\":15}\n");
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(true), value));
@@ -476,7 +473,7 @@ public:
     mgr.setProperty("Prop1", 123);
     mgr.setProperty("Prop2", 456);
     TSM_ASSERT_EQUALS("Change the values", mgr.asString(false),
-                      "{\"Prop1\":\"123\",\"Prop2\":\"456\"}\n");
+                      "{\"Prop1\":123,\"Prop2\":456}\n");
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(false), value));
@@ -497,15 +494,15 @@ public:
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
-                      "{\"ArrayProp\":\"\"}\n");
+                      "{\"ArrayProp\":[]}\n");
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(true), value));
 
-    mgr.setProperty("ArrayProp", "10,12,23");
+    mgr.setProperty("ArrayProp", "10.1,12.5,23.5");
 
     TSM_ASSERT_EQUALS("Change the values", mgr.asString(false),
-                      "{\"ArrayProp\":\"10,12,23\"}\n");
+                      "{\"ArrayProp\":[10.1,12.5,23.5]}\n");
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(false), value));
@@ -635,7 +632,7 @@ public:
   }
 
 private:
-  PropertyManagerHelper *manager;
+  std::unique_ptr<PropertyManagerHelper> manager;
 };
 
 //-------------------------------------------------------------------------------------------------

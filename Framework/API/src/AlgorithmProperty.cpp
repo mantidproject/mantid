@@ -10,6 +10,8 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Algorithm.h"
 
+#include <json/value.h>
+
 namespace Mantid {
 namespace API {
 
@@ -52,6 +54,13 @@ AlgorithmProperty &AlgorithmProperty::operator=(const AlgorithmProperty &rhs) {
  * @returns The algorithm serialized as a string
  */
 std::string AlgorithmProperty::value() const { return m_algStr; }
+
+/**
+ * @return A Json::Value objectValue encoding the algorithm
+ */
+Json::Value AlgorithmProperty::valueAsJson() const {
+  return (*this)()->toJson();
+}
 
 /**
  * Get the default

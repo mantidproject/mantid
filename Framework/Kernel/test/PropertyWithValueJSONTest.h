@@ -7,21 +7,23 @@
 #ifndef PROPERTYWITHVALUEJSONDECODERTEST_H
 #define PROPERTYWITHVALUEJSONDECODERTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include <jsoncpp/json/value.h>
-
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
-#include "MantidKernel/PropertyWithValueJSONDecoder.h"
+#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidKernel/PropertyWithValueJSON.h"
+#include <cxxtest/TestSuite.h>
+#include <json/value.h>
 
-class PropertyWithValueJSONDecoderTest : public CxxTest::TestSuite {
+template <typename T> using AsTypeMemFn = T (Json::Value::*)() const;
+
+class PropertyWithValueJSONTest : public CxxTest::TestSuite {
 public:
-  static PropertyWithValueJSONDecoderTest *createSuite() {
-    return new PropertyWithValueJSONDecoderTest;
+  static PropertyWithValueJSONTest *createSuite() {
+    return new PropertyWithValueJSONTest;
   }
 
-  static void destroySuite(PropertyWithValueJSONDecoderTest *suite) {
+  static void destroySuite(PropertyWithValueJSONTest *suite) {
     return delete suite;
   }
 
@@ -42,7 +44,7 @@ public:
   }
 
   void testDecodeArrayValueAsArrayProperty() {
-    const auto propName{"ArrayProperty"};
+    const std::string propName{"ArrayProperty"};
     const std::vector<double> propValue{1.0, 2.0, 3.0};
     Json::Value arrayItem(Json::arrayValue);
     for (const auto &elem : propValue)
@@ -54,7 +56,8 @@ public:
   }
 
   void testDecodeSingleObjectValuePropertyManagerProperty() {
-    const auto propName{"SinglePropertyManager"}, intKey("k1"), realKey("k2");
+    const std::string propName{"SinglePropertyManager"}, intKey{"k1"},
+        realKey{"k2"};
     const int intValue(1);
     const double realValue(5.3);
     Json::Value dict(Json::objectValue);
@@ -73,9 +76,9 @@ public:
   }
 
   void testDecodeNestedObjectValuesAsNestedPropertyManagerProperty() {
-    const auto propName{"NestedPropertyManager"}, outerIntKey("k1"),
-        innerIntKey("ik1"), outerRealKey("k2"), innerRealKey("ik2"),
-        outerDictKey("ik3");
+    const std::string propName{"NestedPropertyManager"}, outerIntKey{"k1"},
+        innerIntKey{"ik1"}, outerRealKey{"k2"}, innerRealKey{"ik2"},
+        outerDictKey{"ik3"};
     const int outerIntValue(1), innerIntValue(10);
     const double outerRealValue(5.3), innerRealValue(15.3);
 
@@ -97,6 +100,37 @@ public:
                      static_cast<int>(propMgr->getProperty(outerIntKey)));
     TS_ASSERT_EQUALS(outerRealValue,
                      static_cast<double>(propMgr->getProperty(outerRealKey)));
+  }
+
+  void testEncodeIntPropertyAsJsonInt() {
+    doSingleValueEncodeTest<int>(10, Json::intValue, &Json::Value::asInt);
+  }
+
+  void testEncodeDoublePropertyAsJsonReal() {
+    doSingleValueEncodeTest<double>(10, Json::realValue,
+                                    &Json::Value::asDouble);
+  }
+
+  void testEncodeBoolPropertyAsJsonBool() {
+    doSingleValueEncodeTest<bool>(false, Json::booleanValue,
+                                  &Json::Value::asBool);
+  }
+
+  void testEncodeStringPropertyAsJsonString() {
+    doSingleValueEncodeTest<std::string>("test string", Json::stringValue,
+                                         &Json::Value::asString);
+  }
+
+  void testEncodeArrayPropertyAsJsonArray() {
+    std::vector<double> values{1, 2, 3};
+
+    auto jsonVal =
+        doBasicEncodeTest<decltype(values)>(values, Json::arrayValue);
+
+    TS_ASSERT_EQUALS(values.size(), jsonVal.size());
+    for (auto i = 0u; i < values.size(); ++i) {
+      TS_ASSERT_EQUALS(jsonVal[i], values[i]);
+    }
   }
 
   // ----------------------- Failure tests -----------------------
@@ -155,6 +189,24 @@ private:
     TS_ASSERT_EQUALS(propName, typedProperty->name());
 
     return typedProperty;
+  }
+
+  template <typename ValueType>
+  void doSingleValueEncodeTest(const ValueType &propValue,
+                               const Json::ValueType &expectedType,
+                               const AsTypeMemFn<ValueType> &asFn) {
+    auto jsonVal = doBasicEncodeTest<ValueType>(propValue, expectedType);
+    TS_ASSERT_EQUALS(propValue, (jsonVal.*asFn)());
+  }
+
+  template <typename ValueType>
+  Json::Value doBasicEncodeTest(const ValueType &propValue,
+                                const Json::ValueType &expectedType) {
+    using Mantid::Kernel::encodeAsJson;
+    auto jsonVal = encodeAsJson(propValue);
+
+    TS_ASSERT_EQUALS(expectedType, jsonVal.type());
+    return jsonVal;
   }
 };
 

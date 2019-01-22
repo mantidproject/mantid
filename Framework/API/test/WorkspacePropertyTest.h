@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <boost/shared_ptr.hpp>
+#include <json/value.h>
 
 // Property implementations
 #include "MantidAPI/WorkspaceProperty.tcc"
@@ -84,6 +85,12 @@ public:
     TS_ASSERT_EQUALS(wsp1->value(), "ws1")
     TS_ASSERT_EQUALS(wsp2->value(), "")
     TS_ASSERT_EQUALS(wsp3->value(), "ws3")
+  }
+
+  void testValueAsJson() {
+    TS_ASSERT_EQUALS("ws1", wsp1->valueAsJson().asString());
+    TS_ASSERT_EQUALS("", wsp2->valueAsJson().asString());
+    TS_ASSERT_EQUALS("ws3", wsp3->valueAsJson().asString());
   }
 
   void testIsValueSerializable() {

@@ -14,6 +14,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHasProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include <json/value.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -143,6 +144,19 @@ public:
     // Add the required property so now it should pass
     adder->initialize();
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("CalculateStep", adder));
+  }
+
+  void test_ValueAsJson() {
+    AlgorithmProperty prop("name");
+    SimpleSum adder;
+    adder.initialize();
+    adder.execute();
+    prop.setValue(adder.toString());
+    const auto jsonValue = prop.valueAsJson();
+    TS_ASSERT_EQUALS(Json::objectValue, jsonValue.type());
+    TS_ASSERT_EQUALS(adder.name(), jsonValue["name"].asString());
+    TS_ASSERT_EQUALS(adder.version(), jsonValue["version"].asInt());
+    TS_ASSERT_EQUALS(3, jsonValue["properties"]["Output1"].asInt());
   }
 };
 

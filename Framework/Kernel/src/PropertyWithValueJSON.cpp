@@ -4,18 +4,15 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidKernel/PropertyWithValueJSONDecoder.h"
+#include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
-#include <json/json.h>
+#include <json/value.h>
 #include <map>
 
-#include <iostream>
-
-using Json::StreamWriterBuilder;
 using Json::Value;
-using Json::writeString;
 
 namespace Mantid {
 namespace Kernel {
@@ -29,7 +26,7 @@ template <typename T> using ValueAsTypeMemFn = T (Json::Value::*)() const;
 //  Runtime concept idiom to store a templated type internally
 struct FromJson {
   template <typename T>
-  FromJson(ValueAsTypeMemFn<T> asFn) noexcept
+  explicit FromJson(ValueAsTypeMemFn<T> asFn) noexcept
       : m_self{std::make_unique<ModelT<T>>(std::move(asFn))} {}
 
   std::unique_ptr<Property> createProperty(const std::string &name,
@@ -53,7 +50,8 @@ private:
   };
 
   template <typename T> struct ModelT : ConceptT {
-    ModelT(ValueAsTypeMemFn<T> asFn) noexcept : m_asFn{std::move(asFn)} {}
+    explicit ModelT(ValueAsTypeMemFn<T> asFn) noexcept
+        : m_asFn{std::move(asFn)} {}
 
     std::unique_ptr<Property>
     singleValueProperty(const std::string &name,
@@ -118,7 +116,7 @@ const FromJsonConverters &converters() {
  */
 std::unique_ptr<Property> createSingleTypeProperty(const std::string &name,
                                                    const Json::Value &value) {
-  const auto isArray{value.isArray()};
+  const auto isArray = value.isArray();
   FromJsonConverters::const_iterator conversionFnIter;
   // For an array use the first element as the type checker and the rest must
   // be convertible
@@ -144,9 +142,8 @@ std::unique_ptr<Property> createSingleTypeProperty(const std::string &name,
  */
 std::unique_ptr<Property> createKeyValueProperty(const std::string &name,
                                                  const Json::Value &keyValues) {
-  auto propMgr{boost::make_shared<PropertyManager>()};
-  auto propMgrProp{std::make_unique<PropertyManagerProperty>(name, propMgr)};
-  auto members{keyValues.getMemberNames()};
+  auto propMgr = boost::make_shared<PropertyManager>();
+  auto members = keyValues.getMemberNames();
   for (const auto &key : members) {
     const auto &value = keyValues[key];
     if (value.isObject())
@@ -154,7 +151,7 @@ std::unique_ptr<Property> createKeyValueProperty(const std::string &name,
     else
       propMgr->declareProperty(createSingleTypeProperty(key, value));
   }
-  return propMgrProp;
+  return std::make_unique<PropertyManagerProperty>(name, propMgr);
 }
 
 } // namespace

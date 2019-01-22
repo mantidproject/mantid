@@ -12,6 +12,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManagerProperty.h"
+#include "MantidKernel/PropertyWithValue.tcc"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -175,6 +176,42 @@ public:
 
     PropertyManagerProperty pmap("Test");
     TS_ASSERT_EQUALS("", pmap.value());
+  }
+
+  void test_asJson_Gives_Json_ObjectValue() {
+    using Mantid::Kernel::PropertyManager;
+    auto propMgr = boost::make_shared<PropertyManager>();
+    propMgr->declareProperty("IntProp", 1);
+    propMgr->declareProperty("DoubleProp", 15.1);
+    PropertyManagerProperty prop("PMDSTest", propMgr);
+
+    auto jsonVal = prop.valueAsJson();
+
+    TS_ASSERT_EQUALS(2, jsonVal.size());
+    TS_ASSERT_EQUALS(1, jsonVal["IntProp"].asInt());
+    TS_ASSERT_EQUALS(15.1, jsonVal["DoubleProp"].asDouble());
+  }
+
+  void test_Encode_Nested_PropertyManager_As_Nested_Json_Objects() {
+    using Mantid::Kernel::PropertyManager;
+    using Mantid::Kernel::PropertyManagerProperty;
+    auto inner = boost::make_shared<PropertyManager>();
+    inner->declareProperty("IntProp", 2);
+    inner->declareProperty("DoubleProp", 16.1);
+    auto outer = boost::make_shared<PropertyManager>();
+    outer->declareProperty("IntProp", 1);
+    outer->declareProperty(
+        std::make_unique<PropertyManagerProperty>("PropMgr", inner));
+    PropertyManagerProperty prop("PMDSTest", outer);
+
+    auto outerVal = prop.valueAsJson();
+    TS_ASSERT_EQUALS(2, outerVal.size());
+    TS_ASSERT_EQUALS(1, outerVal["IntProp"].asInt());
+    auto innerVal = outerVal["PropMgr"];
+    TS_ASSERT_EQUALS(Json::objectValue, innerVal.type());
+    TS_ASSERT_EQUALS(2, innerVal.size());
+    TS_ASSERT_EQUALS(16.1, innerVal["DoubleProp"].asDouble());
+    TS_ASSERT_EQUALS(2, innerVal["IntProp"].asDouble());
   }
 
   //----------------------------------------------------------------------------

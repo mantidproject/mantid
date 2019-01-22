@@ -88,6 +88,8 @@ public:
 
   std::string value() const override;
 
+  Json::Value valueAsJson() const override;
+
   bool isValueSerializable() const override;
 
   std::string getDefault() const override;

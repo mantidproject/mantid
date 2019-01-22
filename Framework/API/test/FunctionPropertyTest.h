@@ -13,6 +13,7 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/ParamFunction.h"
 #include <boost/shared_ptr.hpp>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -58,6 +59,13 @@ public:
     TS_ASSERT_EQUALS(fun_p->getParameter("B"), 2.0);
     TS_ASSERT_EQUALS(prop.value(),
                      "name=FunctionPropertyTest_Function,A=3,B=2");
+  }
+
+  void testValueAsJson() {
+    FunctionProperty prop("fun");
+    const std::string funcString("name=FunctionPropertyTest_Function,A=3,B=2");
+    prop.setValue(funcString);
+    TS_ASSERT_EQUALS(funcString, prop.valueAsJson().asString());
   }
 
   void testBadValue() {

@@ -8,6 +8,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 
+#include <json/value.h>
+
 #include <sstream>
 
 namespace Mantid {
@@ -52,6 +54,13 @@ std::string PropertyManagerProperty::value() const {
     return (mgr ? mgr->asString(true) : "");
   } else
     return m_dataServiceKey;
+}
+
+/**
+ * Create a Json::Value objectValue from the PropertyManager
+ */
+Json::Value PropertyManagerProperty::valueAsJson() const {
+  return (*this)()->asJson(true);
 }
 
 /**

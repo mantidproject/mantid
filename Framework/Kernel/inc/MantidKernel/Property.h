@@ -15,14 +15,17 @@
 #include <boost/shared_ptr.hpp>
 #endif
 
-namespace NeXus {
-class File;
-}
-
 #include <set>
 #include <string>
 #include <vector>
 
+namespace NeXus {
+class File;
+}
+
+namespace Json {
+class Value;
+}
 namespace std {
 class typeinfo;
 }
@@ -133,6 +136,8 @@ public:
   /// Returns the value of the property as a pretty printed string
   virtual std::string valueAsPrettyStr(const size_t maxLength = 0,
                                        const bool collapseLists = true) const;
+  /// Returns the value of the property as a Json::Value
+  virtual Json::Value valueAsJson() const = 0;
   /// Whether the string returned by value() can be used for serialization.
   virtual bool isValueSerializable() const { return true; }
   /// Set the value of the property via a string.  If the value is unacceptable

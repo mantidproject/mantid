@@ -8,6 +8,7 @@
 
 // PropertyWithValue Definition
 #include "MantidKernel/PropertyWithValue.tcc"
+
 namespace Mantid {
 namespace Kernel {
 /** Constructor

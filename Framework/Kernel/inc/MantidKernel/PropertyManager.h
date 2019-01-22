@@ -58,6 +58,7 @@ public:
   // Function to declare properties (i.e. store them)
   void declareProperty(std::unique_ptr<Property> p,
                        const std::string &doc = "") override;
+  using IPropertyManager::declareProperty;
   void declareOrReplaceProperty(std::unique_ptr<Property> p,
                                 const std::string &doc = "") override;
 
@@ -107,8 +108,6 @@ public:
   ::Json::Value asJson(bool withDefaultValues = false) const override;
 
 protected:
-  using IPropertyManager::declareProperty;
-
   friend class PropertyManagerOwner;
 
   Property *getPointerToProperty(const std::string &name) const override;
@@ -133,6 +132,9 @@ private:
 
 /// Typedef for a shared pointer to a PropertyManager
 using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
+
+/// Return the value of the PropertyManager as a Json::Value
+MANTID_KERNEL_DLL ::Json::Value encodeAsJson(const PropertyManager &propMgr);
 
 } // namespace Kernel
 } // namespace Mantid

@@ -31,6 +31,7 @@ public:
   }
 
   std::string value() const override;
+  Json::Value valueAsJson() const override;
   std::string getDefault() const override;
   std::string setValue(const std::string &strValue) override;
 

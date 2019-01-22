@@ -46,13 +46,14 @@ public:
   PropertyWithValue(std::string name, TYPE defaultValue,
                     const std::string &defaultValueStr,
                     IValidator_sptr validator, const unsigned int direction);
-  PropertyWithValue(const PropertyWithValue &right);
+  PropertyWithValue(const PropertyWithValue<TYPE> &right);
   PropertyWithValue<TYPE> *clone() const override;
 
   void saveProperty(::NeXus::File *file) override;
   std::string value() const override;
   std::string valueAsPrettyStr(const size_t maxLength = 0,
                                const bool collapseLists = true) const override;
+  Json::Value valueAsJson() const override;
   virtual bool operator==(const PropertyWithValue<TYPE> &rhs) const;
   virtual bool operator!=(const PropertyWithValue<TYPE> &rhs) const;
   int size() const override;

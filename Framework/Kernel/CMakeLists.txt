@@ -90,7 +90,7 @@ set ( SRC_FILES
 	src/PropertyManagerProperty.cpp
 	src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
-	src/PropertyWithValueJSONDecoder.cpp
+	src/PropertyWithValueJSON.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
 	src/Quat.cpp
@@ -261,7 +261,7 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyManager_fwd.h
 	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
-	inc/MantidKernel/PropertyWithValueJSONDecoder
+	inc/MantidKernel/PropertyWithValueJSON.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
 	inc/MantidKernel/QuasiRandomNumberSequence.h
@@ -412,7 +412,7 @@ set ( TEST_FILES
 	PropertyNexusTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
-  PropertyWithValueJSONDecoderTest.h
+  PropertyWithValueJSONTest.h
 	ProxyInfoTest.h
 	QuatTest.h
 	ReadLockTest.h
