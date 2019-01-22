@@ -478,7 +478,6 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
     def test_plot_guess_doesnt_crash_without_workspace(self):
         yield self.start()
         DeleteWorkspace('ws')
-        # self.fit_browser.loadFunction('name=LinearBackground')
         action = find_action_with_text(self.fit_browser, 'Plot Guess')
         trigger_action(action)
 
@@ -488,6 +487,73 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         action = find_action_with_text(self.fit_browser, 'Plot Guess')
         trigger_action(action)
         trigger_action(action)
+
+    def test_add_function_with_peaks_creates_markers(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground')
+        self.fit_browser.addFunction('Gaussian')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakHeightOf('f1') > 0)
+        c = self.fit_browser.getPeakCentreOf('f1')
+        h = self.fit_browser.getPeakHeightOf('f1')
+        w = self.fit_browser.getPeakFwhmOf('f1')
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+
+    def test_load_function_with_peaks_creates_markers(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground;name=Gaussian,PeakCentre=1.0,Sigma=0.1')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakHeightOf('f1') > 0)
+        c = self.fit_browser.getPeakCentreOf('f1')
+        h = self.fit_browser.getPeakHeightOf('f1')
+        w = self.fit_browser.getPeakFwhmOf('f1')
+        self.assertAlmostEqual(c, 1.0)
+        self.assertAlmostEqual(h, 4.28, 2)
+        self.assertAlmostEqual(w, 0.235, 2)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+
+    def test_reload_function_with_peaks_updates_markers(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground;name=Gaussian,PeakCentre=1.0,Sigma=0.1')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakHeightOf('f1') > 0)
+        self.fit_browser.loadFunction('name=LinearBackground;name=Gaussian,PeakCentre=1.5,Sigma=0.2,Height=4.1')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakCentreOf('f1') > 1.1)
+        c = self.fit_browser.getPeakCentreOf('f1')
+        h = self.fit_browser.getPeakHeightOf('f1')
+        w = self.fit_browser.getPeakFwhmOf('f1')
+        self.assertAlmostEqual(c, 1.5)
+        self.assertAlmostEqual(h, 4.1)
+        self.assertAlmostEqual(w, 0.471, 2)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+
+    def test_load_different_function_updates_markers(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground;name=Gaussian,PeakCentre=1.0,Sigma=0.1')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakHeightOf('f1') > 0)
+        self.fit_browser.loadFunction('name=Gaussian,PeakCentre=1.5,Sigma=0.2,Height=4.1;name=LinearBackground')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakCentreOf('f0') > 1.1)
+        c = self.fit_browser.getPeakCentreOf('f0')
+        h = self.fit_browser.getPeakHeightOf('f0')
+        w = self.fit_browser.getPeakFwhmOf('f0')
+        self.assertAlmostEqual(c, 1.5)
+        self.assertAlmostEqual(h, 4.1)
+        self.assertAlmostEqual(w, 0.471, 2)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+
+    def test_clear_function_updates_markers(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground;name=Gaussian,PeakCentre=1.0,Sigma=0.1')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakHeightOf('f1') > 0)
+        action = find_action_with_text(self.fit_browser, 'Clear Model')
+        trigger_action(action)
+        yield self.wait_for_true(lambda: len(self.fit_browser.tool.peak_markers) == 0)
+        self.assertEqual(len(self.fit_browser.tool.peak_markers), 0)
 
 
 runTests(TestFitPropertyBrowser)

@@ -210,6 +210,16 @@ class FitInteractiveTool(QObject):
             else:
                 pm.deselect()
 
+    def _get_default_height(self):
+        ylim = self.ax.get_ylim()
+        return (ylim[0] + ylim[1]) / 2
+
+    def get_peak_list(self):
+        plist = []
+        for pm in self.peak_markers:
+            plist.append((pm.peak_id, pm.centre(), pm.height(), pm.fwhm()))
+        return plist
+
     def update_peak_markers(self, peaks_to_keep, peaks_to_add):
         peaks_to_remove = []
         for i, pm in enumerate(self.peak_markers):
@@ -223,7 +233,7 @@ class FitInteractiveTool(QObject):
         for prefix, c, h, w in peaks_to_add:
             do_updates = False
             if h == 0.0:
-                h = 1.0
+                h = self._get_default_height()
                 do_updates = True
             if w <= 0:
                 w = self.fwhm

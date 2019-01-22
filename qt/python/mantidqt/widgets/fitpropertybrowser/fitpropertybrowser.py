@@ -209,14 +209,27 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         peaks_to_add = []
         peaks = {v: k for k, v in self.peak_ids.items()}
         for prefix in self.getPeakPrefixes():
+            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix)
             if prefix in peaks:
+                self.tool.update_peak(peaks[prefix], c, h, w)
                 del peaks[prefix]
             else:
-                c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix)
                 peaks_to_add.append((prefix, c, h, w))
         for i in peaks.values():
             del self.peak_ids[i]
-        if len(peaks_to_add) > 0:
+        need_update_markers = len(peaks_to_add) > 0
+        if not need_update_markers:
+            plist = self.tool.get_peak_list()
+            for i, c, h, w in plist:
+                prefix = self.peak_ids.get(i)
+                if prefix is None:
+                    need_update_markers = True
+                    break
+                if self.getPeakCentreOf(prefix) != c or self.getPeakHeightOf(prefix) != h or\
+                        self.getPeakFwhmOf(prefix) != w:
+                    need_update_markers = True
+                    break
+        if need_update_markers:
             peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(), peaks_to_add)
             self.peak_ids.update(peak_ids)
             for prefix, c, h, w in peak_updates:

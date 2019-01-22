@@ -227,3 +227,8 @@ class PeakMarker(QObject):
     def deselect(self):
         self.centre_marker.deselect()
         self.is_selected = False
+
+    def remove(self):
+        self.centre_marker.remove()
+        self.left_width.remove()
+        self.right_width.remove()
