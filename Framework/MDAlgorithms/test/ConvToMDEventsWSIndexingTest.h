@@ -244,28 +244,79 @@ class MDEventTreeBuilderTest : public CxxTest::TestSuite {
         const std::array<double, 3>& ur) :
         nPerLeaf(N), lowerLeft(ll), upperRight(ur) {}
 
-    std::string description() const override final {
+    std::string description() const override {
       return "Generates " + std::to_string(nPerLeaf) +
       " points with all for every leaf box in the center "
       "of the box.";
     }
-    Points generate() const override final {
+    Points generate() const override {
       FullTree3D3L justForBoxes(lowerLeft, upperRight);
       Points points;
       for(size_t i = 73 ; i < 585; ++i)
         for(size_t _ = 0; _ < nPerLeaf; ++_) {
           auto ctr = justForBoxes.getBox(i).center();
-
           points.emplace_back(Point{static_cast<float>(ctr[0]),
                                     static_cast<float>(ctr[1]),
                                     static_cast<float>(ctr[2])});
         }
       return points;
     }
-  private:
+  protected:
     size_t nPerLeaf;
     const std::array<double, 3>& lowerLeft;
     const std::array<double, 3>& upperRight;
+  };
+
+  class CheckPreciseSplitting : public CheckBasicSplitting {
+  public:
+    CheckPreciseSplitting(size_t N,
+        const std::array<double, 3>& ll,
+        const std::array<double, 3>& ur, double e) :
+        CheckBasicSplitting(N, ll, ur), eps(e) {}
+
+    std::string description() const override final {
+      return "Generates " + std::to_string(nPerLeaf) +
+          " points with all for every leaf box close to"
+          "float bounds of the box (eps) to check accuracy.";
+    }
+    Points generate() const override final {
+      FullTree3D3L justForBoxes(lowerLeft, upperRight);
+      Points points;
+      for(size_t i = 73 ; i < 585; ++i) {
+        const auto& bx = justForBoxes.getBox(i);
+        for (size_t j = 0; j < nPerLeaf; ++j) {
+          Point lower, upper;
+          for(int d = 0; d < 3; ++d) {
+            if(fabs(bx.upperRight[d] - bx.lowerLeft[d]) < 2*eps) {
+              lower[d] = (smallerClosestFloat(biggerClosestFloat(bx.lowerLeft[d]) + eps));
+              upper[d] = (biggerClosestFloat(smallerClosestFloat(bx.upperRight[d]) - eps));
+            } else {
+              lower[d] = static_cast<float>(bx.upperRight[d] + bx.lowerLeft[d]) / 2;
+              upper[d] = lower[d];
+            }
+          }
+          points.emplace_back(j%2==0 ? lower : upper);
+        }
+      }
+      return points;
+    }
+  private:
+    float biggerClosestFloat(const double& d) const {
+      float res = static_cast<float>(d);
+      if(res < d)
+        return std::nextafter(res, std::numeric_limits<float>::max());
+      else
+        return res;
+    }
+    float smallerClosestFloat(const double& d) const {
+      float res = static_cast<float>(d);
+      if(res > d)
+        return std::nextafter(res, std::numeric_limits<float>::min());
+      else
+        return res;
+    }
+  private:
+    double eps;
   };
 
 public:
@@ -283,8 +334,9 @@ public:
     //All points in top level node
     generators.emplace_back(std::make_unique<SimpleInput>(5));
     // Every leaf has 2 points in it
-//    generators.emplace_back(std::make_unique<CheckBasicSplit>(2, lowerLeft, upperRight));
-
+    generators.emplace_back(std::make_unique<CheckBasicSplitting>(2, lowerLeft, upperRight));
+    // Every leaf has 2 points close to boundaries in it
+    generators.emplace_back(std::make_unique<CheckPreciseSplitting>(4, lowerLeft, upperRight, 0.0001));
 
     for(auto& gen: generators)
       TSM_ASSERT_EQUALS(gen->description().c_str(),
@@ -293,12 +345,12 @@ public:
 private:
   bool compare(FullTree3D3L::PtDistr& distr, size_t id, Mantid::API::IMDNode* nd) {
     bool res = (distr[id].empty());
-    if(nd->isLeaf())
+    if(nd->isLeaf()) {
       res = (distr[id].size() == nd->getNPoints());
-    else
-      for(int i = 0; i < 8; ++i)
-        if(nd->getChild(i)->getNPoints() > 0)
-          res &= compare(distr, FullTree3D3L::getChildIdx(id, i), nd->getChild(i));
+    } else {
+      for (int i = 0; i < 8; ++i)
+        res &= compare(distr, FullTree3D3L::getChildIdx(id, i), nd->getChild(i));
+    }
 
     return res;
   }
