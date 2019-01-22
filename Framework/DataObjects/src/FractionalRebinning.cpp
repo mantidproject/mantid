@@ -552,6 +552,8 @@ void rebinToOutput(const Quadrilateral &inputQ,
   for (size_t y = qstart; y < qend; ++y) {
     const double vlo = verticalAxis[y];
     const double vhi = verticalAxis[y + 1];
+    auto &outY = outputWS.mutableY(y);
+    auto &outE = outputWS.mutableE(y);
     for (size_t xi = x_start; xi < x_end; ++xi) {
       const V2D ll(X[xi], vlo);
       const V2D lr(X[xi + 1], vlo);
@@ -565,7 +567,11 @@ void rebinToOutput(const Quadrilateral &inputQ,
       }
       intersectOverlap.clear();
       if (intersection(outputQ, inputQ, intersectOverlap)) {
-        const double weight = intersectOverlap.area() / inputQ.area();
+        const double overlapArea = intersectOverlap.area();
+        if (overlapArea == 0.) {
+          continue;
+        }
+        const double weight = overlapArea / inputQ.area();
         yValue *= weight;
         double eValue = inE[j];
         if (inputWS->isDistribution()) {
@@ -576,8 +582,8 @@ void rebinToOutput(const Quadrilateral &inputQ,
         }
         eValue = eValue * eValue * weight;
         PARALLEL_CRITICAL(overlap_sum) {
-          outputWS.mutableY(y)[xi] += yValue;
-          outputWS.mutableE(y)[xi] += eValue;
+          outY[xi] += yValue;
+          outE[xi] += eValue;
         }
       }
     }
@@ -667,6 +673,9 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
   const double variance = error * error;
   for (const auto &ai : areaInfos) {
+    if (ai.weight == 0.) {
+      continue;
+    }
     const double weight = ai.weight / inputQArea;
     PARALLEL_CRITICAL(overlap) {
       outputWS.mutableY(ai.wsIndex)[ai.binIndex] += signal * weight;

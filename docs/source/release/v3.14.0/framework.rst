@@ -65,6 +65,7 @@ New Algorithms
 - :ref:`MaskNonOverlappingBins <algm-MaskNonOverlappingBins>` masks the bins that do not overlap with another workspace.
 - :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` loads or adds to a sample environment from a .stl file, as well as allowing setting the material of the environment to load.
 - :ref:`ParallaxCorrection <algm-ParallaxCorrection>` will perform a geometric correction for the so-called parallax effect in tube based SANS detectors.
+- :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate a detection efficiency correction with multiple and flexible inputs for calculation.
 
 Improvements
 ############
@@ -95,7 +96,7 @@ Bugfixes
 - Bugfix in :ref:`ConvertToMatrixWorkspace <algm-ConvertToMatrixWorkspace>` with ``Workspace2D`` as the ``InputWorkspace`` not being cloned to the ``OutputWorkspace``. Added support for ragged workspaces.
 - :ref:`SolidAngle <algm-SolidAngle-v1>` Now properly accounts for a given StartWorkspaceIndex.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
-- Fixed an issue where if a workspace's history wouldn't update for some algorithms
+- Fixed an issue where a workspace's history wouldn't update for some algorithms
 - Fixed a ``std::bad_cast`` error in :ref:`algm-LoadLiveData` when the data size changes.
 - :ref:`Fit <algm-Fit>` now applies the ties in correct order independently on the order they are set. If any circular dependencies are found Fit will give an error.
 - Fixed a rare bug in :ref:`MaskDetectors <algm-MaskDetectors>` where a workspace could become invalidated in Python if it was a ``MaskWorkspace``.
@@ -108,6 +109,7 @@ Bugfixes
 - The input validator is fixed in :ref:`MostLikelyMean <algm-MostLikelyMean>` avoiding a segmentation fault.
 - Fixed a bug in `AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to `DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for `AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
+- Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
 
 Python
 ------
@@ -136,6 +138,7 @@ New
    UsageService.setApplicationName('myapp')
    FrameworkManager.Instance()
 
+- `FileFinder.findRuns` now optionally accepts a list of file extensions to search, called **exts**, and an boolean flag **useExtsOnly**. If this flag is True, FileFinder will search for the passed in extensions ONLY. If it is False, it will search for passed in extensions and then facility extensions.
 
 Improvements
 ############

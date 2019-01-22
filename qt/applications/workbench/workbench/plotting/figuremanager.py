@@ -24,7 +24,7 @@ from six import text_type
 from mantid.api import AnalysisDataServiceObserver
 from mantid.plots import MantidAxes
 from workbench.plotting.figurewindow import FigureWindow
-from workbench.plotting.figuretype import figure_type, FigureType
+from mantidqt.plotting.figuretype import figure_type, FigureType
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from workbench.plotting.qappthreadcall import QAppThreadCall

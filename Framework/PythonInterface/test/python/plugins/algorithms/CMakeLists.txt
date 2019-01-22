@@ -12,6 +12,7 @@ set ( TEST_PY_FILES
   AngularAutoCorrelationsTwoAxesTest.py
   ApplyDetectorScanEffCorrTest.py
   BinWidthAtXTest.py
+  CalculateEfficiencyCorrectionTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py

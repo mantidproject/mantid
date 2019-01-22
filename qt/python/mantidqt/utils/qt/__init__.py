@@ -12,16 +12,16 @@
 from __future__ import absolute_import
 
 # stdlib modules
+import os.path as osp
 from contextlib import contextmanager
 from importlib import import_module
-import os.path as osp
 
 # 3rd-party modules
 from qtpy import QT_VERSION
-from qtpy.uic import loadUi, loadUiType
+from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import QAction, QMenu
+from qtpy.uic import loadUi, loadUiType
 
-# local modules
 from ...icons import get_icon
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
@@ -50,7 +50,7 @@ def import_qt(modulename, package, attr=None):
     if modulename.startswith('.'):
         try:
             lib = import_module(modulename + LIB_SUFFIX, package)
-        except ImportError:
+        except ImportError as e:
             lib = import_module(modulename.lstrip('.') + LIB_SUFFIX)
     else:
         lib = import_module(modulename + LIB_SUFFIX)
@@ -130,7 +130,12 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
     if on_triggered is not None:
         action.triggered.connect(on_triggered)
     if shortcut is not None:
-        action.setShortcut(shortcut)
+        if isinstance(shortcut, tuple) or isinstance(shortcut, list):
+            qshortcuts = [QKeySequence(s) for s in shortcut]
+            action.setShortcuts(qshortcuts)
+        else:
+            action.setShortcut(shortcut)
+
         if shortcut_context is not None:
             action.setShortcutContext(shortcut_context)
     if icon_name is not None:
