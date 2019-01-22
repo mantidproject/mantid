@@ -8,8 +8,6 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import unittest
-
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder, InstrumentViewDecoder
@@ -55,8 +53,8 @@ class InstrumentViewEncoderTest(GuiTest):
 
     def test_encoder_is_in_encoder_factory(self):
         # Shows that the decoder has been registered on import of something from mantidqt.widget.instrumentview
-        found_encoder = EncoderFactory.find_encoder("InstrumentView")
-        self.assertIs(InstrumentViewEncoder, found_encoder)
+        found_encoder = EncoderFactory.find_encoder(self.instrumentView.view)
+        self.assertIs(InstrumentViewEncoder, found_encoder.__class__)
 
     def test_encoder_encode_function_returns_none_when_obj_is_none(self):
         self.assertIs(None, self.encoder.encode(None))
@@ -72,7 +70,7 @@ class InstrumentViewDecoderTest(GuiTest):
     def test_decoder_is_in_decoder_factory(self):
         # Shows that the decoder has been registered on import of something from mantidqt.widget.instrumentview
         found_decoder = DecoderFactory.find_decoder("InstrumentView")
-        self.assertIs(InstrumentViewDecoder, found_decoder)
+        self.assertIs(InstrumentViewDecoder, found_decoder.__class__)
 
     def test_decoder_decode_function_returns_none_when_obj_is_none(self):
         self.assertIs(None, self.decoder.decode(None))

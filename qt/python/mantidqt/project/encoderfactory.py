@@ -17,11 +17,11 @@ class EncoderFactory(object):
         """
         This assumes that obj is of a class that has an encode else it returns None
         :param obj: The object for encoding
-        :return: Encoder or None; Returns the Encoder of the
+        :return: Encoder or None; Returns the Encoder of the obj
         """
         for encoder in cls.encoder_list:
             if encoder().has_tag(obj.__class__.__name__):
-                return encoder
+                return encoder()
         return None
 
     @classmethod

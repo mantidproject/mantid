@@ -111,7 +111,7 @@ endif ()
 
   # ctest targets for interpreters (Encoder/Decoder) tests only get tested in qt5 as only for workbench
   set ( PYTHON_WIDGET_INTERPRETER_TESTS
-    mantidqt/widgets/instrumentview/test/test_instrumentview_interpreters.py
+    mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
   )
 
   # Tests
