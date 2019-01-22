@@ -139,7 +139,8 @@ protected:
 
 private:
   /// Save masks applied to the view but not to the workspace
-  bool saveMaskViewToProject(const std::string &name, const std::string &projectPath = "") const;
+  bool saveMaskViewToProject(const std::string &name,
+                             const std::string &projectPath = "") const;
   /// Load masks applied to the view but not to the workspace
   void loadMaskViewFromProject(const std::string &name);
   /// Run the LoadMask algorithm to get a MaskWorkspace

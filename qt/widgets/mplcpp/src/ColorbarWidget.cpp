@@ -189,8 +189,8 @@ void ColorbarWidget::setScaleType(int index) {
  * @param gamma The value of the exponent
  */
 void ColorbarWidget::setNthPower(double gamma) {
-  if (gamma == 0){
-    //A power can not be 0.
+  if (gamma == 0) {
+    // A power can not be 0.
     throw std::runtime_error("Power can not be 0");
   }
   m_ui.powerEdit->setText(QString::number(gamma));

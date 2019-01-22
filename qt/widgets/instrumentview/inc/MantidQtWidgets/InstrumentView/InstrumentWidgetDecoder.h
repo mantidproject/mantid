@@ -28,7 +28,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetDecoder : public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetDecoder
+    : public QObject {
   Q_OBJECT
 public:
   InstrumentWidgetDecoder();

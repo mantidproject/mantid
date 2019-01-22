@@ -55,7 +55,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         m_decoder->decode(m_infoMap, *m_instrumentWidget, QString(""), false));
     // Set to 2
-    TS_ASSERT_EQUALS(m_instrumentWidget->getCurrentTab(),2)
+    TS_ASSERT_EQUALS(m_instrumentWidget->getCurrentTab(), 2)
   }
 
 private:
