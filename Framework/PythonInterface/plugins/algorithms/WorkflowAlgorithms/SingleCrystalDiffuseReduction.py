@@ -14,29 +14,31 @@ from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory,
                         ITableWorkspaceProperty)
 from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               CropWorkspace, LoadInstrument,
-                              SetGoniometer, SetUB, ConvertToMD,
-                              MDNormSCD, DivideMD, MinusMD, Load,
+                              SetGoniometer, ConvertToMD, MDNorm,
+                              RenameWorkspace, MinusMD, Load,
                               DeleteWorkspace, RenameWorkspaces,
                               CreateSingleValuedWorkspace, LoadNexus,
                               MultiplyMD, LoadIsawDetCal, LoadMask,
                               CopyInstrumentParameters,
-                              ApplyCalibration)
-from mantid.geometry import SpaceGroupFactory, SymmetryOperationFactory
+                              ApplyCalibration,
+                              RecalculateTrajectoriesExtents,
+                              ConvertToMDMinMaxGlobal,
+                              CropWorkspaceForMDNorm)
 from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLengthValidator, FloatArrayProperty, Direction, Property
 from mantid import logger
-import numpy as np
 
 
 class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
     temp_workspace_list = ['__sa', '__flux', '__run', '__md', '__data', '__norm',
-                           '__bkg', '__bkg_md', '__bkg_data', '__bkg_norm', '__scaled_background',
+                           '__bkg', '__bkg_md', '__bkg_data', '__bkg_norm',
+                           '__normalizedData', '__normalizedBackground',
                            'PreprocessedDetectorsWS']
 
     def category(self):
         return "Diffraction\\Reduction"
 
     def seeAlso(self):
-        return [ "ConvertToMD","MDNormSCD" ]
+        return [ "ConvertToMD","MDNormSCD",'MDNorm' ]
 
     def name(self):
         return "SingleCrystalDiffuseReduction"
@@ -105,24 +107,16 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                                           extensions=[".xml",".msk"]),
                              "Masking file for masking. Supported file format is XML and ISIS ASCII. See :ref:`LoadMask <algm-LoadMask>`")
 
-        # SymmetryOps, name, group unmber or list symmetries
-        self.declareProperty("SymmetryOps", "",
-                             "If specified the symmetry will be applied, can be space group name or number, or list individual symmetries.")
+        self.copyProperties('MDNorm', ['SymmetryOperations'])
 
-        # Binning output
-        self.copyProperties('ConvertToMD', ['Uproj', 'Vproj', 'Wproj'])
-        self.declareProperty(FloatArrayProperty("BinningDim0", [-5.05,5.05,101], FloatArrayLengthValidator(3), direction=Direction.Input),
-                             "Binning parameters for the 0th dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
-        self.declareProperty(FloatArrayProperty("BinningDim1", [-5.05,5.05,101], FloatArrayLengthValidator(3), direction=Direction.Input),
-                             "Binning parameters for the 1st dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
-        self.declareProperty(FloatArrayProperty("BinningDim2", [-5.05,5.05,101], FloatArrayLengthValidator(3), direction=Direction.Input),
-                             "Binning parameters for the 2nd dimension. Enter it as a"
-                             "comma-separated list of values with the"
-                             "format: 'minimum,maximum,number_of_bins'.")
+        self.declareProperty(FloatArrayProperty('QDimension1', [1, 0, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
+                             "The first Q projection axis")
+        self.declareProperty(FloatArrayProperty('QDimension2', [0, 1, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
+                             "The second Q projection axis")
+        self.declareProperty(FloatArrayProperty('QDimension3', [0, 0, 1], FloatArrayLengthValidator(3), direction=Direction.Input),
+                             "The third Q projection axis")
+
+        self.copyProperties('MDNorm', ['Dimension0Binning', 'Dimension1Binning', 'Dimension2Binning'])
 
         self.declareProperty('KeepTemporaryWorkspaces', False,
                              "If True the normalization and data workspaces in addition to the normalized data will be outputted")
@@ -157,51 +151,24 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.setPropertyGroup("MaskFile","Corrections")
 
         # Projection and binning
-        self.setPropertyGroup("Uproj","Projection and binning")
-        self.setPropertyGroup("Vproj","Projection and binning")
-        self.setPropertyGroup("Wproj","Projection and binning")
-        self.setPropertyGroup("BinningDim0","Projection and binning")
-        self.setPropertyGroup("BinningDim1","Projection and binning")
-        self.setPropertyGroup("BinningDim2","Projection and binning")
-
-    def validateInputs(self):
-        issues = dict()
-
-        if self.getProperty("SymmetryOps").value:
-            syms=self.getProperty("SymmetryOps").value
-            try:
-                if not SpaceGroupFactory.isSubscribedNumber(int(syms)):
-                    issues["SymmetryOps"] = 'Space group number '+syms+' is not valid'
-            except ValueError:
-                if not SpaceGroupFactory.isSubscribedSymbol(syms):
-                    for sym in syms.split(';'):
-                        if not SymmetryOperationFactory.exists(sym):
-                            issues["SymmetryOps"] = sym+' is not valid symmetry or space group name'
-
-        return issues
+        self.setPropertyGroup("QDimension1","Projection and binning")
+        self.setPropertyGroup("QDimension2","Projection and binning")
+        self.setPropertyGroup("QDimension3","Projection and binning")
+        self.setPropertyGroup("Dimension0Binning","Projection and binning")
+        self.setPropertyGroup("Dimension1Binning","Projection and binning")
+        self.setPropertyGroup("Dimension2Binning","Projection and binning")
 
     def PyExec(self):
         # remove possible old temp workspaces
         [DeleteWorkspace(ws) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
 
         _background = bool(self.getProperty("Background").value)
-        _load_inst = bool(self.getProperty("LoadInstrument").value)
-        _apply_cal = bool(self.getProperty("ApplyCalibration").value)
-        _detcal = bool(self.getProperty("DetCal").value)
-        _copy_params = bool(self.getProperty("CopyInstrumentParameters").value)
+        self._load_inst = bool(self.getProperty("LoadInstrument").value)
+        self._apply_cal = bool(self.getProperty("ApplyCalibration").value)
+        self._detcal = bool(self.getProperty("DetCal").value)
+        self._copy_params = bool(self.getProperty("CopyInstrumentParameters").value)
         _masking = bool(self.getProperty("MaskFile").value)
         _outWS_name = self.getPropertyValue("OutputWorkspace")
-
-        UBList = self._generate_UBList()
-
-        dim0_min, dim0_max, dim0_bins = self.getProperty('BinningDim0').value
-        dim1_min, dim1_max, dim1_bins = self.getProperty('BinningDim1').value
-        dim2_min, dim2_max, dim2_bins = self.getProperty('BinningDim2').value
-        MinValues="{},{},{}".format(dim0_min,dim1_min,dim2_min)
-        MaxValues="{},{},{}".format(dim0_max,dim1_max,dim2_max)
-        AlignedDim0=",{},{},{}".format(dim0_min, dim0_max, int(dim0_bins))
-        AlignedDim1=",{},{},{}".format(dim1_min, dim1_max, int(dim1_bins))
-        AlignedDim2=",{},{},{}".format(dim2_min, dim2_max, int(dim2_bins))
 
         LoadNexus(Filename=self.getProperty("SolidAngle").value, OutputWorkspace='__sa')
         LoadNexus(Filename=self.getProperty("Flux").value, OutputWorkspace='__flux')
@@ -213,59 +180,31 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
             MaskDetectors(Workspace='__sa',MaskedWorkspace='__mask')
             DeleteWorkspace('__mask')
 
-        XMin = mtd['__sa'].getXDimension().getMinimum()
-        XMax = mtd['__sa'].getXDimension().getMaximum()
+        self.XMin = mtd['__sa'].getXDimension().getMinimum()
+        self.XMax = mtd['__sa'].getXDimension().getMaximum()
 
         newXMin = self.getProperty("MomentumMin").value
         newXMax = self.getProperty("MomentumMax").value
         if newXMin != Property.EMPTY_DBL or newXMax != Property.EMPTY_DBL:
             if newXMin != Property.EMPTY_DBL:
-                XMin = max(XMin, newXMin)
+                self.XMin = max(self.XMin, newXMin)
             if newXMax != Property.EMPTY_DBL:
-                XMax = min(XMax, newXMax)
-            logger.notice("Using momentum range {} to {} A^-1".format(XMin, XMax))
-            CropWorkspace(InputWorkspace='__flux',OutputWorkspace='__flux',XMin=XMin,XMax=XMax)
+                self.XMax = min(self.XMax, newXMax)
+            logger.notice("Using momentum range {} to {} A^-1".format(self.XMin, self.XMax))
+            CropWorkspace(InputWorkspace='__flux',OutputWorkspace='__flux',XMin=self.XMin,XMax=self.XMax)
             for spectrumNumber in range(mtd['__flux'].getNumberHistograms()):
                 Y = mtd['__flux'].readY(spectrumNumber)
                 mtd['__flux'].setY(spectrumNumber,(Y-Y.min())/(Y.max()-Y.min()))
 
         if _background:
-            Load(Filename=self.getProperty("Background").value,
-                 OutputWorkspace='__bkg',
-                 FilterByTofMin=self.getProperty("FilterByTofMin").value,
-                 FilterByTofMax=self.getProperty("FilterByTofMax").value)
-            if _load_inst:
-                LoadInstrument(Workspace='__bkg', Filename=self.getProperty("LoadInstrument").value, RewriteSpectraMap=False)
-            if _apply_cal:
-                ApplyCalibration(Workspace='__bkg', PositionTable=self.getProperty("ApplyCalibration").value)
-            if _detcal:
-                LoadIsawDetCal(InputWorkspace='__bkg', Filename=self.getProperty("DetCal").value)
-            if _copy_params:
-                CopyInstrumentParameters(OutputWorkspace='__bkg', InputWorkspace=self.getProperty("CopyInstrumentParameters").value)
-            MaskDetectors(Workspace='__bkg',MaskedWorkspace='__sa')
-            ConvertUnits(InputWorkspace='__bkg',OutputWorkspace='__bkg',Target='Momentum')
-            CropWorkspace(InputWorkspace='__bkg',OutputWorkspace='__bkg',XMin=XMin,XMax=XMax)
+            self.load_file_and_apply(self.getProperty("Background").value, '__bkg')
 
-        progress = Progress(self, 0.0, 1.0, len(UBList)*len(self.getProperty("Filename").value))
+        progress = Progress(self, 0.0, 1.0, len(self.getProperty("Filename").value))
 
         for run in self.getProperty("Filename").value:
             logger.notice("Working on " + run)
 
-            Load(Filename=run,
-                 OutputWorkspace='__run',
-                 FilterByTofMin=self.getProperty("FilterByTofMin").value,
-                 FilterByTofMax=self.getProperty("FilterByTofMax").value)
-            if _load_inst:
-                LoadInstrument(Workspace='__run', Filename=self.getProperty("LoadInstrument").value, RewriteSpectraMap=False)
-            if _apply_cal:
-                ApplyCalibration(Workspace='__run', PositionTable=self.getProperty("ApplyCalibration").value)
-            if _detcal:
-                LoadIsawDetCal(InputWorkspace='__run', Filename=self.getProperty("DetCal").value)
-            if _copy_params:
-                CopyInstrumentParameters(OutputWorkspace='__run', InputWorkspace=self.getProperty("CopyInstrumentParameters").value)
-            MaskDetectors(Workspace='__run',MaskedWorkspace='__sa')
-            ConvertUnits(InputWorkspace='__run',OutputWorkspace='__run',Target='Momentum')
-            CropWorkspace(InputWorkspace='__run',OutputWorkspace='__run',XMin=XMin,XMax=XMax)
+            self.load_file_and_apply(run, '__run')
 
             if self.getProperty('SetGoniometer').value:
                 SetGoniometer(Workspace='__run',
@@ -274,81 +213,88 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                               Axis1=self.getProperty('Axis1').value,
                               Axis2=self.getProperty('Axis2').value)
 
-            # Set background Goniometer to be the same as data
+            MinValues, MaxValues = ConvertToMDMinMaxGlobal(InputWorkspace='__run',
+                                                           QDimensions='Q3D',
+                                                           dEAnalysisMode='Elastic',
+                                                           Q3DFrames='Q')
+
+            ConvertToMD(InputWorkspace='__run',
+                        OutputWorkspace='__md',
+                        QDimensions='Q3D',
+                        dEAnalysisMode='Elastic',
+                        Q3DFrames='Q_sample',
+                        MinValues=MinValues,
+                        MaxValues=MaxValues)
+            RecalculateTrajectoriesExtents(InputWorkspace= '__md', OutputWorkspace='__md')
+            MDNorm(InputWorkspace='__md',
+                   FluxWorkspace='__flux',
+                   SolidAngleWorkspace='__sa',
+                   OutputDataWorkspace='__data',
+                   TemporaryDataWorkspace='__data' if mtd.doesExist('__data') else None,
+                   OutputNormalizationWorkspace='__norm',
+                   TemporaryNormalizationWorkspace='__norm' if mtd.doesExist('__norm') else None,
+                   OutputWorkspace='__normalizedData',
+                   QDimension1=self.getProperty('QDimension1').value,
+                   QDimension2=self.getProperty('QDimension2').value,
+                   QDimension3=self.getProperty('QDimension3').value,
+                   Dimension0Name='QDimension1',
+                   Dimension0Binning=self.getProperty('Dimension0Binning').value,
+                   Dimension1Name='QDimension2',
+                   Dimension1Binning=self.getProperty('Dimension1Binning').value,
+                   Dimension2Name='QDimension3',
+                   Dimension2Binning=self.getProperty('Dimension2Binning').value,
+                   SymmetryOperations=self.getProperty('SymmetryOperations').value)
+            DeleteWorkspace('__md')
+
             if _background:
+                # Set background Goniometer to be the same as data
                 mtd['__bkg'].run().getGoniometer().setR(mtd['__run'].run().getGoniometer().getR())
 
-            for ub in UBList:
-                SetUB(Workspace='__run', UB=ub)
-                ConvertToMD(InputWorkspace='__run',
-                            OutputWorkspace='__md',
+                ConvertToMD(InputWorkspace='__bkg',
+                            OutputWorkspace='__bkg_md',
                             QDimensions='Q3D',
                             dEAnalysisMode='Elastic',
-                            Q3DFrames='HKL',
-                            QConversionScales='HKL',
-                            Uproj=self.getProperty('Uproj').value,
-                            Vproj=self.getProperty('Vproj').value,
-                            Wproj=self.getProperty('wproj').value,
+                            Q3DFrames='Q_sample',
                             MinValues=MinValues,
                             MaxValues=MaxValues)
-                MDNormSCD(InputWorkspace=mtd['__md'],
-                          FluxWorkspace='__flux',
-                          SolidAngleWorkspace='__sa',
-                          OutputWorkspace='__data',
-                          SkipSafetyCheck=True,
-                          TemporaryDataWorkspace='__data' if mtd.doesExist('__data') else None,
-                          OutputNormalizationWorkspace='__norm',
-                          TemporaryNormalizationWorkspace='__norm' if mtd.doesExist('__norm') else None,
-                          AlignedDim0=mtd['__md'].getDimension(0).name+AlignedDim0,
-                          AlignedDim1=mtd['__md'].getDimension(1).name+AlignedDim1,
-                          AlignedDim2=mtd['__md'].getDimension(2).name+AlignedDim2)
-                DeleteWorkspace('__md')
-
-                if _background:
-                    SetUB(Workspace='__bkg', UB=ub)
-                    ConvertToMD(InputWorkspace='__bkg',
-                                OutputWorkspace='__bkg_md',
-                                QDimensions='Q3D',
-                                dEAnalysisMode='Elastic',
-                                Q3DFrames='HKL',
-                                QConversionScales='HKL',
-                                Uproj=self.getProperty('Uproj').value,
-                                Vproj=self.getProperty('Vproj').value,
-                                Wproj=self.getProperty('Wproj').value,
-                                MinValues=MinValues,
-                                MaxValues=MaxValues)
-                    MDNormSCD(InputWorkspace='__bkg_md',
-                              FluxWorkspace='__flux',
-                              SolidAngleWorkspace='__sa',
-                              SkipSafetyCheck=True,
-                              OutputWorkspace='__bkg_data',
-                              TemporaryDataWorkspace='__bkg_data' if mtd.doesExist('__bkg_data') else None,
-                              OutputNormalizationWorkspace='__bkg_norm',
-                              TemporaryNormalizationWorkspace='__bkg_norm' if mtd.doesExist('__bkg_norm') else None,
-                              AlignedDim0=mtd['__bkg_md'].getDimension(0).name+AlignedDim0,
-                              AlignedDim1=mtd['__bkg_md'].getDimension(1).name+AlignedDim1,
-                              AlignedDim2=mtd['__bkg_md'].getDimension(2).name+AlignedDim2)
-                    DeleteWorkspace('__bkg_md')
-                progress.report()
+                RecalculateTrajectoriesExtents(InputWorkspace= '__bkg_md', OutputWorkspace='__bkg_md')
+                MDNorm(InputWorkspace='__bkg_md',
+                       FluxWorkspace='__flux',
+                       SolidAngleWorkspace='__sa',
+                       OutputDataWorkspace='__bkg_data',
+                       TemporaryDataWorkspace='__bkg_data' if mtd.doesExist('__bkg_data') else None,
+                       OutputNormalizationWorkspace='__bkg_norm',
+                       TemporaryNormalizationWorkspace='__bkg_norm' if mtd.doesExist('__bkg_norm') else None,
+                       OutputWorkspace='__normalizedBackground',
+                       QDimension1=self.getProperty('QDimension1').value,
+                       QDimension2=self.getProperty('QDimension2').value,
+                       QDimension3=self.getProperty('QDimension3').value,
+                       Dimension0Name='QDimension1',
+                       Dimension0Binning=self.getProperty('Dimension0Binning').value,
+                       Dimension1Name='QDimension2',
+                       Dimension1Binning=self.getProperty('Dimension1Binning').value,
+                       Dimension2Name='QDimension3',
+                       Dimension2Binning=self.getProperty('Dimension2Binning').value,
+                       SymmetryOperations=self.getProperty('SymmetryOperations').value)
+                DeleteWorkspace('__bkg_md')
+            progress.report()
             DeleteWorkspace('__run')
 
         if _background:
             # outWS = data / norm - bkg_data / bkg_norm * BackgroundScale
-            DivideMD(LHSWorkspace='__data',RHSWorkspace='__norm',OutputWorkspace=_outWS_name+'_normalizedData')
-            DivideMD(LHSWorkspace='__bkg_data',RHSWorkspace='__bkg_norm',OutputWorkspace=_outWS_name+'_normalizedBackground')
             CreateSingleValuedWorkspace(OutputWorkspace='__scale', DataValue=self.getProperty('BackgroundScale').value)
-            MultiplyMD(LHSWorkspace=_outWS_name+'_normalizedBackground',
+            MultiplyMD(LHSWorkspace='__normalizedBackground',
                        RHSWorkspace='__scale',
-                       OutputWorkspace='__scaled_background')
+                       OutputWorkspace='__normalizedBackground')
             DeleteWorkspace('__scale')
-            MinusMD(LHSWorkspace=_outWS_name+'_normalizedData',RHSWorkspace='__scaled_background',OutputWorkspace=_outWS_name)
+            MinusMD(LHSWorkspace='__normalizedData',RHSWorkspace='__normalizedBackground',OutputWorkspace=_outWS_name)
             if self.getProperty('KeepTemporaryWorkspaces').value:
                 RenameWorkspaces(InputWorkspaces=['__data','__norm','__bkg_data','__bkg_norm'],
                                  WorkspaceNames=[_outWS_name+'_data', _outWS_name+'_normalization',
                                                  _outWS_name+'_background_data',_outWS_name+'_background_normalization'])
         else:
             # outWS = data / norm
-            DivideMD(LHSWorkspace='__data',RHSWorkspace='__norm',OutputWorkspace=_outWS_name)
+            RenameWorkspace(InputWorkspace='__normalizedData',OutputWorkspace=_outWS_name)
             if self.getProperty('KeepTemporaryWorkspaces').value:
                 RenameWorkspaces(InputWorkspaces=['__data','__norm'],
                                  WorkspaceNames=[_outWS_name+'_data', _outWS_name+'_normalization'])
@@ -358,35 +304,23 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         # remove temp workspaces
         [DeleteWorkspace(ws) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
 
-    def _generate_UBList(self):
-        CreateSingleValuedWorkspace(OutputWorkspace='__ub')
-        LoadIsawUB('__ub',self.getProperty("UBMatrix").value)
-        ub=mtd['__ub'].sample().getOrientedLattice().getUB().copy()
-        DeleteWorkspace(Workspace='__ub')
-
-        symOps = self.getProperty("SymmetryOps").value
-        if symOps:
-            try:
-                symOps = SpaceGroupFactory.subscribedSpaceGroupSymbols(int(symOps))[0]
-            except ValueError:
-                pass
-            if SpaceGroupFactory.isSubscribedSymbol(symOps):
-                symOps = SpaceGroupFactory.createSpaceGroup(symOps).getSymmetryOperations()
-            else:
-                symOps = SymmetryOperationFactory.createSymOps(symOps)
-            logger.information('Using symmetries: '+str([sym.getIdentifier() for sym in symOps]))
-
-            ub_list=[]
-            for sym in symOps:
-                UBtrans = np.zeros((3,3))
-                UBtrans[0] = sym.transformHKL([1,0,0])
-                UBtrans[1] = sym.transformHKL([0,1,0])
-                UBtrans[2] = sym.transformHKL([0,0,1])
-                UBtrans=np.matrix(UBtrans.T)
-                ub_list.append(ub*UBtrans)
-            return ub_list
-        else:
-            return [ub]
+    def load_file_and_apply(self, filename, ws_name):
+        Load(Filename=filename,
+             OutputWorkspace=ws_name,
+             FilterByTofMin=self.getProperty("FilterByTofMin").value,
+             FilterByTofMax=self.getProperty("FilterByTofMax").value)
+        if self._load_inst:
+            LoadInstrument(Workspace=ws_name, Filename=self.getProperty("LoadInstrument").value, RewriteSpectraMap=False)
+        if self._apply_cal:
+            ApplyCalibration(Workspace=ws_name, PositionTable=self.getProperty("ApplyCalibration").value)
+        if self._detcal:
+            LoadIsawDetCal(InputWorkspace=ws_name, Filename=self.getProperty("DetCal").value)
+        if self._copy_params:
+            CopyInstrumentParameters(OutputWorkspace=ws_name, InputWorkspace=self.getProperty("CopyInstrumentParameters").value)
+        MaskDetectors(Workspace=ws_name,MaskedWorkspace='__sa')
+        ConvertUnits(InputWorkspace=ws_name,OutputWorkspace=ws_name,Target='Momentum')
+        CropWorkspaceForMDNorm(InputWorkspace=ws_name,OutputWorkspace=ws_name,XMin=self.XMin,XMax=self.XMax)
+        LoadIsawUB(ws_name,self.getProperty("UBMatrix").value)
 
 
 AlgorithmFactory.subscribe(SingleCrystalDiffuseReduction)
