@@ -87,3 +87,6 @@ class TableWorkspaceDisplayModel:
         if is_v3d:
             data = self._get_v3d_from_str(data)
         self.ws.setCell(row, col, data)
+
+    def workspace_equals(self, workspace_name):
+        return self.ws.name() == workspace_name

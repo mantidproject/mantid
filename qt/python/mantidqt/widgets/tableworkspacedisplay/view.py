@@ -13,7 +13,7 @@ import sys
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QVariant, Qt
+from qtpy.QtCore import QVariant, Qt, Signal, Slot
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox,
                             QStyledItemDelegate, QTableWidget)
@@ -37,6 +37,9 @@ class PreciseDoubleFactory(QItemEditorFactory):
 
 
 class TableWorkspaceDisplayView(QTableWidget):
+    close_signal = Signal()
+    repaint_signal = Signal()
+
     def __init__(self, presenter, parent=None, name=''):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
@@ -54,11 +57,37 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
 
-        self.resize(600, 400)
-        self.show()
+        self.close_signal.connect(self._run_close)
+        self.repaint_signal.connect(self._run_repaint)
 
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
+
+        self.resize(600, 400)
+        self.show()
+
+    def close_later(self):
+        """
+        Emits a close signal to the main GUI thread that triggers the built-in close method.
+
+        This function can be called from outside the main GUI thread. It is currently
+        used to close the window when the relevant workspace is deleted.
+
+        When the signal is emitted, the execution returns to the GUI thread, and thus
+        GUI code can be executed.
+        """
+        self.close_signal.emit()
+
+    def repaint_later(self):
+        self.repaint_signal.emit()
+
+    @Slot()
+    def _run_close(self):
+        self.close()
+
+    @Slot()
+    def _run_repaint(self):
+        self.viewport().update()
 
     def resizeEvent(self, _):
         header = self.horizontalHeader()

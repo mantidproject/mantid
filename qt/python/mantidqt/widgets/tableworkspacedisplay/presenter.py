@@ -12,10 +12,11 @@ from __future__ import absolute_import, division, print_function
 from functools import partial
 
 from qtpy.QtCore import Qt
-from mantid.kernel import logger
 
+from mantid.kernel import logger
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
 from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
+from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
@@ -39,7 +40,7 @@ class TableWorkspaceDisplay(object):
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = 'Column {}'
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None):
         """
         Creates a display for the provided workspace.
 
@@ -59,6 +60,11 @@ class TableWorkspaceDisplay(object):
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
 
+        if ads_observer:
+            self.ads_observer = ads_observer
+        else:
+            self.ads_observer = WorkspaceDisplayADSObserver(self)
+
         self.update_column_headers()
         self.load_data(self.view)
 
@@ -74,6 +80,24 @@ class TableWorkspaceDisplay(object):
         :raises ValueError: if the workspace is not supported
         """
         return TableWorkspaceDisplayModel.supports(ws)
+
+    def close(self, workspace_name):
+        if self.model.workspace_equals(workspace_name):
+            # if the observer is not cleared here then the C++ object is never freed,
+            # and observers keep getting created, and triggering on ADS events
+            self.ads_observer = None
+            self.view.close_later()
+
+    def force_close(self):
+        self.ads_observer = None
+        self.view.close_later()
+
+    def replace_workspace(self, workspace_name, workspace):
+        if self.model.workspace_equals(workspace_name):
+            print("TableWorkspace replaced.")
+            self.model = TableWorkspaceDisplayModel(workspace)
+            self.load_data(self.view)
+            self.view.repaint_later()
 
     def handleItemChanged(self, item):
         """
