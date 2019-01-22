@@ -11,6 +11,7 @@
 
 #include "IndirectFitOutputOptionsModel.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
@@ -19,8 +20,11 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {
 
-/// Note that the number of labels must be equal to the numberOfSpectra given to
-/// a workspace
+std::size_t const NUMBER_OF_WORKSPACES(2);
+int const NUMBER_OF_SPECTRA(3);
+
+std::size_t toSizet(int value) { return static_cast<std::size_t>(value); }
+
 std::vector<std::string> getThreeAxisLabels() {
   return {"Amplitude", "HWHM", "PeakCentre"};
 }
@@ -30,6 +34,7 @@ getExpectedAllSpectra(std::size_t const &numberOfWorkspaces,
                       std::size_t const &numberOfSpectra,
                       std::string const &workspaceName = "") {
   std::vector<SpectrumToPlot> spectraToPlot;
+  spectraToPlot.reserve(numberOfWorkspaces * numberOfSpectra);
   for (auto i = 0u; i < numberOfWorkspaces; ++i)
     for (auto j = 0u; j < numberOfSpectra; ++j)
       spectraToPlot.emplace_back(std::make_pair(workspaceName, j));
@@ -41,6 +46,7 @@ getExpectedParameterSpectra(std::size_t const &numberOfWorkspaces,
                             std::size_t const &index,
                             std::string const &workspaceName = "") {
   std::vector<SpectrumToPlot> spectraToPlot;
+  spectraToPlot.reserve(numberOfWorkspaces);
   for (auto i = 0u; i < numberOfWorkspaces; ++i)
     spectraToPlot.emplace_back(std::make_pair(workspaceName, index));
   return spectraToPlot;
@@ -62,10 +68,15 @@ public:
   }
 
   void setUp() override {
+    m_groupWorkspace = createGroupWorkspaceWithTextAxes(
+        NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA);
     m_model = std::make_unique<IndirectFitOutputOptionsModel>();
   }
 
-  void tearDown() override { m_model.reset(); }
+  void tearDown() override {
+    m_groupWorkspace.reset();
+    m_model.reset();
+  }
 
   void
   test_that_the_model_is_instantiated_without_stored_workspaces_or_spectraToPlot() {
@@ -75,25 +86,17 @@ public:
   }
 
   void test_that_setResultWorkspace_will_set_the_stored_result_group() {
-    auto const resultGroup = createGroupWorkspace(2, 3);
-
-    m_model->setResultWorkspace(resultGroup);
-
-    TS_ASSERT_EQUALS(m_model->getResultWorkspace(), resultGroup);
+    m_model->setResultWorkspace(m_groupWorkspace);
+    TS_ASSERT_EQUALS(m_model->getResultWorkspace(), m_groupWorkspace);
   }
 
   void test_that_setPDFWorkspace_will_set_the_stored_PDF_group() {
-    auto const pdfGroup = createGroupWorkspace(2, 3);
-
-    m_model->setPDFWorkspace(pdfGroup);
-
-    TS_ASSERT_EQUALS(m_model->getPDFWorkspace(), pdfGroup);
+    m_model->setPDFWorkspace(m_groupWorkspace);
+    TS_ASSERT_EQUALS(m_model->getPDFWorkspace(), m_groupWorkspace);
   }
 
   void test_that_removePDFWorkspace_will_remove_the_stored_PDF_workspace() {
-    auto const pdfGroup = createGroupWorkspace(2, 3);
-
-    m_model->setPDFWorkspace(pdfGroup);
+    m_model->setPDFWorkspace(m_groupWorkspace);
     m_model->removePDFWorkspace();
 
     TS_ASSERT(!m_model->getPDFWorkspace());
@@ -101,16 +104,14 @@ public:
 
   void
   test_that_isResultGroupPlottable_returns_true_if_it_contains_a_workspace_with_more_than_one_data_point() {
-    auto const resultGroup = createGroupWorkspace(2, 3, 10);
-
-    m_model->setResultWorkspace(resultGroup);
-
+    m_model->setResultWorkspace(m_groupWorkspace);
     TS_ASSERT(m_model->isResultGroupPlottable());
   }
 
   void
   test_that_isResultGroupPlottable_returns_false_if_it_does_not_contain_a_workspace_with_more_than_one_data_point() {
-    auto const resultGroup = createGroupWorkspace(2, 3, 1);
+    auto const resultGroup = createGroupWorkspaceWithTextAxes(
+        NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA, 1);
 
     m_model->setResultWorkspace(resultGroup);
 
@@ -119,16 +120,14 @@ public:
 
   void
   test_that_isPDFGroupPlottable_returns_true_if_it_contains_a_workspace_with_more_than_one_data_point() {
-    auto const pdfGroup = createGroupWorkspace(2, 3, 10);
-
-    m_model->setPDFWorkspace(pdfGroup);
-
+    m_model->setPDFWorkspace(m_groupWorkspace);
     TS_ASSERT(m_model->isPDFGroupPlottable());
   }
 
   void
   test_that_isPDFGroupPlottable_returns_false_if_it_does_not_contain_a_workspace_with_more_than_one_data_point() {
-    auto const pdfGroup = createGroupWorkspace(2, 3, 1);
+    auto const pdfGroup = createGroupWorkspaceWithTextAxes(
+        NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA, 1);
 
     m_model->setPDFWorkspace(pdfGroup);
 
@@ -136,10 +135,7 @@ public:
   }
 
   void test_that_clearSpectraToPlot_will_remove_the_stored_spectraToPlot() {
-    auto const resultGroup =
-        createGroupWorkspaceWithTextAxes(2, getThreeAxisLabels(), 3);
-
-    m_model->setResultWorkspace(resultGroup);
+    m_model->setResultWorkspace(m_groupWorkspace);
     m_model->plotResult("Amplitude");
     m_model->clearSpectraToPlot();
 
@@ -148,8 +144,8 @@ public:
 
   void
   test_that_getSpectraToPlot_will_return_an_empty_vector_if_none_of_the_workspaces_are_plottable() {
-    auto const resultGroup =
-        createGroupWorkspaceWithTextAxes(2, getThreeAxisLabels(), 3, 1);
+    auto const resultGroup = createGroupWorkspaceWithTextAxes(
+        NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA, 1);
 
     m_model->setResultWorkspace(resultGroup);
     m_model->plotResult("Amplitude");
@@ -159,10 +155,7 @@ public:
 
   void
   test_that_getSpectraToPlot_will_return_an_empty_vector_if_the_parameter_passed_does_not_exist() {
-    auto const resultGroup =
-        createGroupWorkspaceWithTextAxes(2, getThreeAxisLabels(), 3);
-
-    m_model->setResultWorkspace(resultGroup);
+    m_model->setResultWorkspace(m_groupWorkspace);
     m_model->plotResult("Not a parameter");
 
     TS_ASSERT(m_model->getSpectraToPlot().empty());
@@ -170,51 +163,44 @@ public:
 
   void
   test_that_getSpectraToPlot_will_return_a_vector_with_the_correct_number_of_spectra_information_when_plotting_all() {
-    auto const resultGroup =
-        createGroupWorkspaceWithTextAxes(2, getThreeAxisLabels(), 3);
-
-    m_model->setResultWorkspace(resultGroup);
+    m_model->setResultWorkspace(m_groupWorkspace);
     m_model->plotResult("All");
 
     /// Here the size should be equal to numberOfWorkspaces * numberOfSpectra as
     /// it plots all the spectra in each of the workspaces
-    TS_ASSERT_EQUALS(m_model->getSpectraToPlot().size(), 6)
+    auto const expectedSize = NUMBER_OF_WORKSPACES * toSizet(NUMBER_OF_SPECTRA);
+    TS_ASSERT_EQUALS(m_model->getSpectraToPlot().size(), expectedSize);
   }
 
   void
   test_that_getSpectraToPlot_will_return_a_vector_with_the_correct_number_of_spectra_information_when_plotting_a_parameter() {
-    auto const resultGroup =
-        createGroupWorkspaceWithTextAxes(2, getThreeAxisLabels(), 3);
-
-    m_model->setResultWorkspace(resultGroup);
+    m_model->setResultWorkspace(m_groupWorkspace);
     m_model->plotResult("Amplitude");
 
     /// Here the size should be equal to the numberOfWorkspaces as it will be
     /// plotting one spectra from each workspace
-    TS_ASSERT_EQUALS(m_model->getSpectraToPlot().size(), 2)
+    TS_ASSERT_EQUALS(m_model->getSpectraToPlot().size(), NUMBER_OF_WORKSPACES);
   }
 
   void
   test_that_getSpectraToPlot_will_return_a_vector_containing_the_correct_spectra_indices_when_plotting_all() {
-    auto const resultGroup =
-        createGroupWorkspaceWithTextAxes(2, getThreeAxisLabels(), 3);
-
-    m_model->setResultWorkspace(resultGroup);
+    m_model->setResultWorkspace(m_groupWorkspace);
     m_model->plotResult("All");
 
-    TS_ASSERT_EQUALS(m_model->getSpectraToPlot(), getExpectedAllSpectra(2, 3))
+    TS_ASSERT_EQUALS(
+        m_model->getSpectraToPlot(),
+        getExpectedAllSpectra(NUMBER_OF_WORKSPACES, NUMBER_OF_SPECTRA));
   }
 
   void
   test_that_getSpectraToPlot_will_return_a_vector_containing_the_correct_spectra_indices_when_plotting_a_parameter() {
-    auto const resultGroup =
-        createGroupWorkspaceWithTextAxes(2, getThreeAxisLabels(), 3);
+    m_model->setResultWorkspace(m_groupWorkspace);
+    m_model->plotResult("HWHM");
 
-    m_model->setResultWorkspace(resultGroup);
-    m_model->plotResult("HWHM"); /// This parameter has a workspace index of 1
-
-    TS_ASSERT_EQUALS(m_model->getSpectraToPlot(),
-                     getExpectedParameterSpectra(2, 1))
+    auto const parameterIndex(1); /// This parameter has a workspace index of 1
+    TS_ASSERT_EQUALS(
+        m_model->getSpectraToPlot(),
+        getExpectedParameterSpectra(NUMBER_OF_WORKSPACES, parameterIndex));
   }
 
   void test_that_plotResult_will_throw_when_there_is_no_result_workspace_set() {
@@ -237,22 +223,18 @@ public:
 
   void
   test_that_getWorkspaceParameters_will_return_the_axis_labels_of_the_result_group() {
+    m_model->setResultWorkspace(m_groupWorkspace);
+
     auto const axisLabels = getThreeAxisLabels();
-    auto const resultGroup = createGroupWorkspaceWithTextAxes(2, axisLabels, 3);
-
-    m_model->setResultWorkspace(resultGroup);
-
     TS_ASSERT_EQUALS(m_model->getWorkspaceParameters("Result Group"),
                      axisLabels);
   }
 
   void
   test_that_getWorkspaceParameters_will_return_the_axis_labels_of_the_pdf_group() {
+    m_model->setPDFWorkspace(m_groupWorkspace);
+
     auto const axisLabels = getThreeAxisLabels();
-    auto const pdfGroup = createGroupWorkspaceWithTextAxes(2, axisLabels, 3);
-
-    m_model->setPDFWorkspace(pdfGroup);
-
     TS_ASSERT_EQUALS(m_model->getWorkspaceParameters("PDF Group"), axisLabels);
   }
 
@@ -263,19 +245,25 @@ public:
 
   void
   test_that_getPDFWorkspaceNames_will_return_the_expected_workspace_names_when_the_pdf_group_is_set() {
-    auto const pdfGroup =
-        createGroupWorkspaceWithTextAxes(2, getThreeAxisLabels(), 3);
-
-    m_model->setPDFWorkspace(pdfGroup);
+    m_model->setPDFWorkspace(m_groupWorkspace);
 
     /// Note that the names are blank because the workspaces haven't been named
     for (auto const &name : m_model->getPDFWorkspaceNames())
       TS_ASSERT_EQUALS(name, "");
   }
 
-  void test_test() {}
+  void
+  test_that_isResultGroupSelected_returns_true_when_passed_the_result_group_string() {
+    TS_ASSERT(m_model->isResultGroupSelected("Result Group"));
+  }
+
+  void
+  test_that_isResultGroupSelected_returns_false_when_passed_the_pdf_group_string() {
+    TS_ASSERT(!m_model->isResultGroupSelected("PDF Group"));
+  }
 
 private:
+  WorkspaceGroup_sptr m_groupWorkspace;
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
 };
 
