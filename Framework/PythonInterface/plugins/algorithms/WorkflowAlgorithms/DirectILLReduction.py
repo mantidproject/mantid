@@ -11,13 +11,15 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, StringListValidator)
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
-                              DetectorEfficiencyCorUser, Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon,
-                              Transpose)
+                              DetectorEfficiencyCorUser, Divide, GenerateGroupingPowder, GroupDetectors, MaskDetectors, Rebin, Scale,
+                              SofQWNormalisedPolygon, Transpose)
 import math
 import numpy
+import os
 from scipy import constants
+import tempfile
 
 
 def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
@@ -40,53 +42,11 @@ def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
     return scaledWS
 
 
-def _createDetectorGroups(ws):
-    """Find workspace indices with (almost) same theta and group them. Masked
-    detectors are ignored.
-    """
-    numHistograms = ws.getNumberHistograms()
-    groups = list()
-    detectorGrouped = numHistograms * [False]
-    spectrumInfo = ws.spectrumInfo()
-    twoThetas = numpy.empty(numHistograms)
-    for i in range(numHistograms):
-        det = ws.getDetector(i)
-        twoThetas[i] = ws.detectorTwoTheta(det)
-    for i in range(numHistograms):
-        if spectrumInfo.isMasked(i) or detectorGrouped[i]:
-            continue
-        twoTheta1 = twoThetas[i]
-        currentGroup = [ws.getDetector(i).getID()]
-        twoThetaDiff = numpy.abs(twoThetas[i + 1:] - twoTheta1)
-        equalTwoThetas = numpy.flatnonzero(twoThetaDiff < 0.01 / 180.0 * constants.pi)
-        for j in (i + 1) + equalTwoThetas:
-            if spectrumInfo.isMasked(int(j)):
-                continue
-            currentGroup.append(ws.getDetector(int(j)).getID())
-            detectorGrouped[j] = True
-        groups.append(currentGroup)
-    return groups
-
-
 def _deltaQ(ws):
     """Estimate a q bin width for a S(theta, w) workspace."""
     deltaTheta = _medianDeltaTheta(ws)
     wavelength = ws.run().getProperty('wavelength').value
     return 2.0 * constants.pi / wavelength * deltaTheta
-
-
-def _detectorGroupsToXml(groups, instrument):
-    """Create grouping pattern XML tree from detector groups."""
-    from xml.etree import ElementTree
-    rootElement = ElementTree.Element('detector-grouping', {'instrument': 'IN5'})
-    for group in groups:
-        name = str(group.pop())
-        groupElement = ElementTree.SubElement(rootElement, 'group', {'name': name})
-        detIds = name
-        for detId in group:
-            detIds += ',' + str(detId)
-        ElementTree.SubElement(groupElement, 'detids', {'val': detIds})
-    return rootElement
 
 
 def _energyBinning(ws, algorithmLogging):
@@ -156,13 +116,6 @@ def _rebin(ws, params, wsNames, algorithmLogging):
     return rebinnedWS
 
 
-def _writeXml(element, filename):
-    """Write XML element to a file."""
-    from xml.etree import ElementTree
-    with open(filename, mode='wb') as outFile:
-        ElementTree.ElementTree(element).write(outFile)
-
-
 class DirectILLReduction(DataProcessorAlgorithm):
     """A data reduction workflow algorithm for the direct geometry TOF spectrometers at ILL."""
 
@@ -218,32 +171,26 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Convert units from TOF to energy.
         progress.report('Converting to energy')
-        mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup,
-                                          subalgLogging)
+        mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # KiKf conversion.
-        mainWS = self._correctByKiKf(mainWS, wsNames,
-                                     wsCleanup, subalgLogging)
+        mainWS = self._correctByKiKf(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Rebinning.
         progress.report('Rebinning in energy')
-        mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, report,
-                                subalgLogging)
+        mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Divide the energy transfer workspace by bin widths.
         mainWS = self._convertToDistribution(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Detector efficiency correction.
         progress.report('Correcting detector efficiency')
-        mainWS = self._correctByDetectorEfficiency(mainWS, wsNames,
-                                                   wsCleanup, subalgLogging)
+        mainWS = self._correctByDetectorEfficiency(mainWS, wsNames, wsCleanup, subalgLogging)
 
         progress.report('Grouping detectors')
-        mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup,
-                                      subalgLogging)
+        mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
-        self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup,
-                                       subalgLogging)
+        self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup, subalgLogging)
 
         progress.report('Converting to q')
         mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, report, subalgLogging)
@@ -257,6 +204,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
+        positiveFloat = FloatBoundedValidator(0., exclusive=True)
 
         # Properties.
         self.declareProperty(MatrixWorkspaceProperty(
@@ -304,6 +252,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace for masking.')
+        self.declareProperty(name=common.PROP_GROUPING_ANGLE_STEP,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             doc='A scattering angle step to which to group detectors, in degrees.')
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, PROPGROUP_REBINNING)
@@ -407,26 +359,39 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.finalCleanup()
         report.toLog(self.log())
 
-    def _groupDetectors(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _groupDetectors(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Group detectors with similar thetas."""
-        import os
-        import tempfile
-        groups = _createDetectorGroups(mainWS)
-        instrumentName = mainWS.getInstrument().getName()
-        groupsXml = _detectorGroupsToXml(groups, instrumentName)
-        fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrumentName))
-        _writeXml(groupsXml, path)
+        instrument = mainWS.getInstrument()
+        fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrument.getName()))
+        # We don't need the handle, just the path.
         os.close(fileHandle)
-        groupedWSName = wsNames.withSuffix('grouped_detectors')
-        groupedWS = GroupDetectors(InputWorkspace=mainWS,
-                                   OutputWorkspace=groupedWSName,
-                                   MapFile=path,
-                                   KeepUngroupedSpectra=False,
-                                   Behaviour='Average',
-                                   EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        os.remove(path)
-        return groupedWS
+        angleStepProperty = self.getProperty(common.PROP_GROUPING_ANGLE_STEP)
+        if angleStepProperty.isDefault:
+            if instrument.hasParameter('natural-angle-step'):
+                angleStep = instrument.getNumberParameter('natural-angle-step', recursive=False)[0]
+                report.notice('Using grouping angle step of {} degrees from the IPF.'.format(angleStep))
+            else:
+                angleStep = 0.01
+                report.notice('Using the default grouping angle step of {} degrees.'.format(angleStep))
+        else:
+            angleStep = angleStepProperty.value
+        GenerateGroupingPowder(InputWorkspace=mainWS,
+                               AngleStep=angleStep,
+                               GroupingFilename=path,
+                               GenerateParFile=False,
+                               EnableLogging=subalgLogging)
+        try:
+            groupedWSName = wsNames.withSuffix('grouped_detectors')
+            groupedWS = GroupDetectors(InputWorkspace=mainWS,
+                                       OutputWorkspace=groupedWSName,
+                                       MapFile=path,
+                                       KeepUngroupedSpectra=False,
+                                       Behaviour='Average',
+                                       EnableLogging=subalgLogging)
+            wsCleanup.cleanup(mainWS)
+            return groupedWS
+        finally:
+            os.remove(path)
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
         """Return the raw input workspace."""
@@ -450,8 +415,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                               subalgLogging)
         return vanaNormalizedWS
 
-    def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup,
-                                  subalgLogging):
+    def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """
         If requested, convert the spectrum axis to theta and save the result
         into the proper output property.
@@ -466,7 +430,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             self.setProperty(common.PROP_OUTPUT_THETA_W_WS, thetaWS)
             wsCleanup.cleanup(thetaWS)
 
-    def _rebinInW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _rebinInW(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Rebin the horizontal axis of a workspace."""
         if self.getProperty(common.PROP_REBINNING_PARAMS_W).isDefault:
             binBorders = _energyBinning(mainWS, subalgLogging)

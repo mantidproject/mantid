@@ -33,6 +33,7 @@ Improvements
 - :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
 - The upper limit of the empty container scaling factor in :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` has been removed.
 - :ref:`DirectILLCollectData <algm-DirectILLCollectData>` now automatically disables incident energy calibration and normalises to time instead of monitor counts if the monitor counts are deemed too low.
+- The new property in :ref:`DirectILLReduction <algm-DirectILLReduction>`, ``GroupingAngleStep``, allows one to specify a :math:`2\theta` step for detector grouping. By default, a step of 0.01 degrees or the value of ``natural-angle-step`` instrument parameter is used.
 
 Bugfixes
 ########
