@@ -64,6 +64,7 @@ class MockQTableView:
 
 
 class MockMatrixWorkspaceDisplayView:
+
     def __init__(self):
         self.set_context_menu_actions = Mock()
         self.table_x = MockQTableView()
@@ -71,6 +72,7 @@ class MockMatrixWorkspaceDisplayView:
         self.table_e = MockQTableView()
         self.set_model = Mock()
         self.ask_confirmation = None
+        self.close_later = Mock()
 
 
 class MockMatrixWorkspaceDisplayModel:

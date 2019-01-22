@@ -21,6 +21,16 @@ from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedi
     MockMatrixWorkspaceDisplayView, MockQTableView
 
 
+def with_mock_presenter(func):
+    def wrapper(self, *args):
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        presenter = MatrixWorkspaceDisplay(ws, view=view)
+        return func(self, ws, view, presenter, *args)
+
+    return wrapper
+
+
 class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -39,11 +49,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
     @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
-    def test_action_copy_spectrum_values(self, mock_copy, mock_show_mouse_toast):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
-
+    @with_mock_presenter
+    def test_action_copy_spectrum_values(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
 
         # two rows are selected in different positions
@@ -63,10 +70,9 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
     @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
-    def test_action_copy_spectrum_values_no_selection(self, mock_copy, mock_show_mouse_toast):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+    @with_mock_presenter
+    def test_action_copy_spectrum_values_no_selection(self, ws, view, presenter, mock_copy,
+                                                      mock_show_mouse_toast):
 
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
@@ -83,10 +89,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
     @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
-    def test_action_copy_bin_values(self, mock_copy, mock_show_mouse_toast):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+    @with_mock_presenter
+    def test_action_copy_bin_values(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
 
         # two columns are selected at different positions
@@ -108,11 +112,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
     @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
-    def test_action_copy_bin_values_no_selection(self, mock_copy, mock_show_mouse_toast):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
-
+    @with_mock_presenter
+    def test_action_copy_bin_values_no_selection(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
         mock_table.mock_selection_model.selectedColumns = Mock()
@@ -128,10 +129,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
     @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
-    def test_action_copy_cell(self, mock_copy, mock_show_mouse_toast):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+    @with_mock_presenter
+    def test_action_copy_cell(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
 
         # two columns are selected at different positions
@@ -147,10 +146,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
     @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
-    def test_action_copy_cell_no_selection(self, mock_copy, mock_show_mouse_toast):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+    @with_mock_presenter
+    def test_action_copy_cell_no_selection(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
 
@@ -313,6 +310,11 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
         self.assertNotCalled(mock_plot)
+
+    @with_mock_presenter
+    def test_close(self, ws, view, presenter):
+        presenter.close()
+        view.close_later.assert_called_once_with()
 
 
 if __name__ == '__main__':

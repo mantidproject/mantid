@@ -554,9 +554,10 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.plot.mock_ax.legend.assert_called_once_with()
 
     @with_mock_presenter()
-    def test_close(self,  ws, view, twd):
+    def test_close(self, ws, view, twd):
         twd.close()
         view.close_later.assert_called_once_with()
+
 
 if __name__ == '__main__':
     unittest.main()
