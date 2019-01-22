@@ -33,6 +33,6 @@ def find_all_windows_that_are_savable():
     for window in windows:
         encoder_class = EncoderFactory.find_encoder(window)
         if encoder_class is not None:
-            list_of_windows_and_encoder.append((window, encoder_class()))
+            list_of_windows_and_encoder.append((window, encoder_class))
 
     return list_of_windows_and_encoder
