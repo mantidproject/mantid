@@ -88,6 +88,7 @@ Improvements
 - The documentation in :ref:`EventFiltering` and :ref:`FilterEvents <algm-FilterEvents>` have been extensively rewritten to aid in understanding what the code does.
 - All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``).
 - Various clarifications and additional links in the geometry and material documentation pages
+- :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
 
 Bugfixes
 ########
@@ -145,7 +146,7 @@ Improvements
 - :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
 - :ref:`Functions <FitFunctionsInPython>` may now have their constraint penalties for fitting set in python using ``function.setConstraintPenaltyFactor("parameterName", double)``.
 - :py:obj:`mantid.kernel.Logger` now handles unicode in python2
-
+- It is now possible to build custom materials with :class:`mantid.kernel.MaterialBuilder` without setting a formula or atomic number. In this case, all cross sections and number density have to be given.
 
 Bugfixes
 ########
