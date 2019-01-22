@@ -7,11 +7,11 @@
 #ifndef INSTRUMENTWIDGETRENDERTAB_H_
 #define INSTRUMENTWIDGETRENDERTAB_H_
 
+#include "ColorBar.h"
 #include "ColorMap.h"
 #include "InstrumentWidgetTab.h"
 
 #include "MantidQtWidgets/Common/GraphOptions.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 class QPushButton;
 class QLineEdit;
@@ -30,7 +30,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentWidget;
 class BinDialog;
-class DraggableColorBarWidget;
 
 /**
  * Implements the Render tab in InstrumentWidget.
@@ -41,12 +40,13 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab
 
 public:
   explicit InstrumentWidgetRenderTab(InstrumentWidget *instrWindow);
-  ~InstrumentWidgetRenderTab() override;
+  ~InstrumentWidgetRenderTab();
   void initSurface() override;
   void saveSettings(QSettings &) const override;
   void loadSettings(const QSettings &) override;
-  GraphOptions::ScaleType getScaleType() const;
-  void setScaleType(GraphOptions::ScaleType type);
+  // legacy interface for MantidPlot python api
+  ColorMap::ScaleType getScaleType() const;
+  void setScaleType(ColorMap::ScaleType type);
   void setAxis(const QString &axisName);
   bool areAxesOn() const;
   void setupColorBar(const ColorMap &, double, double, double, bool);
@@ -107,7 +107,7 @@ private: // methods
 private: // members
   QPushButton *m_surfaceTypeButton;
   QPushButton *mSaveImage;
-  DraggableColorBarWidget *m_colorMapWidget;
+  ColorBar *m_colorBarWidget;
   QFrame *m_resetViewFrame;
   QComboBox *mAxisCombo;
   QCheckBox *m_flipCheckBox;

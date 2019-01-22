@@ -9,10 +9,10 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -36,6 +36,7 @@ const double TOL = 1.0e-8;
 namespace Mantid {
 namespace Algorithms {
 
+using namespace DataObjects;
 using namespace HistogramData;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(He3TubeEfficiency)
@@ -45,13 +46,6 @@ He3TubeEfficiency::He3TubeEfficiency()
     : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr),
       m_shapeCache(), m_samplePos(), m_spectraSkipped(), m_progress(nullptr) {
   m_shapeCache.clear();
-}
-
-/// Destructor
-He3TubeEfficiency::~He3TubeEfficiency() {
-  if (m_progress) {
-    delete m_progress;
-  }
 }
 
 /**
@@ -107,7 +101,7 @@ void He3TubeEfficiency::exec() {
   m_outputWS = this->getProperty("OutputWorkspace");
 
   if (m_outputWS != m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<API::MatrixWorkspace>(*m_inputWS);
   }
 
   // Get the detector parameters
@@ -125,7 +119,7 @@ void He3TubeEfficiency::exec() {
   }
 
   std::size_t numHists = m_inputWS->getNumberHistograms();
-  m_progress = new API::Progress(this, 0.0, 1.0, numHists);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHists);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
@@ -425,7 +419,7 @@ void He3TubeEfficiency::execEvent() {
 
   std::size_t numHistograms = m_outputWS->getNumberHistograms();
   auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
-  m_progress = new API::Progress(this, 0.0, 1.0, numHistograms);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHistograms);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {

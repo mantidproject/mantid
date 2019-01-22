@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
@@ -15,7 +15,7 @@ from six import with_metaclass
 #----------------------------------------------------------------------
 
 
-class ISISMuonAnalysisGrouping(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class ISISMuonAnalysisGrouping(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
     """A base class for the ISIS Muon Analysis tests
 
     The workflow is defined in the runTest() method, simply

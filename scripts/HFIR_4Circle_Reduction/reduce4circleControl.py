@@ -15,6 +15,7 @@
 #
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
+import bisect
 try:
     # python3
     from urllib.request import urlopen
@@ -25,13 +26,17 @@ except ImportError:
     from urllib2 import HTTPError
     from urllib2 import URLError
 from six.moves import range
+import math
 import csv
 import random
 import os
+import numpy
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
+from HFIR_4Circle_Reduction.peakprocesshelper import SinglePointPeakIntegration
+from HFIR_4Circle_Reduction.peakprocesshelper import SinglePtScansIntegrationOperation
 from HFIR_4Circle_Reduction import fputility
 from HFIR_4Circle_Reduction import project_manager
 from HFIR_4Circle_Reduction import peak_integration_utility
@@ -42,6 +47,7 @@ import mantid
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
+from numpy import *
 
 
 DebugMode = True
@@ -63,6 +69,22 @@ def check_str_type(variable, var_name):
                                       ''.format(var_name, type(var_name))
     assert isinstance(variable, str), '{0} {1} must be an string but not a {2}' \
                                       ''.format(var_name, variable, type(variable))
+
+    return
+
+
+def check_float_type(variable, var_name):
+    """
+    check whether a variable is an integer
+    :except AssertionError:
+    :param variable:
+    :param var_name:
+    :return:
+    """
+    assert isinstance(var_name, str), 'Variable name {0} must be an integer but not a {1}' \
+                                      ''.format(var_name, type(var_name))
+    assert isinstance(variable, int) or isinstance(variable, float), '{0} {1} must be an integer but not a {2}' \
+                                                                     ''.format(var_name, variable, type(variable))
 
     return
 
@@ -138,10 +160,20 @@ class CWSCDReductionControl(object):
 
         # Peak Info
         self._myPeakInfoDict = dict()
+        # Loaded peak information dictionary
+        self._myLoadedPeakInfoDict = dict()
+        # Sample log value look up table
+        self._2thetaLookupTable = dict()
         # Last UB matrix calculated
         self._myLastPeakUB = None
         # Flag for data storage
         self._cacheDataOnly = False
+        # Single PT scan integration:
+        # example:  key = exp_number, scan_number, pt_number, roi_name][integration direction]
+        #           value = vec_x, vec_y, cost, params
+        self._single_pt_integration_dict = dict()
+        # workspace for a exp, scan_numbers, roi_name
+        self._single_pt_matrix_dict = dict()
 
         # Dictionary to store survey information
         self._scanSummaryList = list()
@@ -168,8 +200,15 @@ class CWSCDReductionControl(object):
 
         # reference workspace for LoadMask
         self._refWorkspaceForMask = None
-        # Region of interest: key = (experiment, scan), value = RegionOfInterest instance
+        # Region of interest: key = roi name, value = RegionOfInterest instance
         self._roiDict = dict()
+
+        # single point peak integration related
+        self._two_theta_scan_dict = dict()
+        self._scan_2theta_set = set()
+        self._two_theta_sigma = None  # a 2-tuple vector for (2theta, gaussian-sigma)
+        self._current_single_pt_integration_key = None
+        self._curr_2theta_fwhm_func = None
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface", "4-Circle Reduction", False)
@@ -233,6 +272,26 @@ class CWSCDReductionControl(object):
 
         return
 
+    @staticmethod
+    def generate_single_pt_scans_key(exp_number, scan_number_list, roi_name, integration_direction):
+        """
+        generate a unique but repeatable key for multiple single-pt scans
+        :param exp_number:
+        :param scan_number_list:
+        :param roi_name:
+        :param integration_direction:
+        :return:
+        """
+        # do some math to scan numbers
+        check_list('Scan numbers', scan_number_list)
+        scan_number_vec = numpy.array(scan_number_list)
+        unique = numpy.sum(scan_number_vec, axis=0)
+
+        ws_key = 'e{}_s{}-{}:{}_{}_{}'.format(exp_number, scan_number_list[0], scan_number_list[-1], unique,
+                                              roi_name, integration_direction)
+
+        return ws_key
+
     def add_k_shift_vector(self, k_x, k_y, k_z):
         """
         Add a k-shift vector
@@ -295,6 +354,26 @@ class CWSCDReductionControl(object):
 
         return
 
+    def check_2theta_fwhm_formula(self, formula):
+        """
+        check whether a formula can be used to calculate FWHM from 2theta.
+        If it is a valid formula, set as a class variable
+        :param formula:
+        :return: 2-tuple
+        """
+        assert isinstance(formula, str), '2theta-FWHM formula {} must be a string but not a {}' \
+                                         ''.format(formula, type(formula))
+
+        try:
+            equation = 'lambda x: {}'.format(formula)
+            fwhm_func = eval(equation)
+        except SyntaxError as syn_err:
+            return False, 'Unable to accept 2theta-FWHM formula {} due to {}'.format(formula, syn_err)
+
+        self._curr_2theta_fwhm_func = fwhm_func
+
+        return True, None
+
     def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
         :param exp_number:
@@ -305,8 +384,9 @@ class CWSCDReductionControl(object):
         This part will be redo as 11847_Load_HB3A_Experiment
         """
         # Check & set pt. numbers
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        check_int_type(exp_number, 'Experiment number')
+        check_int_type(scan_number, 'Scan Number')
+
         if pt_number_list is None:
             status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
             assert status, 'Unable to get Pt numbers from scan %d.' % scan_number
@@ -362,6 +442,137 @@ class CWSCDReductionControl(object):
 
         return False, 'Unable to find first Pt file {0}'.format(first_xm_file)
 
+    def calculate_intensity_single_pt(self, exp_number, scan_number, pt_number, roi_name, ref_fwhm, is_fwhm):
+        """
+        calculate single-point-measurement peak/scan's intensity
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :param ref_fwhm:
+        :param is_fwhm:
+        :return:
+        """
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer.'.format(scan_number)
+        assert isinstance(pt_number, int), 'Pt number {0} must be an integer'.format(pt_number)
+        assert isinstance(roi_name, str), 'ROI name {0} must be a string'.format(roi_name)
+        check_float_type(ref_fwhm, 'Reference FWHM')
+
+        # check whether the detector counts has been calculated and get the value
+        if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
+            raise RuntimeError('Exp {0} Scan {1} Pt {2} ROI {3} does not exist in single-point integration '
+                               'dictionary, whose keys are {4}'.format(exp_number, scan_number, pt_number, roi_name,
+                                                                       self._single_pt_integration_dict.keys()))
+
+        integration_record = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+        # integration_record.set_ref_peak_width(ref_fwhm, is_fwhm)
+
+        # params = integration_record
+        #
+        # # get 2theta value from
+        # two_theta = self.get_sample_log_value(exp_number, scan_number, pt_number, '2theta')
+        # ref_exp_number, ref_scan_number, integrated_peak_params = self.get_integrated_scan_params(exp_number,
+        #                                                                                           two_theta,
+        #                                                                                           resolution=0.01)
+        peak_intensity = peak_integration_utility.calculate_single_pt_scan_peak_intensity(
+            integration_record.get_pt_intensity(), ref_fwhm, is_fwhm)
+        integration_record.set_peak_intensity(peak_intensity)
+
+        return peak_intensity
+
+    def get_single_scan_pt_model(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
+        """ get a single-pt scan summed 1D data either vertically or horizontally with model data
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :param integration_direction:
+        :return: 2-tuple.. vector model
+        """
+        # get record key
+        ws_record_key = self._current_single_pt_integration_key
+        print('[DB...BAT] Retrieve ws record key: {}'.format(ws_record_key))
+
+        # TODO - 20180814 - Check pt number, rio name and integration direction
+
+        if ws_record_key in self._single_pt_matrix_dict:
+            # check integration manager
+            integration_manager = self._single_pt_matrix_dict[ws_record_key]
+            assert integration_manager.exp_number == exp_number, 'blabla'
+        else:
+            raise RuntimeError('Last single-pt integration manager (key) {} does not exist.'
+                               .format(ws_record_key))
+
+        matrix_ws = AnalysisDataService.retrieve(integration_manager.get_model_workspace())
+        ws_index = integration_manager.get_spectrum_number(scan_number, from_zero=True)
+
+        vec_x = matrix_ws.readX(ws_index)
+        vec_model = matrix_ws.readY(ws_index)
+
+        return vec_x, vec_model
+
+    def get_single_scan_pt_summed(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
+        """ get a single scan Pt. 's on-detector in-roi integration result
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :param integration_direction: vector X, vector Y (raw), vector Y (model)
+        :return:
+        """
+        integration_record = self.get_single_pt_info(exp_number, scan_number, pt_number, roi_name,
+                                                     integration_direction)
+
+        vec_x, vec_y = integration_record.get_vec_x_y()
+
+        return vec_x, vec_y
+
+    def get_single_pt_info(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
+        """ get the integrated single-pt scan data
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :return:
+        """
+        try:
+            peak_info = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+        except KeyError:
+            err_message = 'Exp {0} Scan {1} Pt {2} ROI {3} does not exit in Single-Pt-Integration dictionary ' \
+                          'which has keys: {4}'.format(exp_number, scan_number, pt_number, roi_name,
+                                                       self._single_pt_integration_dict.keys())
+            raise RuntimeError(err_message)
+        try:
+            peak_info = peak_info[integration_direction]
+        except KeyError:
+            err_message = 'Exp {0} Scan {1} Pt {2} ROI {3} does not have integration direction {4}' \
+                          'in Single-Pt-Integration dictionary which has keys: {5}' \
+                          ''.format(exp_number, scan_number, pt_number, roi_name, integration_direction,
+                                    sorted(peak_info.keys()))
+            raise RuntimeError(err_message)
+
+        return peak_info
+
+    def calculate_peak_integration_sigma(self, two_theta):
+        """
+        calculate Gaussian-Sigma for single-measurement peak integration by linear interpolation
+        :param two_theta:
+        :return: float
+        """
+        if self._two_theta_sigma is None:
+            raise RuntimeError('2-theta Gaussian-sigma curve has not been set')
+
+        # do a linear interpolation
+        interp_sigma = numpy.interp(two_theta, self._two_theta_sigma[0], self._two_theta_sigma[1])
+
+        print ('[DB...BAT] 2theta = {0}: output sigma = {1}'.format(two_theta, interp_sigma))
+        print ('[DB...BAT] X = {0}, Y = {1}'.format(self._two_theta_sigma[0], self._two_theta_sigma[1]))
+
+        return interp_sigma
+
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
         Calculate UB matrix
@@ -388,8 +599,8 @@ class CWSCDReductionControl(object):
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_UB_Peak'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name,
-                                    index_from_spice=True, hkl_to_int=True)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
+        #                            index_from_spice=True, hkl_to_int=True)
 
         # Calculate UB matrix
         try:
@@ -596,13 +807,13 @@ class CWSCDReductionControl(object):
 
         return mask_ws_name
 
-    def does_file_exist(self, exp_number, scan_number, pt_number=None):
+    def does_spice_files_exist(self, exp_number, scan_number, pt_number=None):
         """
         Check whether data file for a scan or pt number exists on the
         :param exp_number: experiment number or None (default to current experiment number)
         :param scan_number:
         :param pt_number: if None, check SPICE file; otherwise, detector xml file
-        :return:
+        :return: boolean (exist?) and string (file name)
         """
         # check inputs
         assert isinstance(exp_number, int) or pt_number is None
@@ -622,14 +833,15 @@ class CWSCDReductionControl(object):
             except AttributeError:
                 raise AttributeError('Unable to create SPICE file name from directory %s and file name %s.'
                                      '' % (self._dataDir, spice_file_name))
+
         else:
-            # pt number given, then check
+            # pt number given, then check whether the XML file for Pt exists
             xml_file_name = get_det_xml_file_name(self._instrumentName, exp_number, scan_number,
                                                   pt_number)
             file_name = os.path.join(self._dataDir, xml_file_name)
         # END-IF
 
-        return os.path.exists(file_name)
+        return os.path.exists(file_name), file_name
 
     @staticmethod
     def estimate_background(pt_intensity_dict, bg_pt_list):
@@ -652,6 +864,15 @@ class CWSCDReductionControl(object):
         avg_bg = float(bg_sum) / len(bg_pt_list)
 
         return avg_bg
+
+    def get_surveyed_scans(self):
+        """
+        get list of scans that are surveyed
+        :return:
+        """
+        scan_number_list = [info[1] for info in self._scanSummaryList]
+
+        return scan_number_list
 
     def get_ub_matrix(self, exp_number):
         """ Get UB matrix assigned to an experiment
@@ -749,33 +970,31 @@ class CWSCDReductionControl(object):
 
         return move_tup[1]
 
-    def export_to_fullprof(self, exp_number, scan_number_list, user_header,
-                           export_absorption, fullprof_file_name, high_precision):
+    # TEST Me - This need a lot of work because of single-pt scans
+    def export_to_fullprof(self, exp_number, scan_roi_list, user_header,
+                           export_absorption, fullprof_file_name, high_precision,
+                           integration_direction='vertical'):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
-        :param scan_number_list:
+        :param scan_roi_list: list of 2-tuple: (1) scan number (2) roi/mask name
         :param user_header:
-        :param export_absorption:
+        :param export_absorption: requiring UB matrix
         :param fullprof_file_name:
         :param high_precision: flag to write peak intensity as f18.5 if true; otherwise, output as f8.2
         :return: 2-tuples. status and return object ((mixed) file content or error message)
         """
         # check
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
-        assert isinstance(scan_number_list, list), 'Scan number list must be a list but not %s.' \
-                                                   '' % str(type(scan_number_list))
-        assert len(scan_number_list) > 0, 'Scan number list must larger than 0, but ' \
-                                          'now %d. ' % len(scan_number_list)
+        assert isinstance(scan_roi_list, list), 'Scan number list must be a list but not %s.' \
+                                                '' % str(type(scan_roi_list))
+        assert len(scan_roi_list) > 0, 'Scan number list must larger than 0'
 
         # get wave-length
-        try:
-            exp_wave_length = self.get_wave_length(exp_number, scan_number_list)
-        except RuntimeError as error:
-            return False, 'RuntimeError: %s.' % str(error)
+        scan_number_list = [t[0] for t in scan_roi_list]
+        exp_wave_length = self.get_wave_length(exp_number, scan_number_list)
 
         # get the information whether there is any k-shift vector specified by user
-
         # form k-shift and peak intensity information
         scan_kindex_dict = dict()
         k_shift_dict = dict()
@@ -789,27 +1008,46 @@ class CWSCDReductionControl(object):
 
         error_message = 'Number of scans with k-shift must either be 0 (no shift at all) or ' \
                         'equal to or larger than the number scans to export.'
-        assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) >= len(scan_number_list), error_message
+        assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) >= len(scan_roi_list), error_message
 
         # form peaks
         no_shift = len(scan_kindex_dict) == 0
 
-        # get ub matrix
-        ub_matrix = self.get_ub_matrix(exp_number)
+        # get ub matrix in the case of export absorption
+        if export_absorption:
+            try:
+                ub_matrix = self.get_ub_matrix(exp_number)
+            except RuntimeError as err:
+                raise RuntimeError('It is required to have UB matrix set up for exporting absorption\n(error '
+                                   'message: {0}'.format(err))
+        else:
+            ub_matrix = None
 
-        mixed_content = None
+        mixed_content = 'Nothing is written'
         for algorithm_type in ['simple', 'mixed', 'gauss']:
             # set list of peaks for exporting
             peaks = list()
-            for scan_number in scan_number_list:
+            for scan_number, roi_name in scan_roi_list:
+                # create a single peak information dictionary for
                 peak_dict = dict()
-                try:
-                    peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)].get_hkl(user_hkl=True)
-                except RuntimeError as run_err:
-                    return False, str('Peak index error: %s.' % run_err)
 
-                intensity, std_dev = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity(
-                    algorithm_type, lorentz_corrected=True)
+                # get peak-info object
+                if (exp_number, scan_number) in self._myPeakInfoDict:
+                    peak_info = self._myPeakInfoDict[exp_number, scan_number]
+                else:
+                    pt_number = 1
+                    peak_info = self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name]
+                    peak_info = peak_info[integration_direction]
+
+                # get HKL
+                try:
+                    peak_dict['hkl'] = peak_info.get_hkl(user_hkl=True)
+                    # self._myPeakInfoDict[(exp_number, scan_number)].get_hkl(user_hkl=True)
+                except RuntimeError as run_err:
+                    raise RuntimeError('Peak index error: {0}.'.format(run_err))
+
+                intensity, std_dev = peak_info.get_intensity(algorithm_type, lorentz_corrected=True)
+                # self._myPeakInfoDict[(exp_number, scan_number)]
 
                 if intensity < std_dev:
                     # error is huge, very likely bad gaussian fit
@@ -841,23 +1079,18 @@ class CWSCDReductionControl(object):
             # get file name for this type
             this_file_name = fullprof_file_name.split('.')[0] + '_' + algorithm_type + '.dat'
 
-            try:
-                file_content = fputility.write_scd_fullprof_kvector(
-                    user_header=user_header, wave_length=exp_wave_length,
-                    k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                    fp_file_name=this_file_name, with_absorption=export_absorption,
-                    high_precision=high_precision)
-                if algorithm_type == 'mixed':
-                    mixed_content = file_content
-            except AssertionError as error:
-                return False, 'AssertionError: %s.' % str(error)
-            except RuntimeError as error:
-                return False, 'RuntimeError: %s.' % str(error)
+            file_content = fputility.write_scd_fullprof_kvector(
+                user_header=user_header, wave_length=exp_wave_length,
+                k_vector_dict=k_shift_dict, peak_dict_list=peaks,
+                fp_file_name=this_file_name, with_absorption=export_absorption,
+                high_precision=high_precision)
+            if algorithm_type == 'mixed':
+                mixed_content = file_content
 
             continue
         # END-FOR
 
-        return True, mixed_content
+        return mixed_content
 
     def export_md_data(self, exp_number, scan_number, base_file_name):
         """
@@ -883,6 +1116,76 @@ class CWSCDReductionControl(object):
 
         return out_file_name
 
+    def find_scans_by_2theta(self, exp_number, two_theta, resolution, excluded_scans):
+        """
+        find scans by 2theta (same or similar)
+        :param exp_number:
+        :param two_theta:
+        :param resolution:
+        :param excluded_scans:
+        :return:
+        """
+        # check inputs
+        assert isinstance(exp_number, int), 'Exp number {0} must be integer'.format(exp_number)
+        assert isinstance(two_theta, float), '2-theta {0} must be a float.'.format(two_theta)
+        assert isinstance(resolution, float), 'Resolution {0} must be a float.'.format(resolution)
+        assert isinstance(excluded_scans, list), 'Excluded scans {0} must be a list.'.format(excluded_scans)
+
+        # get the list of scans in the memory
+        have_change = False
+        for scan_sum in self._scanSummaryList:
+            # get scan number
+            scan_number = scan_sum[1]
+            pt_number = scan_sum[2]
+            if scan_number in self._scan_2theta_set:
+                # already parsed
+                continue
+
+            have_change = True
+            # get 2theta
+            two_theta_i = float(self.get_sample_log_value(exp_number, scan_number, pt_number, '2theta'))
+            self._two_theta_scan_dict[two_theta_i] = scan_number
+            self._scan_2theta_set.add(scan_number)
+        # END-FOR
+
+        # check as an exception whether there are multiple scans with exactly same two theta
+        if len(self._two_theta_scan_dict) != len(self._scan_2theta_set):
+            raise RuntimeError('Exception case: scans with exactly same 2theta!  FindScanBy2Theta fails!')
+
+        # sort 2thetas and index two thetas within a certain range
+        two_theta_list = numpy.array(sorted(self._two_theta_scan_dict.keys()))
+
+        min_2theta = two_theta - resolution
+        max_2theta = two_theta + resolution
+
+        min_index = bisect.bisect_left(two_theta_list, min_2theta)
+        max_index = bisect.bisect_left(two_theta_list, max_2theta)
+
+        # debug output
+        if have_change:
+            pass
+        #     print('[DB...BAT] Dict size = {0}; Scan set size = {1}'.format(len(self._two_theta_scan_dict),
+        #                                                                    len(self._scan_2theta_set)))
+        #     print('[DB...BAT] 2theta list: {0}'.format(two_theta_list))
+
+        # print ('[DB..BAT] Input 2theta = {0}; 2-thetas in range: {1}'
+        #        ''.format(two_theta, two_theta_list[min_index:max_index]))
+        # print ('[DB...BAT] index range: {0}, {1}'.format(min_index, max_index))
+
+        scans_set = set([self._two_theta_scan_dict[two_theta_j] for two_theta_j in two_theta_list[min_index:max_index]])
+        # print ('[DB...BAT] Find scans: {0}  Excluded scans {1}'.format(scans_set, set(excluded_scans)))
+        scans_set = scans_set - set(excluded_scans)
+        # print ('[DB...BAT] Find scans: {0}'.format(scans_set))
+
+        # matched scans by removing single-pt scans
+        matched_scans = list(scans_set)
+        for scan_number in matched_scans:
+            spice_table = self._get_spice_workspace(exp_number, scan_number)
+            if spice_table.rowCount() == 1:
+                matched_scans.remove(scan_number)
+
+        return matched_scans
+
     def get_experiment(self):
         """
         Get experiment number
@@ -899,8 +1202,8 @@ class CWSCDReductionControl(object):
         # Check
         if exp_no is None:
             exp_no = self._expNumber
-        assert isinstance(exp_no, int)
-        assert isinstance(scan_no, int)
+        assert isinstance(exp_no, int), 'Experiment number {0} must be an integer'.format(exp_no)
+        assert isinstance(scan_no, int), 'Scan number {0}  must be an integer'.format(scan_no)
 
         # Get workspace
         status, ret_obj = self.load_spice_scan_file(exp_no, scan_no)
@@ -971,7 +1274,8 @@ class CWSCDReductionControl(object):
 
         if roi_name not in self._roiDict:
             # ROI: not saved
-            raise RuntimeError('ROI not here blabla')
+            raise RuntimeError('ROI {0} is not in ROI dictionary which has keys {1}'
+                               ''.format(roi_name, self._roiDict.keys()))
 
         # check...
         lower_left_corner = self._roiDict[roi_name].lower_left_corner
@@ -982,9 +1286,16 @@ class CWSCDReductionControl(object):
 
         return lower_left_corner, upper_right_corner
 
+    def get_region_of_interest_list(self):
+        """
+        Get the list of all the ROIs defined
+        :return:
+        """
+        return sorted(self._roiDict.keys())
+
     def get_sample_log_value(self, exp_number, scan_number, pt_number, log_name):
         """
-        Get sample log's value
+        Get sample log's value from merged data!
         :param exp_number:
         :param scan_number:167
         :param pt_number:
@@ -995,16 +1306,29 @@ class CWSCDReductionControl(object):
         assert isinstance(scan_number, int)
         assert isinstance(pt_number, int)
         assert isinstance(log_name, str)
-        try:
-            status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
-            assert status
-            md_ws_name = get_merged_md_name(self._instrumentName, exp_number,
-                                            scan_number, pt_number_list)
-            md_ws = AnalysisDataService.retrieve(md_ws_name)
-        except KeyError as ke:
-            return 'Unable to find log value %s due to %s.' % (log_name, str(ke))
 
-        return md_ws.getExperimentInfo(0).run().getProperty(log_name).value
+        # access data from SPICE table
+        # TODO FIXME THIS IS A HACK!
+        if log_name == '2theta':
+            spice_table_name = get_spice_table_name(exp_number, scan_number)
+            print ('[DB...BAT] Scan {0} Spice Table {1}'.format(scan_number, spice_table_name))
+            spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
+            log_value = spice_table_ws.toDict()[log_name][0]
+
+        else:
+
+            try:
+                status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
+                assert status
+                md_ws_name = get_merged_md_name(self._instrumentName, exp_number,
+                                                scan_number, pt_number_list)
+                md_ws = AnalysisDataService.retrieve(md_ws_name)
+            except KeyError as ke:
+                return 'Unable to find log value %s due to %s.' % (log_name, str(ke))
+
+            log_value = md_ws.getExperimentInfo(0).run().getProperty(log_name).value
+
+        return log_value
 
     def get_merged_data(self, exp_number, scan_number, pt_number_list):
         """
@@ -1040,11 +1364,11 @@ class CWSCDReductionControl(object):
 
     def get_peak_info(self, exp_number, scan_number, pt_number=None):
         """
-        get PeakInfo instance
+        get PeakInfo instance, which including
         :param exp_number: experiment number
         :param scan_number:
         :param pt_number:
-        :return: PeakInfo instance or None
+        :return: peakprocesshelper.PeakProcessRecord or None
         """
         # Check for type
         assert isinstance(exp_number, int), 'Experiment %s must be an integer but not of type %s.' \
@@ -1110,6 +1434,59 @@ class CWSCDReductionControl(object):
         # END-FOR
 
         return vec_x, vec_y
+
+    def get_peak_integration_parameters(self, xlabel='2theta', ylabel=None, with_error=True):
+        """
+        get the parameters from peak integration
+        :param xlabel: parameter name for x value
+        :param ylabel: parameter name for y value
+        :param with_error: If true, then output error
+        :return:
+        """
+        # convert all kinds of y-label to a list of strings for y-label
+        if ylabel is None:
+            ylabel = ['sigma']
+        elif isinstance(ylabel, str):
+            ylabel = [ylabel]
+
+        # create list of output
+        param_list = list()
+        for (exp_number, scan_number) in self._myPeakInfoDict.keys():
+            peak_int_info = self._myPeakInfoDict[exp_number, scan_number]
+
+            # x value
+            try:
+                x_value = peak_int_info.get_parameter(xlabel)[0]
+            except RuntimeError as run_err:
+                print ('[ERROR] Exp {} Scan {}: {}'.format(exp_number, scan_number, run_err))
+                continue
+
+            # set up
+            scan_i = [x_value]
+
+            for param_name in ylabel:
+                if param_name.lower() == 'scan':
+                    # scan number
+                    y_value = scan_number
+                    scan_i.append(y_value)
+                else:
+                    # parameter name
+                    y_value, e_value = peak_int_info.get_parameter(param_name.lower())
+                    scan_i.append(y_value)
+                    if with_error:
+                        scan_i.append(e_value)
+            # END-FOR
+            param_list.append(scan_i)
+        # END-FOR
+
+        if len(param_list) == 0:
+            raise RuntimeError('No integrated peak is found')
+
+        # convert to a matrix
+        param_list.sort()
+        xye_matrix = numpy.array(param_list)
+
+        return xye_matrix
 
     def generate_mask_workspace(self, exp_number, scan_number, roi_start, roi_end, mask_tag=None):
         """ Generate a mask workspace
@@ -1285,6 +1662,23 @@ class CWSCDReductionControl(object):
             has = False
 
         return has
+
+    def import_2theta_gauss_sigma_file(self, twotheta_sigma_file_name):
+        """ import a 2theta-sigma column file
+        :param twotheta_sigma_file_name:
+        :return: (numpy.array, numpy.array) : vector X and vector y
+        """
+        assert isinstance(twotheta_sigma_file_name, str), 'Input file name {0} must be a string but not a {1}.' \
+                                                          ''.format(twotheta_sigma_file_name,
+                                                                    type(twotheta_sigma_file_name))
+        if os.path.exists(twotheta_sigma_file_name) is False:
+            raise RuntimeError('2theta-sigma file {0} does not exist.'.format(twotheta_sigma_file_name))
+
+        vec_2theta, vec_sigma = numpy.loadtxt(twotheta_sigma_file_name, delimiter=' ', usecols=(0, 1), unpack=True)
+        # TODO - 20180814 - shall be noted as single-pt scan...
+        self._two_theta_sigma = vec_2theta, vec_sigma
+
+        return vec_2theta, vec_sigma
 
     def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
@@ -1490,6 +1884,220 @@ class CWSCDReductionControl(object):
 
         return peak_intensity, gauss_bkgd, info_str
 
+    def integrate_single_pt_scans_detectors_counts(self, exp_number, scan_number_list, roi_name, integration_direction,
+                                                   fit_gaussian):
+        """
+        integrate a list of single-pt scans detector counts with fit with Gaussian function as an option
+        :param exp_number:
+        :param scan_number_list:
+        :param roi_name:
+        :param integration_direction:
+        :param fit_gaussian:
+        :return: a dictionary of peak height
+        """
+        # check inputs
+        check_list('Scan numbers', scan_number_list)
+
+        # get the workspace key.  if it does exist, it means there is no need to sum the data but just get from dict
+        ws_record_key = self.generate_single_pt_scans_key(exp_number, scan_number_list, roi_name,
+                                                          integration_direction)
+        print ('[DB...BAT] Retrieve ws record key: {}'.format(ws_record_key))
+
+        if ws_record_key in self._single_pt_matrix_dict:
+            # it does exist.  get the workspace name
+            integration_manager = self._single_pt_matrix_dict[ws_record_key]
+            out_ws_name = integration_manager.get_workspace()
+            print ('[DB...TRACE] workspace key {} does exist: workspace name = {}'
+                   ''.format(ws_record_key, out_ws_name))
+        else:
+            # it does not exist.  sum over all the scans and create the workspace
+            out_ws_name = 'Exp{}_Scan{}-{}_{}_{}'.format(exp_number, scan_number_list[0], scan_number_list[-1],
+                                                         roi_name, integration_direction)
+
+            print('[DB...TRACE] workspace key {} does not exist. Integrate and generate workspace {}.'
+                  ''.format(ws_record_key, out_ws_name))
+
+            # initialize the vectors to form a Mantid Workspace2D
+            appended_vec_x = None
+            appended_vec_y = None
+            appended_vec_e = None
+
+            scan_spectrum_map = dict()
+            spectrum_scan_map = dict()
+
+            for ws_index, scan_number in enumerate(scan_number_list):
+
+                scan_spectrum_map[scan_number] = ws_index
+                spectrum_scan_map[ws_index] = scan_number
+
+                pt_number = 1
+                self.integrate_detector_image(exp_number, scan_number, pt_number, roi_name,
+                                              integration_direction=integration_direction,
+                                              fit_gaussian=fit_gaussian)
+
+                # create a workspace
+                det_integration_info = \
+                    self._single_pt_integration_dict[(exp_number, scan_number, pt_number, roi_name)][
+                        integration_direction]
+                vec_x, vec_y = det_integration_info.get_vec_x_y()
+                if appended_vec_x is None:
+                    appended_vec_x = vec_x
+                    appended_vec_y = vec_y
+                    appended_vec_e = numpy.sqrt(vec_y)
+                else:
+                    appended_vec_x = numpy.concatenate((appended_vec_x, vec_x), axis=0)
+                    appended_vec_y = numpy.concatenate((appended_vec_y, vec_y), axis=0)
+                    appended_vec_e = numpy.concatenate((appended_vec_e, numpy.sqrt(vec_y)), axis=0)
+                # END-IF
+            # END-FOR
+
+            # create workspace
+            mantidsimple.CreateWorkspace(DataX=appended_vec_x, DataY=appended_vec_y,
+                                         DataE=appended_vec_e, NSpec=len(scan_number_list),
+                                         OutputWorkspace=out_ws_name)
+
+            # record the workspace
+            integration_manager = SinglePtScansIntegrationOperation(exp_number, scan_number_list, out_ws_name,
+                                                                    scan_spectrum_map, spectrum_scan_map)
+
+            self._single_pt_matrix_dict[ws_record_key] = integration_manager
+            self._current_single_pt_integration_key = ws_record_key
+        # END-IF-ELSE
+
+        # about result: peak height
+        peak_height_dict = dict()
+        for scan_number in scan_number_list:
+            peak_height_dict[scan_number] = 0.
+
+        # fit gaussian
+        if fit_gaussian:
+            # for mantid Gaussian, 'peakindex', 'Height', 'PeakCentre', 'Sigma', 'A0', 'A1', 'chi2'
+            fit_result_dict, model_ws_name = peak_integration_utility.fit_gaussian_linear_background_mtd(out_ws_name)
+            # digest fit parameters
+            for ws_index in sorted(fit_result_dict.keys()):
+                scan_number = integration_manager.get_scan_number(ws_index, from_zero=True)
+                integrate_record_i = \
+                    self._single_pt_integration_dict[(exp_number, scan_number, 1, roi_name)][integration_direction]
+                integrate_record_i.set_fit_cost(fit_result_dict[ws_index]['chi2'])
+                integrate_record_i.set_fit_params(x0=fit_result_dict[ws_index]['PeakCentre'],
+                                                  sigma=fit_result_dict[ws_index]['Sigma'],
+                                                  a0=fit_result_dict[ws_index]['A0'],
+                                                  a1=fit_result_dict[ws_index]['A1'],
+                                                  height=fit_result_dict[ws_index]['Height'])
+                peak_height_dict[scan_number] = fit_result_dict[ws_index]['Height']
+            # END-FOR
+
+            # workspace
+            integration_manager.set_model_workspace(model_ws_name)
+
+            # print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}, integrated = {2} +/- {3}'
+            #        ''.format(cost, params, integrated_intensity, intensity_error))
+        # END-IF
+
+        return peak_height_dict
+
+    def integrate_detector_image(self, exp_number, scan_number, pt_number, roi_name, fit_gaussian,
+                                 integration_direction):
+        """ Integrate detector counts on detector image inside a given ROI.
+        Integration is either along X-direction (summing along rows) or Y-direction (summing along columns)
+        Peak fitting is removed from this method
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :param fit_gaussian:
+        :param integration_direction: horizontal (integrate along X direction) or vertical (integrate along Y direction)
+        :return:
+        """
+        # check data loaded with mask information
+        does_loaded = self.does_raw_loaded(exp_number, scan_number, pt_number, roi_name)
+        if not does_loaded:
+            # load SPICE table
+            self.load_spice_scan_file(exp_number, scan_number)
+            # load Pt xml
+            self.load_spice_xml_file(exp_number, scan_number, pt_number)
+        # END-IF
+
+        # check integration direction
+        assert isinstance(integration_direction, str) and integration_direction in ['vertical', 'horizontal'],\
+            'Integration direction {} (now of type {}) must be a string equal to eiether vertical or horizontal' \
+            ''.format(integration_direction, type(integration_direction))
+
+        # check whether the first step integration been done
+        roi_key = exp_number, scan_number, pt_number, roi_name
+        if roi_key in self._single_pt_integration_dict\
+                and integration_direction in self._single_pt_integration_dict[roi_key]:
+            sum_counts = False
+        else:
+            sum_counts = True
+
+        # Get data and plot
+        if sum_counts:
+            raw_det_data = self.get_raw_detector_counts(exp_number, scan_number, pt_number)
+            assert isinstance(raw_det_data, numpy.ndarray), 'A matrix must be an ndarray but not {0}.' \
+                                                            ''.format(type(raw_det_data))
+            roi_lower_left, roi_upper_right = self.get_region_of_interest(roi_name)
+
+            data_in_roi = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]]
+            print('IN ROI: Data set shape: {}'.format(data_in_roi.shape))
+
+            if integration_direction == 'horizontal':
+                # FIXME - This works!
+                # integrate peak along row
+                print(roi_lower_left[1], roi_upper_right[1])
+                vec_x = numpy.array(range(roi_lower_left[1], roi_upper_right[1]))
+                vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]].sum(
+                    axis=0)
+            elif integration_direction == 'vertical':
+                # integrate peak along column
+                # FIXME - This doesn't work!
+                print(roi_lower_left[0], roi_upper_right[0])
+                vec_x = numpy.array(range(roi_lower_left[0], roi_upper_right[0]))
+                vec_y = raw_det_data[roi_lower_left[0]:roi_upper_right[0], roi_lower_left[1]:roi_upper_right[1]].sum(
+                    axis=1)
+                print('[DB...BAT] Vec X shape: {};  Vec Y shape: {}'.format(vec_x.shape, vec_y.shape))
+            else:
+                # wrong
+                raise NotImplementedError('It is supposed to be unreachable.')
+            # END-IF-ELSE
+
+            # initialize integration record
+            # get 2theta
+            two_theta = self.get_sample_log_value(self._expNumber, scan_number, pt_number, '2theta')
+            # create SinglePointPeakIntegration
+            integrate_record = SinglePointPeakIntegration(exp_number, scan_number, roi_name, pt_number, two_theta)
+            integrate_record.set_xy_vector(vec_x, vec_y, integration_direction)
+            # add the _single_pt_integration_dict()
+            if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
+                self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name] = dict()
+            self._single_pt_integration_dict[exp_number, scan_number, pt_number, roi_name][integration_direction] = \
+                integrate_record
+        # else:
+        #     # retrieve the integration record from previously saved
+        #     integrate_record = self._single_pt_integration_dict[roi_key][integration_direction]
+        #     # vec_x, vec_y = integrate_record.get_vec_x_y()
+        # END-IF
+
+        # if fit_gaussian:
+        #     cost, params, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y,
+        #                                                                                        numpy.sqrt(vec_y))
+        #     gaussian_a = params[2]
+        #     gaussian_sigma = params[1]
+        #     integrated_intensity, intensity_error = \
+        #         peak_integration_utility.calculate_peak_intensity_gauss(gaussian_a, gaussian_sigma)
+        #     print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}, integrated = {2} +/- {3}'
+        #            ''.format(cost, params, integrated_intensity, intensity_error))
+        #
+        # else:
+        #     cost = -1
+        #     params = dict()
+        #     integrated_intensity = 0.
+        #
+        # integrate_record.set_fit_cost(cost)
+        # integrate_record.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
+
+        return
+
     @staticmethod
     def load_scan_survey_file(csv_file_name):
         """ Load scan survey from a csv file
@@ -1579,6 +2187,21 @@ class CWSCDReductionControl(object):
         self._add_spice_workspace(exp_no, scan_no, spice_table_ws)
 
         return True, out_ws_name
+
+    def remove_pt_xml_workspace(self, exp_no, scan_no, pt_no):
+        """
+        remove the Workspace2D loaded from SPICE XML detector file
+        :param exp_no:
+        :param scan_no:
+        :param pt_no:
+        :return:
+        """
+        pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
+
+        if AnalysisDataService.doesExist(pt_ws_name):
+            AnalysisDataService.remove(pt_ws_name)
+
+        return
 
     def load_spice_xml_file(self, exp_no, scan_no, pt_no, xml_file_name=None):
         """
@@ -1831,6 +2454,21 @@ class CWSCDReductionControl(object):
         self.set_roi(mask_tag, roi_range[0], roi_range[1])
 
         return roi_range
+
+    def load_peak_integration_table(self, table_file_name):
+        """
+        load peak integration table
+        :param table_file_name:
+        :return:
+        """
+        # load to a dictionary
+        try:
+            scan_peak_dict = peak_integration_utility.read_peak_integration_table_csv(table_file_name)
+            self._myLoadedPeakInfoDict.update(scan_peak_dict)
+        except RuntimeError as run_error:
+            return False, 'Failed to read: {0}'.format(run_error)
+
+        return True, None
 
     def load_preprocessed_scan(self, exp_number, scan_number, md_dir, output_ws_name):
         """ load preprocessed scan from hard disk
@@ -2174,6 +2812,30 @@ class CWSCDReductionControl(object):
 
         return
 
+    def get_2theta_fwhm_data(self, min_2theta, res_2theta, max_2theta):
+        """
+
+        :param min_2theta:
+        :param max_2theta:
+        :return:
+        """
+        if self._curr_2theta_fwhm_func is None:
+            # user inputs smoothed data for interpolation
+            raise RuntimeError(blabla)
+
+        else:
+            # user inputs math equation as model
+            print ('[DB...BAT] Prepare to evaluate 2theta-FWHM model {}'.format(self._curr_2theta_fwhm_func))
+
+            vec_2theta = numpy.arange(min_2theta, max_2theta, res_2theta)
+            vec_model = self._curr_2theta_fwhm_func(vec_2theta)
+
+        # END-IF-ELSE
+
+        vec_fwhm = None
+
+        return vec_2theta, vec_fwhm, vec_model
+
     def get_calibrated_det_center(self, exp_number):
         """
         get calibrated/user-specified detector center or the default center
@@ -2400,6 +3062,33 @@ class CWSCDReductionControl(object):
 
         # Set up
         self._myUBMatrixDict[exp_number] = ub_matrix
+
+        return
+
+    def set_single_measure_peak_width(self, exp_number, scan_number, pt_number, roi_name, gauss_sigma, is_fhwm=False):
+        """
+        set peak width (Gaussian sigma value) to single-measurement peak
+        :param scan_number:
+        :param gauss_sigma:
+        :param is_fhwm:
+        :return:
+        """
+        # check input
+        fourcircle_utility.check_integer('Experiment number', exp_number)
+        fourcircle_utility.check_integer('Scan number', scan_number)
+        fourcircle_utility.check_float('Gaussian-sigma', gauss_sigma)
+        fourcircle_utility.check_string('ROI name', roi_name)
+
+        # get the single-measurement integration instance
+        dict_key = exp_number, scan_number, pt_number, roi_name
+        if dict_key in self._single_pt_integration_dict:
+            int_record = self._single_pt_integration_dict[dict_key]
+        else:
+            raise RuntimeError('Scan number {0} shall be in the single-pt integration dictionary.  Keys are {1}.'
+                               ''.format(scan_number, self._single_pt_integration_dict.keys()))
+
+        # set sigma: SinglePointPeakIntegration
+        int_record.set_ref_fwhm(gauss_sigma, is_fhwm)
 
         return
 
@@ -2667,7 +3356,7 @@ class CWSCDReductionControl(object):
             file_name = '%s.csv' % file_name
 
         # Write file
-        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q', 'Sample T']
+        titles = ['Max Counts', 'Scan', 'Max Counts Pt', 'H', 'K', 'L', 'Q', 'Sample T', '2-theta']
         with open(file_name, 'w') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(titles)
@@ -2684,28 +3373,6 @@ class CWSCDReductionControl(object):
 
         return
 
-    # def save_roi(self, roi_name, region_of_interest):
-    #     """
-    #     Save region of interest to controller for future use
-    #     :param roi_name:
-    #     :param region_of_interest: a 2-tuple for 2-tuple as lower-left and upper-right corners of the region
-    #     :return:
-    #     """
-    #     # check
-    #     assert isinstance(roi_name, str), 'Tag {0} must be a string {1}'.format(roi_name, type(roi_name))
-    #
-    #
-    #     # save ROI to ROI dictionary
-    #     self._roiDict[roi_name] = region_of_interest
-    #
-    #     # if ROI already been used to mask detectors, then need to change mask workspace dictionary
-    #     if self.RESERVED_ROI_NAME in self._maskWorkspaceDict:
-    #         self._maskWorkspaceDict[roi_name] = self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
-    #         del self._maskWorkspaceDict[self.RESERVED_ROI_NAME]
-    #     # END-IF
-    #
-    #     return
-
     def save_roi_to_file(self, exp_number, scan_number, tag, file_name):
         """
         save ROI to file
@@ -2717,10 +3384,6 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check input
-        # assert isinstance(exp_number, int), 'Experiment number {0} shall be an integer but not a {1}' \
-        #                                     ''.format(exp_number, type(exp_number))
-        # assert isinstance(scan_number, int), 'Scan number {0} shall be an integer but not a {1}' \
-        #                                      ''.format(scan_number, type(scan_number))
         assert isinstance(tag, str), 'Tag {0} shall be a string but not a {1}'.format(tag, type(tag))
         assert isinstance(file_name, str), 'File name {0} shall be a string but not a {1}' \
                                            ''.format(file_name, type(file_name))
@@ -2839,16 +3502,18 @@ class CWSCDReductionControl(object):
         # END-IF
 
         # create a PeakInfo instance if it does not exist
-        peak_info = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
-        self._myPeakInfoDict[(exp_number, scan_number)] = peak_info
+        two_theta = self.get_sample_log_value(exp_number, scan_number, 1, '2theta')
+        self._2thetaLookupTable[two_theta] = exp_number, scan_number
+        self._myPeakInfoDict[(exp_number, scan_number)] = PeakProcessRecord(exp_number, scan_number, peak_ws_name,
+                                                                            two_theta)
 
         # set the other information
-        peak_info.set_data_ws_name(md_ws_name)
-        err_msg = peak_info.calculate_peak_center()
+        self._myPeakInfoDict[(exp_number, scan_number)].set_data_ws_name(md_ws_name)
+        err_msg = self._myPeakInfoDict[(exp_number, scan_number)].calculate_peak_center()
         if self._debugPrintMode and len(err_msg) > 0:
             print ('[Error] during calculating peak center:{0}'.format(err_msg))
 
-        return True, peak_info
+        return True, self._myPeakInfoDict[(exp_number, scan_number)]
 
     def _add_spice_workspace(self, exp_no, scan_no, spice_table_ws):
         """
@@ -2968,106 +3633,142 @@ class CWSCDReductionControl(object):
         error_message = ''
 
         # Download and
+        spice_table_name_list = list()
+
         for scan_number in range(start_scan, end_scan+1):
             # check whether file exists
-            if self.does_file_exist(exp_number, scan_number) is False:
-                # SPICE file does not exist in data directory. Download!
-                # set up URL and target file name
-                spice_file_url = get_spice_file_url(self._myServerURL, self._instrumentName, exp_number, scan_number)
-                spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
-                spice_file_name = os.path.join(self._dataDir, spice_file_name)
-
-                # download file and load
-                try:
-                    mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
-                except RuntimeError as download_error:
-                    error_message += 'Unable to access/download scan {0} from {1} due to {2}.\n' \
-                                     ''.format(scan_number, spice_file_url, download_error)
-                    continue
-            else:
-                spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
-                spice_file_name = os.path.join(self._dataDir, spice_file_name)
+            file_exist, spice_file_name = self.does_spice_files_exist(exp_number, scan_number)
+            if not file_exist:
+                # SPICE file does not exist in data directory. Download
+                # NOTE Download SPICE file is disabled.  An error message will be sent
+                # out for user to download the data explicitly
+                error_message += 'SPICE file for Exp {0} Scan {1} does not exist.' \
+                                 '\n'.format(exp_number, scan_number)
 
             # Load SPICE file and retrieve information
+            spice_table_ws_name = fourcircle_utility.get_spice_table_name(exp_number, scan_number)
             try:
-                spice_table_ws_name = 'TempTable'
-                mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
-                                            OutputWorkspace=spice_table_ws_name,
-                                            RunInfoWorkspace='TempInfo')
-                spice_table_ws = AnalysisDataService.retrieve(spice_table_ws_name)
-                num_rows = spice_table_ws.rowCount()
-
-                if num_rows == 0:
-                    # it is an empty table
-                    error_message += 'Scan %d: empty spice table.\n' % scan_number
-                    continue
-
-                col_name_list = spice_table_ws.getColumnNames()
-                h_col_index = col_name_list.index('h')
-                k_col_index = col_name_list.index('k')
-                l_col_index = col_name_list.index('l')
-                col_2theta_index = col_name_list.index('2theta')
-                m1_col_index = col_name_list.index('m1')
-                time_col_index = col_name_list.index('time')
-                det_count_col_index = col_name_list.index('detector')
-                # optional as T-Sample
-                if 'tsample' in col_name_list:
-                    tsample_col_index = col_name_list.index('tsample')
-                else:
-                    tsample_col_index = None
-
-                max_count = 0
-                max_row = 0
-                max_h = max_k = max_l = 0
-                max_tsample = 0.
-
-                two_theta = m1 = -1
-
-                for i_row in range(num_rows):
-                    det_count = spice_table_ws.cell(i_row, det_count_col_index)
-                    count_time = spice_table_ws.cell(i_row, time_col_index)
-                    # normalize max count to count time
-                    det_count = float(det_count)/count_time
-                    if det_count > max_count:
-                        max_count = det_count
-                        max_row = i_row
-                        max_h = spice_table_ws.cell(i_row, h_col_index)
-                        max_k = spice_table_ws.cell(i_row, k_col_index)
-                        max_l = spice_table_ws.cell(i_row, l_col_index)
-                        two_theta = spice_table_ws.cell(i_row, col_2theta_index)
-                        m1 = spice_table_ws.cell(i_row, m1_col_index)
-                        # t-sample is not a mandatory sample log in SPICE
-                        if tsample_col_index is None:
-                            max_tsample = 0.
-                        else:
-                            max_tsample = spice_table_ws.cell(i_row, tsample_col_index)
-                # END-FOR
-
-                # calculate wavelength
-                wavelength = get_hb3a_wavelength(m1)
-                if wavelength is None:
-                    q_range = 0.
-                    error_message += 'Scan number {0} has invalid m1 for wavelength.\n'.format(scan_number)
-                else:
-                    q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
-
-                # appending to list
-                scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l,
-                                      q_range, max_tsample])
+                info_list, error_i = self.retrieve_scan_info_spice(scan_number, spice_file_name, spice_table_ws_name)
+                scan_sum_list.append(info_list)
+                error_message += error_i
+                spice_table_name_list.append(spice_table_ws_name)
+                # TODO FIXME NOW NOW2 - Need a dict [exp] = list() to record all the surveyed scans
 
             except RuntimeError as e:
                 return False, None, str(e)
+
             except ValueError as e:
                 # Unable to import a SPICE file without necessary information
                 error_message += 'Scan %d: unable to locate column h, k, or l. See %s.' % (scan_number, str(e))
+
         # END-FOR (scan_number)
 
-        if error_message != '':
-            print('[Error]\n%s' % error_message)
+        # group all the SPICE tables
+        # TEST - If workspace group exists, then add new group but not calling GroupWorkspaces
+        group_name = fourcircle_utility.get_spice_group_name(exp_number)
+        if AnalysisDataService.doesExist(group_name):
+            ws_group = AnalysisDataService.retrieve(group_name)
+            for table_name in spice_table_name_list:
+                ws_group.add(table_name)
+        else:
+            mantidsimple.GroupWorkspaces(InputWorkspaces=spice_table_name_list,
+                                         OutputWorkspace=group_name)
+        # END-IF-ELSE
 
-        self._scanSummaryList = scan_sum_list
+        # if error_message != '':
+        #     print('[Error]\n%s' % error_message)
+
+        self._scanSummaryList.extend(scan_sum_list)
 
         return True, scan_sum_list, error_message
+
+    @staticmethod
+    def retrieve_scan_info_spice(scan_number, spice_file_name, spice_table_ws_name):
+        """
+        process SPICE table
+        :param scan_number:
+        :param spice_file_name:
+        :param spice_table_ws_name:
+        :return: list/None (information for scan) and string (error message)
+        """
+        # check inputs
+        if os.path.exists(spice_file_name) is False:
+            raise RuntimeError('Parsing error')
+
+        error_message = ''
+
+        # Load SPICE file if the workspace does not exist
+        if AnalysisDataService.doesExist(spice_table_ws_name) is False:
+            mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
+                                        OutputWorkspace=spice_table_ws_name,
+                                        RunInfoWorkspace='TempInfo')
+
+        # Get workspace
+        spice_table_ws = AnalysisDataService.retrieve(spice_table_ws_name)
+        num_rows = spice_table_ws.rowCount()
+
+        if num_rows == 0:
+            # it is an empty table
+            error_message += 'Scan %d: empty spice table.\n' % scan_number
+            return None, error_message
+
+        # process the columns
+        col_name_list = spice_table_ws.getColumnNames()
+        h_col_index = col_name_list.index('h')
+        k_col_index = col_name_list.index('k')
+        l_col_index = col_name_list.index('l')
+        col_2theta_index = col_name_list.index('2theta')
+        m1_col_index = col_name_list.index('m1')
+        time_col_index = col_name_list.index('time')
+        det_count_col_index = col_name_list.index('detector')
+        # optional as T-Sample
+        if 'tsample' in col_name_list:
+            tsample_col_index = col_name_list.index('tsample')
+        else:
+            tsample_col_index = None
+        # 2theta
+
+        # do some simple statistics
+        max_count = 0
+        max_pt = 0
+        max_h = max_k = max_l = 0
+        max_tsample = 0.
+
+        two_theta = m1 = -1
+
+        for i_row in range(num_rows):
+            det_count = spice_table_ws.cell(i_row, det_count_col_index)
+            count_time = spice_table_ws.cell(i_row, time_col_index)
+            # normalize max count to count time
+            det_count = float(det_count) / count_time
+            if det_count > max_count:
+                max_count = det_count
+                max_pt = spice_table_ws.cell(i_row, 0)  # pt_col_index is always 0
+                max_h = spice_table_ws.cell(i_row, h_col_index)
+                max_k = spice_table_ws.cell(i_row, k_col_index)
+                max_l = spice_table_ws.cell(i_row, l_col_index)
+                two_theta = spice_table_ws.cell(i_row, col_2theta_index)
+                m1 = spice_table_ws.cell(i_row, m1_col_index)
+                # t-sample is not a mandatory sample log in SPICE
+                if tsample_col_index is None:
+                    max_tsample = 0.
+                else:
+                    max_tsample = spice_table_ws.cell(i_row, tsample_col_index)
+        # END-FOR
+
+        # calculate wavelength
+        wavelength = get_hb3a_wavelength(m1)
+        if wavelength is None:
+            q_range = 0.
+            error_message += 'Scan number {0} has invalid m1 for wavelength.\n'.format(scan_number)
+        else:
+            q_range = 4. * math.pi * math.sin(two_theta / 180. * math.pi * 0.5) / wavelength
+
+        # appending to list
+        info_list = [max_count, scan_number, max_pt, max_h, max_k, max_l,
+                     q_range, max_tsample, two_theta]
+
+        return info_list, error_message
 
     def save_project(self, project_file_name, ui_dict):
         """ Export project

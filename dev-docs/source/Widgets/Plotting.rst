@@ -90,6 +90,7 @@ Exposes required functions from ``plotting_view.py``.
         :raises KeyError: if the subplot name doesn't exist
         """
         return self.view.get_subplot(name)
+
 *Functions should only be exposed if they are necessary for use with the plotting interface.*
 
 Plotting View
@@ -131,6 +132,7 @@ Related Bugs/Notes
 
 AxisChanger
 ^^^^^^^^^^^
-``AxisChanger`` is a small widget comprising of two ``QLineEdit``s in a neat format,
+
+``AxisChanger`` is a small widget comprising of two ``QLineEdit`` widgets in a neat format,
 with events exposed for x/y limit changing. This functionality is inherently separate
 to that of the plotting, so the AxisChanger module is separate (albeit enclosed within) the plotting.

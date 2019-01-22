@@ -17,7 +17,7 @@ from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialo
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.flowlayout import FlowLayout
-from mantidqt.py3compat.enum import IntEnum
+from mantid.py3compat.enum import IntEnum
 from workbench.plotting.qappthreadcall import QAppThreadCall
 
 DEBUG_MODE = False
@@ -606,6 +606,7 @@ class PlotNameWidget(QWidget):
     This widget is added to the table widget to support the renaming
     and close buttons, as well as the direct renaming functionality.
     """
+
     def __init__(self, presenter, plot_number, parent=None):
         super(PlotNameWidget, self).__init__(parent)
 

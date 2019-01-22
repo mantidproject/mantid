@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <boost/tokenizer.hpp>
 #include <fstream>
-#include <iostream>
 #include <map>
 
 namespace Mantid {
@@ -88,7 +87,7 @@ void LoadSwans::init() {
 /** Execute the algorithm.
  */
 void LoadSwans::exec() {
-
+  m_ws = boost::make_shared<Mantid::DataObjects::EventWorkspace>();
   // Load instrument here to get the necessary Parameters from the XML file
   loadInstrument();
   m_detector_size = getDetectorSize();

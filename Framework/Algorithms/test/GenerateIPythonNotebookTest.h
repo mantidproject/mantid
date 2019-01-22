@@ -9,7 +9,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <boost/regex.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 

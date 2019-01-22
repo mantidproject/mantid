@@ -12,6 +12,7 @@ set ( TEST_PY_FILES
   AngularAutoCorrelationsTwoAxesTest.py
   ApplyDetectorScanEffCorrTest.py
   BinWidthAtXTest.py
+  CalculateEfficiencyCorrectionTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -118,4 +119,5 @@ set ( TEST_PY_FILES
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonAlgorithms
+set ( PYUNITTEST_PYTHONPATH_EXTRA ${PYTHONINTERFACE_PLUGINS_DIR}/algorithms )
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.algorithms ${TEST_PY_FILES} )

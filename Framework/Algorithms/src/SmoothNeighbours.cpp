@@ -23,7 +23,6 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

@@ -59,9 +59,7 @@ public:
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
-  size_t scanSize() const;
   bool isScanning() const;
-  bool isSyncScan() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
@@ -80,32 +78,29 @@ public:
   void setRotation(const std::pair<size_t, size_t> &index,
                    const Eigen::Quaterniond &rotation);
 
-  size_t scanCount(const size_t index) const;
-  std::pair<int64_t, int64_t>
-  scanInterval(const std::pair<size_t, size_t> &index) const;
-  void setScanInterval(const size_t index,
-                       const std::pair<int64_t, int64_t> &interval);
-  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
+  size_t scanCount() const;
+  const std::vector<std::pair<int64_t, int64_t>> scanIntervals() const;
 
-  void merge(const DetectorInfo &other);
   void setComponentInfo(ComponentInfo *componentInfo);
   bool hasComponentInfo() const;
   double l1() const;
   Eigen::Vector3d sourcePosition() const;
   Eigen::Vector3d samplePosition() const;
 
+  /** The `merge()` operation was made private in `DetectorInfo`, and only
+   * accessible through `ComponentInfo` (via this `friend` declaration)
+   * because we need to avoid merging `DetectorInfo` without merging
+   * `ComponentInfo`, since that would effectively let us create a non-sync
+   * scan. Otherwise we cannot provide scanning-related methods in
+   * `ComponentInfo` without component index.
+   */
+  friend class ComponentInfo;
+
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void checkNoTimeDependence() const;
-  void initScanCounts();
-  void initScanIntervals();
-  void initIndices();
-  std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
-  std::vector<bool> buildMergeSyncScanIndices(const DetectorInfo &other) const;
   void checkSizes(const DetectorInfo &other) const;
-  void checkIdenticalIntervals(const DetectorInfo &other, const size_t index1,
-                               const size_t index2) const;
-  bool m_isSyncScan{true};
+  void merge(const DetectorInfo &other, const std::vector<bool> &merge);
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
@@ -114,13 +109,6 @@ private:
                               Eigen::aligned_allocator<Eigen::Quaterniond>>>
       m_rotations{nullptr};
 
-  Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
-  Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
-      nullptr};
-  /// For (detector index, time index) -> linear index conversions
-  Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
-  /// For linear index -> (detector index, time index) conversions
-  Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
   ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };
 
@@ -219,9 +207,8 @@ DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   // so even in the time dependent case no translation is necessary.
   if (index.second == 0)
     return index.first;
-  if (m_isSyncScan)
+  else
     return index.first + size() * index.second;
-  return (*m_indexMap)[index.first][index.second];
 }
 
 } // namespace Beamline

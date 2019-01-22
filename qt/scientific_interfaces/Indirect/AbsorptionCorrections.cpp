@@ -524,18 +524,20 @@ void AbsorptionCorrections::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
+void AbsorptionCorrections::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
 void AbsorptionCorrections::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void AbsorptionCorrections::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

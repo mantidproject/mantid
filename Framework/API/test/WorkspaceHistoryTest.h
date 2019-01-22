@@ -76,7 +76,8 @@ public:
     TS_ASSERT_EQUALS(history.size(), 0);
     TS_ASSERT_EQUALS(history.empty(), true);
 
-    AlgorithmHistory alg1("FirstAlgorithm", 2);
+    AlgorithmHistory alg1("FirstAlgorithm", 2,
+                          "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
     alg1.addProperty("FirstAlgProperty", "1", false,
                      Mantid::Kernel::Direction::Input);
 
@@ -139,10 +140,18 @@ public:
 
 class WorkspaceHistoryTestPerformance : public CxxTest::TestSuite {
 public:
+  WorkspaceHistoryTestPerformance() {
+    constructAlgHistories1();
+    constructAlgHistories2();
+  }
+
+  void setUp() override { m_wsHist.clearHistory(); }
+
   void test_Wide_History() {
     int depth = 3;
     int width = 50;
-    auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", 1);
+    auto algHist = boost::make_shared<AlgorithmHistory>(
+        "AnAlgorithm", 1, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
     build_Algorithm_History(*algHist, width, depth);
     m_wsHist.addHistory(std::move(algHist));
   }
@@ -151,24 +160,73 @@ public:
     int depth = 10;
     int width = 3;
 
-    auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", 1);
+    auto algHist = boost::make_shared<AlgorithmHistory>(
+        "AnAlgorithm", 1, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
     build_Algorithm_History(*algHist, width, depth);
     m_wsHist.addHistory(std::move(algHist));
   }
 
+  void test_standard_insertion_500000_times() {
+    for (auto i = 0u; i < 500000; ++i) {
+      m_wsHist.addHistory(m_1000000Histories1[i]);
+    }
+  }
+
+  void test_standard_insertion_1000000_times() {
+    for (auto i = 0u; i < 1000000; ++i) {
+      m_wsHist.addHistory(m_1000000Histories1[i]);
+    }
+  }
+
+  void test_adding_1000000_to_500000_workspace_histories() {
+    // It's hard to test this without doing this bit
+    for (auto i = 0u; i < 500000; ++i) {
+      m_wsHist.addHistory(m_1000000Histories1[i]);
+    }
+    // The actual test
+    m_wsHist.addHistory(m_1000000Histories2);
+  }
+
+  void test_adding_1000000_to_1000000_workspace_histories() {
+    // It's hard to test this without doing this bit
+    for (auto i = 0u; i < 1000000; ++i) {
+      m_wsHist.addHistory(m_1000000Histories1[i]);
+    }
+    // The actual test
+    m_wsHist.addHistory(m_1000000Histories2);
+  }
+
+private:
   void build_Algorithm_History(AlgorithmHistory &parent, int width,
                                int depth = 0) {
     if (depth > 0) {
       for (int i = 0; i < width; ++i) {
-        auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", 1);
+        auto algHist = boost::make_shared<AlgorithmHistory>(
+            "AnAlgorithm", 1, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
         build_Algorithm_History(*algHist, width, depth - 1);
         parent.addChildHistory(std::move(algHist));
       }
     }
   }
 
-private:
+  void constructAlgHistories1() {
+    for (auto i = 1u; i < 1000001; ++i) {
+      auto algHist = boost::make_shared<AlgorithmHistory>(
+          "AnAlgorithm", i, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
+      m_1000000Histories1.emplace_back(std::move(algHist));
+    }
+  }
+  void constructAlgHistories2() {
+    for (auto i = 1000001u; i < 1000001; ++i) {
+      auto algHist = boost::make_shared<AlgorithmHistory>(
+          "AnAlgorithm", i, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
+      m_1000000Histories2.addHistory(std::move(algHist));
+    }
+  }
+
   Mantid::API::WorkspaceHistory m_wsHist;
+  std::vector<AlgorithmHistory_sptr> m_1000000Histories1;
+  WorkspaceHistory m_1000000Histories2;
 };
 
 #endif

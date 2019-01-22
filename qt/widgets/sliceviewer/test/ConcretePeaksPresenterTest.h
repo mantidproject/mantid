@@ -29,7 +29,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace testing;
-using boost::regex;
 
 // Alias.
 using MDGeometry_sptr = boost::shared_ptr<Mantid::API::MDGeometry>;

@@ -16,7 +16,7 @@ from abc import ABCMeta, abstractmethod
 
 from PyQt4 import QtGui
 from six import with_metaclass
-import ui_masking_table
+from . import ui_masking_table
 
 
 class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):

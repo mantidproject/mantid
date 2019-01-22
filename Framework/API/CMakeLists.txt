@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
 	src/AnalysisDataService.cpp
+	src/AnalysisDataServiceObserver.cpp
 	src/ArchiveSearchFactory.cpp
 	src/Axis.cpp
 	src/BinEdgeAxis.cpp
@@ -95,8 +96,8 @@ set ( SRC_FILES
 	src/LogFilterGenerator.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
+	src/MDFrameValidator.cpp
 	src/MDGeometry.cpp
-        src/MDFrameValidator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/ModeratorModel.cpp
@@ -111,7 +112,7 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/NumericAxisValidator.cpp
-        src/OrientedLatticeValidator.cpp
+	src/OrientedLatticeValidator.cpp
 	src/ParallelAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
@@ -144,6 +145,7 @@ set ( SRC_FILES
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
+	src/WorkspaceHasDxValidator.cpp
 	src/WorkspaceHistory.cpp
 	src/WorkspaceNearestNeighbourInfo.cpp
 	src/WorkspaceNearestNeighbours.cpp
@@ -174,6 +176,7 @@ set ( INC_FILES
 	inc/MantidAPI/AlgorithmProperty.h
 	inc/MantidAPI/AlgorithmProxy.h
 	inc/MantidAPI/AnalysisDataService.h
+	inc/MantidAPI/AnalysisDataServiceObserver.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
 	inc/MantidAPI/BinEdgeAxis.h
@@ -293,8 +296,8 @@ set ( INC_FILES
 	inc/MantidAPI/LogFilterGenerator.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
+	inc/MantidAPI/MDFrameValidator.h
 	inc/MantidAPI/MDGeometry.h
-        inc/MantidAPI/MDFrameValidator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
@@ -339,6 +342,8 @@ set ( INC_FILES
 	inc/MantidAPI/SpectraAxisValidator.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/SpectrumInfo.h
+	inc/MantidAPI/SpectrumInfoItem.h
+	inc/MantidAPI/SpectrumInfoIterator.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
@@ -348,6 +353,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceGroup_fwd.h
+	inc/MantidAPI/WorkspaceHasDxValidator.h
 	inc/MantidAPI/WorkspaceHistory.h
 	inc/MantidAPI/WorkspaceNearestNeighbourInfo.h
 	inc/MantidAPI/WorkspaceNearestNeighbours.h
@@ -356,8 +362,6 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
-	inc/MantidAPI/SpectrumInfoIterator.h
-	inc/MantidAPI/SpectrumInfoItem.h
 )
 
 set ( TEST_FILES
@@ -372,6 +376,7 @@ set ( TEST_FILES
 	AlgorithmProxyTest.h
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
+	AnalysisDataServiceObserverTest.h
 	AsynchronousTest.h
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
@@ -425,8 +430,8 @@ set ( TEST_FILES
 	LiveListenerTest.h
 	LogFilterGeneratorTest.h
 	LogManagerTest.h
-	MDGeometryTest.h
 	MDFrameValidatorTest.h
+	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	ModeratorModelTest.h
 	MuParserUtilsTest.h
@@ -465,6 +470,7 @@ set ( TEST_FILES
 	VectorParameterTest.h
 	WorkspaceFactoryTest.h
 	WorkspaceGroupTest.h
+	WorkspaceHasDxValidatorTest.h
 	WorkspaceHistoryIOTest.h
 	WorkspaceHistoryTest.h
 	WorkspaceNearestNeighbourInfoTest.h
@@ -491,9 +497,10 @@ if(UNITY_BUILD)
   enable_unity_build(API SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-# Have to link to winsock library on Windows
+# Have to link to winsock and bcrypt library on Windows
 if ( WIN32 )
   set ( WINSOCK ws2_32 )
+  set ( BCRYPT bcrypt )
 endif ()
 
 # Add a precompiled header where they are supported
@@ -513,7 +520,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
+target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} ${BCRYPT})
 
 # Add the unit tests directory
 add_subdirectory ( test )
@@ -522,4 +529,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS API ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

@@ -172,7 +172,8 @@ void InstrumentWindow::selectComponent(const QString &name) {
 }
 
 void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
-  return m_instrumentWidget->setScaleType(type);
+  return m_instrumentWidget->setScaleType(
+      static_cast<MantidColorMap::ScaleType>(type));
 }
 
 void InstrumentWindow::setViewType(const QString &type) {

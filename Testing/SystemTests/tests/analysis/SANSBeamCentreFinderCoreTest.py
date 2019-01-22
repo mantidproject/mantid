@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
-import stresstesting
+import systemtesting
 
 import mantid
 from mantid.api import AlgorithmManager
@@ -195,9 +195,9 @@ class SANSBeamCentreFinderCoreTest(unittest.TestCase):
         self._compare_workspace(output_workspace_bottom, reference_file_name_bottom)
 
 
-class SANSBeamCentreCoreRunnerTest(stresstesting.MantidStressTest):
+class SANSBeamCentreCoreRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

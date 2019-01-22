@@ -13,7 +13,10 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ParallelRunner.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
+  if ( WIN32 )
+    set ( BCRYPT bcrypt )
+  endif ()
+  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${BCRYPT}
             Types
             API
             Nexus

@@ -18,8 +18,7 @@ Templated type for wrapping non-MDLoadingView types. Adapter pattern.
 @author Owen Arnold, Tessella plc
 @date 07/09/2011
 */
-template <typename ViewType>
-class DLLExport MDLoadingViewAdapter : public MDLoadingView {
+template <typename ViewType> class MDLoadingViewAdapter : public MDLoadingView {
 private:
   ViewType *m_adaptee;
 

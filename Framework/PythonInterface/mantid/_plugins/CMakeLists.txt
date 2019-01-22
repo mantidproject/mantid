@@ -67,15 +67,16 @@ target_link_libraries ( PythonCurveFittingModule LINK_PRIVATE ${TCMALLOC_LIBRARI
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties( PythonCurveFittingModule PROPERTIES
-                         INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
+    INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../../../../plugins;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
 elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
   set_target_properties( PythonCurveFittingModule PROPERTIES
-                         INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/;\$ORIGIN/../api/")
+    INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../../../${PLUGINS_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/;\$ORIGIN/../api/")
 endif ()
+
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonCurveFittingModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/_plugins )
+mtd_install_targets( TARGETS PythonCurveFittingModule INSTALL_DIRS ${BIN_DIR}/mantid/_plugins ${WORKBENCH_BIN_DIR}/mantid/_plugins )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/_plugins )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/_plugins ${WORKBENCH_BIN_DIR}/mantid/_plugins)

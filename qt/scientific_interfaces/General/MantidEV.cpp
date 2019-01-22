@@ -36,17 +36,18 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(
     const std::string &ev_ws_name, const std::string &md_ws_name,
     const double modQ, const double minQ, const double maxQ,
     const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
-    const std::string &det_cal_file, const std::string &det_cal_file2)
+    const std::string &det_cal_file, const std::string &det_cal_file2,
+    const std::string &axisCORELLI)
     : worker(worker), file_name(file_name), ev_ws_name(ev_ws_name),
       md_ws_name(md_ws_name), modQ(modQ), minQ(minQ), maxQ(maxQ),
       do_lorentz_corr(do_lorentz_corr), load_data(load_data),
       load_det_cal(load_det_cal), det_cal_file(det_cal_file),
-      det_cal_file2(det_cal_file2) {}
+      det_cal_file2(det_cal_file2), axisCORELLI(axisCORELLI) {}
 
 void RunLoadAndConvertToMD::run() {
   worker->loadAndConvertToMD(file_name, ev_ws_name, md_ws_name, modQ, minQ,
                              maxQ, do_lorentz_corr, load_data, load_det_cal,
-                             det_cal_file, det_cal_file2);
+                             det_cal_file, det_cal_file2, axisCORELLI);
 }
 
 /**
@@ -57,18 +58,19 @@ RunFindPeaks::RunFindPeaks(MantidEVWorker *worker,
                            const std::string &md_ws_name,
                            const std::string &peaks_ws_name, double max_abc,
                            size_t num_to_find, double min_intensity,
-                           double minQPeaks, double maxQPeaks)
+                           double minQPeaks, double maxQPeaks,
+                           const std::string &file_name)
     : worker(worker), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name),
       peaks_ws_name(peaks_ws_name), max_abc(max_abc), num_to_find(num_to_find),
-      min_intensity(min_intensity), minQPeaks(minQPeaks), maxQPeaks(maxQPeaks) {
-}
+      min_intensity(min_intensity), minQPeaks(minQPeaks), maxQPeaks(maxQPeaks),
+      file_name(file_name) {}
 
 /**
  *  Class to call findPeaks in a separate thread.
  */
 void RunFindPeaks::run() {
   worker->findPeaks(ev_ws_name, md_ws_name, peaks_ws_name, max_abc, num_to_find,
-                    min_intensity, minQPeaks, maxQPeaks);
+                    min_intensity, minQPeaks, maxQPeaks, file_name);
 }
 
 /**
@@ -312,6 +314,9 @@ void MantidEV::initLayout() {
   QObject::connect(m_uiForm.SelectCellOfType_rbtn, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledSetCellTypeParams_slot(bool)));
 
+  QObject::connect(m_uiForm.CreateHKLWorkspace_ckbx, SIGNAL(clicked(bool)),
+                   this, SLOT(setEnabledCreateHKLWorkspaceParams_slot(bool)));
+
   QObject::connect(m_uiForm.SelectCellWithForm_rbtn, SIGNAL(toggled(bool)),
                    this, SLOT(setEnabledSetCellFormParams_slot(bool)));
 
@@ -452,6 +457,7 @@ void MantidEV::setDefaultState_slot() {
   m_uiForm.BestCellOnly_ckbx->setChecked(true);
   m_uiForm.AllowPermutations_ckbx->setChecked(true);
   m_uiForm.SelectCellOfType_rbtn->setChecked(false);
+  m_uiForm.CreateHKLWorkspace_ckbx->setChecked(false);
   m_uiForm.CellType_cmbx->setCurrentIndex(0);
   m_uiForm.CellCentering_cmbx->setCurrentIndex(0);
   m_uiForm.SelectCellWithForm_rbtn->setChecked(false);
@@ -473,6 +479,7 @@ void MantidEV::setDefaultState_slot() {
   m_uiForm.IntegrateEdge_ckbx->setChecked(true);
   m_uiForm.Cylinder_ckbx->setChecked(false);
   m_uiForm.CylinderProfileFit_cmbx->setCurrentIndex(5);
+  m_uiForm.axisCORELLI_cmbx->setCurrentIndex(0);
   m_uiForm.TwoDFitIntegration_rbtn->setChecked(false);
   m_uiForm.FitRebinParams_ledt->setText("1000,-0.004,16000");
   m_uiForm.NBadEdgePixels_ledt->setText("5");
@@ -566,12 +573,14 @@ void MantidEV::selectWorkspace_slot() {
                    "Calibration is selected");
       return;
     }
+    std::string axisCORELLI =
+        m_uiForm.axisCORELLI_cmbx->currentText().toStdString();
 
     RunLoadAndConvertToMD *runner = new RunLoadAndConvertToMD(
         worker, file_name, ev_ws_name, md_ws_name, modQ, minQ, maxQ,
         m_uiForm.LorentzCorrection_ckbx->isChecked(),
         m_uiForm.loadDataGroupBox->isChecked(), load_det_cal, det_cal_file,
-        det_cal_file2);
+        det_cal_file2, axisCORELLI);
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
       errorMessage("Failed to start Load and ConvertToMD thread...previous "
@@ -711,9 +720,11 @@ void MantidEV::findPeaks_slot() {
 
     std::string ev_ws_name =
         m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
-    RunFindPeaks *runner =
-        new RunFindPeaks(worker, ev_ws_name, md_ws_name, peaks_ws_name, max_abc,
-                         num_to_find, min_intensity, minQPeaks, maxQPeaks);
+    std::string file_name =
+        m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
+    RunFindPeaks *runner = new RunFindPeaks(
+        worker, ev_ws_name, md_ws_name, peaks_ws_name, max_abc, num_to_find,
+        min_intensity, minQPeaks, maxQPeaks, file_name);
 
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
@@ -952,6 +963,7 @@ void MantidEV::chooseCell_slot() {
 
   bool show_cells = m_uiForm.ShowPossibleCells_rbtn->isChecked();
   bool select_cell_type = m_uiForm.SelectCellOfType_rbtn->isChecked();
+  bool create_hkl_workspace = m_uiForm.CreateHKLWorkspace_ckbx->isChecked();
   bool select_cell_form = m_uiForm.SelectCellWithForm_rbtn->isChecked();
   bool allow_perm = m_uiForm.AllowPermutations_ckbx->isChecked();
 
@@ -998,6 +1010,20 @@ void MantidEV::chooseCell_slot() {
         m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
     worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
   }
+
+  if (create_hkl_workspace) { // Try to create the HKL md_workspace.
+    double minQ;
+    getDouble(m_uiForm.MinMagQ_ledt, minQ);
+
+    double maxQ;
+    getDouble(m_uiForm.MaxMagQ_ledt, maxQ);
+
+    std::string md_ws_name =
+        m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+    std::string ev_ws_name =
+        m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+    worker->convertToHKL(ev_ws_name, md_ws_name, minQ, maxQ);
+  }
 }
 
 /**
@@ -1021,7 +1047,9 @@ void MantidEV::changeHKL_slot() {
   std::string row_2_str = m_uiForm.HKL_tran_row_2_ledt->text().toStdString();
   std::string row_3_str = m_uiForm.HKL_tran_row_3_ledt->text().toStdString();
 
-  if (!worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str)) {
+  bool changed =
+      worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str);
+  if (!changed) {
     errorMessage("Failed to Change the Miller Indicies and UB");
   }
 
@@ -1032,6 +1060,17 @@ void MantidEV::changeHKL_slot() {
   std::string event_ws_name =
       m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
   worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
+
+  bool create_hkl_workspace = m_uiForm.CreateHKLWorkspace_ckbx->isChecked();
+  if (create_hkl_workspace && changed) { // Redo the HKL md_workspace
+    double minQ;
+    getDouble(m_uiForm.MinMagQ_ledt, minQ);
+
+    double maxQ;
+    getDouble(m_uiForm.MaxMagQ_ledt, maxQ);
+
+    worker->convertToHKL(event_ws_name, md_ws_name, minQ, maxQ);
+  }
 }
 
 /**
@@ -1729,6 +1768,7 @@ void MantidEV::setEnabledSphereIntParams_slot(bool on) {
   m_uiForm.CylinderLength_ledt->setEnabled(on);
   m_uiForm.CylinderPercentBkg_ledt->setEnabled(on);
   m_uiForm.CylinderProfileFit_cmbx->setEnabled(on);
+  m_uiForm.axisCORELLI_cmbx->setEnabled(on);
   m_uiForm.AdaptiveQBkg_ckbx->setEnabled(on);
   m_uiForm.AdaptiveQMult_ledt->setEnabled(on);
 }
@@ -2020,6 +2060,8 @@ void MantidEV::saveSettings(const std::string &filename) {
                   m_uiForm.AllowPermutations_ckbx->isChecked());
   state->setValue("SelectCellOfType_rbtn",
                   m_uiForm.SelectCellOfType_rbtn->isChecked());
+  state->setValue("CreateHKLWorkspace_ckbx",
+                  m_uiForm.CreateHKLWorkspace_ckbx->isChecked());
   state->setValue("CellType_cmbx", m_uiForm.CellType_cmbx->currentIndex());
   state->setValue("CellCentering_cmbx",
                   m_uiForm.CellCentering_cmbx->currentIndex());
@@ -2049,6 +2091,8 @@ void MantidEV::saveSettings(const std::string &filename) {
   state->setValue("Cylinder_ckbx", m_uiForm.Cylinder_ckbx->isChecked());
   state->setValue("CylinderProfileFit_cmbx",
                   m_uiForm.CylinderProfileFit_cmbx->currentIndex());
+  state->setValue("axisCORELLI_cmbx",
+                  m_uiForm.axisCORELLI_cmbx->currentIndex());
   state->setValue("TwoDFitIntegration_rbtn",
                   m_uiForm.TwoDFitIntegration_rbtn->isChecked());
   state->setValue("FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt->text());
@@ -2157,6 +2201,7 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "BestCellOnly_ckbx", m_uiForm.BestCellOnly_ckbx);
   restore(state, "AllowPermutations_ckbx", m_uiForm.AllowPermutations_ckbx);
   restore(state, "SelectCellOfType_rbtn", m_uiForm.SelectCellOfType_rbtn);
+  restore(state, "CreateHKLWorkspace_ckbx", m_uiForm.CreateHKLWorkspace_ckbx);
   restore(state, "CellType_cmbx", m_uiForm.CellType_cmbx);
   restore(state, "CellCentering_cmbx", m_uiForm.CellCentering_cmbx);
   restore(state, "SelectCellWithForm_rbtn", m_uiForm.SelectCellWithForm_rbtn);
@@ -2179,6 +2224,7 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "IntegrateEdge_ckbx", m_uiForm.IntegrateEdge_ckbx);
   restore(state, "Cylinder_ckbx", m_uiForm.Cylinder_ckbx);
   restore(state, "CylinderProfileFit_cmbx", m_uiForm.CylinderProfileFit_cmbx);
+  restore(state, "axisCORELLI_cmbx", m_uiForm.axisCORELLI_cmbx);
   restore(state, "TwoDFitIntegration_rbtn", m_uiForm.TwoDFitIntegration_rbtn);
   restore(state, "FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt);
   restore(state, "NBadEdgePixels_ledt", m_uiForm.NBadEdgePixels_ledt);

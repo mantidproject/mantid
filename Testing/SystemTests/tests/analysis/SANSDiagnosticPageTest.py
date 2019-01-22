@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
-import stresstesting
+import systemtesting
 
 import mantid
 
@@ -135,9 +135,9 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         self._compare_workspace(output_workspaces[0], reference_file_name)
 
 
-class SANSDiagnosticPageRunnerTest(stresstesting.MantidStressTest):
+class SANSDiagnosticPageRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

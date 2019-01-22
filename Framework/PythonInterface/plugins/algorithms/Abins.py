@@ -837,7 +837,4 @@ class Abins(PythonAlgorithm):
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
 
-try:
-    AlgorithmFactory.subscribe(Abins)
-except ImportError:
-    logger.debug('Failed to subscribe algorithm SimulatedDensityOfStates; The python package may be missing.')
+AlgorithmFactory.subscribe(Abins)

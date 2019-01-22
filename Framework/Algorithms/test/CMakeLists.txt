@@ -32,9 +32,10 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/FileComparisonHelper.cpp
+                        ../../TestHelpers/src/IndirectFitDataCreationHelper.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp
-			                  ../../TestHelpers/src/MuonWorkspaceCreationHelper.cpp
+                        ../../TestHelpers/src/MuonWorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/SANSInstrumentCreationHelper.cpp
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/TearDownWorld.cpp

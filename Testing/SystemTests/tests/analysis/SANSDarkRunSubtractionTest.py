@@ -10,7 +10,7 @@
 #pylint: disable=too-many-public-methods
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from isis_reduction_steps import DarkRunSubtraction
 from SANSUserFileParser import DarkRunSettings
@@ -621,9 +621,9 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                mon_number = mon_number)
 
 
-class DarkRunSubtractionTestStressTest(stresstesting.MantidStressTest):
+class DarkRunSubtractionTestSystemTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

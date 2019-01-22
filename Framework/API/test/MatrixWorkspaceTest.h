@@ -471,6 +471,20 @@ public:
     TS_ASSERT_EQUALS(ws.size(), 0);
   }
 
+  void testIsCommonBins() {
+    WorkspaceTester ws;
+    ws.initialize(10, 10, 10);
+    // After initialization, ws should contain a shared HistogramX.
+    TS_ASSERT(ws.isCommonBins());
+    // Modifying the value of one Spectrum will cause this Histogram to detach.
+    // Since the value is identical, isCommonBins is still true.
+    ws.mutableX(0)[0] = 1.;
+    TS_ASSERT(ws.isCommonBins());
+    // Once we change the the value, however, isCommonsBins should return false
+    ws.mutableX(0)[0] = 2.;
+    TS_ASSERT_EQUALS(ws.isCommonBins(), false);
+  }
+
   void test_updateSpectraUsing() {
     WorkspaceTester testWS;
     testWS.initialize(3, 1, 1);
@@ -1654,15 +1668,17 @@ public:
     auto ws2 = makeWorkspaceWithDetectors(1, 1);
     auto &detInfo1 = ws1->mutableDetectorInfo();
     auto &detInfo2 = ws2->mutableDetectorInfo();
+    auto &compInfo1 = ws1->mutableComponentInfo();
+    auto &compInfo2 = ws2->mutableComponentInfo();
+
     detInfo1.setPosition(0, {1, 0, 0});
     detInfo2.setPosition(0, {2, 0, 0});
-    detInfo1.setScanInterval(0, {10, 20});
-    detInfo2.setScanInterval(0, {20, 30});
+    compInfo1.setScanInterval({10, 20});
+    compInfo2.setScanInterval({20, 30});
 
     // Merge
     auto merged = WorkspaceFactory::Instance().create(ws1, 2);
-    auto &detInfo = merged->mutableDetectorInfo();
-    detInfo.merge(detInfo2);
+    merged->mutableComponentInfo().merge(ws2->componentInfo());
 
     // Setting IndexInfo without spectrum definitions will set up a 1:1 mapping
     // such that each spectrum corresponds to 1 time index of a detector.

@@ -33,21 +33,19 @@ protected slots:
   void fitFunctionChanged();
 
 protected:
-  bool shouldEnablePlotResult() override { return true; };
-
+  void setRunIsRunning(bool running) override;
+  void setFitSingleSpectrumIsFitting(bool fitting) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
-
-  void setRunIsRunning(bool running) override;
 
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
+  void setPlotResultIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
-
-  void setPlotResultIsPlotting(bool plotting);
 
   std::string fitTypeString() const;
 

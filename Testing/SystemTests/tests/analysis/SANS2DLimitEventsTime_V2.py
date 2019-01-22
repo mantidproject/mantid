@@ -7,13 +7,13 @@
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import mantid  # noqa
 from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, AssignSample, WavRangeReduction,
                                                          UseCompatibilityMode)
 
 
-class SANS2DLimitEventsTimeTest_V2(stresstesting.MantidStressTest):
+class SANS2DLimitEventsTimeTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()

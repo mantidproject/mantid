@@ -9,7 +9,7 @@
 # These system test perform some of the fits provided by NIST for non-linear
 # least square systems that can be found here:
 # http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
@@ -28,7 +28,7 @@ def runFit(x, y, fn):
     return params, errors
 
 
-class LeastSquaresNISTRat43Test(stresstesting.MantidStressTest):
+class LeastSquaresNISTRat43Test(systemtesting.MantidSystemTest):
     def runTest(self):
         x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
         y = [16.08, 33.83, 65.8, 97.2, 191.55, 326.2, 386.87, 520.53, 590.03, 651.92, 724.93, 699.56, 689.96, 637.56,
@@ -48,7 +48,7 @@ class LeastSquaresNISTRat43Test(stresstesting.MantidStressTest):
             self.assertDelta(val / expected - 1.0, 0.0, 3e-3)
 
 
-class LeastSquaresNISTGauss3Test(stresstesting.MantidStressTest):
+class LeastSquaresNISTGauss3Test(systemtesting.MantidSystemTest):
     def runTest(self):
         x = [1.000000, 2.000000, 3.000000, 4.000000, 5.000000, 6.000000, 7.000000, 8.000000, 9.000000, 10.000000,
              11.00000, 12.00000, 13.00000, 14.00000, 15.00000, 16.00000, 17.00000, 18.00000, 19.00000, 20.00000,
@@ -119,7 +119,7 @@ class LeastSquaresNISTGauss3Test(stresstesting.MantidStressTest):
             self.assertDelta(val / expected - 1.0, 0.0, 2e-5)
 
 
-class LeastSquaresNISTMGH09Test(stresstesting.MantidStressTest):
+class LeastSquaresNISTMGH09Test(systemtesting.MantidSystemTest):
     def runTest(self):
         x = [4.000000E+00, 2.000000E+00, 1.000000E+00, 5.000000E-01, 2.500000E-01, 1.670000E-01, 1.250000E-01,
              1.000000E-01, 8.330000E-02, 7.140000E-02, 6.250000E-02]

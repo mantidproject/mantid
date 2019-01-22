@@ -130,11 +130,11 @@ class WANDPowderReductionTest(unittest.TestCase):
         x = pd_out4.extractX()
         y = pd_out4.extractY()
 
-        self.assertAlmostEqual(x.min(), 0.53479223)
-        self.assertAlmostEqual(x.max(), 3.21684994)
-        self.assertAlmostEqual(y.min(),  0)
-        self.assertAlmostEqual(y.max(), 19.9948756)
-        self.assertAlmostEqual(x[0,y.argmax()], 2.9122841)
+        self.assertAlmostEqual(x.min(), 0.53479223, places=4)
+        self.assertAlmostEqual(x.max(), 3.21684994, places=4)
+        self.assertAlmostEqual(y.min(),  0, places=4)
+        self.assertAlmostEqual(y.max(), 19.9948756, places=4)
+        self.assertAlmostEqual(x[0,y.argmax()], 2.9122841, places=4)
 
         # data, cal and background, scale background
         pd_out4=WANDPowderReduction(InputWorkspace=data,

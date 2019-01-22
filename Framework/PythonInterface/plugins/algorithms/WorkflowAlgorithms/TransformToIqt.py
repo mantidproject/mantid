@@ -210,7 +210,8 @@ class TransformToIqt(PythonAlgorithm):
                             resolution, resolution_bins])
 
         workflow_prog.report('Deleting temp Workspace')
-        DeleteWorkspace('__TransformToIqt_sample_cropped')
+        if mtd.doesExist('__TransformToIqt_sample_cropped'):
+            DeleteWorkspace('__TransformToIqt_sample_cropped')
 
         self.setProperty('ParameterWorkspace', param_table)
 

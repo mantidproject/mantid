@@ -45,6 +45,11 @@ public:
     }
   }
 
+  double centerError() const {
+    const auto &dx = m_histogram.dx();
+    return dx[m_index];
+  }
+
   double binWidth() const {
     const auto &x = m_histogram.x();
     if (xModeIsPoints()) {

@@ -28,14 +28,15 @@ class EXPORT_OPT_MANTIDQT_LEGACYQWT DraggableColorBarWidget : public QFrame {
   enum DragType { Bottom, Top };
 
 public:
-  DraggableColorBarWidget(int type, QWidget *parent,
+  DraggableColorBarWidget(QWidget *parent,
                           const double &minPositiveValue = 0.0001);
   void setupColorBarScaling(const MantidColorMap &);
+  void setClim(double vmin, double vmax);
   void setMinValue(double);
   void setMaxValue(double);
   QString getMinValue() const;
   QString getMaxValue() const;
-  QString getNth_power() const;
+  QString getNthPower() const;
   void setMinPositiveValue(double);
   int getScaleType() const;
   void setScaleType(int);

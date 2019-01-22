@@ -165,7 +165,7 @@ def get_detector_size_from_sans_file(state, detector):
 def create_state(state_model_with_view_update, file, period, facility):
     table_row = TableIndexModel(file, period, '', '', '', '', '', '', '', '', '', '')
     table = TableModel()
-    table.add_table_entry(0, table_row)
+    table.add_table_entry_no_thread_or_signal(0, table_row)
 
     gui_state_director = GuiStateDirector(table, state_model_with_view_update, facility)
 

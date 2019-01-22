@@ -12,7 +12,6 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
 namespace DataObjects {

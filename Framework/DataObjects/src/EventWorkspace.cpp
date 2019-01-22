@@ -328,6 +328,8 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
 double EventWorkspace::getEventXMin() const {
   // set to crazy values to start
   double xmin = std::numeric_limits<double>::max();
+  if (this->getNumberEvents() == 0)
+    return xmin;
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
@@ -352,6 +354,8 @@ double EventWorkspace::getEventXMin() const {
 double EventWorkspace::getEventXMax() const {
   // set to crazy values to start
   double xmax = std::numeric_limits<double>::lowest();
+  if (this->getNumberEvents() == 0)
+    return xmax;
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
@@ -373,6 +377,9 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
+  if (this->getNumberEvents() == 0)
+    return;
+
   int64_t numWorkspace = static_cast<int64_t>(this->data.size());
 #pragma omp parallel
   {

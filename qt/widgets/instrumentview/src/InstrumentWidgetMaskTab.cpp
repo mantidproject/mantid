@@ -5,7 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -1198,6 +1200,7 @@ void InstrumentWidgetMaskTab::changedIntegrationRange(double, double) {
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("masktab"))
@@ -1235,6 +1238,11 @@ void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
     tab >> maskWSName;
     loadMaskViewFromProject(maskWSName);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentWidgetMaskTab::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Load a mask workspace applied to the instrument actor from the project
@@ -1309,6 +1317,7 @@ InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
  * @return a string representing the state of the mask tab
  */
 std::string InstrumentWidgetMaskTab::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   API::TSVSerialiser tab;
 
@@ -1338,6 +1347,10 @@ std::string InstrumentWidgetMaskTab::saveToProject() const {
 
   tsv.writeSection("masktab", tab.outputLines());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentWidgetMaskTab::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save a mask workspace containing masks applied to the instrument view

@@ -68,17 +68,35 @@ void MSDFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
+void MSDFit::runClicked() { runTab(); }
+
 void MSDFit::plotClicked() {
   setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
   setPlotResultIsPlotting(false);
 }
 
-bool MSDFit::shouldEnablePlotResult() {
-  for (auto i = 0u; i < m_msdFittingModel->numberOfWorkspaces(); ++i)
-    if (m_msdFittingModel->getNumberOfSpectra(i) > 1)
-      return true;
-  return false;
+void MSDFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void MSDFit::setFitSingleSpectrumIsFitting(bool fitting) {
+  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
+      fitting ? "Fitting..." : "Fit Single Spectrum");
+  setButtonsEnabled(!fitting);
+}
+
+void MSDFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void MSDFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
 }
 
 void MSDFit::setRunEnabled(bool enabled) {
@@ -97,21 +115,6 @@ void MSDFit::setFitSingleSpectrumEnabled(bool enabled) {
 void MSDFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
-
-void MSDFit::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
-  setFitSingleSpectrumEnabled(!running);
-}
-
-void MSDFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
-}
-
-void MSDFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

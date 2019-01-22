@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MPLCPPTESTGLOBALINITIALIZATION_H
 #define MPLCPPTESTGLOBALINITIALIZATION_H
 
@@ -17,6 +23,7 @@ class PythonInterpreter : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
     Py_Initialize();
+    PyEval_InitThreads();
     Mantid::PythonInterface::importNumpy();
     return Py_IsInitialized();
   }

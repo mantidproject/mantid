@@ -7,19 +7,11 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from TofConverter import converterGUI
-from PyQt4 import QtGui
-import sys
+from gui_helper import get_qapplication
 
+app, within_mantid = get_qapplication()
 
-def qapp():
-    if QtGui.QApplication.instance():
-        _app = QtGui.QApplication.instance()
-    else:
-        _app = QtGui.QApplication(sys.argv)
-    return _app
-
-
-app = qapp()
 reducer = converterGUI.MainWindow()#the main ui class in this file is called MainWindow
 reducer.show()
-app.exec_()
+if not within_mantid:
+    app.exec_()

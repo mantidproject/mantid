@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import os
 
@@ -43,7 +43,7 @@ def do_cleanup():
     return True
 
 
-class SNAP_short(stresstesting.MantidStressTest):
+class SNAP_short(systemtesting.MantidSystemTest):
     def skipTests(self):
         return _skip_test()
 
@@ -70,7 +70,7 @@ class SNAP_short(stresstesting.MantidStressTest):
         return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
 
 
-class SNAP_short_detcal(stresstesting.MantidStressTest):
+class SNAP_short_detcal(systemtesting.MantidSystemTest):
     def skipTests(self):
         return _skip_test()
 

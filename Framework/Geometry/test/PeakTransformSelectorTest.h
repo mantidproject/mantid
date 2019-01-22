@@ -16,7 +16,6 @@
 using namespace Mantid::Geometry;
 using namespace Mantid;
 using namespace testing;
-using boost::regex;
 
 class PeakTransformSelectorTest : public CxxTest::TestSuite {
 private:

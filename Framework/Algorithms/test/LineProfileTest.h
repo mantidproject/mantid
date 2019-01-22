@@ -18,6 +18,10 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 using Mantid::Algorithms::CompareWorkspaces;
 using Mantid::Algorithms::LineProfile;
 using namespace Mantid::API;
@@ -409,7 +413,8 @@ public:
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
     auto &oldHistory = inputWS->history();
     auto historyEntry = boost::make_shared<AlgorithmHistory>(
-        "LineProfileTestDummyAlgorithmName", 1);
+        "LineProfileTestDummyAlgorithmName", 1,
+        boost::uuids::to_string(boost::uuids::random_generator()()));
     oldHistory.addHistory(historyEntry);
     const int start = 2;
     const int end = nBins - 2;

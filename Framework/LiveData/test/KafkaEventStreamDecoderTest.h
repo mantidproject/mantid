@@ -37,14 +37,13 @@ public:
     auto &config = ConfigService::Instance();
     auto baseInstDir = config.getInstrumentDirectory();
     Poco::Path testFile =
-        Poco::Path(baseInstDir)
-            .resolve("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml");
+        Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
     config.setFacility("TEST");
     // Update instrument search directory
     config.setString("instrumentDefinition.directory",
-                     baseInstDir + "/IDFs_for_UNIT_TESTING");
+                     baseInstDir + "/unit_testing");
   }
 
   void tearDown() override {

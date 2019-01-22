@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 import os
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 import mantid.simpleapi as ms
 import Direct.DirectEnergyConversion as reduction
 
 
-class DirectInelasticDiagnostic(MantidStressTest):
+class DirectInelasticDiagnostic(MantidSystemTest):
     saved_diag_file=""
 
     def requiredMemoryMB(self):

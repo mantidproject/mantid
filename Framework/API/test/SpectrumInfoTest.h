@@ -497,28 +497,28 @@ public:
   void test_iterator_begin() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.begin();
+    auto iter = spectrumInfo.cbegin();
 
     // Check we start at the correct place
-    TS_ASSERT(iter != spectrumInfo.end());
+    TS_ASSERT(iter != spectrumInfo.cend());
   }
 
   void test_iterator_end() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.end();
+    auto iter = spectrumInfo.cend();
 
     // Check we start at the correct place
-    TS_ASSERT(iter != spectrumInfo.begin());
+    TS_ASSERT(iter != spectrumInfo.cbegin());
   }
 
   void test_iterator_increment_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.begin();
+    auto iter = spectrumInfo.cbegin();
 
     // Check that we start at the beginning
-    TS_ASSERT(iter == spectrumInfo.begin());
+    TS_ASSERT(iter == spectrumInfo.cbegin());
 
     // Increment iterator and check hasUniqueDetector
     for (size_t i = 0; i < m_workspace.spectrumInfo().size(); ++i) {
@@ -527,16 +527,16 @@ public:
     }
 
     // Check we've reached the end
-    TS_ASSERT(iter == spectrumInfo.end());
+    TS_ASSERT(iter == spectrumInfo.cend());
   }
 
   void test_iterator_decrement_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.end();
+    auto iter = spectrumInfo.cend();
 
     // Check that we start at the end
-    TS_ASSERT(iter == spectrumInfo.end());
+    TS_ASSERT(iter == spectrumInfo.cend());
 
     // Decrement iterator and check hasUniqueDetector
     for (size_t i = m_workspace.spectrumInfo().size(); i > 0; --i) {
@@ -545,13 +545,13 @@ public:
     }
 
     // Check we've reached the beginning
-    TS_ASSERT(iter == spectrumInfo.begin());
+    TS_ASSERT(iter == spectrumInfo.cbegin());
   }
 
   void test_iterator_advance_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.begin();
+    auto iter = spectrumInfo.cbegin();
 
     // Advance 3 places
     std::advance(iter, 3);
@@ -563,16 +563,16 @@ public:
 
     // Go to the start
     std::advance(iter, -1);
-    TS_ASSERT(iter == spectrumInfo.begin());
+    TS_ASSERT(iter == spectrumInfo.cbegin());
   }
 
   void test_copy_iterator_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto iter = spectrumInfo.begin();
+    auto iter = spectrumInfo.cbegin();
 
     // Create a copy
-    auto iterCopy = SpectrumInfoIterator(iter);
+    auto iterCopy = SpectrumInfoConstIt(iter);
 
     // Check
     TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
@@ -585,6 +585,14 @@ public:
     // Check again
     TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
     TS_ASSERT_EQUALS(iterCopy->hasUniqueDetector(), true);
+  }
+
+  void test_mutating_via_writable_iterator() {
+    auto &spectrumInfo = m_workspace.mutableSpectrumInfo();
+    auto it = spectrumInfo.begin();
+
+    it->setMasked(true);
+    TS_ASSERT(spectrumInfo.cbegin()->isMasked() == true);
   }
 
 private:

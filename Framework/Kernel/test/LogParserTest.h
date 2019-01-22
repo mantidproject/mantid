@@ -17,7 +17,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/lexical_cast.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <Poco/File.h>
 

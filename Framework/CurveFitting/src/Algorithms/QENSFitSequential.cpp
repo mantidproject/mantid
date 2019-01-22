@@ -29,6 +29,16 @@ namespace {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+WorkspaceGroup_sptr getADSGroupWorkspace(const std::string &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(const std::string &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
 MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
                                          const std::string &outputName) {
   auto convSpec = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
@@ -40,8 +50,7 @@ MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
   convSpec->execute();
   // Attempting to use getProperty("OutputWorkspace") on algorithm results in a
   // nullptr being returned
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      outputName);
+  return getADSMatrixWorkspace(outputName);
 }
 
 MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWorkspace,
@@ -150,8 +159,7 @@ std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
   std::vector<MatrixWorkspace_sptr> workspaces;
 
   auto extractWorkspace = [&](const std::string &name) {
-    workspaces.emplace_back(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
+    workspaces.emplace_back(getADSMatrixWorkspace(name));
   };
 
   boost::regex reg("([^,;]+),");
@@ -239,15 +247,14 @@ template <typename F>
 void renameWorkspacesInQENSFit(Algorithm *qensFit,
                                IAlgorithm_sptr renameAlgorithm,
                                WorkspaceGroup_sptr outputGroup,
+                               std::string const &outputBaseName,
+                               std::string const &groupSuffix,
                                const F &getNameSuffix) {
-  const auto groupName = qensFit->getPropertyValue("OutputWorkspaceGroup");
-  auto outputBase = groupName.substr(0, groupName.rfind("_Workspaces"));
-
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 
   auto getName = [&](std::size_t i) {
-    return outputBase + "_" + getNameSuffix(i);
+    return outputBaseName + "_" + getNameSuffix(i);
   };
 
   auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
@@ -256,6 +263,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
   };
   renameWorkspacesWith(outputGroup, getName, renamer);
 
+  auto const groupName = outputBaseName + groupSuffix;
   if (outputGroup->getName() != groupName)
     renameWorkspace(renameAlgorithm, outputGroup, groupName);
 }
@@ -302,6 +310,7 @@ runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
   }
   return createGroup(results);
 }
+
 } // namespace
 
 namespace Mantid {
@@ -511,21 +520,23 @@ void QENSFitSequential::exec() {
       processParameterTable(performFit(inputString, outputBaseName));
   const auto resultWs =
       processIndirectFitParameters(parameterWs, getDatasetGrouping(workspaces));
-  const auto groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          outputBaseName + "_Workspaces");
+  const auto groupWs = getADSGroupWorkspace(outputBaseName + "_Workspaces");
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
   if (containsMultipleData(workspaces))
-    renameWorkspaces(groupWs, spectra, inputWorkspaces);
+    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
+                     inputWorkspaces);
   else
-    renameWorkspaces(groupWs, spectra);
+    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
   if (doExtractMembers)
     extractMembers(groupWs, workspaces, outputBaseName + "_Members");
+
+  renameGroupWorkspace("__PDF_Workspace", spectra, outputBaseName, "_PDF");
 
   deleteTemporaryWorkspaces(outputBaseName);
 
@@ -558,6 +569,11 @@ QENSFitSequential::getAdditionalLogNumbers() const {
   logs["start_x"] = getPropertyValue("StartX");
   logs["end_x"] = getPropertyValue("EndX");
   return logs;
+}
+
+void QENSFitSequential::addAdditionalLogs(WorkspaceGroup_sptr resultWorkspace) {
+  for (const auto &workspace : *resultWorkspace)
+    addAdditionalLogs(workspace);
 }
 
 void QENSFitSequential::addAdditionalLogs(Workspace_sptr resultWorkspace) {
@@ -658,20 +674,34 @@ QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
 }
 
 void QENSFitSequential::renameWorkspaces(
-    WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
-    const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
+    WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix,
+    std::vector<MatrixWorkspace_sptr> const &inputWorkspaces) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   const auto getNameSuffix = [&](std::size_t i) {
-    return inputWorkspaces[i]->getName() + "_" + spectra[i] + "_Workspace";
+    return inputWorkspaces[i]->getName() + "_" + spectra[i] + endOfSuffix;
   };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
 }
 
 void QENSFitSequential::renameWorkspaces(
-    WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra) {
+    WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + "_Workspace"; };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
+  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
+}
+
+void QENSFitSequential::renameGroupWorkspace(
+    std::string const &currentName, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix) {
+  if (AnalysisDataService::Instance().doesExist(currentName)) {
+    auto const group = getADSGroupWorkspace(currentName);
+    if (group)
+      renameWorkspaces(group, spectra, outputBaseName, endOfSuffix);
+  }
 }
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
@@ -742,12 +772,19 @@ void QENSFitSequential::extractMembers(
 }
 
 void QENSFitSequential::copyLogs(
-    WorkspaceGroup_sptr resultWorkspace,
-    const std::vector<MatrixWorkspace_sptr> &workspaces) {
+    WorkspaceGroup_sptr resultWorkspaces,
+    std::vector<MatrixWorkspace_sptr> const &workspaces) {
+  for (auto const &resultWorkspace : *resultWorkspaces)
+    copyLogs(resultWorkspace, workspaces);
+}
+
+void QENSFitSequential::copyLogs(
+    Workspace_sptr resultWorkspace,
+    std::vector<MatrixWorkspace_sptr> const &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("OutputWorkspace", resultWorkspace->getName());
 
-  for (const auto &workspace : workspaces) {
+  for (auto const &workspace : workspaces) {
     logCopier->setProperty("InputWorkspace", workspace);
     logCopier->executeAsChildAlg();
   }
@@ -755,6 +792,12 @@ void QENSFitSequential::copyLogs(
 
 void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
                                  WorkspaceGroup_sptr resultGroup) {
+  for (auto const &workspace : *resultGroup)
+    copyLogs(resultWorkspace, workspace);
+}
+
+void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
+                                 Workspace_sptr resultGroup) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("InputWorkspace", resultWorkspace);
   logCopier->setProperty("OutputWorkspace", resultGroup->getName());

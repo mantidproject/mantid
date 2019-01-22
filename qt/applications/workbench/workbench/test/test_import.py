@@ -18,5 +18,6 @@ class ImportTest(unittest.TestCase):
     def test_import_workbench(self):
         import workbench  # noqa
 
+
 if __name__ == "__main__":
     unittest.main()

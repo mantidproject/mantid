@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantidqt.py3compat import Enum
+from mantid.py3compat import Enum
 
 
 class DictionaryAction(Enum):
@@ -23,6 +23,7 @@ class ObservableDictionary(dict):
     Override parts of dictionary that deal with adding, removing
     or changing data in the dictionary to call an observer.
     """
+
     def __init__(self, value):
         super(ObservableDictionary, self).__init__(value)
         self.observers = []

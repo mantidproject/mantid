@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name,no-init
 import os
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 from mantid.simpleapi import *
 from mantid.kernel import PropertyManager
 from mantid import config
@@ -22,7 +22,7 @@ def getNamedParameter(ws, name):
     return ws.getInstrument().getNumberParameter(name)[0]
 
 
-class DirectInelasticDiagnostic2(MantidStressTest):
+class DirectInelasticDiagnostic2(MantidSystemTest):
 
     saved_diag_file=''
 

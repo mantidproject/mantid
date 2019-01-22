@@ -21,7 +21,6 @@
 #include "MantidTestHelpers/BoxControllerDummyIO.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
