@@ -7,10 +7,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSMODEL_H_
 
+#include "IIndirectFitOutputOptionsModel.h"
+
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/PythonRunner.h"
 
 #include <boost/pointer_cast.hpp>
 
@@ -18,36 +19,38 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-using SpectrumToPlot = std::pair<std::string, std::size_t>;
-
-class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsModel {
+class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsModel
+    : public IIndirectFitOutputOptionsModel {
 public:
   IndirectFitOutputOptionsModel();
   ~IndirectFitOutputOptionsModel() = default;
 
-  void setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace);
-  void setPDFWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace);
-  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
-  Mantid::API::WorkspaceGroup_sptr getPDFWorkspace() const;
+  void
+  setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) override;
+  void
+  setPDFWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) override;
+  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const override;
+  Mantid::API::WorkspaceGroup_sptr getPDFWorkspace() const override;
 
-  void removePDFWorkspace();
+  void removePDFWorkspace() override;
 
-  bool isResultGroupPlottable() const;
-  bool isPDFGroupPlottable() const;
+  bool isResultGroupPlottable() const override;
+  bool isPDFGroupPlottable() const override;
 
-  void clearSpectraToPlot();
-  std::vector<SpectrumToPlot> getSpectraToPlot() const;
+  void clearSpectraToPlot() override;
+  std::vector<SpectrumToPlot> getSpectraToPlot() const override;
 
-  void plotResult(std::string const &plotType);
-  void plotPDF(std::string const &workspaceName, std::string const &plotType);
+  void plotResult(std::string const &plotType) override;
+  void plotPDF(std::string const &workspaceName,
+               std::string const &plotType) override;
 
-  void saveResult() const;
+  void saveResult() const override;
 
   std::vector<std::string>
-  getWorkspaceParameters(std::string const &selectedGroup) const;
-  std::vector<std::string> getPDFWorkspaceNames() const;
+  getWorkspaceParameters(std::string const &selectedGroup) const override;
+  std::vector<std::string> getPDFWorkspaceNames() const override;
 
-  bool isResultGroupSelected(std::string const &selectedGroup) const;
+  bool isResultGroupSelected(std::string const &selectedGroup) const override;
 
 private:
   void plotResult(Mantid::API::WorkspaceGroup_const_sptr groupWorkspace,

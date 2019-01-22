@@ -85,6 +85,8 @@ set ( INC_FILES
 	Elwin.h
 	IAddWorkspaceDialog.h
 	IIndirectFitDataView.h
+	IIndirectFitOutputOptionsModel.h
+	IIndirectFitOutputOptionsView.h
 	IIndirectFitPlotView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
@@ -157,6 +159,8 @@ set ( MOC_FILES
     Elwin.h
     IAddWorkspaceDialog.h
     IIndirectFitDataView.h
+	IIndirectFitOutputOptionsModel.h
+    IIndirectFitOutputOptionsView.h
     IIndirectFitPlotView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
