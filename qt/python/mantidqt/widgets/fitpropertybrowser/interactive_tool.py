@@ -179,15 +179,21 @@ class FitInteractiveTool(QObject):
         if selected_name[1]:
             self.add_other_requested.emit(selected_name[0])
 
-    def add_peak(self, x, y_top, y_bottom=0.0):
+    def add_peak_marker(self, x, y_top, y_bottom=0.0, fwhm=None):
+        if fwhm is None:
+            fwhm = self.fwhm
         peak_id = self._make_peak_id()
-        peak = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom, fwhm=self.fwhm)
+        peak = PeakMarker(self.canvas, peak_id, x, y_top, y_bottom, fwhm=fwhm)
         peak.peak_moved.connect(self.peak_moved)
         peak.fwhm_changed.connect(self.peak_fwhm_changed_slot)
         self.peak_markers.append(peak)
+        return peak
+
+    def add_peak(self, x, y_top, y_bottom=0.0):
+        peak = self.add_peak_marker(x, y_top, y_bottom)
         self.select_peak(peak)
         self.canvas.draw()
-        self.peak_added.emit(peak_id, x, peak.height(), peak.fwhm())
+        self.peak_added.emit(peak.peak_id, x, peak.height(), peak.fwhm())
 
     def update_peak(self, peak_id, centre, height, fwhm):
         for pm in self.peak_markers:
@@ -203,6 +209,31 @@ class FitInteractiveTool(QObject):
                 self.selected_peak = peak
             else:
                 pm.deselect()
+
+    def update_peak_markers(self, peaks_to_keep, peaks_to_add):
+        peaks_to_remove = []
+        for i, pm in enumerate(self.peak_markers):
+            if pm.peak_id not in peaks_to_keep:
+                peaks_to_remove.append(i)
+        for i in peaks_to_remove:
+            self.peak_markers[i].remove()
+            del self.peak_markers[i]
+        peak_ids = {}
+        peak_updates = []
+        for prefix, c, h, w in peaks_to_add:
+            do_updates = False
+            if h == 0.0:
+                h = 1.0
+                do_updates = True
+            if w <= 0:
+                w = self.fwhm
+                do_updates = True
+            pm = self.add_peak_marker(c, h, fwhm=w)
+            peak_ids[pm.peak_id] = prefix
+            if do_updates:
+                peak_updates.append((prefix, c, h, w))
+        self.canvas.draw()
+        return peak_ids, peak_updates
 
     @Slot(int, float)
     def peak_fwhm_changed_slot(self, peak_id, fwhm):

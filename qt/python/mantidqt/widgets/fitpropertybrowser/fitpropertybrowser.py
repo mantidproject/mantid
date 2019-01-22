@@ -47,6 +47,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.changedParameterOf.connect(self.peak_changed_slot)
         self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
+        self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
         self.setFeatures(self.DockWidgetMovable)
 
     def closeEvent(self, event):
@@ -114,6 +115,32 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         if axes.legend_ is not None:
             axes.legend()
 
+    def plot_guess(self):
+        from workbench.plotting.functions import plot
+        fun = self.getFittingFunction()
+        ws_name = self.workspaceName()
+        if fun == '' or ws_name == '':
+            return
+        ws_index = self.workspaceIndex()
+        out_ws_name = '{}guess'.format(ws_name)
+        EvaluateFunction(fun, ws_name, WorkspaceIndex=ws_index, OutputWorkspace=out_ws_name)
+        plot([mtd[out_ws_name]], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
+        out_ws_name += ':'
+        for lin in self.get_lines():
+            if lin.get_label().startswith(out_ws_name):
+                self.guess_line = lin
+                self.setTextPlotGuess('Remove Guess')
+        self.canvas.draw()
+
+    def remove_guess(self):
+        if self.guess_line is None:
+            return
+        self.guess_line.remove()
+        self.guess_line = None
+        self.update_legend()
+        self.setTextPlotGuess('Plot Guess')
+        self.canvas.draw()
+
     @Slot()
     def clear_fit_result_lines_slot(self):
         self.clear_fit_result_lines()
@@ -177,28 +204,22 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         else:
             self.remove_guess()
 
-    def plot_guess(self):
-        from workbench.plotting.functions import plot
-        fun = self.getFittingFunction()
-        ws_name = self.workspaceName()
-        if fun == '' or ws_name == '':
-            return
-        ws_index = self.workspaceIndex()
-        out_ws_name = '{}guess'.format(ws_name)
-        EvaluateFunction(fun, ws_name, WorkspaceIndex=ws_index, OutputWorkspace=out_ws_name)
-        plot([mtd[out_ws_name]], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
-        out_ws_name += ':'
-        for lin in self.get_lines():
-            if lin.get_label().startswith(out_ws_name):
-                self.guess_line = lin
-                self.setTextPlotGuess('Remove Guess')
-        self.canvas.draw()
-
-    def remove_guess(self):
-        if self.guess_line is None:
-            return
-        self.guess_line.remove()
-        self.guess_line = None
-        self.update_legend()
-        self.setTextPlotGuess('Plot Guess')
-        self.canvas.draw()
+    @Slot()
+    def function_changed_slot(self):
+        peaks_to_add = []
+        peaks = {v: k for k, v in self.peak_ids.items()}
+        for prefix in self.getPeakPrefixes():
+            if prefix in peaks:
+                del peaks[prefix]
+            else:
+                c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix)
+                peaks_to_add.append((prefix, c, h, w))
+        for i in peaks.values():
+            del self.peak_ids[i]
+        if len(peaks_to_add) > 0:
+            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(), peaks_to_add)
+            self.peak_ids.update(peak_ids)
+            for prefix, c, h, w in peak_updates:
+                self.setPeakCentreOf(prefix, c)
+                self.setPeakHeightOf(prefix, h)
+                self.setPeakFwhmOf(prefix, w)

@@ -285,6 +285,7 @@ public:
   double getPeakHeightOf(const QString &prefix);
   void setPeakFwhmOf(const QString &prefix, double value);
   double getPeakFwhmOf(const QString &prefix);
+  QStringList getPeakPrefixes() const;
 
 public slots:
   virtual void fit();

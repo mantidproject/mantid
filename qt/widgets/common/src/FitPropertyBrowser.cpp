@@ -3429,5 +3429,18 @@ double FitPropertyBrowser::getPeakFwhmOf(
   return handler->fwhm();
 }
 
+QStringList FitPropertyBrowser::getPeakPrefixes() const {
+  QStringList peaks;
+  auto parentHandler = getHandler();
+  auto nFunctions = parentHandler->cfun()->nFunctions();
+  for(size_t i = 0; i < nFunctions; ++i) {
+    auto handler = parentHandler->getHandler(i);
+    if (handler->pfun()) {
+      peaks << handler->functionPrefix();
+    }
+  }
+  return peaks;
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

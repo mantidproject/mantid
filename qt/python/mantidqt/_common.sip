@@ -306,6 +306,7 @@ public:
     QStringList registeredPeaks() const;
     QStringList registeredBackgrounds() const;
     QStringList registeredOthers() const;
+    QStringList getPeakPrefixes() const;
     QString addFunction(QString);
     double getPeakCentreOf(QString);
     void setPeakCentreOf(QString, double);
@@ -334,6 +335,7 @@ public:
     void setPeakToolOn(bool on);
 
 signals:
+    void functionChanged();
     void startXChanged(double);
     void endXChanged(double);
     void changedParameterOf(const QString &prefix);
