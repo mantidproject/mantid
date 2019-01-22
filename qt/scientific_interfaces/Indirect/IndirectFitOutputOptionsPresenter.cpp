@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsPresenter.h"
 
-#include "IndirectFitAnalysisTab.h"
-
 using namespace Mantid::API;
 
 namespace MantidQt {
@@ -15,17 +13,16 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
-    IndirectFitOutputOptionsView *view)
-    : QObject(nullptr),
-      m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
+    IIndirectFitOutputOptionsModel *model, IIndirectFitOutputOptionsView *view)
+    : QObject(nullptr), m_model(model), m_view(view) {
   setMultiWorkspaceOptionsVisible(false);
 
-  connect(m_view.get(), SIGNAL(groupWorkspaceChanged(std::string const &)),
-          this, SLOT(setAvailablePlotOptions(std::string const &)));
+  connect(m_view, SIGNAL(groupWorkspaceChanged(std::string const &)), this,
+          SLOT(setAvailablePlotOptions(std::string const &)));
 
-  connect(m_view.get(), SIGNAL(plotClicked()), this, SLOT(plotResult()));
-  connect(m_view.get(), SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
-  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveResult()));
+  connect(m_view, SIGNAL(plotClicked()), this, SLOT(plotResult()));
+  connect(m_view, SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
+  connect(m_view, SIGNAL(saveClicked()), this, SLOT(saveResult()));
 }
 
 IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() {}

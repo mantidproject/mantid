@@ -11,7 +11,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
-    : API::MantidWidget(parent),
+    : IIndirectFitOutputOptionsView(parent),
       m_outputOptions(new Ui::IndirectFitOutputOptions) {
   m_outputOptions->setupUi(this);
 

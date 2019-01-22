@@ -10,7 +10,7 @@
 #include "ui_IndirectFitOutputOptions.h"
 
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "IIndirectFitOutputOptionsView.h"
 
 #include <QMessageBox>
 
@@ -19,43 +19,39 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsView
-    : public API::MantidWidget {
+    : public IIndirectFitOutputOptionsView {
   Q_OBJECT
 
 public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
-  ~IndirectFitOutputOptionsView() override;
+  virtual ~IndirectFitOutputOptionsView();
 
-  void setGroupWorkspaceComboBoxVisible(bool visible);
-  void setWorkspaceComboBoxVisible(bool visible);
+  void setGroupWorkspaceComboBoxVisible(bool visible) override;
+  void setWorkspaceComboBoxVisible(bool visible) override;
 
-  void clearPlotWorkspaces();
-  void clearPlotTypes();
-  void
-  setAvailablePlotWorkspaces(std::vector<std::string> const &workspaceNames);
-  void setAvailablePlotTypes(std::vector<std::string> const &parameterNames);
+  void clearPlotWorkspaces() override;
+  void clearPlotTypes() override;
+  void setAvailablePlotWorkspaces(
+      std::vector<std::string> const &workspaceNames) override;
+  void setAvailablePlotTypes(
+      std::vector<std::string> const &parameterNames) override;
 
-  void setPlotGroupWorkspaceIndex(int index);
-  void setPlotWorkspacesIndex(int index);
-  void setPlotTypeIndex(int index);
+  void setPlotGroupWorkspaceIndex(int index) override;
+  void setPlotWorkspacesIndex(int index) override;
+  void setPlotTypeIndex(int index) override;
 
-  std::string getSelectedGroupWorkspace() const;
-  std::string getSelectedWorkspace() const;
-  std::string getSelectedPlotType() const;
+  std::string getSelectedGroupWorkspace() const override;
+  std::string getSelectedWorkspace() const override;
+  std::string getSelectedPlotType() const override;
 
-  void setPlotText(QString const &text);
-  void setSaveText(QString const &text);
+  void setPlotText(QString const &text) override;
+  void setSaveText(QString const &text) override;
 
-	void setPlotExtraOptionsEnabled(bool enable);
-  void setPlotEnabled(bool enable);
-  void setSaveEnabled(bool enable);
+  void setPlotExtraOptionsEnabled(bool enable) override;
+  void setPlotEnabled(bool enable) override;
+  void setSaveEnabled(bool enable) override;
 
-  void displayWarning(std::string const &message);
-
-signals:
-  void groupWorkspaceChanged(std::string const &group);
-  void plotClicked();
-  void saveClicked();
+  void displayWarning(std::string const &message) override;
 
 private slots:
   void emitGroupWorkspaceChanged(QString const &group);

@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTFITOUTPUTOPTIONSPRESENTER_H_
 
+#include "IIndirectFitOutputOptionsView.h"
 #include "IndirectFitOutputOptionsModel.h"
-#include "IndirectFitOutputOptionsView.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -22,7 +22,8 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsPresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectFitOutputOptionsPresenter(IndirectFitOutputOptionsView *view);
+  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
+                                    IIndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
 
   void setMultiWorkspaceOptionsVisible(bool visible);
@@ -58,8 +59,8 @@ private:
 
   void displayWarning(std::string const &message);
 
-  std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
-  std::unique_ptr<IndirectFitOutputOptionsView> m_view;
+  IIndirectFitOutputOptionsModel *m_model;
+  IIndirectFitOutputOptionsView *m_view;
 };
 
 } // namespace IDA
