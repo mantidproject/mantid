@@ -17,6 +17,10 @@ namespace Geometry {
 
 Base to allow users of the Info objects (DetectorInfo etc) access to data
 via a random access iterator.
+
+Note that the reference type (InfoItem<T>) causes the iterator to be treated as
+std::input_iterator for the purposes of many std algorithms such as
+std::advance. See https://en.cppreference.com/w/cpp/iterator/advance for example
 */
 template <typename T, template <typename> class InfoItem>
 class InfoIteratorBase
@@ -51,6 +55,10 @@ private:
                              m_item.m_index + static_cast<size_t>(delta));
   }
 
+  bool equal(const InfoIteratorBase<T, InfoItem> &other) const {
+    return getIndex() == other.getIndex();
+  }
+
   void increment() {
     if (m_item.m_index < m_totalSize) {
       ++m_item.m_index;
@@ -66,10 +74,6 @@ private:
   size_t getIndex() const { return m_item.m_index; }
 
   void setIndex(const size_t index) { m_item.m_index = index; }
-
-  bool equal(const InfoIteratorBase<T, InfoItem> &other) const {
-    return getIndex() == other.getIndex();
-  }
 
   InfoItem<T> dereference() const { return m_item; }
 
