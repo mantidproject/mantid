@@ -41,4 +41,4 @@ target_link_libraries ( Nexus LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANT
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Nexus ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Nexus INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

@@ -50,7 +50,8 @@ def import_qt(modulename, package, attr=None):
     if modulename.startswith('.'):
         try:
             lib = import_module(modulename + LIB_SUFFIX, package)
-        except ImportError:
+        except ImportError as e:
+            print (e)
             lib = import_module(modulename.lstrip('.') + LIB_SUFFIX)
     else:
         lib = import_module(modulename + LIB_SUFFIX)

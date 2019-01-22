@@ -44,7 +44,7 @@ else()
   set ( PYUNITTEST_RUNNER ${CMAKE_BINARY_DIR}/bin/workbench -x)
 endif()
 
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (NOT APPLE)
     # Tests fail/crash on OSX for unknown reasons. Skipping by the usual way
     # via @unittest.skipIf also doesn't work.
     pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
@@ -52,4 +52,20 @@ if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     )
 endif()
 
-# Not installed yet...
+# Install MantidWorkbench for OSX
+if ( APPLE )
+
+    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
+        ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
+        @ONLY )
+    install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb DESTINATION MantidWorkbench.app/ )
+    install ( CODE "
+        set ( bundle \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app )
+        execute_process(COMMAND chmod +x ./make_package.rb WORKING_DIRECTORY \${bundle})
+        execute_process(COMMAND ./make_package.rb WORKING_DIRECTORY \${bundle} RESULT_VARIABLE install_name_tool_result)
+        if(NOT install_name_tool_result EQUAL 0)
+          message(FATAL_ERROR \"Package script failed!!!\n\")
+        endif()
+    ")
+
+endif()
