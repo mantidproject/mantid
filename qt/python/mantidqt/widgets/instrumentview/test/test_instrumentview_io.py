@@ -17,13 +17,13 @@ from mantidqt.utils.qt.test import GuiTest
 
 
 INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
-                        u'tabs': {u'maskTab':
-                                      {u'activeType':
-                                           {u'roiOn': False, u'groupingOn': False, u'maskingOn': True},
-                                       u'activeTools': {u'ellipseButton': False, u'moveButton': True,
-                                                        u'pointerButton': False, u'ringRectangleButton': False,
-                                                        u'freeDrawButton': False, u'ringEllipseButton': False},
-                                       u'maskWorkspaceSaved': False},
+                        u'tabs': {u'maskTab': {
+                                    u'activeType': {
+                                        u'roiOn': False, u'groupingOn': False, u'maskingOn': True},
+                                    u'activeTools': {u'ellipseButton': False, u'moveButton': True,
+                                                     u'pointerButton': False, u'ringRectangleButton': False,
+                                                     u'freeDrawButton': False, u'ringEllipseButton': False},
+                                    u'maskWorkspaceSaved': False},
                                   u'renderTab': {u'displayWireframe': False, u'displayLighting': False,
                                                  u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': True,
                                                  u'colorBar': {u'max': u'40', u'scaleType': 0, u'power': u'2',
