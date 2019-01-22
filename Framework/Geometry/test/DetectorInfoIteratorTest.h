@@ -166,15 +166,6 @@ public:
         !bidirectionalit);
 
     // see https://en.cppreference.com/w/cpp/iterator/advance
-    // Demonstrate internal switched behaviour in std::advance
-    auto detectorInfo = create_detector_info_object();
-    auto it = detectorInfo->cbegin();
-    TS_ASSERT_EQUALS(it->index(), 0);
-    std::advance(it, 2);
-    TS_ASSERT_EQUALS(it->index(), 2);
-    std::advance(it, -2);
-    TSM_ASSERT_EQUALS("Was not decremented. Not zero. For reasons above",
-                      it->index(), 2);
   }
 
   void test_iterator_advance_and_positions() {
