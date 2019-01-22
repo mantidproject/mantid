@@ -18,7 +18,7 @@ from qtpy.QtCore import QEvent, Signal
 from qtpy.QtWidgets import QMainWindow
 
 # local imports
-from .figuretype import figure_type, FigureType
+from mantidqt.plotting.figuretype import figure_type, FigureType
 
 
 class FigureWindow(QMainWindow):
@@ -88,7 +88,7 @@ class FigureWindow(QMainWindow):
         if len(names) == 0:
             return
         # local import to avoid circular import with FigureManager
-        from workbench.plotting.functions import pcolormesh_from_names, plot_from_names
+        from mantidqt.plotting.functions import pcolormesh_from_names, plot_from_names
 
         fig = self._canvas.figure
         fig_type = figure_type(fig)
