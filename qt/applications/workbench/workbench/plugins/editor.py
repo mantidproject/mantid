@@ -10,15 +10,15 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QVBoxLayout
 
 # third-party library imports
 from mantidqt.utils.qt import add_actions, create_action
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QVBoxLayout
-
 # local package imports
 from workbench.plugins.base import PluginWidget
+
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
@@ -53,7 +53,7 @@ class MultiFileEditor(PluginWidget):
         # attributes
         self.run_action = create_action(self, "Run",
                                         on_triggered=self.editors.execute_current,
-                                        shortcut="Ctrl+Return",
+                                        shortcut=("Ctrl+Return", "Ctrl+Enter"),
                                         shortcut_context=Qt.ApplicationShortcut)
         self.abort_action = create_action(self, "Abort",
                                           on_triggered=self.editors.abort_current)

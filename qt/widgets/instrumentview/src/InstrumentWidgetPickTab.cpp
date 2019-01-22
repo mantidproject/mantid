@@ -1160,6 +1160,27 @@ void DetectorPlotController::setPlotData(
                         actor.getWorkspace()->getAxis(0)->unit()->unitID()),
                     "multiple");
   }
+
+  addPeakLabels(detIndices);
+}
+
+/**
+ * Add peak labels to plot for each detector shown
+ * @param detIndices :: A list of detector inidices.
+ */
+void DetectorPlotController::addPeakLabels(
+    const std::vector<size_t> &detIndices) {
+  auto surface = m_tab->getSurface();
+  if (surface) {
+    const auto &actor = m_instrWidget->getInstrumentActor();
+    auto detIds = actor.getDetIDs(detIndices);
+    for (const auto &detId : detIds) {
+      auto markers = surface->getMarkersWithID(static_cast<int>(detId));
+      for (const auto &marker : markers) {
+        m_plot->addPeakLabel(marker);
+      }
+    }
+  }
 }
 
 /**

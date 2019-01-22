@@ -24,8 +24,6 @@ from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay
 
 
 class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
-    WORKSPACE = r"C:\Users\qbr77747\dev\m\workbench_matrixworkspace\test_masked_bins.nxs"
-
     def test_correct_model_type(self):
         ws = MockWorkspace()
         model = MatrixWorkspaceTableViewModel(ws, MatrixWorkspaceTableViewModelType.x)
@@ -482,6 +480,31 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         output = model.headerData(mock_section, Qt.Horizontal, Qt.ToolTipRole)
 
         self.assertEqual(MatrixWorkspaceTableViewModel.HORIZONTAL_BINS_VARY_TOOLTIP_STRING.format(mock_section), output)
+
+    def test_histogram_data_has_one_extra_x_column(self):
+        """
+        Test that an extra column is added if the workspace is HistogramData. This is the column that
+        contains the right boundary for the last bin.
+        """
+        mock_data = [1, 2, 3, 4, 5, 6, 7]
+        data_len = len(mock_data)
+        ws = MockWorkspace(read_return=mock_data, isHistogramData=True)
+
+        model_type = MatrixWorkspaceTableViewModelType.x
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+
+        self.assertEqual(data_len + 1, model.columnCount())
+
+        # test that it is not added to Y and E
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+
+        self.assertEqual(data_len, model.columnCount())
+
+        model_type = MatrixWorkspaceTableViewModelType.e
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+
+        self.assertEqual(data_len, model.columnCount())
 
 
 if __name__ == '__main__':
