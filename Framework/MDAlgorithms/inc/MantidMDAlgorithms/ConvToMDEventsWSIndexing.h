@@ -183,7 +183,10 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
   auto rootAndErr = distributor.distribute(mdEvents);
   m_OutWSWrapper->pWorkspace()->setBox(rootAndErr.root);
   rootAndErr.root->calculateGridCaches();
-  g_Log.information("Error with using Morton indexes is:\n" + toString(rootAndErr.err));
+
+  std::stringstream ss;
+  ss << rootAndErr.err;
+  g_Log.information("Error with using Morton indexes is:\n" + ss.str());
   pProgress->report(1);
 }
 

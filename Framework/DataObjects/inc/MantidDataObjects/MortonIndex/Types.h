@@ -17,13 +17,6 @@ template <size_t ND, typename IntT> using IntArray = Eigen::Array<IntT, static_c
 
 template <size_t ND> using MDCoordinate = Eigen::Array<float, static_cast<int>(ND), 1>;
 
-template <typename T>
-std::string toString(const T& mat){
-  std::stringstream ss;
-  ss << mat;
-  return ss.str();
-}
-
 template <size_t ND> using MDSpaceBounds = Eigen::Array<float, static_cast<int>(ND), 2>;
 template <size_t ND> using MDSpaceDimensions = Eigen::Array<float, static_cast<int>(ND), 1>;
 template <size_t ND> using MDSpaceSteps = Eigen::Array<float, static_cast<int>(ND), 1>;
