@@ -40,7 +40,7 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
         self.observeClear(True)
         self.observeDelete(True)
         self.observeReplace(observe_replace)
-        # self.observeRename(True) # todo add
+        self.observeRename(True)
 
     @_catch_exceptions
     def clearHandle(self):
@@ -70,3 +70,7 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
         :param workspace: A reference to the new workspace
         """
         self.window.replace_workspace(name, workspace)
+
+    @_catch_exceptions
+    def renameHandle(self, old_name, new_name):
+        self.window.rename_workspace(old_name, new_name)

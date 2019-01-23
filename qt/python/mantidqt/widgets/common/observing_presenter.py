@@ -5,8 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
+
+
 class ObservingPresenter:
     """
     This class provides some common functions for classes that need to be observable.
@@ -32,11 +32,15 @@ class ObservingPresenter:
             # if the observer is not cleared here then the C++ object is never freed,
             # and observers keep getting created, and triggering on ADS events
             self.ads_observer = None
-            self.view.close_later()
+            self.view.emit_close()
 
     def force_close(self):
         self.ads_observer = None
-        self.view.close_later()
+        self.view.emit_close()
 
     def replace_workspace(self, workspace_name, workspace):
         raise NotImplementedError("This method must be overridden.")
+
+    def rename_workspace(self, old_name, new_name):
+        if self.model.workspace_equals(old_name):
+            self.view.emit_rename(new_name)

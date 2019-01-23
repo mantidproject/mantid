@@ -42,6 +42,7 @@ class MatrixWorkspaceTableView(QTableView):
 
 class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
     close_signal = Signal()
+    rename_signal = Signal(str)
 
     def __init__(self, presenter, parent=None, name=''):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
@@ -70,6 +71,7 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
         self.table_e = self.add_table("E values")
 
         self.close_signal.connect(self._run_close)
+        self.rename_signal.connect(self._run_rename)
 
         self.resize(600, 400)
         self.show()
@@ -78,6 +80,10 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
     def _run_close(self):
         self.presenter.clear_observer()
         self.close()
+
+    @Slot(str)
+    def _run_rename(self, new_name):
+        self._rename(new_name)
 
     def add_table(self, label):
         tab = MatrixWorkspaceTableView(self)
