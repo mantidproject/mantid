@@ -40,8 +40,7 @@ class InstrumentView(QWidget, ObservingView):
     def __init__(self, presenter, name, parent=None):
         super(InstrumentView, self).__init__(parent)
 
-        if self.make_widget(name):
-            return
+        self.widget = InstrumentWidget(name)
 
         self.presenter = presenter
 
@@ -55,9 +54,6 @@ class InstrumentView(QWidget, ObservingView):
         self.setLayout(layout)
 
         self.close_signal.connect(self._run_close)
-
-    def make_widget(self, name):
-        self.widget = InstrumentWidget(name)
 
     @Slot()
     def _run_close(self):
