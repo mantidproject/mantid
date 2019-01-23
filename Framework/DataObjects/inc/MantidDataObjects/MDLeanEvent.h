@@ -110,20 +110,14 @@ protected:
     MortonT index;
   };
 #pragma pack(pop)
-public:
-  static MDCoordinate<nd> indexToCoordinates(const MortonT& idx, const MDSpaceBounds<nd>& space) {
-    return md_structure_ws::ConvertCoordinatesFromIntegerRange<nd, IntT>(space, Interleaver<nd, IntT, MortonT>::deinterleave(idx));
-  }
-  static MortonT coordinatesToIndex(coord_t* coord, const MDSpaceBounds<nd>& space) {
-    return Interleaver<nd, IntT, MortonT>::interleave(md_structure_ws::ConvertCoordinatesToIntegerRange<nd, IntT>(space, coord));
-  }
+
 protected:
   void retrieveIndex(const MDSpaceBounds<nd>& space) {
-    index = coordinatesToIndex(center, space);
+    index = md_structure_ws::coordinatesToIndex<nd, IntT, MortonT>(center, space);
   }
 
   void retrieveCoordinates(const MDSpaceBounds<nd>& space) {
-    auto coords = indexToCoordinates(index, space);
+    auto coords = md_structure_ws::indexToCoordinates<nd, IntT, MortonT>(index, space);
     for(unsigned i = 0; i < nd; ++i)
       center[i] = coords[i];
   }

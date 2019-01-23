@@ -163,7 +163,8 @@ retrieveIndex(std::vector<MDEventType<ND>>& mdEvents, const MDSpaceBounds<ND>& s
   for(size_t i = 0; i < mdEvents.size(); ++i) {
     MDCoordinate<ND> oldCoord{mdEvents[i].getCenter()};
     IndexCoordinateSwitcher::retrieveIndex(mdEvents[i], space);
-    MDCoordinate<ND> newCoord = MDEvent::indexToCoordinates(IndexCoordinateSwitcher::getIndex(mdEvents[i]), space);
+    MDCoordinate<ND> newCoord = md_structure_ws::indexToCoordinates<ND, IntT, MortonT>
+        (IndexCoordinateSwitcher::getIndex(mdEvents[i]), space);
     newCoord -= oldCoord;
     MDCoordinate<ND>& threadErr = perThread[omp_get_thread_num()];
     for(size_t d = 0; d < ND; ++d)
@@ -274,8 +275,8 @@ distributeEvents(Task& tsk, const WORKER_TYPE& wtp) {
     /* As we are adding as we iterate over Morton numbers and parent events
      * child boxes are inserted in the correct sorted order. */
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extents(ND);
-    auto minCoord = MDEvent::indexToCoordinates(boxLower, m_space);
-    auto maxCoord = MDEvent::indexToCoordinates(boxUpper, m_space);
+    auto minCoord = md_structure_ws::indexToCoordinates<ND, IntT, MortonT>(boxLower, m_space);
+    auto maxCoord = md_structure_ws::indexToCoordinates<ND, IntT, MortonT>(boxUpper, m_space);
     for(unsigned ax = 0; ax < ND; ++ax) {
       extents[ax].setExtents(minCoord[ax], maxCoord[ax]);
     }

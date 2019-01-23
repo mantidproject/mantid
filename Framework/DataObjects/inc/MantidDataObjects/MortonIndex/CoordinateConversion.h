@@ -179,6 +179,16 @@ float ConvertCoordinateFromIntegerRange(IntT value, float lower, float upper) {
   return lower + (coordFactorOfRange * (upper - lower));
 }
 
+template <size_t nd, typename IntT, typename MortonT>
+MDCoordinate<nd> indexToCoordinates(const MortonT& idx, const MDSpaceBounds<nd>& space) {
+  return md_structure_ws::ConvertCoordinatesFromIntegerRange<nd, IntT>(space, Interleaver<nd, IntT, MortonT>::deinterleave(idx));
+}
+
+template <size_t nd, typename IntT, typename MortonT, typename coord_t = float>
+MortonT coordinatesToIndex(coord_t* coord, const MDSpaceBounds<nd>& space) {
+  return Interleaver<nd, IntT, MortonT>::interleave(md_structure_ws::ConvertCoordinatesToIntegerRange<nd, IntT>(space, coord));
+}
+
 } //md_structure_ws
 
 #endif //MANTID_DATAOBJECTS_MORTONINDEX_COORDINATE_CONVERSION_H_
