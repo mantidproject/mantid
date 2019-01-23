@@ -573,7 +573,7 @@ public:
   void testHelper_ValidDateOverlap() {
     const std::string instDir =
         ConfigService::Instance().getInstrumentDirectory();
-    const std::string testDir = instDir + "IDFs_for_UNIT_TESTING";
+    const std::string testDir = instDir + "unit_testing";
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         testDir);
     ExperimentInfo helper;
@@ -586,6 +586,15 @@ public:
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         instDir);
+  }
+
+  void test_nexus_geometry_getInstrumentFilename() {
+    const std::string instrumentName = "LOKI";
+    ExperimentInfo info;
+    const auto path = info.getInstrumentFilename(instrumentName, "");
+    TS_ASSERT(!path.empty());
+    TS_ASSERT(
+        boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
   }
 
   void test_nexus() {

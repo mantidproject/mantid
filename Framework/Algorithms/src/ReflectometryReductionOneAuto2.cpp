@@ -217,7 +217,7 @@ void ReflectometryReductionOneAuto2::init() {
   // Processing instructions
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
-                  "Grouping pattern of workspace indices to yield only the"
+                  "Grouping pattern of spectrum numbers to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
 
   // Theta
@@ -259,9 +259,6 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Monitor properties
   initMonitorProperties();
-  // Normalization by integrated monitors
-  declareProperty("NormalizeByIntegratedMonitors", true,
-                  "Normalize by dividing by the integrated monitors.");
 
   // Init properties for transmission normalization
   initTransmissionProperties();
@@ -278,30 +275,30 @@ void ReflectometryReductionOneAuto2::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "Polarization analysis mode.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Pp", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("CPp", Direction::Input),
       "Effective polarizing power of the polarizing system. "
       "Expressed as a ratio 0 &lt; Pp &lt; 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Ap", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("CAp", Direction::Input),
       "Effective polarizing power of the analyzing system. "
       "Expressed as a ratio 0 &lt; Ap &lt; 1");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Rho", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("CRho", Direction::Input),
       "Ratio of efficiencies of polarizer spin-down to polarizer "
       "spin-up. This is characteristic of the polarizer flipper. "
       "Values are constants for each term in a polynomial "
       "expression.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Alpha", Direction::Input),
+      Kernel::make_unique<ArrayProperty<double>>("CAlpha", Direction::Input),
       "Ratio of efficiencies of analyzer spin-down to analyzer "
       "spin-up. This is characteristic of the analyzer flipper. "
       "Values are factors for each term in a polynomial "
       "expression.");
   setPropertyGroup("PolarizationAnalysis", "Polarization Corrections");
-  setPropertyGroup("Pp", "Polarization Corrections");
-  setPropertyGroup("Ap", "Polarization Corrections");
-  setPropertyGroup("Rho", "Polarization Corrections");
-  setPropertyGroup("Alpha", "Polarization Corrections");
+  setPropertyGroup("CPp", "Polarization Corrections");
+  setPropertyGroup("CAp", "Polarization Corrections");
+  setPropertyGroup("CRho", "Polarization Corrections");
+  setPropertyGroup("CAlpha", "Polarization Corrections");
 
   // Flood correction
   propOptions = {"Workspace", "ParameterFile"};
@@ -365,12 +362,11 @@ void ReflectometryReductionOneAuto2::exec() {
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
-  const auto instructions =
-      populateProcessingInstructions(alg, instrument, inputWS);
-
-  // Now that we know the detectors of interest, we can move them if necessary
-  // (i.e. if theta is given). If not, we calculate theta from the current
-  // detector positions
+  convertProcessingInstructions(instrument, inputWS);
+  alg->setProperty("ProcessingInstructions", m_processingInstructions);
+  // Now that we know the detectors of interest, we can move them if
+  // necessary (i.e. if theta is given). If not, we calculate theta from the
+  // current detector positions
   bool correctDetectors = getProperty("CorrectDetectors");
   double theta;
   if (!getPointerToProperty("ThetaIn")->isDefault()) {
@@ -379,7 +375,7 @@ void ReflectometryReductionOneAuto2::exec() {
     theta = getThetaFromLogs(inputWS, getPropertyValue("ThetaLogName"));
   } else {
     // Calculate theta from detector positions
-    theta = calculateTheta(instructions, inputWS);
+    theta = calculateTheta(inputWS);
     // Never correct detector positions if ThetaIn or ThetaLogName is not
     // specified
     correctDetectors = false;
@@ -389,19 +385,18 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setProperty("ThetaIn", theta);
 
   if (correctDetectors) {
-    inputWS = correctDetectorPositions(instructions, inputWS, 2 * theta);
+    inputWS = correctDetectorPositions(inputWS, 2 * theta);
   }
 
   // Optional properties
 
+  alg->setPropertyValue("TransmissionProcessingInstructions",
+                        getPropertyValue("TransmissionProcessingInstructions"));
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors",
                         getPropertyValue("NormalizeByIntegratedMonitors"));
   bool transRunsFound = populateTransmissionProperties(alg);
-  if (transRunsFound)
-    alg->setProperty("StrictSpectrumChecking",
-                     getPropertyValue("StrictSpectrumChecking"));
-  else
+  if (!transRunsFound)
     populateAlgorithmicCorrectionProperties(alg, instrument);
 
   alg->setProperty("InputWorkspace", inputWS);
@@ -437,15 +432,15 @@ void ReflectometryReductionOneAuto2::exec() {
  * last spectrum indices in the processing instructions. It is assumed that all
  * the interim detectors have the same parent.
  *
- * @param instructions :: processing instructions defining detectors of interest
  * @param inputWS :: the input workspace
  * @return :: the names of the detectors of interest
  */
-std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
-    const std::string &instructions, MatrixWorkspace_sptr inputWS) {
+std::vector<std::string>
+ReflectometryReductionOneAuto2::getDetectorNames(MatrixWorkspace_sptr inputWS) {
 
   std::vector<std::string> wsIndices;
-  boost::split(wsIndices, instructions, boost::is_any_of(":,-+"));
+  boost::split(wsIndices, m_processingInstructionsWorkspaceIndex,
+               boost::is_any_of(":,-+"));
   // vector of comopnents
   std::vector<std::string> detectors;
 
@@ -466,7 +461,7 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
     }
   } catch (boost::bad_lexical_cast &) {
     throw std::runtime_error("Invalid processing instructions: " +
-                             instructions);
+                             m_processingInstructionsWorkspaceIndex);
   }
 
   return detectors;
@@ -475,17 +470,14 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
 /** Correct an instrument component by shifting it vertically or
  * rotating it around the sample.
  *
- * @param instructions :: processing instructions defining the detectors of
- * interest
  * @param inputWS :: the input workspace
  * @param twoTheta :: the angle to move detectors to
  * @return :: the corrected workspace
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
-    const std::string &instructions, MatrixWorkspace_sptr inputWS,
-    const double twoTheta) {
+    MatrixWorkspace_sptr inputWS, const double twoTheta) {
 
-  auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
+  auto detectorsOfInterest = getDetectorNames(inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
   // a workspace that was previously reduced using this algorithm. In this case,
@@ -517,16 +509,13 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
 /** Calculate the theta value of the detector of interest specified via
  * processing instructions
  *
- * @param instructions :: processing instructions defining the detectors of
- * interest
  * @param inputWS :: the input workspace
  * @return :: the angle of the detector (only the first detector is considered)
  */
 double
-ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
-                                               MatrixWorkspace_sptr inputWS) {
+ReflectometryReductionOneAuto2::calculateTheta(MatrixWorkspace_sptr inputWS) {
 
-  const auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
+  const auto detectorsOfInterest = getDetectorNames(inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
   // a workspace that was previously reduced using this algorithm. In this case,
@@ -804,6 +793,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     if (!firstTransG) {
       alg->setProperty("FirstTransmissionRun", firstTrans);
     } else {
+      g_log.information("A group has been passed as the first transmission run "
+                        "so the first run only is being used");
       alg->setProperty("FirstTransmissionRun", firstTransG->getItem(0));
     }
   }
@@ -817,6 +808,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
     } else {
+      g_log.information("A group has been passed as the second transmission "
+                        "run so the first run only is being used");
       alg->setProperty("secondTransmissionRun", secondTransG->getItem(0));
     }
   }
@@ -896,13 +889,19 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setProperty("FirstTransmissionRun", "");
   alg->setProperty("SecondTransmissionRun", "");
   alg->setProperty("CorrectionAlgorithm", "None");
-  alg->setProperty("ProcessingInstructions", "0");
+
   auto outputIvsLamNames = workspaceNamesInGroup(outputIvsLam);
   for (size_t i = 0; i < outputIvsLamNames.size(); ++i) {
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
     const std::string IvsQBinnedName =
         outputIvsQBinned + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLamNames[i];
+
+    // Find the spectrum processing instructions for ws index 0
+    auto currentWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(outputIvsLamNames[i]));
+    auto newProcInst = convertToSpectrumNumber("0", currentWorkspace);
+    alg->setProperty("ProcessingInstructions", newProcInst);
     alg->setProperty("InputWorkspace", IvsLamName);
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
@@ -945,17 +944,17 @@ ReflectometryReductionOneAuto2::getPolarizationEfficiencies() {
   } else {
     auto effAlg = createChildAlgorithm("CreatePolarizationEfficiencies");
     effAlg->setProperty("InputWorkspace", workspace);
-    if (!isDefault("Pp")) {
-      effAlg->setProperty("Pp", getPropertyValue("Pp"));
+    if (!isDefault("CPp")) {
+      effAlg->setProperty("Pp", getPropertyValue("CPp"));
     }
-    if (!isDefault("Rho")) {
-      effAlg->setProperty("Rho", getPropertyValue("Rho"));
+    if (!isDefault("CRho")) {
+      effAlg->setProperty("Rho", getPropertyValue("CRho"));
     }
-    if (!isDefault("Ap")) {
-      effAlg->setProperty("Ap", getPropertyValue("Ap"));
+    if (!isDefault("CAp")) {
+      effAlg->setProperty("Ap", getPropertyValue("CAp"));
     }
-    if (!isDefault("Alpha")) {
-      effAlg->setProperty("Alpha", getPropertyValue("Alpha"));
+    if (!isDefault("CAlpha")) {
+      effAlg->setProperty("Alpha", getPropertyValue("CAlpha"));
     }
     effAlg->execute();
     efficiencies = effAlg->getProperty("OutputWorkspace");

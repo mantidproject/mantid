@@ -81,6 +81,7 @@ set ( EXPORT_FILES
   src/Exports/SpectrumInfoItem.cpp
   src/Exports/SpectrumInfoIterator.cpp
   src/Exports/SpectrumInfoPythonIterator.cpp
+  src/Exports/AnalysisDataServiceObserver.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
@@ -99,6 +100,7 @@ set ( SRC_FILES
   src/PythonAlgorithm/DataProcessorAdapter.cpp
   src/CloneMatrixWorkspace.cpp
   src/ExtractWorkspace.cpp
+  src/Exports/AnalysisDataServiceObserverAdapter.cpp
 )
 
 set ( INC_FILES
@@ -109,6 +111,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
+  ${HEADER_DIR}/api/AnalysisDataServiceObserverAdapter.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/ExtractWorkspace.h
@@ -172,7 +175,7 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonAPIModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/api )
+mtd_install_targets( TARGETS PythonAPIModule INSTALL_DIRS ${BIN_DIR}/mantid/api ${WORKBENCH_BIN_DIR}/mantid/api )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/api )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/api ${WORKBENCH_BIN_DIR}/mantid/api)

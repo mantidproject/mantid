@@ -24,7 +24,7 @@ The *InputWorkspace* should be loaded using the :ref:`DirectILLCollectData <algm
 Vanadium temperature
 ####################
 
-A correction for the Debye-Waller factor is applied to the integrated vanadium, as explained in the documentation of :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`. The temperature for the DWF calculation is taken from the 'Sample.temperature' sample log of the *InputWorkspace*. This value can be overridden by the *Temperature* property, if needed.
+A correction for the Debye-Waller factor is applied to the integrated vanadium, as explained in the documentation of :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`. The temperature for the DWF calculation is taken from the sample logs of the *InputWorkspace*. This value can be overridden by the *Temperature* property, if needed.
 
 Usage
 -----

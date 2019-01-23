@@ -193,14 +193,18 @@ double Run::getProtonCharge() const {
  * If "proton_charge" is not found, the value is not stored
  */
 void Run::integrateProtonCharge(const std::string &logname) const {
-  Kernel::TimeSeriesProperty<double> *log;
-  try {
-    log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        this->getProperty(logname));
-  } catch (Exception::NotFoundError &) {
-    g_log.warning(logname + " log was not found. The value of the total proton "
-                            "charge has not been set");
-    return;
+  Kernel::TimeSeriesProperty<double> *log = nullptr;
+
+  if (this->hasProperty(logname)) {
+    try {
+      log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+          this->getProperty(logname));
+    } catch (Exception::NotFoundError &) {
+      g_log.warning(logname +
+                    " log was not found. The value of the total proton "
+                    "charge has not been set");
+      return;
+    }
   }
 
   if (log) {
@@ -468,16 +472,18 @@ void Run::calculateGoniometerMatrix() {
         getLogAsSingleValue(axisName, Kernel::Math::Minimum);
     const double maxAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Maximum);
-    const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
+    const double angle =
+        getLogAsSingleValue(axisName, Kernel::Math::TimeAveragedMean);
+
     if (minAngle != maxAngle &&
         !(std::isnan(minAngle) && std::isnan(maxAngle))) {
       const double lastAngle =
           getLogAsSingleValue(axisName, Kernel::Math::LastValue);
-      g_log.warning(
-          "Goniometer angle changed in " + axisName + " log from " +
-          boost::lexical_cast<std::string>(minAngle) + " to " +
-          boost::lexical_cast<std::string>(maxAngle) +
-          ".  Used mean = " + boost::lexical_cast<std::string>(angle) + ".");
+      g_log.warning("Goniometer angle changed in " + axisName + " log from " +
+                    boost::lexical_cast<std::string>(minAngle) + " to " +
+                    boost::lexical_cast<std::string>(maxAngle) +
+                    ".  Used time averaged value = " +
+                    boost::lexical_cast<std::string>(angle) + ".");
       if (axisName == "omega") {
         g_log.warning("To set to last angle, replace omega with " +
                       boost::lexical_cast<std::string>(lastAngle) +

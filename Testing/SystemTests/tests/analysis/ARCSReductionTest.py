@@ -10,11 +10,11 @@ System test for ARCS reduction
 """
 
 import os
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class ARCSReductionTest(stresstesting.MantidStressTest):
+class ARCSReductionTest(systemtesting.MantidSystemTest):
 
     vanFile1=''
     vanFile0=''

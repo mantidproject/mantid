@@ -8,16 +8,19 @@
 #define SAVEREFLTHREECOLUMNASCIITEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveReflThreeColumnAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
+using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
 class SaveReflThreeColumnAsciiTest : public CxxTest::TestSuite {
@@ -34,14 +37,11 @@ public:
     m_filename = "SaveReflThreeColumnAsciiTestFile.txt";
     m_name = "SaveReflThreeColumnAsciiWS";
     for (int i = 1; i < 11; ++i) {
-      // X, Y and E get [1,2,3,4,5,6,7,8,9,10]
-      // 0 gets [0,0,0,0,0,0,0,0,0,0] and is used to make sure there is no
-      // problem with divide by zero
-      m_dataX.push_back(i);
-      m_dataY.push_back(i);
-      m_dataE.push_back(i);
-      m_data0.push_back(0);
+      m_dataX.emplace_back(i);
+      m_dataY.emplace_back(i);
+      m_dataE.emplace_back(i);
     }
+    m_dataX.emplace_back(11);
   }
   ~SaveReflThreeColumnAsciiTest() override {}
 
@@ -70,8 +70,8 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4); // first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -100,8 +100,8 @@ public:
     boost::split(columns, fullline, boost::is_any_of("\t"),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4); // first blank
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
     // TS_ASSERT((columns.at(3) == "nan") || (columns.at(3) == "inf"));
     in.close();
 
@@ -132,8 +132,8 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4); // first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -163,8 +163,8 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4); // first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -195,8 +195,8 @@ public:
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4); // first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -219,34 +219,22 @@ public:
 
 private:
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false) {
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    AnalysisDataService::Instance().addOrReplace(m_name, ws);
     // Check if any of X, Y or E should be zeroed to check for divide by zero or
     // similiar
-    if (zeroX) {
-      ws->dataX(0) = m_data0;
-    } else {
-      ws->dataX(0) = m_dataX;
-    }
-
-    if (zeroY) {
-      ws->dataY(0) = m_data0;
-    } else {
-      ws->dataY(0) = m_dataY;
-    }
-
-    if (zeroE) {
-      ws->dataE(0) = m_data0;
-    } else {
-      ws->dataE(0) = m_dataE;
-    }
+    BinEdges edges = zeroX ? BinEdges(11, 0.) : BinEdges(m_dataX);
+    Counts counts = zeroY ? Counts(10, 0.) : Counts(m_dataY);
+    CountStandardDeviations stddev = zeroE ? CountStandardDeviations(10, 0.)
+                                           : CountStandardDeviations(m_dataE);
+    MatrixWorkspace_sptr ws =
+        create<Workspace2D>(1, Histogram(edges, counts, stddev));
+    AnalysisDataService::Instance().addOrReplace(m_name, ws);
   }
   void cleanupafterwards() {
     Poco::File(m_long_filename).remove();
     AnalysisDataService::Instance().remove(m_name);
   }
   std::string m_filename, m_name, m_long_filename;
-  std::vector<double> m_dataX, m_dataY, m_dataE, m_data0;
+  std::vector<double> m_dataX, m_dataY, m_dataE;
 };
 
 #endif /*SAVEREFLTHREECOLUMNASCIITEST_H_*/

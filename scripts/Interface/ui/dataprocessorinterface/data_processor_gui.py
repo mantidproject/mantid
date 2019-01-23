@@ -5,17 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-try:
-    from mantidplot import *
-except ImportError:
-    canMantidPlot = False
-
 from PyQt4 import QtGui
 from mantidqtpython import MantidQt
 from ui.dataprocessorinterface.ui_data_processor_window import Ui_DataProcessorWindow
-
-
-canMantidPlot = True
+from reduction_gui.reduction.scripter import execute_script
 
 
 class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter):
@@ -227,4 +220,4 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
         """
         Re-emits 'runPytonScript' signal
         """
-        mantidplot.runPythonScript(text, True)
+        execute_script(text)

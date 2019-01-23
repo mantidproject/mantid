@@ -10,8 +10,14 @@
 import os
 from qtpy.QtWidgets import (QDialog, QFileDialog, QMessageBox)  # noqa
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
-from HFIR_4Circle_Reduction import ui_httpserversetup as ui_http
+
 import qtpy  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class DataDownloadDialog(QDialog):
@@ -26,8 +32,8 @@ class DataDownloadDialog(QDialog):
         super(DataDownloadDialog, self).__init__(parent)
 
         # set up UI
-        self.ui = ui_http.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = "httpserversetup.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
         self._init_widgets()
@@ -57,8 +63,6 @@ class DataDownloadDialog(QDialog):
         # experiment number
         self._expNumber = None
 
-        return
-
     def _init_widgets(self):
         """
         initialize widgets
@@ -66,13 +70,13 @@ class DataDownloadDialog(QDialog):
         """
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
 
-        return
-
     def do_browse_local_cache_dir(self):
         """ Browse local cache directory
         :return:
         """
-        local_cache_dir = str(QFileDialog.getExistingDirectory(self, 'Get Local Cache Directory', self._homeSrcDir))
+        local_cache_dir = QFileDialog.getExistingDirectory(self, 'Get Local Cache Directory', self._homeSrcDir)
+        if isinstance(local_cache_dir, tuple):
+            local_cache_dir = local_cache_dir[0]
 
         # Set local directory to control
         status, error_message = self._myControl.set_local_data_dir(local_cache_dir)
@@ -88,13 +92,12 @@ class DataDownloadDialog(QDialog):
         self.ui.lineEdit_localSrcDir.setText(local_cache_dir)
         # self.ui.lineEdit_localSpiceDir.setText(local_cache_dir)
 
-        return
-
     def do_change_data_access_mode(self):
         """ Change data access mode between downloading from server and local
         Event handling methods
         :return:
         """
+        pass
         # TODO/FIXME/NOW - Find out whether these widgets are used in the dialog
         # new_mode = str(self.ui.comboBox_mode.currentText())
         # self._dataAccessMode = new_mode
@@ -113,8 +116,6 @@ class DataDownloadDialog(QDialog):
         #     self.ui.lineEdit_localSrcDir.setEnabled(True)
         #     self.ui.pushButton_browseLocalCache.setEnabled(True)
         #     self._allowDownload = True
-
-        return
 
     def do_download_spice_data(self):
         """ Download SPICE data
@@ -159,8 +160,6 @@ class DataDownloadDialog(QDialog):
         # Download
         self._myControl.download_data_set(scan_list)
 
-        return
-
     def do_list_scans(self):
         """ List all scans available and show the information in a pop-up dialog
         :return:
@@ -177,8 +176,6 @@ class DataDownloadDialog(QDialog):
             message = hb3a_util.get_scans_list(url, exp_no)
 
         self.pop_one_button_dialog(message)
-
-        return
 
     def do_test_url(self):
         """ Test whether the root URL provided specified is good
@@ -204,8 +201,6 @@ class DataDownloadDialog(QDialog):
                                          '' % (str(message), type(message))
         QMessageBox.information(self, '4-circle Data Reduction', message)
 
-        return
-
     def set_experiment_number(self, exp_number):
         """set the experiment number
         :param exp_number:
@@ -215,5 +210,3 @@ class DataDownloadDialog(QDialog):
                                             'not a {1}.'.format(exp_number, type(exp_number))
 
         self._expNumber = exp_number
-
-        return

@@ -231,8 +231,7 @@ void InterfaceManager::registerHelpWindowFactory(
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   if (m_helpViewer == nullptr) {
     g_log.error("InterfaceManager::createHelpWindow is null.");
-    throw Mantid::Kernel::Exception::NullPointerException(
-        "InterfaceManager::createHelpWindow", "m_helpViewer");
+    return nullptr;
   } else {
     MantidHelpInterface *interface =
         this->m_helpViewer->createUnwrappedInstance();

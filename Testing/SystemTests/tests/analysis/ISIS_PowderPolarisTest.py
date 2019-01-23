@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-import stresstesting
+import systemtesting
 import shutil
 
 import mantid.simpleapi as mantid
@@ -48,7 +48,7 @@ unsplined_van_path = os.path.join(calibration_dir, unsplined_van_rel_path)
 total_scattering_input_file = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInput.nxs")
 
 
-class CreateVanadiumTest(stresstesting.MantidStressTest):
+class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
     existing_config = config['datasearch.directories']
@@ -76,7 +76,7 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
             config['datasearch.directories'] = self.existing_config
 
 
-class FocusTest(stresstesting.MantidStressTest):
+class FocusTest(systemtesting.MantidSystemTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
@@ -104,7 +104,7 @@ class FocusTest(stresstesting.MantidStressTest):
             mantid.mtd.clear()
 
 
-class TotalScatteringTest(stresstesting.MantidStressTest):
+class TotalScatteringTest(systemtesting.MantidSystemTest):
 
     pdf_output = None
 

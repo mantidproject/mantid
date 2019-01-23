@@ -1578,8 +1578,16 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
     itemMenuAction->setText(item->title());
   }
 
-  auto catalogMenuAction = myMenuBar()->addMenu(icat);
-  catalogMenuAction->setText(tr("&Catalog"));
+  const auto &config = Mantid::Kernel::ConfigService::Instance();
+  const auto showCatalogMenu = !config.getFacility(config.getFacility().name())
+                                    .catalogInfo()
+                                    .soapEndPoint()
+                                    .empty();
+
+  if (showCatalogMenu) {
+    auto catalogMenuAction = myMenuBar()->addMenu(icat);
+    catalogMenuAction->setText(tr("&Catalog"));
+  }
 
   // -- INTERFACE MENU --
   auto interfaceMenuAction = myMenuBar()->addMenu(interfaceMenu);
@@ -11639,7 +11647,11 @@ void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
 
 bool ApplicationWindow::isUnityDesktop() const {
   return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity" ||
-         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity";
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity" ||
+         QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) ==
+             "ubuntu:GNOME" ||
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) ==
+             "ubuntu:GNOME";
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
@@ -16783,11 +16795,26 @@ bool ApplicationWindow::isOfType(const QObject *obj,
  * @param sourceFile The full path to the .project file
  * @return True is loading was successful, false otherwise
  */
-bool ApplicationWindow::loadProjectRecovery(std::string sourceFile) {
+bool ApplicationWindow::loadProjectRecovery(std::string sourceFile,
+                                            std::string recoveryFolder) {
+  // Wait on this thread until scriptWindow is finished (Should be a seperate
+  // thread)
+  do {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  } while (scriptingWindow->isExecuting());
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   // File version is not applicable to project recovery - so set to 0
-  return projectWriter.load(sourceFile, 0);
+  const auto loadSuccess = projectWriter.load(sourceFile, 0);
+
+  // Handle the removal of old checkpoints and start project saving again
+  Poco::Path deletePath(recoveryFolder);
+  deletePath.setFileName("");
+  deletePath.popDirectory();
+  m_projectRecovery.clearAllCheckpoints(deletePath);
+  m_projectRecovery.startProjectSaving();
+
+  return loadSuccess;
 }
 
 /**
@@ -16811,10 +16838,7 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
 void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
 
-  m_projectRecovery.removeOlderCheckpoints();
-
-  // Mantid crashed during writing to this checkpoint so remove it
-  m_projectRecovery.removeLockedCheckpoints();
+  m_projectRecovery.repairCheckpointDirectory();
 
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();

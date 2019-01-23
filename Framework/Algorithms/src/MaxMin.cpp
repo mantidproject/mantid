@@ -9,7 +9,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaxMin.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -20,6 +23,8 @@ DECLARE_ALGORITHM(MaxMin)
 
 using namespace Kernel;
 using namespace API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 /** Initialisation method.
  *
@@ -89,9 +94,10 @@ void MaxMin::exec() {
   }
 
   // Create the 1D workspace for the output
-  MatrixWorkspace_sptr outputWorkspace =
-      API::WorkspaceFactory::Instance().create(localworkspace,
-                                               MaxSpec - MinSpec + 1, 2, 1);
+  MatrixWorkspace_sptr outputWorkspace;
+
+  outputWorkspace = create<HistoWorkspace>(*localworkspace,
+                                           MaxSpec - MinSpec + 1, BinEdges(2));
 
   Progress progress(this, 0.0, 1.0, (MaxSpec - MinSpec + 1));
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))

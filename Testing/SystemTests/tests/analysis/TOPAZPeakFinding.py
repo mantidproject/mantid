@@ -11,12 +11,12 @@ converts to Q space, finds peaks and indexes
 them.
 """
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import numpy
 from mantid.simpleapi import *
 
 
-class TOPAZPeakFinding(stresstesting.MantidStressTest):
+class TOPAZPeakFinding(systemtesting.MantidSystemTest):
 
     def requiredMemoryMB(self):
         """ Require about 2GB free """

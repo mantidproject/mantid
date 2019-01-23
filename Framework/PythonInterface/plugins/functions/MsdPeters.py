@@ -28,12 +28,12 @@ class MsdPeters(IFunction1D):
     def init(self):
         # Active fitting parameters
         self.declareParameter("Height", 1.0, 'Height')
-        self.declareParameter("MSD", 0.05, 'Mean square displacement')
+        self.declareParameter("Msd", 0.05, 'Mean square displacement')
         self.declareParameter("Beta", 1.0, 'beta')
 
     def function1D(self, xvals):
         height = self.getParameterValue("Height")
-        msd = self.getParameterValue("MSD")
+        msd = self.getParameterValue("Msd")
         beta = self.getParameterValue("Beta")
 
         xvals = np.array(xvals)
@@ -44,7 +44,7 @@ class MsdPeters(IFunction1D):
 
     def functionDeriv1D(self, xvals, jacobian):
         height = self.getParameterValue("Height")
-        msd = self.getParameterValue("MSD")
+        msd = self.getParameterValue("Msd")
         beta = self.getParameterValue("Beta")
 
         for i, x in enumerate(xvals):

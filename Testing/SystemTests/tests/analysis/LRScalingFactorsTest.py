@@ -5,13 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 import os
 from mantid import *
 from mantid.simpleapi import *
 
 
-class LRPrimaryFractionTest(stresstesting.MantidStressTest):
+class LRPrimaryFractionTest(systemtesting.MantidSystemTest):
     """
     #y=a+bx
     #

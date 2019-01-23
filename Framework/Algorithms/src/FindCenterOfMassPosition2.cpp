@@ -13,12 +13,13 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -260,7 +261,7 @@ void FindCenterOfMassPosition2::exec() {
     setPropertyValue("OutputWorkspace", output);
 
     Mantid::API::ITableWorkspace_sptr m_result =
-        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+        boost::make_shared<TableWorkspace>();
     m_result->addColumn("str", "Name");
     m_result->addColumn("double", "Value");
 

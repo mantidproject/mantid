@@ -6,11 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class SXDAnalysis(stresstesting.MantidStressTest):
+class SXDAnalysis(systemtesting.MantidSystemTest):
     """
     Start of a system test for SXD data analyiss
     """

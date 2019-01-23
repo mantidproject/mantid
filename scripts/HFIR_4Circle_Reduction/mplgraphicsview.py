@@ -9,8 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import os
 import numpy as np
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from MPLwidgets import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 import matplotlib.collections

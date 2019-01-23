@@ -203,12 +203,13 @@ if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
+add_custom_target ( AllTests )
+add_dependencies( AllTests FrameworkTests )
 if ( ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH )
   add_custom_target ( GUITests )
   add_dependencies ( check GUITests )
   # Collect all tests together
-  add_custom_target ( AllTests )
-  add_dependencies ( AllTests FrameworkTests GUITests )
+  add_dependencies ( AllTests GUITests )
   add_subdirectory ( qt )
 endif()
 
@@ -310,7 +311,8 @@ if ( ENABLE_CPACK )
                                        "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
                                        "sip >= 4.18,"
                                        "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
-                                       "scipy,"
+                                       "python-requests,"
+                                       "scipy,python2-scikit-image,"
                                        "hdf,hdf5,jsoncpp >= 0.7.0" )
       if (ENABLE_MANTIDPLOT)
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,PyQt4,qwtplot3d-qt4" )
@@ -371,21 +373,29 @@ if ( ENABLE_CPACK )
                                            "libqscintilla2-12v5,"
                                            "ipython-notebook,"
                                            "libhdf5-cpp-11" )
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqt5scintilla2-12v5" )
+        endif()
       else()  # bionic and newer
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23,"
                                            "liboce-foundation11,liboce-modeling11,"
                                            "libqscintilla2-qt4-13,"
                                            "jupyter-notebook,"
                                            "libhdf5-cpp-100" )
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13" )
+        endif()
       endif()
 
       if ( PYTHON_VERSION_MAJOR EQUAL 3 )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
                                            "python3-numpy,"
+                                           "python3-requests,"
                                            "python3-sip,"
                                            "python3-six,"
                                            "python3-matplotlib,"
                                            "python3-scipy,"
+                                           "python3-skimage,"
                                            "python3-pycifrw (>= 4.2.1),"
                                            "python3-yaml,"
                                            "python3-qtawesome,"
@@ -400,10 +410,12 @@ if ( ENABLE_CPACK )
       else() # python 2
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-h5py,"
                                            "python-numpy,"
+                                           "python-requests,"
                                            "python-sip,"
                                            "python-six,"
                                            "python-matplotlib,"
                                            "python-scipy,"
+                                           "python-skimage,"
                                            "python-pycifrw (>= 4.2.1),"
                                            "python-yaml,"
                                            "python-qtawesome,"

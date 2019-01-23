@@ -8,11 +8,16 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import testhelpers
-from mantid.api import (AlgorithmManager, IAlgorithm, Algorithm, AlgorithmProxy)
+from mantid.api import (AlgorithmManager, Algorithm, AlgorithmProxy,
+                        FrameworkManagerImpl, IAlgorithm)
 
-import sys
 
 class AlgorithmManagerTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # Load the plugins
+        FrameworkManagerImpl.Instance()
 
     def test_create_default_version(self):
         alg = testhelpers.assertRaisesNothing(self, AlgorithmManager.create, "ConvertUnits")

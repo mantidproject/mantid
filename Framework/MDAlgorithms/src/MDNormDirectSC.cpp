@@ -49,7 +49,7 @@ MDNormDirectSC::MDNormDirectSC()
     : m_normWS(), m_inputWS(), m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f),
       m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_dEmin(0.f), m_dEmax(0.f),
       m_Ei(0.), m_ki(0.), m_kfmin(0.), m_kfmax(0.), m_hIntegrated(true),
-      m_kIntegrated(true), m_lIntegrated(true), m_dEIntegrated(false),
+      m_kIntegrated(true), m_lIntegrated(true), m_dEIntegrated(true),
       m_rubw(3, 3), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_hX(),
       m_kX(), m_lX(), m_eX(), m_samplePos(), m_beamDir() {}
 

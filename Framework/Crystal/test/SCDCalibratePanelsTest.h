@@ -36,6 +36,14 @@ public:
     alg->setPropertyValue("Filename", "Peaks5637.integrate");
     alg->setPropertyValue("OutputWorkspace", "TOPAZ_5637");
     TS_ASSERT(alg->execute());
+    PeaksWorkspace_sptr pws =
+        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
+            "TOPAZ_5637");
+    size_t numberPeaks = pws->getNumberPeaks();
+    std::vector<int> notBank47;
+    for (int i=0; i < int(numberPeaks); i++) if (pws->getPeak(i).getBankName() !="bank47") notBank47.push_back(i);
+    pws->removePeaks(std::move(notBank47));
+    
 
     // run the calibration
     alg = AlgorithmFactory::Instance().create("SCDCalibratePanels", 1);
@@ -48,6 +56,7 @@ public:
     alg->setProperty("alpha", 90.0);
     alg->setProperty("beta", 90.0);
     alg->setProperty("gamma", 120.0);
+    alg->setProperty("ChangeL1", false);
     alg->setPropertyValue("DetCalFilename", "/tmp/topaz.detcal"); // deleteme
     TS_ASSERT(alg->execute());
 
@@ -64,6 +73,7 @@ public:
     TS_ASSERT_DELTA(
         -1.05, results->cell<double>(3, 1) + results->cell<double>(5, 1), 0.05);
     TS_ASSERT_DELTA(0.0, results->cell<double>(4, 1), 1.1);
+    TS_ASSERT_DELTA(-6.31219, results->cell<double>(5, 1), 1.e-2);
     TS_ASSERT_DELTA(1.0024, results->cell<double>(6, 1), 5e-3);
     TS_ASSERT_DELTA(0.9986, results->cell<double>(7, 1), 1e-2);
     TS_ASSERT_DELTA(0.2710, results->cell<double>(9, 1), 0.2);

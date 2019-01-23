@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class LoadMuonNexusTest(stresstesting.MantidStressTest):
+class LoadMuonNexusTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
       # EMU03087 is an old data file produced by CONVERT_NEXUS from MCS binary files.

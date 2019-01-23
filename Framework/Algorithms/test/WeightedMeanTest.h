@@ -63,19 +63,19 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("result")))
     // Check bin boundaries are the same
-    TS_ASSERT_EQUALS(in2->readX(0), result->readX(0))
+    TS_ASSERT_EQUALS(in2->x(0), result->x(0))
     // Pick a bin where both entries are non-zero
-    TS_ASSERT_DELTA(result->readY(0)[1176], 21983.40535, 0.00001)
-    TS_ASSERT_DELTA(result->readE(0)[1176], 104.841321, 0.000001)
+    TS_ASSERT_DELTA(result->y(0)[1176], 21983.40535, 0.00001)
+    TS_ASSERT_DELTA(result->e(0)[1176], 104.841321, 0.000001)
     // Now one where first is zero
-    TS_ASSERT_EQUALS(result->readY(0)[2], 2.0)
-    TS_ASSERT_EQUALS(result->readE(0)[2], M_SQRT2)
+    TS_ASSERT_EQUALS(result->y(0)[2], 2.0)
+    TS_ASSERT_EQUALS(result->e(0)[2], M_SQRT2)
     // And one where second is zero
-    TS_ASSERT_EQUALS(result->readY(0)[113], 97.0)
-    TS_ASSERT_EQUALS(result->readE(0)[113], std::sqrt(97.0))
+    TS_ASSERT_EQUALS(result->y(0)[113], 97.0)
+    TS_ASSERT_EQUALS(result->e(0)[113], std::sqrt(97.0))
     // Finally one where both are zero
-    TS_ASSERT_EQUALS(result->readY(0)[4989], 0.0)
-    TS_ASSERT_EQUALS(result->readE(0)[4989], 0.0)
+    TS_ASSERT_EQUALS(result->y(0)[4989], 0.0)
+    TS_ASSERT_EQUALS(result->e(0)[4989], 0.0)
 
     AnalysisDataService::Instance().remove("first");
     AnalysisDataService::Instance().remove("second");

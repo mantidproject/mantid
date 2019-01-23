@@ -801,6 +801,12 @@ QString ReflDataProcessorPresenter::loadRun(const QString &run,
     // Run not loaded from disk
     runFound = false;
     return "";
+  } else if (loader == "LoadEventNexus" && !this->retrieveWorkspace(outputName)
+                                                ->run()
+                                                .hasProperty("proton_charge")) {
+    /*ISIS event nexus files require the proton_charge log to be present*/
+    runFound = false;
+    return "";
   }
 
   return outputName;

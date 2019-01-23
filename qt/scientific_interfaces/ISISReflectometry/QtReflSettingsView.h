@@ -58,6 +58,10 @@ public:
   std::string getCAp() const override;
   /// Return Cpp
   std::string getCPp() const override;
+  /// Return FloodCorrection
+  std::string getFloodCorrection() const override;
+  /// Return FloodWorkspace
+  std::string getFloodWorkspace() const override;
   /// Return integrated monitors option
   std::string getIntMonCheck() const override;
   /// Return monitor integral wavelength min
@@ -125,11 +129,13 @@ public slots:
 
 private slots:
   void setPolCorPageForIndex(int index);
+  void floodCorComboBoxChanged(const QString &text);
 
 private:
   /// Initialise the interface
   void initLayout();
   void initOptionsTable();
+  void initFloodCorControls();
   void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerInstrumentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);

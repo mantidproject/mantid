@@ -9,7 +9,6 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
@@ -30,6 +29,11 @@ void observeProgress(AlgorithmObserver &self, boost::python::object alg) {
   self.observeProgress(calg);
 }
 
+void stopObserving(AlgorithmObserver &self, boost::python::object alg) {
+  IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
+  self.stopObserving(calg);
+}
+
 GET_POINTER_SPECIALIZATION(AlgorithmObserver)
 
 void export_algorithm_observer() {
@@ -47,5 +51,7 @@ void export_algorithm_observer() {
       .def("observeError", &observeError, (arg("self"), arg("alg")),
            "Observe algorithm for its error notification.")
       .def("observeProgress", &observeProgress, (arg("self"), arg("alg")),
-           "Observe algorithm for its progress notification.");
+           "Observe algorithm for its progress notification.")
+      .def("stopObserving", &stopObserving, (arg("self"), arg("alg")),
+           "Remove all observers from the algorithm.");
 }

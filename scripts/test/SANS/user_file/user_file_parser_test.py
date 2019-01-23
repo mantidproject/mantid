@@ -8,8 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType)
-from sans.user_file.user_file_parser import (DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
+from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
+from sans.user_file.user_file_parser import (InstrParser, DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
                                              TubeCalibFileParser, QResolutionParser, FitParser, GravityParser,
                                              MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
                                              UserFileParser, LARMORParser, CompatibilityParser)
@@ -32,7 +32,8 @@ def assert_valid_result(result, expected, assert_true):
     for key in keys_result:
         assert_true(key in keys_expected)
         if result[key] != expected[key]:
-            assert_true(result[key] == expected[key])
+            assert_true(result[key] == expected[key], "For key {}, {} does not equal {}".format(key, result[key],
+                                                                                                expected[key]))
 
 
 def assert_valid_parse(parser, to_parse, expected, assert_true):
@@ -56,6 +57,32 @@ def do_test(parser, valid_settings, invalid_settings, assert_true, assert_raises
 # # -----------------------------------------------------------------
 # # --- Tests -------------------------------------------------------
 # # -----------------------------------------------------------------
+class InstrParserTest(unittest.TestCase):
+    def test_that_gets_type(self):
+        self.assertTrue(InstrParser.get_type(), "INSTR")
+
+    def test_that_instruments_are_recognised(self):
+        self.assertTrue(InstrParser.get_type_pattern("LOQ"))
+        self.assertTrue(InstrParser.get_type_pattern("SANS2D"))
+        self.assertTrue(InstrParser.get_type_pattern("ZOOM"))
+        self.assertTrue(InstrParser.get_type_pattern("LARMOR"))
+        self.assertFalse(InstrParser.get_type_pattern("Not an instrument"))
+        self.assertFalse(InstrParser.get_type_pattern("SANS2D/something else"))
+
+    def test_that_instruments_are_parsed_correctly(self):
+        valid_settings = {"SANS2D": {DetectorId.instrument: SANSInstrument.SANS2D},
+                          "LOQ": {DetectorId.instrument: SANSInstrument.LOQ},
+                          "ZOOM": {DetectorId.instrument: SANSInstrument.ZOOM},
+                          "LARMOR": {DetectorId.instrument: SANSInstrument.LARMOR}}
+
+        invalid_settings = {"NOINSTRUMENT": RuntimeError,
+                            "SANS2D/HAB": RuntimeError,
+                            "!LOQ": RuntimeError}
+
+        instr_parser = InstrParser()
+        do_test(instr_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+
+
 class DetParserTest(unittest.TestCase):
     def test_that_gets_type(self):
         self.assertTrue(DetParser.get_type(), "DET")
@@ -219,25 +246,29 @@ class LimitParserTest(unittest.TestCase):
                                                                               rebin_string="-12.0,-2.7,34.6")},
                           "L/q -12 3.6 2 /LIN": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
                                                                             rebin_string="-12.0,2.0,3.6")},
-                          "L/q -12 ,  0.4  ,23 ,-34.8, 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                              rebin_string="-12.0,0.4,23.0,-34.8,3.6")},  # noqa
-                          "L/q -12  , 0.4 , 23 ,-34.8 ,3.6 /LIn": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                                   rebin_string="-12.0,0.4,23.0,34.8,3.6")},
-                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6  /Log": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                                    rebin_string="-12.0,-0.4,23.0,-34.8,3.6")},
-                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.q: q_rebin_values(min=-12.,
+                          "L/q -12 ,  0.41  ,23 ,-34.8, 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                              rebin_string="-12.0,0.41,23.0,-34.8,3.6")},  # noqa
+                          "L/q -12  , 0.42 , 23 ,-34.8 ,3.6 /LIn": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                   rebin_string="-12.0,0.42,23.0,34.8,3.6")},
+                          "L/q -12   0.43     23 -34.8 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                            rebin_string="-12.0,0.43,23.0,-34.8,3.6")},
+                          "L/q -12  , 0.44 , 23  ,34.8,3.6  /Log": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                    rebin_string="-12.0,-0.44,23.0,-34.8,3.6")},
+                          "L/q -12  , 0.45 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.q: q_rebin_values(min=-12.,
                                                                                                           max=5.6,
-                                                                    rebin_string="-12.0,-0.4,23.0,-34.8,3.6,"
+                                                                    rebin_string="-12.0,-0.45,23.0,-34.8,3.6,"
                                                                                  "-0.123,5.6")},
-                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.q: q_rebin_values(min=-12.,
+                          "L/q -12  , 0.46 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.q: q_rebin_values(min=-12.,
                                                                                                      max=5.6,
-                                                                          rebin_string="-12.0,0.4,23.0,34.8,3.6,"
-                                                                                       "-0.123,5.6")}
+                                                                          rebin_string="-12.0,0.46,23.0,34.8,3.6,"
+                                                                                       "-0.123,5.6")},
+                          "L/q -12   0.47   23 34.8  3.6, -.123    5.6": {LimitsId.q: q_rebin_values(min=-12.,
+                                                                            max=5.6,
+                                                                            rebin_string="-12.0,0.47,23.0,34.8,3.6,"
+                                                                                            "-0.123,5.6")}
                           }
 
-        invalid_settings = {"L/Q 12 2 3 4": RuntimeError,
-                            "L/Q 12 2 3 4 23 3": RuntimeError,
-                            "L/Q 12 2 3 4 5/LUG": RuntimeError,
+        invalid_settings = {"L/Q 12 2 3 4 5/LUG": RuntimeError,
                             "L/Q 12 2 /LIN": RuntimeError,
                             "L/Q ": RuntimeError,
                             "L/Q a 1 2 3 4 /LIN": RuntimeError}
@@ -1064,13 +1095,13 @@ class UserFileParserTest(unittest.TestCase):
         result = user_file_parser.parse_line("BACK / M3 /OFF")
         assert_valid_result(result, {BackId.monitor_off: 3}, self.assertTrue)
 
-        # SANS2DParser
+        # Instrument parser
         result = user_file_parser.parse_line("SANS2D")
-        self.assertTrue(not result)
+        assert_valid_result(result, {DetectorId.instrument: SANSInstrument.SANS2D}, self.assertTrue)
 
-        # LOQParser
-        result = user_file_parser.parse_line("LOQ")
-        self.assertTrue(not result)
+        # Instrument parser - whitespace
+        result = user_file_parser.parse_line("     ZOOM      ")
+        assert_valid_result(result, {DetectorId.instrument: SANSInstrument.ZOOM}, self.assertTrue)
 
     def test_that_non_existent_parser_throws(self):
         # Arrange

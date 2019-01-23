@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="GeneralPurposedPlotView" name="graphicsView_plotView"/>
+     <widget class="QFrame" name="frame_graphicsView_plotView"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">

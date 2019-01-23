@@ -10,7 +10,7 @@
 """
 from __future__ import (absolute_import, division, print_function)
 import six
-from PyQt4 import QtGui
+from qtpy.QtWidgets import (QMessageBox)  # noqa
 import sys
 import os
 import traceback
@@ -81,7 +81,7 @@ class InstrumentInterface(object):
             #TODO: change this to signals and slots mechanism
         """
         if len(self.widgets)>0:
-            QtGui.QMessageBox.warning(self.widgets[0], title, message)
+            QMessageBox.warning(self.widgets[0], title, message)
 
     def load_last_reduction(self):
         try:
