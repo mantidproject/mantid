@@ -67,6 +67,11 @@ public:
 
 class PropertyManagerTest : public CxxTest::TestSuite {
 public:
+  static PropertyManagerTest *createSuite() { return new PropertyManagerTest; }
+
+  static void destroySuite(PropertyManagerTest *suite) { return delete suite; }
+
+public:
   void setUp() override {
     manager = std::make_unique<PropertyManagerHelper>();
     auto p = Mantid::Kernel::make_unique<PropertyWithValue<int>>("aProp", 1);
