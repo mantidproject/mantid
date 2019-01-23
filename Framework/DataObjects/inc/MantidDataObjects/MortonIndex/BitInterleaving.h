@@ -21,7 +21,6 @@
  * @tparam N Number of padding bits to add
  * @tparam IntT Integer type
  * @tparam MortonT Padded integer type
- * @param x Integer to pad
  * @return Padded integer
  */
 template <size_t N, typename IntT, typename MortonT> MortonT pad(IntT) {
@@ -35,7 +34,6 @@ template <size_t N, typename IntT, typename MortonT> MortonT pad(IntT) {
  * @tparam N Number of padding bits to remove
  * @tparam IntT Integer type
  * @tparam MortonT Padded integer type
- * @param x Padded integer
  * @return Original integer
  */
 template <size_t N, typename IntT, typename MortonT> IntT compact(MortonT) {
