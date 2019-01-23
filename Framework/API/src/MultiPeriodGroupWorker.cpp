@@ -93,9 +93,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
   } else {
     using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
     WorkspaceVector inWorkspaces;
-    WorkspaceVector outWorkspaces;
-    sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
-    UNUSED_ARG(outWorkspaces);
+    sourceAlg->findWorkspaces(inWorkspaces, Direction::Input);
     for (auto &inWorkspace : inWorkspaces) {
       tryAddInputWorkspaceToInputGroups(
           inWorkspace, vecMultiPeriodWorkspaceGroups, vecWorkspaceGroups);

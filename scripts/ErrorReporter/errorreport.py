@@ -4,15 +4,22 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtGui, QtCore
-import ui_errorreport
-from PyQt4.QtCore import pyqtSignal
-from mantidqtpython import MantidQt
+from qtpy import QtGui, QtCore, QtWidgets
+from qtpy.QtCore import Signal
+
+try:
+    from ErrorReporter import resources_qt5 # noqa
+except ImportError:
+    from ErrorReporter import resources_qt4 # noqa
+
+from mantidqt.utils.qt import load_ui
+
+ErrorReportUI, ErrorReportUIBase = load_ui(__file__, 'errorreport.ui')
 
 
-class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
-    action = pyqtSignal(bool, int, str, str, str)
-    quit_signal = pyqtSignal()
+class CrashReportPage(QtWidgets.QWidget, ErrorReportUI):
+    action = Signal(bool, int, str, str, str)
+    quit_signal = Signal()
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
@@ -23,11 +30,11 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
             self.adjustSize()
         self.setFixedSize(self.width(), self.height())
 
-        self.quit_signal.connect(QtGui.QApplication.instance().quit)
+        self.quit_signal.connect(QtWidgets.QApplication.instance().quit)
 
         self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
 
-        self.requestTextBrowser.anchorClicked.connect(MantidQt.API.MantidDesktopServices.openUrl)
+        self.requestTextBrowser.anchorClicked.connect(QtGui.QDesktopServices.openUrl)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)

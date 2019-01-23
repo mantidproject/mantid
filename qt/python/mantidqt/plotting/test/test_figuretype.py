@@ -18,7 +18,7 @@ matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 
 # local imports
-from workbench.plotting.figuretype import figure_type, FigureType
+from mantidqt.plotting.figuretype import figure_type, FigureType
 
 
 class FigureTypeTest(TestCase):
@@ -42,7 +42,7 @@ class FigureTypeTest(TestCase):
 
     def test_image_plot_returns_image(self):
         ax = plt.subplot(111)
-        ax.imshow([[1],[1]])
+        ax.imshow([[1], [1]])
         self.assertEqual(FigureType.Image, figure_type(ax.figure))
 
 

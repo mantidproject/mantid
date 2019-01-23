@@ -41,7 +41,7 @@ generate_mantid_export_header ( Types )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Types ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Types INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Add the unit tests directory
 add_subdirectory ( test )

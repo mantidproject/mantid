@@ -57,8 +57,16 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.resize(600, 400)
         self.show()
 
-    def doubleClickedHeader(self):
-        print("Double clicked WOO")
+        header = self.horizontalHeader()
+        header.sectionDoubleClicked.connect(self.handle_double_click)
+
+    def resizeEvent(self, _):
+        header = self.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Interactive)
+
+    def handle_double_click(self, section):
+        header = self.horizontalHeader()
+        header.resizeSection(section, header.defaultSectionSize())
 
     def keyPressEvent(self, event):
         if event.matches(QKeySequence.Copy):
@@ -144,10 +152,10 @@ class TableWorkspaceDisplayView(QTableWidget):
         show_all_columns.triggered.connect(self.presenter.action_show_all_columns)
 
         sort_ascending = QAction("Sort Ascending", menu_main)
-        sort_ascending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.AscendingOrder))
+        sort_ascending.triggered.connect(partial(self.presenter.action_sort, Qt.AscendingOrder))
 
         sort_descending = QAction("Sort Descending", menu_main)
-        sort_descending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.DescendingOrder))
+        sort_descending.triggered.connect(partial(self.presenter.action_sort, Qt.DescendingOrder))
 
         menu_main.addAction(copy_bin_values)
         menu_main.addAction(self.make_separator(menu_main))
@@ -160,14 +168,18 @@ class TableWorkspaceDisplayView(QTableWidget):
         # If any columns are marked as Y then generate the set error menu
         if num_y_cols > 0:
             menu_set_as_y_err = QMenu("Set error for Y...")
-            for col in range(num_y_cols):
-                set_as_y_err = QAction("Y{}".format(col), menu_main)
-                # the column index of the column relative to the whole table, this is necessary
+            for label_index in range(num_y_cols):
+                set_as_y_err = QAction("Y{}".format(label_index), menu_main)
+
+                # This is the column index of the Y column for which a YERR column is being added.
+                # The column index is relative to the whole table, this is necessary
                 # so that later the data of the column marked as error can be retrieved
-                real_column_index = marked_y_cols[col]
-                # col here holds the index in the LABEL (multiple Y columns have labels Y0, Y1, YN...)
+                related_y_column = marked_y_cols[label_index]
+
+                # label_index here holds the index in the LABEL (multiple Y columns have labels Y0, Y1, YN...)
                 # this is NOT the same as the column relative to the WHOLE table
-                set_as_y_err.triggered.connect(partial(self.presenter.action_set_as_y_err, real_column_index, col))
+                set_as_y_err.triggered.connect(
+                    partial(self.presenter.action_set_as_y_err, related_y_column, label_index))
                 menu_set_as_y_err.addAction(set_as_y_err)
             menu_main.addMenu(menu_set_as_y_err)
 
