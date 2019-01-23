@@ -100,7 +100,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         trigger_action(self.fit_action)
         yield self.wait_for_true(lambda: not self.fit_browser.isVisible())
         self.assertFalse(self.fit_browser.isVisible())
-        self.assertEqual(self.draw_count, 1)
+        self.assertGreaterEqual(self.draw_count, 1)
 
     def test_dock_undock(self):
         yield self.start()
@@ -383,9 +383,9 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
         self.fit_browser.tool.add_peak(1.5, 4.4)
         self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 4)
-        yield self.drag_mouse(1.0, 4.295, 1.75, 4.45)
+        yield self.drag_mouse(1.0, 4.29, 1.75, 4.45)
         yield self.wait_for_true(lambda: self.fit_browser.getPeakCentreOf('f0') > 1.7)
-        yield self.drag_mouse(1.5, 4.395, 0.9, 4.12)
+        yield self.drag_mouse(1.5, 4.39, 0.9, 4.12)
         yield self.wait_for_true(lambda: self.fit_browser.getPeakCentreOf('f1') < 1.0)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.75, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.35, 1)
