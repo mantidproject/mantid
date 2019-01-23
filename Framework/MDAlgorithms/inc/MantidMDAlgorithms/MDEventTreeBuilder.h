@@ -177,12 +177,12 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::retrieveIndex(
     newCoord -= oldCoord;
     MDCoordinate<ND> &threadErr = perThread[omp_get_thread_num()];
     for (size_t d = 0; d < ND; ++d)
-      threadErr[d] = std::max<coord_t>(threadErr[d], fabs(newCoord[d]));
+      threadErr[d] = std::max(threadErr[d], abs(newCoord[d]));
   }
   MDCoordinate<ND> maxErr(0);
   for (const auto &err : perThread)
     for (size_t d = 0; d < ND; ++d)
-      maxErr[d] = std::max<coord_t>(maxErr[d], err[d]);
+      maxErr[d] = std::max(maxErr[d], err[d]);
   return maxErr;
 }
 
