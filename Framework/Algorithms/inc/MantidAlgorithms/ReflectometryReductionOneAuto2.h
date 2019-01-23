@@ -35,9 +35,18 @@ public:
   bool processGroups() override;
 
 private:
+  // Utility class to store output workspace names
+  struct WorkspaceNames {
+    std::string iVsQ;
+    std::string iVsQBinned;
+    std::string iVsLam;
+  };
+
   void init() override;
   void exec() override;
-  // Set default names for output workspaces
+  std::string
+  getRunNumberForWorkspaceGroup(WorkspaceGroup_const_sptr workspace);
+  WorkspaceNames getOutputWorkspaceNames();
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
