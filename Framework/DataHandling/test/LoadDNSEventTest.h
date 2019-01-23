@@ -128,7 +128,7 @@ public:
     TS_ASSERT(iws);
 
     TS_ASSERT_EQUALS(iws->getEventType(), EventType::TOF);
-    TS_ASSERT_EQUALS(iws->size(), 960 * 128 + 24); // number of detector cells
+    TS_ASSERT_EQUALS(iws->size(), 960 * 128); // number of detector cells
 
     TS_ASSERT_EQUALS(iws->getNumDims(), 2);
     TS_ASSERT_EQUALS(iws->id(), "EventWorkspace");
@@ -143,7 +143,7 @@ public:
     TS_ASSERT(specDim);
     TS_ASSERT_EQUALS(specDim->getName(), "Spectrum");
     TS_ASSERT_EQUALS(specDim->getNBins(),
-                     960 * 128 + 24); // number of detector cells
+                     960 * 128); // number of detector cells
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMinimum(), 0);
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMaximum(), 0);
 
