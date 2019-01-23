@@ -13,9 +13,17 @@ class ObservingView:
     It runs the close_signal so that the view is closed from the GUI thread,
     and ensures that the closeEvent will clear the observer to prevent a memory leak.
 
+    It is designed to be used with a presenter that inherits `ObservingPresenter`.
+
+    If this class is inherited a `close_signal` and a `rename_signal` must be declared.
+
+    It is not possible to do that here, as this is not a QObject, however it was
+    attempted to do the declaration here, but the signals don't seem to work
+    through inheritance.
+
     This class shouldn't inherit from a QObject/QWidget, otherwise the closeEvent
     doesn't replace the closeEvent of the view that is inheriting this. This also
-    makes it easily testable, as the GUI library isn't pulled in
+    makes it easily testable, as the GUI library isn't pulled in.
     """
 
     TITLE_STRING = "{} - Mantid"

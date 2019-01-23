@@ -11,9 +11,10 @@ class ObservingPresenter:
     """
     This class provides some common functions for classes that need to be observable.
     It is not a GUI class, and if used, should be inherited by the presenter.
+    It is designed to be used with a view that inherits `ObservingView`.
 
-    The presenter must initialise a model and a view, that implement the required methods,
-    used in the functions below.
+    The presenter that is inheriting this must initialise a model and a view,
+    that implement the methods required in the functions below.
     """
 
     def clear_observer(self):
