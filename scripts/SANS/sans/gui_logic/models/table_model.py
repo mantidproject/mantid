@@ -188,7 +188,8 @@ class TableModel(object):
             self._table_entries[row].update_attribute('sample_thickness', rounded_file_thickness)
             self._table_entries[row].update_attribute('sample_height', rounded_file_height)
             self._table_entries[row].update_attribute('sample_width', rounded_file_width)
-            self._table_entries[row].update_attribute('sample_shape', file_information.get_shape())
+            if self.table_entries[row].sample_shape_string == "":
+                self._table_entries[row].update_attribute('sample_shape', file_information.get_shape())
             self._table_entries[row].file_finding = False
             self.reset_row_state(row)
 
@@ -470,6 +471,7 @@ class SampleShapeColumnModel(object):
                     shape_enum_string = SampleShapeColumnModel.SAMPLE_SHAPES_DICT[shape]
                     self.sample_shape = SampleShape.from_string(shape_enum_string)
                     self.sample_shape_string = shape_enum_string
+                    break
 
     @staticmethod
     def get_hint_strategy():
