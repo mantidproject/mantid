@@ -69,6 +69,12 @@ Input File
   Specify a range of input files that are either reduced (*_red.nxs*) or
   :math:`S(Q, \omega)`.
 
+Group Input
+  Provides an option to group or ungroup the input data.
+
+Load History
+  If unchecked the input workspace will be loaded without it's history.
+
 Integration Range
   The energy range over which to integrate the values.
 

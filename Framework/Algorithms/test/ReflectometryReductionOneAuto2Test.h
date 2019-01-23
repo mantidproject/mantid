@@ -1180,8 +1180,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1205,8 +1205,8 @@ public:
 
     MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQbinned->x(0);
-    auto outY = outQbinned->y(0);
+    const auto &outX = outQbinned->x(0);
+    const auto &outY = outQbinned->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1229,8 +1229,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0006, 0.0001);
@@ -1255,8 +1255,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1280,8 +1280,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
@@ -1306,8 +1306,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1331,8 +1331,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);

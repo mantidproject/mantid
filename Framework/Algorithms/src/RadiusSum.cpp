@@ -603,7 +603,7 @@ double RadiusSum::getMaxDistance(const V3D &centre,
   return max_distance;
 }
 
-void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
+void RadiusSum::setUpOutputWorkspace(const std::vector<double> &values) {
 
   g_log.debug() << "Output calculated, setting up the output workspace\n";
 
