@@ -1,6 +1,6 @@
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
-from qtpy.QtCore import Qt, QObject, Signal, Slot
+from qtpy.QtCore import Qt, QObject, Signal
 from qtpy.QtGui import QCursor
 
 

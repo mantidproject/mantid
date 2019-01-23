@@ -1,6 +1,6 @@
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QApplication, QMenu
+from qtpy.QtWidgets import QApplication
 
 
 class StateMachine(object):
