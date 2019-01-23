@@ -9,7 +9,7 @@ from qtpy.QtCore import Signal
 
 try:
     from ErrorReporter import resources_qt5 # noqa
-except ImportError:
+except (ImportError, RuntimeError):
     from ErrorReporter import resources_qt4 # noqa
 
 from mantidqt.utils.qt import load_ui
