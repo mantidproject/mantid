@@ -14,6 +14,7 @@ import re
 from qtpy.QtCore import Qt, Signal, Slot
 
 from mantid.simpleapi import mtd, EvaluateFunction
+from mantid.api import AlgorithmManager
 from mantidqt.utils.qt import import_qt
 from .interactive_tool import FitInteractiveTool
 
@@ -122,10 +123,19 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         if fun == '' or ws_name == '':
             return
         ws_index = self.workspaceIndex()
-        out_ws_name = '{}guess'.format(ws_name)
-        EvaluateFunction(fun, ws_name, WorkspaceIndex=ws_index, OutputWorkspace=out_ws_name)
-        plot([mtd[out_ws_name]], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
-        out_ws_name += ':'
+        out_ws_name = '{}_guess'.format(ws_name)
+
+        alg = AlgorithmManager.create('EvaluateFunction')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Function', fun)
+        alg.setProperty('InputWorkspace', ws_name)
+        alg.setProperty('WorkspaceIndex', ws_index)
+        alg.setProperty('OutputWorkspace', out_ws_name)
+        alg.execute()
+        out_ws = alg.getProperty('OutputWorkspace').value
+
+        plot([out_ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True, plot_kwargs={'label': out_ws_name})
         for lin in self.get_lines():
             if lin.get_label().startswith(out_ws_name):
                 self.guess_line = lin
@@ -140,6 +150,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.update_legend()
         self.setTextPlotGuess('Plot Guess')
         self.canvas.draw()
+
+    def update_guess(self):
+        if self.guess_line is None:
+            return
+        self.remove_guess()
+        self.plot_guess()
 
     @Slot()
     def clear_fit_result_lines_slot(self):
@@ -171,11 +187,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         fun = self.peak_ids[peak_id]
         self.setPeakCentreOf(fun, centre)
         self.setPeakHeightOf(fun, height)
+        self.update_guess()
 
     @Slot(int, float)
     def peak_fwhm_changed_slot(self, peak_id, fwhm):
         fun = self.peak_ids[peak_id]
         self.setPeakFwhmOf(fun, fwhm)
+        self.update_guess()
 
     @Slot(str)
     def peak_changed_slot(self, fun):
@@ -184,6 +202,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix),
                                       self.getPeakHeightOf(prefix),
                                       self.getPeakFwhmOf(prefix))
+        self.update_guess()
 
     @Slot(str)
     def add_function_slot(self, fun_name):
@@ -236,3 +255,4 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 self.setPeakCentreOf(prefix, c)
                 self.setPeakHeightOf(prefix, h)
                 self.setPeakFwhmOf(prefix, w)
+        self.update_guess()
