@@ -31,14 +31,16 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['Cd'], 'Absorber')
 
     def test_beam(self):
-        SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
+        SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db', FluxOutputWorkspace='Fl')
         self._check_output(mtd['Db'], True, 1, 128*128)
         self._check_process_flag(mtd['Db'], 'Beam')
         run = mtd['Db'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0048, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, -0.0027, delta=1e-4)
-        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 6628249, delta=1)
-        self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 8566, delta=1)
+        self._check_output(mtd['Fl'], False, 1, 128*128)
+        self._check_process_flag(mtd['Fl'], 'Beam')
+        self.assertAlmostEqual(mtd['Fl'].readY(0)[0], 6628249, delta=1)
+        self.assertAlmostEqual(mtd['Fl'].readE(0)[0], 8566, delta=1)
 
     def test_transmission(self):
         SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
@@ -73,14 +75,26 @@ class SANSILLReductionTest(unittest.TestCase):
 
     def test_beam_tof(self):
         # D33 VTOF
-        SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam')
+        SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam', FluxOutputWorkspace='flux')
         self._check_output(mtd['beam'], True, 30, 256*256)
         self._check_process_flag(mtd['beam'], 'Beam')
         run = mtd['beam'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0025, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, 0.0009, delta=1e-4)
-        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 33963, delta=1)
-        self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 16, delta=1)
+        self._check_output(mtd['flux'], False, 30, 256*256)
+        self._check_process_flag(mtd['flux'], 'Beam')
+        self.assertAlmostEqual(mtd['flux'].readY(0)[0], 0.309, delta=1e-3)
+        self.assertAlmostEqual(mtd['flux'].readE(0)[0], 0.05, delta=1e-2)
+        self.assertAlmostEqual(mtd['flux'].readY(1)[0], 0.309, delta=1e-3)
+        self.assertAlmostEqual(mtd['flux'].readE(1)[0], 0.05, delta=1e-2)
+        self.assertAlmostEqual(mtd['flux'].readY(117)[0], 0.309, delta=1e-3)
+        self.assertAlmostEqual(mtd['flux'].readE(117)[0], 0.05, delta=1e-2)
+        self.assertAlmostEqual(mtd['flux'].readY(0)[9], 2891, delta=1)
+        self.assertAlmostEqual(mtd['flux'].readE(0)[9], 4.928, delta=1e-3)
+        self.assertAlmostEqual(mtd['flux'].readY(917)[9], 2891, delta=1)
+        self.assertAlmostEqual(mtd['flux'].readE(917)[9], 4.928, delta=1e-3)
+        self.assertAlmostEqual(mtd['flux'].readY(2516)[9], 2891, delta=1)
+        self.assertAlmostEqual(mtd['flux'].readE(2516)[9], 4.928, delta=1e-3)
 
     def test_transmission_tof(self):
         # D33 VTOF
