@@ -15,9 +15,9 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -90,12 +90,10 @@ void GetDetectorOffsets::init() {
       "given XMin and XMax"
       "And in second round peak fitting, fit range will be limited to FHWM. ");
 
-  declareProperty(
-      make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-          "PeakFitResultTableWorkspace", "",
-          Direction::Output),
-      "Name of the input Tableworkspace containing peak fit window "
-      "information for each spectrum. ");
+  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+                      "PeakFitResultTableWorkspace", "", Direction::Output),
+                  "Name of the input Tableworkspace containing peak fit window "
+                  "information for each spectrum. ");
 
   declareProperty("OutputFitResult", false,
                   "If true, then a TableWorkspace containing all the fitted "
@@ -170,13 +168,15 @@ void GetDetectorOffsets::exec() {
       double offset2(0.);
       try {
         offset2 = fitPeakSecondTime(wi, isAbsolute, minimum_peak_height,
-                                         fit_result, mask_it);
-      } catch (const std::string& ex) {
-        g_log.error() << "Caught exception when fitting ws-index " << wi << "\n";
-	throw std::runtime_error("Need to find out how to deal with this!");
+                                    fit_result, mask_it);
+      } catch (const std::string &ex) {
+        g_log.error() << "Caught exception when fitting ws-index " << wi
+                      << "\n";
+        throw std::runtime_error("Need to find out how to deal with this!");
       } catch (...) {
-        g_log.error() << "Caught exception 2 when fitting ws-index " << wi << "\n";
-	throw std::runtime_error("Need to find out how to deal with this! 2 ");
+        g_log.error() << "Caught exception 2 when fitting ws-index " << wi
+                      << "\n";
+        throw std::runtime_error("Need to find out how to deal with this! 2 ");
       }
       if (mask_it) {
         if (offset2 < -1.9)
@@ -250,7 +250,6 @@ void GetDetectorOffsets::exec() {
   // std::string fit_result_table_name = getPropertyValue("OutputWorkspace");
   // fit_result_table_name += "_FitResult";
   setProperty("PeakFitResultTableWorkspace", fit_result_table);
- 
 }
 
 /** Fit the peak for the second time
@@ -303,12 +302,14 @@ double GetDetectorOffsets::fitPeakSecondTime(
   // fit second time!
   double xmin = fit_result.center - 0.5 * fit_result.sigma * 2.355;
   double xmax = fit_result.center + 0.5 * fit_result.sigma * 2.355;
-  // g_log.debug() << "ws-index " << wi << " found: center = " << fit_result.center
+  // g_log.debug() << "ws-index " << wi << " found: center = " <<
+  // fit_result.center
   //               << ", FHWM = " << fit_result.sigma
   //               << "; new fit range: " << xmin << ", " << xmax << "\n";
   offset = fitSpectra(wi, isAbsolute, xmin, xmax, fit_result, true);
   if (offset > 1.E10) {
-    g_log.error() << "ws-index " << wi << " found: center = " << fit_result.center
+    g_log.error() << "ws-index " << wi
+                  << " found: center = " << fit_result.center
                   << ", FHWM = " << fit_result.sigma
                   << "; new fit range: " << xmin << ", " << xmax << "\n";
   }
@@ -382,8 +383,9 @@ double GetDetectorOffsets::fitSpectra(
   try {
     fit_alg->executeAsChildAlg();
   } catch (std::invalid_argument &) {
-    g_log.error() << "Input workspace: " << inputW->getName() << ". ws-index = " << s << ", xmin = " << xmin
-	          << ", xmax = " << xmax << "\n";
+    g_log.error() << "Input workspace: " << inputW->getName()
+                  << ". ws-index = " << s << ", xmin = " << xmin
+                  << ", xmax = " << xmax << "\n";
     return (1.E20);
   }
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
@@ -477,8 +479,10 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
  */
 ITableWorkspace_sptr GetDetectorOffsets::GenerateFitResultTable() {
 
-  TableWorkspace_sptr anytable = boost::make_shared<DataObjects::TableWorkspace>();
-  API::ITableWorkspace_sptr fit_result_table = boost::dynamic_pointer_cast<API::ITableWorkspace>(anytable);
+  TableWorkspace_sptr anytable =
+      boost::make_shared<DataObjects::TableWorkspace>();
+  API::ITableWorkspace_sptr fit_result_table =
+      boost::dynamic_pointer_cast<API::ITableWorkspace>(anytable);
   fit_result_table->addColumn("int", "wsindex");
   fit_result_table->addColumn("double", "center");
   fit_result_table->addColumn("double", "fwhm");
@@ -491,5 +495,5 @@ ITableWorkspace_sptr GetDetectorOffsets::GenerateFitResultTable() {
   return fit_result_table;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -23,7 +23,7 @@ struct PeakLinearFunction {
   double a0;
   double a1;
 };
-}
+} // namespace GetDetectorsOffset
 
 /**
  Find the offsets for each detector
@@ -57,25 +57,25 @@ private:
   void init() override;
   void exec() override;
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-//  double fitSpectra(const int64_t s, bool isAbsolbute);
-  double fitSpectra(
-      const int64_t s, bool isAbsolbute, const double xmin, const double xmax,
-      GetDetectorsOffset::PeakLinearFunction &fit_result,
-      const bool use_fit_result);
+  //  double fitSpectra(const int64_t s, bool isAbsolbute);
+  double fitSpectra(const int64_t s, bool isAbsolbute, const double xmin,
+                    const double xmax,
+                    GetDetectorsOffset::PeakLinearFunction &fit_result,
+                    const bool use_fit_result);
 
-  double fitPeakSecondTime(
-      size_t wi, const bool isAbsolute, const double minimum_peak_height,
-      GetDetectorsOffset::PeakLinearFunction &fit_result, bool &mask_it);
+  double fitPeakSecondTime(size_t wi, const bool isAbsolute,
+                           const double minimum_peak_height,
+                           GetDetectorsOffset::PeakLinearFunction &fit_result,
+                           bool &mask_it);
 
   /// Create a function string from the given parameters and the algorithm
   /// inputs
-//  API::IFunction_sptr createFunction(const double peakHeight,
-//                                     const double peakLoc);
+  //  API::IFunction_sptr createFunction(const double peakHeight,
+  //                                     const double peakLoc);
   API::IFunction_sptr createFunction(const double peakHeight,
-                                                    const double peakLoc,
-                                                    const double peakSigma,
-                                                    const double a0,
-                                                    const double a1) ;
+                                     const double peakLoc,
+                                     const double peakSigma, const double a0,
+                                     const double a1);
   /// Read in all the input parameters
   void retrieveProperties();
 
