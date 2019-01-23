@@ -63,6 +63,11 @@ public:
     BoxBase *root;
     MDCoordinate<ND> err;
   };
+  /**
+   *
+   * @param mdEvents :: events to distribute around the tree
+   * @return :: pointer to the root node and error
+   */
   TreeWithIndexError distribute(std::vector<MDEventType<ND>> &mdEvents);
 
 private:
@@ -107,10 +112,6 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::MDEventTreeBuilder(
   }
 }
 
-/**
- * Top level function to build tree structure
- * @param tsk :: top level task to start building the box structure
- */
 template <size_t ND, template <size_t> class MDEventType,
           typename EventIterator>
 typename MDEventTreeBuilder<ND, MDEventType, EventIterator>::TreeWithIndexError
@@ -176,12 +177,12 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::retrieveIndex(
     newCoord -= oldCoord;
     MDCoordinate<ND> &threadErr = perThread[omp_get_thread_num()];
     for (size_t d = 0; d < ND; ++d)
-      threadErr[d] = std::max(threadErr[d], fabs(newCoord[d]));
+      threadErr[d] = std::max<coord_t>(threadErr[d], fabs(newCoord[d]));
   }
   MDCoordinate<ND> maxErr(0);
   for (const auto &err : perThread)
     for (size_t d = 0; d < ND; ++d)
-      maxErr[d] = std::max(maxErr[d], err[d]);
+      maxErr[d] = std::max<coord_t>(maxErr[d], err[d]);
   return maxErr;
 }
 

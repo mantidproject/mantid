@@ -18,13 +18,13 @@
 /**
  * Pad an integer with a given number of padding bits.
  *
- * @param N Number of padding bits to add
- * @param IntT Integer type
- * @param MortonT Padded integer type
+ * @tparam N Number of padding bits to add
+ * @tparam IntT Integer type
+ * @tparam MortonT Padded integer type
  * @param x Integer to pad
  * @return Padded integer
  */
-template <size_t N, typename IntT, typename MortonT> MortonT pad(IntT) {
+template <size_t N, typename IntT, typename MortonT> MortonT pad(IntT x) {
   throw std::runtime_error("No pad() specialisation.");
 }
 
@@ -32,13 +32,13 @@ template <size_t N, typename IntT, typename MortonT> MortonT pad(IntT) {
  * Compacts (removes padding from) an integer with a given number of padding
  * bits.
  *
- * @param N Number of padding bits to remove
- * @param IntT Integer type
- * @param MortonT Padded integer type
+ * @tparam N Number of padding bits to remove
+ * @tparam IntT Integer type
+ * @tparam MortonT Padded integer type
  * @param x Padded integer
  * @return Original integer
  */
-template <size_t N, typename IntT, typename MortonT> IntT compact(MortonT) {
+template <size_t N, typename IntT, typename MortonT> IntT compact(MortonT x) {
   throw std::runtime_error("No compact() specialisation.");
 }
 
@@ -294,9 +294,9 @@ template <> inline uint64_t compact<3, uint64_t, uint256_t>(uint256_t x) {
 /**
  * Interleaves an integer coordinate.
  *
- * @param ND Number of dimensions
- * @param IntT Intermediate integer type
- * @param MortonT Morton number type
+ * @tparam ND Number of dimensions
+ * @tparam IntT Intermediate integer type
+ * @tparam MortonT Morton number type
  * @param coord Coordinate in intermediate integer space
  * @return Interleaved integer (Morton number)
  */
@@ -317,9 +317,9 @@ Morton96 interleave(const IntArray<3, uint32_t> &coord) {
 /**
  * Deinterleaves a Morton number into an integer coordinate.
  *
- * @param ND Number of dimensions
- * @param IntT Intermediate integer type
- * @param MortonT Morton number type
+ * @tparam ND Number of dimensions
+ * @tparam IntT Intermediate integer type
+ * @tparam MortonT Morton number type
  * @param z Morton number
  * @return Integer coordinate
  */

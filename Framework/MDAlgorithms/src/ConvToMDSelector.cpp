@@ -20,6 +20,11 @@ enum wsType {
   EventWS,    //< event workspace
   Undefined   //< unknown initial state
 };
+
+ConvToMDSelector::ConvToMDSelector(ConvToMDSelector::ConverterType tp)
+    : converterType(tp) {}
+
+
 /** function which selects the convertor depending on workspace type and
 (possibly, in a future) some workspace properties
 * @param inputWS      -- the sp to workspace which has to be processed
@@ -28,10 +33,6 @@ initiated)
 
 *@returns shared pointer to new solver, which corresponds to the workspace
 */
-
-ConvToMDSelector::ConvToMDSelector(ConvToMDSelector::ConverterType tp)
-    : converterType(tp) {}
-
 boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     API::MatrixWorkspace_sptr inputWS,
     boost::shared_ptr<ConvToMDBase> &currentSolver) const {
