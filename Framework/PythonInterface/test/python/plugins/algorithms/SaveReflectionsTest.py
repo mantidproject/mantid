@@ -55,14 +55,14 @@ class SaveReflectionsTest(unittest.TestCase):
         return ws
 
     def _create_modulated_peak_table(self):
-        return self._create_indexed_workspace(self._workspace, 5, np.ones((self._workspace.rowCount(), 2)))
+        hklm = np.ones((self._workspace.rowCount(), 2))
+        return self._create_indexed_workspace(self._workspace, 5, hklm)
 
     def _create_indexed_workspace(self, fractional_peaks, ndim, hklm):
         # Create table with the number of columns we need
-        types = ['int', 'long64', 'double', 'double', 'double', 'double',  'double', 'double',
-                 'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D', 'int']
         indexed = CreateEmptyTableWorkspace()
         names = fractional_peaks.getColumnNames()
+        types = fractional_peaks.columnTypes()
 
         # Insert the extra columns for the addtional indicies
         for i in range(ndim - 3):

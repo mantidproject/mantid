@@ -4,6 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+import re
 import numpy as np
 from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, ITableWorkspaceProperty
 from mantid.kernel import StringListValidator, Direction
@@ -11,7 +12,6 @@ from mantid.simpleapi import SaveHKL
 
 # List of file format names supported by this algorithm
 SUPPORTED_FORMATS = ["Fullprof", "GSAS", "Jana", "SHELX"]
-NUM_PEAKSWS_COLUMNS = 18
 
 
 def has_modulated_indexing(workspace):
@@ -20,7 +20,7 @@ def has_modulated_indexing(workspace):
     :params: workspace :: the workspace to check
     :returns: True if the workspace > 3 indicies else False
     """
-    return workspace.columnCount() > NUM_PEAKSWS_COLUMNS
+    return num_additional_indicies(workspace) > 0
 
 
 def num_additional_indicies(workspace):
@@ -29,7 +29,7 @@ def num_additional_indicies(workspace):
     :params: workspace :: the workspace count indicies in
     :returns: the number of additional indicies present in the workspace
     """
-    return workspace.columnCount() - NUM_PEAKSWS_COLUMNS
+    return len(get_additional_index_names(workspace))
 
 
 def get_additional_index_names(workspace):
@@ -38,7 +38,9 @@ def get_additional_index_names(workspace):
     :params: workspace :: the workspace to get column names from
     :returns: the names of any additional columns in the workspace
     """
-    return ["m{}".format(i+1) for i in range(num_additional_indicies(workspace))]
+    pattern = re.compile("m[1-9]+")
+    names = workspace.getColumnNames()
+    return list(filter(pattern.match, names))
 
 
 class SaveReflections(PythonAlgorithm):
@@ -83,6 +85,7 @@ class SaveReflections(PythonAlgorithm):
 
         :returns: file format to use for saving reflections to an ASCII file.
         """
+
         if output_format == "Fullprof":
             return FullprofFormat()
         elif output_format == "Jana":
