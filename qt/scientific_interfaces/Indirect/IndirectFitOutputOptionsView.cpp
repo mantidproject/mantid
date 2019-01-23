@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsView.h"
 
+#include <QMessageBox>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
