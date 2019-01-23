@@ -33,13 +33,18 @@ void convertToSpectrumAxis(std::string const &inputName,
   converter->execute();
 }
 
+void deleteWorkspace(std::string const &workspaceName) {
+  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleter->initialize();
+  deleter->setProperty("Workspace", workspaceName);
+  deleter->execute();
+}
+
 } // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
+
 IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
@@ -158,6 +163,9 @@ void IndirectSqw::run() {
   m_pythonExportWsName = sqwWsName.toStdString();
 
   m_batchAlgoRunner->executeBatch();
+
+  if (rebinInEnergy)
+    deleteWorkspace(eRebinWsName.toStdString());
 }
 
 std::size_t IndirectSqw::getOutWsNumberOfSpectra() const {
