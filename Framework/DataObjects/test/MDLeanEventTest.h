@@ -19,6 +19,7 @@ using namespace Mantid::DataObjects;
 
 class MDLeanEventTest : public CxxTest::TestSuite {
 public:
+  using EventAccessType = DataObjects::EventAccessor;
   void test_Constructors() {
     MDLeanEvent<3> a;
     TS_ASSERT_EQUALS(a.getNumDims(), 3);
@@ -123,8 +124,9 @@ public:
     floatCoord << 1.5f, 10.0f, 5.0f, 5.0f;
 
     MDLeanEvent<ND> event(0.0f, 0.0f, &floatCoord[0]);
-    event.retrieveIndex(bounds);
-    event.retrieveCoordinates(bounds);
+    using EventAccess = MDLeanEvent<ND>::template AccessFor<MDLeanEventTest>;
+    EventAccess::retrieveIndex(event, bounds);
+    EventAccess::retrieveCoordinates(event, bounds);
 
     TS_ASSERT_EQUALS(event.getCenter(0), 1.5);
     TS_ASSERT_EQUALS(event.getCenter(1), 10);
