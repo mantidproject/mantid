@@ -13,14 +13,13 @@ import unittest
 
 from mock import Mock, call, patch
 
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockQModelIndex, \
-    MockWorkspace
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedisplay import MockQSelectionModel
+from mantidqt.widgets.common.test_mocks.mock_mantid import MockWorkspace
+from mantidqt.widgets.common.test_mocks.mock_plotlib import MockAx, MockPlotLib
+from mantidqt.widgets.common.test_mocks.mock_qt import MockQModelIndex, MockQSelectionModel
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.model import TableWorkspaceDisplayModel
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.tableworkspacedisplay.test_helpers.mock_plotlib import MockAx, MockPlotLib
 from mantidqt.widgets.tableworkspacedisplay.view import TableWorkspaceDisplayView
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
 
@@ -44,7 +43,8 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
     And an answer with a little more description of the logic behind it all
     https://stackoverflow.com/a/25827070/2823526
 
-    :param add_selection_model:
+    :param add_selection_model: Adds a mock selection model to the presenter
+    :param add_plot: Adds mock plotting to the presenter
     """
 
     def real_decorator(func, *args, **kwargs):
@@ -556,26 +556,26 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     @with_mock_presenter()
     def test_close_incorrect_workspace(self, ws, view, presenter):
         presenter.close(ws.TEST_NAME + "123")
-        self.assertNotCalled(view.close_later)
+        self.assertNotCalled(view.emit_close)
         self.assertIsNotNone(presenter.ads_observer)
 
     @with_mock_presenter()
     def test_close(self, ws, view, presenter):
         presenter.close(ws.TEST_NAME)
-        view.close_later.assert_called_once_with()
+        view.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter()
     def test_force_close_even_with_incorrect_name(self, _, view, presenter):
         # window always closes, regardless of the workspace
         presenter.force_close()
-        view.close_later.assert_called_once_with()
+        view.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter()
     def test_force_close(self, _, view, presenter):
         presenter.force_close()
-        view.close_later.assert_called_once_with()
+        view.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter()

@@ -13,12 +13,11 @@ import unittest
 
 from mock import Mock, patch
 
+from mantidqt.widgets.common.test_mocks.mock_mantid import MockWorkspace
+from mantidqt.widgets.common.test_mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
+from mantidqt.widgets.common.test_mocks.mock_qt import MockQModelIndex, MockQTableView
 from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockQModelIndex, \
-    MockWorkspace
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedisplay import \
-    MockMatrixWorkspaceDisplayView, MockQTableView
 
 
 def with_mock_presenter(func):
@@ -315,26 +314,26 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
     @with_mock_presenter
     def test_close_incorrect_workspace(self, ws, view, presenter):
         presenter.close(ws.TEST_NAME + "123")
-        self.assertNotCalled(view.close_later)
+        self.assertNotCalled(view.emit_close)
         self.assertIsNotNone(presenter.ads_observer)
 
     @with_mock_presenter
     def test_close(self, ws, view, presenter):
         presenter.close(ws.TEST_NAME)
-        view.close_later.assert_called_once_with()
+        view.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter
     def test_force_close_even_with_incorrect_name(self, _, view, presenter):
         # window always closes, regardless of the workspace
         presenter.force_close()
-        view.close_later.assert_called_once_with()
+        view.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter
     def test_force_close(self, _, view, presenter):
         presenter.force_close()
-        view.close_later.assert_called_once_with()
+        view.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter
