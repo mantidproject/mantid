@@ -55,9 +55,9 @@ public:
   /// Clear all contained data
   void clear() override {}
 
-  //Not to be pure virtual
+  // Not to be pure virtual
   void getBoxes(std::vector<API::IMDNode *> &,
-                std::function<bool(API::IMDNode *)> ) override {}
+                std::function<bool(API::IMDNode *)>) override {}
 
   uint64_t getNPoints() const override {
     return 0;
