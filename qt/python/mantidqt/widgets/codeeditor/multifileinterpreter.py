@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
+import os
 import os.path as osp
 
 # 3rd party imports
@@ -56,7 +57,15 @@ class MultiPythonFileInterpreter(QWidget):
 
     def append_new_editor(self, content=None, filename=None):
         if content is None:
-            content = self.default_content
+            filepath = os.path.expanduser("~/.mantid/default_editor_content.py")
+            if os.path.isfile(filepath):
+                with open(filepath, 'r') as f:
+                    content = "".join(f.readlines())
+            else:
+                with open(filepath, 'w') as f:
+                    f.write(self.default_content)
+                content = self.default_content
+
         interpreter = PythonFileInterpreter(content, filename=filename,
                                             parent=self._tabs)
         # monitor future modifications
@@ -102,7 +111,7 @@ class MultiPythonFileInterpreter(QWidget):
 
         # we never want an empty widget
         if self.editor_count == 0:
-            self.append_new_editor(content=self.default_content)
+            self.append_new_editor()
 
         return True
 
