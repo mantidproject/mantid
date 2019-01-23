@@ -19,6 +19,7 @@ from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDispl
 class MockWorkspaceDisplay:
     def __init__(self):
         self.close = Mock()
+        self.force_close = Mock()
         self.replace_workspace = Mock()
 
 
@@ -27,18 +28,20 @@ class WorkspaceDisplayADSObserverTest(unittest.TestCase):
         mock_wsd = MockWorkspaceDisplay()
         observer = WorkspaceDisplayADSObserver(mock_wsd)
         observer.clearHandle()
-        mock_wsd.close.assert_called_once_with()
+        mock_wsd.force_close.assert_called_once_with()
 
     def test_deleteHandle(self):
         mock_wsd = MockWorkspaceDisplay()
         observer = WorkspaceDisplayADSObserver(mock_wsd)
-        observer.deleteHandle("a", None)
-        mock_wsd.close.assert_called_once_with()
+        expected_name = "adad"
+        observer.deleteHandle(expected_name, None)
+        mock_wsd.close.assert_called_once_with(expected_name)
 
     def test_replaceHandle(self):
         mock_wsd = MockWorkspaceDisplay()
         observer = WorkspaceDisplayADSObserver(mock_wsd)
 
+        expected_name = "a"
         expected_parameter = 444555.158
-        observer.replaceHandle("a", expected_parameter)
-        mock_wsd.replace_workspace.assert_called_once_with(expected_parameter)
+        observer.replaceHandle(expected_name, expected_parameter)
+        mock_wsd.replace_workspace.assert_called_once_with(expected_name, expected_parameter)

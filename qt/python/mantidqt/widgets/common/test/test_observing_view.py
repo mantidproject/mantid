@@ -22,7 +22,8 @@ class MockObservingView(ObservingView):
         ObservingView.__init__(self, _)
         self.close_signal = MockQtSignal()
         self.rename_signal = MockQtSignal()
-        self.presenter = Mock(spec={'clear_observer'})
+        self.presenter = Mock()
+        self.presenter.clear_observer = Mock()
         self.setWindowTitle = Mock()
 
 
@@ -45,4 +46,8 @@ class ObservingViewTest(unittest.TestCase):
         new_name = "123edsad"
         self.view.emit_rename(new_name)
         self.view.rename_signal.emit.assert_called_once_with(new_name)
+
+    def test_rename_action(self):
+        new_name = "123edsad"
+        self.view._rename(new_name)
         self.view.setWindowTitle.assert_called_once_with(self.view.TITLE_STRING.format(new_name))
