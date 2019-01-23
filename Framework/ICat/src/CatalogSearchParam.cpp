@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidICat/CatalogSearchParam.h"
 #include "MantidKernel/DateAndTime.h"
 #include <boost/algorithm/string/regex.hpp>
@@ -224,5 +230,5 @@ time_t CatalogSearchParam::getTimevalue(const std::string &inputDate) {
   // Return the date as time_t value.
   return Types::Core::DateAndTime(isoDate).to_time_t();
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

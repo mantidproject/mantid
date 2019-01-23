@@ -14,9 +14,9 @@ This function implements the
 It finds its main usage in fitting broad mass peaks in Y space within Neutron Compton Scattering experiments such
 as on the `Vesuvio <http://www.isis.stfc.ac.uk/instruments/vesuvio/vesuvio4837.html>`_ instrument at ISIS. As such
 the expansion includes only the even numbered Hermite polynomials, up to order 10, with the exception of the 3rd order term where
-it is useful to include a differnt amplitude factor.
+it is useful to include a different amplitude factor.
 
-The function defintion is given by:
+The function definition is given by:
 
 .. math::
 

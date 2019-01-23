@@ -6,7 +6,7 @@
 # Find the installed version of PyQt4. FindPyQt4 should only be called after
 # Python has been found.
 #
-# This file defines the following variables, which can also be overriden by
+# This file defines the following variables, which can also be overridden by
 # users:
 #
 # PYQT4_VERSION - The version of PyQt4 found expressed as a 6 digit hex number

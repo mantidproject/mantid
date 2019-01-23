@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include <ostream>
 namespace MantidQt {
@@ -9,14 +15,17 @@ Cell::Cell(std::string const &contentText, std::string const &backgroundColor,
            int borderOpacity, bool isEditable)
     : m_contentText(contentText), m_backgroundColor(backgroundColor),
       m_borderThickness(borderThickness), m_borderOpacity(borderOpacity),
-      m_borderColor(borderColor), m_iconFilePath(), m_isEditable(isEditable) {}
+      m_borderColor(borderColor), m_iconFilePath(), m_isEditable(isEditable),
+      m_toolTip("") {}
 
 Cell::Cell(std::string const &contentText)
     : m_contentText(contentText), m_backgroundColor("white"),
       m_borderThickness(1), m_borderOpacity(255), m_borderColor("darkGrey"),
-      m_iconFilePath(), m_isEditable(true) {}
+      m_iconFilePath(), m_isEditable(true), m_toolTip("") {}
 
 std::string const &Cell::contentText() const { return m_contentText; }
+
+std::string const &Cell::toolTip() const { return m_toolTip; }
 
 bool Cell::isEditable() const { return m_isEditable; }
 
@@ -29,6 +38,8 @@ int Cell::borderOpacity() const { return m_borderOpacity; }
 void Cell::setContentText(std::string const &contentText) {
   m_contentText = contentText;
 }
+
+void Cell::setToolTip(std::string const &toolTip) { m_toolTip = toolTip; }
 
 void Cell::setBorderThickness(int borderThickness) {
   m_borderThickness = borderThickness;
@@ -81,6 +92,6 @@ std::vector<Cell> paddedCellsToWidth(std::vector<Cell> const &cells,
     paddedCells.emplace_back(paddingCell);
   return paddedCells;
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

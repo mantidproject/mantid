@@ -46,7 +46,7 @@ this.
     :width: 100%
     :alt: A labelled image of the instrument created by CreateSampleWorkspace
 
-The sample is placed at the origin.  The source is seperated from the sample in
+The sample is placed at the origin.  The source is separated from the sample in
 the negative direction by the value you specify in "SourceDistanceFromSample".
 The instrument has "NumBanks" detector banks, each bank is moved down the Z axis
 by "BankDistanceFromSample" from the sample or the previous bank.

@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_SPECIALWORKSPACE2DTEST_H_
 #define MANTID_DATAOBJECTS_SPECIALWORKSPACE2DTEST_H_
 
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -217,9 +223,9 @@ public:
   }
 
   /**
-  * Test declaring an input SpecialWorkspace2D and retrieving it as const_sptr
-  * or sptr
-  */
+   * Test declaring an input SpecialWorkspace2D and retrieving it as const_sptr
+   * or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     SpecialWorkspace2D_sptr wsInput(new SpecialWorkspace2D());

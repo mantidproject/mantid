@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SetGoniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -83,9 +89,9 @@ void SetGoniometer::exec() {
         // If axisName is a number, add a new log value
         double angle = 0;
         if (Strings::convert(axisName, angle)) {
-          g_log.information() << "Axis " << i
-                              << " - create a new log value GoniometerAxis" << i
-                              << "_FixedValue\n";
+          g_log.information()
+              << "Axis " << i << " - create a new log value GoniometerAxis" << i
+              << "_FixedValue\n";
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
             Types::Core::DateAndTime now =
@@ -140,5 +146,5 @@ void SetGoniometer::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

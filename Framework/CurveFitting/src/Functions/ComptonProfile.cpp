@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
-#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -20,7 +26,7 @@ namespace {
 // const char * WSINDEX_NAME = "WorkspaceIndex";
 const char *MASS_NAME = "Mass";
 ///@endcond
-}
+} // namespace
 
 /**
  */

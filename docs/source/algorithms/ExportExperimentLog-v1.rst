@@ -70,7 +70,7 @@ File format
 -----------
 
 There are two types of output file formats that are supported. They are
-csv (comma seperated) file and tsv (tab separated) file. The csv file
+csv (comma separated) file and tsv (tab separated) file. The csv file
 must have an extension as ".csv". If a user gives the name of a log
 file, which is in csv format, does not have an extension as .csv, the
 algorithm will correct it automatically.

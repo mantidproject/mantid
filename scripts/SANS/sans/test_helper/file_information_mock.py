@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from sans.common.file_information import SANSFileInformation
 from mantid.kernel import DateAndTime
 from sans.common.enums import (SANSFacility, SANSInstrument, FileType, SampleShape)
@@ -5,7 +11,7 @@ from sans.common.enums import (SANSFacility, SANSInstrument, FileType, SampleSha
 
 class SANSFileInformationMock(SANSFileInformation):
     def __init__(self, instrument=SANSInstrument.LOQ, facility=SANSFacility.ISIS, run_number=00000, file_name='file_name',
-                 height=8.0, width=8.0, thickness=1.0, shape=SampleShape.Cuboid, date='2012-10-22T22:41:27', periods=1,
+                 height=8.0, width=8.0, thickness=1.0, shape=SampleShape.FlatPlate, date='2012-10-22T22:41:27', periods=1,
                  event_mode=True, added_data=False):
         super(SANSFileInformationMock, self).__init__(file_name)
         self._instrument = instrument

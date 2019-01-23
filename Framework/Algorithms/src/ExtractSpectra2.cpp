@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractSpectra2.h"
+#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/Algorithm.tcc"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/make_unique.h"
 
@@ -53,20 +60,24 @@ void ExtractSpectra2::exec() {
       getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
 
   auto outputWS = create<MatrixWorkspace>(
-      *inputWS, dynamic_cast<IndexProperty *>(
-                    getPointerToProperty("InputWorkspaceIndexSet"))
-                    ->getFilteredIndexInfo(),
+      *inputWS,
+      dynamic_cast<IndexProperty *>(
+          getPointerToProperty("InputWorkspaceIndexSet"))
+          ->getFilteredIndexInfo(),
       HistogramData::BinEdges(2));
 
   Axis *inAxis1(nullptr);
   TextAxis *outTxtAxis(nullptr);
   NumericAxis *outNumAxis(nullptr);
+  bool isBinEdgeAxis(false);
   if (inputWS->axes() > 1) {
     inAxis1 = inputWS->getAxis(1);
     auto outAxis1 = outputWS->getAxis(1);
     outTxtAxis = dynamic_cast<TextAxis *>(outAxis1);
-    if (!outTxtAxis)
+    if (!outTxtAxis) {
       outNumAxis = dynamic_cast<NumericAxis *>(outAxis1);
+      isBinEdgeAxis = dynamic_cast<BinEdgeAxis *>(inAxis1) != nullptr;
+    }
   }
 
   Progress prog(this, 0.0, 1.0, indexSet.size());
@@ -87,6 +98,17 @@ void ExtractSpectra2::exec() {
       outputWS->setMaskedBins(j, inputWS->maskedBins(i));
 
     prog.report();
+  }
+
+  if (isBinEdgeAxis) {
+    if (!indexSet.isContiguous()) {
+      throw std::invalid_argument("Cannot extract non-contiguous set of "
+                                  "spectra when the vertical axis has bin "
+                                  "edges.");
+    }
+    const auto outIndex = indexSet.size();
+    const auto inIndex = indexSet[indexSet.size() - 1] + 1;
+    outNumAxis->setValue(outIndex, inAxis1->operator()(inIndex));
   }
 
   setProperty("OutputWorkspace", std::move(outputWS));

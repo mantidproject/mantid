@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/LoadIsawSpectrum.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -215,9 +221,9 @@ double LoadIsawSpectrum::spectrumCalc(double TOF, int iSpec,
     for (i = 1; i < spectra[0].size() - 1; ++i)
       if (TOF < time[id][i])
         break;
-    spect = spectra[id][i - 1] +
-            (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) *
-                (spectra[id][i] - spectra[id][i - 1]);
+    spect = spectra[id][i - 1] + (TOF - time[id][i - 1]) /
+                                     (time[id][i] - time[id][i - 1]) *
+                                     (spectra[id][i] - spectra[id][i - 1]);
   }
 
   return spect;
@@ -300,5 +306,5 @@ LoadIsawSpectrum::getInstrument3Ways(Algorithm *alg) {
   return inst;
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

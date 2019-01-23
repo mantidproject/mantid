@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CONVERTSPECTRUMAXISTEST_H_
 #define CONVERTSPECTRUMAXISTEST_H_
 
@@ -7,7 +13,6 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

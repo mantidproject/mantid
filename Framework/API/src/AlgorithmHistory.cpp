@@ -1,19 +1,33 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <sstream>
 
 namespace Mantid {
 namespace API {
 
 using Kernel::Property;
-using Types::Core::DateAndTime;
-using Kernel::PropertyHistory;
-using Kernel::PropertyHistory_sptr;
-using Kernel::PropertyHistory_const_sptr;
 using Kernel::PropertyHistories;
+using Kernel::PropertyHistory;
+using Kernel::PropertyHistory_const_sptr;
+using Kernel::PropertyHistory_sptr;
+using Types::Core::DateAndTime;
+
+namespace {
+/// The generator for algorithm history UUIDs
+static boost::uuids::random_generator uuidGen;
+} // namespace
 
 /** Constructor
  *  @param alg ::      A pointer to the algorithm for which the history should
@@ -33,6 +47,12 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
+  m_uuid = boost::uuids::to_string(uuidGen());
+}
+
+/// Default constructor
+AlgorithmHistory::AlgorithmHistory() {
+  m_uuid = boost::uuids::to_string(uuidGen());
 }
 
 /// Destructor
@@ -43,18 +63,21 @@ AlgorithmHistory::~AlgorithmHistory() = default;
    from saved records.
     @param name :: The algorithm name.
     @param vers :: The algorithm version.
+    @param uuid :: The universally unique id assigned to this alghistory on
+   creation during assignment to history.
     @param start :: The start time of the algorithm execution (optional).
     @param duration :: The time (in seconds) that it took to run this algorithm
    (optional).
    @param uexeccount ::  an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
+                                   std::string uuid,
                                    const Types::Core::DateAndTime &start,
                                    const double &duration,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
       m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories() {}
+      m_childHistories(), m_uuid(uuid) {}
 
 /**
  *  Set the history properties for an algorithm pointer
@@ -101,7 +124,7 @@ AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory &A)
     : m_name(A.m_name), m_version(A.m_version),
       m_executionDate(A.m_executionDate),
       m_executionDuration(A.m_executionDuration), m_properties(A.m_properties),
-      m_execCount(A.m_execCount) {
+      m_execCount(A.m_execCount), m_uuid(A.m_uuid) {
   m_childHistories = A.m_childHistories;
 }
 
@@ -137,7 +160,7 @@ void AlgorithmHistory::addChildHistory(AlgorithmHistory_sptr childHist) {
     return;
   }
 
-  m_childHistories.insert(childHist);
+  m_childHistories.emplace_back(childHist);
 }
 
 /*
@@ -148,11 +171,11 @@ size_t AlgorithmHistory::childHistorySize() const {
 }
 
 /**
-  * Retrieve a child algorithm history by index
-  * @param index ::  An index within the child algorithm history set
-  * @returns A pointer to an AlgorithmHistory object
-  * @throws std::out_of_range error if the index is invalid
-  */
+ * Retrieve a child algorithm history by index
+ * @param index ::  An index within the child algorithm history set
+ * @returns A pointer to an AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
+ */
 AlgorithmHistory_sptr
 AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
   if (index >= this->getChildHistories().size()) {
@@ -173,11 +196,11 @@ AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
 }
 
 /**
-* Gets the value of a specified algorithm property
-* @param name ::  The property to find
-* @returns The string value of the property
-* @throw Exception::NotFoundError if the named property is unknown
-*/
+ * Gets the value of a specified algorithm property
+ * @param name ::  The property to find
+ * @returns The string value of the property
+ * @throw Exception::NotFoundError if the named property is unknown
+ */
 const std::string &
 AlgorithmHistory::getPropertyValue(const std::string &name) const {
   for (const auto &hist : m_properties) {
@@ -208,14 +231,15 @@ AlgorithmHistory::getChildAlgorithm(const size_t index) const {
  */
 void AlgorithmHistory::printSelf(std::ostream &os, const int indent,
                                  const size_t maxPropertyLength) const {
+  auto execDate = m_executionDate.toISO8601String();
+  execDate.replace(execDate.find("T"), 1, " ");
   os << std::string(indent, ' ') << "Algorithm: " << m_name;
   os << std::string(indent, ' ') << " v" << m_version << '\n';
 
-  os << std::string(indent, ' ')
-     << "Execution Date: " << m_executionDate.toFormattedString() << '\n';
+  os << std::string(indent, ' ') << "Execution Date: " << execDate << '\n';
   os << std::string(indent, ' ')
      << "Execution Duration: " << m_executionDuration << " seconds\n";
-
+  os << std::string(indent, ' ') << "UUID: " << m_uuid << '\n';
   os << std::string(indent, ' ') << "Parameters:\n";
 
   for (const auto &property : m_properties) {
@@ -246,6 +270,7 @@ AlgorithmHistory &AlgorithmHistory::operator=(const AlgorithmHistory &A) {
     // to an ancestor
     auto temp = A.m_childHistories;
     m_childHistories = temp;
+    m_uuid = A.m_uuid;
   }
   return *this;
 }
@@ -284,6 +309,5 @@ void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
   }
   file->closeGroup();
 }
-
 } // namespace API
 } // namespace Mantid

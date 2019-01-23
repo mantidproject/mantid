@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import argparse
 import sys
 import os
@@ -48,7 +54,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--path', dest='path',
                         default="./Report",
-                        help='Path to the ouput HTML. Default "./Report".')
+                        help='Path to the output HTML. Default "./Report".')
 
     parser.add_argument('--x_field', dest='x_field',
                         default="revision",
@@ -58,14 +64,18 @@ if __name__ == "__main__":
                         default=["./MantidSystemTests.db"],
                         help='Required: Path to the SQL database file(s).')
 
+    parser.add_argument('--plotting', dest='plotting',
+                        default="plotly",
+                        help='Plotting toolkit to generate the plots. Options=["plotly", "matplotlib"]')
+
     args = parser.parse_args()
 
-    # Import the manager definition
-    try:
+    if args.plotting == 'plotly':
         import analysis
-    except:
-        # plotly not available, use matplotlib fallback
+    elif args.plotting == 'matplotlib':
         import analysis_mpl as analysis
+    else:
+        raise RuntimeError("Unknown plotting toolkit '{}'".format(args.plotting))
 
     import sqlresults
 

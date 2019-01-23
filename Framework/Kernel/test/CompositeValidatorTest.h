@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_COMPOSITEVALIDATORTEST_H_
 #define MANTID_KERNEL_COMPOSITEVALIDATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid;
@@ -82,6 +88,27 @@ public:
     TS_ASSERT_EQUALS(comp.isValid(30), "");  // In range of val1
     TS_ASSERT_EQUALS(comp.isValid(70), "");  // In range of val2
     TS_ASSERT_DIFFERS(comp.isValid(55), ""); // Not in range
+  }
+
+  void test_ContainsReturnsTrueIfListContainsType() {
+    CompositeValidator comp;
+    auto val1 = boost::make_shared<BoundedValidator<int>>(1, 50);
+    auto val2 = boost::make_shared<BoundedValidator<double>>(60, 100);
+    comp.add(val1);
+    comp.add(val2);
+
+    TS_ASSERT(comp.contains<BoundedValidator<int>>());
+    TS_ASSERT(comp.contains<BoundedValidator<double>>());
+  }
+
+  void test_ContainsReturnsFalseIfListDoesNotContainType() {
+    CompositeValidator comp;
+    auto val1 = boost::make_shared<BoundedValidator<int>>(1, 50);
+    auto val2 = boost::make_shared<BoundedValidator<double>>(60, 100);
+    comp.add(val1);
+    comp.add(val2);
+
+    TS_ASSERT_EQUALS(false, comp.contains<StringListValidator>());
   }
 };
 

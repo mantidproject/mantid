@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
 #include "MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h"
@@ -31,8 +37,8 @@ ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle() {
   // declareParameter("Height", 1.0); //parameter "Height" already declared in
   // constructor of base class DeltaFunction
   this->declareParameter("Radius", 1.0, "Circle radius [Angstroms] ");
-  this->declareAttribute("Q", API::IFunction::Attribute(0.5));
   this->declareAttribute("N", API::IFunction::Attribute(3));
+  FunctionQDepends::declareAttributes();
 }
 
 /**

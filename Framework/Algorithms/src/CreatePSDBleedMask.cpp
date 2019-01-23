@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreatePSDBleedMask.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -20,8 +26,8 @@ DECLARE_ALGORITHM(CreatePSDBleedMask)
 
 const std::string CreatePSDBleedMask::category() const { return "Diagnostics"; }
 
-using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
+using API::MatrixWorkspace_sptr;
 using DataObjects::MaskWorkspace_sptr;
 
 /// Default constructor
@@ -30,8 +36,8 @@ CreatePSDBleedMask::CreatePSDBleedMask() {}
 /// Initialize the algorithm properties
 void CreatePSDBleedMask::init() {
   using API::WorkspaceProperty;
-  using Kernel::Direction;
   using Kernel::BoundedValidator;
+  using Kernel::Direction;
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                            Direction::Input),
@@ -264,5 +270,5 @@ void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
     workspace->mutableY(tubeIndice)[0] = deadValue;
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

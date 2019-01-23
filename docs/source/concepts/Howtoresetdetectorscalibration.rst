@@ -31,7 +31,7 @@ This image is clearly calibrated. To reset the calibration, execute:
     empty_instr = LoadEmptyInstrument('MANTIDINSTALL/instrument/MERLIN_Definition.xml')
     CopyInstrumentParameters(empty_instr, mer12024)
 
-The result is reseting the calibration of this workspace as you can see
+The result is resetting the calibration of this workspace as you can see
 in the image below:
 
 .. image:: ../images/Merlin_uncalibrated.png

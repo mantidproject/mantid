@@ -40,7 +40,7 @@ created during the algorithm's execution.
 
 If specified, the ``CalibrationFile`` is loaded using
 :ref:`algm-LoadDiffCal`. If the ``GroupingFile`` is specified, the
-grouping it specifies takes precidence over the one that is in the
+grouping it specifies takes precedence over the one that is in the
 ``CalibrationFile``. :ref:`algm-LoadDetectorsGroupingFile` performs
 the loading. The order of preference in which to use is (first found wins):
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -28,11 +34,11 @@ boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws,
 }
 
 /**
-* Creates a vector of QwtData using X and Y values from every single
-* workspace index in ws, written for only Engg Diffraction fitting tab
-* @param ws :: Workspace with X and Y values to use
-* @return Pointer to created Vector QwtData
-*/
+ * Creates a vector of QwtData using X and Y values from every single
+ * workspace index in ws, written for only Engg Diffraction fitting tab
+ * @param ws :: Workspace with X and Y values to use
+ * @return Pointer to created Vector QwtData
+ */
 std::vector<boost::shared_ptr<QwtData>>
 curveDataFromWs(MatrixWorkspace_const_sptr ws) {
 
@@ -112,6 +118,6 @@ boost::shared_ptr<QwtData> emptyCurveData() {
   QwtArray<double> x, y; // Empty arrays -> empty data
   return boost::make_shared<QwtArrayData>(x, y);
 }
-}
-} // namespace CustomInterfaces
+} // namespace QwtHelper
+} // namespace API
 } // namespace MantidQt

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WEIGHTEDMEANOFWORKSPACETEST_H_
 #define WEIGHTEDMEANOFWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

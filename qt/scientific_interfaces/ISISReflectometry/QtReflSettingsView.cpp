@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "QtReflSettingsView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
@@ -15,10 +21,10 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param parent :: [input] The parent of this widget
-* @param group :: The number of the group this settings view's settings
-* correspond to.
-*/
+ * @param parent :: [input] The parent of this widget
+ * @param group :: The number of the group this settings view's settings
+ * correspond to.
+ */
 QtReflSettingsView::QtReflSettingsView(int group, QWidget *parent) {
 
   UNUSED_ARG(parent);
@@ -30,7 +36,7 @@ QtReflSettingsView::QtReflSettingsView(int group, QWidget *parent) {
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 QtReflSettingsView::~QtReflSettingsView() {}
 
 /**
@@ -39,6 +45,7 @@ Initialise the Interface
 void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
   initOptionsTable();
+  initFloodCorControls();
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
@@ -52,6 +59,10 @@ void QtReflSettingsView::initLayout() {
           SLOT(addPerAngleOptionsTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
+  connect(m_ui.polCorrComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setPolCorPageForIndex(int)));
+  connect(m_ui.floodCorComboBox, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(floodCorComboBoxChanged(const QString &)));
 }
 
 void QtReflSettingsView::initOptionsTable() {
@@ -74,6 +85,11 @@ void QtReflSettingsView::initOptionsTable() {
   }
   const int padding = 2;
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
+}
+
+void QtReflSettingsView::initFloodCorControls() {
+  m_ui.floodWorkspaceWsSelector->setOptional(true);
+  m_ui.floodWorkspaceWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
 
 void QtReflSettingsView::connectSettingsChange(QLineEdit &edit) {
@@ -137,7 +153,10 @@ void QtReflSettingsView::registerInstrumentSettingsWidgets(
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors",
                         alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
+  registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
+                        alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
+  registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
 void QtReflSettingsView::registerExperimentSettingsWidgets(
@@ -153,6 +172,8 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.CApEdit, "CAp", alg);
   registerSettingWidget(*m_ui.CPpEdit, "CPp", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
+  registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
+  registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
 }
 
 void QtReflSettingsView::notifySettingsChanged() {
@@ -166,6 +187,10 @@ void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
 
 void QtReflSettingsView::setReductionTypeEnabled(bool enable) {
   m_ui.reductionTypeComboBox->setEnabled(enable);
+}
+
+void QtReflSettingsView::setIncludePartialBinsEnabled(bool enable) {
+  m_ui.includePartialBinsCheckBox->setEnabled(enable);
 }
 
 template <typename Widget>
@@ -184,40 +209,41 @@ void QtReflSettingsView::setToolTipAsPropertyDocumentation(
 }
 
 /** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
+ * @return :: A pointer to the presenter
+ */
 IReflSettingsPresenter *QtReflSettingsView::getPresenter() const {
   return m_presenter.get();
 }
 
 /** This slot notifies the presenter to fill experiment settings with default
-* values.
-*/
+ * values.
+ */
 void QtReflSettingsView::requestExpDefaults() const {
   m_presenter->notify(IReflSettingsPresenter::ExpDefaultsFlag);
 }
 
 /** This slot notifies the presenter to fill instrument settings with default
-* values.
-*/
+ * values.
+ */
 void QtReflSettingsView::requestInstDefaults() const {
   m_presenter->notify(IReflSettingsPresenter::InstDefaultsFlag);
 }
 
 /** This slot sets the value of 'm_isPolCorrEnabled' - whether polarisation
-* corrections should be enabled or not.
-* @param enable :: Value of experiment settings enable status
-*/
+ * corrections should be enabled or not.
+ * @param enable :: Value of experiment settings enable status
+ */
 void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
   m_isPolCorrEnabled = enable;
 }
 
 /* Sets default values for all experiment settings given a list of default
-* values.
-*/
+ * values.
+ */
 void QtReflSettingsView::setExpDefaults(ExperimentOptionDefaults defaults) {
   setSelected(*m_ui.analysisModeComboBox, defaults.AnalysisMode);
   setSelected(*m_ui.reductionTypeComboBox, defaults.ReductionType);
+  setChecked(*m_ui.includePartialBinsCheckBox, defaults.IncludePartialBins);
   setSelected(*m_ui.summationTypeComboBox, defaults.SummationType);
   setText(*m_ui.startOverlapEdit, defaults.TransRunStartOverlap);
   setText(*m_ui.endOverlapEdit, defaults.TransRunEndOverlap);
@@ -354,8 +380,8 @@ private:
 };
 
 /* Sets default values for all instrument settings given a list of default
-* values.
-*/
+ * values.
+ */
 void QtReflSettingsView::setInstDefaults(InstrumentOptionDefaults defaults) {
   setChecked(*m_ui.intMonCheckBox, defaults.NormalizeByIntegratedMonitors);
   setText(*m_ui.monIntMinEdit, defaults.MonitorIntegralMin);
@@ -376,8 +402,8 @@ void QtReflSettingsView::setDetectorCorrectionEnabled(bool enabled) {
 }
 
 /* Sets the enabled status of polarisation corrections and parameters
-* @param enable :: [input] bool to enable options or not
-*/
+ * @param enable :: [input] bool to enable options or not
+ */
 void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
 
   if (enable && (!m_isPolCorrEnabled || !experimentSettingsEnabled()))
@@ -409,6 +435,12 @@ void QtReflSettingsView::addPerAngleOptionsTableRow() {
   m_ui.optionsTable->setCurrentCell(numRows - 1, 0);
 }
 
+void QtReflSettingsView::floodCorComboBoxChanged(const QString &text) {
+  auto const showWorkspaceSelector = text == "Workspace";
+  m_ui.floodWorkspaceWsSelector->setVisible(showWorkspaceSelector);
+  m_ui.floodWorkspaceWsSelectorLabel->setVisible(showWorkspaceSelector);
+}
+
 std::string QtReflSettingsView::getText(QLineEdit const &lineEdit) const {
   return lineEdit.text().toStdString();
 }
@@ -435,10 +467,11 @@ std::string toCsv(std::vector<T> const &values, StringConverter toString) {
 
 QString QtReflSettingsView::messageFor(
     std::vector<MissingInstrumentParameterValue> const &missingValues) const {
-  auto missingNamesCsv =
-      toCsv(missingValues,
-            [](const MissingInstrumentParameterValue &missingValue)
-                -> std::string { return missingValue.parameterName(); });
+  auto missingNamesCsv = toCsv(
+      missingValues,
+      [](const MissingInstrumentParameterValue &missingValue) -> std::string {
+        return missingValue.parameterName();
+      });
 
   return QString::fromStdString(missingNamesCsv) +
          QString(missingValues.size() == 1 ? " is" : " are") +
@@ -462,8 +495,8 @@ void QtReflSettingsView::showOptionLoadErrors(
 }
 
 /** Returns global options for 'Stitch1DMany'
-* @return :: Global options for 'Stitch1DMany'
-*/
+ * @return :: Global options for 'Stitch1DMany'
+ */
 std::string QtReflSettingsView::getStitchOptions() const {
   return getText(stitchOptionsLineEdit());
 }
@@ -473,10 +506,9 @@ QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
 }
 
 /** Creates hints for 'Stitch1DMany'
-* @param hints :: Hints as a map
-*/
-void QtReflSettingsView::createStitchHints(
-    const std::map<std::string, std::string> &hints) {
+ * @param hints :: Hints as a map
+ */
+void QtReflSettingsView::createStitchHints(const std::vector<Hint> &hints) {
 
   // We want to add the stitch params box next to the stitch
   // label, so first find the label's position
@@ -486,12 +518,12 @@ void QtReflSettingsView::createStitchHints(
                                            &rowSpan, &colSpan);
   // Create the new edit box and add it to the right of the label
   m_stitchEdit = new HintingLineEdit(this, hints);
-  m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1, 3);
+  m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1, 1);
 }
 
 /** Return selected analysis mode
-* @return :: selected analysis mode
-*/
+ * @return :: selected analysis mode
+ */
 std::string QtReflSettingsView::getAnalysisMode() const {
   return getText(*m_ui.analysisModeComboBox);
 }
@@ -514,8 +546,8 @@ OptionsQMap QtReflSettingsView::createOptionsMapForRow(const int row) const {
 }
 
 /** Return the per-angle options
-* @return :: return a map of angles to the options
-*/
+ * @return :: return a map of angles to the options
+ */
 std::map<std::string, OptionsQMap>
 QtReflSettingsView::getPerAngleOptions() const {
 
@@ -544,106 +576,114 @@ QtReflSettingsView::getPerAngleOptions() const {
 }
 
 /** Return start overlap
-* @return :: start overlap
-*/
+ * @return :: start overlap
+ */
 std::string QtReflSettingsView::getStartOverlap() const {
   return getText(*m_ui.startOverlapEdit);
 }
 
 /** Return end overlap
-* @return :: end overlap
-*/
+ * @return :: end overlap
+ */
 std::string QtReflSettingsView::getEndOverlap() const {
   return getText(*m_ui.endOverlapEdit);
 }
 
 /** Return selected polarisation corrections
-* @return :: selected polarisation corrections
-*/
+ * @return :: selected polarisation corrections
+ */
 std::string QtReflSettingsView::getPolarisationCorrections() const {
   return getText(*m_ui.polCorrComboBox);
 }
 
 /** Return CRho
-* @return :: polarization correction CRho
-*/
+ * @return :: polarization correction CRho
+ */
 std::string QtReflSettingsView::getCRho() const {
   return getText(*m_ui.CRhoEdit);
 }
 
 /** Return CAlpha
-* @return :: polarization correction CAlpha
-*/
+ * @return :: polarization correction CAlpha
+ */
 std::string QtReflSettingsView::getCAlpha() const {
   return getText(*m_ui.CAlphaEdit);
 }
 
 /** Return CAp
-* @return :: polarization correction CAp
-*/
+ * @return :: polarization correction CAp
+ */
 std::string QtReflSettingsView::getCAp() const {
   return getText(*m_ui.CApEdit);
 }
 
 /** Return CPp
-* @return :: polarization correction CPp
-*/
+ * @return :: polarization correction CPp
+ */
 std::string QtReflSettingsView::getCPp() const {
   return getText(*m_ui.CPpEdit);
 }
 
+std::string QtReflSettingsView::getFloodCorrection() const {
+  return getText(*m_ui.floodCorComboBox);
+}
+
+std::string QtReflSettingsView::getFloodWorkspace() const {
+  return getText(*m_ui.floodWorkspaceWsSelector);
+}
+
 /** Return integrated monitors option
-* @return :: integrated monitors check
-*/
+ * @return :: integrated monitors check
+ */
 std::string QtReflSettingsView::getIntMonCheck() const {
   return m_ui.intMonCheckBox->isChecked() ? "1" : "0";
 }
 
 /** Return monitor integral wavelength min
-* @return :: monitor integral min
-*/
+ * @return :: monitor integral min
+ */
 std::string QtReflSettingsView::getMonitorIntegralMin() const {
   return getText(*m_ui.monIntMinEdit);
 }
 
 /** Return monitor integral wavelength max
-* @return :: monitor integral max
-*/
+ * @return :: monitor integral max
+ */
 std::string QtReflSettingsView::getMonitorIntegralMax() const {
   return getText(*m_ui.monIntMaxEdit);
 }
 
 /** Return monitor background wavelength min
-* @return :: monitor background min
-*/
+ * @return :: monitor background min
+ */
 std::string QtReflSettingsView::getMonitorBackgroundMin() const {
   return getText(*m_ui.monBgMinEdit);
 }
 
 /** Return monitor background wavelength max
-* @return :: monitor background max
-*/
+ * @return :: monitor background max
+ */
 std::string QtReflSettingsView::getMonitorBackgroundMax() const {
   return getText(*m_ui.monBgMaxEdit);
 }
 
 /** Return wavelength min
-* @return :: lambda min
-*/
+ * @return :: lambda min
+ */
 std::string QtReflSettingsView::getLambdaMin() const {
   return getText(*m_ui.lamMinEdit);
 }
 
 /** Return wavelength max
-* @return :: lambda max
-*/
+ * @return :: lambda max
+ */
 std::string QtReflSettingsView::getLambdaMax() const {
   return getText(*m_ui.lamMaxEdit);
 }
 
 /** Return I0MonitorIndex
-* @return :: I0MonitorIndex
-*/
+ * @return :: I0MonitorIndex
+ */
 std::string QtReflSettingsView::getI0MonitorIndex() const {
   return getText(*m_ui.I0MonIndexEdit);
 }
@@ -652,13 +692,21 @@ std::string QtReflSettingsView::getReductionType() const {
   return getText(*m_ui.reductionTypeComboBox);
 }
 
+bool QtReflSettingsView::getDebugOption() const {
+  return m_ui.debugCheckBox->isChecked();
+}
+
+bool QtReflSettingsView::getIncludePartialBins() const {
+  return m_ui.includePartialBinsCheckBox->isChecked();
+}
+
 std::string QtReflSettingsView::getSummationType() const {
   return getText(*m_ui.summationTypeComboBox);
 }
 
 /** Return selected correction type
-* @return :: selected correction type
-*/
+ * @return :: selected correction type
+ */
 std::string QtReflSettingsView::getDetectorCorrectionType() const {
   return getText(*m_ui.detectorCorrectionTypeComboBox);
 }
@@ -668,18 +716,31 @@ bool QtReflSettingsView::detectorCorrectionEnabled() const {
 }
 
 /** Returns the status of experiment settings group
-* @return :: the status of the checkable group
-*/
+ * @return :: the status of the checkable group
+ */
 bool QtReflSettingsView::experimentSettingsEnabled() const {
   return m_ui.expSettingsGroup->isChecked();
 }
 
 /** Returns the status of instrument settings group
-* @return :: the status of the checkable group
-*/
+ * @return :: the status of the checkable group
+ */
 bool QtReflSettingsView::instrumentSettingsEnabled() const {
   return m_ui.instSettingsGroup->isChecked();
 }
 
+/**
+  Set the current page index of m_ui.polCorStackedWidget depending on the index
+  of m_ui.polCorrComboBox. They don't match 1-to-1 because PA and PNR options
+  share a page.
+  @param index :: New current index of m_ui.polCorrComboBox.
+ */
+void QtReflSettingsView::setPolCorPageForIndex(int index) {
+  assert(m_ui.polCorrComboBox->count() == 4);
+  assert(m_ui.polCorStackedWidget->count() == 3);
+  static std::array<int, 4> const indexMap = {{0, 1, 1, 2}};
+  m_ui.polCorStackedWidget->setCurrentIndex(indexMap[index]);
+}
+
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

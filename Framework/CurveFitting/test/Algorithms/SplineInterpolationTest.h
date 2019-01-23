@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_SPLINEINTERPOLATIONTEST_H_
 #define MANTID_CURVEFITTING_SPLINEINTERPOLATIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Algorithms::SplineInterpolation;
 using namespace Mantid::API;

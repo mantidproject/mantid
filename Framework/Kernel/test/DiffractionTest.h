@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_DIFFRACTIONTEST_H_
 #define MANTID_KERNEL_DIFFRACTIONTEST_H_
 
@@ -6,8 +12,8 @@
 
 #include "MantidKernel/Diffraction.h"
 
-using Mantid::Kernel::Diffraction::calcTofMin;
 using Mantid::Kernel::Diffraction::calcTofMax;
+using Mantid::Kernel::Diffraction::calcTofMin;
 
 namespace {                // anonymous
 const double DIFC = 2100.; // sensible value
@@ -18,7 +24,7 @@ const double DIFA1 = .25 * DIFC * DIFC;
 const double DIFA2 = 25 * DIFC * DIFC;
 // intentionally goofy
 const double DIFA3 = -.25 * DIFC * DIFC;
-}
+} // namespace
 
 class DiffractionTest : public CxxTest::TestSuite {
 public:

@@ -1,14 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INTERPOLATIONTEST_H_
 #define INTERPOLATIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <ctime>
 #include "MantidKernel/Interpolation.h"
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 
 class InterpolationTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static InterpolationTest *createSuite() { return new InterpolationTest(); }
+  static void destroySuite(InterpolationTest *suite) { delete suite; }
+
   /* In the constructor some vectors with values are setup,
    * which make the tests easier later on.
    *

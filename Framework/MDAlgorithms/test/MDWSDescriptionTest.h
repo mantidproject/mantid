@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDEVENTS_MDWSDESCRIPTION_TEST_H
 #define MDEVENTS_MDWSDESCRIPTION_TEST_H
 
-#include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

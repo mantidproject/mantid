@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ISpectrum.h"
@@ -322,6 +328,8 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
 double EventWorkspace::getEventXMin() const {
   // set to crazy values to start
   double xmin = std::numeric_limits<double>::max();
+  if (this->getNumberEvents() == 0)
+    return xmin;
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
@@ -346,6 +354,8 @@ double EventWorkspace::getEventXMin() const {
 double EventWorkspace::getEventXMax() const {
   // set to crazy values to start
   double xmax = std::numeric_limits<double>::lowest();
+  if (this->getNumberEvents() == 0)
+    return xmax;
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
@@ -367,6 +377,9 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
+  if (this->getNumberEvents() == 0)
+    return;
+
   int64_t numWorkspace = static_cast<int64_t>(this->data.size());
 #pragma omp parallel
   {
@@ -566,7 +579,7 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
   this->data[index]->generateHistogramPulseTime(X, Y, E, skipError);
 }
 
-/*** Set all histogram X vectors.
+/** Set all histogram X vectors.
  * @param x :: The X vector of histogram bins to use.
  */
 void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
@@ -578,6 +591,25 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
 
   // Clear MRU lists now, free up memory
   this->clearMRU();
+}
+
+/**
+ * Set all Histogram X vectors to a single bin with boundaries that fit the
+ * TOF of all events across all spectra.
+ */
+void EventWorkspace::resetAllXToSingleBin() {
+  double tofmin, tofmax;
+  getEventXMinMax(tofmin, tofmax);
+
+  // Sanitize TOF min/max to ensure it always passes HistogramX validation.
+  // They would be invalid when number of events are 0 or 1, for example.
+  if (tofmin > tofmax) {
+    tofmin = 0;
+    tofmax = std::numeric_limits<double>::min();
+  } else if (tofmin == tofmax) {
+    tofmax += std::numeric_limits<double>::min();
+  }
+  setAllX({tofmin, tofmax});
 }
 
 /** Task for sorting an event list */

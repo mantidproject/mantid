@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadNexus.h"
-#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/NexusClasses.h"

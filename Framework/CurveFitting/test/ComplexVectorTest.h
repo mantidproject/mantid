@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ComplexVectorTEST_H_
 #define ComplexVectorTEST_H_
 
@@ -19,7 +25,7 @@ const ComplexType v22{333, 0.333};
 
 const ComplexType v30{1, 0.1};
 const ComplexType v31{11, 0.11};
-}
+} // namespace
 
 class ComplexVectorTest : public CxxTest::TestSuite {
 public:

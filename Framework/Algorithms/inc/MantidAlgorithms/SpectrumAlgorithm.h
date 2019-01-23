@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SPECTRUMALGORITHM_H_
 #define MANTID_ALGORITHMS_SPECTRUMALGORITHM_H_
 
@@ -28,27 +34,6 @@ namespace Algorithms {
      ranges and list.
 
   @author Simon Heybrock, ESS
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_ALGORITHMS_DLL SpectrumAlgorithm : public API::Algorithm {
 private:
@@ -59,10 +44,10 @@ private:
   template <std::size_t...> struct seq {};
   // Doxygen does not like recursive types.
   template <std::size_t N, std::size_t... S>
-  struct gens                                     /** @cond */
-      : gens<N - 1, N - 1, S...> /** @endcond */ {/** @cond */
+  struct gens                                      /** @cond */
+      : gens<N - 1, N - 1, S...> /** @endcond */ { /** @cond */
   };
-  template <std::size_t... S> struct gens<0, S...> {/** @endcond */
+  template <std::size_t... S> struct gens<0, S...> { /** @endcond */
     using type = seq<S...>;
   };
 

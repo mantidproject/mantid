@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # Note all changes in this file require a restart of Mantid
 # additionally any long term changes should be sent back to the development team so any changes can be merged
 # into future versions of Mantid.
@@ -94,7 +100,9 @@ variables = {
 
 def get_mode_specific_dict(mode):
     if mode is None:
-        raise RuntimeError("Failed to supply chopper mode")
+        raise RuntimeError("The parameter with name: 'mode' is required but "
+                           "was not set or passed.\n"
+                           "Acceptable values for this parameter are: PDF, Rietveld.")
 
     mode = mode.lower()
     if mode == "pdf":

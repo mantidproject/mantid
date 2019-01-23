@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * FilterByTimeTest.h
  *
@@ -12,10 +18,10 @@
 
 #include "MantidAlgorithms/FilterByTime.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;

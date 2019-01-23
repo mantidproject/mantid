@@ -20,7 +20,7 @@ This algorithm does not generate a :ref:`UB matrix <Lattice>`, it will only inde
 Run :ref:`CalculateUMatrix <algm-CalculateUMatrix>` algorithm after executing
 this algorithm in order to attach a :ref:`UB matrix <Lattice>` onto the sample. The
 :ref:`CopySample <algm-CopySample>` algorithm will allow this :ref:`UB matrix <Lattice>`
-to be transfered between workspaces.
+to be transferred between workspaces.
 
 Usage
 -----

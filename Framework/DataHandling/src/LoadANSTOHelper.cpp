@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadANSTOHelper.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
 #include <numeric>
@@ -493,7 +499,7 @@ bool File::append(const std::string &path, const std::string &name,
   return good;
 }
 
-} // Tar
-} // ANSTO
-} // DataHandling
-} // Mantid
+} // namespace Tar
+} // namespace ANSTO
+} // namespace DataHandling
+} // namespace Mantid

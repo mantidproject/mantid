@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_PLOTPEAKBULOGVALUE_H_
 #define MANTID_CURVEFITTING_PLOTPEAKBULOGVALUE_H_
 
@@ -32,31 +38,10 @@ Required Properties:
 
 @author Roman Tolchenov, Tessella plc
 @date 01/06/2010
-
-Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport PlotPeakByLogValue : public API::Algorithm {
   /** Structure to identify data for fitting
-    */
+   */
   struct InputData {
     /// Constructor
     InputData(const std::string &nam, int ix, int s, int p, double st = 0,

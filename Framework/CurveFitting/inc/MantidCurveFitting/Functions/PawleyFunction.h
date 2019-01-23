@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_PAWLEYFUNCTION_H_
 #define MANTID_CURVEFITTING_PAWLEYFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPawleyFunction.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/System.h"
 
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
@@ -90,26 +96,6 @@ using PawleyParameterFunction_sptr = boost::shared_ptr<PawleyParameterFunction>;
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 11/03/2015
-
-  Copyright © 2015 PSI-NXMM
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport PawleyFunction : public API::IPawleyFunction {
 public:

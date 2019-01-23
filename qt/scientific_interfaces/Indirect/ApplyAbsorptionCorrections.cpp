@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QStringList>
 
@@ -19,6 +26,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
     : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
+
   connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleGeometryChange(int)));
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
@@ -39,8 +47,12 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
           SLOT(updateContainer()));
   connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this,
           SLOT(updateContainer()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
+          SLOT(plotSpectrumClicked()));
+  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
+          SLOT(plotContourClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
@@ -169,6 +181,8 @@ void ApplyAbsorptionCorrections::updateContainer() {
 }
 
 void ApplyAbsorptionCorrections::run() {
+  setRunIsRunning(true);
+
   // Create / Initialize algorithm
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
   IAlgorithm_sptr applyCorrAlg =
@@ -210,6 +224,10 @@ void ApplyAbsorptionCorrections::run() {
         m_uiForm.ckRebinContainer->setChecked(true);
       } else {
         m_batchAlgoRunner->clearQueue();
+        setRunIsRunning(false);
+        setPlotSpectrumEnabled(false);
+        setPlotContourEnabled(false);
+        setSaveResultEnabled(false);
         g_log.error("Cannot apply absorption corrections "
                     "using a sample and "
                     "container with different binning.");
@@ -269,6 +287,10 @@ void ApplyAbsorptionCorrections::run() {
         break;
       default:
         m_batchAlgoRunner->clearQueue();
+        setRunIsRunning(false);
+        setPlotSpectrumEnabled(false);
+        setPlotContourEnabled(false);
+        setSaveResultEnabled(false);
         g_log.error(
             "ApplyAbsorptionCorrections cannot run with corrections that do "
             "not match sample binning.");
@@ -336,6 +358,15 @@ void ApplyAbsorptionCorrections::run() {
   // updateContainer();
 }
 
+std::size_t ApplyAbsorptionCorrections::getOutWsNumberOfSpectra() const {
+  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
+}
+
+MatrixWorkspace_const_sptr
+ApplyAbsorptionCorrections::getADSWorkspace(std::string const &name) const {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+}
+
 /**
  * Adds a spline interpolation as a step in the calculation for using legacy
  *correction factor
@@ -368,30 +399,34 @@ void ApplyAbsorptionCorrections::addInterpolationStep(
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
-  if (error) {
+
+  if (!error) {
+    if (m_uiForm.ckUseCan->isChecked()) {
+      if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
+        IAlgorithm_sptr shiftLog =
+            AlgorithmManager::Instance().create("AddSampleLog");
+        shiftLog->initialize();
+
+        shiftLog->setProperty("Workspace", m_pythonExportWsName);
+        shiftLog->setProperty("LogName", "container_shift");
+        shiftLog->setProperty("LogType", "Number");
+        shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
+                                             m_uiForm.spCanShift->value()));
+        m_batchAlgoRunner->addAlgorithm(shiftLog);
+      }
+    }
+    // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(postProcessComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  } else {
+    setRunIsRunning(false);
+    setPlotSpectrumEnabled(false);
+    setPlotContourEnabled(false);
+    setSaveResultEnabled(false);
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
-    return;
   }
-
-  if (m_uiForm.ckUseCan->isChecked()) {
-    if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
-      IAlgorithm_sptr shiftLog =
-          AlgorithmManager::Instance().create("AddSampleLog");
-      shiftLog->initialize();
-
-      shiftLog->setProperty("Workspace", m_pythonExportWsName);
-      shiftLog->setProperty("LogName", "container_shift");
-      shiftLog->setProperty("LogType", "Number");
-      shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
-                                           m_uiForm.spCanShift->value()));
-      m_batchAlgoRunner->addAlgorithm(shiftLog);
-    }
-  }
-  // Run algorithm queue
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(postProcessComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -402,35 +437,35 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
 void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(postProcessComplete(bool)));
+  setRunIsRunning(false);
 
-  if (error) {
+  if (!error) {
+    setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
+
+    // Handle preview plot
+    plotPreview(m_uiForm.spPreviewSpec->value());
+
+    // Clean up unwanted workspaces
+    IAlgorithm_sptr deleteAlg =
+        AlgorithmManager::Instance().create("DeleteWorkspace");
+    if (AnalysisDataService::Instance().doesExist("__algorithm_can")) {
+
+      deleteAlg->initialize();
+      deleteAlg->setProperty("Workspace", "__algorithm_can");
+      deleteAlg->execute();
+    }
+    const auto conv =
+        AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
+    if (conv) {
+      deleteAlg->setProperty("Workspace", "__algorithm_can_Wavelength");
+      deleteAlg->execute();
+    }
+  } else {
+    setPlotSpectrumEnabled(false);
+    setPlotContourEnabled(false);
+    setSaveResultEnabled(false);
     emit showMessageBox("Unable to process corrected workspace.\nSee Results "
                         "Log for more details.");
-    return;
-  }
-
-  // Enable post processing plot and save
-  m_uiForm.cbPlotOutput->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
-
-  // Handle preview plot
-  plotPreview(m_uiForm.spPreviewSpec->value());
-
-  // Clean up unwanted workspaces
-  IAlgorithm_sptr deleteAlg =
-      AlgorithmManager::Instance().create("DeleteWorkspace");
-  if (AnalysisDataService::Instance().doesExist("__algorithm_can")) {
-
-    deleteAlg->initialize();
-    deleteAlg->setProperty("Workspace", "__algorithm_can");
-    deleteAlg->execute();
-  }
-  const auto conv =
-      AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
-  if (conv) {
-    deleteAlg->setProperty("Workspace", "__algorithm_can_Wavelength");
-    deleteAlg->execute();
   }
 }
 
@@ -533,7 +568,7 @@ void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
   if (AnalysisDataService::Instance().doesExist(m_pythonExportWsName))
     m_uiForm.ppPreview->addSpectrum(
         "Corrected", QString::fromStdString(m_pythonExportWsName), wsIndex,
-        Qt::green);
+        Qt::blue);
   // Plot container
   if (m_ppContainerWS && useCan) {
     m_uiForm.ppPreview->addSpectrum(
@@ -543,32 +578,33 @@ void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
 
   m_spectra = boost::numeric_cast<size_t>(wsIndex);
 }
-/**
- * Handles saving of the workspace
- */
-void ApplyAbsorptionCorrections::saveClicked() {
 
+void ApplyAbsorptionCorrections::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/**
- * Handles mantid plotting of workspace
- */
-void ApplyAbsorptionCorrections::plotClicked() {
+void ApplyAbsorptionCorrections::plotSpectrumClicked() {
+  setPlotSpectrumIsPlotting(true);
 
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
+  auto const spectrumIndex = m_uiForm.spSpectrum->text().toInt();
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumIndex);
 
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
-
-    if (plotType == "Spectra" || plotType == "Both")
-      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-    if (plotType == "Contour" || plotType == "Both")
-      plot2D(QString::fromStdString(m_pythonExportWsName));
-  }
+  setPlotSpectrumIsPlotting(false);
 }
+
+void ApplyAbsorptionCorrections::plotContourClicked() {
+  setPlotContourIsPlotting(true);
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    plot2D(QString::fromStdString(m_pythonExportWsName));
+
+  setPlotContourIsPlotting(false);
+}
+
+void ApplyAbsorptionCorrections::runClicked() { runTab(); }
 
 /**
  * Plots the current spectrum displayed in the preview plot
@@ -630,5 +666,54 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
     m_uiForm.spPreviewSpec->setMaximum(boost::numeric_cast<int>(m_spectra));
   }
 }
+
+void ApplyAbsorptionCorrections::setPlotSpectrumIndexMax(int maximum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  m_uiForm.spSpectrum->setMaximum(maximum);
+}
+
+int ApplyAbsorptionCorrections::getPlotSpectrumIndex() {
+  return m_uiForm.spSpectrum->text().toInt();
+}
+
+void ApplyAbsorptionCorrections::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setPlotSpectrumEnabled(bool enabled) {
+  m_uiForm.pbPlotSpectrum->setEnabled(enabled);
+  m_uiForm.spSpectrum->setEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setPlotContourEnabled(bool enabled) {
+  m_uiForm.pbPlotContour->setEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotSpectrumEnabled(enabled);
+  setPlotContourEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void ApplyAbsorptionCorrections::setPlotSpectrumIsPlotting(bool plotting) {
+  m_uiForm.pbPlotSpectrum->setText(plotting ? "Plotting..." : "Plot Spectrum");
+  setButtonsEnabled(!plotting);
+}
+
+void ApplyAbsorptionCorrections::setPlotContourIsPlotting(bool plotting) {
+  m_uiForm.pbPlotContour->setText(plotting ? "Plotting..." : "Plot Contour");
+  setButtonsEnabled(!plotting);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

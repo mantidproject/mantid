@@ -1,4 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
@@ -8,17 +15,18 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UsageService.h"
 
 #include "MantidParallel/Communicator.h"
 
-#include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
 
 #include <MantidKernel/StringTokenizer.h>
@@ -36,6 +44,7 @@
 #include "MantidAPI/Algorithm.tcc"
 
 using namespace Mantid::Kernel;
+using VectorStringProperty = PropertyWithValue<std::vector<std::string>>;
 
 namespace Mantid {
 namespace API {
@@ -46,7 +55,7 @@ const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 class WorkspacePropertyValueIs {
 public:
   explicit WorkspacePropertyValueIs(const std::string &value)
-      : m_value(value){};
+      : m_value(value) {}
   bool operator()(IWorkspaceProperty *property) {
     Property *prop = dynamic_cast<Property *>(property);
     if (!prop)
@@ -95,15 +104,11 @@ Algorithm::Algorithm()
       m_runningAsync(false), m_running(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
-      m_groupsHaveSimilarNames(false),
+      m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
       m_communicator(Kernel::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
-Algorithm::~Algorithm() {
-  delete m_notificationCenter;
-  delete m_executeAsync;
-  delete m_progressObserver;
-}
+Algorithm::~Algorithm() {}
 
 //=============================================================================================
 //================================== Simple Getters/Setters
@@ -248,11 +253,6 @@ const std::vector<std::string> Algorithm::workspaceMethodOn() const {
  */
 const std::string Algorithm::workspaceMethodInputProperty() const { return ""; }
 
-//=============================================================================================
-//================================== Initialization
-//===========================================
-//=============================================================================================
-
 //---------------------------------------------------------------------------------------------
 /** Initialization method invoked by the framework. This method is responsible
  *  for any bookkeeping of initialization required by the framework itself.
@@ -308,43 +308,104 @@ std::map<std::string, std::string> Algorithm::validateInputs() {
 }
 
 //---------------------------------------------------------------------------------------------
-/** Go through the properties and cache the input/output
+/**
+ * Go through the properties and cache the input/output
  * workspace properties for later use.
  */
 void Algorithm::cacheWorkspaceProperties() {
-  // Cache the list of the in/out workspace properties
   m_inputWorkspaceProps.clear();
   m_outputWorkspaceProps.clear();
   m_pureOutputWorkspaceProps.clear();
-  const std::vector<Property *> &props = this->getProperties();
-  for (auto prop : props) {
-    IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
-    if (wsProp) {
-      switch (prop->direction()) {
-      case Kernel::Direction::Input:
-        m_inputWorkspaceProps.push_back(wsProp);
-        break;
-      case Kernel::Direction::InOut:
-        m_inputWorkspaceProps.push_back(wsProp);
-        m_outputWorkspaceProps.push_back(wsProp);
-        break;
-      case Kernel::Direction::Output:
-        m_outputWorkspaceProps.push_back(wsProp);
-        m_pureOutputWorkspaceProps.push_back(wsProp);
-        break;
-      default:
-        throw std::logic_error(
-            "Unexpected property direction found for property " + prop->name() +
-            " of algorithm " + this->name());
-      }
-    } // is a ws property
-  }   // each property
+  const auto &props = this->getProperties();
+  for (const auto &prop : props) {
+    auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+    if (!wsProp)
+      continue;
+    switch (prop->direction()) {
+    case Kernel::Direction::Input:
+      m_inputWorkspaceProps.push_back(wsProp);
+      break;
+    case Kernel::Direction::InOut:
+      m_inputWorkspaceProps.push_back(wsProp);
+      m_outputWorkspaceProps.push_back(wsProp);
+      break;
+    case Kernel::Direction::Output:
+      m_outputWorkspaceProps.push_back(wsProp);
+      m_pureOutputWorkspaceProps.push_back(wsProp);
+      break;
+    default:
+      throw std::logic_error(
+          "Unexpected property direction found for property " + prop->name() +
+          " of algorithm " + this->name());
+    }
+  }
 }
 
-//=============================================================================================
-//================================== Execution
-//================================================
-//=============================================================================================
+/**
+ * Cache the histories of any input workspaces so they can be copied over after
+ * algorithm completion.
+ */
+void Algorithm::cacheInputWorkspaceHistories() {
+  if (!trackingHistory())
+    return;
+
+  auto cacheHistories = [this](const Workspace_sptr &ws) {
+    if (auto group = dynamic_cast<const WorkspaceGroup *>(ws.get())) {
+      m_inputWorkspaceHistories.reserve(m_inputWorkspaceHistories.size() +
+                                        group->size());
+      for (const auto &memberWS : *group) {
+        m_inputWorkspaceHistories.emplace_back(memberWS);
+      }
+    } else {
+      m_inputWorkspaceHistories.emplace_back(ws);
+    }
+  };
+  using ArrayPropertyString = ArrayProperty<std::string>;
+  auto isADSValidator = [](const IValidator_sptr &validator) -> bool {
+    if (!validator)
+      return false;
+    if (dynamic_cast<ADSValidator *>(validator.get()))
+      return true;
+    if (const auto compValidator =
+            dynamic_cast<CompositeValidator *>(validator.get()))
+      return compValidator->contains<ADSValidator>();
+
+    return false;
+  };
+
+  // Look over all properties so we can catch an string array properties
+  // with an ADSValidator. ADSValidator indicates that the strings
+  // point to workspace names so we want to pick up the history from these too.
+  const auto &ads = AnalysisDataService::Instance();
+  m_inputWorkspaceHistories.clear();
+  const auto &props = this->getProperties();
+  for (const auto &prop : props) {
+    if (prop->direction() != Direction::Input &&
+        prop->direction() != Direction::InOut)
+      continue;
+
+    if (auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
+      if (auto ws = wsProp->getWorkspace()) {
+        cacheHistories(ws);
+      } else {
+        Workspace_sptr wsFromADS;
+        try {
+          wsFromADS = ads.retrieve(prop->value());
+        } catch (Exception::NotFoundError &) {
+          continue;
+        }
+        cacheHistories(wsFromADS);
+      }
+    } else if (auto strArrayProp = dynamic_cast<ArrayPropertyString *>(prop)) {
+      if (!isADSValidator(strArrayProp->getValidator()))
+        continue;
+      const auto &wsNames((*strArrayProp)());
+      for (const auto &name : wsNames) {
+        cacheHistories(ads.retrieve(name));
+      }
+    }
+  }
+} // namespace API
 
 //---------------------------------------------------------------------------------------------
 /** Go through the workspace properties of this algorithm
@@ -430,7 +491,7 @@ void Algorithm::unlockWorkspaces() {
  *  invoked for top level algorithms by the application manager.
  *  This method invokes exec() method.
  *  For Child Algorithms either the execute() method or exec() method
- *  must be EXPLICITLY invoked by  the parent algorithm.
+ *  must be EXPLICITLY invoked by the parent algorithm.
  *
  *  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be
  *executed
@@ -453,9 +514,6 @@ bool Algorithm::execute() {
     throw std::runtime_error("Algorithm is not initialised:" + this->name());
   }
 
-  // Cache the workspace in/out properties for later use
-  cacheWorkspaceProperties();
-
   // no logging of input if a child algorithm (except for python child algos)
   if (!m_isChildAlgorithm || m_alwaysStoreInADS)
     logAlgorithmInfo();
@@ -465,9 +523,9 @@ bool Algorithm::execute() {
   float timingInit = timer.elapsed(resetTimer);
   if (!validateProperties()) {
     // Reset name on input workspaces to trigger attempt at collection from ADS
-    const std::vector<Property *> &props = getProperties();
+    const auto &props = getProperties();
     for (auto &prop : props) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (wsProp && !(wsProp->getWorkspace())) {
         // Setting it's name to the same one it already had
         prop->setValue(prop->value());
@@ -482,6 +540,10 @@ bool Algorithm::execute() {
   }
   const float timingPropertyValidation = timer.elapsed(resetTimer);
 
+  // All properties are now valid - cache workspace properties and histories
+  cacheWorkspaceProperties();
+  cacheInputWorkspaceHistories();
+
   // ----- Check for processing groups -------------
   // default true so that it has the right value at the check below the catch
   // block should checkGroups throw
@@ -491,7 +553,8 @@ bool Algorithm::execute() {
     callProcessGroups = this->checkGroups();
   } catch (std::exception &ex) {
     getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << "\n" << ex.what() << "\n";
+                        << "\n"
+                        << ex.what() << "\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     m_running = false;
@@ -508,9 +571,8 @@ bool Algorithm::execute() {
   // ----- Perform validation of the whole set of properties -------------
   if ((!callProcessGroups) &&
       (executionMode != Parallel::ExecutionMode::MasterOnly ||
-       communicator().rank() ==
-           0)) // for groups this is called on each workspace
-               // separately
+       communicator().rank() == 0)) // for groups this is called on each
+                                    // workspace separately
   {
     std::map<std::string, std::string> errors = this->validateInputs();
     if (!errors.empty()) {
@@ -565,6 +627,7 @@ bool Algorithm::execute() {
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
+      setExecuted(false);
       if (!isChild()) {
         m_running = true;
       }
@@ -592,26 +655,26 @@ bool Algorithm::execute() {
       if (m_alwaysStoreInADS)
         this->store();
 
-      // RJT, 19/3/08: Moved this up from below the catch blocks
       setExecuted(true);
 
       // Log that execution has completed.
-      getLogger().debug("Time to validate properties: " +
-                        std::to_string(timingPropertyValidation) +
-                        " seconds\n" + "Time for other input validation: " +
-                        std::to_string(timingInputValidation) + " seconds\n" +
-                        "Time for other initialization: " +
-                        std::to_string(timingInit) + " seconds\n" +
-                        "Time to run exec: " + std::to_string(timingExec) +
-                        " seconds\n");
+      getLogger().debug(
+          "Time to validate properties: " +
+          std::to_string(timingPropertyValidation) + " seconds\n" +
+          "Time for other input validation: " +
+          std::to_string(timingInputValidation) + " seconds\n" +
+          "Time for other initialization: " + std::to_string(timingInit) +
+          " seconds\n" + "Time to run exec: " + std::to_string(timingExec) +
+          " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error() << "Error in execution of algorithm "
-                            << this->name() << '\n' << ex.what() << '\n';
+        getLogger().error()
+            << "Error in execution of algorithm " << this->name() << '\n'
+            << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -621,8 +684,9 @@ bool Algorithm::execute() {
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error() << "Logic Error in execution of algorithm "
-                            << this->name() << '\n' << ex.what() << '\n';
+        getLogger().error()
+            << "Logic Error in execution of algorithm " << this->name() << '\n'
+            << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -646,7 +710,8 @@ bool Algorithm::execute() {
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << ":\n" << ex.what() << "\n";
+                        << ":\n"
+                        << ex.what() << "\n";
     this->unlockWorkspaces();
     throw;
   }
@@ -704,7 +769,7 @@ void Algorithm::store() {
 
   // add any regular/child workspaces first, then add the groups
   for (unsigned int i = 0; i < props.size(); ++i) {
-    IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(props[i]);
+    auto *wsProp = dynamic_cast<IWorkspaceProperty *>(props[i]);
     if (wsProp) {
       // check if the workspace is a group, if so remember where it is and add
       // it later
@@ -726,8 +791,7 @@ void Algorithm::store() {
   std::vector<int>::const_iterator wsIndex;
   for (wsIndex = groupWsIndicies.begin(); wsIndex != groupWsIndicies.end();
        ++wsIndex) {
-    IWorkspaceProperty *wsProp =
-        dynamic_cast<IWorkspaceProperty *>(props[*wsIndex]);
+    auto *wsProp = dynamic_cast<IWorkspaceProperty *>(props[*wsIndex]);
     if (wsProp) {
       try {
         wsProp->store();
@@ -942,54 +1006,11 @@ void Algorithm::initializeFromProxy(const AlgorithmProxy &proxy) {
 /** Fills History, Algorithm History and Algorithm Parameters
  */
 void Algorithm::fillHistory() {
-  // this is not a child algorithm. Add the history algorithm to the
-  // WorkspaceHistory object.
+  WorkspaceVector outputWorkspaces;
   if (!isChild()) {
-    // Create two vectors to hold a list of pointers to the input & output
-    // workspaces (InOut's go in both)
-    std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
-    std::vector<Workspace_sptr>::iterator outWS;
-    std::vector<Workspace_sptr>::const_iterator inWS;
-
-    findWorkspaceProperties(inputWorkspaces, outputWorkspaces);
-
-    // Loop over the output workspaces
-    for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end();
-         ++outWS) {
-      WorkspaceGroup_sptr wsGroup =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(*outWS);
-
-      // Loop over the input workspaces, making the call that copies their
-      // history to the output ones
-      // (Protection against copy to self is in
-      // WorkspaceHistory::copyAlgorithmHistory)
-      for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end();
-           ++inWS) {
-        (*outWS)->history().addHistory((*inWS)->getHistory());
-
-        // Add history to each child of output workspace group
-        if (wsGroup) {
-          for (size_t i = 0; i < wsGroup->size(); i++) {
-            wsGroup->getItem(i)->history().addHistory((*inWS)->getHistory());
-          }
-        }
-      }
-
-      // Add the history for the current algorithm to all the output workspaces
-      (*outWS)->history().addHistory(m_history);
-
-      // Add history to each child of output workspace group
-      if (wsGroup) {
-        for (size_t i = 0; i < wsGroup->size(); i++) {
-          wsGroup->getItem(i)->history().addHistory(m_history);
-        }
-      }
-    }
+    findWorkspaces(outputWorkspaces, Direction::Output);
   }
-  // this is a child algorithm, but we still want to keep the history.
-  else if (m_recordHistoryForChild && m_parentHistory) {
-    m_parentHistory->addChildHistory(m_history);
-  }
+  fillHistory(outputWorkspaces);
 }
 
 /**
@@ -1001,42 +1022,40 @@ void Algorithm::fillHistory() {
  *can be re-run.
  */
 void Algorithm::linkHistoryWithLastChild() {
-  if (m_recordHistoryForChild) {
-    // iterate over the algorithms output workspaces
-    const std::vector<Property *> &algProperties = getProperties();
-    std::vector<Property *>::const_iterator it;
-    for (it = algProperties.begin(); it != algProperties.end(); ++it) {
-      const IWorkspaceProperty *outputProp =
-          dynamic_cast<IWorkspaceProperty *>(*it);
-      if (outputProp) {
-        // Check we actually have a workspace, it may have been optional
-        Workspace_sptr workspace = outputProp->getWorkspace();
-        if (!workspace)
-          continue;
+  if (!m_recordHistoryForChild)
+    return;
 
-        // Check it's an output workspace
-        if ((*it)->direction() == Kernel::Direction::Output ||
-            (*it)->direction() == Kernel::Direction::InOut) {
-          bool linked = false;
-          // find child histories with anonymous output workspaces
-          auto childHistories = m_history->getChildHistories();
-          auto childIter = childHistories.rbegin();
-          for (; childIter != childHistories.rend() && !linked; ++childIter) {
-            auto props = (*childIter)->getProperties();
-            auto propIter = props.begin();
-            for (; propIter != props.end() && !linked; ++propIter) {
-              // check we have a workspace property
-              if ((*propIter)->direction() == Kernel::Direction::Output ||
-                  (*propIter)->direction() == Kernel::Direction::InOut) {
-                // if the workspaces are equal, then rename the history
-                std::ostringstream os;
-                os << "__TMP" << outputProp->getWorkspace().get();
-                if (os.str() == (*propIter)->value()) {
-                  (*propIter)->setValue((*it)->value());
-                  linked = true;
-                }
-              }
-            }
+  // iterate over the algorithms output workspaces
+  const auto &algProperties = getProperties();
+  for (const auto &prop : algProperties) {
+    if (prop->direction() != Kernel::Direction::Output &&
+        prop->direction() != Kernel::Direction::InOut)
+      continue;
+    const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+    if (!wsProp)
+      continue;
+    // Check we actually have a workspace, it may have been optional
+    Workspace_sptr workspace = wsProp->getWorkspace();
+    if (!workspace)
+      continue;
+
+    bool linked = false;
+    // find child histories with anonymous output workspaces
+    const auto &childHistories = m_history->getChildHistories();
+    auto childIter = childHistories.rbegin();
+    for (; childIter != childHistories.rend() && !linked; ++childIter) {
+      const auto &props = (*childIter)->getProperties();
+      auto propIter = props.begin();
+      for (; propIter != props.end() && !linked; ++propIter) {
+        // check we have a workspace property
+        if ((*propIter)->direction() == Kernel::Direction::Output ||
+            (*propIter)->direction() == Kernel::Direction::InOut) {
+          // if the workspaces are equal, then rename the history
+          std::ostringstream os;
+          os << "__TMP" << wsProp->getWorkspace().get();
+          if (os.str() == (*propIter)->value()) {
+            (*propIter)->setValue(prop->value());
+            linked = true;
           }
         }
       }
@@ -1054,40 +1073,53 @@ void Algorithm::trackAlgorithmHistory(
   m_parentHistory = parentHist;
 }
 
-/** Check if we are tracking history for thus algorithm
+/** Check if we are tracking history for this algorithm
  *  @return if we are tracking the history of this algorithm
  */
 bool Algorithm::trackingHistory() {
   return (!isChild() || m_recordHistoryForChild);
 }
 
-/** Populate lists of the input & output workspace properties.
- *  (InOut workspaces go in both lists)
- *  @param inputWorkspaces ::  A reference to a vector for the input workspaces
- *  @param outputWorkspaces :: A reference to a vector for the output workspaces
+/** Populate lists of the workspace properties for a given direction
+ *  (InOut workspaces are included in both input/output)
+ * @param workspaces A reference to a vector for the workspaces
+ * @param direction The direction of the property required for the search
+ * @param checkADS If true, check the ADS for workspace references
+ * if the check on the workspace property value is empty. Most useful for
+ * finding group workspaces that are never stored on the property
  */
-void Algorithm::findWorkspaceProperties(
-    std::vector<Workspace_sptr> &inputWorkspaces,
-    std::vector<Workspace_sptr> &outputWorkspaces) const {
-  // Loop over properties looking for the workspace properties and putting them
-  // in the right list
-  const std::vector<Property *> &algProperties = getProperties();
-  std::vector<Property *>::const_iterator it;
-  for (it = algProperties.begin(); it != algProperties.end(); ++it) {
-    const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(*it);
-    if (wsProp) {
-      const Property *wsPropProp = dynamic_cast<Property *>(*it);
-      // Check we actually have a workspace, it may have been optional
-      Workspace_sptr workspace = wsProp->getWorkspace();
-      if (!workspace)
-        continue;
-      unsigned int direction = wsPropProp->direction();
-      if (direction == Direction::Input || direction == Direction::InOut) {
-        inputWorkspaces.push_back(workspace);
-      }
-      if (direction == Direction::Output || direction == Direction::InOut) {
-        outputWorkspaces.push_back(workspace);
-      }
+void Algorithm::findWorkspaces(WorkspaceVector &workspaces,
+                               unsigned int direction, bool checkADS) const {
+  auto workspaceFromWSProperty =
+      [](const IWorkspaceProperty &prop, const AnalysisDataServiceImpl &ads,
+         const std::string &strValue, bool checkADS) {
+        auto workspace = prop.getWorkspace();
+        if (workspace)
+          return workspace;
+
+        // Empty string indicates optional workspace
+        if (checkADS && !strValue.empty()) {
+          return ads.retrieve(strValue);
+        }
+        return Workspace_sptr();
+      };
+  auto appendWS = [&workspaces](const Workspace_sptr &workspace) {
+    if (!workspace)
+      return false;
+    workspaces.emplace_back(workspace);
+    return true;
+  };
+
+  // Additional output properties can be declared on the fly
+  // so we need a fresh loop over the properties
+  const auto &algProperties = getProperties();
+  const auto &ads = AnalysisDataService::Instance();
+  for (const auto &prop : algProperties) {
+    const unsigned int propDirection = prop->direction();
+    if (propDirection != direction && propDirection != Direction::InOut)
+      continue;
+    if (const auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
+      appendWS(workspaceFromWSProperty(*wsProp, ads, prop->value(), checkADS));
     }
   }
 }
@@ -1101,8 +1133,8 @@ void Algorithm::logAlgorithmInfo() const {
     if (this->isChild())
       logger.notice() << " (child)";
     logger.notice() << '\n';
-    // Make use of the AlgorithmHistory class, which holds all the info we want
-    // here
+    // Make use of the AlgorithmHistory class, which holds all the info we
+    // want here
     AlgorithmHistory algHistory(this);
     size_t maxPropertyLength = 40;
     if (logger.is(Logger::Priority::PRIO_DEBUG)) {
@@ -1143,26 +1175,23 @@ bool Algorithm::checkGroups() {
   size_t numGroups = 0;
   bool processGroups = false;
 
-  // Unroll the groups or single inputs into vectors of workspace
-  m_groups.clear();
+  // Unroll the groups or single inputs into vectors of workspaces
+  const auto &ads = AnalysisDataService::Instance();
+  m_unrolledInputWorkspaces.clear();
   m_groupWorkspaces.clear();
   for (auto inputWorkspaceProp : m_inputWorkspaceProps) {
     auto prop = dynamic_cast<Property *>(inputWorkspaceProp);
     auto wsGroupProp = dynamic_cast<WorkspaceProperty<WorkspaceGroup> *>(prop);
-    std::vector<Workspace_sptr> thisGroup;
+    auto ws = inputWorkspaceProp->getWorkspace();
+    auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
 
-    Workspace_sptr ws = inputWorkspaceProp->getWorkspace();
-    WorkspaceGroup_sptr wsGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-
-    // Workspace groups are NOT returned by IWP->getWorkspace() most of the time
-    // because WorkspaceProperty is templated by <MatrixWorkspace>
-    // and WorkspaceGroup does not subclass <MatrixWorkspace>
+    // Workspace groups are NOT returned by IWP->getWorkspace() most of the
+    // time because WorkspaceProperty is templated by <MatrixWorkspace> and
+    // WorkspaceGroup does not subclass <MatrixWorkspace>
     if (!wsGroup && prop && !prop->value().empty()) {
       // So try to use the name in the AnalysisDataService
       try {
-        wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            prop->value());
+        wsGroup = ads.retrieveWS<WorkspaceGroup>(prop->value());
       } catch (Exception::NotFoundError &) { /* Do nothing */
       }
     }
@@ -1172,25 +1201,17 @@ bool Algorithm::checkGroups() {
     if (wsGroup && !wsGroupProp) {
       numGroups++;
       processGroups = true;
-      std::vector<std::string> names = wsGroup->getNames();
-      for (auto &name : names) {
-        Workspace_sptr memberWS =
-            AnalysisDataService::Instance().retrieve(name);
-        if (!memberWS)
-          throw std::invalid_argument("One of the members of " +
-                                      wsGroup->getName() + ", " + name +
-                                      " was not found!.");
-        thisGroup.push_back(memberWS);
-      }
+      m_unrolledInputWorkspaces.emplace_back(wsGroup->getAllItems());
     } else {
       // Single Workspace. Treat it as a "group" with only one member
       if (ws)
-        thisGroup.push_back(ws);
+        m_unrolledInputWorkspaces.emplace_back(WorkspaceVector{ws});
+      else
+        m_unrolledInputWorkspaces.emplace_back(WorkspaceVector{});
     }
 
     // Add to the list of groups
-    m_groups.push_back(thisGroup);
-    m_groupWorkspaces.push_back(wsGroup);
+    m_groupWorkspaces.emplace_back(wsGroup);
   }
 
   // No groups? Get out.
@@ -1203,8 +1224,8 @@ bool Algorithm::checkGroups() {
   // Size of the single or of all the groups
   m_groupSize = 1;
   m_groupsHaveSimilarNames = true;
-  for (size_t i = 0; i < m_groups.size(); i++) {
-    std::vector<Workspace_sptr> &thisGroup = m_groups[i];
+  for (size_t i = 0; i < m_unrolledInputWorkspaces.size(); i++) {
+    const auto &thisGroup = m_unrolledInputWorkspaces[i];
     // We're ok with empty groups if the workspace property is optional
     if (thisGroup.empty() && !m_inputWorkspaceProps[i]->isOptional())
       throw std::invalid_argument("Empty group passed as input");
@@ -1255,7 +1276,6 @@ bool Algorithm::doCallProcessGroups(
   startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
   // Start a timer
   Timer timer;
-
   bool completed = false;
   try {
     // Call the concrete algorithm's processGroups method
@@ -1284,12 +1304,23 @@ bool Algorithm::doCallProcessGroups(
   interruption_point();
 
   if (completed) {
+    // Get how long this algorithm took to run
+    const float duration = timer.elapsed();
+
+    m_history = boost::make_shared<AlgorithmHistory>(this, startTime, duration,
+                                                     ++g_execCount);
+    if (trackingHistory() && m_history) {
+      // find any further outputs created by the execution
+      WorkspaceVector outputWorkspaces;
+      const bool checkADS{true};
+      findWorkspaces(outputWorkspaces, Direction::Output, checkADS);
+      fillHistory(outputWorkspaces);
+    }
+
     // in the base processGroups each individual exec stores its outputs
     if (!m_usingBaseProcessGroups && m_alwaysStoreInADS)
       this->store();
 
-    // Get how long this algorithm took to run
-    const float duration = timer.elapsed();
     // Log that execution has completed.
     reportCompleted(duration, true /* this is for group processing*/);
   }
@@ -1299,6 +1330,52 @@ bool Algorithm::doCallProcessGroups(
       new FinishedNotification(this, isExecuted()));
 
   return completed;
+}
+
+/**
+ * If this algorithm is not a child then copy history between the inputs and
+ * outputs and add a record for this algorithm. If the algorithm is a child
+ * attach the child history to the parent if requested.
+ *  @param outputWorkspaces :: A reference to a vector for the output
+ * workspaces. Used in the non-child case.
+ */
+void Algorithm::fillHistory(
+    const std::vector<Workspace_sptr> &outputWorkspaces) {
+  // this is not a child algorithm. Add the history algorithm to the
+  // WorkspaceHistory object.
+  if (!isChild()) {
+    auto copyHistoryToGroup = [](const Workspace &in, WorkspaceGroup &out) {
+      for (auto &outGroupItem : out) {
+        outGroupItem->history().addHistory(in.getHistory());
+      }
+    };
+
+    for (auto &outWS : outputWorkspaces) {
+      auto outWSGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+      // Copy the history from the cached input workspaces to the output ones
+      for (const auto &inputWS : m_inputWorkspaceHistories) {
+        if (outWSGroup) {
+          copyHistoryToGroup(*inputWS, *outWSGroup);
+        } else {
+          outWS->history().addHistory(inputWS->getHistory());
+        }
+      }
+      // Add history for this operation
+      if (outWSGroup) {
+        for (auto &outGroupItem : *outWSGroup) {
+          outGroupItem->history().addHistory(m_history);
+        }
+      } else {
+        // Add the history for the current algorithm to all the output
+        // workspaces
+        outWS->history().addHistory(m_history);
+      }
+    }
+  }
+  // this is a child algorithm, but we still want to keep the history.
+  else if (m_recordHistoryForChild && m_parentHistory) {
+    m_parentHistory->addChildHistory(m_history);
+  }
 }
 
 //--------------------------------------------------------------------------------------------
@@ -1338,10 +1415,11 @@ bool Algorithm::processGroups() {
         this->name(), progress_proportion * static_cast<double>(entry),
         progress_proportion * (1 + static_cast<double>(entry)),
         this->isLogging(), this->version());
-    // Don't make the new algorithm a child so that it's workspaces are stored
-    // correctly
-    alg_sptr->setChild(false);
-
+    // Make a child algorithm and turn off history recording for it, but always
+    // store result in the ADS
+    alg_sptr->setChild(true);
+    alg_sptr->setAlwaysStoreInADS(true);
+    alg_sptr->enableHistoryRecordingForChild(false);
     alg_sptr->setRethrows(true);
 
     IAlgorithm *alg = alg_sptr.get();
@@ -1351,8 +1429,8 @@ bool Algorithm::processGroups() {
     std::string outputBaseName;
 
     // ---------- Set all the input workspaces ----------------------------
-    for (size_t iwp = 0; iwp < m_groups.size(); iwp++) {
-      std::vector<Workspace_sptr> &thisGroup = m_groups[iwp];
+    for (size_t iwp = 0; iwp < m_unrolledInputWorkspaces.size(); iwp++) {
+      std::vector<Workspace_sptr> &thisGroup = m_unrolledInputWorkspaces[iwp];
       if (!thisGroup.empty()) {
         // By default (for a single group) point to the first/only workspace
         Workspace_sptr ws = thisGroup[0];
@@ -1410,7 +1488,8 @@ bool Algorithm::processGroups() {
         // by ADS)
         if (inputProp != m_inputWorkspaceProps.end()) {
           const auto &inputGroup =
-              m_groups[inputProp - m_inputWorkspaceProps.begin()];
+              m_unrolledInputWorkspaces[inputProp -
+                                        m_inputWorkspaceProps.begin()];
           if (!inputGroup.empty())
             outName = inputGroup[entry]->getName();
         }
@@ -1421,8 +1500,8 @@ bool Algorithm::processGroups() {
 
         outputWSNames[owp] = outName;
       } else {
-        throw std::logic_error(
-            "Found a Workspace property which doesn't inherit from Property.");
+        throw std::logic_error("Found a Workspace property which doesn't "
+                               "inherit from Property.");
       }
     } // for each OutputWorkspace property
 
@@ -1468,8 +1547,8 @@ bool Algorithm::processGroups() {
 void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   if (!alg)
     throw std::runtime_error("Algorithm not created!");
-  std::vector<Property *> props = this->getProperties();
-  for (auto prop : props) {
+  const auto &props = this->getProperties();
+  for (const auto &prop : props) {
     if (prop) {
       IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
@@ -1542,8 +1621,9 @@ private:
  * Asynchronous execution
  */
 Poco::ActiveResult<bool> Algorithm::executeAsync() {
-  m_executeAsync = new Poco::ActiveMethod<bool, Poco::Void, Algorithm>(
-      this, &Algorithm::executeAsyncImpl);
+  m_executeAsync =
+      std::make_unique<Poco::ActiveMethod<bool, Poco::Void, Algorithm>>(
+          this, &Algorithm::executeAsyncImpl);
   return (*m_executeAsync)(Poco::Void());
 }
 
@@ -1562,7 +1642,7 @@ bool Algorithm::executeAsyncImpl(const Poco::Void &) {
  */
 Poco::NotificationCenter &Algorithm::notificationCenter() const {
   if (!m_notificationCenter)
-    m_notificationCenter = new Poco::NotificationCenter;
+    m_notificationCenter = std::make_unique<Poco::NotificationCenter>();
   return *m_notificationCenter;
 }
 
@@ -1582,9 +1662,10 @@ void Algorithm::handleChildProgressNotification(
  */
 const Poco::AbstractObserver &Algorithm::progressObserver() const {
   if (!m_progressObserver)
-    m_progressObserver = new Poco::NObserver<Algorithm, ProgressNotification>(
-        *const_cast<Algorithm *>(this),
-        &Algorithm::handleChildProgressNotification);
+    m_progressObserver =
+        std::make_unique<Poco::NObserver<Algorithm, ProgressNotification>>(
+            *const_cast<Algorithm *>(this),
+            &Algorithm::handleChildProgressNotification);
 
   return *m_progressObserver;
 }
@@ -1624,9 +1705,8 @@ void Algorithm::setLoggingOffset(const int value) {
   if (m_communicator->rank() == 0)
     g_log.setLevelOffset(value);
   else {
-    int offset{1};
-    ConfigService::Instance().getValue("mpi.loggingOffset", offset);
-    g_log.setLevelOffset(value + offset);
+    auto offset = ConfigService::Instance().getValue<int>("mpi.loggingOffset");
+    g_log.setLevelOffset(value + offset.get_value_or(1));
   }
 }
 
@@ -1642,8 +1722,8 @@ void Algorithm::interruption_point() {
   // contravene the OpenMP standard
   // that defines that all loops must complete, and no exception can leave an
   // OpenMP section
-  // openmp cancel handling is performed using the ??, ?? and ?? macros in each
-  // algrothim
+  // openmp cancel handling is performed using the ??, ?? and ?? macros in
+  // each algrothim
   IF_NOT_PARALLEL
   if (m_cancel)
     throw CancelException();
@@ -1743,11 +1823,11 @@ void Algorithm::execDistributed() { exec(); }
 /** Runs the algorithm in `master-only` execution mode.
  *
  * The default implementation runs the normal exec() method on rank 0 and
- * nothing on all other ranks. As a consequence all output properties will have
- * their default values, such as a nullptr for output workspaces. Classes
+ * nothing on all other ranks. As a consequence all output properties will
+ * have their default values, such as a nullptr for output workspaces. Classes
  * inheriting from Algorithm can re-implement this if they support execution
- * with multiple MPI ranks and require a special implementation for master-only
- * execution. */
+ * with multiple MPI ranks and require a special implementation for
+ * master-only execution. */
 void Algorithm::execMasterOnly() {
   if (communicator().rank() == 0)
     exec();
@@ -1778,9 +1858,9 @@ Parallel::ExecutionMode Algorithm::getExecutionMode() const {
     getLogger().error() << error << "\n";
     throw(std::runtime_error(error));
   }
-  getLogger().information() << "MPI Rank " << communicator().rank()
-                            << " running with "
-                            << Parallel::toString(executionMode) << '\n';
+  getLogger().information()
+      << "MPI Rank " << communicator().rank() << " running with "
+      << Parallel::toString(executionMode) << '\n';
   return executionMode;
 }
 
@@ -1810,10 +1890,10 @@ Algorithm::getInputWorkspaceStorageModes() const {
 
 /** Get correct execution mode based on input storage modes for an MPI run.
  *
- * The default implementation returns ExecutionMode::Invalid. Classes inheriting
- * from Algorithm can re-implement this if they support execution with multiple
- * MPI ranks. May not return ExecutionMode::Serial, because that is not a
- * "parallel" execution mode. */
+ * The default implementation returns ExecutionMode::Invalid. Classes
+ * inheriting from Algorithm can re-implement this if they support execution
+ * with multiple MPI ranks. May not return ExecutionMode::Serial, because that
+ * is not a "parallel" execution mode. */
 Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   UNUSED_ARG(storageModes)
@@ -1824,9 +1904,10 @@ Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
 /// Sets up skipping workspace validation on non-master ranks for
 /// StorageMode::MasterOnly.
 void Algorithm::setupSkipValidationMasterOnly() {
-  // If workspaces have StorageMode::MasterOnly, validation on non-master ranks
-  // would usually fail. Therefore, WorkspaceProperty needs to skip validation.
-  // Thus, we must notify it whether or not it is on the master rank or not.
+  // If workspaces have StorageMode::MasterOnly, validation on non-master
+  // ranks would usually fail. Therefore, WorkspaceProperty needs to skip
+  // validation. Thus, we must notify it whether or not it is on the master
+  // rank or not.
   if (communicator().rank() != 0)
     for (auto *prop : getProperties())
       if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop))

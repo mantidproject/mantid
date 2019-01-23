@@ -30,7 +30,7 @@ and thus
 
 where,
 
--  :math:`\Delta T` is the time resolution from modulator
+-  :math:`\Delta T` is the time resolution from moderator
 -  :math:`\Delta\theta` is the coverage of the detector, and can be
    approximated from the square root of the solid angle of the detector
    to sample
@@ -47,7 +47,7 @@ functions where ``_tof`` is the time-of-flight term, ``_length`` is
 the path length term, and ``_angle`` is the angular term. Note that
 the total resolution is these terms added in quadriture.
 
-Note that :math:`\frac{\Delta d}{d} = \frac{\Delta Q}{Q}`.
+Note that :math:`\frac{\Delta d}{d} = \frac{\Delta Q}{Q}`. When fitting peaks in time-of-flight the resolution is :math:`\frac{\Delta T}{T} = \frac{\Delta d}{d}`.
 
 Factor Sheet
 ------------

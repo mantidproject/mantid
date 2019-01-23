@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CROPWORKSPACETEST_H_
 #define CROPWORKSPACETEST_H_
 
-#include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Timer.h"

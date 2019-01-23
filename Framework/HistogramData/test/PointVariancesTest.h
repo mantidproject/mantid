@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_POINTVARIANCESTEST_H_
 #define MANTID_HISTOGRAMDATA_POINTVARIANCESTEST_H_
 
@@ -18,8 +24,9 @@ public:
 
   void test_has_correct_mixins() {
     PointVariances data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::VarianceVectorOf<
-        PointVariances, HistogramDx, PointStandardDeviations> &>(data))));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
+        (dynamic_cast<detail::VarianceVectorOf<
+             PointVariances, HistogramDx, PointStandardDeviations> &>(data))));
   }
 
   void test_construct_default() {

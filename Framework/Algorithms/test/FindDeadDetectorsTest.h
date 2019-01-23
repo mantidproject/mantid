@@ -1,11 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FINDDEADDETECTORSTEST_H_
 #define FINDDEADDETECTORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,8 +24,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 class FindDeadDetectorsTest : public CxxTest::TestSuite {
 public:

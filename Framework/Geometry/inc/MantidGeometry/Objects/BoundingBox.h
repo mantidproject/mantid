@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDGEOMETRY_BOUNDINGBOX_H_
 #define MANTIDGEOMETRY_BOUNDINGBOX_H_
 
@@ -25,27 +31,6 @@ cuboid.
 
 @author Martyn Gigg
 @date 01/10/2010
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL BoundingBox {
 public:
@@ -54,14 +39,14 @@ public:
       : m_minPoint(), m_maxPoint(), m_null(true), is_axis_aligned(true) {}
 
   /** Constructor taking six points. If inconsistent points are defined, i.e.
-  * xmin > xmax, then an error is thrown
-  * @param xmax :: Value of maximum in X. It must be greater than xmin.
-  * @param ymax :: Value of maximum in Y. It must be greater than ymin.
-  * @param zmax :: Value of maximum in Z. It must be greater than zmin.
-  * @param xmin :: Value of minimum in X. It must be less than xmax.
-  * @param ymin :: Value of minimum in Y. It must be less than ymax.
-  * @param zmin :: Value of minimum in Z. It must be less than zmax.
-  */
+   * xmin > xmax, then an error is thrown
+   * @param xmax :: Value of maximum in X. It must be greater than xmin.
+   * @param ymax :: Value of maximum in Y. It must be greater than ymin.
+   * @param zmax :: Value of maximum in Z. It must be greater than zmin.
+   * @param xmin :: Value of minimum in X. It must be less than xmax.
+   * @param ymin :: Value of minimum in Y. It must be less than ymax.
+   * @param zmin :: Value of minimum in Z. It must be less than zmax.
+   */
   BoundingBox(double xmax, double ymax, double zmax, double xmin, double ymin,
               double zmin)
       : m_minPoint(xmin, ymin, zmin), m_maxPoint(xmax, ymax, zmax),
@@ -71,15 +56,15 @@ public:
   }
 
   /**
-  * Do the given arguments form a valid bounding box, throws std::invalid
-  * argument if not
-  * @param xmax :: Value of maximum in X. It must be greater than xmin.
-  * @param ymax :: Value of maximum in Y. It must be greater than ymin.
-  * @param zmax :: Value of maximum in Z. It must be greater than zmin.
-  * @param xmin :: Value of minimum in X. It must be less than xmax.
-  * @param ymin :: Value of minimum in Y. It must be less than ymax.
-  * @param zmin :: Value of minimum in Z. It must be less than zmax.
-  */
+   * Do the given arguments form a valid bounding box, throws std::invalid
+   * argument if not
+   * @param xmax :: Value of maximum in X. It must be greater than xmin.
+   * @param ymax :: Value of maximum in Y. It must be greater than ymin.
+   * @param zmax :: Value of maximum in Z. It must be greater than zmin.
+   * @param xmin :: Value of minimum in X. It must be less than xmax.
+   * @param ymin :: Value of minimum in Y. It must be less than ymax.
+   * @param zmin :: Value of minimum in Z. It must be less than zmax.
+   */
   static void checkValid(double xmax, double ymax, double zmax, double xmin,
                          double ymin, double zmin) {
     if (xmax < xmin || ymax < ymin || zmax < zmin) {
@@ -147,7 +132,7 @@ public:
   /// Generate a random point within the box
   Kernel::V3D generatePointInside(double r1, double r2, double r3) const;
   /** returns the expanded box consisting of all 8 box points,
-    * shifted into the coordinate system with the observer centre; */
+   * shifted into the coordinate system with the observer centre; */
   void getFullBox(std::vector<Kernel::V3D> &box,
                   const Kernel::V3D &observer) const;
   /** @name Box mutation functions*/
@@ -225,7 +210,7 @@ using BoundingBox_const_sptr = boost::shared_ptr<const BoundingBox>;
 /// Print out the bounding box values to a stream.
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
                                              const BoundingBox &box);
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif // MANTIDGEOMETRY_BOUNDINGBOX_H_

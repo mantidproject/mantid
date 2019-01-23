@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VIEWPORT_H_
 #define VIEWPORT_H_
 
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -170,7 +176,7 @@ protected:
   /// Translation in z direction
   mutable double m_zTrans;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*VIEWPORT_H_*/

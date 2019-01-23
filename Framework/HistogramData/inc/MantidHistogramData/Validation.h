@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_VALIDATION_H_
 #define MANTID_HISTOGRAMDATA_VALIDATION_H_
 
@@ -51,8 +57,8 @@ template <class T> bool Validator<HistogramX>::isValid(const T &data) {
   ++it;
   // after first NAN everything must be NAN
   return std::find_if_not(it, data.end(), [](const double d) {
-    return std::isnan(d);
-  }) == data.end();
+           return std::isnan(d);
+         }) == data.end();
 }
 
 template <class T> void Validator<HistogramX>::checkValidity(const T &data) {

@@ -7,7 +7,7 @@ digraph IndirectILLReductionFWS {
     OutputWorkspace
   }
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
   }
 

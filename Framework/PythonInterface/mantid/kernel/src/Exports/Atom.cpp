@@ -1,10 +1,16 @@
-#include "MantidKernel/PhysicalConstants.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
-#include <boost/python/make_function.hpp>
 #include <boost/python/make_constructor.hpp>
+#include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::PhysicalConstants::Atom;
@@ -58,7 +64,7 @@ static boost::shared_ptr<Atom> setAtom(const std::string &symbol,
     return boost::shared_ptr<Atom>(new Atom(atom));
   }
 }
-}
+} // namespace
 
 void export_Atom() {
   register_ptr_to_python<Atom *>();

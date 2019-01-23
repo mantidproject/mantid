@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 
@@ -146,5 +152,5 @@ FilePropertyWidget::openMultipleFileDialog(Mantid::Kernel::Property *baseProp) {
   return files;
 }
 
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

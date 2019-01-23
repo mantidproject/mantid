@@ -41,7 +41,7 @@ Example 2: use different NPoints for groups of spectra
 
   # Create a workspace
   ws = CreateSampleWorkspace()
-  # Greate a grouping workspace to put detectors from banks
+  # Create a grouping workspace to put detectors from banks
   # bank1 and bank2 into two separate groups
   gr = CreateGroupingWorkspace(ws,GroupNames='bank1,bank2')
 

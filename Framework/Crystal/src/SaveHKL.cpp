@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/SaveHKL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidCrystal/SaveHKL.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Utils.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Strings.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Utils.h"
 #include <fstream>
 
 #include <Poco/File.h>
@@ -255,9 +261,7 @@ void SaveHKL::exec() {
                                    // with wrong atomic
                                    // number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
-                        m_amu);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
     auto shape = boost::shared_ptr<IObject>(
         peaksW->sample().getShape().cloneWithMaterial(
             Material("SetInSaveHKL", neutron, 1.0)));
@@ -717,9 +721,9 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
     for (i = 1; i < spectra[id].size(); ++i)
       if (TOF < time[id][i])
         break;
-    spect = spectra[id][i - 1] +
-            (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) *
-                (spectra[id][i] - spectra[id][i - 1]);
+    spect = spectra[id][i - 1] + (TOF - time[id][i - 1]) /
+                                     (time[id][i] - time[id][i - 1]) *
+                                     (spectra[id][i] - spectra[id][i - 1]);
   }
 
   return spect;
@@ -760,5 +764,5 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
 
@@ -14,11 +20,11 @@ QwtRasterDataMDNonOrthogonal::QwtRasterDataMDNonOrthogonal()
 
 //-------------------------------------------------------------------------
 /** Return the data value to plot at the given position
-*
-* @param x :: position in coordinates of the MDWorkspace
-* @param y :: position in coordinates of the MDWorkspace
-* @return signal to plot
-*/
+ *
+ * @param x :: position in coordinates of the MDWorkspace
+ * @param y :: position in coordinates of the MDWorkspace
+ * @return signal to plot
+ */
 double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
   if (!m_ws)
     return 0;
@@ -60,9 +66,9 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
 
 //------------------------------------------------------------------------------------------------------
 /** Sets the workspace being displayed
-*
-* @param ws :: IMDWorkspace to show
-*/
+ *
+ * @param ws :: IMDWorkspace to show
+ */
 void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
   QwtRasterDataMD::setWorkspace(ws);
   // Create a lookpoint
@@ -91,10 +97,10 @@ QwtRasterDataMDNonOrthogonal *QwtRasterDataMDNonOrthogonal::copy() const {
 }
 
 /**
-* Copy settings from one object to another
-* @param source A source object to copy from
-* @param dest The destination object that receives the contents
-*/
+ * Copy settings from one object to another
+ * @param source A source object to copy from
+ * @param dest The destination object that receives the contents
+ */
 void QwtRasterDataMDNonOrthogonal::copyFrom(
     const QwtRasterDataMDNonOrthogonal &source,
     QwtRasterDataMDNonOrthogonal &dest) const {
@@ -127,5 +133,5 @@ void QwtRasterDataMDNonOrthogonal::copyFrom(
             std::begin(dest.m_fromHklToXyz));
 }
 
-} // namespace
-} // namespace
+} // namespace API
+} // namespace MantidQt

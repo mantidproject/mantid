@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
     ISIS-specific implementation of the SANS Reducer.
@@ -382,7 +388,7 @@ class ISISReducer(Reducer):
         self.settings = get_settings_object()
 
         # Dark Run Subtraction handler. This is not a step but a utility class
-        # which gets used during cropping and Tranmission calculation
+        # which gets used during cropping and Transmission calculation
         self.dark_run_subtraction = isis_reduction_steps.DarkRunSubtraction()
 
         # Unwrap monitors
@@ -729,7 +735,7 @@ class ISISReducer(Reducer):
     # set_beam_finder: override to accept the front detector
     def set_beam_finder(self, finder, det_bank='rear'):
         """
-            Extends teh SANS_reducer in order to support 2 bank detectors
+            Extends the SANS_reducer in order to support 2 bank detectors
             Set the ReductionStep object that finds the beam center
             @param finder: BaseBeamFinder object
             @param det_bank: two valid options: 'rear', 'front'
@@ -947,7 +953,7 @@ class ISISReducer(Reducer):
 
     def get_dark_run_setting(self, is_time, is_mon):
         '''
-        Gets one of the four dark run setttings
+        Gets one of the four dark run settings
         @param is_time: is it time_based or not
         @param is_mon: monitors or not
         @returns the requested setting

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the state of the geometry and unit scaling."""
 
 from __future__ import (absolute_import, division, print_function)
@@ -28,7 +34,7 @@ class StateScale(StateBase):
         super(StateScale, self).__init__()
 
         # The default geometry
-        self.shape_from_file = SampleShape.CylinderAxisAlong
+        self.shape_from_file = SampleShape.Disc
 
         # The default values are 1mm
         self.thickness_from_file = 1.

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -39,10 +45,10 @@ const boost::regex L1_REG_EXP{"^#.+flight path\\s+([0-9.]+)\\s*m"};
 
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file
-  * @param descriptor A descriptor for the file
-  * @returns An integer specifying the confidence level. 0 indicates it will not
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
-  */
+ */
 int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
 
   if (!descriptor.isAscii() || descriptor.extension() == ".tar")
@@ -70,7 +76,7 @@ int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialise the algorithm
-  */
+ */
 void LoadGSS::init() {
   const std::vector<std::string> exts{".gsa", ".gss", ".gda", ".txt"};
   declareProperty(Kernel::make_unique<API::FileProperty>(
@@ -88,7 +94,7 @@ void LoadGSS::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm
-  */
+ */
 void LoadGSS::exec() {
   // Process input parameters
   std::string filename = getPropertyValue("Filename");
@@ -103,7 +109,7 @@ void LoadGSS::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Main method to load GSAS file
-  */
+ */
 API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
                                                 bool useBankAsSpectrum) {
   // Vectors for detector information
@@ -179,8 +185,8 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       if (key2 == "Histograms") {
         // NSpec (Format: 'nspec HISTOGRAM')
         nSpec = std::stoi(key1);
-        g_log.information() << "Histogram Line:  " << key1
-                            << "  nSpec = " << nSpec << "\n";
+        g_log.information()
+            << "Histogram Line:  " << key1 << "  nSpec = " << nSpec << "\n";
       } else if (key1 == "Instrument:") {
         // Instrument (Format: 'Instrument XXXX')
         instrumentname = key2;
@@ -459,7 +465,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
 //----------------------------------------------------------------------------------------------
 /** Convert a string containing number and unit to double
-  */
+ */
 double LoadGSS::convertToDouble(std::string inputstring) {
   std::string temps;
   int isize = static_cast<int>(inputstring.size());
@@ -480,7 +486,7 @@ double LoadGSS::convertToDouble(std::string inputstring) {
 
 //----------------------------------------------------------------------------------------------
 /** Create the instrument geometry with Instrument
-  */
+ */
 void LoadGSS::createInstrumentGeometry(
     MatrixWorkspace_sptr workspace, const std::string &instrumentname,
     const double &primaryflightpath, const std::vector<int> &detectorids,
@@ -556,5 +562,5 @@ void LoadGSS::createInstrumentGeometry(
   workspace->setInstrument(instrument);
 }
 
-} // namespace
-} // namespace
+} // namespace DataHandling
+} // namespace Mantid

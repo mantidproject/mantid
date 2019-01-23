@@ -61,6 +61,16 @@
   <value val="6.480"/>
 </parameter>
 
+<parameter name="beam_centre_radius_min">
+  <!-- This is the default minimum masking radius to use when finding the beam centre-->
+  <value val="60"/>
+</parameter>
+
+<parameter name="beam_centre_radius_max">
+  <!-- This is the default maximum masking radius to use when finding the beam centre-->
+  <value val="200"/>
+</parameter>
+
 </component-link>
 
 </parameter-file>

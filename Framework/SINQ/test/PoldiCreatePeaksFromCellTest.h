@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDICREATEPEAKSFROMCELLTEST_H_
 #define MANTID_SINQ_POLDICREATEPEAKSFROMCELLTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiCreatePeaksFromCell.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidSINQ/PoldiCreatePeaksFromCell.h"
 
 using Mantid::Poldi::PoldiCreatePeaksFromCell;
 using namespace Mantid::API;

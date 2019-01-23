@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FINDREPLACEDIALOG_H_
 #define FINDREPLACEDIALOG_H_
 
 //----------------------------------
 // Includes
 //----------------------------------
-#include <QDialog>
 #include "DllOption.h"
+#include <QDialog>
 
 //----------------------------------
 // Forward declarations

@@ -15,7 +15,7 @@ digraph SANSBeamFluxCorrection {
     isEntryName         [label="Has Entry Name?"]
   }
   
-  subgraph algoritms {
+  subgraph algorithms {
     $algorithm_style
     convertToHist       [label="ConvertToHistogram v1"]
     rebinToWs           [label="RebinToWorkspace v1"]
@@ -26,7 +26,7 @@ digraph SANSBeamFluxCorrection {
   }
 
   isEntryName           -> load [label="Yes"]
-  isEntryName           -> flexRefWS [label="No. Emtpy Workspace"]
+  isEntryName           -> flexRefWS [label="No. Empty Workspace"]
   load                  -> flexRefWS
   flexRefWS             -> convertToHist
   convertToHist         -> rebinToWs

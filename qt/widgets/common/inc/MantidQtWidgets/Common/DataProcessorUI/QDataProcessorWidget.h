@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/HintStrategy.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
-#include "MantidQtWidgets/Common/HintStrategy.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,27 +30,6 @@ class WhiteList;
 
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
-
-Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
     : public MantidQt::API::MantidWidget,
@@ -121,6 +106,7 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
   void setClipboard(const QString &text) override;
+  void setItemDelegate() override;
 
   // Transfer runs
   void transfer(const QList<QString> &runs);
@@ -203,5 +189,5 @@ private slots:
 
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 #endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_ */

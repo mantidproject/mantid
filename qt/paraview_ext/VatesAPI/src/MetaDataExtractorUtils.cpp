@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -15,7 +21,7 @@ namespace VATES {
 namespace {
 /// Static logger
 Kernel::Logger g_log("MetaDataExtractorUtils");
-}
+} // namespace
 
 MetaDataExtractorUtils::MetaDataExtractorUtils() = default;
 
@@ -65,5 +71,5 @@ std::string MetaDataExtractorUtils::extractInstrument(
 
   return instrument;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

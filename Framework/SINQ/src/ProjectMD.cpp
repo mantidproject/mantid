@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/ProjectMD.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/ListValidator.h"
 
 #define MAXDIM 10
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_FILELOADERREGISTRY_H_
 #define MANTID_API_FILELOADERREGISTRY_H_
 
@@ -30,27 +36,6 @@ to find the correct one to load a particular file.
 A macro, DECLARE_FILELOADER_ALGORITHM is defined in RegisterFileLoader.h. Use
 this in place of the standard
 DECLARE_ALGORITHM macro
-
-Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_API_DLL FileLoaderRegistryImpl {
 public:
@@ -109,18 +94,20 @@ private:
         if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>, T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") +
-              typeid(T).name() + "' registered as Nexus loader but it does not "
-                                 "inherit from "
-                                 "API::IFileLoader<Kernel::NexusDescriptor>");
+              typeid(T).name() +
+              "' registered as Nexus loader but it does not "
+              "inherit from "
+              "API::IFileLoader<Kernel::NexusDescriptor>");
         }
         break;
       case Generic:
         if (!std::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") +
-              typeid(T).name() + "' registered as Generic loader but it does "
-                                 "not inherit from "
-                                 "API::IFileLoader<Kernel::FileDescriptor>");
+              typeid(T).name() +
+              "' registered as Generic loader but it does "
+              "not inherit from "
+              "API::IFileLoader<Kernel::FileDescriptor>");
         }
         break;
       default:
@@ -155,6 +142,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::FileLoaderRegistryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_API_FILELOADERREGISTRY_H_ */

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_STANDARDDEVIATIONVECTOROFTEST_H_
 #define MANTID_HISTOGRAMDATA_STANDARDDEVIATIONVECTOROFTEST_H_
 
@@ -6,10 +12,10 @@
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/StandardDeviationVectorOf.h"
 
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::StandardDeviationVectorOf;
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::HistogramX;
 
 class VariancesTester : public VectorOf<VariancesTester, HistogramX>,
                         public Iterable<VariancesTester> {
@@ -25,8 +31,7 @@ public:
   using StandardDeviationVectorOf<StandardDeviationVectorOfTester, HistogramX,
                                   VariancesTester>::StandardDeviationVectorOf;
   using StandardDeviationVectorOf<StandardDeviationVectorOfTester, HistogramX,
-                                  VariancesTester>::
-  operator=;
+                                  VariancesTester>::operator=;
   StandardDeviationVectorOfTester(const StandardDeviationVectorOfTester &) =
       default;
   StandardDeviationVectorOfTester &

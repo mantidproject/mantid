@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -5,8 +11,8 @@
  *********************************************************************************/
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
@@ -84,7 +90,7 @@ MDHistoWorkspace_sptr doTest(std::string algoName, std::string lhs,
   }
 }
 
-} // (end namespace)
+} // namespace BinaryOperationMDTestHelper
 
 namespace UnaryOperationMDTestHelper {
 
@@ -125,4 +131,4 @@ MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName,
     return (MDHistoWorkspace_sptr());
   }
 }
-} // (end namespace)
+} // namespace UnaryOperationMDTestHelper

@@ -30,21 +30,21 @@
  *                                                                         *
  ***************************************************************************/
 #include "SetColValuesDialog.h"
-#include "Table.h"
 #include "MantidQtWidgets/Common/ScriptEditor.h"
+#include "Table.h"
 
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QList>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
 #include <QTableWidget>
 #include <QTableWidgetSelectionRange>
-#include <QList>
-#include <QLayout>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QComboBox>
-#include <QTextEdit>
 #include <QTextCursor>
-#include <QMessageBox>
+#include <QTextEdit>
 #ifdef SCRIPTING_PYTHON
 #include <QCheckBox>
 #endif

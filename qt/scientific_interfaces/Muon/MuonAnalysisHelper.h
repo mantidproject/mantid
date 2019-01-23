@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_
 
 #include "DllConfig.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidKernel/Logger.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
-#include <QSettings>
-#include <QVector>
 #include <QDoubleValidator>
 #include <QLineEdit>
+#include <QSettings>
+#include <QVector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,10 +42,9 @@ struct DatasetParams {
 };
 /// Whether multiple fitting is enabled or disabled
 enum class MultiFitState { Enabled, Disabled };
-}
+} // namespace Muon
 
 namespace MuonAnalysisHelper {
-
 /// Sets double validator for specified field
 MANTIDQT_MUONINTERFACE_DLL void setDoubleValidator(QLineEdit *field,
                                                    bool allowEmpty = false);
@@ -68,6 +73,7 @@ getRunLabel(const Mantid::API::Workspace_sptr &ws);
 MANTIDQT_MUONINTERFACE_DLL std::string
 getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
 
+MANTIDQT_MUONINTERFACE_DLL bool isNumber(const QString &string);
 /// Get a run label given instrument and run numbers
 MANTIDQT_MUONINTERFACE_DLL std::string
 getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);
@@ -216,6 +222,6 @@ public:
 
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_ */

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -31,7 +37,7 @@ namespace SimpleGui {
 namespace {
 /// Static logger
 Kernel::Logger g_log("ThreeSliceView");
-}
+} // namespace
 
 ThreeSliceView::ThreeSliceView(QWidget *parent,
                                RebinnedSourcesManager *rebinnedSourcesManager,
@@ -110,6 +116,6 @@ ModeControlWidget::Views ThreeSliceView::getViewType() {
 }
 
 void ThreeSliceView::resetCamera() { this->m_mainView->resetCamera(); }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

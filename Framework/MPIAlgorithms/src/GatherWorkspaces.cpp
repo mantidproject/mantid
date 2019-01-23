@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidMPIAlgorithms/MPISerialization.h"
 #include <boost/mpi.hpp>
 #include <boost/version.hpp>
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 namespace mpi = boost::mpi;
 
@@ -78,7 +84,7 @@ struct eplus : public std::binary_function<MantidVec, MantidVec,
 };
 
 #endif // boost version
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GatherWorkspaces)

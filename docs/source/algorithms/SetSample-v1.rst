@@ -22,6 +22,10 @@ The 3 arguments to this algorithm ``Environment``, ``Geometry`` and
 dictionaries specifying multiple parameters that relate to the
 respective argument.
 
+.. note:: Contrary to the :ref:`xml forms of defining the geometry
+          <HowToDefineGeometricShape>` which are in metres,
+          :py:obj:`dict` versions are in centimetres.
+
 Environment
 ###########
 
@@ -118,7 +122,7 @@ The following example uses a test file called ``CRYO-01.xml`` in the
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
 
-   # Use geometry as is from environment defintion
+   # Use geometry as is from environment definition
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
                        'SampleNumberDensity': 0.1})
@@ -129,7 +133,7 @@ The following example uses a test file called ``CRYO-01.xml`` in the
 
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
-   # Use geometry from environment but set differnet height for sample
+   # Use geometry from environment but set different height for sample
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',

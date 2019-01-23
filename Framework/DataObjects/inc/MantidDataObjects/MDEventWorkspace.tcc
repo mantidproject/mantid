@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -30,9 +36,7 @@
 #if __GNUC__ > 4 ||                                                            \
     (__GNUC__ == 4 &&                                                          \
      (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
-// clang-format off
-GCC_DIAG_OFF(strict-aliasing)
-// clang-format on
+GNU_DIAG_OFF("strict-aliasing")
 #endif
 
 namespace Mantid {

@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """ SANBatchReduction algorithm is the starting point for any new type reduction, event single reduction"""
 from __future__ import (absolute_import, division, print_function)
 from sans.state.state import State
 from sans.algorithm_detail.batch_execution import (single_reduction_for_batch)
-from sans.common.enums import (OutputMode, FindDirectionEnum)
+from sans.common.enums import (OutputMode, FindDirectionEnum, DetectorType)
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 
 
@@ -11,7 +17,8 @@ class SANSBatchReduction(object):
     def __init__(self):
         super(SANSBatchReduction, self).__init__()
 
-    def __call__(self, states, use_optimizations=True, output_mode=OutputMode.PublishToADS, plot_results = False, output_graph=''):
+    def __call__(self, states, use_optimizations=True, output_mode=OutputMode.PublishToADS, plot_results = False,
+                 output_graph='', save_can=False):
         """
         This is the start of any reduction.
 
@@ -24,13 +31,20 @@ class SANSBatchReduction(object):
         """
         self.validate_inputs(states, use_optimizations, output_mode, plot_results, output_graph)
 
-        self._execute(states, use_optimizations, output_mode, plot_results, output_graph)
+        return self._execute(states, use_optimizations, output_mode, plot_results, output_graph, save_can=save_can)
 
     @staticmethod
-    def _execute(states, use_optimizations, output_mode, plot_results, output_graph):
+    def _execute(states, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
         # Iterate over each state, load the data and perform the reduction
+        out_scale_factors_list = []
+        out_shift_factors_list = []
         for state in states:
-            single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph)
+            out_scale_factors, out_shift_factors = \
+                single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph,
+                                           save_can=save_can)
+            out_shift_factors_list.append(out_shift_factors)
+            out_scale_factors_list.append(out_scale_factors)
+        return out_scale_factors_list, out_shift_factors_list
 
     def validate_inputs(self, states, use_optimizations, output_mode, plot_results, output_graph):
         # We are strict about the types here.
@@ -83,7 +97,8 @@ class SANSCentreFinder(object):
         super(SANSCentreFinder, self).__init__()
 
     def __call__(self, state, r_min = 60, r_max = 280, max_iter = 20, x_start = 0.0, y_start = 0.0,
-                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True, verbose=False):
+                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True, verbose=False,
+                 component=DetectorType.LAB):
         """
         This is the start of the beam centre finder algorithm.
 
@@ -102,19 +117,19 @@ class SANSCentreFinder(object):
 
         if reduction_method:
             return self._execute_reduction_method(state, r_min, r_max, max_iter, x_start, y_start, tolerance,
-                                                  find_direction, verbose)
+                                                  find_direction, verbose, component)
         else:
-            return self._execute_mass_method(state, r_min, max_iter, x_start, y_start, tolerance)
+            return self._execute_mass_method(state, r_min, max_iter, x_start, y_start, tolerance, component)
 
     @staticmethod
-    def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose):
+    def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose, component):
         # Perform the beam centre finder algorithm
-        return centre_finder_new(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose)
+        return centre_finder_new(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose, component)
 
     @staticmethod
-    def _execute_mass_method(state, r_min, max_iter, xstart, ystart, tolerance):
+    def _execute_mass_method(state, r_min, max_iter, xstart, ystart, tolerance, component):
         # Perform the beam centre finder algorithm
-        return centre_finder_mass(state, r_min, max_iter, xstart, ystart, tolerance)
+        return centre_finder_mass(state, r_min, max_iter, xstart, ystart, tolerance, component)
 
     def validate_inputs(self, state, r_min, r_max, max_iter, xstart, ystart, tolerance):
         # We are strict about the types here.

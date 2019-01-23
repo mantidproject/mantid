@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AbsorptionCorrection.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -12,11 +19,11 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Fast_Exponential.h"
-#include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/NeutronAtom.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,6 +33,7 @@ using namespace Geometry;
 using HistogramData::interpolateLinearInplace;
 using namespace Kernel;
 using namespace Mantid::PhysicalConstants;
+using namespace Mantid::DataObjects;
 
 AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
@@ -103,8 +111,7 @@ void AbsorptionCorrection::exec() {
   retrieveBaseProperties();
 
   // Create the output workspace
-  MatrixWorkspace_sptr correctionFactors =
-      WorkspaceFactory::Instance().create(m_inputWS);
+  MatrixWorkspace_sptr correctionFactors = create<HistoWorkspace>(*m_inputWS);
   correctionFactors->setDistribution(
       true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
@@ -132,6 +139,11 @@ void AbsorptionCorrection::exec() {
 
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
+  if (m_L1s.empty()) {
+    throw std::runtime_error(
+        "Failed to define any initial scattering gauge volume for geometry");
+  }
+
   // If sample not at origin, shift cached positions.
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const V3D samplePos = spectrumInfo.samplePosition();
@@ -241,9 +253,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
       sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, sigma_s, 0.0,
-                        sigma_s, sigma_atten);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
 
     auto shape = boost::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(

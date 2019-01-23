@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLTOF2.h"
 
 #include "MantidAPI/Axis.h"
@@ -41,11 +47,10 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
       descriptor.pathExists("/entry0/mode") &&
       !descriptor.pathExists("/entry0/dataSD") // This one is for
                                                // LoadILLIndirect
-      &&
-      !descriptor.pathExists(
-          "/entry0/instrument/VirtualChopper") // This one is for
-                                               // LoadILLReflectometry
-      ) {
+      && !descriptor.pathExists(
+             "/entry0/instrument/VirtualChopper") // This one is for
+                                                  // LoadILLReflectometry
+  ) {
     return 80;
   } else {
     return 0;

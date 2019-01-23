@@ -168,7 +168,7 @@ The PEARL object does not behave as described in
 :ref:`how_objects_hold_state_isis-powder-diffraction-ref`. For PEARL,
 any settings given in the constructor for the PEARL object, either
 explicitly or via a config file, are taken as defaults. If these are
-overriden in a call to either
+overridden in a call to either
 :ref:`focus_pearl_isis-powder-diffraction-ref`,
 :ref:`create_vanadium_pearl_isis-powder-diffraction-ref` or
 :ref:`create_cal_pearl_isis-powder-diffraction-ref`, then these

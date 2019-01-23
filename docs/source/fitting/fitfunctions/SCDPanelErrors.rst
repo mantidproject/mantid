@@ -56,7 +56,7 @@ follows:
    SampleOffsets;Boolean;;A sample being off from the center of the goniometer can result in larger errors.
 
 -  PeakWorkspaceName - This peak must be indexed by a UB matrix 
-   whose lattice parametersare CLOSE to the above lattice paramters
+   whose lattice parametersare CLOSE to the above lattice parameters
 -  BankNames - Names separated by "/" or a "!" if the next
    bank is in a different group. Bank names from the same group 
    belong together("Requirement" for use with the Fit algorithm)

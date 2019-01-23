@@ -9,12 +9,12 @@ set ( TEST_PY_FILES
   AlgorithmManagerTest.py
   AlgorithmPropertyTest.py
   AnalysisDataServiceTest.py
+  AnalysisDataServiceObserverTest.py
   AxisTest.py
   CatalogManagerTest.py
   CompositeFunctionTest.py
   DataProcessorAlgorithmTest.py
   DeprecatedAlgorithmCheckerTest.py
-  DetectorInfoTest.py
   ExperimentInfoTest.py
   FilePropertyTest.py
   FileFinderTest.py

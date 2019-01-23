@@ -87,18 +87,18 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h"
+#include <QApplication>
 #include <QDateTime>
+#include <QFontDatabase>
+#include <QIcon>
+#include <QLabel>
 #include <QLocale>
 #include <QMap>
-#include <QTimer>
-#include <QIcon>
 #include <QMetaEnum>
-#include <QFontDatabase>
-#include <QStyleOption>
-#include <QStyle>
-#include <QApplication>
 #include <QPainter>
-#include <QLabel>
+#include <QStyle>
+#include <QStyleOption>
+#include <QTimer>
 
 #include <cfloat>
 #include <climits>

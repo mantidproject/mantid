@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -35,7 +41,7 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
     valueVec.push_back(boost::lexical_cast<int>(value));
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("SplitInto", valueVec),
+      Kernel::make_unique<ArrayProperty<int>>("SplitInto", std::move(valueVec)),
       "A comma separated list of into how many sub-grid elements each "
       "dimension should split; "
       "or just one to split into the same number for all dimensions. Default " +
@@ -149,5 +155,5 @@ void BoxControllerSettingsAlgorithm::setBoxController(BoxController_sptr bc) {
   bc->resetNumBoxes();
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

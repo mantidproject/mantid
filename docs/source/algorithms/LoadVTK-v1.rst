@@ -43,7 +43,7 @@ The MDEventWorkspace can be rebinned to a regular grid using SliceMD and BinMD b
 Usage
 -----
 
-These example is for illustation only. The file used is very large and not publically available.
+These example is for illustation only. The file used is very large and not publicly available.
 
 **Example: Adaptive Binning**  
 

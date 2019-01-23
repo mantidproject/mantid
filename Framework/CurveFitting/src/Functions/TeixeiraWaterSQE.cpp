@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
 #include "MantidCurveFitting/Functions/TeixeiraWaterSQE.h"
@@ -5,8 +11,8 @@
 // N/A
 // Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/Jacobian.h"
 // third party library headers
 // N/A
 // standard library headers

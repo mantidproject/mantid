@@ -30,9 +30,9 @@
 #ifndef PLOT_H
 #define PLOT_H
 
-#include <QObject>
-#include <QMap>
 #include <QLocale>
+#include <QMap>
+#include <QObject>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>

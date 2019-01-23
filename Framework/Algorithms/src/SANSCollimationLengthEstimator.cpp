@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include "boost/lexical_cast.hpp"
 
@@ -25,7 +31,7 @@ bool checkForDouble(std::string val) {
   }
   return isDouble;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -194,5 +200,5 @@ double SANSCollimationLengthEstimator::getGuideValue(
                               "Guides. Currently only Numeric and TimeSeries "
                               "are supported.");
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

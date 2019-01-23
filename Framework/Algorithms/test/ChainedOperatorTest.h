@@ -1,16 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CHAINEDOPERATORTEST_H_
 #define CHAINEDOPERATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/Minus.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/Minus.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;

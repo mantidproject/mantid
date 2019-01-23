@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAlgorithms/ExtractUnmaskedSpectra.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAlgorithms/ExtractUnmaskedSpectra.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractUnmaskedSpectra)

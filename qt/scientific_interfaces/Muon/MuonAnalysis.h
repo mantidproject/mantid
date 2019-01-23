@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_H_
 #define MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_H_
 
@@ -7,27 +13,27 @@
 #include "ui_MuonAnalysis.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidGeometry/Instrument.h"
 
+#include "IO_MuonGrouping.h"
+#include "MantidQtWidgets/Common/MWDiag.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/pythonCalc.h"
-#include "MantidQtWidgets/Common/MWDiag.h"
-#include "IO_MuonGrouping.h"
 #include "MuonAnalysisDataLoader.h"
 #include "MuonAnalysisHelper.h"
 
-#include <map>
 #include <boost/optional/optional.hpp>
+#include <map>
 
 namespace MantidQt {
 namespace MantidWidgets {
 class FunctionBrowser;
 class MuonFitDataSelector;
-}
+} // namespace MantidWidgets
 namespace CustomInterfaces {
 class MuonAnalysisFitDataPresenter;
 class MuonAnalysisFitFunctionPresenter;
@@ -42,34 +48,13 @@ struct GroupResult {
   bool usedExistGrouping;
   boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
 };
-}
+} // namespace Muon
 
 /**
 This is the main class for the MuonAnalysis interface
 see <http://www.mantidproject.org/MuonAnalysis>.
 
 @author Anders Markvardsen, ISIS, RAL
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class MuonAnalysis : public MantidQt::API::UserSubWindow {
@@ -204,12 +189,13 @@ private slots:
   bool plotExists(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS and optional filepath
-  void selectMultiPeak(const QString &wsName,
+  void selectMultiPeak(const QString &wsName, const bool update,
                        const boost::optional<QString> &filePath);
 
   /// Enable PP tool for the plot of the given WS overload to take just a ws
   void selectMultiPeak(const QString &wsName);
-
+  /// Enable PP tool for the plot of the given WS overload to take just a ws
+  void selectMultiPeakNoUpdate(const QString &wsName);
   /// Disable tools for all the graphs within MantidPlot
   void disableAllTools();
 
@@ -261,6 +247,8 @@ private slots:
   void updateNormalization(QString name);
 
 private:
+  void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames,
+                    bool raw);
   bool getIfTFAsymmStore() const;
   /// Initialize local Python environment
   void initLocalPython() override;
@@ -301,6 +289,7 @@ private:
   Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,
                                                       Muon::PlotType plotType,
+                                                      std::string wsName,
                                                       bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
@@ -512,8 +501,8 @@ private:
   /// handles fit data work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisFitDataTab *m_fitDataTab;
   /// handles result table tab work
-  MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab *
-      m_resultTableTab;
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab
+      *m_resultTableTab;
 
   /// Time Zero as loaded from Data file
   double m_dataTimeZero;
@@ -583,7 +572,7 @@ private:
   int m_deadTimeIndex;
   bool m_useDeadTime;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_H_

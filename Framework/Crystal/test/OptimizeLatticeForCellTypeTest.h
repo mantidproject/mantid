@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_OptimizeLatticeForCellType_TEST_H_
 #define MANTID_CRYSTAL_OptimizeLatticeForCellType_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingFFT.h"
 #include "MantidCrystal/LoadIsawUB.h"

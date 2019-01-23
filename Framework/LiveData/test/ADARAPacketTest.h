@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_ADARAPACKETTEST_H_
 #define MANTID_LIVEDATA_ADARAPACKETTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidLiveData/ADARA/ADARAParser.h"
-#include <boost/shared_ptr.hpp>
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h> // for parsing the XML device descriptions
 #include <Poco/DOM/Document.h>
-#include <Poco/AutoPtr.h>
+#include <boost/shared_ptr.hpp>
 
 // All of the sample packets that we need to run the tests are defined in the
 // following

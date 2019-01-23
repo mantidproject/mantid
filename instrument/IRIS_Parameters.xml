@@ -81,12 +81,8 @@
 <parameter name="Workflow.NamingConvention" type="string">
     <value val="AnalyserReflection" />
 </parameter>
-<parameter name="Workflow.SE-log" type="string">
-    <value val="sample" />
-</parameter>
-<parameter name="Workflow.SE-log-value" type="string">
-    <value val="last_value" />
-</parameter>
+
+<!-- Beam dimensions -->
 <parameter name="Workflow.beam-width" type="string">
     <value val="2.1" />
 </parameter>
@@ -94,6 +90,27 @@
     <value val="3.2" />
 </parameter>
 
+<!-- Absorption corrections -->
+<parameter name="Workflow.absorption-wavelengths" type="string">
+    <value val="10" />
+</parameter>
+<parameter name="Workflow.absorption-events" type="string">
+    <value val="5000" />
+</parameter>
+<parameter name="Workflow.absorption-interpolation" type="string">
+    <value val="CSpline" />
+</parameter>
+<parameter name="Workflow.absorption-attempts" type="string">
+    <value val="5000" />
+</parameter>
+
+<!-- Sample environment -->
+<parameter name="Workflow.SE-log" type="string">
+    <value val="sample" />
+</parameter>
+<parameter name="Workflow.SE-log-value" type="string">
+    <value val="last_value" />
+</parameter>
 <parameter name="Workflow.TemperatureSensorNames" type="string">
     <value val="Bottom_can,Middle_can,Top_can" />
 </parameter>

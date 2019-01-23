@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
@@ -23,7 +29,7 @@ def get_run_dictionary(run_number_string, file_path):
 
 def is_run_range_key_unbounded(key):
     split_key = str(key).split('-')
-    return True if split_key[-1] == '' else False
+    return split_key[-1] == ''
 
 
 def open_yaml_file_as_dictionary(file_path):

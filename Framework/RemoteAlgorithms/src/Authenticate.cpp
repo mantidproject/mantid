@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/Authenticate.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/RemoteJobManager.h"
 
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace RemoteAlgorithms {

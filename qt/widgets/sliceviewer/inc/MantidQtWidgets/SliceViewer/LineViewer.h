@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LINEVIEWER_H
 #define LINEVIEWER_H
 
 #include "DllOption.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/VMD.h"
-#include "ui_LineViewer.h"
-#include <QWidget>
-#include <qwt_plot_curve.h>
-#include <qwt_plot.h>
-#include <qwt_painter.h>
-#include "MantidAPI/CoordTransform.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "ui_LineViewer.h"
+#include <QWidget>
+#include <qwt_painter.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -175,6 +181,6 @@ private:
   double m_binWidth;
 };
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif // LINEVIEWER_H

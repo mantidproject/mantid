@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_SIGNALRANGETEST_H_
 #define MANTIDQT_API_SIGNALRANGETEST_H_
 
@@ -12,7 +18,7 @@
 
 #include "MantidAPI/IMDIterator.h"
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class SignalRangeTest : public CxxTest::TestSuite {
 private:
@@ -86,7 +92,7 @@ private:
     MOCK_CONST_METHOD0(getLinearIndex, size_t());
     MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
   };
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   class NormalizableMockIterator : public MockMDIterator {
   public:
     Mantid::signal_t getNormalizedSignal() const override {

@@ -28,8 +28,8 @@
  ***************************************************************************/
 
 #include "ImageMarker.h"
-#include <QPainter>
 #include <QImageReader>
+#include <QPainter>
 
 ImageMarker::ImageMarker(const QString &fn)
     : d_pos(QPoint(0, 0)), d_x_right(0), d_y_bottom(0) {

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, invalid-name
 
 """
@@ -19,7 +25,7 @@ PyChop2.showGUI()
 
 from __future__ import (absolute_import, division, print_function)
 import warnings
-from .PyChop2 import PyChop2  # noqa: F401
+from .Instruments import Instrument as PyChop2  # noqa: F401
 # If the system doesn't have matplotlib, don't import the GUI.
 try:
     from .PyChopGui import show as showGUI

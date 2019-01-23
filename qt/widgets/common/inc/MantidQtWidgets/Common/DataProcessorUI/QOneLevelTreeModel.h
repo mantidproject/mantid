@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_
 
@@ -22,27 +28,6 @@ reduction. Each row in the table corresponds to an independent reduction. The
 second argument is a WhiteList containing the header of the model, i.e. the name
 of the columns that will be displayed in the tree. The table workspace must have
 the same number of columns as the number of items in the WhiteList.
-
-Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON QOneLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
@@ -60,7 +45,7 @@ public:
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
   // Get row metadata
-  RowData_sptr rowData(const QModelIndex &index) override;
+  RowData_sptr rowData(const QModelIndex &index) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
@@ -69,6 +54,10 @@ public:
   // Get the 'processed' status of a row
   bool isProcessed(int position,
                    const QModelIndex &parent = QModelIndex()) const override;
+  // Check wheter reduction failed for a row
+  bool
+  reductionFailed(int position,
+                  const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -86,9 +75,14 @@ public:
   // Remove rows from the model
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
+  // Remove all rows from the model
+  bool removeAll();
   // Set the 'processed' status of a row
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Set the error message for a row
+  bool setError(const std::string &error, int position,
+                const QModelIndex &parent = QModelIndex()) override;
   // Transfer rows into the table
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
 private slots:
@@ -111,6 +105,6 @@ using QOneLevelTreeModel_sptr = boost::shared_ptr<QOneLevelTreeModel>;
 
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_ */

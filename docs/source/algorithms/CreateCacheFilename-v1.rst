@@ -52,7 +52,7 @@ result will be ``<location>/<sha1>.nxs``.
   no globbing here.
 * ``Prefix``: prefix to the output hash name. when it is empty, just the hash.
   when it is not empty, it will be ``<prefix>_<sha1>``
-* ``CacheDir``: the directory in which the cach file will be created.
+* ``CacheDir``: the directory in which the cache file will be created.
   empty string means default as described above
 
 Usage

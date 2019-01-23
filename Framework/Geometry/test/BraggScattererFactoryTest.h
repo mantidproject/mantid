@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_BRAGGSCATTERERFACTORYTEST_H_
 #define MANTID_GEOMETRY_BRAGGSCATTERERFACTORYTEST_H_
 
@@ -56,10 +62,10 @@ private:
     ~MockScatterer() override {}
 
     std::string name() const override { return "MockScatterer"; }
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(clone, BraggScatterer_sptr());
     MOCK_CONST_METHOD1(calculateStructureFactor, StructureFactor(const V3D &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

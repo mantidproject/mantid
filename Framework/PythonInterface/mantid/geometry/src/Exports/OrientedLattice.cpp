@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
 #include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
 #include <boost/python/class.hpp>
@@ -12,7 +18,7 @@ using Mantid::Geometry::angDegrees;
 using namespace boost::python;
 
 namespace //<unnamed>
-    {
+{
 using namespace Mantid::PythonInterface;
 
 /// Set the U vector via a numpy array
@@ -41,7 +47,7 @@ Mantid::Kernel::V3D qFromHKL(OrientedLattice &self, const object &vec) {
 Mantid::Kernel::V3D hklFromQ(OrientedLattice &self, const object &vec) {
   return self.hklFromQ(Converters::PyObjectToV3D(vec)());
 }
-}
+} // namespace
 
 void export_OrientedLattice() {
   /// return_value_policy for read-only numpy array

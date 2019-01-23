@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVECANSAS1D2_H
 #define MANTID_DATAHANDLING_SAVECANSAS1D2_H
 
@@ -13,8 +19,8 @@ namespace XML {
 class Document;
 class Element;
 class Text;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -54,27 +60,6 @@ stylesheet
 
 @author Gesner Passos, Rutherford Appleton Laboratory
 @date 11/04/2013
-
-Copyright &copy; 2007-13 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveCanSAS1D2 : public SaveCanSAS1D {
 public:
@@ -104,7 +89,7 @@ protected:
   /// points to the workspace that will be written to file
   API::MatrixWorkspace_const_sptr m_trans_ws, m_transcan_ws;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif

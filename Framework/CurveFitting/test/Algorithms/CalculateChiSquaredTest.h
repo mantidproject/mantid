@@ -1,9 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_CALCULATECHISQUAREDTEST_H_
 #define MANTID_CURVEFITTING_CALCULATECHISQUAREDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -13,10 +18,11 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 #include "MantidKernel/EmptyValues.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 using Mantid::CurveFitting::Algorithms::CalculateChiSquared;

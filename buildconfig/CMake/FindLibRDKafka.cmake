@@ -37,7 +37,7 @@ macro(HEXCHAR2DEC VAR VAL)
     elseif(${VAL} MATCHES "[fF]")
         SET(${VAR} 15)
     else()
-        MESSAGE(FATAL_ERROR "Invalid format for hexidecimal character")
+        MESSAGE(FATAL_ERROR "Invalid format for hexadecimal character")
     endif()
 
 endmacro(HEXCHAR2DEC)

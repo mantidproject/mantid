@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "IndirectSimulation.h"
+#include "DensityOfStates.h"
+#include "IndirectMolDyn.h"
+#include "IndirectSassena.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "DensityOfStates.h"
-#include "IndirectSimulation.h"
-#include "IndirectMolDyn.h"
-#include "IndirectSassena.h"
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSimulation)
 }
-}
+} // namespace MantidQt
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -51,7 +57,6 @@ void IndirectSimulation::initLayout() {
 
   // Connect statements for the buttons shared between all tabs on the Indirect
   // Bayes interface
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
@@ -102,18 +107,6 @@ void IndirectSimulation::loadSettings() {
   }
 
   settings.endGroup();
-}
-
-/**
- * Slot to run the underlying algorithm code based on the currently selected
- * tab.
- *
- * This method checks the tabs validate method is passing before calling
- * the run method.
- */
-void IndirectSimulation::runClicked() {
-  int tabIndex = m_uiForm.IndirectSimulationTabs->currentIndex();
-  m_simulationTabs[tabIndex]->runTab();
 }
 
 /**

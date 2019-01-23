@@ -253,7 +253,7 @@ bool ImportOPJ::importTables(const OPJFile &opj) {
           case 1: // Scientific
             f = 2;
             break;
-          case 2: // Engeneering
+          case 2: // Engineering
           case 3: // Decimal 1,000
             f = 0;
             break;
@@ -460,7 +460,7 @@ bool ImportOPJ::importTables(const OPJFile &opj) {
     case 1: // Scientific
       format = 'e';
       break;
-    case 2: // Engeneering
+    case 2: // Engineering
     case 3: // Decimal 1,000
       format = 'g';
       break;
@@ -1073,7 +1073,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           case 1: // Scientific
             format = 2;
             break;
-          case 2: // Engeneering
+          case 2: // Engineering
           case 3: // Decimal 1,000
             format = 0;
             break;
@@ -1107,7 +1107,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           case 1: // Scientific
             format = 2;
             break;
-          case 2: // Engeneering
+          case 2: // Engineering
           case 3: // Decimal 1,000
             format = 0;
             break;
@@ -1125,8 +1125,9 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
             tickTypeMap[formats[i].majorTicksType],
             tickTypeMap[formats[i].minorTicksType], !(ticks[i].hidden),
             ColorBox::color(formats[i].color), format, prec, ticks[i].rotation,
-            0, "", (ticks[i].color == 0xF7 ? ColorBox::color(formats[i].color)
-                                           : ColorBox::color(ticks[i].color)));
+            0, "",
+            (ticks[i].color == 0xF7 ? ColorBox::color(formats[i].color)
+                                    : ColorBox::color(ticks[i].color)));
 
         QFont fnt = graph->axisTitleFont(i);
         int fontsize;
@@ -1401,8 +1402,8 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
                      R"(\\\s*\+\s*\()",    R"(\\\s*\-\s*\()",
                      R"(\\\s*f\:[^\(]*\()"};
   int postag[] = {0, 0, 0, 0, 0, 0, 0};
-  QString ltag[] = {"<b>", "<i>", "<u>", "<font face=Symbol>", "<sup>", "<sub>",
-                    "<font face=%1>"};
+  QString ltag[] = {"<b>",   "<i>",   "<u>",           "<font face=Symbol>",
+                    "<sup>", "<sub>", "<font face=%1>"};
   QString rtag[] = {"</b>",   "</i>",   "</u>",   "</font>",
                     "</sup>", "</sub>", "</font>"};
   QRegExp rxtags[7];
@@ -1460,4 +1461,4 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
 // TODO: bug in grid dialog
 //		scale/minor ticks checkbox
 //		histogram: autobin export
-//		if prec not setted - automac+4digits
+//		if prec not set - automac+4digits

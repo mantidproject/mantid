@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
 //----------------------------------
 #include "MantidQtWidgets/Common/GenericDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <QApplication>
 #include <QCheckBox>
@@ -27,10 +33,10 @@
 #include <QSignalMapper>
 #include <QVBoxLayout>
 
-#include <climits>
-#include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
+#include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
+#include <climits>
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -41,22 +47,22 @@ using namespace Mantid::API;
 // Public member functions
 //----------------------------------
 /**
-* Default Constructor
-*/
+ * Default Constructor
+ */
 GenericDialog::GenericDialog(QWidget *parent)
     : AlgorithmDialog(parent), m_algoPropertiesWidget(nullptr) {}
 
 /**
-* Destructor
-*/
+ * Destructor
+ */
 GenericDialog::~GenericDialog() {}
 
 //----------------------------------
 // Protected member functions
 //----------------------------------
 /**
-* Create the layout for this dialog.
-*/
+ * Create the layout for this dialog.
+ */
 void GenericDialog::initLayout() {
 
   // Add a layout for QDialog

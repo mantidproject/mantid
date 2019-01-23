@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODEL_H_
 #define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODEL_H_
 
@@ -31,13 +37,13 @@ public:
   void removeRun(const RunLabel &runLabel) override;
 
 private:
-  static constexpr size_t MAX_BANKS = 2;
+  static constexpr size_t MAX_BANKS = 3;
 
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedRunMap;
 };
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODEL_H_

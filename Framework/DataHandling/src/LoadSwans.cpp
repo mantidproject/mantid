@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSwans.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
@@ -5,11 +11,10 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 
-#include <map>
-#include <iostream>
-#include <fstream>
 #include <algorithm>
 #include <boost/tokenizer.hpp>
+#include <fstream>
+#include <map>
 
 namespace Mantid {
 namespace DataHandling {
@@ -82,7 +87,7 @@ void LoadSwans::init() {
 /** Execute the algorithm.
  */
 void LoadSwans::exec() {
-
+  m_ws = boost::make_shared<Mantid::DataObjects::EventWorkspace>();
   // Load instrument here to get the necessary Parameters from the XML file
   loadInstrument();
   m_detector_size = getDetectorSize();
@@ -202,8 +207,9 @@ std::vector<double> LoadSwans::loadMetaData() {
     if (!line.empty() && line[0] != '#') {
       g_log.debug() << "Metadata parsed line: " << line << '\n';
       auto tokenizer = Mantid::Kernel::StringTokenizer(
-          line, "\t ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                           Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+          line, "\t ",
+          Mantid::Kernel::StringTokenizer::TOK_TRIM |
+              Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       for (const auto &token : tokenizer) {
         metadata.push_back(boost::lexical_cast<double>(token));
       }

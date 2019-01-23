@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ProductFunction.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 
-using Mantid::API::ProductFunction;
 using Mantid::API::IFunction;
+using Mantid::API::ProductFunction;
 using namespace boost::python;
 
 namespace {
@@ -17,7 +23,7 @@ using setParameterType2 = void (ProductFunction::*)(const std::string &,
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
-}
+} // namespace
 
 void export_ProductFunction() {
 

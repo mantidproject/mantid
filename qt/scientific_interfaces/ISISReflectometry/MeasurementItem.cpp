@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MeasurementItem.h"
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -102,4 +108,4 @@ MeasurementItem &MeasurementItem::operator=(const MeasurementItem &other) {
 std::string MeasurementItem::whyUnuseable() const { return m_whyUnuseable; }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/DimensionSliceWidget.h"
-#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidKernel/UnitLabel.h"
-#include <iosfwd>
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include <QLayout>
+#include <iosfwd>
 
 namespace MantidQt {
 using API::toQStringInternal;
@@ -228,5 +234,5 @@ void DimensionSliceWidget::spinThicknessChanged() {
 void DimensionSliceWidget::spinBinsChanged() {
   emit changedNumBins(m_dimIndex, this->getNumBins());
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

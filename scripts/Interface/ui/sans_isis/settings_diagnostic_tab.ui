@@ -29,7 +29,7 @@
      <item>
       <widget class="QPushButton" name="select_row_push_button">
        <property name="text">
-        <string>Update row selection</string>
+        <string>Update </string>
        </property>
       </widget>
      </item>

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H
 
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <QObject>
 #include <QMenu>
+#include <QObject>
 #include <QToolBar>
 #include <memory>
 #include <vector>
@@ -21,35 +27,14 @@ using Command_uptr = std::unique_ptr<Command>;
 QtCommandAdapter is an adapter that allows Commands to
 be treated as
 QObjects for signals.
-
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON QtCommandAdapter : public QObject {
   Q_OBJECT
 public:
   /** Constructor: Adds actions to a menu
-  * @param menu :: The menu where the actions will be added
-  * @param adaptee :: The action to add
-  */
+   * @param menu :: The menu where the actions will be added
+   * @param adaptee :: The action to add
+   */
   QtCommandAdapter(QMenu *menu, Command_uptr adaptee)
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
@@ -62,9 +47,9 @@ public:
   };
 
   /** Constructor: Adds actions to a toolbar
-  * @param toolbar :: The toolbar where actions will be added
-  * @param adaptee :: The action to add
-  */
+   * @param toolbar :: The toolbar where actions will be added
+   * @param adaptee :: The action to add
+   */
   QtCommandAdapter(QToolBar *toolbar, Command_uptr adaptee)
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
@@ -156,7 +141,7 @@ private:
   // The child adaptors
   std::vector<std::unique_ptr<QtCommandAdapter>> m_childAdapters;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H*/

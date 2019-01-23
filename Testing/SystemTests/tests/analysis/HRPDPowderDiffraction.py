@@ -1,11 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 # Simply tests that our LoadRaw and LoadISISNexus algorithms produce the same workspace
 
 
-class HRPDPowderDiffraction(stresstesting.MantidStressTest):
+class HRPDPowderDiffraction(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         return ["HRP39191.RAW", "hrpd_new_072_01_corr.cal", "HRP39187.RAW", 'HRPDPowderDiffraction.nxs']

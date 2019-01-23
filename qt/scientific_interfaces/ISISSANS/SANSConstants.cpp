@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "SANSConstants.h"
 #include <limits>
 
@@ -102,5 +108,5 @@ int SANSConstants::getDecimals() { return 6; }
  * @returns the max integer value
  */
 int SANSConstants::getMaxIntValue() { return std::numeric_limits<int>::max(); }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

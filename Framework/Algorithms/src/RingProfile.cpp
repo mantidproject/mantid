@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RingProfile.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <cmath>
-#include <climits>
-#include <MantidAPI/IEventWorkspace.h>
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include <MantidAPI/IEventWorkspace.h>
+#include <climits>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -50,20 +56,20 @@ void RingProfile::init() {
       boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 3);
   std::vector<double> myInput(3, 0);
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      "Centre", myInput, twoOrThree),
+                      "Centre", std::move(myInput), std::move(twoOrThree)),
                   "Coordinate of the centre of the ring");
   auto nonNegative = boost::make_shared<Kernel::BoundedValidator<double>>();
   nonNegative->setLower(0);
 
-  declareProperty<double>("MinRadius", 0, nonNegative,
+  declareProperty<double>("MinRadius", 0, nonNegative->clone(),
                           "Radius of the inner ring(m)");
-  declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
-          "MaxRadius", std::numeric_limits<double>::max(), nonNegative),
-      "Radius of the outer ring(m)");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+                      "MaxRadius", std::numeric_limits<double>::max(),
+                      std::move(nonNegative)),
+                  "Radius of the outer ring(m)");
   auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   nonNegativeInt->setLower(1);
-  declareProperty<int>("NumBins", 100, nonNegativeInt,
+  declareProperty<int>("NumBins", 100, std::move(nonNegativeInt),
                        "Number of slice bins for the output");
   auto degreesLimits = boost::make_shared<Kernel::BoundedValidator<double>>();
   degreesLimits->setLower(-360);
@@ -207,7 +213,7 @@ void RingProfile::exec() {
  *  - The minimum ring is smaller than the limits of the image to allow
  *
  * @param inputWS: the input workspace
-*/
+ */
 void RingProfile::checkInputsForSpectraWorkspace(
     const API::MatrixWorkspace_sptr inputWS) {
   try {
@@ -292,7 +298,8 @@ void RingProfile::checkInputsForSpectraWorkspace(
     if (summed >= 2) {
       std::stringstream s;
       s << "The defined minRadius make the inner ring outside the limits of "
-           "the detectors inside this instrument: " << limits_s.str();
+           "the detectors inside this instrument: "
+        << limits_s.str();
       throw std::invalid_argument(s.str());
     }
 
@@ -316,7 +323,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
  *  - the centre of the ring is inside the image it self.
  *  - The minimum ring is smaller than the limits of the image to allow
  * @param inputWS: pointer to the input workspace
-*/
+ */
 void RingProfile::checkInputsForNumericWorkspace(
     const API::MatrixWorkspace_sptr inputWS) {
   g_log.notice() << "CheckingInputs For Numeric Workspace\n";

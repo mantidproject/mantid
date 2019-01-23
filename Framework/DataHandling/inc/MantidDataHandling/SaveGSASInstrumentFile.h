@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILE_H_
 #define MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -14,27 +20,6 @@ class ChopperConfiguration;
 /** SaveGSASInstrumentFile :  Convert Fullprof"s instrument resolution file
    (.irf) to  GSAS"s instrument
     file (.iparm/.prm).
-
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 class DLLExport SaveGSASInstrumentFile : public API::Algorithm {
 public:
@@ -86,16 +71,15 @@ private:
       std::map<unsigned int, std::map<std::string, double>> &profilemap);
 
   /// Convert to GSAS instrument file
-  void
-  convertToGSAS(const std::vector<unsigned int> &outputbankids,
-                const std::string &gsasinstrfilename,
-                const std::map<unsigned int, std::map<std::string, double>> &
-                    bankprofilemap);
+  void convertToGSAS(const std::vector<unsigned int> &outputbankids,
+                     const std::string &gsasinstrfilename,
+                     const std::map<unsigned int, std::map<std::string, double>>
+                         &bankprofilemap);
 
   /// Build a data structure for GSAS's tabulated peak profile
   void buildGSASTabulatedProfile(
-      const std::map<unsigned int, std::map<std::string, double>> &
-          bankprofilemap,
+      const std::map<unsigned int, std::map<std::string, double>>
+          &bankprofilemap,
       unsigned int bankid);
 
   /// Write the header of the file
@@ -103,10 +87,10 @@ private:
                       const std::string &prmfilename);
 
   /// Write out .prm/.iparm file
-  void writePRMSingleBank(
-      const std::map<unsigned int, std::map<std::string, double>> &
-          bankprofilemap,
-      unsigned int bankid, const std::string &prmfilename);
+  void
+  writePRMSingleBank(const std::map<unsigned int, std::map<std::string, double>>
+                         &bankprofilemap,
+                     unsigned int bankid, const std::string &prmfilename);
 
   /// Caclualte L2 from DIFFC and L1
   double calL2FromDtt1(double difc, double L1, double twotheta);

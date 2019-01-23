@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MAGFORMFACTORCORRECTION_H_
 #define MAGFORMFACTORCORRECTION_H_
 
-#include <cmath>
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/MagFormFactorCorrection.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/MagFormFactorCorrection.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

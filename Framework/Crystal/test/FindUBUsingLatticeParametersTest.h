@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_TEST_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_TEST_H_
 
@@ -9,10 +15,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
+#include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidCrystal/LoadIsawUB.h"
 
 using namespace Mantid::Crystal;
 using Mantid::Geometry::OrientedLattice;

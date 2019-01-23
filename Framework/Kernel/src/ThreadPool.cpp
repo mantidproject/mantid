@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,8 +18,8 @@
 #include <Poco/Thread.h>
 
 #include <algorithm>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 // needed on windows and any place missing openmp
 #if defined(_WIN32) || !defined(_OPENMP)
 #include <Poco/Environment.h>
@@ -37,7 +43,8 @@ namespace Kernel {
  */
 ThreadPool::ThreadPool(ThreadScheduler *scheduler, size_t numThreads,
                        ProgressBase *prog)
-    : m_scheduler(scheduler), m_started(false), m_prog(prog) {
+    : m_scheduler(std::unique_ptr<ThreadScheduler>(scheduler)),
+      m_started(false), m_prog(std::unique_ptr<ProgressBase>(prog)) {
   if (!m_scheduler)
     throw std::invalid_argument(
         "NULL ThreadScheduler passed to ThreadPool constructor.");
@@ -53,12 +60,7 @@ ThreadPool::ThreadPool(ThreadScheduler *scheduler, size_t numThreads,
 //--------------------------------------------------------------------------------
 /** Destructor. Deletes the ThreadScheduler.
  */
-ThreadPool::~ThreadPool() {
-  if (m_scheduler)
-    delete m_scheduler;
-  if (m_prog)
-    delete m_prog;
-}
+ThreadPool::~ThreadPool() = default;
 
 //--------------------------------------------------------------------------------
 /** Return the number of physical cores available on the system.
@@ -73,11 +75,11 @@ size_t ThreadPool::getNumPhysicalCores() {
   int physicalCores = PARALLEL_GET_MAX_THREADS;
 #endif
 
-  int maxCores(0);
-  int retVal = Kernel::ConfigService::Instance().getValue(
-      "MultiThreaded.MaxCores", maxCores);
-  if (retVal > 0 && maxCores > 0)
-    return std::min(maxCores, physicalCores);
+  auto maxCores =
+      Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
+
+  if (!maxCores.is_initialized())
+    return std::min(maxCores.get_value_or(0), physicalCores);
   else
     return physicalCores;
 }
@@ -96,13 +98,6 @@ size_t ThreadPool::getNumPhysicalCores() {
 void ThreadPool::start(double waitSec) {
   if (m_started)
     throw std::runtime_error("Threads have already started.");
-
-  // Delete any old threads (they should NOT be running!)
-  for (auto &thread : m_threads)
-    delete thread;
-  for (auto &runnable : m_runnables)
-    delete runnable;
-
   // Now, launch that many threads and let them wait for new tasks.
   m_threads.clear();
   m_runnables.clear();
@@ -111,14 +106,13 @@ void ThreadPool::start(double waitSec) {
     std::ostringstream name;
     name << "Thread" << i;
     // Create the thread
-    Poco::Thread *thread = new Poco::Thread(name.str());
-    m_threads.push_back(thread);
-
+    auto thread = std::make_unique<Poco::Thread>(name.str());
     // Make the runnable object and run it
-    auto runnable = new ThreadPoolRunnable(i, m_scheduler, m_prog, waitSec);
-    m_runnables.push_back(runnable);
-
+    auto runnable = std::make_unique<ThreadPoolRunnable>(i, m_scheduler.get(),
+                                                         m_prog.get(), waitSec);
     thread->start(*runnable);
+    m_threads.push_back(std::move(thread));
+    m_runnables.push_back(std::move(runnable));
   }
   // Yep, all the threads are running.
   m_started = true;
@@ -178,15 +172,12 @@ void ThreadPool::joinAll() {
   // Sequentially join all the threads.
   for (auto &thread : m_threads) {
     thread->join();
-    delete thread;
   }
 
   // Clear the vectors (the threads are deleted now).
   m_threads.clear();
 
   // Get rid of the runnables too
-  for (auto &runnable : m_runnables)
-    delete runnable;
   m_runnables.clear();
 
   // This will make threads restart

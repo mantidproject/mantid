@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
-#include <QMimeData>
 #include <QFileInfo>
+#include <QMimeData>
 #include <QStringList>
 #include <QUrl>
 
@@ -33,8 +39,8 @@ QUrl fixupURL(const QUrl &url) {
     CFURLRef relCFURL = CFURLCreateWithFileSystemPath(
         kCFAllocatorDefault, relCFStringRef, kCFURLPOSIXPathStyle,
         false // isDirectory
-        );
-    CFErrorRef error = 0;
+    );
+    CFErrorRef error = nullptr;
     CFURLRef absCFURL =
         CFURLCreateFilePathURL(kCFAllocatorDefault, relCFURL, &error);
     if (!error) {

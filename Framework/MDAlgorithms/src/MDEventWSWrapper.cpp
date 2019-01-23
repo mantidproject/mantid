@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
@@ -94,8 +100,8 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
           *(detId + i), (Coord + i * nd)));
     }
   } else {
-    DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *const
-        pLWs = dynamic_cast<
+    DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd>
+        *const pLWs = dynamic_cast<
             DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *>(
             m_Workspace.get());
 
@@ -164,14 +170,14 @@ size_t MDEventWSWrapper::nDimensions() const {
 }
 
 /** function creates empty MD event workspace with given parameters (workspace
-*factory) and stores internal pointer to this workspace for further usage.
-*  IT ASLO SETS UP W-TRANSFORMATON. TODO: reconcile w-transformation with MD
-*geometry.
-*
-*@param WSD the class which describes an MD workspace
-*
-*@returns shared pointer to the created workspace
-*/
+ *factory) and stores internal pointer to this workspace for further usage.
+ *  IT ASLO SETS UP W-TRANSFORMATON. TODO: reconcile w-transformation with MD
+ *geometry.
+ *
+ *@param WSD the class which describes an MD workspace
+ *
+ *@returns shared pointer to the created workspace
+ */
 API::IMDEventWorkspace_sptr
 MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD) {
 
@@ -203,16 +209,16 @@ void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS) {
 }
 
 /** method adds the data to the workspace which was initiated before;
-*@param sigErr   -- pointer to the beginning of 2*data_size array containing
-*signal and squared error
-*@param runIndex -- pointer to the beginnign of data_size  containing run index
-*@param detId    -- pointer to the beginning of dataSize array containing
-*detector id-s
-*@param Coord    -- pointer to the beginning of dataSize*nd array containig the
-*coordinates od nd-dimensional events
-*
-*@param dataSize -- the length of the vector of MD events
-*/
+ *@param sigErr   -- pointer to the beginning of 2*data_size array containing
+ *signal and squared error
+ *@param runIndex -- pointer to the beginnign of data_size  containing run index
+ *@param detId    -- pointer to the beginning of dataSize array containing
+ *detector id-s
+ *@param Coord    -- pointer to the beginning of dataSize*nd array containig the
+ *coordinates od nd-dimensional events
+ *
+ *@param dataSize -- the length of the vector of MD events
+ */
 void MDEventWSWrapper::addMDData(std::vector<float> &sigErr,
                                  std::vector<uint16_t> &runIndex,
                                  std::vector<uint32_t> &detId,
@@ -273,5 +279,5 @@ MDEventWSWrapper::MDEventWSWrapper()
   LOOP<MAX_N_DIM>::EXEC(this);
 }
 
-} // endnamespace MDAlgorithms
-} // endnamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid

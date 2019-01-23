@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VTKPEAKMARKERFACTORY_TEST_H_
 #define VTKPEAKMARKERFACTORY_TEST_H_
 
@@ -25,7 +31,7 @@ using namespace ::testing;
 using namespace Mantid::VATES;
 using Mantid::VATES::vtkPeakMarkerFactory;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockPeakShape : public Peak {
 public:
@@ -55,7 +61,7 @@ public:
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak &(int peakNum));
   MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak &(int peakNum));
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 //=====================================================================================
 // Functional Tests

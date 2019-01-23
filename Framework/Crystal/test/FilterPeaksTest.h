@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_FILTERPEAKSTEST_H_
 #define MANTID_CRYSTAL_FILTERPEAKSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Crystal::FilterPeaks;
 using namespace Mantid::API;

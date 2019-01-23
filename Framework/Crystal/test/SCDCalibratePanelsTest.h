@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * SCDCalibratePanelsTest.h
  *
@@ -8,9 +14,9 @@
 #ifndef SCDCALIBRATEPANELSTEST_H_
 #define SCDCALIBRATEPANELSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -58,7 +64,7 @@ public:
     TS_ASSERT_DELTA(0.0, results->cell<double>(3, 1), 1.2);
     TS_ASSERT_DELTA(0.0, results->cell<double>(4, 1), 1.1);
     TS_ASSERT_DELTA(0.1133, results->cell<double>(5, 1), 0.36);
-    TS_ASSERT_DELTA(1.0024, results->cell<double>(6, 1), 5e-3);
+    TS_ASSERT_DELTA(0.9953, results->cell<double>(6, 1), 1e-2);
     TS_ASSERT_DELTA(0.9986, results->cell<double>(7, 1), 1e-2);
     TS_ASSERT_DELTA(0.2710, results->cell<double>(9, 1), 0.2);
     ITableWorkspace_sptr resultsL1 =

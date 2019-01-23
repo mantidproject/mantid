@@ -1,19 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_
 #define MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/System.h"
+
+#include <Poco/DOM/Document.h>
 
 #include <fstream>
 
 namespace Poco {
 namespace XML {
-class Document;
 class Element;
 class Node;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,27 +33,6 @@ namespace DataHandling {
   detectors' grouping information.
 
   @date 2011-11-17
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadDetectorsGroupingFile : public API::Algorithm {
 public:
@@ -166,9 +152,7 @@ private:
   bool m_userGiveDescription;
 
   /// XML document loaded
-  Poco::XML::Document *m_pDoc;
-  /// Root element of the parsed XML
-  Poco::XML::Element *m_pRootElem;
+  Poco::AutoPtr<Poco::XML::Document> m_pDoc;
   /// Data structures to store XML to Group/Detector conversion map
   std::map<int, std::vector<std::string>> m_groupComponentsMap;
   std::map<int, std::vector<detid_t>> m_groupDetectorsMap;

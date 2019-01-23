@@ -40,4 +40,4 @@ include_directories(inc)
 
 target_link_libraries(ScriptRepository LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${LIBS} ${JSONCPP_LIBRARIES})
 
-install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS ScriptRepository INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

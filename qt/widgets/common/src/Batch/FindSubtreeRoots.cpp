@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 namespace MantidQt {
@@ -25,8 +31,9 @@ void FindSubtreeRoots::removeIfDepthNotEqualTo(std::vector<RowLocation> &region,
                                                int expectedDepth) const {
   region.erase(
       std::remove_if(region.begin(), region.end(),
-                     [expectedDepth](RowLocation const &location)
-                         -> bool { return location.depth() != expectedDepth; }),
+                     [expectedDepth](RowLocation const &location) -> bool {
+                       return location.depth() != expectedDepth;
+                     }),
       region.end());
 }
 

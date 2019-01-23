@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 
 #include "MantidAPI/Axis.h"
@@ -7,9 +13,9 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -317,11 +323,9 @@ PawleyFunction::PawleyFunction()
     : IPawleyFunction(), m_compositeFunction(), m_pawleyParameterFunction(),
       m_peakProfileComposite(), m_hkls(), m_dUnit(), m_wsUnit(),
       m_peakRadius(5) {
-  int peakRadius;
-  if (Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",
-                                                 peakRadius)) {
-    m_peakRadius = peakRadius;
-  }
+  auto peakRadius = Kernel::ConfigService::Instance().getValue<int>(
+      "curvefitting.peakRadius");
+  m_peakRadius = peakRadius.get_value_or(5);
 }
 
 void PawleyFunction::setMatrixWorkspace(
@@ -407,8 +411,8 @@ void PawleyFunction::setPeakPositions(std::string centreName, double zeroShift,
   for (size_t i = 0; i < m_hkls.size(); ++i) {
     double centre = getTransformedCenter(cell.d(m_hkls[i]));
 
-    m_peakProfileComposite->getFunction(i)
-        ->setParameter(centreName, centre + zeroShift);
+    m_peakProfileComposite->getFunction(i)->setParameter(centreName,
+                                                         centre + zeroShift);
   }
 }
 

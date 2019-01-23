@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MUTEXTEST_H
 #define MUTEXTEST_H
 
-#include <cxxtest/TestSuite.h>
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/FunctionTask.h"
-#include "MantidKernel/CPUTimer.h"
 #include <Poco/RWLock.h>
+#include <cxxtest/TestSuite.h>
 using namespace Mantid::Kernel;
 
 #define DATA_SIZE 10000000

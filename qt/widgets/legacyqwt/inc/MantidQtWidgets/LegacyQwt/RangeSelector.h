@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_MANTIDWIDGET_POSHPLOTTING_H
 #define MANTIDQT_MANTIDWIDGET_POSHPLOTTING_H
 
 #include "DllOption.h"
 
-#include <qwt_plot_picker.h>
 #include <qwt_plot.h>
 #include <qwt_plot_marker.h>
+#include <qwt_plot_picker.h>
 
 #include <QPen>
 
@@ -14,10 +20,10 @@ namespace MantidWidgets {
 class PreviewPlot;
 
 /**
-* Allows for simpler (in a way) selection of a range on a QwtPlot in MantidQt.
-* @author Michael Whitty, RAL ISIS
-* @date 11/10/2010
-*/
+ * Allows for simpler (in a way) selection of a range on a QwtPlot in MantidQt.
+ * @author Michael Whitty, RAL ISIS
+ * @date 11/10/2010
+ */
 class EXPORT_OPT_MANTIDQT_LEGACYQWT RangeSelector : public QwtPlotPicker {
   Q_OBJECT
 public:
@@ -106,7 +112,7 @@ private:
       m_movCursor; ///< the cursor object to display when an item is being moved
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif

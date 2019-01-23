@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
-#include "MantidVatesAPI/ProgressAction.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/V3D.h"
+#include "MantidVatesAPI/ProgressAction.h"
 
 #include <vtkAppendPolyData.h>
 #include <vtkAxes.h>
@@ -159,7 +165,7 @@ void setNormal(vtkRegularPolygonSource *source, unsigned direction) {
     break;
   }
 }
-}
+} // namespace
 
 /**
 Create the vtkStructuredGrid from the provided workspace
@@ -273,5 +279,5 @@ vtkPeakMarkerFactory::create(ProgressAction &progressUpdating) const {
 
   return vtkSmartPointer<vtkPolyData>::Take(appendFilter->GetOutput());
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -11,8 +17,8 @@
 #include "MantidKernel/Logger.h"
 
 #include <boost/lexical_cast.hpp>
-#include <gsl/gsl_blas.h>
 #include <cmath>
+#include <gsl/gsl_blas.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -20,7 +26,7 @@ namespace FuncMinimisers {
 namespace {
 /// static logger object
 Kernel::Logger g_log("LevenbergMarquardMD");
-}
+} // namespace
 
 // clang-format off
 DECLARE_FUNCMINIMIZER(LevenbergMarquardtMDMinimizer, Levenberg-MarquardtMD)
@@ -32,8 +38,9 @@ LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer()
       m_F(0.0) {
   declareProperty("MuMax", 1e6,
                   "Maximum value of mu - a stopping parameter in failure.");
-  declareProperty("AbsError", 0.0001, "Absolute error allowed for parameters - "
-                                      "a stopping parameter in success.");
+  declareProperty("AbsError", 0.0001,
+                  "Absolute error allowed for parameters - "
+                  "a stopping parameter in success.");
   declareProperty("Verbose", false, "Make output more verbose.");
 }
 

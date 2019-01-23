@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDEVENT_H_
 #define MDEVENT_H_
 
+#include "MantidAPI/BoxController.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/BoxController.h"
-#include "MantidDataObjects/MDLeanEvent.h"
 #include <cmath>
 #include <numeric>
 

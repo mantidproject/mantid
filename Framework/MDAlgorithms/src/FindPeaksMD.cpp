@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -494,13 +500,14 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (nexp > 1) {
         MDBox<MDE, nd> *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
         typename std::vector<MDE> &events = mdbox->getEvents();
-        if (std::none_of(events.cbegin(), events.cend(), [&iexp, &nexp](
-                                                             MDE event) {
-              return event.getRunIndex() == iexp || event.getRunIndex() >= nexp;
-            }))
+        if (std::none_of(events.cbegin(), events.cend(),
+                         [&iexp, &nexp](MDE event) {
+                           return event.getRunIndex() == iexp ||
+                                  event.getRunIndex() >= nexp;
+                         }))
           continue;
       }
-// The center of the box = Q in the lab frame
+        // The center of the box = Q in the lab frame
 
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];

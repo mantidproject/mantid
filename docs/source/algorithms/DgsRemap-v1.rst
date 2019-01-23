@@ -23,7 +23,7 @@ Usage
 
 .. warning::
 
-    This algorithm is not really intented for use at the command line, but is used
+    This algorithm is not really intended for use at the command line, but is used
     within :ref:`DgsReduction <algm-DgsReduction>`.
 
 .. categories::

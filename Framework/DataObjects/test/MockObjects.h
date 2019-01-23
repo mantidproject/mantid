@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MOCKOBJECTS_H_
 #define MOCKOBJECTS_H_
 
@@ -10,7 +16,7 @@
 namespace Mantid {
 namespace DataObjects {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockPeakShapeFactory : public PeakShapeFactory {
 public:
@@ -34,9 +40,9 @@ public:
       radius, boost::optional<double>(Mantid::Geometry::PeakShape::RadiusType));
   ~MockPeakShape() override {}
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MOCKOBJECTS_H_ */

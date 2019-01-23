@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
 #include "DPDFInputDataControl.h"
 // Mantid Headers from the same project
 // Mantid headers from other projects
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 // 3rd party library headers
 // System #includes
 
@@ -201,6 +207,6 @@ void InputDataControl::updateDomain() {
   int second = static_cast<int>(std::distance(y.begin(), it));
   m_domain.at(m_selectedWorkspaceIndex) = std::pair<int, int>(first, second);
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

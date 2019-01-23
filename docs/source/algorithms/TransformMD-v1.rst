@@ -14,7 +14,7 @@ This algorithm applies a simple linear transformation to a
 :ref:`MDHistoWorkspace <MDHistoWorkspace>`. This could be used, for
 example, to scale the Energy dimension to different units.
 
-Each coordinate is tranformed so that :math:`x'_d = (x_d * s_d) + o_d`
+Each coordinate is transformed so that :math:`x'_d = (x_d * s_d) + o_d`
 where:
 
 -  d : index of the dimension, from 0 to the number of dimensions

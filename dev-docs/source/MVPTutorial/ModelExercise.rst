@@ -15,4 +15,4 @@ input values
 3. In the initialisation of the Presenter get the allowed colours from
 the Model and pass them to the View
 
-See `here <ModelExerciseSolution.html>`_ for the solution. 
+See :ref:`here <ModelExerciseSolution>` for the solution. 

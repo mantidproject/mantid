@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
-from isis_powder.routines.run_details import create_run_details_object, CustomFuncForRunDetails
+from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 
 
 def attenuate_workspace(attenuation_file_path, ws_to_correct):
@@ -30,7 +36,7 @@ def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
     if van_original_units != absorb_units:
         van_ws = mantid.ConvertUnits(InputWorkspace=van_ws, Target=absorb_units, OutputWorkspace=van_ws)
 
-    van_ws = mantid.RebinToWorkspace(WorkspaceToRebin=van_ws, WorkspaceToMatch=absorb_ws, OutputWorkspace=van_ws)
+    absorb_ws = mantid.RebinToWorkspace(WorkspaceToRebin=absorb_ws, WorkspaceToMatch=van_ws, OutputWorkspace=absorb_ws)
     van_ws = mantid.Divide(LHSWorkspace=van_ws, RHSWorkspace=absorb_ws, OutputWorkspace=van_ws)
 
     if van_original_units != absorb_units:
@@ -64,21 +70,6 @@ def generate_vanadium_absorb_corrections(van_ws, output_filename):
     return absorb_ws
 
 
-def get_run_details(run_number_string, inst_settings, is_vanadium_run):
-    spline_identifier = [inst_settings.tt_mode]
-    if inst_settings.long_mode:
-        spline_identifier.append("_long")
-
-    grouping_file_name_callable = CustomFuncForRunDetails().add_to_func_chain(
-        user_function=_pearl_get_tt_grouping_file_name,
-        inst_settings=inst_settings)
-
-    return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
-                                     grouping_file_name_call=grouping_file_name_callable,
-                                     van_abs_file_name=inst_settings.van_absorb_file)
-
-
 def _pearl_get_tt_grouping_file_name(inst_settings):
     tt_grouping_key = str(inst_settings.tt_mode).lower() + '_grouping'
     try:
@@ -86,6 +77,29 @@ def _pearl_get_tt_grouping_file_name(inst_settings):
     except AttributeError:
         raise ValueError("The tt_mode: " + str(inst_settings.tt_mode).lower() + " is unknown")
     return grouping_file_name
+
+
+def _get_run_numbers_for_key(current_mode_run_numbers, key):
+    err_message = "this must be under the relevant Rietveld or PDF mode."
+    return common.cal_map_dictionary_key_helper(current_mode_run_numbers, key=key,
+                                                append_to_error_message=err_message)
+
+
+def get_run_details(run_number_string, inst_settings, is_vanadium_run):
+    all_run_numbers = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
+    empty_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_run_numbers")
+    vanadium_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_run_numbers")
+
+    grouping_file_name = _pearl_get_tt_grouping_file_name(inst_settings)
+
+    spline_identifier = [inst_settings.tt_mode]
+    if inst_settings.long_mode:
+        spline_identifier.append("_long")
+
+    return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
+                                     is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
+                                     grouping_file_name=grouping_file_name, empty_run_number=empty_runs,
+                                     vanadium_string=vanadium_runs, van_abs_file_name=inst_settings.van_absorb_file)
 
 
 def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range, ex_regions):

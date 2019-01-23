@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef REF_IV_CONNECTIONS_H
 #define REF_IV_CONNECTIONS_H
 
-#include <QWidget>
 #include <QActionGroup>
+#include <QWidget>
 
-#include "ui_RefImageView.h"
-#include "MantidQtWidgets/RefDetectorView/RefImageView.h"
-#include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
-#include "MantidQtWidgets/RefDetectorView/RefImageDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 #include "DllOption.h"
+#include "MantidQtWidgets/RefDetectorView/RefImageDisplay.h"
+#include "MantidQtWidgets/RefDetectorView/RefImageView.h"
+#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
+#include "ui_RefImageView.h"
 
 /**
     @class RefIVConnections
@@ -23,26 +29,6 @@
 
     @author Dennis Mikkelson
     @date   2012-04-03
-
-    Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    Code Documentation is available at
-                 <http://doxygen.mantidproject.org>
  */
 
 namespace MantidQt {

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_FUNCTIONDOMAIN1DSPECTRUMCREATORTEST_H_
 #define MANTID_CURVEFITTING_FUNCTIONDOMAIN1DSPECTRUMCREATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

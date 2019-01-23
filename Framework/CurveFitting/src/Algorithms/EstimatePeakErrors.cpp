@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/EstimatePeakErrors.h"
-#include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/Functions/PeakParameterFunction.h"
+#include "MantidCurveFitting/GSLMatrix.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -105,7 +111,7 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
   row = results.appendRow();
   row << prefix + "Intensity" << intensity << sqrt(JCJ.get(3, 3));
 }
-}
+} // namespace
 
 /// Initialize
 void EstimatePeakErrors::init() {

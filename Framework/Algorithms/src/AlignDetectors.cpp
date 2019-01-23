@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -7,7 +13,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -106,12 +111,7 @@ const std::string AlignDetectors::summary() const {
 }
 
 /// (Empty) Constructor
-AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
-  this->tofToDmap = nullptr;
-}
-
-/// Destructor
-AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
 
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -311,8 +311,8 @@ void AlignDetectors::align(const ConversionFactors &converter,
   if (outputWS.getTofMin() < 0.) {
     std::stringstream msg;
     msg << "Something wrong with the calibration. Negative minimum d-spacing "
-           "created. d_min = " << outputWS.getTofMin() << " d_max "
-        << outputWS.getTofMax();
+           "created. d_min = "
+        << outputWS.getTofMin() << " d_max " << outputWS.getTofMax();
     g_log.warning(msg.str());
   }
   outputWS.clearMRU();

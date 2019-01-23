@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>661</width>
-    <height>575</height>
+    <height>662</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,12 +16,6 @@
   <layout class="QVBoxLayout" name="layoutAbsF2P">
    <item>
     <widget class="QGroupBox" name="gbInput">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="title">
       <string>Input</string>
      </property>
@@ -110,11 +104,11 @@
    </item>
    <item>
     <widget class="QGroupBox" name="corrDetails">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>93</height>
+      </size>
      </property>
      <property name="toolTip">
       <string>Correction computation details. By default will be set automatically from the instrument parameters of the input workspace. Modify to override.</string>
@@ -235,12 +229,6 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbShapeDetails">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="title">
       <string>Shape Details</string>
      </property>
@@ -282,23 +270,31 @@
         </property>
         <widget class="QWidget" name="pgFlatPlate">
          <layout class="QGridLayout" name="gridLayout_2">
-          <property name="margin">
+          <property name="leftMargin">
            <number>0</number>
           </property>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lbFlatSampleAngle">
-            <property name="text">
-             <string>Sample Angle:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="lbFlatCanFrontThickness">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
             <property name="enabled">
              <bool>false</bool>
             </property>
-            <property name="text">
-             <string>Container Front Thickness:</string>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -309,6 +305,23 @@
             </property>
             <property name="text">
              <string>Container Back Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbFlatSampleThickness">
+            <property name="text">
+             <string>Sample Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lbFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Container Front Thickness:</string>
             </property>
            </widget>
           </item>
@@ -328,18 +341,8 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbFlatSampleThickness">
-            <property name="text">
-             <string>Sample Thickness:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatSampleThickness">
             <property name="suffix">
              <string> cm</string>
             </property>
@@ -358,16 +361,10 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatSampleThickness">
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbFlatSampleAngle">
+            <property name="text">
+             <string>Sample Angle:</string>
             </property>
            </widget>
           </item>
@@ -375,7 +372,16 @@
         </widget>
         <widget class="QWidget" name="pgCylinder">
          <layout class="QGridLayout" name="gridLayout_4">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="5" column="3">
@@ -494,7 +500,16 @@
         </widget>
         <widget class="QWidget" name="pgAnnulus">
          <layout class="QGridLayout" name="gridLayout_5">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="5" column="3">
@@ -641,11 +656,11 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbSampleDetails">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>93</height>
+      </size>
      </property>
      <property name="title">
       <string>Sample Details</string>
@@ -719,11 +734,11 @@
      <property name="enabled">
       <bool>false</bool>
      </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>93</height>
+      </size>
      </property>
      <property name="title">
       <string>Can Details</string>
@@ -790,13 +805,67 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gbOutput">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QGroupBox" name="gbRun">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>45</height>
+      </size>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>45</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Run</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>7</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>265</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbRun">
+        <property name="text">
+         <string>Run</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>265</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbOutput">
      <property name="title">
       <string>Output Options</string>
      </property>

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------
 // Includes
 //-----------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 
-#include <QtOpenGL>
 #include <QMessageBox>
+#include <QtOpenGL>
 
 #include <cfloat>
 
@@ -68,7 +74,7 @@ void MantidGLWidget::setDisplayObject(
       m_bb_centres[i] *= -1.0;
   }
 
-  GLdouble aspect_ratio((GLdouble) this->width() / (GLdouble) this->height());
+  GLdouble aspect_ratio((GLdouble)this->width() / (GLdouble)this->height());
   setOrthoProjectionMatrix(aspect_ratio);
 
   updateGL();
@@ -261,10 +267,10 @@ void MantidGLWidget::setOrthoProjectionMatrix(GLdouble aspect_ratio) {
 }
 
 /**
-*Adjust the angle given so that it is within the range 0 < x < (360 * 16)
-*(Note: The factor of 16 is due to Qt using angles in 1/16th of a degree)
-*@param angle :: The angle of rotation
-*/
+ *Adjust the angle given so that it is within the range 0 < x < (360 * 16)
+ *(Note: The factor of 16 is due to Qt using angles in 1/16th of a degree)
+ *@param angle :: The angle of rotation
+ */
 void MantidGLWidget::normalizeAngle(int *angle) {
   while (*angle < 0)
     *angle += 360 * 16;

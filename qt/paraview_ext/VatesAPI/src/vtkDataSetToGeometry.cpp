@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "vtkDataSet.h"
 
 #include <algorithm>
@@ -54,5 +60,5 @@ operator=(const vtkDataSetToGeometry &other) {
   }
   return *this;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

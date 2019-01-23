@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDMATRIXFUNCTION_H
 #define MANTIDMATRIXFUNCTION_H
 
 #include "../UserFunction.h"
 #include "MantidMatrix.h"
 
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/HistogramX.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <QPointer>
 #include <vector>

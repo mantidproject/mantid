@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ChangeLogTime.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <sstream>
 
@@ -93,5 +99,5 @@ void ChangeLogTime::exec() {
   outputWS->mutableRun().addProperty(newlog, true);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

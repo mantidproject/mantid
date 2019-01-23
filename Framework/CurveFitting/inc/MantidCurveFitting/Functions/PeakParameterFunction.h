@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_PEAKPARAMETERFUNCTION_H_
 #define MANTID_CURVEFITTING_PEAKPARAMETERFUNCTION_H_
 
-#include "MantidCurveFitting/DllConfig.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -22,26 +28,6 @@ namespace Functions {
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 24/02/2015
-
-    Copyright ©2015 PSI-NXMM
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_CURVEFITTING_DLL PeakParameterFunction
     : virtual public API::IFunction1D,

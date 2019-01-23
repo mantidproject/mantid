@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SMOOTHNEIGHBOURSTEST_H_
 #define SMOOTHNEIGHBOURSTEST_H_
 
-#include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -236,8 +242,8 @@ public:
   }
 
   /*
-  * Start test Radius Filter.
-  */
+   * Start test Radius Filter.
+   */
   void testRadiusThrowsIfNegativeCutoff() {
     TS_ASSERT_THROWS(RadiusFilter(-1), std::invalid_argument);
   }
@@ -258,8 +264,8 @@ public:
   }
 
   /*
-  * End test radius filter
-  */
+   * End test radius filter
+   */
 
   void testWithUnsignedNumberOfNeighbours() {
     SmoothNeighbours alg;

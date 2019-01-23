@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
@@ -175,8 +181,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         """
         instr, run_number = self._get_InstrRun(ws_name)
 
-        facility = config.getFacility()
-        pad_num = facility.instrument(instr).zeroPadding(int(run_number))
+        pad_num = config.getInstrument(instr).zeroPadding(int(run_number))
         zero_padding = '0' * (pad_num - len(run_number))
 
         run_name = instr + zero_padding + run_number

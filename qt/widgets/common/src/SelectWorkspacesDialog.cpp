@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------
 // Includes
 //---------------------------------------
 
 #include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
-#include <QListWidget>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QDialogButtonBox>
-#include <set>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include <QDialogButtonBox>
+#include <QListWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <set>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -113,5 +119,5 @@ void SelectWorkspacesDialog::selectionChanged() {
 
 /// slot to handle the custom button press
 void SelectWorkspacesDialog::customButtonPress() { this->done(CustomButton); }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -109,7 +109,7 @@ Powder Diffraction
 
 - :ref:`CalibrateRectangularDetectors
   <algm-CalibrateRectangularDetectors>` has been modified to output
-  ``.h5`` formated calibration files as well as the other versions it
+  ``.h5`` formatted calibration files as well as the other versions it
   already supported.
 
 - New algorithm :ref:`PDCalibration <algm-PDCalibration>` for

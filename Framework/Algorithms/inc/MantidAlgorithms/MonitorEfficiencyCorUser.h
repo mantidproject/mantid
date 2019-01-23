@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSER_H_
 #define MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSER_H_
 
@@ -10,7 +16,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 
 class DLLExport MonitorEfficiencyCorUser : public API::Algorithm {

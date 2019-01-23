@@ -2,7 +2,7 @@
  PropertyMode
 ==============
 
-This a python binding to the C++ class Mantid::API::PropertyMode.
+This is a Python binding to the C++ class Mantid::API::PropertyMode.
 
 
 .. module:`mantid.api`

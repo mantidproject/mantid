@@ -1,21 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 
+#include "IndirectTab.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/IndirectInstrumentConfig.h"
+#include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
-#include "IndirectTab.h"
 
-#include <QDoubleValidator>
-#include <QMap>
 #include <MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager>
 #include <MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser>
+#include <QDoubleValidator>
+#include <QMap>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -49,27 +55,6 @@ class IndirectDataReduction;
 
   @author Samuel Jackson
   @date 13/08/2013
-
-  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport IndirectDataReductionTab : public IndirectTab {
   Q_OBJECT
@@ -84,8 +69,9 @@ public slots:
 
 signals:
   /// Update the Run button on the IDR main window
-  void updateRunButton(bool enabled = true, QString message = "Run",
-                       QString tooltip = "");
+  void updateRunButton(bool enabled = true,
+                       std::string const &enableOutputButtons = "unchanged",
+                       QString message = "Run", QString tooltip = "");
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();
 
@@ -110,6 +96,6 @@ private:
   bool m_tabRunning;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_ */

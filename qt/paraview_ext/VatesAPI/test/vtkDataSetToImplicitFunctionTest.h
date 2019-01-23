@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VTK_DATASET_TO_WS_IMPLICITFUNCTION_TEST
 #define VTK_DATASET_TO_WS_IMPLICITFUNCTION_TEST
 
-#include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MockObjects.h"
-#include <vtkDataSet.h>
+#include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
+#include <vtkDataSet.h>
 #include <vtkNew.h>
 
 using namespace Mantid::VATES;

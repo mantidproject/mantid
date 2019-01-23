@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTALGEBRA__
 #define MANTID_TESTALGEBRA__
 
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <vector>
-#include <algorithm>
 
 //#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Math/Algebra.h"

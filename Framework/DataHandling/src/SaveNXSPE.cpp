@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveNXSPE.h"
 
 #include "MantidAPI/CommonBinsValidator.h"
@@ -16,9 +22,9 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <nexus/NeXusFile.hpp>
 #include <boost/scoped_array.hpp>
 #include <limits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace DataHandling {

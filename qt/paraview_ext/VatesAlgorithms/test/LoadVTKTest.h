@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADVTK_TEST_H_
 #define LOADVTK_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidVatesAlgorithms/LoadVTK.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidVatesAlgorithms/LoadVTK.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::VATES;

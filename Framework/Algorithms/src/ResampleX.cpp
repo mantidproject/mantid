@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ResampleX.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -377,7 +383,7 @@ void ResampleX::exec() {
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << inputEventWS->getName() << ".\n";
       outputWS = create<DataObjects::Workspace2D>(
-          *inputWS, numSpectra, HistogramData::BinEdges(m_numBins));
+          *inputWS, numSpectra, HistogramData::BinEdges(m_numBins + 1));
 
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, numSpectra);

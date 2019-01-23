@@ -85,7 +85,7 @@ The following methods are useful helpers on ``ComponentInfo`` that allow the ext
 
 The ``ComponentInfo`` object is accessed by an index going from 0 to the number of components (including the instrument iteself). **The component index for a detector is EQUAL to the detector index**, this is an important point to understand. In other words, a detector with a Detector Index of 5, for the purposes of working with a ``DetectorInfo`` and  will have a Component Index of 5, when working with a ``ComponentInfo``. Explained in yet another way: The first 0 - n components referenced in the ``ComponentInfo`` are detectors, where n is the total number of detectors. This guarantee can be leveraged to provide speedups, as some of the examples will show.  
 
-A ``ComponentID`` for compatiblity with older code, and be extracted from ``ComponentInfo::componentID(componentIndex)``, but such calls should be avoided where possible.
+A ``ComponentID`` for compatibility with older code, and be extracted from ``ComponentInfo::componentID(componentIndex)``, but such calls should be avoided where possible.
 
 It is also possible to use the method ``componentInfo.indexOf(componentID)`` to get the index for a particular component ID. However, this is a call to a lookup in an unordered map, so is an expensive calculation which should be avoided where possible.
 

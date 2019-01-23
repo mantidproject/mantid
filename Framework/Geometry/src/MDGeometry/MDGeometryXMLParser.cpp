@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
 
-#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -84,7 +90,7 @@ void MDGeometryXMLParser::execute() {
   std::string xDimId =
       xDimensionElement
           ->getChildElement(
-                MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
+              MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
   if (!xDimId.empty()) {
     auto xDimensionIt =
@@ -104,7 +110,7 @@ void MDGeometryXMLParser::execute() {
   std::string yDimId =
       yDimensionElement
           ->getChildElement(
-                MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
+              MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
 
   if (!yDimId.empty()) {
@@ -125,7 +131,7 @@ void MDGeometryXMLParser::execute() {
   std::string zDimId =
       zDimensionElement
           ->getChildElement(
-                MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
+              MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
 
   if (!zDimId.empty()) {
@@ -146,7 +152,7 @@ void MDGeometryXMLParser::execute() {
   std::string tDimId =
       tDimensionElement
           ->getChildElement(
-                MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
+              MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
   if (!tDimId.empty()) {
     auto tDimensionIt =
@@ -405,5 +411,5 @@ bool MDGeometryXMLParser::isTDimension(
   }
   return bResult;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTTREEMODEL_H
 #define INSTRUMENTTREEMODEL_H
 
@@ -9,15 +15,15 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
-* The InstrumentTreeModel is a class used by a QTreeView
-* in order to display the components of an instrument as a
-* hierarchical tree view.
-*
-* It fills out the nodes in the tree as requested.
-*
-* Author: ???
-*
-*/
+ * The InstrumentTreeModel is a class used by a QTreeView
+ * in order to display the components of an instrument as a
+ * hierarchical tree view.
+ *
+ * It fills out the nodes in the tree as requested.
+ *
+ * Author: ???
+ *
+ */
 class InstrumentTreeModel : public QAbstractItemModel {
   Q_OBJECT
 public:
@@ -40,7 +46,7 @@ private:
   const InstrumentWidget *m_instrWidget;
   mutable std::vector<size_t> m_componentIndices;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // INSTRUMENTTREEMODEL_H

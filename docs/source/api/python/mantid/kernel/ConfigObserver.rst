@@ -2,7 +2,7 @@
  ConfigObserver
 ===================
 
-This a python binding to the C++ class Mantid::Kernel::ConfigObserver.
+This is a Python binding to the C++ class Mantid::Kernel::ConfigObserver.
 
 
 .. module:`mantid.kernel`

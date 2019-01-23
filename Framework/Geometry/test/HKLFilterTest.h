@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_HKLFILTERTEST_H_
 #define MANTID_GEOMETRY_HKLFILTERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidGeometry/Crystal/HKLFilter.h"
 #include "MantidKernel/V3D.h"
@@ -14,9 +20,9 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-using ::testing::_;
-using ::testing::Return;
 using ::testing::Mock;
+using ::testing::Return;
+using ::testing::_;
 
 class HKLFilterTest : public CxxTest::TestSuite {
 public:
@@ -184,7 +190,7 @@ public:
     TS_ASSERT_EQUALS(orFilterCasted->getLHS(), lhs);
     TS_ASSERT_EQUALS(orFilterCasted->getRHS(), rhs);
   }
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   class MockHKLFilter : public HKLFilter {
   public:
@@ -212,5 +218,5 @@ private:
     MOCK_CONST_METHOD1(isAllowed, bool(const V3D &));
   };
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTID_GEOMETRY_HKLFILTERTEST_H_ */

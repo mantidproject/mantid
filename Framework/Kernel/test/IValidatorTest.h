@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_IVALIDATORTEST_H_
 #define MANTID_KERNEL_IVALIDATORTEST_H_
 
@@ -34,7 +40,7 @@ private:
   /// The pointer to the head of the vector
   mutable const double *m_head;
 };
-}
+} // namespace
 
 class IValidatorTest : public CxxTest::TestSuite {
 public:

@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GATHERWORKSPACESTEST_H_
 #define GATHERWORKSPACESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMPIAlgorithms/GatherWorkspaces.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidMPIAlgorithms/GatherWorkspaces.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 

@@ -30,8 +30,8 @@
 #ifndef RENAMEDIALOG_H
 #define RENAMEDIALOG_H
 
-#include <qvariant.h>
 #include <qdialog.h>
+#include <qvariant.h>
 
 #include "MdiSubWindow.h"
 

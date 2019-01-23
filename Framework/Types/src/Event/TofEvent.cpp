@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTypes/Event/TofEvent.h"
 
 using std::ostream;
@@ -15,22 +21,8 @@ bool TofEvent::operator==(const TofEvent &rhs) const {
 /** < comparison operator, using the TOF to do the comparison.
  * @param rhs: the other TofEvent to compare.
  * @return true if this->m_tof < rhs.m_tof*/
-bool TofEvent::operator<(const TofEvent &rhs) const {
-  return (this->m_tof < rhs.m_tof);
-}
-
-/** < comparison operator, using the TOF to do the comparison.
- * @param rhs: the other TofEvent to compare.
- * @return true if this->m_tof < rhs.m_tof*/
 bool TofEvent::operator>(const TofEvent &rhs) const {
   return (this->m_tof > rhs.m_tof);
-}
-
-/** < comparison operator, using the TOF to do the comparison.
- * @param rhs_tof: the other time of flight to compare.
- * @return true if this->m_tof < rhs.m_tof*/
-bool TofEvent::operator<(const double rhs_tof) const {
-  return (this->m_tof < rhs_tof);
 }
 
 /**

@@ -76,7 +76,7 @@ def get_include(headerfile):
         includefile = matches.group(2)
     else:
         raise RuntimeError("Unable to determine include path from given header")
-    # Make sure the include only has forward slases
+    # Make sure the include only has forward slashes
     includefile = includefile.replace("\\", "/")
     return includefile
 def get_modulepath(frameworkdir, submodule):

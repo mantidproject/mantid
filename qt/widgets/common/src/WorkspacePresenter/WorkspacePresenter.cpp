@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
@@ -364,5 +370,5 @@ void WorkspacePresenter::updateView() {
   m_view->updateTree(m_adapter->topLevelItems());
 }
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

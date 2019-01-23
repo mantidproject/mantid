@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadRawBin0.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "LoadRaw/isisraw2.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/LoadLog.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <boost/shared_ptr.hpp>
 #include <Poco/Path.h>
+#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 
@@ -132,9 +138,8 @@ void LoadRawBin0::exec() {
     for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
       int64_t histToRead = i + periodTimesNSpectraP1;
       if ((i >= m_spec_min && i < m_spec_max) ||
-          (m_list &&
-           find(m_spec_list.begin(), m_spec_list.end(), i) !=
-               m_spec_list.end())) {
+          (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
+                         m_spec_list.end())) {
         progress(m_prog, "Reading raw file data...");
         // readData(file, histToRead);
         // read spectrum

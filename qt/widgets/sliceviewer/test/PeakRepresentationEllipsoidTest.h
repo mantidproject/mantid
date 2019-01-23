@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 #define SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 
@@ -20,7 +26,7 @@ bool isAngleEitherValueOr180DegreesRoated(double expectedAngle,
          Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle + M_PI) ||
          Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle - M_PI);
 }
-}
+} // namespace
 
 class PeakRepresentationEllipsoidExposeProtectedWrapper
     : public PeakRepresentationEllipsoid {

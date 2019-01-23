@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
@@ -465,7 +471,8 @@ class BASISReduction(PythonAlgorithm):
                                       OutputWorkspace=mon_ws)
             sapi.Rebin(InputWorkspace=mon_ws,
                        OutputWorkspace=mon_ws,
-                       Params='10')
+                       Params='10',  # 10 microseconds TOF bin width
+                       PreserveEvents=False)
             sapi.ConvertUnits(InputWorkspace=mon_ws,
                               OutputWorkspace=mon_ws,
                               Target='Wavelength')

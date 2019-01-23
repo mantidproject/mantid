@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADQKKTEST_H_
 #define LOADQKKTEST_H_
 
-#include "MantidDataHandling/LoadQKK.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadQKK.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::ConfigServiceImpl;
 using namespace Mantid::API;
@@ -55,15 +61,15 @@ public:
     for (size_t i = 0; i < data->getNumberHistograms(); ++i) {
       TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(i));
 
-      auto x = data->x(i);
+      const auto &x = data->x(i);
       TS_ASSERT_EQUALS(x.size(), 2);
       TS_ASSERT_DELTA(x[0], 4.9639999139, 1e-8);
       TS_ASSERT_DELTA(x[1], 5.1039999245, 1e-8);
 
-      auto y = data->y(i);
+      const auto &y = data->y(i);
       TS_ASSERT_DIFFERS(y[0], 0.0);
 
-      auto e = data->e(i);
+      const auto &e = data->e(i);
       TS_ASSERT_DIFFERS(e[0], 0.0);
     }
   }

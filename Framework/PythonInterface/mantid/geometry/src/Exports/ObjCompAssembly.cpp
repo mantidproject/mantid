@@ -1,11 +1,17 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-using Mantid::Geometry::ObjCompAssembly;
 using Mantid::Geometry::ICompAssembly;
+using Mantid::Geometry::ObjCompAssembly;
 using Mantid::Geometry::ObjComponent;
 using namespace boost::python;
 

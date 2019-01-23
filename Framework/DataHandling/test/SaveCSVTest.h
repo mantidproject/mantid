@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVECSVTEST_H_
 #define SAVECSVTEST_H_
 
@@ -14,9 +20,9 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::LinearGenerator;
 
 // Notice, the SaveCSV algorithm currently does not create

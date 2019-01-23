@@ -11,7 +11,7 @@ Description
 
 This algorithm will resize a
 :ref:`RectangularDetector <RectangularDetector>` by applying X and Y
-scaling factors. Each pixel's position will be modifed relative to the
+scaling factors. Each pixel's position will be modified relative to the
 0,0 point of the detector by these factors. Typically, a
 RectangularDetector is constructed around its center, so this would
 scale the detector around its center.

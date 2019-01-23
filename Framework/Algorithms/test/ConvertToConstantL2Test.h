@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CONVERTTOCONSTANTL2TEST_H_
 #define MANTID_ALGORITHMS_CONVERTTOCONSTANTL2TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertToConstantL2.h"
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
-#include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ConvertToConstantL2.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
 using namespace Mantid::API;

@@ -1,11 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SumNeighboursTEST_H_
 #define SumNeighboursTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADNXCANSASTEST_H_
 #define MANTID_DATAHANDLING_LOADNXCANSASTEST_H_
 
@@ -430,18 +436,21 @@ private:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(transName);
 
     // Ensure that both have the same Y data
-    auto readDataY =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->y(index); };
+    auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->y(index);
+    };
     do_assert_data(transIn, transOut, readDataY);
 
     // Ensure that both have the same E data
-    auto readDataE =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->e(index); };
+    auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->e(index);
+    };
     do_assert_data(transIn, transOut, readDataE);
 
     // Ensure that both have the same X data
-    auto readDataX =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->x(index); };
+    auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->x(index);
+    };
     do_assert_data(transIn, transOut, readDataX);
   }
 
@@ -460,18 +469,21 @@ private:
     TSM_ASSERT("Should be a point workspace", !wsOut->isHistogramData());
 
     // Ensure that both have the same Y data
-    auto readDataY =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->y(index); };
+    auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->y(index);
+    };
     do_assert_data(wsIn, wsOut, readDataY);
 
     // Ensure that both have the same E data
-    auto readDataE =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->e(index); };
+    auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->e(index);
+    };
     do_assert_data(wsIn, wsOut, readDataE);
 
     // Ensure that both have the same X data
-    auto readDataX =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->x(index); };
+    auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
+      return ws->x(index);
+    };
     do_assert_data(wsIn, wsOut, readDataX);
 
     // If applicable, ensure that both have the same Xdev data

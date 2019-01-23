@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/TransformScaleFactory.h"
 #include "MantidAPI/ITransformScale.h"
 #include "MantidKernel/Logger.h"
@@ -7,7 +13,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("TransformScaleFactory");
-}
+} // namespace
 
 /** Creates an instance of the appropriate scaling transform
  *  @param type The name of the scaling transform
@@ -42,5 +48,5 @@ TransformScaleFactoryImpl::createUnwrapped(const std::string &className) const {
       "Don't use this method - use the safe one!!!");
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

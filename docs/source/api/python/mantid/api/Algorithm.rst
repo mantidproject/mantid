@@ -2,7 +2,7 @@
  Algorithm
 ===========
 
-This a python binding to the C++ class Mantid::API::Algorithm.
+This is a Python binding to the C++ class Mantid::API::Algorithm.
 
 *bases:* :py:obj:`mantid.api.IAlgorithm`
 

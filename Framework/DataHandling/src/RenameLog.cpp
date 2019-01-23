@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataHandling/RenameLog.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidDataHandling/RenameLog.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -53,5 +59,5 @@ void RenameLog::exec() {
   matrixWS->mutableRun().addProperty(timeprop);
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

@@ -29,7 +29,7 @@ Improved
 
 - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` is extended to support conversion to elastic d-spacing.
 - :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
-- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
+- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurrences are to be replaced in the input workspace, as well as the value to replace it with.
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces-v1>` provides option to change Y axis unit and label.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
@@ -52,7 +52,7 @@ Improved
 - :ref:`SaveGSS <algm-SaveGSS-v1>` now supports saving in the legacy GSAS ALT format. This is useful for older tools however the default format FXYE should be used whenever possible.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK-v1>` and :ref:`LoadVTK <algm-LoadVTK-v1>` algorithms are now accessible from python.
 - :ref:`MergeRuns <algm-MergeRuns-v1>` will now merge workspaces with detector scans.
-- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
+- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurrences are to be replaced in the input workspace, as well as the value to replace it with.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 - :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
 - :ref:`LoadBBY <algm-LoadBBY-v1>`: Fixed bug where the logManager did not work with sample_name, sample_aperture and source_aperture. Also added more information regarding the sample and the selected choppers.
@@ -60,7 +60,7 @@ Improved
 - :ref:`MSDFit <algm-MSDFit>` now supports model selection. Currently has the option of 3 models: MsdGauss, MsdPeters and MsdYi.
 - :ref:`algm-LineProfile`: Fixed a bug which could cause crashes when the line extended over the right or bottom edge of a workspace.
 - :ref:`algm-Mean`: Added error messages if the data is not appropriate.
-- :ref:`algm-LoadLiveData`: Fixed a bug affecting Live Data Processing in "Replace" mode. The bug meant that changes to Instrument position/rotation were overwitten by defaults on every load. Now fixed so that Instrument state is persistent across loads.
+- :ref:`algm-LoadLiveData`: Fixed a bug affecting Live Data Processing in "Replace" mode. The bug meant that changes to Instrument position/rotation were overwritten by defaults on every load. Now fixed so that Instrument state is persistent across loads.
 - :ref:`CalMuonDetectorPhasees <algm-CalMuonDetectorPhases-v1>` now fits a cos instead of a sin function.
 
 Performance

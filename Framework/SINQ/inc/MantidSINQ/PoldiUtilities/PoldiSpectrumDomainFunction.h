@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
 #define MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
 
@@ -111,8 +117,9 @@ public:
 
   void set(size_t iY, size_t iP, double value) override {
     size_t realY = (m_offset + iY) % m_domainSize;
-    m_jacobian.set(realY, iP, m_jacobian.get(realY, iP) +
-                                  value * m_factors[m_factorOffset + iY]);
+    m_jacobian.set(realY, iP,
+                   m_jacobian.get(realY, iP) +
+                       value * m_factors[m_factorOffset + iY]);
   }
 
   void zero() override { m_jacobian.zero(); }
@@ -213,26 +220,6 @@ protected:
 
         @author Michael Wedel, Paul Scherrer Institut - SINQ
         @date 16/05/2014
-
-    Copyright © 2014,2015 PSI-MSS
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
 class MANTID_SINQ_DLL PoldiSpectrumDomainFunction

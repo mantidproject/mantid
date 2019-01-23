@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Elwin.h"
 #include "../General/UserInputValidator.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QFileInfo>
@@ -13,7 +20,37 @@ using namespace MantidQt::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
 }
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
+  return workspace->y(0).size() > 1;
+}
+
+bool isWorkspacePlottable(std::string const &workspaceName) {
+  return isWorkspacePlottable(getADSMatrixWorkspace(workspaceName));
+}
+
+bool canPlotWorkspace(std::string const &workspaceName) {
+  return doesExistInADS(workspaceName) && isWorkspacePlottable(workspaceName);
+}
+
+std::vector<std::string> getOutputWorkspaceSuffices() {
+  return {"_eq", "_eq2", "_elf", "_elt"};
+}
+
+int getNumberOfSpectra(std::string const &name) {
+  return static_cast<int>(getADSMatrixWorkspace(name)->getNumberHistograms());
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -102,10 +139,14 @@ void Elwin::setup() {
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
   // Handle plot and save
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+
+  connect(m_uiForm.cbPlotWorkspace, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateAvailablePlotSpectra()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -116,6 +157,8 @@ void Elwin::setup() {
 }
 
 void Elwin::run() {
+  setRunIsRunning(true);
+
   QStringList inputFilenames = m_uiForm.dsInputFiles->getFilenames();
   inputFilenames.sort();
 
@@ -175,8 +218,7 @@ void Elwin::run() {
   }
 
   // Group input workspaces
-  IAlgorithm_sptr groupWsAlg =
-      AlgorithmManager::Instance().create("GroupWorkspaces");
+  auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
   runTimeProps["InputWorkspaces"] = inputWorkspacesString;
@@ -185,7 +227,7 @@ void Elwin::run() {
   m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
 
   // Configure ElasticWindowMultiple algorithm
-  IAlgorithm_sptr elwinMultAlg =
+  auto elwinMultAlg =
       AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
 
@@ -237,19 +279,65 @@ void Elwin::run() {
 void Elwin::unGroupInput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(unGroupInput(bool)));
-  if (error)
-    return;
-  if (!m_uiForm.ckGroupInput->isChecked()) {
-    IAlgorithm_sptr ungroupAlg =
-        AlgorithmManager::Instance().create("UnGroupWorkspace");
-    ungroupAlg->initialize();
-    ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
-    ungroupAlg->execute();
-  }
+  setRunIsRunning(false);
 
-  // Enable plot and save
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
+  if (!error) {
+    if (!m_uiForm.ckGroupInput->isChecked()) {
+      auto ungroupAlg = AlgorithmManager::Instance().create("UnGroupWorkspace");
+      ungroupAlg->initialize();
+      ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
+      ungroupAlg->execute();
+    }
+
+    updatePlotSpectrumOptions();
+
+  } else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
+  }
+}
+
+void Elwin::updatePlotSpectrumOptions() {
+  updateAvailablePlotWorkspaces();
+  if (m_uiForm.cbPlotWorkspace->size().isEmpty())
+    setPlotResultEnabled(false);
+  else
+    updateAvailablePlotSpectra();
+}
+
+void Elwin::updateAvailablePlotWorkspaces() {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.cbPlotWorkspace);
+  m_uiForm.cbPlotWorkspace->clear();
+  for (auto const &suffix : getOutputWorkspaceSuffices()) {
+    auto const workspaceName = getOutputBasename().toStdString() + suffix;
+    if (canPlotWorkspace(workspaceName))
+      m_uiForm.cbPlotWorkspace->addItem(QString::fromStdString(workspaceName));
+  }
+}
+
+QString Elwin::getPlotWorkspaceName() const {
+  return m_uiForm.cbPlotWorkspace->currentText();
+}
+
+void Elwin::setPlotSpectrumValue(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spPlotSpectrum);
+  m_uiForm.spPlotSpectrum->setValue(value);
+}
+
+void Elwin::updateAvailablePlotSpectra() {
+  auto const name = m_uiForm.cbPlotWorkspace->currentText().toStdString();
+  auto const maximumValue = getNumberOfSpectra(name) - 1;
+  setPlotSpectrumMinMax(0, maximumValue);
+  setPlotSpectrumValue(0);
+}
+
+void Elwin::setPlotSpectrumMinMax(int minimum, int maximum) {
+  m_uiForm.spPlotSpectrum->setMinimum(minimum);
+  m_uiForm.spPlotSpectrum->setMaximum(maximum);
+}
+
+int Elwin::getPlotSpectrumIndex() const {
+  return m_uiForm.spPlotSpectrum->text().toInt();
 }
 
 bool Elwin::validate() {
@@ -335,7 +423,7 @@ void Elwin::setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws) {
 /**
  * Handles a new set of input files being entered.
  *
- * Updates preview seletcion combo box.
+ * Updates preview selection combo box.
  */
 void Elwin::newInputFiles() {
   // Clear the existing list of files
@@ -355,9 +443,8 @@ void Elwin::newInputFiles() {
 
   // Default to the first file
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
-  QString wsname = m_uiForm.cbPreviewFile->currentText();
-  auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsname.toStdString());
+  QString const wsname = m_uiForm.cbPreviewFile->currentText();
+  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
   setInputWorkspace(inputWs);
 }
 
@@ -369,25 +456,22 @@ void Elwin::newInputFiles() {
  * @param index Index of the new selected file
  */
 void Elwin::newPreviewFileSelected(int index) {
-  QString wsName = m_uiForm.cbPreviewFile->itemText(index);
-  QString filename = m_uiForm.cbPreviewFile->itemData(index).toString();
+  auto const workspaceName = m_uiForm.cbPreviewFile->itemText(index);
+  auto const filename = m_uiForm.cbPreviewFile->itemData(index).toString();
 
-  // Ignore empty filenames (can happen when new files are loaded and the widget
-  // is being populated)
-  if (filename.isEmpty())
-    return;
+  if (!filename.isEmpty()) {
+    auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
 
-  if (!loadFile(filename, wsName)) {
-    g_log.error("Failed to load input workspace.");
-    return;
+    if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
+      auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+      int const numHist =
+          static_cast<int>(workspace->getNumberHistograms()) - 1;
+
+      m_uiForm.spPreviewSpec->setMaximum(numHist);
+      m_uiForm.spPreviewSpec->setValue(0);
+    } else
+      g_log.error("Failed to load input workspace.");
   }
-
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsName.toStdString());
-  int numHist = static_cast<int>(ws->getNumberHistograms()) - 1;
-
-  m_uiForm.spPreviewSpec->setMaximum(numHist);
-  m_uiForm.spPreviewSpec->setValue(0);
 }
 
 /**
@@ -456,56 +540,62 @@ void Elwin::updateRS(QtProperty *prop, double val) {
     backgroundRangeSelector->setMaximum(val);
 }
 
+void Elwin::runClicked() { runTab(); }
+
 /**
  * Handles mantid plotting
  */
 void Elwin::plotClicked() {
-
-  auto workspaceBaseName =
-      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
-                                   true))
-    plotSpectrum(workspaceBaseName + "_eq");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
-                                   true))
-    plotSpectrum(workspaceBaseName + "_eq2");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
-                                   true))
-    plotSpectrum(workspaceBaseName + "_elf");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   true, false))
-    plotSpectrum(workspaceBaseName + "_elt");
+  setPlotResultIsPlotting(true);
+  plotSpectrum(getPlotWorkspaceName(), getPlotSpectrumIndex());
+  setPlotResultIsPlotting(false);
 }
 
 /**
  * Handles saving of workspaces
  */
 void Elwin::saveClicked() {
+  auto const workspaceBaseName = getOutputBasename().toStdString();
 
-  auto workspaceBaseName =
-      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
-                                   false))
-    addSaveWorkspaceToQueue(workspaceBaseName + "_eq");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
-                                   false))
-    addSaveWorkspaceToQueue(workspaceBaseName + "_eq2");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
-                                   false))
-    addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
-
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   false, false))
-    addSaveWorkspaceToQueue(workspaceBaseName + "_elt");
+  for (auto const &suffix : getOutputWorkspaceSuffices())
+    if (checkADSForPlotSaveWorkspace(workspaceBaseName + suffix, false))
+      addSaveWorkspaceToQueue(workspaceBaseName + suffix);
 
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+QString Elwin::getOutputBasename() {
+  return getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+}
+
+void Elwin::setRunIsRunning(const bool &running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void Elwin::setPlotResultIsPlotting(const bool &plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Spectrum");
+  setButtonsEnabled(!plotting);
+}
+
+void Elwin::setButtonsEnabled(const bool &enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
+void Elwin::setRunEnabled(const bool &enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void Elwin::setPlotResultEnabled(const bool &enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotWorkspace->setEnabled(enabled);
+  m_uiForm.spPlotSpectrum->setEnabled(enabled);
+}
+
+void Elwin::setSaveResultEnabled(const bool &enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
 }
 
 } // namespace IDA

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_ISISHISTODATALISTENER_H_
 #define MANTID_LIVEDATA_ISISHISTODATALISTENER_H_
 
@@ -5,8 +11,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/LiveListener.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
-
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -18,9 +24,7 @@ namespace Mantid {
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
-namespace API {
-class MatrixWorkspace;
-}
+
 namespace HistogramData {
 class BinEdges;
 }
@@ -30,24 +34,6 @@ namespace LiveData {
    to
     instrument data acquisition systems (DAS) for retrieval of 'live' data into
    Mantid.
-
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 class ISISHistoDataListener : public API::LiveListener {
 public:
@@ -130,6 +116,10 @@ private:
 
   /// Time regime to load
   int m_timeRegime;
+
+  /// Buffer workspace to store instrument data (or not only instrument in the
+  /// future), prevents loading for every chank of data
+  API::MatrixWorkspace_sptr m_bufferWorkspace;
 
   /// reporter function called when the IDC reading routines raise an error
   static void IDCReporter(int status, int code, const char *message);

@@ -1,13 +1,19 @@
-#include "MantidKernel/Logger.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/RemoteJobManager.h"
+#include "MantidKernel/Logger.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 
 #include <Poco/Base64Encoder.h>
-#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
+#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/URI.h>
 
 #include <sstream>
@@ -18,7 +24,7 @@ namespace Kernel {
 namespace {
 // static logger object
 Logger g_log("RemoteJobManager");
-}
+} // namespace
 
 RemoteJobManager::RemoteJobManager(const Poco::XML::Element *elem)
     : m_displayName(elem->getAttribute("name")),

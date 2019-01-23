@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDFEDITLOCALPARAMETERDIALOG_H_
 #define MDFEDITLOCALPARAMETERDIALOG_H_
 
-#include "ui_EditLocalParameterDialog.h"
-#include "MantidQtWidgets/Common/IFunctionBrowser.h"
 #include "DllConfig.h"
 #include "MDFLogValueFinder.h"
+#include "MantidQtWidgets/Common/IFunctionBrowser.h"
+#include "ui_EditLocalParameterDialog.h"
 #include <QDialog>
 
 namespace MantidQt {
@@ -15,10 +21,10 @@ class MultiDatasetFit;
 namespace MDF {
 
 /**
-  * A dialog for displaying and editing values of local parameters.
-  * Parameters can be set individually or all to the same value.
-  * They also can be fixed and unfixed.
-  */
+ * A dialog for displaying and editing values of local parameters.
+ * Parameters can be set individually or all to the same value.
+ * They also can be fixed and unfixed.
+ */
 class MANTIDQT_MULTIDATASETFIT_DLL EditLocalParameterDialog : public QDialog {
   Q_OBJECT
 public:
@@ -74,8 +80,8 @@ private:
   std::unique_ptr<MDFLogValueFinder> m_logFinder;
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFEDITLOCALPARAMETERDIALOG_H_*/

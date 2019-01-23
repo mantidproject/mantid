@@ -1,15 +1,21 @@
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
-#include <boost/make_shared.hpp>
 #include <Poco/AutoPtr.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
 #include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/NumberParser.h>
 #include <Poco/XML/XMLException.h>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -145,5 +151,5 @@ IMDDimension_sptr createDimension(const std::string &dimensionXMLString,
   return dimension;
 }
 
-} // namespace
-} // namespace
+} // namespace Geometry
+} // namespace Mantid

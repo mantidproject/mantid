@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAlgorithms/SaveMDWorkspaceToVTKImpl.h"
 #include "MantidVatesAPI/Normalization.h"
 
@@ -52,7 +58,7 @@ bool isNDWorkspace(const Mantid::API::IMDWorkspace &workspace,
       workspace.getNonIntegratedDimensions().size();
   return actualNonIntegratedDimensionality == dimensionality;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace VATES {
@@ -170,7 +176,7 @@ SaveMDWorkspaceToVTKImpl::getDataSetFactoryChain(
  * @param workspace: the workspace
  * @param recursionDepth: the recursion depth
  * @returns a presenter for either MDHisto or MDEvent
-*/
+ */
 std::unique_ptr<MDLoadingPresenter>
 SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
                                        Mantid::API::IMDWorkspace_sptr workspace,
@@ -181,13 +187,15 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
       Mantid::Kernel::make_unique<SingleWorkspaceProvider>(workspace);
   if (isHistoWorkspace) {
     InMemoryPresenterFactory<MDHWInMemoryLoadingPresenter,
-                             EmptyWorkspaceNamePolicy> presenterFactory;
+                             EmptyWorkspaceNamePolicy>
+        presenterFactory;
     presenter = presenterFactory.create(std::move(view), workspace,
                                         std::move(workspaceProvider));
   } else {
     view->setRecursionDepth(recursionDepth);
     InMemoryPresenterFactory<MDEWInMemoryLoadingPresenter,
-                             EmptyWorkspaceNamePolicy> presenterFactory;
+                             EmptyWorkspaceNamePolicy>
+        presenterFactory;
     presenter = presenterFactory.create(std::move(view), workspace,
                                         std::move(workspaceProvider));
   }
@@ -360,5 +368,5 @@ SaveMDWorkspaceToVTKImpl::getDataSetWithOrthogonalCorrection(
 
   return dataSet;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

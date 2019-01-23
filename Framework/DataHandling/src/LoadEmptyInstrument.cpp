@@ -1,16 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadGeometry.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidIndexing/IndexInfo.h"
+#include "MantidNexusGeometry/NexusGeometryParser.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -24,11 +32,11 @@ using namespace DataObjects;
 using namespace HistogramData;
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filePath = descriptor.filename();
 
@@ -55,14 +63,15 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadEmptyInstrument::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                ".xml"),
+                                LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
-      "specifying an instrument definition file. Note Filename or "
+      "specifying an instrument definition file. Files can also be .hdf5 or "
+      ".nxs for usage with NeXus Geometry files. Note Filename or "
       "InstrumentName must be specified but not both.");
-  declareProperty(
-      "InstrumentName", "",
-      "Name of instrument. Can be used instead of Filename to specify an IDF");
+  declareProperty("InstrumentName", "",
+                  "Name of instrument. Can be used instead of Filename to "
+                  "specify an IDF");
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
                                                       Direction::Output),
@@ -97,8 +106,14 @@ void LoadEmptyInstrument::init() {
  */
 void LoadEmptyInstrument::exec() {
   // load the instrument into this workspace
-  MatrixWorkspace_sptr ws = this->runLoadInstrument();
-  Instrument_const_sptr instrument = ws->getInstrument();
+  const std::string filename = getPropertyValue("Filename");
+  const std::string instrumentname = getPropertyValue("InstrumentName");
+  Instrument_const_sptr instrument;
+  Progress prog(this, 0.0, 1.0, 10);
+
+  // Call LoadIstrument as a child algorithm
+  MatrixWorkspace_sptr ws = this->runLoadInstrument(filename, instrumentname);
+  instrument = ws->getInstrument();
 
   // Get number of detectors stored in instrument
   const size_t number_spectra = instrument->getNumberDetectors();
@@ -113,17 +128,19 @@ void LoadEmptyInstrument::exec() {
 
   Indexing::IndexInfo indexInfo(number_spectra);
   bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
+  prog.reportIncrement(5, "Creating Data");
   if (MakeEventWorkspace) {
-    setProperty(
-        "OutputWorkspace",
-        create<EventWorkspace>(
-            *ws, indexInfo, BinEdges{0.0, std::numeric_limits<double>::min()}));
+    setProperty("OutputWorkspace",
+                create<EventWorkspace>(
+                    std::move(instrument), indexInfo,
+                    BinEdges{0.0, std::numeric_limits<double>::min()}));
   } else {
     const double detector_value = getProperty("DetectorValue");
     const double monitor_value = getProperty("MonitorValue");
-    auto ws2D = create<MatrixWorkspace>(
-        *ws, indexInfo, Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value),
-                                  CountStandardDeviations(1, detector_value)));
+    auto ws2D = create<Workspace2D>(
+        std::move(instrument), indexInfo,
+        Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value),
+                  CountStandardDeviations(1, detector_value)));
 
     Counts v_monitor_y(1, monitor_value);
     CountStandardDeviations v_monitor_e(1, monitor_value);
@@ -142,12 +159,12 @@ void LoadEmptyInstrument::exec() {
 }
 
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
-API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument() {
-  const std::string filename = getPropertyValue("Filename");
-  const std::string instrumentName = getPropertyValue("InstrumentName");
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 1);
+API::MatrixWorkspace_sptr
+LoadEmptyInstrument::runLoadInstrument(const std::string &filename,
+                                       const std::string &instrumentname) {
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 0.5);
   loadInst->setPropertyValue("Filename", filename);
-  loadInst->setPropertyValue("InstrumentName", instrumentName);
+  loadInst->setPropertyValue("InstrumentName", instrumentname);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);

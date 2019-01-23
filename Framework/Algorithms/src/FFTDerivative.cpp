@@ -1,6 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FFTDerivative.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
@@ -17,6 +25,8 @@ DECLARE_ALGORITHM(FFTDerivative)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 void FFTDerivative::init() {
   declareProperty(
@@ -46,10 +56,13 @@ void FFTDerivative::execComplexFFT() {
   // Workspace for holding a copy of a spectrum. Each spectrum is symmetrized to
   // minimize
   // possible edge effects.
+
+  HistogramBuilder builder;
+  builder.setX(nx + ny);
+  builder.setY(ny + ny);
+  builder.setDistribution(inWS->isDistribution());
   MatrixWorkspace_sptr copyWS =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::WorkspaceFactory::Instance().create(inWS, 1, nx + ny,
-                                                           ny + ny));
+      create<MatrixWorkspace>(*inWS, 1, builder.build());
 
   for (size_t spec = 0; spec < n; ++spec) {
     symmetriseSpectrum(inWS->histogram(spec), copyWS->mutableX(0),
@@ -87,19 +100,18 @@ void FFTDerivative::execComplexFFT() {
     }
 
     if (!outWS) {
-      outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::WorkspaceFactory::Instance().create(inWS));
+      outWS = create<MatrixWorkspace>(*inWS);
     }
 
     // Save the upper half of the inverse transform for output
     size_t m2 = transWS->y(0).size() / 2;
     double dx = copyWS->x(0)[m2];
 
-    outWS->mutableX(spec)
-        .assign(transWS->x(0).cbegin() + m2, transWS->x(0).cend());
+    outWS->mutableX(spec).assign(transWS->x(0).cbegin() + m2,
+                                 transWS->x(0).cend());
     outWS->mutableX(spec) += dx;
-    outWS->mutableY(spec)
-        .assign(transWS->y(0).cbegin() + m2, transWS->y(0).cend());
+    outWS->mutableY(spec).assign(transWS->y(0).cbegin() + m2,
+                                 transWS->y(0).cend());
 
     progress.report();
   }
@@ -144,7 +156,7 @@ void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in,
  * @param nu :: complete real X of input histogram
  * @param &re :: complete real Y  of input histogram
  * @param &im :: complete imaginary Y of input histogram
-*/
+ */
 void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re,
                                       HistogramY &im) {
   int dn = getProperty("Order");
@@ -184,5 +196,5 @@ void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re,
   }
 }
 
-} // Algorithms
-} // Mandid
+} // namespace Algorithms
+} // namespace Mantid

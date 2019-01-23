@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MEMENTOTABLEWORKSPACETEST_H_
 #define MANTID_DATAOBJECTS_MEMENTOTABLEWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/MementoTableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/MementoTableWorkspace.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -74,8 +80,9 @@ public:
   void testCompareWithWrongColumnType() {
     MementoTableWorkspace standard;
     TableWorkspace ws; // Candidate workspace.
-    ws.addColumn("double", standard.getColumn(0)
-                               ->name()); // Copy the name, but not the type.
+    ws.addColumn(
+        "double",
+        standard.getColumn(0)->name()); // Copy the name, but not the type.
     TSM_ASSERT("Wrong column type, should have been identified.",
                !MementoTableWorkspace::isMementoWorkspace(ws));
   }

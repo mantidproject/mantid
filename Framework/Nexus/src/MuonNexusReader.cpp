@@ -1,9 +1,15 @@
-#include <vector>
-#include <sstream>
-#include "MantidKernel/System.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/MuonNexusReader.h"
+#include "MantidKernel/System.h"
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusException.hpp>
+#include <sstream>
+#include <vector>
 
 using std::string;
 
@@ -19,7 +25,7 @@ const string START_TIME("start_time");
 
 /// logger
 Mantid::Kernel::Logger g_log("MuonNexusReader");
-}
+} // namespace
 
 using namespace Mantid;
 

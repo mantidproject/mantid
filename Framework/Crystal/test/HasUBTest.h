@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_HASUBTEST_H_
 #define MANTID_CRYSTAL_HASUBTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCrystal/HasUB.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidCrystal/HasUB.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H
 
@@ -5,27 +11,6 @@
 
     This class creates ipython notebooks from the ISIS DataProcessorUI
     (Polref) interface
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-    National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
 #include "MantidKernel/System.h"
@@ -52,15 +37,14 @@ QStringList DLLExport splitByCommas(const QString &namesString);
 
 QString DLLExport plot1DString(const QStringList &ws_names);
 
-QString DLLExport
-tableString(const TreeData &treeData, const WhiteList &whitelist);
+QString DLLExport tableString(const TreeData &treeData,
+                              const WhiteList &whitelist);
 
 QString DLLExport titleString(const QString &wsName);
 
-boost::tuple<QString, QString> DLLExport
-postprocessGroupString(const GroupData &rowMap,
-                       const ProcessingAlgorithm &processor,
-                       const PostprocessingStep &postprocessingStep);
+boost::tuple<QString, QString> DLLExport postprocessGroupString(
+    const GroupData &rowMap, const ProcessingAlgorithm &processor,
+    const PostprocessingStep &postprocessingStep);
 
 QString DLLExport plotsString(const GroupData &groupData,
                               const QString &stitched_wsStr,
@@ -73,10 +57,9 @@ reduceRowString(const RowData_sptr data, const QString &instrument,
                 const ProcessingAlgorithm &processor,
                 const ColumnOptionsMap &globalPreprocessingOptionsMap);
 
-boost::tuple<QString, QString> DLLExport
-loadWorkspaceString(const QString &runStr, const QString &instrument,
-                    const PreprocessingAlgorithm &preprocessor,
-                    const QString &options);
+boost::tuple<QString, QString> DLLExport loadWorkspaceString(
+    const QString &runStr, const QString &instrument,
+    const PreprocessingAlgorithm &preprocessor, const QString &options);
 
 QString DLLExport preprocessString(const QString &input_name1,
                                    const QString &input_name2,
@@ -84,12 +67,13 @@ QString DLLExport preprocessString(const QString &input_name1,
                                    const PreprocessingAlgorithm &preprocessor,
                                    const QString &options);
 
-boost::tuple<QString, QString> DLLExport
-loadRunString(const QString &run, const QString &instrument,
-              const QString &prefix, const QString &outputName = QString());
+boost::tuple<QString, QString>
+    DLLExport loadRunString(const QString &run, const QString &instrument,
+                            const QString &prefix,
+                            const QString &outputName = QString());
 
-QString DLLExport
-completeOutputProperties(const QString &algName, size_t currentProperties);
+QString DLLExport completeOutputProperties(const QString &algName,
+                                           size_t currentProperties);
 
 class DLLExport GenerateNotebook {
 
@@ -124,7 +108,7 @@ private:
   // hinting line edits
   ColumnOptionsMap m_preprocessingOptionsMap;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORGENERATENOTEBOOK_H

@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_QUASI_H_
 #define MANTIDQTCUSTOMINTERFACES_QUASI_H_
 
-#include "ui_Quasi.h"
 #include "IndirectBayesTab.h"
+#include "ui_Quasi.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -38,14 +44,23 @@ private slots:
   void updateMiniPlot();
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
-  // Handles saving of workspace
-  void saveClicked();
-  // Handles plotting
+
+  void runClicked();
   void plotClicked();
-  // Handles plotting current preview
   void plotCurrentPreview();
+  void saveClicked();
 
 private:
+  void displayMessageAndRun(std::string const &saveDirectory);
+  int displaySaveDirectoryMessage();
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

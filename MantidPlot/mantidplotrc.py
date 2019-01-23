@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #-------------------------------------------------------------------------------
 # mantidplotrc.py
 #
@@ -38,7 +44,7 @@ if __name__ == '__main__':
     from mantid.api import *
     from mantid.simpleapi import *
 
-    # Common imports (here for backwards compatability)
+    # Common imports (here for backwards compatibility)
     import os
     import sys
 

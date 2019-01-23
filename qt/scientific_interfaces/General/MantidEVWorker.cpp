@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <iostream>
 #include <sstream>
 
@@ -10,12 +16,14 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidEVWorker.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
-#include "MantidEVWorker.h"
 #include <exception>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -27,7 +35,7 @@ using namespace Mantid::API;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidEV");
-}
+} // namespace
 
 /**
  *  Default constructor
@@ -153,6 +161,7 @@ bool MantidEVWorker::isEventWorkspace(const std::string &event_ws_name) {
  *  @param det_cal_file     Fully qualified name of the .DetCal file.
  *  @param det_cal_file2    Fully qualified name of the second .DetCal
  *                          file for the second panel on SNAP.
+ *  @param axisCORELLI      Which axis for phi for CORELLI goniometer
  *
  *  @return true if the file was loaded and MD workspace was
  *          successfully created.
@@ -162,7 +171,7 @@ bool MantidEVWorker::loadAndConvertToMD(
     const std::string &md_ws_name, const double modQ, const double minQ,
     const double maxQ, const bool do_lorentz_corr, const bool load_data,
     const bool load_det_cal, const std::string &det_cal_file,
-    const std::string &det_cal_file2) {
+    const std::string &det_cal_file2, const std::string &axisCORELLI) {
   try {
     IAlgorithm_sptr alg;
     if (load_data) {
@@ -177,8 +186,7 @@ bool MantidEVWorker::loadAndConvertToMD(
         alg->setProperty("FilterByTofMin", 500.0);
         alg->setProperty("FilterByTofMax", 16666.0);
       }
-      alg->setProperty("LoadMonitors", true);
-
+      alg->setProperty("LoadMonitors", false);
       if (!alg->execute())
         return false;
 
@@ -190,6 +198,14 @@ bool MantidEVWorker::loadAndConvertToMD(
 
         if (!alg->execute())
           return false;
+      } else if (axisCORELLI.compare(
+                     "Select Goniometer Axis for CORELLI only") != 0) {
+        const auto &ADS = AnalysisDataService::Instance();
+        Mantid::API::MatrixWorkspace_sptr ev_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+        double phi = ev_ws->run().getLogAsSingleValue(
+            axisCORELLI, Mantid::Kernel::Math::TimeAveragedMean);
+        ev_ws->mutableRun().mutableGoniometer().setRotationAngle(0, phi);
       }
 
       if (load_det_cal) {
@@ -242,6 +258,97 @@ bool MantidEVWorker::loadAndConvertToMD(
 }
 
 /**
+ *  Take the specified EventWorkspace
+ *  and convert it to the specified MD workspace.
+ *
+ *  @param ev_ws_name       Name of the event workspace to create
+ *  @param md_ws_name       Name of the MD workspace to create
+ *  @param minQ             The smallest value of any component
+ *                          of Q to include.
+ *  @param maxQ             The largest absolute value of any component
+ *                          of Q to include. When ConvertToMD is called,
+ *  @return true if the file was loaded and MD workspace was
+ *          successfully created.
+ */
+bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
+                                  const std::string &md_ws_name,
+                                  const double minQ, const double maxQ) {
+  try {
+    IAlgorithm_sptr alg;
+    const auto &ADS = AnalysisDataService::Instance();
+    Mantid::API::MatrixWorkspace_sptr ev_ws =
+        ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+    double Q = maxQ;
+    if (minQ != Mantid::EMPTY_DBL()) {
+      Q = std::max(Q, -minQ);
+    }
+    Mantid::Geometry::OrientedLattice o_lattice =
+        ev_ws->mutableSample().getOrientedLattice();
+    std::vector<V3D> hkl;
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, -Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, -Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, -Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, -Q, -Q)));
+    double hmin = 0;
+    double kmin = 0;
+    double lmin = 0;
+    double hmax = 0;
+    double kmax = 0;
+    double lmax = 0;
+    for (int i = 0; i < 8; i++) {
+      if (hkl[i][0] < hmin)
+        hmin = hkl[i][0];
+      if (hkl[i][1] < kmin)
+        kmin = hkl[i][1];
+      if (hkl[i][2] < lmin)
+        lmin = hkl[i][2];
+      if (hkl[i][0] > hmax)
+        hmax = hkl[i][0];
+      if (hkl[i][1] > kmax)
+        kmax = hkl[i][1];
+      if (hkl[i][2] > lmax)
+        lmax = hkl[i][2];
+    }
+
+    std::ostringstream min_str;
+    min_str << hmin << "," << kmin << "," << lmin;
+
+    std::ostringstream max_str;
+    max_str << hmax << "," << kmax << "," << lmax;
+
+    alg = AlgorithmManager::Instance().create("ConvertToMD");
+    alg->setProperty("InputWorkspace", ev_ws_name);
+    alg->setProperty("OutputWorkspace", md_ws_name + "_HKL");
+    alg->setProperty("OverwriteExisting", true);
+    alg->setProperty("QDimensions", "Q3D");
+    alg->setProperty("dEAnalysisMode", "Elastic");
+    alg->setProperty("QConversionScales", "HKL");
+    alg->setProperty("Q3DFrames", "HKL");
+    alg->setProperty("LorentzCorrection", true);
+    alg->setProperty("MinValues", min_str.str());
+    alg->setProperty("MaxValues", max_str.str());
+    alg->setProperty("SplitInto", "2");
+    alg->setProperty("SplitThreshold", "50");
+    alg->setProperty("MaxRecursionDepth", "13");
+    alg->setProperty("MinRecursionDepth", "7");
+
+    if (!alg->execute())
+      return false;
+  } catch (std::exception &e) {
+    g_log.error() << "Error:" << e.what() << '\n';
+    return false;
+  } catch (...) {
+    g_log.error() << "Error: Could Not load file and convert to MD\n";
+    return false;
+  }
+  return true;
+}
+
+/**
  *  Find peaks in the specified MD workspace and save them in the
  *  specified peaks workspace.
  *
@@ -260,13 +367,15 @@ bool MantidEVWorker::loadAndConvertToMD(
  *                        the average intensity will be considered.
  *  @param minQPeaks   Filter with ModQ min
  *  @param maxQPeaks  Filter with ModQmax
+ *  @param file_name  Filename for monitors
  *  @return true if FindPeaksMD completed successfully.
  */
 bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
                                const std::string &md_ws_name,
                                const std::string &peaks_ws_name, double max_abc,
                                size_t num_to_find, double min_intensity,
-                               double minQPeaks, double maxQPeaks) {
+                               double minQPeaks, double maxQPeaks,
+                               const std::string &file_name) {
   try {
     // Estimate a lower bound on the distance between
     // based on the maximum real space cell edge
@@ -280,21 +389,36 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
     const auto &ADS = AnalysisDataService::Instance();
 
     if (alg->execute()) {
-      Mantid::API::MatrixWorkspace_sptr mon_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
-      IAlgorithm_sptr int_alg =
-          AlgorithmManager::Instance().create("Integration");
-      int_alg->setProperty("InputWorkspace", mon_ws);
-      int_alg->setProperty("RangeLower", 1000.0);
-      int_alg->setProperty("RangeUpper", 12500.0);
-      int_alg->setProperty("OutputWorkspace",
-                           ev_ws_name + "_integrated_monitor");
-      int_alg->execute();
-      Mantid::API::MatrixWorkspace_sptr int_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
-      double monitor_count = int_ws->y(0)[0];
-      std::cout << "Beam monitor counts used for scaling = " << monitor_count
-                << "\n";
+      double monitor_count = 0;
+      try {
+        IAlgorithm_sptr mon_alg =
+            AlgorithmManager::Instance().create("LoadNexusMonitors");
+        mon_alg->setProperty("Filename", file_name);
+        mon_alg->setProperty("OutputWorkspace", ev_ws_name + "__monitors");
+        mon_alg->execute();
+
+        Mantid::API::MatrixWorkspace_sptr mon_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
+        IAlgorithm_sptr int_alg =
+            AlgorithmManager::Instance().create("Integration");
+        int_alg->setProperty("InputWorkspace", mon_ws);
+        int_alg->setProperty("RangeLower", 1000.0);
+        int_alg->setProperty("RangeUpper", 12500.0);
+        int_alg->setProperty("OutputWorkspace",
+                             ev_ws_name + "_integrated_monitor");
+        int_alg->execute();
+        Mantid::API::MatrixWorkspace_sptr int_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
+        monitor_count = int_ws->y(0)[0];
+        g_log.notice() << "Beam monitor counts used for scaling = "
+                       << monitor_count << "\n";
+      } catch (...) {
+        Mantid::API::MatrixWorkspace_sptr ev_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+        monitor_count = ev_ws->run().getProtonCharge() * 1000.0;
+        g_log.notice() << "Beam proton charge used for scaling = "
+                       << monitor_count << "\n";
+      }
 
       IPeaksWorkspace_sptr peaks_ws =
           ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
@@ -1016,15 +1140,19 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
 
     g_log.notice() << '\n';
     g_log.notice() << "Mantid UB = \n";
-    sprintf(logInfo, std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
-                                 "%12.8f\n %12.8f %12.8f %12.8f\n").c_str(),
+    sprintf(logInfo,
+            std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
+                        "%12.8f\n %12.8f %12.8f %12.8f\n")
+                .c_str(),
             UB[0][0], UB[0][1], UB[0][2], UB[1][0], UB[1][1], UB[1][2],
             UB[2][0], UB[2][1], UB[2][2]);
     g_log.notice(std::string(logInfo));
 
     g_log.notice() << "ISAW UB = \n";
-    sprintf(logInfo, std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
-                                 "%12.8f\n %12.8f %12.8f %12.8f\n").c_str(),
+    sprintf(logInfo,
+            std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
+                        "%12.8f\n %12.8f %12.8f %12.8f\n")
+                .c_str(),
             UB[2][0], UB[0][0], UB[1][0], UB[2][1], UB[0][1], UB[1][1],
             UB[2][2], UB[0][2], UB[1][2]);
     g_log.notice(std::string(logInfo));

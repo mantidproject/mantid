@@ -49,7 +49,7 @@ So by specifying one single symmetry operation as generator, all symmetry operat
   G' = G \cdot \left\{m^0, m^1\right\} = \left\{1, 4^{+}, 2, 4^{-}\right\} \cdot \left\{1, m\right\} = \left\{1, m, 4^{+}, \bar{4}^{+}, 2, \bar{1}, 4^{-}, \bar{4}^{-}\right\}
 
 
-This means that :math:`4/m` contains an inversion center as well as a four fold rotoinversion axis which result from the combination of the operations of the two cyclic groups. It's also possible to use a different cyclic group to achive the same result (:math:`\bar{1}`). As mentioned above, for some point groups it's necessary to use three generators, which follows the same principle and is not shown here.
+This means that :math:`4/m` contains an inversion center as well as a four fold rotoinversion axis which result from the combination of the operations of the two cyclic groups. It's also possible to use a different cyclic group to achieve the same result (:math:`\bar{1}`). As mentioned above, for some point groups it's necessary to use three generators, which follows the same principle and is not shown here.
 
 Space groups can be handled in a very similar way if translations are limited to the interval :math:`[0, 1)` so that screw-axes and glide-planes can also be used to generate cyclic groups. Without this limitation, the translational components would not be the same for :math:`S^k` and :math:`S^0`.
 
@@ -629,7 +629,7 @@ Building on the example above which showed how to check whether a reflection is 
         # (see the helper functions defined above).
         spaceGroupMatchList.append((sgSymbol, getValueFrequencies(conditionsMatchList)))
 
-    # Sort the list according to abscence violations and additional reflection conditions
+    # Sort the list according to absence violations and additional reflection conditions
     spaceGroupMatchList.sort(key=lambda x: (x[1].get(1, 0), x[1].get(-1, 0)))
 
     # Remove the second setting that exists for some groups

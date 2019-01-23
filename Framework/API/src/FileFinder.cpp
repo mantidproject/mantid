@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,15 +18,15 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/Path.h>
-#include <Poco/File.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/Exception.h>
-#include <boost/regex.hpp>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
-#include <cctype>
 #include <algorithm>
+#include <cctype>
 
 #include <boost/algorithm/string.hpp>
 
@@ -39,7 +45,7 @@ Mantid::Kernel::Logger g_log("FileFinder");
 bool containsWildCard(const std::string &ext) {
   return std::string::npos != ext.find('*');
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace API {
@@ -62,13 +68,9 @@ FileFinderImpl::FileFinderImpl() {
 #ifdef _WIN32
   m_globOption = Poco::Glob::GLOB_DEFAULT;
 #else
-  std::string casesensitive =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "filefinder.casesensitive");
-  if (boost::iequals("Off", casesensitive))
-    m_globOption = Poco::Glob::GLOB_CASELESS;
-  else
-    m_globOption = Poco::Glob::GLOB_DEFAULT;
+  setCaseSensitive(Kernel::ConfigService::Instance()
+                       .getValue<bool>("filefinder.casesensitive")
+                       .get_value_or(false));
 #endif
 }
 
@@ -101,55 +103,11 @@ bool FileFinderImpl::getCaseSensitive() const {
  * search locations
  *  or an empty string otherwise.
  */
+
 std::string FileFinderImpl::getFullPath(const std::string &filename,
                                         const bool ignoreDirs) const {
-  std::string fName = Kernel::Strings::strip(filename);
-  g_log.debug() << "getFullPath(" << fName << ")\n";
-  // If this is already a full path, nothing to do
-  if (Poco::Path(fName).isAbsolute())
-    return fName;
-
-  // First try the path relative to the current directory. Can throw in some
-  // circumstances with extensions that have wild cards
-  try {
-    Poco::File fullPath(Poco::Path().resolve(fName));
-    if (fullPath.exists() && (!ignoreDirs || !fullPath.isDirectory()))
-      return fullPath.path();
-  } catch (std::exception &) {
-  }
-
-  const std::vector<std::string> &searchPaths =
-      Kernel::ConfigService::Instance().getDataSearchDirs();
-  for (const auto &searchPath : searchPaths) {
-    g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
-// On windows globbing is note working properly with network drives
-// for example a network drive containing a $
-// For this reason, and since windows is case insensitive anyway
-// a special case is made for windows
-#ifdef _WIN32
-    if (fName.find("*") != std::string::npos) {
-#endif
-      Poco::Path path(searchPath, fName);
-      std::set<std::string> files;
-      Kernel::Glob::glob(path, files, m_globOption);
-      if (!files.empty()) {
-        Poco::File matchPath(*files.begin());
-        if (ignoreDirs && matchPath.isDirectory()) {
-          continue;
-        }
-        return *files.begin();
-      }
-#ifdef _WIN32
-    } else {
-      Poco::Path path(searchPath, fName);
-      Poco::File file(path);
-      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
-        return path.toString();
-      }
-    }
-#endif
-  }
-  return "";
+  return Kernel::ConfigService::Instance().getFullPath(filename, ignoreDirs,
+                                                       m_globOption);
 }
 
 /** Run numbers can be followed by an allowed string. Check if there is
@@ -351,32 +309,6 @@ FileFinderImpl::makeFileName(const std::string &hint,
 }
 
 /**
- * Find the file given a hint. If the name contains a dot(.) then it is assumed
- * that it is already a file stem
- * otherwise calls makeFileName internally.
- * @param hintstr :: The name hint, format: [INSTR]1234[.ext]
- * @param exts :: Optional list of allowed extensions. Only those extensions
- * found in both
- *  facilities extension list and exts will be used in the search. If an
- * extension is given in hint
- *  this argument is ignored.
- * @return The full path to the file or empty string if not found
- */
-std::string FileFinderImpl::findRun(const std::string &hintstr,
-                                    const std::set<std::string> &exts) const {
-  std::string hint = Kernel::Strings::strip(hintstr);
-  g_log.debug() << "set findRun(\'" << hintstr << "\', exts[" << exts.size()
-                << "])\n";
-  if (hint.empty())
-    return "";
-  std::vector<std::string> exts_v;
-  if (!exts.empty())
-    exts_v.assign(exts.begin(), exts.end());
-
-  return this->findRun(hint, exts_v);
-}
-
-/**
  * Determine the extension from a filename.
  *
  * @param filename The filename to get the extension from.
@@ -466,9 +398,9 @@ FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
   return archs;
 }
 
-std::string
-FileFinderImpl::findRun(const std::string &hintstr,
-                        const std::vector<std::string> &exts) const {
+std::string FileFinderImpl::findRun(const std::string &hintstr,
+                                    const std::vector<std::string> &exts,
+                                    const bool useExtsOnly) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size()
                 << "])\n";
@@ -555,45 +487,11 @@ FileFinderImpl::findRun(const std::string &hintstr,
   if (!extension.empty())
     uniqueExts.push_back(extension);
 
-  auto cend = exts.end();
-  for (auto cit = exts.begin(); cit != cend; ++cit) {
-    if (getCaseSensitive()) // prune case variations - this is a hack, see above
-    {
-      std::string transformed(*cit);
-      std::transform(cit->begin(), cit->end(), transformed.begin(), tolower);
-      auto searchItr =
-          std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-      if (searchItr != uniqueExts.end())
-        continue;
-      std::transform(cit->begin(), cit->end(), transformed.begin(), toupper);
-      searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-      if (searchItr == uniqueExts.end())
-        uniqueExts.push_back(*cit);
-    } else {
-      auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), *cit);
-      if (searchItr == uniqueExts.end())
-        uniqueExts.push_back(*cit);
-    }
-  }
-  cend = extensions.end();
-  for (auto cit = extensions.begin(); cit != cend; ++cit) {
-    if (getCaseSensitive()) // prune case variations - this is a hack, see above
-    {
-      std::string transformed(*cit);
-      std::transform(cit->begin(), cit->end(), transformed.begin(), tolower);
-      auto searchItr =
-          std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-      if (searchItr != uniqueExts.end())
-        continue;
-      std::transform(cit->begin(), cit->end(), transformed.begin(), toupper);
-      searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-      if (searchItr == uniqueExts.end())
-        uniqueExts.push_back(*cit);
-    } else {
-      auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), *cit);
-      if (searchItr == uniqueExts.end())
-        uniqueExts.push_back(*cit);
-    }
+  // If provided exts are empty, or useExtsOnly is false,
+  // we want to include facility exts as well
+  getUniqueExtensions(exts, uniqueExts);
+  if (exts.empty() || !useExtsOnly) {
+    getUniqueExtensions(extensions, uniqueExts);
   }
 
   // determine which archive search facilities to use
@@ -613,22 +511,57 @@ FileFinderImpl::findRun(const std::string &hintstr,
 }
 
 /**
+ * Given a set of already determined extensions and new extensions,
+ * create a set of all extensions.
+ * If not in an extension-is-case-sensitive environment, only add the
+ * lower case OR upper case version of the extension
+ * @param extensionsToAdd :: a vector of extensions to add
+ * @param uniqueExts :: a vector of currently included extensions
+ */
+void FileFinderImpl::getUniqueExtensions(
+    const std::vector<std::string> &extensionsToAdd,
+    std::vector<std::string> &uniqueExts) const {
+  const bool isCaseSensitive = getCaseSensitive();
+  for (const auto &cit : extensionsToAdd) {
+    std::string transformed(cit);
+    if (!isCaseSensitive) {
+      std::transform(cit.begin(), cit.end(), transformed.begin(), tolower);
+    }
+    const auto searchItr =
+        std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
+    if (searchItr == uniqueExts.end()) {
+      uniqueExts.push_back(transformed);
+    }
+  }
+}
+
+/**
  * Find a list of files file given a hint. Calls findRun internally.
  * @param hintstr :: Comma separated list of hints to findRun method.
  *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
  *  Only the beginning of a range can contain an instrument name.
+ * @param exts :: Vector of allowed file extensions. Optional.
+ *                If provided, this provides the only extensions searched for.
+ *                If not provided, facility extensions used.
+ * @param useExtsOnly :: Optional bool. If it's true (and exts is not empty),
+                           search the for the file using exts only.
+                           If it's false, use exts AND facility extensions.
  * @return A vector of full paths or empty vector
  * @throw std::invalid_argument if the argument is malformed
  * @throw Exception::NotFoundError if a file could not be found
  */
 std::vector<std::string>
-FileFinderImpl::findRuns(const std::string &hintstr) const {
+FileFinderImpl::findRuns(const std::string &hintstr,
+                         const std::vector<std::string> &exts,
+                         const bool useExtsOnly) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
   Mantid::Kernel::StringTokenizer hints(
-      hint, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      hint, ",",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  static const boost::regex digits("[0-9]+");
   auto h = hints.begin();
 
   for (; h != hints.end(); ++h) {
@@ -646,8 +579,9 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
     }
 
     Mantid::Kernel::StringTokenizer range(
-        *h, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        *h, "-",
+        Mantid::Kernel::StringTokenizer::TOK_TRIM |
+            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if ((range.count() > 2) && (!fileSuspected)) {
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
@@ -665,7 +599,6 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
       runEnd.replace(runEnd.end() - range[1].size(), runEnd.end(), range[1]);
 
       // Throw if runEnd contains something else other than a digit.
-      boost::regex digits("[0-9]+");
       if (!boost::regex_match(runEnd, digits))
         throw std::invalid_argument("Malformed range of runs: Part of the run "
                                     "has a non-digit character in it.");
@@ -678,7 +611,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
         run = std::to_string(irun);
         while (run.size() < nZero)
           run.insert(0, "0");
-        std::string path = findRun(p1.first + run);
+        std::string path = findRun(p1.first + run, exts, useExtsOnly);
         if (!path.empty()) {
           res.push_back(path);
         } else {
@@ -686,7 +619,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
         }
       }
     } else {
-      std::string path = findRun(*h);
+      std::string path = findRun(*h, exts, useExtsOnly);
       if (!path.empty()) {
         res.push_back(path);
       } else {
@@ -824,5 +757,5 @@ std::string FileFinderImpl::toUpper(const std::string &src) const {
   return result;
 }
 
-} // API
-} // Mantid
+} // namespace API
+} // namespace Mantid

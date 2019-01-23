@@ -1,9 +1,15 @@
-#include "MantidGeometry/Instrument.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/ComponentVisitor.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Logger.h"
 
@@ -12,7 +18,7 @@ namespace Geometry {
 namespace {
 // static logger object
 Kernel::Logger g_log("Detector");
-}
+} // namespace
 
 using Kernel::V3D;
 
@@ -119,10 +125,10 @@ double Detector::getPhiOffset(const double &offset) const {
 }
 
 /** returns the detector's topology, namely, the meaning of the detector's
-* angular measurements.
-*     It is different in cartesian and cylindrical (surrounding the beam)
-* coordinate system
-*/
+ * angular measurements.
+ *     It is different in cartesian and cylindrical (surrounding the beam)
+ * coordinate system
+ */
 det_topology Detector::getTopology(V3D &center) const {
   center = this->getPos();
   return rect;

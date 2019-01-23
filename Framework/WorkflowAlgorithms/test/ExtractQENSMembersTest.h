@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_EXTRACTQENSMEMBERSTEST_H_
 #define MANTID_ALGORITHMS_EXTRACTQENSMEMBERSTEST_H_
 
@@ -8,7 +14,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -186,8 +191,8 @@ private:
     for (auto i = 0u; i < members.size(); ++i) {
       auto memberWS = createGenericWorkspace(
           dataX, randomDataVector<double>(dataX.size() - 1, 0.0, 10.0));
-      memberWS->getAxis(0)
-          ->setUnit(resultWorkspace->getAxis(0)->unit()->unitID());
+      memberWS->getAxis(0)->setUnit(
+          resultWorkspace->getAxis(0)->unit()->unitID());
       resultWorkspace = appendSpectra(resultWorkspace, memberWS);
       axis->setLabel(i, members[i]);
     }

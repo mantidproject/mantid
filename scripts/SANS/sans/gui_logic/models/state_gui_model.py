@@ -1,4 +1,10 @@
-""" The state gui model contains all the reduction information which is not explictily available in the data table.
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+""" The state gui model contains all the reduction information which is not explicitly available in the data table.
 
 This is one of the two models which is used for the data reduction. It contains generally all the settings which
 are not available in the model associated with the data table.
@@ -11,13 +17,16 @@ from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, 
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
                                           q_rebin_values, fit_general, mask_angle_entry, range_entry, position_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
-                               DetectorType, DataType, FitType)
+                               DetectorType, DataType, FitType, SANSInstrument)
 
 
 class StateGuiModel(object):
     def __init__(self, user_file_items):
         super(StateGuiModel, self).__init__()
         self._user_file_items = user_file_items
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     @property
     def settings(self):
@@ -44,13 +53,16 @@ class StateGuiModel(object):
     # FRONT TAB
     # ==================================================================================================================
     # ==================================================================================================================
+    @property
+    def instrument(self):
+        return self.get_simple_element(element_id=DetectorId.instrument, default_value=SANSInstrument.NoInstrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Compatibility Mode Options
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def compatibility_mode(self):
-        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=False)
+        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=True)
 
     @compatibility_mode.setter
     def compatibility_mode(self, value):
@@ -107,7 +119,7 @@ class StateGuiModel(object):
 
     @property
     def hab_pos_1(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos1")
+        return self.get_simple_element_with_attribute(element_id=SetId.centre_HAB, default_value='', attribute="pos1")
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
@@ -115,7 +127,7 @@ class StateGuiModel(object):
 
     @property
     def hab_pos_2(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos2")
+        return self.get_simple_element_with_attribute(element_id=SetId.centre_HAB, default_value='', attribute="pos2")
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):
@@ -125,7 +137,7 @@ class StateGuiModel(object):
         if SetId.centre in self._user_file_items:
             settings = self._user_file_items[SetId.centre]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overriden
+            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
             settings = [position_entry(pos1=0.0, pos2=0.0, detector_type=DetectorType.LAB)]
 
@@ -261,7 +273,7 @@ class StateGuiModel(object):
 
     @property
     def merge_scale(self):
-        return self.get_simple_element(element_id=DetectorId.rescale, default_value="")
+        return self.get_simple_element(element_id=DetectorId.rescale, default_value="1.0")
 
     @merge_scale.setter
     def merge_scale(self, value):
@@ -269,7 +281,7 @@ class StateGuiModel(object):
 
     @property
     def merge_shift(self):
-        return self.get_simple_element(element_id=DetectorId.shift, default_value="")
+        return self.get_simple_element(element_id=DetectorId.shift, default_value="0.0")
 
     @merge_shift.setter
     def merge_shift(self, value):
@@ -371,7 +383,7 @@ class StateGuiModel(object):
         if LimitsId.wavelength in self._user_file_items:
             settings = self._user_file_items[LimitsId.wavelength]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overriden
+            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
             settings = [simple_range(start=-1., stop=-1., step=-1., step_type=RangeStepType.Lin)]
 
@@ -760,7 +772,7 @@ class StateGuiModel(object):
 
     @property
     def show_transmission(self):
-        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=False)
+        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=True)
 
     @show_transmission.setter
     def show_transmission(self, value):
@@ -1056,7 +1068,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="min", default_value="")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="min", default_value="-90")
 
     @phi_limit_min.setter
     def phi_limit_min(self, value):
@@ -1064,7 +1076,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="max", default_value="")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="max", default_value="90")
 
     @phi_limit_max.setter
     def phi_limit_max(self, value):
@@ -1072,7 +1084,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_use_mirror(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="use_mirror", default_value=False)  # noqa
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="use_mirror", default_value=True)  # noqa
 
     @phi_limit_use_mirror.setter
     def phi_limit_use_mirror(self, value):

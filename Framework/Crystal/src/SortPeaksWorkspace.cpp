@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SortPeaksWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -31,10 +37,10 @@ const std::string SortPeaksWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void SortPeaksWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
@@ -46,36 +52,14 @@ void SortPeaksWorkspace::init() {
       "Sort the OutputWorkspace by the target column in a Ascending fashion.");
 }
 
-PeaksWorkspace_sptr SortPeaksWorkspace::tryFetchOutputWorkspace() const {
-  IPeaksWorkspace_sptr temp = getProperty("OutputWorkspace");
-  PeaksWorkspace_sptr outputWS;
-  if (temp != nullptr) {
-    outputWS = boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
-    if (outputWS == nullptr) {
-      throw std::invalid_argument("OutputWorkspace is not a PeaksWorkspace.");
-    }
-  }
-  return outputWS;
-}
-
-PeaksWorkspace_sptr SortPeaksWorkspace::tryFetchInputWorkspace() const {
-  IPeaksWorkspace_sptr temp = getProperty("InputWorkspace");
-  PeaksWorkspace_sptr inputWS =
-      boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
-  if (inputWS == nullptr) {
-    throw std::invalid_argument("InputWorkspace is not a PeaksWorkspace.");
-  }
-  return inputWS;
-}
-
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SortPeaksWorkspace::exec() {
   const std::string columnToSortBy = getProperty("ColumnNameToSortBy");
   const bool sortAscending = getProperty("SortAscending");
-  PeaksWorkspace_sptr inputWS = tryFetchInputWorkspace();
-  PeaksWorkspace_sptr outputWS = tryFetchOutputWorkspace();
+  PeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  PeaksWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   try {
     // Try to get the column. This will throw if the column does not exist.

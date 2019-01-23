@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGERTEST_H
 #define MANTID_MANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGERTEST_H
 
@@ -8,7 +14,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
@@ -34,6 +39,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 
 using namespace Mantid::API;
@@ -231,6 +237,19 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
   }
 
+  void test_delete_all() {
+    // This is well tested in GenericDataProcessorPresenterTest, hence just
+    // checking that the presenter is called
+
+    NiceMock<MockDataProcessorPresenter> presenter;
+    TwoLevelTreeManager manager(&presenter, reflWhitelist());
+
+    EXPECT_CALL(presenter, selectedParents()).Times(0);
+    EXPECT_CALL(presenter, selectedChildren()).Times(0);
+    TS_ASSERT_THROWS_NOTHING(manager.deleteAll());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
+  }
+
   void test_expand_selection() {
     // This is well tested in GenericDataProcessorPresenterTest, hence just
     // checking that the presenter is called
@@ -412,12 +431,12 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
     TS_ASSERT_EQUALS(data.size(), 2);
-    QStringList firstRow = {"12345", "0.5",                       "20000",
-                            "0.1",   "0.2",                       "0.04",
-                            "5",     "CorrectDetectorPositions=1"};
-    QStringList secondRow = {"12346", "0.6",                       "20001",
-                             "0.1",   "0.2",                       "0.04",
-                             "4",     "CorrectDetectorPositions=0"};
+    QStringList firstRow = {
+        "12345", "0.5",  "20000", "0.1",
+        "0.2",   "0.04", "5",     "CorrectDetectorPositions=1"};
+    QStringList secondRow = {
+        "12346", "0.6",  "20001", "0.1",
+        "0.2",   "0.04", "4",     "CorrectDetectorPositions=0"};
     QStringList thirdRow = {"12347", "0.7",  "20003", "0.3",
                             "0.4",   "0.01", "3",     ""};
     QStringList fourthRow = {"12348", "0.8",  "20004", "0.4",

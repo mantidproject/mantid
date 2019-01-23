@@ -18,7 +18,7 @@ From a user's point of view, the main purposes of usage examples are:
 * Understanding the algorithm
 * Showing hints/comments etc. that help understand Mantid Python scripting in general
 
-The usage examples are written in `reStructuredText <http://docutils.sourceforge.net/rst.html>`__, which can be converted to HTML and the code in the usage examples can be tested. The image below demonstrates an example of converting reStructuredText to HTML. 
+The usage examples are written in `reStructuredText <http://docutils.sourceforge.net/rst.html>`__, which can be converted to HTML and the code in the usage examples can be tested. 
 
 Guide
 =====
@@ -75,7 +75,7 @@ What is worth keeping in mind is:
 * Use comments.
 * Use Python ``print`` to output results, which, where possible, helps to understand the algorithm.
 
-A Jenkins job tests that the usage examples are not broken, i.e. that they continue to provide a working demonstration against the current build. It is vital to stress that the purpose of usage testing is *not to replace unit testing* (or system testing). The purpose of usage testing (better described as demonstration examples), is to provide some happy-path examples, which, where this is possible, can assist the user understanding of the Python code. This is very different from the purposes of testing in general, see `here <UnitTestGoodPractice.html>`__.
+A Jenkins job tests that the usage examples are not broken, i.e. that they continue to provide a working demonstration against the current build. It is vital to stress that the purpose of usage testing is *not to replace unit testing* (or system testing). The purpose of usage testing (better described as demonstration examples), is to provide some happy-path examples, which, where this is possible, can assist the user understanding of the Python code. This is very different from the purposes of testing in general, see :ref:`here <UnitTestGoodPractice>`.
 
 Additional benefits of usage examples:
 
@@ -181,7 +181,7 @@ For a more simple use of CreateSampleWorkspace see example below (note if no arg
 When needing to load a data file
 --------------------------------
 
-Instructions to add a new data file to the repository are available `here <DataFilesForTesting.html>`__. Files from the repository will be bundled up into a .zip file, and this .zip made available for download from the Mantid download page.
+Instructions to add a new data file to the repository are available :ref:`here <DataFilesForTesting>`. Files from the repository will be bundled up into a .zip file, and this .zip made available for download from the Mantid download page.
 
 If you use files you must add the line
 
@@ -221,4 +221,4 @@ as shown in the example below. This will generate a note to the user explaining 
 Running the Tests
 =================
 
-See `here <DocumentationGuideForDevs.html>`__ for how to run and test the usage examples locally.
+See :ref:`here <DocumentationGuideForDevs>` for how to run and test the usage examples locally.

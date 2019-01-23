@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 """Defines classes for handling installation
 """
@@ -69,6 +75,11 @@ def get_installer(package_dir, do_install=True):
         @param package_dir :: The directory to search for packages
         @param do_install :: True if installation is to be performed
     """
+    # == for testing conda build of mantid-framework ==========
+    import os
+    if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
+        return CondaInstaller(package_dir, do_install)
+    # =========================================================
     system = platform.system()
     if system == 'Windows':
         return NSISInstaller(package_dir, do_install)
@@ -155,9 +166,19 @@ class NSISInstaller(MantidInstaller):
     """
 
     def __init__(self, package_dir, do_install):
-        MantidInstaller.__init__(self, package_dir, 'Mantid-*-win*.exe', do_install)
-        self.mantidPlotPath = 'C:/MantidInstall/bin/launch_mantidplot.bat'
-        self.python_cmd = "C:/MantidInstall/bin/mantidpython.bat"
+        MantidInstaller.__init__(self, package_dir, 'mantid*.exe', do_install)
+        package = os.path.basename(self.mantidInstaller)
+        install_prefix = 'C:/'
+        if 'mantidnightly' in package:
+            install_prefix += 'MantidNightlyInstall'
+        elif 'mantidunstable' in package:
+            install_prefix += 'MantidUnstableInstall'
+        else:
+            install_prefix += 'MantidInstall'
+
+        self.uninstallPath = install_prefix + '/Uninstall.exe'
+        self.mantidPlotPath = install_prefix + '/bin/launch_mantidplot.bat'
+        self.python_cmd = install_prefix + '/bin/mantidpython.bat'
 
     def do_install(self):
         """
@@ -172,11 +193,10 @@ class NSISInstaller(MantidInstaller):
 
     def do_uninstall(self):
         "Runs the uninstall exe"
-        uninstall_path = 'C:/MantidInstall/Uninstall.exe'
         # The NSIS uninstaller actually runs a new process & detaches itself from the parent
         # process so that it is able to remove itself. This means that the /WAIT has no affect
         # because the parent appears to finish almost immediately
-        run(uninstall_path + ' /S')
+        run(self.uninstallPath + ' /S')
         # Wait for 30 seconds for it to finish
         log("Waiting 30 seconds for uninstaller to finish")
         time.sleep(30)
@@ -279,6 +299,33 @@ class DMGInstaller(MantidInstaller):
 
     def do_uninstall(self):
         run('sudo rm -fr /Applications/MantidPlot.app/')
+
+
+class CondaInstaller(MantidInstaller):
+
+    python_args = "" # not mantidpython. just normal python
+
+    def __init__(self, package_dir, do_install=True):
+        filepattern = "mantid-framework*.tar.bz2"
+        MantidInstaller.__init__(self, package_dir, filepattern, do_install)
+        package = os.path.basename(self.mantidInstaller)
+        self.conda_prefix = os.path.expanduser('~/jenkins-systemtests-opt/miniconda2')
+        self.conda_mantid_env_prefix = install_prefix = os.path.join(self.conda_prefix, 'envs', 'mantid')
+        self.mantidPlotPath = None # conda mantid-framework does not include mantidplot
+        self.python_cmd = install_prefix + '/bin/python'
+
+    def do_install(self):
+        """Uses gdebi to run the install
+        """
+        thisdir = os.path.dirname(__file__)
+        script = os.path.join(thisdir, 'install_conda_mantid.sh')
+        run('%s %s' % (script, self.mantidInstaller))
+
+    def do_uninstall(self):
+        """Removes the debian package
+        """
+        # run('rm -rf %s' % self.conda_mantid_env_prefix)
+
 
 #-------------------------------------------------------------------------------
 # Main

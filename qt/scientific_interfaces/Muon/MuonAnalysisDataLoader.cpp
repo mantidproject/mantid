@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisDataLoader.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -12,16 +18,16 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
-using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup;
-using MantidQt::CustomInterfaces::Muon::LoadResult;
-using MantidQt::CustomInterfaces::Muon::DeadTimesType;
+using Mantid::API::Workspace_sptr;
 using MantidQt::CustomInterfaces::Muon::AnalysisOptions;
+using MantidQt::CustomInterfaces::Muon::DeadTimesType;
+using MantidQt::CustomInterfaces::Muon::LoadResult;
 
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MuonAnalysisDataLoader");
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -388,7 +394,9 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
   if (!options.rebinArgs.empty()) {
     alg->setProperty("RebinParams", options.rebinArgs);
   }
-
+  if (options.wsName != "") {
+    alg->setProperty("WorkspaceName", options.wsName);
+  }
   // ---- Analysis ----
 
   // Find index of a name in a collection

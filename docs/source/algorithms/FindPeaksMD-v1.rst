@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is used to find single-crystal peaks in a
-multi-dimensional workspace (`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or
+multi-dimensional workspace (:ref:`MDEventWorkspace <MDWorkspace>` or
 :ref:`MDHistoWorkspace <MDHistoWorkspace>`). It looks for high signal
 density areas, and is based on an algorithm designed by Dennis Mikkelson
 for ISAW.
@@ -46,7 +46,7 @@ is not accessible. It may give better results on
 
 
 For data which has originally been based on histogram-type data and that has been converted to 
-event-based data it migth be beneficial to select the NumberOfEventNormalization for the `PeakFindingStrategy` property instead of the VolumeNormalization which is the default. This
+event-based data it might be beneficial to select the NumberOfEventNormalization for the `PeakFindingStrategy` property instead of the VolumeNormalization which is the default. This
 will disable the `DensityThresholdFactor` property and enable the `SignalThresholdFactor` property.
 The algorithmic steps remain the same as above but instead of using the signal density as the sorting
 quantity the signal count (total weighted event sum divided by the number of events) is used. If 
@@ -136,7 +136,7 @@ Usage
 
 The code iteslef works but disabled from doc tests as takes too long to complete. User should provide its own
 event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
-file is availible in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
+file is available in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
 
 .. code-block:: python

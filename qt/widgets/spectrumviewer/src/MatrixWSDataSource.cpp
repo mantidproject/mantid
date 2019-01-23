@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /**
  *  File: MatrixWSDataSource.cpp
  */
@@ -8,20 +14,20 @@
 
 #include <QThread>
 
-#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
-#include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
-#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 using namespace Mantid;
 using namespace Kernel;

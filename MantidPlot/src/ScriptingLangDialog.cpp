@@ -30,10 +30,10 @@
 #include "ScriptingLangDialog.h"
 #include "ApplicationWindow.h"
 
-#include <QListWidget>
-#include <QPushButton>
 #include <QLayout>
+#include <QListWidget>
 #include <QMessageBox>
+#include <QPushButton>
 
 ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env,
                                          ApplicationWindow *parent,
@@ -66,8 +66,9 @@ ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env,
 void ScriptingLangDialog::updateLangList() {
   langList->clear();
   langList->insertItems(0, ScriptingLangManager::languages());
-  QListWidgetItem *current = langList->findItems(scriptingEnv()->objectName(),
-                                                 Qt::MatchExactly).first();
+  QListWidgetItem *current =
+      langList->findItems(scriptingEnv()->objectName(), Qt::MatchExactly)
+          .first();
   if (current)
     langList->setCurrentItem(current);
 }

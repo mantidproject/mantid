@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
 //----------------------------------
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/InterfaceFactory.h"
 #include "MantidQtWidgets/Common/GenericDialog.h"
+#include "MantidQtWidgets/Common/InterfaceFactory.h"
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
-#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 
 #include <Poco/Environment.h>
 #include <QStringList>
@@ -27,14 +33,14 @@ Mantid::Kernel::Logger g_log("InterfaceManager");
 
 // Load libraries once
 std::once_flag DLLS_LOADED;
-}
+} // namespace
 
 // initialise VATES factory
-Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *
-    InterfaceManager::m_vatesGuiFactory = nullptr;
+Mantid::Kernel::AbstractInstantiator<VatesViewerInterface>
+    *InterfaceManager::m_vatesGuiFactory = nullptr;
 // initialise HelpWindow factory
-Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *
-    InterfaceManager::m_helpViewer = nullptr;
+Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
+    *InterfaceManager::m_helpViewer = nullptr;
 
 //----------------------------------
 // Public member functions
@@ -83,7 +89,7 @@ AlgorithmDialog *InterfaceManager::createDialog(
   // Work around to ensure that floating windows remain on top of the main
   // application window, but below other applications on Mac
   // Note: Qt::Tool cannot have both a max and min button on OSX
-  flags = 0;
+  flags = 0; // NOLINT
   flags |= Qt::Tool;
   flags |= Qt::CustomizeWindowHint;
   flags |= Qt::WindowMinimizeButtonHint;
@@ -225,8 +231,7 @@ void InterfaceManager::registerHelpWindowFactory(
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   if (m_helpViewer == nullptr) {
     g_log.error("InterfaceManager::createHelpWindow is null.");
-    throw Mantid::Kernel::Exception::NullPointerException(
-        "InterfaceManager::createHelpWindow", "m_helpViewer");
+    return nullptr;
   } else {
     MantidHelpInterface *interface =
         this->m_helpViewer->createUnwrappedInstance();

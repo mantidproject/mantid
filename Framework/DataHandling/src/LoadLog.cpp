@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -20,7 +26,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
 
@@ -38,6 +43,24 @@ using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
 using DataObjects::Workspace2D_sptr;
 using Types::Core::DateAndTime;
+
+namespace {
+
+template <class MapClass, class LoggerType>
+void addLogDataToRun(Mantid::API::Run &run, MapClass &aMap,
+                     LoggerType &logger) {
+  for (auto &itr : aMap) {
+    try {
+      run.addLogData(itr.second.release());
+    } catch (std::invalid_argument &e) {
+      logger.warning() << e.what() << '\n';
+    } catch (Exception::ExistsError &e) {
+      logger.warning() << e.what() << '\n';
+    }
+  }
+}
+
+} // namespace
 
 /// Empty default constructor
 LoadLog::LoadLog() {}
@@ -203,7 +226,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
   std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
       dMap;
   std::map<std::string,
-           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>> sMap;
+           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>>
+      sMap;
   kind l_kind(LoadLog::empty);
   bool isNumeric(false);
 
@@ -288,18 +312,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
       }
     }
   }
-  try {
-    for (auto &itr : dMap) {
-      run.addLogData(itr.second.release());
-    }
-    for (auto &sitr : sMap) {
-      run.addLogData(sitr.second.release());
-    }
-  } catch (std::invalid_argument &e) {
-    g_log.warning() << e.what();
-  } catch (Exception::ExistsError &e) {
-    g_log.warning() << e.what();
-  }
+  addLogDataToRun(run, dMap, g_log);
+  addLogDataToRun(run, sMap, g_log);
 }
 
 /**

@@ -63,19 +63,19 @@ private:
   void init(Buttons btns);
 
 private slots:
-  //! Format seleted text to fraction
+  //! Format selected text to fraction
   void addFraction();
-  //! Format seleted text to square root
+  //! Format selected text to square root
   void addSquareRoot();
-  //! Format seleted text to subscript
+  //! Format selected text to subscript
   void addSubscript();
-  //! Format seleted text to superscript
+  //! Format selected text to superscript
   void addSuperscript();
-  //! Format seleted text to underlined
+  //! Format selected text to underlined
   void addUnderline();
-  //! Format seleted text to italics
+  //! Format selected text to italics
   void addItalics();
-  //! Format seleted text to bold
+  //! Format selected text to bold
   void addBold();
   //! Insert curve marker into the text
   void addCurve();

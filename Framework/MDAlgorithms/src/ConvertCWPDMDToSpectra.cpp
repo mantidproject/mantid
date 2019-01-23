@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 
 #include "MantidAPI/Axis.h"
@@ -19,8 +25,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDAlgorithms;
 using HistogramData::BinEdges;
-using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::Counts;
 
 DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 
@@ -132,8 +138,9 @@ void ConvertCWPDMDToSpectra::exec() {
         std::stringstream errss;
         errss << "In order to convert unit to " << outputunit
               << ", either NeutronWaveLength "
-                 " is to be specified or property " << wavelengthpropertyname
-              << " must exist for run " << runid << ".";
+                 " is to be specified or property "
+              << wavelengthpropertyname << " must exist for run " << runid
+              << ".";
         throw std::runtime_error(errss.str());
       }
       map_runWavelength.emplace(runid, thislambda);

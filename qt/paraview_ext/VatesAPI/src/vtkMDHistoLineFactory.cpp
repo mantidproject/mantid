@@ -1,4 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/NullCoordTransform.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ReadLock.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
@@ -7,14 +18,9 @@
 #include "vtkFloatArray.h"
 #include "vtkLine.h"
 #include <vector>
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/Logger.h"
 
-using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::API::NullCoordTransform;
+using Mantid::DataObjects::MDHistoWorkspace;
 
 namespace {
 Mantid::Kernel::Logger g_log("vtkMDHistoLineFactory");
@@ -169,5 +175,5 @@ void vtkMDHistoLineFactory::validate() const {
 }
 
 vtkMDHistoLineFactory::~vtkMDHistoLineFactory() {}
-}
-}
+} // namespace VATES
+} // namespace Mantid

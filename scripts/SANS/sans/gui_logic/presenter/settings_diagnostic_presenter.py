@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The settings diagnostic tab which visualizes the SANS state object. """
 from __future__ import (absolute_import, division, print_function)
 
@@ -6,7 +12,6 @@ import os
 import json
 
 from mantid.kernel import Logger
-
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from sans.gui_logic.gui_common import JSON_SUFFIX
 
@@ -46,10 +51,14 @@ class SettingsDiagnosticPresenter(object):
         self._view.expand()
 
     def on_row_changed(self):
-        row_index = self._view.get_current_row()
-        state = self.get_state(row_index)
-        if state:
-            self.display_state_diagnostic_tree(state)
+        try:
+            row_index = self._view.get_current_row()
+            state = self.get_state(row_index)
+            if state:
+                self.display_state_diagnostic_tree(state)
+        except RuntimeError as e:
+            self.gui_logger.error(str(e))
+            self._parent_presenter.display_warning_box('Warning', 'Unable to find files.', str(e))
 
     def on_update_rows(self):
         """

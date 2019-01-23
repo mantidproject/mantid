@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h"
 
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -66,10 +72,12 @@ void PeaksTabWidget::addNewTab(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
       SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)));
 
   // Connect to the sort functionality of the widget
-  QObject::connect(widget, SIGNAL(sortPeaks(const std::string &, const bool,
-                                            Mantid::API::IPeaksWorkspace_sptr)),
-                   this, SIGNAL(sortPeaks(const std::string &, const bool,
-                                          Mantid::API::IPeaksWorkspace_sptr)));
+  QObject::connect(widget,
+                   SIGNAL(sortPeaks(const std::string &, const bool,
+                                    Mantid::API::IPeaksWorkspace_sptr)),
+                   this,
+                   SIGNAL(sortPeaks(const std::string &, const bool,
+                                    Mantid::API::IPeaksWorkspace_sptr)));
 
   // Add as a new tab
   m_tabWidget->addTab(widget, QString(tabName.c_str()));
@@ -133,6 +141,6 @@ void PeaksTabWidget::addNewPeaksWorkspace(
   m_ws.push_back(std::move(peaksWorkspace));
   addNewTab(peaksWorkspace, peaksWorkspace->getName(), std::move(visiblePeaks));
 }
-}
-} // namespace
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

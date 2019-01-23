@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DATAPROCESSORTESTHELPER_H
 #define DATAPROCESSORTESTHELPER_H
 
@@ -12,9 +18,9 @@ namespace MantidWidgets {
 namespace DataProcessor {
 class RowData;
 using RowData_sptr = std::shared_ptr<RowData>;
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 namespace DataProcessorTestHelper {
 
@@ -35,6 +41,6 @@ DLLExport MantidQt::MantidWidgets::DataProcessor::RowData_sptr
 makeRowData(const std::vector<std::string> &list,
             const std::vector<std::string> &prefixes = {"TOF_", "", "TRANS_"},
             const size_t numSlices = 0);
-}
+} // namespace DataProcessorTestHelper
 
 #endif /*DATAPROCESSORTESTHELPER_H*/

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGPUAlgorithms/GPUAlgorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/System.h"
 #include <CL/cl.hpp>
 #include <Poco/File.h>
-#include <sstream>
 #include <fstream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -120,7 +126,7 @@ void GPUAlgorithm::buildKernelFromCode(const std::string &code,
    */
 
   cl_context_properties cps[3] = {CL_CONTEXT_PLATFORM,
-                                  (cl_context_properties) (*i)(), 0};
+                                  (cl_context_properties)(*i)(), 0};
 
   g_log.debug() << "Creating a context AMD platform\n";
   context = cl::Context(CL_DEVICE_TYPE_CPU, cps, NULL, NULL, &err);
@@ -198,5 +204,5 @@ void GPUAlgorithm::buildKernelFromCode(const std::string &code,
   checkError("CommandQueue::CommandQueue() failed");
 }
 
-} // namespace Mantid
 } // namespace GPUAlgorithms
+} // namespace Mantid

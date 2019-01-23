@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_BUILDSUBTREETEST_H
 #define MANTID_MANTIDWIDGETS_BUILDSUBTREETEST_H
 
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
-#include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
+#include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
+#include <QStandardItem>
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <gtest/gtest.h>
 #include <vector>
-#include <QStandardItem>
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;

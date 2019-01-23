@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "PropertyAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -12,7 +18,7 @@ using namespace Kernel;
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
-*/
+ */
 void PropertyAlgorithm::init() {
   // Declare simple properties by giving it a name and initial value
   // Property's type is determined by the type of the initial value.
@@ -79,5 +85,5 @@ void PropertyAlgorithm::exec() {
   g_log.information() << "Size of StringArray = " << stringArray.size()
                       << std::endl;
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

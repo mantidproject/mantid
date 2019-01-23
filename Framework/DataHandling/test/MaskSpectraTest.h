@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_MASKSPECTRATEST_H_
 #define MANTID_DATAHANDLING_MASKSPECTRATEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/MaskSpectra.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/Algorithm.tcc"
-#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -58,7 +64,7 @@ MatrixWorkspace_sptr runMaskSpectra(MatrixWorkspace_sptr inputWS) {
   MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
   return outputWS;
 }
-}
+} // namespace
 
 class MaskSpectraTest : public CxxTest::TestSuite {
 public:

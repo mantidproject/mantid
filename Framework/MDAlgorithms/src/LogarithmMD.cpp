@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/LogarithmMD.h"
 #include "MantidKernel/System.h"
 
@@ -22,15 +28,17 @@ int LogarithmMD::version() const { return 1; }
 //----------------------------------------------------------------------------------------------
 /// Optional method to be subclassed to add properties
 void LogarithmMD::initExtraProperties() {
-  declareProperty("Filler", 0.0, "Some values in a workspace can normally be "
-                                 "zeros or may get negative values after "
-                                 "transformations\n"
-                                 "log(x) is not defined for such values, so "
-                                 "here is the value, that will be placed as "
-                                 "the result of log(x<=0) operation\n"
-                                 "Default value is 0");
-  declareProperty("Natural", true, "Switch to choose between natural or base "
-                                   "10 logarithm. Default true (natural).");
+  declareProperty("Filler", 0.0,
+                  "Some values in a workspace can normally be "
+                  "zeros or may get negative values after "
+                  "transformations\n"
+                  "log(x) is not defined for such values, so "
+                  "here is the value, that will be placed as "
+                  "the result of log(x<=0) operation\n"
+                  "Default value is 0");
+  declareProperty("Natural", true,
+                  "Switch to choose between natural or base "
+                  "10 logarithm. Default true (natural).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -59,5 +67,5 @@ void LogarithmMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
     out->log10(filler);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

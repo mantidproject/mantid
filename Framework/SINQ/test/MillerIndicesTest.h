@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_MILLERINDICESTEST_H
 #define MANTID_SINQ_MILLERINDICESTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/PoldiUtilities/MillerIndices.h"
-#include <stdexcept>
 #include "MantidKernel/V3D.h"
+#include "MantidSINQ/PoldiUtilities/MillerIndices.h"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::Poldi;
 using namespace Mantid::Kernel;

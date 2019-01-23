@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /**
  *
  * Uses a similar method to the plugin loading to ensure that the
@@ -9,8 +15,8 @@
  *started
  * the "static" object will ensure that the FrameworkManager is started
  */
-#include "MantidKernel/RegistrationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/RegistrationHelper.h"
 
 namespace {
 Mantid::Kernel::RegistrationHelper

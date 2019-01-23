@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*WIKI*
  Facade over [[CreateTransmissionWorkspace]]. Pull numeric parameters out of the
  instrument parameters where possible. You can override any of these
@@ -8,9 +14,9 @@
  algorithm.
  *WIKI*/
 
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"

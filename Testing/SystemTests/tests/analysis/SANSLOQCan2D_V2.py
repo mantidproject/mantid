@@ -1,7 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import mantid  # noqa
 from sans.command_interface.ISISCommandInterface import (LOQ, Set2D, Detector, MaskFile, SetDetectorOffsets, Gravity,
                                                          AssignSample, AssignCan, WavRangeReduction,
@@ -10,7 +16,7 @@ from sans.command_interface.ISISCommandInterface import (LOQ, Set2D, Detector, M
 # Test is giving odd results on Linux, but only this 2D one.
 
 
-class SANSLOQCan2DTest_V2(stresstesting.MantidStressTest):
+class SANSLOQCan2DTest_V2(systemtesting.MantidSystemTest):
 
     def runTest(self):
         UseCompatibilityMode()

@@ -113,10 +113,8 @@ transmission runs or specific correction algorithms.
 When normalizing by transmission runs, i.e. when one or two transmission runs
 are given, the spectrum numbers in the
 transmission workspaces must be the same as those in the input run
-workspace. If spectrum numbers do not match, the algorithm will throw and exception
-and execution of the algorithm will be stopped. This behaviour can be optionally
-switched off by setting :literal:`StrictSpectrumChecking` to false, in which case
-a warning message will be shown instead.
+workspace. You can pass individual processing instructions to the transmission
+runs. 
 
 When normalizing by transmission run, this algorithm will run
 :ref:`algm-CreateTransmissionWorkspace` as a child algorithm, with properties :literal:`WavelengthMin`,
@@ -164,6 +162,29 @@ the output workspace in wavelength.
 
 .. diagram:: ReflectometryReductionOne_SumInQ-v2_wkflw.dot
 
+The ``IncludePartialBins`` property specifies how the :math:`\lambda_v` range
+should be calculated from the input range :math:`\lambda_1, \lambda_2` (which
+corresponds to ``WavelengthMin``, ``WavelengthMax``). If ``IncludePartialBins``
+is ``false`` (default) then we use the projection to the strictly-cropped range
+:math:`\lambda_{c_1},\lambda_{c_2}`. This excludes any counts from the
+orange-shaded triangles shown in the figure, for which we may only have partial
+information because counts from the red shaded triangles are outside the
+specified lambda range.
+
+If ``IncludePartialBins`` is ``true`` then the algorithm will use the full
+projected range :math:`\lambda_{f_1},\lambda_{f_2}`. This will include all
+counts from the input range :math:`\lambda_1,\lambda_2`, but may result in
+partially-filled bins for counts contributed from the orange-shaded regions if
+data is not available in the red-shaded regions. Note however that if the red
+regions do contain counts then they will still be included, e.g. if you have
+narrowed the range ``WavelengthMin``, ``WavelengthMax`` from the available
+range for the instrument then the red regions may contain valid counts.
+
+.. figure:: /images/ReflectometryReductionOneDetectorPositions.png
+    :width: 400px
+    :align: center
+
+
 Conversion to Momentum Transfer (Q)
 ###################################
 
@@ -201,7 +222,7 @@ Usage
    IvsQ, IvsLam = ReflectometryReductionOne(InputWorkspace=run,
                                             WavelengthMin=1.0,
                                             WavelengthMax=17.0,
-                                            ProcessingInstructions='3:4',
+                                            ProcessingInstructions='4',
                                             I0MonitorIndex=2,
                                             MonitorBackgroundWavelengthMin=15.0,
                                             MonitorBackgroundWavelengthMax=17.0,
@@ -235,7 +256,7 @@ Output:
    IvsQ, IvsLam = ReflectometryReductionOne(InputWorkspace=run,
                                             WavelengthMin=1.0,
                                             WavelengthMax=17.0,
-                                            ProcessingInstructions='3-4',
+                                            ProcessingInstructions='4',
                                             I0MonitorIndex=2,
                                             MonitorBackgroundWavelengthMin=15.0,
                                             MonitorBackgroundWavelengthMax=17.0,

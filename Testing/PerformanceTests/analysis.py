@@ -1,5 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ Module containing functions for test
-performance analyis, plotting, and saving
+performance analysis, plotting, and saving
 to other formats (CSV, PDF) """
 
 import testresult

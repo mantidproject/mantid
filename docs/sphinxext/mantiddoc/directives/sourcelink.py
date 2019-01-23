@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
@@ -208,7 +214,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             suggested_path = "os_agnostic_path_to_file_from_Code/Mantid"
             if not valid_ext_list:
                 raise SourceLinkError("No file possibilities for " + file_name + " have been found\n" +
-                                      "Please specify a better one using the :filename: opiton or use the " +
+                                      "Please specify a better one using the :filename: option or use the " +
                                       str(list(self.file_types.keys())) + " options\n" +
                                       "e.g. \n" +
                                       ".. sourcelink:\n" +

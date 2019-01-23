@@ -167,11 +167,11 @@
 
   <!-- Monitor & Detector ID Lists, note the "left" tubes are followed by the "right" tubes, 
           in the same order as the y locations list, starting at the bottom 
-		  they are numbered dgttppp  where d=1 for rear, 2 for front
-		                                   g= 1 to 5 for boards/cables 
+		  they are numbered dgttppp  where d=1 for rear, 
+		                                   g= 1 to 8 for boards/cables 
 										   tt= 0 to 23 for tube number on that board
-										   ppp=0 to 512 for pixels 
-		There are 5 boards of 24 tubes,each 1m long, for each detector.
+										   ppp=0 to 511 for pixels 
+		There are 8 boards of 24 tubes,each 1m long, for each detector.
 		note that the spectrum mapping will normally reduce the number of pixels to 256 or 128 
 		[note also that the wiring table inverts the raw 0 to 511 pixel numbers to 511 to 0 so we get the correct direction] -->
 
@@ -180,103 +180,6 @@
   </idlist>   
   
   <idlist idname="RearDetector">
-   <id start="	1122000	   "  end="	1122511	" />
-   <id start="	1120000	   "  end="	1120511	" />
-   <id start="	1118000	   "  end="	1118511	" />
-   <id start="	1116000	   "  end="	1116511	" />
-   <id start="	1114000	   "  end="	1114511	" />
-   <id start="	1112000	   "  end="	1112511	" />
-   <id start="	1110000	   "  end="	1110511	" />
-   <id start="	1108000	   "  end="	1108511	" />
-   <id start="	1106000	   "  end="	1106511	" />
-   <id start="	1104000	   "  end="	1104511	" />
-   <id start="	1102000	   "  end="	1102511	" />
-   <id start="	1100000	   "  end="	1100511	" />
-   <id start="	1222000	   "  end="	1222511	" />
-   <id start="	1220000	   "  end="	1220511	" />
-   <id start="	1218000	   "  end="	1218511	" />
-   <id start="	1216000	   "  end="	1216511	" />
-   <id start="	1214000	   "  end="	1214511	" />
-   <id start="	1212000	   "  end="	1212511	" />
-   <id start="	1210000	   "  end="	1210511	" />
-   <id start="	1208000	   "  end="	1208511	" />
-   <id start="	1206000	   "  end="	1206511	" />
-   <id start="	1204000	   "  end="	1204511	" />
-   <id start="	1202000	   "  end="	1202511	" />
-   <id start="	1200000	   "  end="	1200511	" />
-   <id start="	1322000	   "  end="	1322511	" />
-   <id start="	1320000	   "  end="	1320511	" />
-   <id start="	1318000	   "  end="	1318511	" />
-   <id start="	1316000	   "  end="	1316511	" />
-   <id start="	1314000	   "  end="	1314511	" />
-   <id start="	1312000	   "  end="	1312511	" />
-   <id start="	1310000	   "  end="	1310511	" />
-   <id start="	1308000	   "  end="	1308511	" />
-   <id start="	1306000	   "  end="	1306511	" />
-   <id start="	1304000	   "  end="	1304511	" />
-   <id start="	1302000	   "  end="	1302511	" />
-   <id start="	1300000	   "  end="	1300511	" />
-   <id start="	1422000	   "  end="	1422511	" />
-   <id start="	1420000	   "  end="	1420511	" />
-   <id start="	1418000	   "  end="	1418511	" />
-   <id start="	1416000	   "  end="	1416511	" />
-   <id start="	1414000	   "  end="	1414511	" />
-   <id start="	1412000	   "  end="	1412511	" />
-   <id start="	1410000	   "  end="	1410511	" />
-   <id start="	1408000	   "  end="	1408511	" />
-   <id start="	1406000	   "  end="	1406511	" />
-   <id start="	1404000	   "  end="	1404511	" />
-   <id start="	1402000	   "  end="	1402511	" />
-   <id start="	1400000	   "  end="	1400511	" />
-   <id start="	1522000	   "  end="	1522511	" />
-   <id start="	1520000	   "  end="	1520511	" />
-   <id start="	1518000	   "  end="	1518511	" />
-   <id start="	1516000	   "  end="	1516511	" />
-   <id start="	1514000	   "  end="	1514511	" />
-   <id start="	1512000	   "  end="	1512511	" />
-   <id start="	1510000	   "  end="	1510511	" />
-   <id start="	1508000	   "  end="	1508511	" />
-   <id start="	1506000	   "  end="	1506511	" />
-   <id start="	1504000	   "  end="	1504511	" />
-   <id start="	1502000	   "  end="	1502511	" />
-   <id start="	1500000	   "  end="	1500511	" />
-   <id start="	1622000	   "  end="	1622511	" />
-   <id start="	1620000	   "  end="	1620511	" />
-   <id start="	1618000	   "  end="	1618511	" />
-   <id start="	1616000	   "  end="	1616511	" />
-   <id start="	1614000	   "  end="	1614511	" />
-   <id start="	1612000	   "  end="	1612511	" />
-   <id start="	1610000	   "  end="	1610511	" />
-   <id start="	1608000	   "  end="	1608511	" />
-   <id start="	1606000	   "  end="	1606511	" />
-   <id start="	1604000	   "  end="	1604511	" />
-   <id start="	1602000	   "  end="	1602511	" />
-   <id start="	1600000	   "  end="	1600511	" />
-   <id start="	1722000	   "  end="	1722511	" />
-   <id start="	1720000	   "  end="	1720511	" />
-   <id start="	1718000	   "  end="	1718511	" />
-   <id start="	1716000	   "  end="	1716511	" />
-   <id start="	1714000	   "  end="	1714511	" />
-   <id start="	1712000	   "  end="	1712511	" />
-   <id start="	1710000	   "  end="	1710511	" />
-   <id start="	1708000	   "  end="	1708511	" />
-   <id start="	1706000	   "  end="	1706511	" />
-   <id start="	1704000	   "  end="	1704511	" />
-   <id start="	1702000	   "  end="	1702511	" />
-   <id start="	1700000	   "  end="	1700511	" />
-   <id start="	1822000	   "  end="	1822511	" />
-   <id start="	1820000	   "  end="	1820511	" />
-   <id start="	1818000	   "  end="	1818511	" />
-   <id start="	1816000	   "  end="	1816511	" />
-   <id start="	1814000	   "  end="	1814511	" />
-   <id start="	1812000	   "  end="	1812511	" />
-   <id start="	1810000	   "  end="	1810511	" />
-   <id start="	1808000	   "  end="	1808511	" />
-   <id start="	1806000	   "  end="	1806511	" />
-   <id start="	1804000	   "  end="	1804511	" />
-   <id start="	1802000	   "  end="	1802511	" />
-   <id start="	1800000	   "  end="	1800511	" />			
-				
    <id start="	1123000	   "  end="	1123511	" />
    <id start="	1121000	   "  end="	1121511	" />
    <id start="	1119000	   "  end="	1119511	" />
@@ -372,7 +275,105 @@
    <id start="	1807000	   "  end="	1807511	" />
    <id start="	1805000	   "  end="	1805511	" />
    <id start="	1803000	   "  end="	1803511	" />
-   <id start="	1801000	   "  end="	1801511	" />
+   <id start="	1801000	   "  end="	1801511	" />			
+				   
+   <id start="	1122000	   "  end="	1122511	" />
+   <id start="	1120000	   "  end="	1120511	" />
+   <id start="	1118000	   "  end="	1118511	" />
+   <id start="	1116000	   "  end="	1116511	" />
+   <id start="	1114000	   "  end="	1114511	" />
+   <id start="	1112000	   "  end="	1112511	" />
+   <id start="	1110000	   "  end="	1110511	" />
+   <id start="	1108000	   "  end="	1108511	" />
+   <id start="	1106000	   "  end="	1106511	" />
+   <id start="	1104000	   "  end="	1104511	" />
+   <id start="	1102000	   "  end="	1102511	" />
+   <id start="	1100000	   "  end="	1100511	" />
+   <id start="	1222000	   "  end="	1222511	" />
+   <id start="	1220000	   "  end="	1220511	" />
+   <id start="	1218000	   "  end="	1218511	" />
+   <id start="	1216000	   "  end="	1216511	" />
+   <id start="	1214000	   "  end="	1214511	" />
+   <id start="	1212000	   "  end="	1212511	" />
+   <id start="	1210000	   "  end="	1210511	" />
+   <id start="	1208000	   "  end="	1208511	" />
+   <id start="	1206000	   "  end="	1206511	" />
+   <id start="	1204000	   "  end="	1204511	" />
+   <id start="	1202000	   "  end="	1202511	" />
+   <id start="	1200000	   "  end="	1200511	" />
+   <id start="	1322000	   "  end="	1322511	" />
+   <id start="	1320000	   "  end="	1320511	" />
+   <id start="	1318000	   "  end="	1318511	" />
+   <id start="	1316000	   "  end="	1316511	" />
+   <id start="	1314000	   "  end="	1314511	" />
+   <id start="	1312000	   "  end="	1312511	" />
+   <id start="	1310000	   "  end="	1310511	" />
+   <id start="	1308000	   "  end="	1308511	" />
+   <id start="	1306000	   "  end="	1306511	" />
+   <id start="	1304000	   "  end="	1304511	" />
+   <id start="	1302000	   "  end="	1302511	" />
+   <id start="	1300000	   "  end="	1300511	" />
+   <id start="	1422000	   "  end="	1422511	" />
+   <id start="	1420000	   "  end="	1420511	" />
+   <id start="	1418000	   "  end="	1418511	" />
+   <id start="	1416000	   "  end="	1416511	" />
+   <id start="	1414000	   "  end="	1414511	" />
+   <id start="	1412000	   "  end="	1412511	" />
+   <id start="	1410000	   "  end="	1410511	" />
+   <id start="	1408000	   "  end="	1408511	" />
+   <id start="	1406000	   "  end="	1406511	" />
+   <id start="	1404000	   "  end="	1404511	" />
+   <id start="	1402000	   "  end="	1402511	" />
+   <id start="	1400000	   "  end="	1400511	" />
+   <id start="	1522000	   "  end="	1522511	" />
+   <id start="	1520000	   "  end="	1520511	" />
+   <id start="	1518000	   "  end="	1518511	" />
+   <id start="	1516000	   "  end="	1516511	" />
+   <id start="	1514000	   "  end="	1514511	" />
+   <id start="	1512000	   "  end="	1512511	" />
+   <id start="	1510000	   "  end="	1510511	" />
+   <id start="	1508000	   "  end="	1508511	" />
+   <id start="	1506000	   "  end="	1506511	" />
+   <id start="	1504000	   "  end="	1504511	" />
+   <id start="	1502000	   "  end="	1502511	" />
+   <id start="	1500000	   "  end="	1500511	" />
+   <id start="	1622000	   "  end="	1622511	" />
+   <id start="	1620000	   "  end="	1620511	" />
+   <id start="	1618000	   "  end="	1618511	" />
+   <id start="	1616000	   "  end="	1616511	" />
+   <id start="	1614000	   "  end="	1614511	" />
+   <id start="	1612000	   "  end="	1612511	" />
+   <id start="	1610000	   "  end="	1610511	" />
+   <id start="	1608000	   "  end="	1608511	" />
+   <id start="	1606000	   "  end="	1606511	" />
+   <id start="	1604000	   "  end="	1604511	" />
+   <id start="	1602000	   "  end="	1602511	" />
+   <id start="	1600000	   "  end="	1600511	" />
+   <id start="	1722000	   "  end="	1722511	" />
+   <id start="	1720000	   "  end="	1720511	" />
+   <id start="	1718000	   "  end="	1718511	" />
+   <id start="	1716000	   "  end="	1716511	" />
+   <id start="	1714000	   "  end="	1714511	" />
+   <id start="	1712000	   "  end="	1712511	" />
+   <id start="	1710000	   "  end="	1710511	" />
+   <id start="	1708000	   "  end="	1708511	" />
+   <id start="	1706000	   "  end="	1706511	" />
+   <id start="	1704000	   "  end="	1704511	" />
+   <id start="	1702000	   "  end="	1702511	" />
+   <id start="	1700000	   "  end="	1700511	" />
+   <id start="	1822000	   "  end="	1822511	" />
+   <id start="	1820000	   "  end="	1820511	" />
+   <id start="	1818000	   "  end="	1818511	" />
+   <id start="	1816000	   "  end="	1816511	" />
+   <id start="	1814000	   "  end="	1814511	" />
+   <id start="	1812000	   "  end="	1812511	" />
+   <id start="	1810000	   "  end="	1810511	" />
+   <id start="	1808000	   "  end="	1808511	" />
+   <id start="	1806000	   "  end="	1806511	" />
+   <id start="	1804000	   "  end="	1804511	" />
+   <id start="	1802000	   "  end="	1802511	" />
+   <id start="	1800000	   "  end="	1800511	" />
+   
   
   </idlist>
   

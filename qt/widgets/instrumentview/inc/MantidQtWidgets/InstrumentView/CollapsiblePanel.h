@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef COLLAPSIBLEPANEL_H_
 #define COLLAPSIBLEPANEL_H_
 
-#include <QWidget>
 #include <QLabel>
+#include <QWidget>
 
 class QVBoxLayout;
 
@@ -25,8 +31,8 @@ private:
 };
 
 /**
-* Implements a collapsible panel.
-*/
+ * Implements a collapsible panel.
+ */
 class CollapsiblePanel : public QWidget {
   Q_OBJECT
 public:
@@ -62,7 +68,7 @@ private:
   QVBoxLayout *m_layout;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*COLLAPSIBLEPANEL_H_*/

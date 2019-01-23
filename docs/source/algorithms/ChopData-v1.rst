@@ -31,7 +31,7 @@ For example: looking at Figure 1 which shows an input workspace covering
 100000 microseconds, we can see that the first frame covers forty
 thousand, and the other three cover twenty thousand each.
 
-In order for Mantid to determine this programatically, it integrates
+In order for Mantid to determine this programmatically, it integrates
 over a range (defined by IntegrationRangeLower and
 IntegrationRangeUpper) for each "chop" of the data. If the relative
 values for this integration fall within certain bounds, then the chop is
@@ -63,7 +63,7 @@ Usage
    result = ChopData(ws, NChops=2, Step=time_diff/2)
 
    print("The time range of the original workspace was {:.0f}.".format(time_diff))
-   print("The number of bins in the orginal workspace was {}.".format(ws.blocksize()))
+   print("The number of bins in the original workspace was {}.".format(ws.blocksize()))
    print("The number of bins in the 1st chop is {}.".format(result[0][0].blocksize()))
    print("The number of bins in the 2nd chop is {}.".format(result[0][1].blocksize()))
 
@@ -72,7 +72,7 @@ Output:
 .. testoutput:: Ex
 
    The time range of the original workspace was 19800.
-   The number of bins in the orginal workspace was 100.
+   The number of bins in the original workspace was 100.
    The number of bins in the 1st chop is 48.
    The number of bins in the 2nd chop is 48.
 

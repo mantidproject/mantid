@@ -1,8 +1,10 @@
+.. _ReceivingSignalFromView:
+
 ================================
 Receiving a signal from the view
 ================================
 
-In the `Add Button <AddButton.html>`_ section we had the response to a button press
+In the :ref:`Add Button <AddButton>` section we had the response to a button press
 within the View. In practice this is not a good implementation. If the
 response was more complicated then it would be difficult to maintain
 the View as it would become extremely long. Furthermore creating the
@@ -23,7 +25,7 @@ pressed. First we will start with the View:
 
         doSomethingSignal = QtCore.pyqtSignal()
 
-	def __init__(self, parent=None):
+        def __init__(self, parent=None):
             super(view, self).__init__(parent)
 
             self.button = QtGui.QPushButton('Hi', self)
@@ -44,10 +46,10 @@ pressed. First we will start with the View:
             # set the layout for the view widget
             self.setLayout(grid)
  
-	#send signals
-	def btn_click(self):
+        #send signals
+        def btn_click(self):
             print ("hellow from view")
-	    self.doSomethingSignal.emit()
+            self.doSomethingSignal.emit()
 
 The above code has two new additions. The first is the creation of a
 custom signal on line eight. It is also possible to pass objects with
@@ -67,13 +69,13 @@ custom signal from the View to its own function (``handleButton``).
     class Presenter(object):
 
         # pass the view and model into the presenter
-	def __init__(self, view):
+        def __init__(self, view):
             self.view = view
 
-	    self.view.doSomethingSignal.connect(self.handleButton)             
+            self.view.doSomethingSignal.connect(self.handleButton)             
        
-	# handle signals 
-	def handleButton(self):
+        # handle signals 
+        def handleButton(self):
             print("hello world, from the presenter")
 
 The main is now:
@@ -105,12 +107,12 @@ The main is now:
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-	def qapp():
+        def qapp():
             if QtGui.QApplication.instance():
                 _app = QtGui.QApplication.instance()
-	    else:
-		_app = QtGui.QApplication(sys.argv)
-	    return _app
+            else:
+                _app = QtGui.QApplication(sys.argv)
+            return _app
 
 
     app = qapp()

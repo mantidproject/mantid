@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_SAVEISAWQVECTORTEST_H_
 #define MANTID_MDEVENTS_SAVEISAWQVECTORTEST_H_
 
@@ -6,8 +12,8 @@
 #include "MantidMDAlgorithms/SaveIsawQvector.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
-#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::MDAlgorithms::SaveIsawQvector;

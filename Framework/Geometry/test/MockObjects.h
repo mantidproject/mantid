@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * MockObjects.h
  *
@@ -23,7 +29,7 @@ using boost::regex;
 
 namespace {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /*------------------------------------------------------------
  Mock Peak Transform
@@ -75,11 +81,14 @@ public:
   MOCK_CONST_METHOD0(getK, double());
   MOCK_CONST_METHOD0(getL, double());
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D());
+  MOCK_CONST_METHOD0(getSamplePos, Mantid::Kernel::V3D());
   MOCK_METHOD1(setH, void(double m_H));
   MOCK_METHOD1(setK, void(double m_K));
   MOCK_METHOD1(setL, void(double m_L));
   MOCK_METHOD3(setHKL, void(double H, double K, double L));
   MOCK_METHOD1(setHKL, void(const Mantid::Kernel::V3D &HKL));
+  MOCK_METHOD3(setSamplePos, void(double samX, double samY, double samZ));
+  MOCK_METHOD1(setSamplePos, void(const Mantid::Kernel::V3D &XYZ));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D());
   MOCK_METHOD0(findDetector, bool());
@@ -120,6 +129,6 @@ public:
   MOCK_CONST_METHOD0(getDetectorPositionNoCheck, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
 };
-}
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+} // namespace
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

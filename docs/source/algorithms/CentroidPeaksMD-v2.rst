@@ -24,7 +24,7 @@ Usage
 
 The code iteslef works but disabled from doc tests as takes too long to complete. User should provide its own 
 event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
-file is availible in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
+file is available in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
 The example shows how applying centroid peaks changes the peak posisions previously calculated by 
 FindPeaksMD algorithm.

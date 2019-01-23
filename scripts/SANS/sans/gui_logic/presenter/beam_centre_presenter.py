@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import copy
@@ -47,23 +53,28 @@ class BeamCentrePresenter(object):
 
     def on_update_instrument(self, instrument):
         self._beam_centre_model.set_scaling(instrument)
+        self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
+        file_information = self._parent_presenter._table_model.get_file_information_for_row(0)
+        if file_information:
+            self._beam_centre_model.reset_to_defaults_for_instrument(file_information=file_information)
         self._view.set_options(self._beam_centre_model)
 
     def on_processing_finished_centre_finder(self, result):
         # Enable button
         self._view.set_run_button_to_normal()
         # Update Centre Positions in model and GUI
-        self._beam_centre_model.lab_pos_1 = result['pos1']
-        self._beam_centre_model.lab_pos_2 = result['pos2']
-        self._beam_centre_model.hab_pos_1 = result['pos1']
-        self._beam_centre_model.hab_pos_2 = result['pos2']
-
-        self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
-        self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
-        self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
-        self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
+        if self._beam_centre_model.update_lab:
+            self._beam_centre_model.lab_pos_1 = result['pos1']
+            self._beam_centre_model.lab_pos_2 = result['pos2']
+            self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
+            self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
+        if self._beam_centre_model.update_hab:
+            self._beam_centre_model.hab_pos_1 = result['pos1']
+            self._beam_centre_model.hab_pos_2 = result['pos2']
+            self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
+            self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
@@ -91,7 +102,7 @@ class BeamCentrePresenter(object):
         listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
 
-        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, state_copy)
+        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, 0, state_copy)
 
     def _update_beam_model_from_view(self):
         self._beam_centre_model.r_min = self._view.r_min
@@ -108,6 +119,22 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2 / self._beam_centre_model.scale_2
         self._beam_centre_model.q_min = self._view.q_min
         self._beam_centre_model.q_max = self._view.q_max
+        self._beam_centre_model.component = self._view.component
+        self._beam_centre_model.update_hab = self._view.update_hab
+        self._beam_centre_model.update_lab = self._view.update_lab
+
+    def update_centre_positions(self, state_model):
+        lab_pos_1 = getattr(state_model, 'lab_pos_1')
+        lab_pos_2 = getattr(state_model, 'lab_pos_2')
+
+        hab_pos_1 = getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
+        hab_pos_2 = getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
+
+        self._view.lab_pos_1 = lab_pos_1
+        self._view.lab_pos_2 = lab_pos_2
+
+        self._view.hab_pos_1 = hab_pos_1
+        self._view.hab_pos_2 = hab_pos_2
 
     def set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)

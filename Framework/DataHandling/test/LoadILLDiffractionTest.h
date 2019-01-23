@@ -1,14 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_
 #define MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/Load.h"
+#include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -26,7 +33,22 @@ public:
   void setUp() override {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+
+    m_oldFacility = ConfigService::Instance().getFacility().name();
     ConfigService::Instance().setFacility("ILL");
+
+    m_oldInstrument = ConfigService::Instance().getInstrument().name();
+    ConfigService::Instance().setString("default.instrument", "");
+  }
+
+  void tearDown() override {
+    if (!m_oldFacility.empty()) {
+      ConfigService::Instance().setFacility(m_oldFacility);
+    }
+    if (!m_oldInstrument.empty()) {
+      ConfigService::Instance().setString("default.instrument",
+                                          m_oldInstrument);
+    }
   }
 
   void test_Init() {
@@ -250,16 +272,14 @@ public:
     TS_ASSERT(run.hasProperty("PixelHeight"))
     TS_ASSERT(run.hasProperty("MaxHeight"))
     TS_ASSERT_DELTA(run.getLogAsSingleValue("PixelHeight"), 0.00276, 1E-5)
-    TS_ASSERT_DELTA(run.getLogAsSingleValue("MaxHeight"), 0.19358, 1E-5)
+    TS_ASSERT_DELTA(run.getLogAsSingleValue("MaxHeight"), 0.19386, 1E-5)
     const auto &detInfo = outputWS->detectorInfo();
-    const auto tube1CentreTime1 =
-        (detInfo.position({70, 0}) + detInfo.position({71, 0})) / 2.;
+    const auto tube1CentreTime1 = detInfo.position({70, 0});
     TS_ASSERT_DELTA(tube1CentreTime1.Y(), 0., 0.001)
     double r, theta, phi;
     tube1CentreTime1.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 11.25, 0.001)
-    const auto tube1CentreTime2 =
-        (detInfo.position({70, 1}) + detInfo.position({71, 1})) / 2.;
+    const auto tube1CentreTime2 = detInfo.position({70, 1});
     TS_ASSERT_DELTA(tube1CentreTime2.Y(), 0., 0.001)
     tube1CentreTime2.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 11.2, 0.001)
@@ -271,15 +291,11 @@ public:
     TS_ASSERT_DELTA(tube23CentreTime2.Y(), 0., 0.001)
     tube23CentreTime2.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 16.288, 0.001)
-    const auto tube128CentreTime1 = (detInfo.position({128 * 127 + 67, 0}) +
-                                     detInfo.position({128 * 127 + 68, 0})) /
-                                    2.;
+    const auto tube128CentreTime1 = detInfo.position({128 * 127 + 68, 0});
     TS_ASSERT_DELTA(tube128CentreTime1.Y(), 0., 0.001)
     tube128CentreTime1.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 147.5, 0.001)
-    const auto tube128CentreTime2 = (detInfo.position({128 * 127 + 67, 1}) +
-                                     detInfo.position({128 * 127 + 68, 1})) /
-                                    2.;
+    const auto tube128CentreTime2 = detInfo.position({128 * 127 + 68, 1});
     TS_ASSERT_DELTA(tube128CentreTime2.Y(), 0., 0.001)
     tube128CentreTime2.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 147.55, 0.001)
@@ -318,30 +334,24 @@ public:
         "2015-04-16T16:40:34.289000000";
     const std::string EXPECTED_END_TIME = "2015-04-16T16:41:11.956000000";
 
-    for (size_t i = 0; i < detInfo.size(); ++i) {
-      TS_ASSERT_EQUALS(detInfo.scanCount(i), SCAN_COUNT)
+    TS_ASSERT_EQUALS(detInfo.scanCount(), SCAN_COUNT)
 
-      const auto &startRange = detInfo.scanInterval({i, 0});
-      const auto &secondRange = detInfo.scanInterval({i, 1});
-      const auto &secondFromEndRange =
-          detInfo.scanInterval({i, detInfo.scanCount(i) - 2});
-      const auto &endRange =
-          detInfo.scanInterval({i, detInfo.scanCount(i) - 1});
-
-      TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
-      TS_ASSERT_EQUALS(startRange.second.toISO8601String(),
-                       EXPECTED_SECOND_TIME)
-      TS_ASSERT_EQUALS(secondRange.first.toISO8601String(),
-                       EXPECTED_SECOND_TIME)
-      TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
-                       EXPECTED_SECOND_FROM_END_TIME)
-      TS_ASSERT_EQUALS(endRange.first.toISO8601String(),
-                       EXPECTED_SECOND_FROM_END_TIME)
-      TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
-    }
+    const auto startRange = detInfo.scanIntervals()[0];
+    const auto secondRange = detInfo.scanIntervals()[1];
+    const auto secondFromEndRange =
+        detInfo.scanIntervals()[detInfo.scanCount() - 2];
+    const auto endRange = detInfo.scanIntervals()[detInfo.scanCount() - 1];
+    TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
+    TS_ASSERT_EQUALS(startRange.second.toISO8601String(), EXPECTED_SECOND_TIME)
+    TS_ASSERT_EQUALS(secondRange.first.toISO8601String(), EXPECTED_SECOND_TIME)
+    TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
+                     EXPECTED_SECOND_FROM_END_TIME)
+    TS_ASSERT_EQUALS(endRange.first.toISO8601String(),
+                     EXPECTED_SECOND_FROM_END_TIME)
+    TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
 
     // Check monitor does not move
-    for (size_t j = 0; j < detInfo.scanCount(0); ++j) {
+    for (size_t j = 0; j < detInfo.scanCount(); ++j) {
       TS_ASSERT(detInfo.isMonitor({0, j}))
       TS_ASSERT_EQUALS(detInfo.position({0, j}), detInfo.position({0, 0}))
     }
@@ -352,7 +362,7 @@ public:
     const double TUBE_128_FIRST_ANGLE = 147.496;
 
     for (size_t i = 0; i < NUMBER_OF_TUBES; ++i) {
-      for (size_t j = 0; j < detInfo.scanCount(i); ++j) {
+      for (size_t j = 0; j < detInfo.scanCount(); ++j) {
         // Find two pixels just above and just below the centre, and take their
         // average position as the tube centre
         auto belowCentrePixel = i * NUMBER_OF_PIXELS + NUMBER_OF_PIXELS / 2;
@@ -406,6 +416,8 @@ public:
 
 private:
   const double RAD_2_DEG = 180.0 / M_PI;
+  std::string m_oldFacility;
+  std::string m_oldInstrument;
 };
 
 #endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_ */

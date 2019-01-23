@@ -1,6 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Plus.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -16,31 +19,29 @@ DECLARE_ALGORITHM(Plus)
 // ===================================== HISTOGRAM BINARY OPERATIONS
 // ==========================================
 //---------------------------------------------------------------------------------------------
-void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                                  const MantidVec &lhsE, const MantidVec &rhsY,
-                                  const MantidVec &rhsE, MantidVec &YOut,
-                                  MantidVec &EOut) {
-  (void)lhsX; // Avoid compiler warning
-  std::transform(lhsY.begin(), lhsY.end(), rhsY.begin(), YOut.begin(),
+void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                  const HistogramData::Histogram &rhs,
+                                  HistogramData::HistogramY &YOut,
+                                  HistogramData::HistogramE &EOut) {
+  std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(),
                  std::plus<double>());
-  std::transform(lhsE.begin(), lhsE.end(), rhsE.begin(), EOut.begin(),
+  std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(),
                  VectorHelper::SumGaussError<double>());
 }
 
 //---------------------------------------------------------------------------------------------
-void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                                  const MantidVec &lhsE, const double rhsY,
-                                  const double rhsE, MantidVec &YOut,
-                                  MantidVec &EOut) {
-  (void)lhsX; // Avoid compiler warning
-  std::transform(lhsY.begin(), lhsY.end(), YOut.begin(),
+void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                  const double rhsY, const double rhsE,
+                                  HistogramData::HistogramY &YOut,
+                                  HistogramData::HistogramE &EOut) {
+  std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
                  std::bind2nd(std::plus<double>(), rhsY));
   // Only do E if non-zero, otherwise just copy
   if (rhsE != 0)
-    std::transform(lhsE.begin(), lhsE.end(), EOut.begin(),
+    std::transform(lhs.e().begin(), lhs.e().end(), EOut.begin(),
                    std::bind2nd(VectorHelper::SumGaussError<double>(), rhsE));
   else
-    EOut = lhsE;
+    EOut = lhs.e();
 }
 
 // ===================================== EVENT LIST BINARY OPERATIONS
@@ -213,11 +214,11 @@ Plus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
 
 //---------------------------------------------------------------------------------------------
 /** Adds the integrated proton currents, proton charges, of the two input
-*  workspaces together
-*  @param lhs :: one of the workspace samples to be summed
-*  @param rhs :: the other workspace sample to be summed
-*  @param ans :: the sample in the output workspace
-*/
+ *  workspaces together
+ *  @param lhs :: one of the workspace samples to be summed
+ *  @param rhs :: the other workspace sample to be summed
+ *  @param ans :: the sample in the output workspace
+ */
 void Plus::operateOnRun(const Run &lhs, const Run &rhs, Run &ans) const {
   // The addition operator of Run will add the proton charges, append logs, etc.
   // If ans=lhs or ans=rhs then we need to be careful in which order we do this
@@ -235,5 +236,5 @@ void Plus::operateOnRun(const Run &lhs, const Run &rhs, Run &ans) const {
     ans += rhs;
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TIME_TO_TIMESTEP_TEST_H_
 #define TIME_TO_TIMESTEP_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/TimeToTimeStep.h"
+#include <cxxtest/TestSuite.h>
 
 class TimeToTimeStepTest : public CxxTest::TestSuite {
 public:

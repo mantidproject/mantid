@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -119,10 +125,10 @@ void UserFunction1D::function(const double *in, double *out,
 }
 
 /**
-* @param in :: Input fitting parameter values
-* @param out :: Derivatives
-* @param xValues :: X values for data points
-* @param nData :: Number of data points
+ * @param in :: Input fitting parameter values
+ * @param out :: Derivatives
+ * @param xValues :: X values for data points
+ * @param nData :: Number of data points
  */
 void UserFunction1D::functionDeriv(const double *in, Jacobian *out,
                                    const double *xValues, const size_t nData) {

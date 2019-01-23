@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffFittingPresenter.h"
 #include "EnggDiffFittingPresWorker.h"
 #include "IEnggDiffFittingModel.h"
@@ -81,14 +87,7 @@ std::string generateXAxisLabel(Mantid::Kernel::Unit_const_sptr unit) {
   }
   return label;
 }
-
-std::string generateMultiRunFileName(const std::vector<RunLabel> &runLabels) {
-  const auto minLabel = std::min_element(runLabels.cbegin(), runLabels.cend());
-  const auto maxLabel = std::max_element(runLabels.cbegin(), runLabels.cend());
-  return std::to_string(minLabel->runNumber) + "_" +
-         std::to_string(maxLabel->runNumber) + ".hdf5";
-}
-}
+} // namespace
 
 /**
  * Constructs a presenter for a fitting tab/widget view, which has a
@@ -110,9 +109,9 @@ EnggDiffFittingPresenter::EnggDiffFittingPresenter(
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
 /**
-* Close open sessions, kill threads etc., for a graceful window
-* close/destruction
-*/
+ * Close open sessions, kill threads etc., for a graceful window
+ * close/destruction
+ */
 void EnggDiffFittingPresenter::cleanup() {
   // m_model->cleanup();
 
@@ -198,8 +197,18 @@ EnggDiffFittingPresenter::currentCalibration() const {
 }
 
 Poco::Path
-EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
+EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) const {
   return m_mainParam->outFilesUserDir(addToDir);
+}
+
+std::string
+EnggDiffFittingPresenter::userHDFRunFilename(const int runNumber) const {
+  return m_mainParam->userHDFRunFilename(runNumber);
+}
+
+std::string EnggDiffFittingPresenter::userHDFMultiRunFilename(
+    const std::vector<RunLabel> &runLabels) const {
+  return m_mainParam->userHDFMultiRunFilename(runLabels);
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
@@ -221,13 +230,13 @@ void EnggDiffFittingPresenter::startAsyncFittingWorker(
 }
 
 /**
-  * Takes a full file path as a string and attempts to get the base name
-  * of the file at that location and return it
-  *
-  * @param filePath The full path to get the basename of
-  *
-  * @return The base name (without ext) of the file
-  */
+ * Takes a full file path as a string and attempts to get the base name
+ * of the file at that location and return it
+ *
+ * @param filePath The full path to get the basename of
+ *
+ * @return The base name (without ext) of the file
+ */
 std::string EnggDiffFittingPresenter::getBaseNameFromStr(
     const std::string &filePath) const {
   Poco::Path pocoPath = filePath;
@@ -497,30 +506,23 @@ void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
       return;
     }
 
-    const auto outFilename = std::to_string(runLabel.runNumber) + ".hdf5";
-    auto saveDirectory = outFilesUserDir("Runs");
-    saveDirectory.append(outFilename);
-    m_model->saveFitResultsToHDF5({runLabel}, saveDirectory.toString());
+    const auto outFilename = userHDFRunFilename(runLabel.runNumber);
+    m_model->saveFitResultsToHDF5({runLabel}, outFilename);
 
     m_model->createFittedPeaksWS(runLabel);
   }
 
   if (runLabels.size() > 1) {
-    const auto outFilename = generateMultiRunFileName(runLabels);
-    auto saveDirectory = outFilesUserDir("Runs");
-    saveDirectory.append(outFilename);
-    m_model->saveFitResultsToHDF5(runLabels, saveDirectory.toString());
+    m_model->saveFitResultsToHDF5(runLabels,
+                                  userHDFMultiRunFilename(runLabels));
   }
   m_fittingFinishedOK = true;
 }
 
 void EnggDiffFittingPresenter::browsePeaksToFit() {
   try {
-    auto prevPath = m_view->focusingDir();
-    if (prevPath.empty()) {
-      prevPath = m_view->getPreviousDir();
-    }
-    std::string path = m_view->getOpenFile(prevPath);
+    const auto &userDir = outFilesUserDir("");
+    std::string path = m_view->getOpenFile(userDir.toString());
     if (path.empty()) {
       return;
     }
@@ -574,12 +576,8 @@ void EnggDiffFittingPresenter::addPeakToList() {
 
 void EnggDiffFittingPresenter::savePeakList() {
   try {
-    QString prevPath = QString::fromStdString(m_view->focusingDir());
-    if (prevPath.isEmpty()) {
-      prevPath = QString::fromStdString(m_view->getPreviousDir());
-    }
-
-    std::string path = m_view->getSaveFile(prevPath.toStdString());
+    const auto &userDir = outFilesUserDir("");
+    const auto &path = m_view->getSaveFile(userDir.toString());
 
     if (path.empty()) {
       return;

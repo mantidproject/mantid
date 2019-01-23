@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
-#include "MantidCurveFitting/SeqDomain.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidCurveFitting/SeqDomain.h"
 
 #include <cmath>
 
@@ -40,7 +46,7 @@ CostFuncRwp::getFitWeights(API::FunctionValues_sptr values) const {
 
 //----------------------------------------------------------------------------------------------
 /** Get weight of data point i(1/sigma)
-  */
+ */
 double CostFuncRwp::getWeight(API::FunctionValues_sptr values, size_t i,
                               double sqrtW) const {
   return (values->getFitWeight(i) / sqrtW);
@@ -48,7 +54,7 @@ double CostFuncRwp::getWeight(API::FunctionValues_sptr values, size_t i,
 
 //----------------------------------------------------------------------------------------------
 /** Get square root of normalization weight (W)
-  */
+ */
 double CostFuncRwp::calSqrtW(API::FunctionValues_sptr values) const {
   double weight = 0.0;
 

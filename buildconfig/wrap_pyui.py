@@ -9,7 +9,7 @@ import sys
 
 def lines_to_pre_append():
     lines = list()
-    # PYLINT ingnore flags
+    # PYLINT ignore flags
     lines.append(u"#pylint: skip-file\n")
     return lines
 

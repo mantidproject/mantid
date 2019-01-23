@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 
 namespace MantidQt {
@@ -39,14 +45,14 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
 }
 
 /** Delegating constructor
-*
-* @param name : The name of the pre-processing algorithm
-* @param prefix : A prefix that will added to the output workspace name
-* @param separator : A separator that will used between values in the output
-* workspace name
-* @param blacklist : The list of properties we don't want to show, as a string
-* algorithm in the processed workspace's name
-*/
+ *
+ * @param name : The name of the pre-processing algorithm
+ * @param prefix : A prefix that will added to the output workspace name
+ * @param separator : A separator that will used between values in the output
+ * workspace name
+ * @param blacklist : The list of properties we don't want to show, as a string
+ * algorithm in the processed workspace's name
+ */
 PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
                                                QString separator,
                                                const QString &blacklist)
@@ -55,7 +61,7 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
                              convertStringToSet(blacklist)) {}
 
 /** Default constructor: do nothing
-*/
+ */
 PreprocessingAlgorithm::PreprocessingAlgorithm()
     : m_prefix(), m_separator(), m_lhs(), m_rhs(), m_outProperty() {}
 
@@ -76,6 +82,6 @@ QString PreprocessingAlgorithm::prefix() const { return m_prefix; }
 
 // Returns the separator to separate multiple values in the output property
 QString PreprocessingAlgorithm::separator() const { return m_separator; }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -18,6 +18,7 @@ set ( EXPORT_FILES
   src/Exports/ObjCompAssembly.cpp
   src/Exports/Detector.cpp
   src/Exports/DetectorGroup.cpp
+  src/Exports/GridDetector.cpp
   src/Exports/RectangularDetector.cpp
   src/Exports/Instrument.cpp
   src/Exports/UnitCell.cpp
@@ -38,6 +39,11 @@ set ( EXPORT_FILES
   src/Exports/SymmetryOperationFactory.cpp
   src/Exports/CrystalStructure.cpp
   src/Exports/ReflectionGenerator.cpp
+  src/Exports/DetectorInfo.cpp
+  src/Exports/DetectorInfoItem.cpp
+  src/Exports/DetectorInfoIterator.cpp
+  src/Exports/DetectorInfoPythonIterator.cpp
+  src/Exports/ComponentInfo.cpp
 )
 
 #############################################################################################
@@ -80,7 +86,8 @@ add_library ( PythonGeometryModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FI
 set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonGeometryModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+target_link_libraries ( PythonGeometryModule PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            PythonInterfaceCore
             PythonKernelModule
             Geometry
             Beamline
@@ -104,7 +111,7 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonGeometryModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/geometry )
+mtd_install_targets( TARGETS PythonGeometryModule INSTALL_DIRS ${BIN_DIR}/mantid/geometry ${WORKBENCH_BIN_DIR}/mantid/geometry )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/geometry )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/geometry ${WORKBENCH_BIN_DIR}/mantid/geometry)

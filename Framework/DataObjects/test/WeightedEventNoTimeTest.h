@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WEIGHTEDEVENTNOTIMETEST_H_
 #define WEIGHTEDEVENTNOTIMETEST_H_ 1
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

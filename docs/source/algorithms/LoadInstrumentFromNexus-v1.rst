@@ -32,7 +32,7 @@ Usage
    source = inst.getSource()
 
    print("The name of the instrument is '{}'.".format(inst.getName().strip()))
-   print("The source postion is at:  {}.".format(source.getPos()))
+   print("The source position is at:  {}.".format(source.getPos()))
 
 
 Output:
@@ -40,7 +40,7 @@ Output:
 .. testoutput:: ExLoadMUSR
 
    The name of the instrument is 'MUSR'.
-   The source postion is at:  [0,-10,0].
+   The source position is at:  [0,-10,0].
 
 .. categories::
 

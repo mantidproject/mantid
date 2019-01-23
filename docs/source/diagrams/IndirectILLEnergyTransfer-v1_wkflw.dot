@@ -7,7 +7,7 @@ digraph IndirectILLEnergyTransfer {
     OutputWorkspace
   }
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     CropDeadMonitorChannels
   }

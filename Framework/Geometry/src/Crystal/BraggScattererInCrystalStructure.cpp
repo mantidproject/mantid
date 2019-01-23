@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/BraggScattererInCrystalStructure.h"
 #include <stdexcept>
 
-#include <boost/regex.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/algorithm/string.hpp>
-#include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidKernel/ListValidator.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)

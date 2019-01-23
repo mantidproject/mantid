@@ -7,7 +7,7 @@
 #
 # EX: Framework/Kernel
 #
-# Thie macro the calls include_directories for each path and creates the 
+# This macro calls include_directories for each path and creates the
 # MANTID_SUBPROJECT_LIBS variable with the given subproject library names.
 #
 ################################################################################

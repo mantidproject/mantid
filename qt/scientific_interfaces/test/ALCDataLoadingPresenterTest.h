@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_
 #define MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
-#include "../Muon/IALCDataLoadingView.h"
 #include "../Muon/ALCDataLoadingPresenter.h"
+#include "../Muon/IALCDataLoadingView.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -23,9 +29,9 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe->first << ", " << maybe->second;
   return out;
 }
-}
+} // namespace boost
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCDataLoadingView : public IALCDataLoadingView {
   // XXX: A workaround, needed because of the way the comma is treated in a
@@ -78,7 +84,7 @@ MATCHER_P3(VectorValue, i, value, delta, "") {
   return fabs(arg.at(i) - value) < delta;
 }
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
   MockALCDataLoadingView *m_view;
@@ -189,11 +195,13 @@ public:
                 setAvailableLogs(
                     AllOf(Property(&std::vector<std::string>::size, 39),
                           Contains("run_number"), Contains("sample_magn_field"),
-                          Contains("Field_Danfysik")))).Times(1);
+                          Contains("Field_Danfysik"))))
+        .Times(1);
     // Test periods
     EXPECT_CALL(*m_view, setAvailablePeriods(
                              AllOf(Property(&std::vector<std::string>::size, 2),
-                                   Contains("1"), Contains("2")))).Times(1);
+                                   Contains("1"), Contains("2"))))
+        .Times(1);
     // Test time limits
     auto timeRange = std::make_pair<double, double>(0.0, 0.0);
     ON_CALL(*m_view, timeRange())
@@ -209,11 +217,13 @@ public:
                 setAvailableLogs(
                     AllOf(Property(&std::vector<std::string>::size, 39),
                           Contains("run_number"), Contains("sample_magn_field"),
-                          Contains("Field_Danfysik")))).Times(1);
+                          Contains("Field_Danfysik"))))
+        .Times(1);
     // Test periods
     EXPECT_CALL(*m_view, setAvailablePeriods(
                              AllOf(Property(&std::vector<std::string>::size, 2),
-                                   Contains("1"), Contains("2")))).Times(1);
+                                   Contains("1"), Contains("2"))))
+        .Times(1);
     // Test time limits
     auto timeRange =
         std::make_pair<double, double>(0.1, 10.0); // not the first run loaded
@@ -353,14 +363,14 @@ public:
     EXPECT_CALL(
         *m_view,
         setDataCurve(
-            AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1398.090, 1E-3),
-                  QwtDataX(1, 1360.200, 1E-3), QwtDataX(2, 1364.520, 1E-3),
-                  QwtDataY(0, 0.15004, 1E-5), QwtDataY(1, 0.14289, 1E-5),
-                  QwtDataY(2, 0.12837, 1E-5)),
+            AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1360.200, 1E-3),
+                  QwtDataX(1, 1364.520, 1E-3), QwtDataX(2, 1398.090, 1E-3),
+                  QwtDataY(0, 0.14289, 1E-5), QwtDataY(1, 0.12837, 1E-5),
+                  QwtDataY(2, 0.15004, 1E-5)),
             AllOf(Property(&std::vector<double>::size, 3),
-                  VectorValue(0, 1.285E-3, 1E-6),
-                  VectorValue(1, 1.284E-3, 1E-6),
-                  VectorValue(2, 1.280E-3, 1E-6))));
+                  VectorValue(0, 1.284E-3, 1E-6),
+                  VectorValue(1, 1.280E-3, 1E-6),
+                  VectorValue(2, 1.285E-3, 1E-6))));
     m_view->requestLoading();
   }
 

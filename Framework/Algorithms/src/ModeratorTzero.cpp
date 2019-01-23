@@ -1,13 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ModeratorTzero.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -23,6 +31,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 ModeratorTzero::ModeratorTzero()
     : Mantid::API::Algorithm(),
@@ -98,7 +107,7 @@ void ModeratorTzero::exec() {
   // Check whether input == output to see whether a new workspace is required.
   if (outputWS != inputWS) {
     // Create new workspace for output from old
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   // calculate tof shift once for all neutrons if emode==Direct

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/StartLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -26,7 +32,7 @@ DECLARE_ALGORITHM(StartLiveData)
 namespace {
 /// name for a group of properties that get copied from the listener
 const char *listenerPropertyGroup = "ListenerProperties";
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -101,12 +101,12 @@ Output:
 
 .. testoutput:: ExCountsOffsetAndRebin
 
-   Total counts (rebinned) : 84438
-   Total counts (no rebin) : 84438
+   Total counts (rebinned) : 79970
+   Total counts (no rebin) : 79970
 
    Time range (original) : -0.550 - 31.450 mus
-   Time range (no rebin) : -0.550 - 31.450 mus
-   Time range (rebinned) : -0.550 - 31.450 mus
+   Time range (no rebin) : 0.106 - 31.450 mus
+   Time range (rebinned) : 0.106 - 31.306 mus
 
    Time step (original)  : 0.016 mus
    Time step (no rebin)  : 0.016 mus

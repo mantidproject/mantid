@@ -2,7 +2,7 @@
  IntPropertyWithValue
 ======================
 
-This a python binding to the C++ class Mantid::Kernel::IntPropertyWithValue.
+This is a Python binding to the C++ class Mantid::Kernel::IntPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

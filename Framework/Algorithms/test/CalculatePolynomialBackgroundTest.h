@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CALCULATEPOLYNOMIALBACKGROUNDTEST_H_
 #define MANTID_ALGORITHMS_CALCULATEPOLYNOMIALBACKGROUNDTEST_H_
 
@@ -113,7 +119,8 @@ public:
     const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
     API::MatrixWorkspace_sptr ws(
         DataObjects::create<DataObjects::Workspace2D>(
-            nHist, HistogramData::Histogram(edges, counts, stdDevs)).release());
+            nHist, HistogramData::Histogram(edges, counts, stdDevs))
+            .release());
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
@@ -144,7 +151,8 @@ public:
     const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
     API::MatrixWorkspace_sptr ws(
         DataObjects::create<DataObjects::Workspace2D>(
-            nHist, HistogramData::Histogram(edges, counts)).release());
+            nHist, HistogramData::Histogram(edges, counts))
+            .release());
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /* SaveIsawUBTest.h
  *
  *  Created on: Aug 12, 2011
@@ -7,22 +13,22 @@
 #ifndef MANTID_CRYSTAL_SAVEISAWUBTEST_H_
 #define MANTID_CRYSTAL_SAVEISAWUBTEST_H_
 
-#include "MantidCrystal/SaveIsawUB.h"
 #include "MantidCrystal/LoadIsawUB.h"
+#include "MantidCrystal/SaveIsawUB.h"
 
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sstream>
 
 using namespace Mantid::Kernel::Strings;
 using namespace Mantid::Crystal;

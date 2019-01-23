@@ -37,34 +37,19 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "Fedora
   find_program ( RPMBUILD_CMD rpmbuild )
   if ( RPMBUILD_CMD )
     set ( CPACK_GENERATOR "RPM" )
+
     set ( CPACK_RPM_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}" )
     set ( CPACK_RPM_PACKAGE_URL "http://www.mantidproject.org" )
+    set ( CPACK_RPM_PACKAGE_LICENSE "GPLv3" )
     set ( CPACK_RPM_COMPRESSION_TYPE "xz" )
 
-    # determine the distribution number
-    if(NOT CPACK_RPM_DIST)
-      execute_process(COMMAND ${RPMBUILD_CMD} -E %{?dist}
-                      OUTPUT_VARIABLE CPACK_RPM_DIST
-                      ERROR_QUIET
-                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set (CPACK_RPM_PACKAGE_RELEASE 1 CACHE STRING "The release number")
+    if ( CMAKE_VERSION VERSION_GREATER "3.5" )
+      # cmake can set the distribution flag correctly
+      set (CPACK_RPM_PACKAGE_RELEASE_DIST "on")
+    else ()
+      message (FATAL_ERROR "Will not create packages on cmake <3.6")
     endif()
-
-    # release number defaults to 1
-    if(NOT CPACK_RPM_PACKAGE_RELEASE_NUMBER)
-      set(CPACK_RPM_PACKAGE_RELEASE_NUMBER "1")
-    endif()
-
-    # reset the release name
-    set( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE_NUMBER}${CPACK_RPM_DIST}" )
-
-    # If CPACK_SET_DESTDIR is ON then the Prefix doesn't get put in the spec file
-    if( CPACK_SET_DESTDIR )
-      message ( STATUS "Adding \"Prefix:\" line to spec file manually when CPACK_SET_DESTDIR is set")
-      set( CPACK_RPM_SPEC_MORE_DEFINE "Prefix: ${CPACK_PACKAGING_INSTALL_PREFIX}" )
-    endif()
-
-    # according to rpm.org: name-version-release.architecture.rpm
-    set ( CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
-  endif ( RPMBUILD_CMD)
-endif ()
+    set (CPACK_RPM_FILE_NAME RPM-DEFAULT)
+  endif()
+endif()

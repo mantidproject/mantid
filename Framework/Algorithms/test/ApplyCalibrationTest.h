@@ -1,23 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef APPLYCALIBRATIONTEST_H_
 #define APPLYCALIBRATIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAlgorithms/ApplyCalibration.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "WorkspaceCreationHelperTest.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/V3D.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAlgorithms/ApplyCalibration.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
@@ -90,7 +97,7 @@ public:
      * and so here we
      * load the IDF of a MAPS instrument where the number of detectors has been
      * reduced.
-    */
+     */
 
     int ndets = 3;
 
@@ -99,8 +106,8 @@ public:
     const std::string wsName("ApplyCabrationWs");
     Mantid::DataHandling::LoadEmptyInstrument loader;
     loader.initialize();
-    loader.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/MAPS_Definition_Reduced.xml");
+    loader.setPropertyValue("Filename",
+                            "unit_testing/MAPS_Definition_Reduced.xml");
     loader.setPropertyValue("OutputWorkspace", wsName);
     loader.execute();
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();

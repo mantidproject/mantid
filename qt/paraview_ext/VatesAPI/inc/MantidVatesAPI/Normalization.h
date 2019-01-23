@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_VATES_NORMALIZATION_H_
 #define MANTID_VATES_NORMALIZATION_H_
 
@@ -14,7 +20,7 @@ class IMDIterator;
 class IMDNode;
 class IMDWorkspace;
 class IMDEventWorkspace;
-}
+} // namespace API
 
 namespace VATES {
 
@@ -55,7 +61,7 @@ IMDWorkspace
 DLLExport std::unique_ptr<Mantid::API::IMDIterator>
 createIteratorWithNormalization(const VisualNormalization normalizationOption,
                                 Mantid::API::IMDWorkspace const *const ws);
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif /*MANTID_VATES_NORMALIZATION_H_*/

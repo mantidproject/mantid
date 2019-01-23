@@ -18,7 +18,7 @@ Description
 
 -  The PeakWidthPercent value is used to estimate the width of the peak
    (as a percentage of the d-spacing value).
--  The algorithm performs a simple linear fit of the background exluding
+-  The algorithm performs a simple linear fit of the background excluding
    the peak.
 
    -  It uses two use averaging regions of 1/2 width, centered at +-

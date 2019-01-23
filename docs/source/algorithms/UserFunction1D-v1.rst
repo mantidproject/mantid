@@ -82,7 +82,7 @@ with 0.0. If some of the parameters should be fixed in the fit list them
 in the *Fix* property in any order, e.g. "a,c".
 
 The resulting parameters are returned in a
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ set in ``OutputParameters`` property.
+:ref:`TableWorkspace <Table Workspaces>` set in ``OutputParameters`` property.
 Also for displaying purposes *OutputWorkspace* is returned. It contains
 the initial spectrum, the fitted spectrum and their difference.
 

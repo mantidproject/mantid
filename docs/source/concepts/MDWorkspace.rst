@@ -75,6 +75,8 @@ There are several algorithms that will create a MDWorkspace:
    new one.
 -  :ref:`LoadSQW <algm-LoadSQW>` converts from the SQW format.
 
+.. _MDWorkspace File Backed:
+
 File-Backed MDWorkspaces
 ------------------------
 

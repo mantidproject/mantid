@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
 from qtpy.QtCore import Qt
@@ -11,6 +17,7 @@ class AlgorithmProgressWidget(QWidget):
     """
     Widget consisting of a progress bar and a button.
     """
+
     def __init__(self, parent=None):
         super(AlgorithmProgressWidget, self).__init__(parent)
         self.progress_bar = None
@@ -21,6 +28,7 @@ class AlgorithmProgressWidget(QWidget):
         self.layout.addWidget(self.details_button)
         self.setLayout(self.layout)
         self.presenter = AlgorithmProgressPresenter(self)
+        self.algorithm_monitor_dialog = None
 
     def show_progress_bar(self):
         if self.progress_bar is None:
@@ -37,5 +45,11 @@ class AlgorithmProgressWidget(QWidget):
             self.progress_bar = None
 
     def show_dialog(self):
-        dialog = AlgorithmMonitorDialog(self, self.presenter.model)
-        dialog.show()
+        if not self.algorithm_monitor_dialog:
+            self.algorithm_monitor_dialog = AlgorithmMonitorDialog(self, self.presenter.model)
+            self.algorithm_monitor_dialog.show()
+        else:
+            self.algorithm_monitor_dialog.setFocus()
+
+    def clear_dialog(self):
+        self.algorithm_monitor_dialog = None

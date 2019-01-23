@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from math import (pi, cos, sin)
 from sans.common.enums import MaskingQuadrant
@@ -33,7 +39,7 @@ def infinite_plane(shape_id, plane_pt, normal_pt):
 def infinite_cylinder(centre, radius, axis, shape_id='shape'):
     """
         Generates xml code for an infintely long cylinder
-        :param centre: a tupple for a point on the axis
+        :param centre: a tuple for a point on the axis
         :param radius: cylinder radius
         :param axis: cylinder orientation
         :param shape_id: a string to refer to the shape by

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_TABLEWORKSPACE_H_
 #define MANTID_DATAOBJECTS_TABLEWORKSPACE_H_
 
@@ -5,11 +11,11 @@
 // Includes
 //----------------------------------------------------------------------
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -53,27 +59,6 @@ namespace DataObjects {
 
     \author Roman Tolchenov
     \date 31/10/2008
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class MANTID_DATAOBJECTS_DLL TableWorkspace : public API::ITableWorkspace {
@@ -186,9 +171,9 @@ public:
   }
   /**Non-throwing access to the pointer to the column data array for the column
    * with given name. Returns null on error or if the coulmn has not been found
-    * No checks if one tries to use pointer to work out of the array limits are
+   * No checks if one tries to use pointer to work out of the array limits are
    * performed; The pointer has to be received right before usage as
-    * underlying vectoor changes within the table workspace immidiately make
+   * underlying vectoor changes within the table workspace immidiately make
    * this pointer invalid. Nasty method. Use only if no choice.      */
   template <class T> T *getColDataArray(const std::string &name) {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
@@ -203,9 +188,9 @@ public:
   /**Non-throwing const access to the pointer to the column data array for the
    * column with given name. Returns null on error or if the coulmn has not been
    * found
-    * No checks if one tries to use pointer to work out of the array limits are
+   * No checks if one tries to use pointer to work out of the array limits are
    * performed; The pointer has to be received right before usage as
-    * underlying vectoor changes within the table workspace immidiately make
+   * underlying vectoor changes within the table workspace immidiately make
    * this pointer invalid. Nasty method. Use only if no choice.      */
   template <class T> T *getColDataArray(const std::string &name) const {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
@@ -337,59 +322,59 @@ private:
     }
   }
 
-  bool addColumn(boost::shared_ptr<API::Column> column);
+  void addColumn(boost::shared_ptr<API::Column> column);
 
   /** This method finds the row and column index of an integer cell value in a
-  * table workspace
-  * @param value :: -value to search
-  * @param  row  row number of the value  searched
-  * @param  col  column number of the value searched
-  */
+   * table workspace
+   * @param value :: -value to search
+   * @param  row  row number of the value  searched
+   * @param  col  column number of the value searched
+   */
   virtual void find(size_t value, size_t &row, size_t &col) {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an string cell value in a
-  * table workspace
-  * @param value :: -value to search
-  * @param  row  row number of the value  searched
-  * @param  col  column number of the value searched
-  */
+   * table workspace
+   * @param value :: -value to search
+   * @param  row  row number of the value  searched
+   * @param  col  column number of the value searched
+   */
   virtual void find(std::string value, size_t &row, size_t &col) {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an float value in a table
-  * workspace
-  * @param value :: -value to search
-  * @param  row  row number of the value  searched
-  * @param  col  column number of the value searched
-  */
+   * workspace
+   * @param value :: -value to search
+   * @param  row  row number of the value  searched
+   * @param  col  column number of the value searched
+   */
   virtual void find(float value, size_t &row, size_t &col) {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an API::Bollean value in a
-  * table workspace
-  * @param value :: -value to search
-  * @param  row  row number of the value  searched
-  * @param  col  column number of the value searched
-  */
+   * table workspace
+   * @param value :: -value to search
+   * @param  row  row number of the value  searched
+   * @param  col  column number of the value searched
+   */
   virtual void find(API::Boolean value, size_t &row, size_t &col) {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an double cell value in a
-  * table workspace
-  * @param value :: -value to search
-  * @param  row  row number of the value  searched
-  * @param  col  column number of the value searched
-  */
+   * table workspace
+   * @param value :: -value to search
+   * @param  row  row number of the value  searched
+   * @param  col  column number of the value searched
+   */
   virtual void find(double value, size_t &row, size_t &col) {
     findValue(value, row, col);
   }
   /** This method finds the row and column index of an Mantid::Kernel::V3D cell
-  * value in a table workspace
-  * @param value :: -value to search
-  * @param  row  row number of the value  searched
-  * @param  col  column number of the value searched
-  */
+   * value in a table workspace
+   * @param value :: -value to search
+   * @param  row  row number of the value  searched
+   * @param  col  column number of the value searched
+   */
   void find(Mantid::Kernel::V3D value, size_t &row, size_t &col) {
     findValue(value, row, col);
   }
@@ -410,8 +395,9 @@ private:
     }
   };
 
-  using column_it = std::vector<
-      boost::shared_ptr<API::Column>>::iterator; ///< Column iterator
+  using column_it =
+      std::vector<boost::shared_ptr<API::Column>>::iterator; ///< Column
+                                                             ///< iterator
 
   ///< Column const iterator
   using column_const_it =

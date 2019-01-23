@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SETUNCERTAINTIESTEST_H_
 #define MANTID_ALGORITHMS_SETUNCERTAINTIESTEST_H_
 
@@ -19,10 +25,10 @@ public:
   }
 
   /**
-    * Create and execute the algorithm in the specified mode.
-  * @param mode The name of the SetError property SetUncertainties
-  * @return The name that the output workspace will be registered as.
-  */
+   * Create and execute the algorithm in the specified mode.
+   * @param mode The name of the SetError property SetUncertainties
+   * @return The name that the output workspace will be registered as.
+   */
   API::MatrixWorkspace_sptr runAlg(const std::string &mode) {
     // random data mostly works
     auto inWksp = WorkspaceCreationHelper::create1DWorkspaceRand(30, true);
@@ -84,7 +90,7 @@ public:
   void test_zero() {
     const auto outWS = runAlg("zero");
 
-    const auto E = outWS->e(0);
+    const auto &E = outWS->e(0);
     for (const auto item : E) {
       TS_ASSERT_EQUALS(item, 0.);
     }
@@ -95,8 +101,8 @@ public:
   void test_sqrt() {
     const auto outWS = runAlg("sqrt");
 
-    const auto E = outWS->e(0);
-    const auto Y = outWS->y(0);
+    const auto &E = outWS->e(0);
+    const auto &Y = outWS->y(0);
     for (size_t i = 0; i < E.size(); ++i) {
       TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
     }
@@ -107,7 +113,7 @@ public:
   void test_oneIfZero() {
     const auto outWS = runAlg("oneIfZero");
 
-    const auto E = outWS->e(0);
+    const auto &E = outWS->e(0);
     for (const auto item : E) {
       TS_ASSERT(item > 0.);
     }

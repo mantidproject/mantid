@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -115,8 +121,10 @@ void FindUBUsingLatticeParameters::exec() {
     // Show the modified lattice parameters
     g_log.notice() << lattice << "\n";
 
-    sprintf(logInfo, std::string("Lattice Parameters (Refined - Input): %11.6f "
-                                 "%11.6f %11.6f %11.6f %11.6f %11.6f").c_str(),
+    sprintf(logInfo,
+            std::string("Lattice Parameters (Refined - Input): %11.6f "
+                        "%11.6f %11.6f %11.6f %11.6f %11.6f")
+                .c_str(),
             calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha,
             calc_beta - beta, calc_gamma - gamma);
     g_log.notice(std::string(logInfo));
@@ -124,5 +132,5 @@ void FindUBUsingLatticeParameters::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

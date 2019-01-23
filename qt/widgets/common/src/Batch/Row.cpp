@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/Row.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <boost/algorithm/string/predicate.hpp>
@@ -37,6 +43,6 @@ bool operator<=(Row const &lhs, Row const &rhs) {
 bool operator>=(Row const &lhs, Row const &rhs) { return !(lhs < rhs); }
 
 bool operator>(Row const &lhs, Row const &rhs) { return !(lhs <= rhs); }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

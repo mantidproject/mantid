@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef REFLECTIVITYMULFTEST_H_
 #define REFLECTIVITYMULFTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/ReflectivityMulf.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Functions/ReflectivityMulf.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

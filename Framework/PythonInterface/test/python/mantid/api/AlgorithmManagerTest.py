@@ -1,12 +1,23 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import testhelpers
-from mantid.api import (AlgorithmManager, IAlgorithm, Algorithm, AlgorithmProxy)
+from mantid.api import (AlgorithmManager, Algorithm, AlgorithmProxy,
+                        FrameworkManagerImpl, IAlgorithm)
 
-import sys
 
 class AlgorithmManagerTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # Load the plugins
+        FrameworkManagerImpl.Instance()
 
     def test_create_default_version(self):
         alg = testhelpers.assertRaisesNothing(self, AlgorithmManager.create, "ConvertUnits")

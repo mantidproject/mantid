@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKLTEST_H_
 #define MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKLTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
 
 using Mantid::MDAlgorithms::ConvertCWSDMDtoHKL;
 

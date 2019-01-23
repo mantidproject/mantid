@@ -1,9 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ICAT_COMPOSITECATALOGTEST_H_
 #define MANTID_ICAT_COMPOSITECATALOGTEST_H_
 
+#include "ICatTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/CompositeCatalog.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidICat/CatalogSearchParam.h"
@@ -80,6 +88,17 @@ int DummyCatalog::m_counter(0);
 
 class CompositeCatalogTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static CompositeCatalogTest *createSuite() {
+    return new CompositeCatalogTest();
+  }
+  static void destroySuite(CompositeCatalogTest *suite) { delete suite; }
+
+  /// Skip all unit tests if ICat server is down
+  bool skipTests() override { return ICatTestHelper::skipTests(); }
+
+  CompositeCatalogTest() { Mantid::API::FrameworkManager::Instance(); }
+
   /// Verifies that multiple catalogs are being logged in to.
   void testLogin() {
     std::string temp = "";

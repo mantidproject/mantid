@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_
 #define MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_
 
@@ -21,9 +27,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
-using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 using Mantid::DataHandling::LoadInstrument;
 using Mantid::DataHandling::LoadSpiceAscii;
+using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

@@ -1,19 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_VATES_vtkSplatterPlotFactory_H_
 #define MANTID_VATES_vtkSplatterPlotFactory_H_
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidVatesAPI/MetaDataExtractorUtils.h"
-#include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidAPI/IMDNode.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
-#include <vtkPoints.h>
-#include <boost/shared_ptr.hpp>
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <vtkPoints.h>
 
 namespace Mantid {
 namespace VATES {
@@ -26,26 +31,7 @@ using SigFuncIMDNodePtr = Mantid::signal_t (Mantid::API::IMDNode::*)() const;
  *
  * @date August 16, 2011
  *
- * Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- *National Laboratory & European Spallation Source
  *
- * This file is part of Mantid.
- *
- * Mantid is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * Mantid is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * File change history is stored at: <https://github.com/mantidproject/mantid>
- * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
 class DLLExport vtkSplatterPlotFactory : public vtkDataSetFactory {
@@ -159,7 +145,7 @@ private:
   /// Sort boxes by normalized signal value
   virtual void sortBoxesByDecreasingSignal(const bool VERBOSE) const;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

@@ -2,7 +2,7 @@
  DataProcessorAlgorithm
 ========================
 
-This a python binding to the C++ class Mantid::API::DataProcessorAlgorithm.
+This is a Python binding to the C++ class Mantid::API::DataProcessorAlgorithm.
 
 *bases:* :py:obj:`mantid.api.Algorithm`
 

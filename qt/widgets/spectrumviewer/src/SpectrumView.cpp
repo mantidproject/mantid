@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UsageService.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
-#include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/SliderHandler.h"
-#include "MantidQtWidgets/SpectrumViewer/RangeHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/RangeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
+#include "MantidQtWidgets/SpectrumViewer/SliderHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
 
 #include <QDropEvent>
 #include <QSettings>

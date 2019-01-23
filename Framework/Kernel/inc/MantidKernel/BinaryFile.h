@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BINARYFILE_H_
 #define BINARYFILE_H_
 
-#include <fstream>
-#include <string>
-#include <vector>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/make_unique.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <fstream>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

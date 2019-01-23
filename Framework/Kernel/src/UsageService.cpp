@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UsageService.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
@@ -20,7 +26,7 @@ Kernel::Logger g_log("UsageServiceImpl");
 
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
-*/
+ */
 FeatureUsage::FeatureUsage(const std::string &type, const std::string &name,
                            const bool internal)
     : type(type), name(name), internal(internal) {}
@@ -62,24 +68,27 @@ UsageServiceImpl::UsageServiceImpl()
     : m_timer(), m_timerTicks(0), m_timerTicksTarget(0), m_FeatureQueue(),
       m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex(),
       m_application("python"),
+      m_startTime(Types::Core::DateAndTime::getCurrentTime()),
       m_startupActiveMethod(this, &UsageServiceImpl::sendStartupAsyncImpl),
       m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
-  int retval = Mantid::Kernel::ConfigService::Instance().getValue(
-      "usagereports.rooturl", m_url);
-  if (retval == 0) {
+  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
+      "usagereports.rooturl");
+  if (!url.is_initialized()) {
     g_log.debug() << "Failed to load usage report url\n";
   } else {
+    m_url = url.get();
     g_log.debug() << "Root usage reporting url is " << m_url << "\n";
-  }
-  m_startTime = Types::Core::DateAndTime::getCurrentTime();
+  };
 }
 
-void UsageServiceImpl::setApplication(const std::string &name) {
+void UsageServiceImpl::setApplicationName(const std::string &name) {
   m_application = name;
 }
 
-std::string UsageServiceImpl::getApplication() const { return m_application; }
+std::string UsageServiceImpl::getApplicationName() const {
+  return m_application;
+}
 
 void UsageServiceImpl::setInterval(const uint32_t seconds) {
   // set the ticks target to by 24 hours / interval
@@ -96,7 +105,7 @@ void UsageServiceImpl::registerStartup() {
 }
 
 /** registerFeatureUsage
-*/
+ */
 void UsageServiceImpl::registerFeatureUsage(const std::string &type,
                                             const std::string &name,
                                             const bool internal) {
@@ -191,8 +200,8 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
 }
 
 /**
-* This puts together the system information for the json document.
-*/
+ * This puts together the system information for the json document.
+ */
 ::Json::Value UsageServiceImpl::generateFeatureHeader() {
   ::Json::Value header;
 
@@ -203,8 +212,8 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
 }
 
 /**
-* This puts together the system information for the json document.
-*/
+ * This puts together the system information for the json document.
+ */
 std::string UsageServiceImpl::generateStartupMessage() {
   ::Json::Value message;
 
@@ -279,17 +288,17 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
 
 //--------------------------------------------------------------------------------------------
 /**
-* Asynchronous execution
-*/
+ * Asynchronous execution
+ */
 
 /**Async method for sending startup messages
-*/
+ */
 int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
   return this->sendReport(message, m_url + "/api/usage");
 }
 
 /**Async method for sending feature messages
-*/
+ */
 int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
   return this->sendReport(message, m_url + "/api/feature");
 }
@@ -306,7 +315,8 @@ int UsageServiceImpl::sendReport(const std::string &message,
   } catch (Mantid::Kernel::Exception::InternetError &e) {
     status = e.errorCode();
     g_log.information() << "Call to \"" << url << "\" responded with " << status
-                        << "\n" << e.what() << "\n";
+                        << "\n"
+                        << e.what() << "\n";
   }
 
   return status;

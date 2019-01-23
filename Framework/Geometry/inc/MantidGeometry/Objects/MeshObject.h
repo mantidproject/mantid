@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_MESHOBJECT_H_
 #define MANTID_GEOMETRY_MESHOBJECT_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "BoundingBox.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidKernel/Material.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
-#include "BoundingBox.h"
+#include "MantidKernel/Material.h"
 #include <map>
 #include <memory>
 
@@ -19,7 +25,7 @@ namespace Mantid {
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 class CompGrp;
@@ -37,38 +43,17 @@ class vtkGeometryCacheWriter;
 
 Mesh Object of Triangles assumed to form one or more
 non-intersecting closed surfaces enclosing separate volumes.
-The number of vertices is limited to 65535.
-
-Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
+The number of vertices is limited to 2^32 based on index type. For 2D Meshes see
+Mesh2DObject
 */
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Constructor
-  MeshObject(const std::vector<uint16_t> &faces,
-             const std::vector<Mantid::Kernel::V3D> &vertices,
-             const Kernel::Material &material);
+  MeshObject(const std::vector<uint32_t> &faces,
+             const std::vector<Kernel::V3D> &vertices,
+             const Kernel::Material material);
   /// Constructor
-  MeshObject(std::vector<uint16_t> &&faces,
-             std::vector<Mantid::Kernel::V3D> &&vertices,
+  MeshObject(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
              const Kernel::Material &&material);
 
   /// Copy constructor
@@ -97,8 +82,7 @@ public:
   bool
   isValid(const Kernel::V3D &) const override; ///< Check if a point is inside
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt,
-                    const Kernel::V3D &uVec) const override;
+  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
   // INTERSECTION
   int interceptSurface(Geometry::Track &) const override;
@@ -149,6 +133,8 @@ public:
   size_t numberOfTriangles() const;
   std::vector<uint32_t> getTriangles() const;
 
+  void rotate(const Kernel::Matrix<double> &);
+  void translate(Kernel::V3D);
   void updateGeometryHandler();
 
 private:
@@ -157,12 +143,7 @@ private:
   void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
                         std::vector<Kernel::V3D> &intersectionPoints,
                         std::vector<int> &entryExitFlags) const;
-  /// Determine intersection between ray and an one triangle
-  bool rayIntersectsTriangle(const Kernel::V3D &start,
-                             const Kernel::V3D &direction,
-                             const Kernel::V3D &v1, const Kernel::V3D &v2,
-                             const Kernel::V3D &v3, Kernel::V3D &intersection,
-                             int &entryExit) const;
+
   /// Get triangle
   bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2,
                    Kernel::V3D &v3) const;
@@ -191,7 +172,7 @@ private:
 
   /// Contents
   /// Triangles are specified by indices into a list of vertices.
-  std::vector<uint16_t> m_triangles;
+  std::vector<uint32_t> m_triangles;
   std::vector<Kernel::V3D> m_vertices;
   /// material composition
   Kernel::Material m_material;

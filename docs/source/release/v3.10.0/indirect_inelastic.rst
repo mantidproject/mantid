@@ -15,7 +15,7 @@ Algorithms
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` and :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>` algorithms are extended for `Efixed` mode, where the correction will be computed for a single wavelength point.
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` can now load NeXus files as well as raw files
 - :ref:`VesuvioPeakPrediction <algm-VesuvioPeakPrediction>` to predict parameters for Vesuvio peaks
-- :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
+- BASISReduction311 has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 - :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
 - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` has been deprecated, use :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
 - :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` and :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now have an option to subtract a background also from the calibration runs.

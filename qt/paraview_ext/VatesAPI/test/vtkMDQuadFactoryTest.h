@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VTK_MD_QUAD_FACTORY_TEST
 #define VTK_MD_QUAD_FACTORY_TEST
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/make_unique.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidVatesAPI/vtkMDQuadFactory.h"
-#include "MockObjects.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "vtkCellType.h"
-#include "vtkUnstructuredGrid.h"
+#include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "MockObjects.h"
+#include "vtkCellType.h"
 #include "vtkSmartPointer.h"
+#include "vtkUnstructuredGrid.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
@@ -94,8 +100,8 @@ public:
         .Times(AtLeast(1));
 
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
-        Mantid::DataObjects::MDEvent<2>, 2>> ws =
-        MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 10);
+        Mantid::DataObjects::MDEvent<2>, 2>>
+        ws = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 10);
 
     // Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;
@@ -136,8 +142,8 @@ class vtkMDQuadFactoryTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
-        Mantid::DataObjects::MDEvent<2>, 2>> input =
-        MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 1000);
+        Mantid::DataObjects::MDEvent<2>, 2>>
+        input = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 1000);
     // Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;
     IAlgorithm_sptr slice =

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -15,7 +21,7 @@ doTest(std::string algoName, std::string lhs, std::string rhs,
        std::string outName, bool succeeds = true, std::string otherProp = "",
        std::string otherPropValue = "");
 
-} // (end namespace)
+} // namespace BinaryOperationMDTestHelper
 
 namespace UnaryOperationMDTestHelper {
 /// Run a unary algorithm.
@@ -24,6 +30,6 @@ doTest(std::string algoName, std::string inName, std::string outName,
        bool succeeds = true, std::string otherProp = "",
        std::string otherPropValue = "");
 
-} // (end namespace)
+} // namespace UnaryOperationMDTestHelper
 
 #endif

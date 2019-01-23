@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_PERFORMINDEXOPERATIONSTEST_H_
 #define MANTID_ALGORITHMS_PERFORMINDEXOPERATIONSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/PerformIndexOperations.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/PerformIndexOperations.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Algorithms::PerformIndexOperations;
 using namespace Mantid::API;

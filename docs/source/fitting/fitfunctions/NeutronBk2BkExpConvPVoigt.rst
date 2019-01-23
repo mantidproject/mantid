@@ -37,10 +37,10 @@ Mantid. It is the peak shape No. 10 in Fullprof. See Refs. 1.
 Description
 -----------
 
-Thermal neutron back to back exponential convoluted with psuedo voigt
-peak function is a back to back exponential convoluted with psuedo voigt
+Thermal neutron back to back exponential convoluted with pseudo voigt
+peak function is a back to back exponential convoluted with pseudo voigt
 peak function. Its difference to a regular back to back exponential
-convoluted with psuedo voigt peak functiont is that it is a function for
+convoluted with pseudo voigt peak functiont is that it is a function for
 all peaks in a TOF powder diffraction pattern, but not a single peak.
 
 Furthermore, the purpose to implement this function in Mantid is to

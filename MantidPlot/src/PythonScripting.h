@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
   File                 : PythonScripting.h
   Project              : QtiPlot
 --------------------------------------------------------------------
-  Copyright            : (C) 2006 by Knut Franke
-  Email (use @ for *)  : knut.franke*gmx.de
-  Description          : Execute Python code from within QtiPlot
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -64,7 +53,7 @@ public:
   /// Set the argv attribute on the sys module
   void setSysArgs(const QStringList &args) override;
 
-  /// Create a new script object that can execute code within this enviroment
+  /// Create a new script object that can execute code within this environment
   Script *newScript(const QString &name, QObject *context,
                     const Script::InteractionType interact) const override;
 
@@ -77,7 +66,7 @@ public:
   /// Does this support abort requests?
   bool supportsAbortRequests() const override { return true; }
 
-  /// Return a string represenation of the given object
+  /// Return a string representation of the given object
   QString toString(PyObject *object, bool decref = false);
   /// Convert a Python list object to a Qt QStringList
   QStringList toStringList(PyObject *py_seq);
@@ -139,8 +128,6 @@ private:
   PyObject *m_sys;
   /// Pointer to the main threads state
   PyThreadState *m_mainThreadState;
-  /// Wrap's acquisition of the GIL
-  PythonGIL m_gil;
 };
 
 #endif

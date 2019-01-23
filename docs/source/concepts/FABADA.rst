@@ -78,7 +78,7 @@ Usage
   ws_res = Load(Filename='irs26173_graphite002_res.nxs')
   
   function_str = 'composite=Convolution,FixResolution=tue,NumDeriv=false;name=Resolution,Workspace=ws_res,WorkspaceIndex=0;(composite=CompositeFunction,NumDeriv=true;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5)'
-  minimizer_str = "FABADA,Chain Lengh=1000000,Steps between values=10,Convergence Criteria=0.01,PDF=pdf,Chains=chain,Converged chain=conv,Cost Function Table=CostFunction,Parameter Erros =Errors"
+  minimizer_str = "FABADA,Chain Length=1000000,Steps between values=10,Convergence Criteria=0.01,PDF=pdf,Chains=chain,Converged chain=conv,Cost Function Table=CostFunction,Parameter Erros =Errors"
   
   Fit(Function = function_str,InputWorkspace=ws_data,WorkspaceIndex=3,StartX=-0.25,EndX=0.25,CreateOutput=True,Output = 'result',OutputCompositeMembers=True,MaxIterations=2000000, Minimizer=minimizer_str)   
 

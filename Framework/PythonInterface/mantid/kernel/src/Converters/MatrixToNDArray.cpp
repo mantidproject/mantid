@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -45,7 +51,7 @@ PyObject *wrapWithNDArray(const ContainerType &cdata,
 INSTANTIATE_MATRIX_WRAP(int);
 INSTANTIATE_MATRIX_WRAP(float);
 INSTANTIATE_MATRIX_WRAP(double);
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

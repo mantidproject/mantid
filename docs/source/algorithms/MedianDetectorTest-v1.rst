@@ -26,7 +26,7 @@ SignificanceTest will not be labelled bad. This test is particularly
 important when the number of counts is low, for example when examining
 the low count "background" parts of spectra.
 
-Optionally, some might want to do median on a tube, or a bank. Fot that,
+Optionally, some might want to do median on a tube, or a bank. For that,
 use the LevelsUp input. For example, in the CNCS instrument, the
 detector is called a pixel. The parent of a pixel is a tube, while an
 eightpack contains 8 tubes. To calculate the median of a tube, use

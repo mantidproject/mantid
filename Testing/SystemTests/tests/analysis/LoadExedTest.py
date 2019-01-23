@@ -1,11 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-public-methods,too-many-arguments
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 
 import mantid.simpleapi as ms
 
 
-class LoadExedTest(stresstesting.MantidStressTest):
+class LoadExedTest(systemtesting.MantidSystemTest):
     def runTest(self):
         rawfile = "V15_0000016544_S000_P01.raw"
         print("Rawfilename:"+rawfile)

@@ -1,17 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_REPOMODEL_H_
 #define MANTID_API_REPOMODEL_H_
-#include <QAbstractItemModel>
-#include <QModelIndex>
-#include <QVariant>
-#include <QList>
-#include <QVariant>
-#include <QStringList>
-#include <QWidget>
-#include <QDialog>
 #include "MantidAPI/ScriptRepository.h"
-#include <QtConcurrentRun>
+#include <QAbstractItemModel>
+#include <QDialog>
 #include <QFutureWatcher>
+#include <QList>
 #include <QMessageBox>
+#include <QModelIndex>
+#include <QStringList>
+#include <QVariant>
+#include <QWidget>
+#include <QtConcurrentRun>
 
 class QLineEdit;
 class QCheckBox;
@@ -67,27 +72,6 @@ const QString DELETABLEENTRY = "deletable";
    This class should be constructed just once, and as so, the copy constructor
   and the assignment
    will be make private to ensure this.
-
-  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class RepoModel : public QAbstractItemModel {
   Q_OBJECT
@@ -268,6 +252,6 @@ private slots:
 };
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_API_SCRIPTREPOSITORYVIEW_H_ */

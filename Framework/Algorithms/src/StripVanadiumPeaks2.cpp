@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
 
 #include "MantidAPI/Axis.h"
@@ -33,15 +39,17 @@ void StripVanadiumPeaks2::init() {
   auto min = boost::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("FWHM", 7, min, "The number of points covered, on average, "
-                                  "by the fwhm of a peak. Passed through to "
-                                  "FindPeaks. Default 7.");
+  declareProperty("FWHM", 7, min,
+                  "The number of points covered, on average, "
+                  "by the fwhm of a peak. Passed through to "
+                  "FindPeaks. Default 7.");
 
   // The tolerance allowed in meeting the conditions
-  declareProperty("Tolerance", 4, min, "A measure of the strictness desired in "
-                                       "meeting the condition on peak "
-                                       "candidates. Passed through to "
-                                       "FindPeaks. Default 4.");
+  declareProperty("Tolerance", 4, min,
+                  "A measure of the strictness desired in "
+                  "meeting the condition on peak "
+                  "candidates. Passed through to "
+                  "FindPeaks. Default 4.");
 
   std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
@@ -49,9 +57,10 @@ void StripVanadiumPeaks2::init() {
                   "The type of background of the histogram. Present choices "
                   "include Linear and Quadratic. ");
 
-  declareProperty("HighBackground", true, "Flag to indicate that the peaks are "
-                                          "relatively weak comparing to "
-                                          "background ");
+  declareProperty("HighBackground", true,
+                  "Flag to indicate that the peaks are "
+                  "relatively weak comparing to "
+                  "background ");
 
   declareProperty("PeakPositionTolerance", -1.0,
                   "Tolerance on the found peaks' positions against the input "
@@ -92,9 +101,10 @@ void StripVanadiumPeaks2::exec() {
     // 12.1040, 12.4568";
 
   } else {
-    g_log.error() << "Unit " << unit << " Is NOT supported by "
-                                        "StripVanadiumPeaks, which only "
-                                        "supports d-spacing\n";
+    g_log.error() << "Unit " << unit
+                  << " Is NOT supported by "
+                     "StripVanadiumPeaks, which only "
+                     "supports d-spacing\n";
     throw std::invalid_argument("Not supported unit");
   }
 
@@ -127,5 +137,5 @@ void StripVanadiumPeaks2::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

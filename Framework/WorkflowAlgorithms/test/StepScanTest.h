@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_WORKFLOWALGORITHMS_ROCKINGCURVETEST_H_
 #define MANTID_WORKFLOWALGORITHMS_ROCKINGCURVETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidWorkflowAlgorithms/StepScan.h"
-#include "MantidAlgorithms/FilterByXValue.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/FilterByXValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidWorkflowAlgorithms/StepScan.h"
 
-using Mantid::WorkflowAlgorithms::StepScan;
 using Mantid::DataObjects::EventWorkspace_sptr;
+using Mantid::WorkflowAlgorithms::StepScan;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 

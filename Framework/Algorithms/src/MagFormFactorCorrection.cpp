@@ -1,13 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MagFormFactorCorrection.h"
-#include "MantidKernel/MagneticIon.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MagneticIon.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-
 using namespace Mantid::PhysicalConstants;
 
 namespace Mantid {
@@ -19,6 +28,8 @@ DECLARE_ALGORITHM(MagFormFactorCorrection)
 using namespace Kernel;
 using namespace API;
 using namespace PhysicalConstants;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 void MagFormFactorCorrection::init() {
   declareProperty(
@@ -88,8 +99,10 @@ void MagFormFactorCorrection::exec() {
     FF.push_back(ion.analyticalFormFactor(Qval * Qval));
   }
   if (!ffwsStr.empty()) {
-    MatrixWorkspace_sptr ffws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, Qvals.size(), FF.size());
+    HistogramBuilder builder;
+    builder.setX(Qvals.size());
+    builder.setY(FF.size());
+    MatrixWorkspace_sptr ffws = create<Workspace2D>(1, builder.build());
     ffws->mutableX(0).assign(Qvals.begin(), Qvals.end());
     ffws->mutableY(0).assign(FF.begin(), FF.end());
     ffws->getAxis(0)->unit() =

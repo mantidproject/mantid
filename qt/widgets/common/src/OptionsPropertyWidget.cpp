@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
 #include <QComboBox>
 #include <QLabel>
 
@@ -69,5 +75,5 @@ void OptionsPropertyWidget::setValueImpl(const QString &value) {
   if (index >= 0)
     m_combo->setCurrentIndex(index);
 }
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

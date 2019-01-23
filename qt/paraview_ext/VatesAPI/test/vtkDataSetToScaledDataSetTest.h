@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_VATESAPI_VTKDATASETTOSCALEDDATASETTEST_H_
 #define MANTID_VATESAPI_VTKDATASETTOSCALEDDATASETTEST_H_
 
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
@@ -17,13 +23,12 @@
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
 #include <vtkMatrix4x4.h>
+#include <vtkNew.h>
 #include <vtkPVChangeOfBasisHelper.h>
+#include <vtkPointSet.h>
 #include <vtkSmartPointer.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
-#include <vtkPointSet.h>
-#include <vtkNew.h>
-#include <vtkSmartPointer.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;

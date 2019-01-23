@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*=========================================================================
 
    Program: ParaView
@@ -34,27 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Modified Camera reaction to adjust view along nonorthogonal axes
 
  @date 19/04/2017
-
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 #ifndef pqCameraReactionNonOrthogonalAxes_h
@@ -64,10 +49,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqReaction.h"
 
 /**
-* @ingroup Reactions
-* pqCameraReaction has the logic to handle common operations associated with
-* the camera such as reset view along X axis etc.
-*/
+ * @ingroup Reactions
+ * pqCameraReaction has the logic to handle common operations associated with
+ * the camera such as reset view along X axis etc.
+ */
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
     pqCameraReactionNonOrthogonalAxes : public pqReaction {
   Q_OBJECT
@@ -105,15 +90,15 @@ public:
 
 public slots:
   /**
-  * Updates the enabled state. Applications need not explicitly call
-  * this.
-  */
+   * Updates the enabled state. Applications need not explicitly call
+   * this.
+   */
   void updateEnableState() override;
 
 protected:
   /**
-  * Called when the action is triggered.
-  */
+   * Called when the action is triggered.
+   */
   void onTriggered() override;
 
 private:

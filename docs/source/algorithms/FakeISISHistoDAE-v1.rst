@@ -70,7 +70,7 @@ Usage
     # put back the facility
     ConfigService.setFacility(oldFacility)
 
-    #get the ouput workspace
+    #get the output workspace
     wsOut = mtd["wsOut"]
     print("The workspace contains %i histograms" % wsOut.getNumberHistograms())
 

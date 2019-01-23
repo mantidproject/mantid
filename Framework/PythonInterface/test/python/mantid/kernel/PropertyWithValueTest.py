@@ -1,10 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
-from testhelpers import run_algorithm
+from testhelpers import create_algorithm, run_algorithm
 import numpy as np
 import sys
+
 
 class PropertyWithValueTest(unittest.TestCase):
 
@@ -15,10 +22,10 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def setUp(self):
         if self._integration is None:
-            self.__class__._integration = AlgorithmManager.createUnmanaged("Integration")
+            self.__class__._integration = create_algorithm("Integration")
             self.__class__._integration.initialize()
         if self._mask_dets is None:
-            self.__class__._mask_dets = AlgorithmManager.createUnmanaged("MaskDetectors")
+            self.__class__._mask_dets = create_algorithm("MaskDetectors")
             self.__class__._mask_dets.initialize()
 
     def test_value_setting_as_string_gives_expected_value_for_correct_type(self):
@@ -127,6 +134,9 @@ class PropertyWithValueTest(unittest.TestCase):
         self.assertEquals(result.startswith("1,2,3,"), True)
         self.assertEquals(result.endswith("98,99"), True)
 
+        # Check the dtype return value
+        self.assertEquals(det_list_prop.dtype(), "i")
+
     def _do_vector_double_numpy_test(self, int_type=False):
         create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')
         create_ws.initialize()
@@ -156,6 +166,7 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
         self._do_vector_int_numpy_test('WorkspaceIndexList')
+
 
 if __name__ == '__main__':
     unittest.main()

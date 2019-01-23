@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SLICE_VIEWER_NULLPEAKSPRESENTER_TEST_H_
 #define SLICE_VIEWER_NULLPEAKSPRESENTER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MockObjects.h"
-#include <gmock/gmock.h>
 #include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
+#include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
 using namespace MantidQt::SliceViewer;
 
@@ -35,7 +41,7 @@ public:
 
   void test_changeShownDim_does_nothing() {
     NullPeaksPresenter presenter;
-    TS_ASSERT(!presenter.changeShownDim());
+    TS_ASSERT(!presenter.changeShownDim(0, 1));
   }
 
   void test_isLabelOfFreeAxis_always_returns_false() {

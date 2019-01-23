@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CatalogSession.h"
 #include "MantidKernel/Logger.h"
 
@@ -41,5 +47,5 @@ const std::string &CatalogSession::getSoapEndpoint() const {
  * @return The facility used to create the catalog.
  */
 const std::string &CatalogSession::getFacility() const { return m_facility; }
-}
-}
+} // namespace API
+} // namespace Mantid

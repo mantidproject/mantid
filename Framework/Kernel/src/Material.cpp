@@ -1,10 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/regex.hpp>
 #include <numeric>
 
 namespace Mantid {
@@ -14,8 +19,8 @@ using tokenizer = Mantid::Kernel::StringTokenizer;
 using str_pair = std::pair<std::string, std::string>;
 
 using PhysicalConstants::Atom;
-using PhysicalConstants::getAtom;
 using PhysicalConstants::NeutronAtom;
+using PhysicalConstants::getAtom;
 
 namespace {
 const double INV_FOUR_PI = 1. / (4. * M_PI);
@@ -39,13 +44,13 @@ Material::Material()
       m_temperature(0.0), m_pressure(0.0) {}
 
 /**
-* Construct a material object
-* @param name :: The name of the material
-* @param formula :: The chemical formula
-* @param numberDensity :: Density in atoms / Angstrom^3
-* @param temperature :: The temperature in Kelvin (Default = 300K)
-* @param pressure :: Pressure in kPa (Default: 101.325 kPa)
-*/
+ * Construct a material object
+ * @param name :: The name of the material
+ * @param formula :: The chemical formula
+ * @param numberDensity :: Density in atoms / Angstrom^3
+ * @param temperature :: The temperature in Kelvin (Default = 300K)
+ * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
+ */
 Material::Material(const std::string &name, const ChemicalFormula &formula,
                    const double numberDensity, const double temperature,
                    const double pressure)
@@ -56,13 +61,13 @@ Material::Material(const std::string &name, const ChemicalFormula &formula,
 }
 
 /**
-* Construct a material object
-* @param name :: The name of the material
-* @param atom :: The neutron atom to take scattering infrmation from
-* @param numberDensity :: Density in atoms / Angstrom^3
-* @param temperature :: The temperature in Kelvin (Default = 300K)
-* @param pressure :: Pressure in kPa (Default: 101.325 kPa)
-*/
+ * Construct a material object
+ * @param name :: The name of the material
+ * @param atom :: The neutron atom to take scattering infrmation from
+ * @param numberDensity :: Density in atoms / Angstrom^3
+ * @param temperature :: The temperature in Kelvin (Default = 300K)
+ * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
+ */
 Material::Material(const std::string &name,
                    const PhysicalConstants::NeutronAtom &atom,
                    const double numberDensity, const double temperature,
@@ -126,12 +131,12 @@ double Material::cohScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal +
-                   right.atom->neutron.coh_scatt_xs * right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.coh_scatt_xs *
+                                              right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -152,12 +157,12 @@ double Material::incohScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal +
-                   right.atom->neutron.inc_scatt_xs * right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.inc_scatt_xs *
+                                              right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -179,12 +184,12 @@ double Material::totalScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal +
-                   right.atom->neutron.tot_scatt_xs * right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.tot_scatt_xs *
+                                              right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -205,12 +210,12 @@ double Material::totalScatterXSection(const double lambda) const {
  */
 double Material::absorbXSection(const double lambda) const {
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal +
-                   right.atom->neutron.abs_scatt_xs * right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.abs_scatt_xs *
+                                              right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -224,12 +229,12 @@ double Material::cohScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal +
-                   right.atom->neutron.coh_scatt_length * right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.coh_scatt_length *
+                                              right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -243,12 +248,12 @@ double Material::incohScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal +
-                   right.atom->neutron.inc_scatt_length * right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.inc_scatt_length *
+                                              right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -262,13 +267,12 @@ double Material::cohScatterLengthReal(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal +
-                               right.atom->neutron.coh_scatt_length_real *
-                                   right.multiplicity;
-                      }) /
+      std::accumulate(
+          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+          [](double subtotal, const FormulaUnit &right) {
+            return subtotal + right.atom->neutron.coh_scatt_length_real *
+                                  right.multiplicity;
+          }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -282,13 +286,12 @@ double Material::cohScatterLengthImg(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal +
-                               right.atom->neutron.coh_scatt_length_img *
-                                   right.multiplicity;
-                      }) /
+      std::accumulate(
+          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+          [](double subtotal, const FormulaUnit &right) {
+            return subtotal + right.atom->neutron.coh_scatt_length_img *
+                                  right.multiplicity;
+          }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -302,13 +305,12 @@ double Material::incohScatterLengthReal(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal +
-                               right.atom->neutron.inc_scatt_length_real *
-                                   right.multiplicity;
-                      }) /
+      std::accumulate(
+          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+          [](double subtotal, const FormulaUnit &right) {
+            return subtotal + right.atom->neutron.inc_scatt_length_real *
+                                  right.multiplicity;
+          }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -322,13 +324,12 @@ double Material::incohScatterLengthImg(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal +
-                               right.atom->neutron.inc_scatt_length_img *
-                                   right.multiplicity;
-                      }) /
+      std::accumulate(
+          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
+          [](double subtotal, const FormulaUnit &right) {
+            return subtotal + right.atom->neutron.inc_scatt_length_img *
+                                  right.multiplicity;
+          }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -342,12 +343,12 @@ double Material::totalScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
   const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            return subtotal +
-                   right.atom->neutron.tot_scatt_length * right.multiplicity;
-          }) /
+      std::accumulate(std::begin(m_chemicalFormula),
+                      std::end(m_chemicalFormula), 0.,
+                      [](double subtotal, const FormulaUnit &right) {
+                        return subtotal + right.atom->neutron.tot_scatt_length *
+                                              right.multiplicity;
+                      }) /
       m_atomTotal;
 
   if (!std::isnormal(weightedTotal)) {
@@ -533,7 +534,7 @@ getAtomName(const std::string &text) // TODO change to get number after letters
   else
     return std::make_pair(text.substr(0, 2), text.substr(2));
 }
-}
+} // namespace
 
 Material::ChemicalFormula
 Material::parseChemicalFormula(const std::string chemicalSymbol) {
@@ -587,5 +588,5 @@ Material::parseChemicalFormula(const std::string chemicalSymbol) {
 
   return CF;
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

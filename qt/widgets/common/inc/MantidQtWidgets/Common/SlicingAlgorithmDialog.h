@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMDIALOGS_SLICINGALGORITHMDIALOG_H_
 #define MANTIDQTCUSTOMDIALOGS_SLICINGALGORITHMDIALOG_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_SlicingAlgorithmDialog.h"
-#include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "DllOption.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "ui_SlicingAlgorithmDialog.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -145,7 +151,7 @@ public:
   ~BinMDDialog() override {}
   void customiseInitLayout() override;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif

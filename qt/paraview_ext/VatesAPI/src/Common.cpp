@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/Common.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/UnitLabel.h"
 
-#include <vtkNew.h>
 #include <vtkFieldData.h>
+#include <vtkNew.h>
 #include <vtkStringArray.h>
 
 #include "vtkPVChangeOfBasisHelper.h"
@@ -72,5 +78,5 @@ void setAxisLabel(const std::string &metadataLabel,
   fieldData->AddArray(axisTitle.GetPointer());
 }
 
-} // VATES
-} // Mantid
+} // namespace VATES
+} // namespace Mantid

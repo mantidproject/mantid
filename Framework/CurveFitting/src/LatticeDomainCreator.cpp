@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -8,8 +14,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidDataObjects/Peak.h"
 #include "MantidCurveFitting/Algorithms/PawleyFit.h"
+#include "MantidDataObjects/Peak.h"
 
 namespace Mantid {
 namespace CurveFitting {

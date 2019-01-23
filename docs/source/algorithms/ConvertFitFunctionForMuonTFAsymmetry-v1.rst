@@ -13,7 +13,7 @@ This algorithm can be run in two modes. The first is construct, which takes a us
 
 .. math:: N_0[1+f(t)] + A\exp(-\lambda t)
 
-where :math:`N_0` is the normalisation constant, :math:`A`  is fixed to zero by default and :math:`\lambda` is fixed to the Muon lifetime. The inital value for the normalisation constant is from the normalisation table. 
+where :math:`N_0` is the normalisation constant, :math:`A`  is fixed to zero by default and :math:`\lambda` is fixed to the Muon lifetime. The initial value for the normalisation constant is from the normalisation table. 
 
 The second mode is extract, if the TF normalisation function is given it will return the user function.
 
@@ -58,6 +58,7 @@ This example is for converting a function.
    fit_output =    Fit(Function=str(returnFunc),InputWorkspace=ws,MaxIterations=0,Output="return_params")
 
    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+
    if paramTable.column(1)[0] == paramTable.column(1)[2]:
        print("Constant tie has been preserved")
    else:

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
@@ -389,7 +395,7 @@ class TestLARMORCommand(unittest.TestCase):
         selected_idf = "LARMOR_Definition_NONEXIST.xml"
         # Act + Assert
         self.assertFalse(command_iface.LARMOR(selected_idf),
-                         "A non existant idf path should return false")
+                         "A non existent idf path should return false")
 
 class TestMaskFile(unittest.TestCase):
     def test_throws_for_user_file_with_invalid_extension(self):

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H
 
@@ -6,11 +12,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include <QStringList>
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,27 +30,6 @@ TreeManager is an abstract base class defining some methods meant
 to be used by the Generic Data Processor presenter, which will delegate some
 functionality to concrete tree manager implementations, depending on whether or
 not a post-processing algorithm has been defined.
-
-Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class TreeManager {
@@ -63,6 +48,8 @@ public:
   virtual void deleteRow() = 0;
   /// Delete a group
   virtual void deleteGroup() = 0;
+  /// Delete all rows and groups
+  virtual void deleteAll() = 0;
   /// Group rows
   virtual void groupRows() = 0;
   /// Expand selection
@@ -83,6 +70,8 @@ public:
 
   /// Return selected data
   virtual TreeData selectedData(bool prompt = false) = 0;
+  /// Return all data
+  virtual TreeData allData(bool prompt = false) = 0;
   /// Transfer new data to model
   virtual void
   transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
@@ -97,6 +86,13 @@ public:
   /// Set the 'processed' status of a data item
   virtual void setProcessed(bool processed, int position) = 0;
   virtual void setProcessed(bool processed, int position, int parent) = 0;
+  /// Check whether reduction failed for a data item
+  virtual bool reductionFailed(int position) const = 0;
+  virtual bool reductionFailed(int position, int parent) const = 0;
+  /// Set the error message for a data item
+  virtual void setError(const std::string &error, int position) = 0;
+  virtual void setError(const std::string &error, int position, int parent) = 0;
+  /// Reset the processed/error state of all items
   virtual void invalidateAllProcessed() = 0;
   /// Access cells
   virtual void setCell(int row, int column, int parentRow, int parentColumn,
@@ -122,7 +118,7 @@ protected:
     commands.push_back(std::move(command));
   }
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /* MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H */

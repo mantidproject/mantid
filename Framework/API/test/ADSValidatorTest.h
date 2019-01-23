@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ADSVALIDATORTEST_H_
 #define MANTID_API_ADSVALIDATORTEST_H_
 
@@ -26,7 +32,7 @@ private:
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
-}
+} // namespace
 
 using StringVector = std::vector<std::string>;
 

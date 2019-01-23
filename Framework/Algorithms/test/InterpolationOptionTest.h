@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_INTERPOLATIONOPTIONTEST_H_
 #define MANTID_ALGORITHMS_INTERPOLATIONOPTIONTEST_H_
 
@@ -6,10 +12,9 @@
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
-#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using Mantid::Algorithms::InterpolationOption;
 using namespace Mantid::HistogramData;

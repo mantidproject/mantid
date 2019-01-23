@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -24,7 +30,19 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
+
+std::string castToString(int value) {
+  return boost::lexical_cast<std::string>(value);
 }
+
+template <typename Predicate>
+void setPropertyIf(Algorithm_sptr algorithm, std::string const &propName,
+                   std::string const &value, Predicate const &condition) {
+  if (condition)
+    algorithm->setPropertyValue(propName, value);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -130,26 +148,20 @@ void IndirectTab::exportPythonScript() {
  * @return If the algorithm was successful
  */
 bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
-                           const int specMin, const int specMax) {
-  Algorithm_sptr load =
-      AlgorithmManager::Instance().createUnmanaged("Load", -1);
-  load->initialize();
+                           const int specMin, const int specMax,
+                           bool loadHistory) {
+  const auto algName = loadHistory ? "Load" : "LoadNexusProcessed";
 
-  load->setProperty("Filename", filename.toStdString());
-  load->setProperty("OutputWorkspace", outputName.toStdString());
+  auto loader = AlgorithmManager::Instance().createUnmanaged(algName, -1);
+  loader->initialize();
+  loader->setProperty("Filename", filename.toStdString());
+  loader->setProperty("OutputWorkspace", outputName.toStdString());
+  setPropertyIf(loader, "SpectrumMin", castToString(specMin), specMin != -1);
+  setPropertyIf(loader, "SpectrumMax", castToString(specMax), specMax != -1);
+  setPropertyIf(loader, "LoadHistory", loadHistory ? "1" : "0", !loadHistory);
+  loader->execute();
 
-  if (specMin != -1)
-    load->setPropertyValue("SpectrumMin",
-                           boost::lexical_cast<std::string>(specMin));
-
-  if (specMax != -1)
-    load->setPropertyValue("SpectrumMax",
-                           boost::lexical_cast<std::string>(specMax));
-
-  load->execute();
-
-  // If reloading fails we're out of options
-  return load->isExecuted();
+  return loader->isExecuted();
 }
 
 /**
@@ -161,19 +173,23 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
  */
 void IndirectTab::addSaveWorkspaceToQueue(const QString &wsName,
                                           const QString &filename) {
+  addSaveWorkspaceToQueue(wsName.toStdString(), filename.toStdString());
+}
+
+void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName,
+                                          const std::string &filename) {
   // Setup the input workspace property
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-  saveProps["InputWorkspace"] = wsName.toStdString();
+  saveProps["InputWorkspace"] = wsName;
 
   // Setup the algorithm
-  IAlgorithm_sptr saveAlgo =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
+  auto saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
   saveAlgo->initialize();
 
-  if (filename.isEmpty())
-    saveAlgo->setProperty("Filename", wsName.toStdString() + ".nxs");
+  if (filename.empty())
+    saveAlgo->setProperty("Filename", wsName + ".nxs");
   else
-    saveAlgo->setProperty("Filename", filename.toStdString());
+    saveAlgo->setProperty("Filename", filename);
 
   // Add the save algorithm to the batch
   m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
@@ -251,21 +267,22 @@ void IndirectTab::plotMultipleSpectra(
  * This uses the plotSpectrum function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param wsIndex Index of spectrum from each workspace to plot
+ * @param spectraIndex Index of spectrum from each workspace to plot
  */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
-  if (workspaceNames.isEmpty())
-    return;
+void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
+                               const int &spectraIndex, const bool &errorBars) {
+  if (!workspaceNames.isEmpty()) {
+    const QString errors = errorBars ? "True" : "False";
 
-  QString pyInput = "from mantidplot import plotSpectrum\n";
+    QString pyInput = "from mantidplot import plotSpectrum\n";
+    pyInput += "plotSpectrum(['";
+    pyInput += workspaceNames.join("','");
+    pyInput += "'], ";
+    pyInput += QString::number(spectraIndex);
+    pyInput += ", error_bars=" + errors + ")\n";
 
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], ";
-  pyInput += QString::number(wsIndex);
-  pyInput += ")\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
+    m_pythonRunner.runPythonCode(pyInput);
+  }
 }
 
 /**
@@ -273,15 +290,16 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
  * index.
  *
  * @param workspaceName Names of workspace to plot
- * @param wsIndex Workspace Index of spectrum to plot
+ * @param spectraIndex Workspace Index of spectrum to plot
+ * @param errorBars Is true if you want to plot the error bars
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int wsIndex) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, wsIndex);
+void IndirectTab::plotSpectrum(const QString &workspaceName,
+                               const int &spectraIndex, const bool &errorBars) {
+  if (!workspaceName.isEmpty()) {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotSpectrum(workspaceNames, spectraIndex, errorBars);
+  }
 }
 
 /**
@@ -456,35 +474,6 @@ void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
   preview->setAxisRange(range, QwtPlot::yLeft);
 }
 
-/*
- * Extracts the row at the specified index in the specified table workspace, as
- * a map from the column name to the value in that column in the extracted row.
- *
- * @param tableWs           The table workspace to extract a row from.
- * @param columnsToExtract  The names of the columns to extract.
- * @param wsIndex           The index of the row to extract.
- * @return                  A map from the name of a column to the value in that
- *                          column (from the extracted row).
- */
-QHash<QString, double>
-IndirectTab::extractRowFromTable(ITableWorkspace_sptr tableWs,
-                                 const QSet<QString> &columnsToExtract,
-                                 size_t wsIndex) {
-  std::vector<std::string> columnNames = tableWs->getColumnNames();
-  QHash<QString, double> parameters;
-
-  for (size_t column = 0; column < columnNames.size(); ++column) {
-    const auto columnName = QString::fromStdString(columnNames[column]);
-
-    if (columnsToExtract.contains(columnName)) {
-      double value = tableWs->Double(wsIndex, column);
-      parameters.insert(columnName, value);
-    }
-  }
-
-  return parameters;
-}
-
 /**
  * Sets the edge bounds of plot to prevent the user inputting invalid values
  * Also sets limits for range selector movement
@@ -650,7 +639,7 @@ void IndirectTab::algorithmFinished(bool error) {
 /**
  * Run Python code and return anything printed to stdout.
  *
- * @param code Python code the execute
+ * @param code Python code to execute
  * @param no_output Enable to ignore any output
  * @returns What was printed to stdout
  */
@@ -682,106 +671,18 @@ bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
   return workspaceExists;
 }
 
-/*
- * Extracts the parameter values in the specified columns of the table
- * workspace, with the specified name, for each row in the table workspace.
- *
- * @param  tableWs            The table workspace to extract values from.
- * @param  columnsToExtract   A set of the names of the columns to extract
- *                            values from.
- * @param  minSpectrum        The spectrum index corresponding to the first row
- *                            in the table workspace.
- * @param  maxSpectrum        The max spectrum index, such that:
- *                            1 + maxSpectrum - minSpectrum
- *                            Is the number of rows, starting from the first,
- *                            extracted from the table workspace.
- * @return                    A map from spectrum index to a map of column name
- *                            to the value in the cell at the specified spectrum
- *                            index in the column with the specified name.
- */
-QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
-    const std::string &tableWsName, const QSet<QString> &columnsToExtract,
-    size_t minSpectrum, size_t maxSpectrum) {
-  std::vector<size_t> spectraIndices;
-  spectraIndices.reserve(1 + maxSpectrum - minSpectrum);
-
-  for (size_t index = minSpectrum; index <= maxSpectrum; ++index) {
-    spectraIndices.push_back(index);
-  }
-
-  return extractParametersFromTable(tableWsName, columnsToExtract,
-                                    spectraIndices);
-}
-
-/*
- * Extracts the parameter values in the specified columns of the table
- * workspace, with the specified name, for each row in the table workspace.
- *
- * @param  tableWs            The table workspace to extract values from.
- * @param  columnsToExtract   A set of the names of the columns to extract
- *                            values from.
- * @param  spectraIndices     The spectrum indices which each row in the table
- *                            workspace maps onto.
- * @return                    A map from spectrum index to a map of column name
- *                            to the value in the cell at the specified spectrum
- *                            index in the column with the specified name.
- */
-QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
-    const std::string &tableWsName, const QSet<QString> &columnsToExtract,
-    const std::vector<size_t> &spectraIndices) {
-  using AnalysisDataService = Mantid::API::AnalysisDataService;
-  using ITableWorkspace = Mantid::API::ITableWorkspace;
-
-  // Check if a table with the specified name exists in the ADS
-  if (AnalysisDataService::Instance().doesExist(tableWsName)) {
-    auto tableWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        tableWsName);
-    return extractParametersFromTable(tableWs, columnsToExtract,
-                                      spectraIndices);
-  }
-
-  throw std::invalid_argument("Table workspace with the specified name does "
-                              "not exist in the Analysis Data Service.");
-}
-
-/*
- * Extracts the parameter values in the specified columns of the table workspace
- * for each row in the table workspace.
- *
- * @param  tableWs            The table workspace to extract values from.
- * @param  columnsToExtract   A set of the names of the columns to extract
- *                            values from.
- * @param  spectraIndices     The spectrum indices which each row in the table
- *                            workspace maps onto.
- * @return                    A map from spectrum index to a map of column name
- *                            to the value in the cell at the specified spectrum
- *                            index in the column with the specified name.
- */
-QHash<size_t, QHash<QString, double>> IndirectTab::extractParametersFromTable(
-    Mantid::API::ITableWorkspace_sptr tableWs,
-    const QSet<QString> &columnsToExtract,
-    const std::vector<size_t> &spectraIndices) {
-  QHash<size_t, QHash<QString, double>> parameterValues;
-
-  for (size_t i = 0; i < tableWs->rowCount(); ++i) {
-    parameterValues[spectraIndices[i]] =
-        extractRowFromTable(tableWs, columnsToExtract, i);
-  }
-  return parameterValues;
-}
-
-QHash<QString, size_t> IndirectTab::extractAxisLabels(
+std::unordered_map<std::string, size_t> IndirectTab::extractAxisLabels(
     Mantid::API::MatrixWorkspace_const_sptr workspace,
     const size_t &axisIndex) const {
   Axis *axis = workspace->getAxis(axisIndex);
   if (!axis->isText())
-    return QHash<QString, size_t>();
+    return std::unordered_map<std::string, size_t>();
 
   TextAxis *textAxis = boost::static_pointer_cast<TextAxis>(axis);
-  QHash<QString, size_t> labels;
+  std::unordered_map<std::string, size_t> labels;
 
   for (size_t i = 0; i < textAxis->length(); ++i)
-    labels[QString::fromStdString(textAxis->label(i))] = i;
+    labels[textAxis->label(i)] = i;
   return labels;
 }
 

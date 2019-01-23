@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TEST_INVALID_PARAMETER_PARSER_H_
 #define TEST_INVALID_PARAMETER_PARSER_H_
 
+#include "MantidMDAlgorithms/InvalidParameter.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/InvalidParameterParser.h"
-#include "MantidMDAlgorithms/InvalidParameter.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

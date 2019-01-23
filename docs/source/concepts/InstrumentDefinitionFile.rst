@@ -384,6 +384,76 @@ just a single ID number you may alternatively use the notation <id val="650" />.
 note the number of ID specified must match the number of
 detectors/monitors defined.
 
+.. _Creating Grid (Voxel) Banks:
+
+Creating Grid (Voxel) Banks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There is a shortcut way to create 3D arrays of detector pixels. These pixels represent volumetric detectors. Here is an example how to do this:
+
+.. code-block:: xml
+
+    <component type="block"  idstart="1" idfillorder="zxy">
+      <location x="0" y="0" z="0.2" name="bank2">
+      </location>
+    </component>
+      
+    <type name="block" is="GridDetector" type="voxel" 
+        xpixels="4" xstart="-0.04" xstep="+0.02"
+        ypixels="48" ystart="-0.48" ystep="+0.02" 
+        zpixels="16" zstart="-0.08" zstep="+0.01">
+      <properties/>
+    </type>  
+     
+    <!-- Pixel for Detectors-->
+    <type name="voxel" is="detector">
+     	<cuboid id="shape">
+      		<left-front-bottom-point x="-0.01" y="-0.01" z="-0.005"  />
+      		<left-front-top-point  x="-0.01" y="0.01" z="-0.005"  />
+      		<left-back-bottom-point  x="0.01" y="-0.01" z="-0.005"  />
+      		<right-front-bottom-point  x="-0.01" y="-0.01" z="0.005"  />
+    	</cuboid>
+    <algebra val="shape" />
+    </type>
+
+- The “block” type defined above has the special “is” tag of “GridDetector”. The same type definition 
+  then needs these attributes specified:
+
+  - type: point to another type defining your pixel shape and size.
+  - xpixels: number of pixels in X
+  - xstart: x-position of the 0-th pixel (in length units, normally meters)
+  - xstep: step size between pixels in the horizontal direction (in length units, normally meters)
+  - ypixels: number of pixels in Y
+  - ystart: y-position of the 0-th pixel (in length units, normally meters)
+  - ystep: step size between pixels in the vertical direction (in length units, normally meters)
+  - zpixels: number of pixels in Z
+  - zstart: z-position of the 0-th pixel (in length units, normally meters)
+  - zstep: step size between pixels in the z (usually beam) direction (in length units, normally meters)
+- Detectors of the type specified (“pixel” in the example) will be replicated at the X Y and Z coordinates 
+  given. The usual rotation and translation of the panel will rotate the pixels as needed.
+- Each instance of a “block” needs to set these attributes, at the <component> tag, in order to specify the 
+  Pixel IDs of the 2D array.
+  
+  - idstart: detector ID of the first pixel
+  - idfillorder: a string which determines the ordering of the axes. For example "zxy": (0,0,0)=1; 
+    (0,0,1)=1, (0, 0, 2)=2 and so on. Default is idfillorder=”xyz”. Other characters are not allowed and 
+    the string must contain all three axes.
+  - idstepbyrow: amount to increase the ID number on each row (2nd order). e.g, if idfillorder="zyx",and set 
+    idstepbyrow="100", and have 10 Z pixels, you would get: (0,0,0)=0; (0,0,1)=1; ... (0,0,9)=9; 
+    (0,1,0)=100;(0,1,1)=101; etc. The last order is always calculated automatically.
+  - idstep. Default to 1. Set the ID increment within a row (1st order).
+- DO NOT also specify an “idlist” attribute for rectangular detectors, as it will not be used.
+- Advantages of using a GridDetector tag:
+  
+  - Convenient way of defining voxel-based instruments.
+  - Special handling/rendering of each voxel layer (z plane) as textures in the instrument view.
+  - Smaller IDF and faster instrument loading times.
+  - No need to make a script to generate the pixel positions.
+- Disadvantages/Limitations:
+
+  - Must have constant pixel spacing in each direction.
+  - Bank must be cuboid (box) shape.
+
 .. _Creating Rectangular Area Detectors:
 
 Creating Rectangular Area Detectors
@@ -1305,7 +1375,7 @@ shape is shape is shown here:
    CombineIntoOneShapeExample.png
 
 Note for this to work, a unique name for each component must be provided
-and these names must be used in the algebra sting (here "A : B", see
+and these names must be used in the algebra string (here "A : B", see
 :ref:`HowToDefineGeometricShape <HowToDefineGeometricShape>`). Further a
 bounding-box may optionally be added to the to the type.
 Note the above geometric shape can alternatively be defined with the XML

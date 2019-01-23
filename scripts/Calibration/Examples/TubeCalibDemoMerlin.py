@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
 Tube Calibration Demonstration program for MERLIN.
@@ -144,7 +150,7 @@ def calibrateMerlin(filename):
     # For the tubes 2_x (smaller tube above, it is better to take the first part of known positions: edge1, edge2, peak1,peak2
 
     # NOTE: the smaller tubes they have length = 1.22879882813, but 1024 detectors
-    # so we have to correct the known positiosn by multiplying by its lenght and dividing by the longer dimension
+    # so we have to correct the known positiosn by multiplying by its length and dividing by the longer dimension
 
     from tube_calib_fit_params import TubeCalibFitParams
 
@@ -155,7 +161,7 @@ def calibrateMerlin(filename):
                            2.92713867188 - 1.22879882813) / 2
     # difference among the expected center position for
     # both tubes here a little bit of attempts is necessary.
-    # The effective center position and lengh is different for the calibrated tube, that is the reason,
+    # The effective center position and length is different for the calibrated tube, that is the reason,
     # the calibrated values of the smaller tube does not seems aligned with the others. By, finding the
     # 'best' half_diff_center value, the alignment occurs nicely.
     half_diff_center = 0.835  #
@@ -165,7 +171,7 @@ def calibrateMerlin(filename):
     doorpos = knownPositions[[5, 6, 7, 8]] - half_diff_center
     doorfunc = [1, 1, 2, 2]
     # for the smal tubes, automatically searching for the peak position in pixel was not working quite well,
-    # so we will give the aproximate position for these tubes through fitPar argument
+    # so we will give the approximate position for these tubes through fitPar argument
     fitPar = TubeCalibFitParams([216, 527, 826, 989])
     fitPar.setAutomatic(True)
 
@@ -185,7 +191,7 @@ def calibrateMerlin(filename):
     doorfunc = [2, 2, 1, 1]
 
     # for the smal tubes, automatically searching for the peak position in pixel was not working quite well,
-    # so we will give the aproximate position for these tubes through fitPar argument
+    # so we will give the approximate position for these tubes through fitPar argument
     fitPar = TubeCalibFitParams([50, 202, 664, 815])
     fitPar.setAutomatic(True)
 

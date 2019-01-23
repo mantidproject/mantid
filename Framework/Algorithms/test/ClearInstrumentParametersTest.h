@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CLEARINSTRUMENTPARAMETERSTEST_H
 #define CLEARINSTRUMENTPARAMETERSTEST_H
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/OptionalBool.h"
 
 using namespace Mantid::Algorithms;
@@ -84,8 +90,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    loaderIDF2.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+    loaderIDF2.setPropertyValue("Filename",
+                                "unit_testing/IDF_for_UNIT_TESTING2.xml");
     loaderIDF2.setPropertyValue("Workspace", wsName);
     loaderIDF2.setProperty("RewriteSpectraMap",
                            Mantid::Kernel::OptionalBool(true));

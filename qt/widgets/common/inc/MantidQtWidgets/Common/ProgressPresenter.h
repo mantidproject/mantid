@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_PROGRESSPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_PROGRESSPRESENTER_H
 
@@ -24,9 +30,14 @@ public:
   }
 
   void doReport(const std::string &) override {
-    m_progressableView->setProgress(static_cast<int>(m_i));
+    if (m_progressableView->isPercentageIndicator())
+      m_progressableView->setProgress(static_cast<int>(m_i));
   }
   void clear() { m_progressableView->clearProgress(); }
+  void setAsPercentageIndicator() {
+    m_progressableView->setAsPercentageIndicator();
+  }
+  void setAsEndlessIndicator() { m_progressableView->setAsEndlessIndicator(); }
   ~ProgressPresenter() {}
 };
 #endif /* MANTIDQTMANTIDWIDGETS_PROGRESSPRESENTER_H */

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 
@@ -65,10 +71,10 @@ private:
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
 private slots:
+  /// Sets the active workspace in the selected tab
+  void tabChanged(int index);
   /// Called when the user clicks the Py button
   void exportTabPython();
-  /// Called when the Run button is pressed.  Runs current tab.
-  void run();
   /// Opens a directory dialog.
   void openDirectoryDialog();
   /// Opens the Mantid Wiki web page of the current tab.
@@ -86,7 +92,8 @@ private:
 
   /// Change Observer for ConfigService (monitors user directories)
   Poco::NObserver<IndirectDataAnalysis,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, IndirectDataAnalysisTab *> m_tabs;

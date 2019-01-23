@@ -62,17 +62,16 @@ FindVisibleProducerWithChangeOfBasisMatrix(pqView *view) {
     vtkPVArrayInformation *cobm =
         info->GetArrayInformation("ChangeOfBasisMatrix", vtkDataObject::FIELD);
     vtkPVArrayInformation *bbimc =
-        cobm
-            ? info->GetArrayInformation("BoundingBoxInModelCoordinates",
-                                        vtkDataObject::FIELD)
-            : nullptr;
+        cobm ? info->GetArrayInformation("BoundingBoxInModelCoordinates",
+                                         vtkDataObject::FIELD)
+             : nullptr;
     if (cobm && bbimc) {
       return vtkSMSourceProxy::SafeDownCast(drepr->getInput()->getProxy());
     }
   }
   return nullptr;
 }
-}
+} // namespace
 
 //-----------------------------------------------------------------------------
 pqCameraReactionNonOrthogonalAxes::pqCameraReactionNonOrthogonalAxes(

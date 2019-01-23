@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AddPeak.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::PhysicalConstants;
 
@@ -20,11 +26,13 @@ DECLARE_ALGORITHM(AddPeak)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::DataObjects::PeaksWorkspace;
+using Mantid::DataObjects::PeaksWorkspace_sptr;
 
 /** Initialize the algorithm's properties.
  */
 void AddPeak::init() {
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "A peaks workspace.");
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -39,7 +47,7 @@ void AddPeak::init() {
 /** Execute the algorithm.
  */
 void AddPeak::exec() {
-  IPeaksWorkspace_sptr peaksWS = getProperty("PeaksWorkspace");
+  PeaksWorkspace_sptr peaksWS = getProperty("PeaksWorkspace");
   MatrixWorkspace_sptr runWS = getProperty("RunWorkspace");
 
   const int detID = getProperty("DetectorID");
@@ -109,8 +117,8 @@ void AddPeak::exec() {
   Qy *= knorm;
   Qz *= knorm;
 
-  Mantid::Geometry::IPeak *peak =
-      peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2);
+  auto peak = std::unique_ptr<Mantid::Geometry::IPeak>(
+      peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2));
   peak->setDetectorID(detID);
   peak->setGoniometerMatrix(runWS->run().getGoniometer().getR());
   peak->setBinCount(count);
@@ -120,9 +128,8 @@ void AddPeak::exec() {
     peak->setSigmaIntensity(std::sqrt(height));
 
   peaksWS->addPeak(*peak);
-  delete peak;
   // peaksWS->modified();
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

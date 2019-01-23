@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
-#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -16,8 +22,10 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include "LoadRaw/isisraw2.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/File.h>
 
@@ -41,9 +49,9 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
 
   StartAndEndTime startAndEndTime;
   startAndEndTime.startTime =
-      Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
+      Mantid::DataHandling::LoadRawHelper::extractStartTime(isisRaw);
   startAndEndTime.endTime =
-      Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
+      Mantid::DataHandling::LoadRawHelper::extractEndTime(isisRaw);
 
   fclose(rawFile);
   return startAndEndTime;
@@ -65,7 +73,7 @@ StartAndEndTime getStartAndEndTimesFromNexusFile(
 
   return startAndEndTime;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -288,7 +296,7 @@ void CreateSimulationWorkspace::loadMappingFromISISNXS(
     throw std::runtime_error(
         "Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
   }
-  using NXIntArray = boost::scoped_ptr<std::vector<int32_t>>;
+  using NXIntArray = std::unique_ptr<std::vector<int32_t>>;
 
   nxsFile.openData("NDET");
   NXIntArray ndets(nxsFile.getData<int32_t>());

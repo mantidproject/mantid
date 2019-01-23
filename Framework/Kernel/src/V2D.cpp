@@ -1,5 +1,11 @@
-#include "MantidKernel/Exception.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/V2D.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 
 #include <limits>
@@ -11,17 +17,17 @@ namespace Kernel {
 namespace {
 // Smallest possible double value
 const double EPSILON = std::numeric_limits<double>::epsilon();
-}
+} // namespace
 
 //-----------------------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------------------
 /**
-* Index access.
-* @param index :: Index value
-* @returns Value at the given index
-* @throws if out of range
-*/
+ * Index access.
+ * @param index :: Index value
+ * @returns Value at the given index
+ * @throws if out of range
+ */
 const double &V2D::operator[](const size_t index) const {
   switch (index) {
   case 0:
@@ -60,19 +66,19 @@ V2D &V2D::operator-=(const V2D &rhs) {
 }
 
 /**
-* Scale and return
-* @param factor :: The scale factor
-* @returns A new V2D object scaled by the given factor
-*/
+ * Scale and return
+ * @param factor :: The scale factor
+ * @returns A new V2D object scaled by the given factor
+ */
 V2D V2D::operator*(const double factor) const {
   return V2D(m_x * factor, m_y * factor);
 }
 
 /**
-* Scale this vector
-* @param factor :: The scale factor
-* @returns A reference to this object that has been scaled by the given factor
-*/
+ * Scale this vector
+ * @param factor :: The scale factor
+ * @returns A reference to this object that has been scaled by the given factor
+ */
 V2D &V2D::operator*=(const double factor) {
   m_x *= factor;
   m_y *= factor;
@@ -80,9 +86,9 @@ V2D &V2D::operator*=(const double factor) {
 }
 
 /**
-* Negate and return
-* @returns A new negated V2D object
-*/
+ * Negate and return
+ * @returns A new negated V2D object
+ */
 V2D V2D::operator-() const noexcept { return V2D{-m_x, -m_y}; }
 
 /**
@@ -120,9 +126,9 @@ double V2D::normalize() {
 double V2D::norm() const { return std::sqrt(norm2()); }
 
 /**
-  * Compute the square of the norm
-  * @returns The square of the norm
-  */
+ * Compute the square of the norm
+ * @returns The square of the norm
+ */
 double V2D::norm2() const { return m_x * m_x + m_y * m_y; }
 
 /**

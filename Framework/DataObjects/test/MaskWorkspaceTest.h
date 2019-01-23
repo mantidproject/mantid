@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MASKWORKSPACETEST_H
 #define MANTID_DATAOBJECTS_MASKWORKSPACETEST_H
 
@@ -115,9 +121,9 @@ public:
   }
 
   /**
-  * Test declaring an input MaskWorkspace and retrieving it as const_sptr or
-  * sptr
-  */
+   * Test declaring an input MaskWorkspace and retrieving it as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     MaskWorkspace_sptr wsInput(new Mantid::DataObjects::MaskWorkspace());

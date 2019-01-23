@@ -8,4 +8,4 @@ mocked and the return values should be present only when necessary (on
 this occasion the values do not matter). The ``updatePlot`` function
 should be tested to make sure that it calls the correct methods.
 
-See `here <MockingExerciseSolution.html>`_ for the solution. 
+See :ref:`here <MockingExerciseSolution>` for the solution. 

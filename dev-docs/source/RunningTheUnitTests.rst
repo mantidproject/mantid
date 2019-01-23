@@ -86,48 +86,61 @@ Starting in your build folder (e.g. Mantid/Code/debug):
    .. code-block:: sh
 
       ctest -j8 -R KernelTest
-      bin/KernelTest
+      ./bin/KernelTest
 
 -  Running a specific test class.
 
    .. code-block:: sh
 
       ctest -R MyTestClassName
-      bin/KernelTest MyTestClassName
+      ./bin/KernelTest MyTestClassName
 
--  Running a specific test.
+-  Running a specific test from a CxxTest test class (not possible via CTest).
 
    .. code-block:: sh
 
-      bin/KernelTest MyTestClassName MySingleTestName``
+      ./bin/KernelTest MyTestClassName MySingleTestName
 
-   -  Not possible with ctest.
+- Running a specific test from a Python ``unittest`` test class (not possible
+  via CTest).
 
-Visual Studio/ XCode note
-#########################
+  .. code-block:: sh
 
-In Visual Studio the user can alter the properties of the subset of
-tests (inside the unitTest directory (e.g. AlgorithmTest). In the
-properties box it is possible to specify a specific test to run by
-typing its name in the TargetName box. Then to execute the test, right
-click the subset of tests and select debug and then start new instance.
+     ./bin/mantidpython /path/to/src/Framework/PythonInterface/test/python/plugins/algorithms/MeanTest.py MeanTest.test_mean
 
-To run the tests under one of these environments then you will need to
-open a command window and change to the build directory. Once there you
-can run the tests by selecting the configuration;
+Running Unit Tests With Visual Studio and ctest
+###############################################
 
-.. code-block:: sh
+Open the Mantid solution in Visual Studio. To run a subset of tests (for example ``UnitTests/AlgorithmsTest``);
 
-   ctest -C Debug -j4
+-  In the Solution Explorer, right click the project for the tests (in this case ``UnitTests/AlgorithmsTest``) and select Properties.
 
-This runs all tests in Debug mode (note that this will NOT build any
-outdated libraries). To select a subset use the ``-R`` option:
+-  In the Debugging tab of Properties change the Command Arguments box to the name of the test, for example "AddNoteTest".
 
-.. code-block:: sh
+-  Right click the directory again and select Debug->Start new instance.
 
-   ctest -C Release -R Kernel -j4
+-  Once the build has finished, open a file browser and navigate to the mantid build directory, run the command-prompt.bat file to open a command prompt and run 
 
-   (-R Kernel), with 4 cores (-j4), in Release mode (-C Release).
+   .. code-block:: sh
+
+     ctest -C Debug -V -R AddNoteTest
+
+   For this example, there should be several lines of output ending with the time taken and the line
+
+   .. code-block:: sh
+
+     100% tests passed, 0 tests failed out of 1
+
+   Omitting the ``-R AddNoteTest`` option runs all the tests, but note that any tests which were not built according to the above instructions will fail. Adding the ``-V`` increases the output verbosity.
+
+
+Running Unit Tests With Visual Studio
+#####################################
+
+The unit tests can be run from within Visual Studio, following steps 1-3 above, with the addition in step 2 of;
+
+-  Add the name of the test to the Target Name field in the General tab of Properties. Then add a breakpoint somewhere in the test header file.
+
 
 Debugging unit tests
 ####################

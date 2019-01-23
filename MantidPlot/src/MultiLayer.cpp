@@ -91,7 +91,7 @@ Mantid::Kernel::Logger g_log("MultiLayer");
 const double MAXIMUM = std::numeric_limits<double>::max();
 const double MINIMUM = std::numeric_limits<double>::min();
 constexpr int AXIS_X(0), AXIS_Y(1);
-}
+} // namespace
 
 LayerButton::LayerButton(const QString &text, QWidget *parent)
     : QPushButton(text, parent) {
@@ -350,6 +350,10 @@ void MultiLayer::confirmRemoveLayer() {
 }
 
 void MultiLayer::removeLayer() {
+  // ignore function if no layers
+  if (active_graph == nullptr)
+    return;
+
   // remove corresponding button
   foreach (LayerButton *btn, buttonsList) {
     if (btn->isChecked()) {
@@ -371,6 +375,7 @@ void MultiLayer::removeLayer() {
   active_graph->setAttribute(Qt::WA_DeleteOnClose, false);
   active_graph->close();
   delete active_graph;
+
   if (index >= graphsList.count())
     index--;
 
@@ -1293,7 +1298,7 @@ void MultiLayer::dropEvent(QDropEvent *event) {
   }
 }
 
-/** Drop a workspace onto an exisiting MantidMDCurve (plot of a MDWorkspace)
+/** Drop a workspace onto an existing MantidMDCurve (plot of a MDWorkspace)
 @param g : Graph object
 @param originalCurve : the original MantidMDCurve onto which the new
 workspace(s) are to be dropped
@@ -1345,7 +1350,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
 }
 
 /*
-Drop a workspace onto an exisiting matrix curve
+Drop a workspace onto an existing matrix curve
 @param g : Graph object
 @param originalCurve : the original MantidMatrixCurve onto which the new
 workspace(s) are to be dropped
@@ -1398,8 +1403,8 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve *originalCurve,
 }
 
 /**
-* Mark the layer selector for deletion and set the pointer to NULL
-*/
+ * Mark the layer selector for deletion and set the pointer to NULL
+ */
 void MultiLayer::removeLayerSelectionFrame() {
   d_layers_selector->deleteLater();
   d_layers_selector = nullptr;
@@ -1472,7 +1477,7 @@ void MultiLayer::convertToWaterfall() {
 }
 
 /**
- * Assume we have a waterfall 1D plot and convert it to a standard overlayed
+ * Assume we have a waterfall 1D plot and convert it to a standard overlaid
  * layout
  */
 void MultiLayer::convertFromWaterfall() {
@@ -1783,7 +1788,7 @@ MultiLayer::loadFromProject(const std::string &lines, ApplicationWindow *app,
     multiLayer->setLayerCanvasSize(width, height);
   }
 
-  if (tsv.selectLine("Alignement")) {
+  if (tsv.selectLine("Alignment")) {
     int hor = 0, vert = 0;
     tsv >> hor >> vert;
     multiLayer->setAlignement(hor, vert);
@@ -1846,7 +1851,7 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
                            << bottom_margin;
   tsv.writeLine("Spacing") << rowsSpace << colsSpace;
   tsv.writeLine("LayerCanvasSize") << l_canvas_width << l_canvas_height;
-  tsv.writeLine("Alignement") << hor_align << vert_align;
+  tsv.writeLine("Alignment") << hor_align << vert_align;
 
   foreach (Graph *g, graphsList)
     tsv.writeSection("graph", g->saveToProject());

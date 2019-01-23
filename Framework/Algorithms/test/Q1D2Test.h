@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef Q1D2Test_H_
 #define Q1D2Test_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/Q1D2.h"
-#include "MantidAlgorithms/Rebin.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
-#include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAlgorithms/Q1D2.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/LoadRKH.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

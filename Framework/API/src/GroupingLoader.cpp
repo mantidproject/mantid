@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -6,10 +12,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Strings.h"
-#include <boost/make_shared.hpp>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
+#include <boost/make_shared.hpp>
 
 using namespace Poco::XML;
 
@@ -18,15 +24,15 @@ namespace API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor without field direction
-* @param instrument :: [input] Instrument
-*/
+ * @param instrument :: [input] Instrument
+ */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument)
     : m_instrument(instrument) {}
 
 /** Constructor with field direction
-* @param instrument :: [input] Instrument
-* @param mainFieldDirection :: [input] Direction of main field (for MUSR)
-*/
+ * @param instrument :: [input] Instrument
+ * @param mainFieldDirection :: [input] Direction of main field (for MUSR)
+ */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument,
                                const std::string &mainFieldDirection)
     : m_instrument(instrument), m_mainFieldDirection(mainFieldDirection) {}

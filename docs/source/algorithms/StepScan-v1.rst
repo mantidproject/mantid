@@ -23,14 +23,14 @@ resulting table pertaining to scan\_index=0 (which indicates 'not a scan
 point') is then removed.
  
 Before then it will call other algorithms as shown in the flowchart,
-if the relevent inputs have been set.
+if the relevant inputs have been set.
 :ref:`algm-MaskDetectors` will be called if a MaskWorkspace is supplied.
 If either Xmin or Xmax or both are supplied, 
 then :ref:`algm-FilterByXValue` algorithm is run to restrict the
 region of data included and if RangeUnit is not TOF,
 :ref:`algm-ConvertUnits` is run beforehand.  
 
-If necessary, the imput workspace is cloned, to save it from being modified.
+If necessary, the input workspace is cloned, to save it from being modified.
 
 .. image:: ../images/StepScanWorkflow.png
 

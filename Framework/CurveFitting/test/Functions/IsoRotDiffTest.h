@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ISOROTDIFFTEST_H_
 #define ISOROTDIFFTEST_H_
 
@@ -7,21 +13,21 @@
 // Mantid Headers from the same project
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 // Mantid headers from other projects
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction.h"
 #include <cxxtest/TestSuite.h>
 // third party library headers
 #include <boost/make_shared.hpp>
 // standard library headers (n/a)
 #include <limits>
 
-using Mantid::CurveFitting::Functions::IsoRotDiff;
 using Mantid::API::FunctionDomain;
 using Mantid::API::FunctionDomain1DVector;
 using Mantid::API::FunctionValues;
 using Mantid::API::IFunction;
+using Mantid::CurveFitting::Functions::IsoRotDiff;
 
 class IsoRotDiffTest : public CxxTest::TestSuite {
 public:

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CRYSTALFIELDSPECTRUMTEST_H_
 #define CRYSTALFIELDSPECTRUMTEST_H_
 
@@ -6,8 +12,8 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
@@ -157,8 +163,9 @@ public:
         "name=Gaussian,PeakCentre=0.0,Height=" + height1 +
         ",Sigma=10.0;"
         "name=Gaussian,PeakCentre=29.3261,Height=" +
-        height2 + ",Sigma=2.0;"
-                  "name=Gaussian,PeakCentre=44.3412,Height=" +
+        height2 +
+        ",Sigma=2.0;"
+        "name=Gaussian,PeakCentre=44.3412,Height=" +
         height3 + ",Sigma=3.0;");
     FunctionValues t(x);
     testFun->function(x, t);
@@ -867,8 +874,8 @@ private:
     FunctionDomain1DVector x(x0, x1, nbins);
     FunctionValues y(x);
     fun.function(x, y);
-    ws->dataX(0) = x.toVector();
-    ws->dataY(0) = y.toVector();
+    ws->mutableX(0) = x.toVector();
+    ws->mutableY(0) = y.toVector();
     return ws;
   }
 };

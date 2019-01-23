@@ -1,33 +1,29 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 import sys
+import os.path
+import traceback
 
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+from mantidqt.io import open_a_file_dialog
 
 # Status messages
 IDLE_STATUS_MSG = "Status: Idle."
@@ -45,7 +41,11 @@ class EditorIO(object):
         self.editor = editor
 
     def ask_for_filename(self):
-        filename, _ = QFileDialog.getSaveFileName(self.editor, "Choose filename...")
+        filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
+                                      accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile)
+        if filename is not None and os.path.isdir(filename):
+            # Set value to None as, we do not want to be saving a directory, it is possible to receive a directory
+            filename = None
         return filename
 
     def save_if_required(self, confirm=True):
@@ -179,6 +179,7 @@ class PythonFileInterpreter(QWidget):
 
 class PythonFileInterpreterPresenter(QObject):
     """Presenter part of MVP to control actions on the editor"""
+    MAX_STACKTRACE_LENGTH = 2
 
     def __init__(self, view, model):
         super(PythonFileInterpreterPresenter, self).__init__()
@@ -216,10 +217,10 @@ class PythonFileInterpreterPresenter(QObject):
     def req_execute_async(self):
         if self.is_executing:
             return
-        self.is_executing = True
         code_str, self._code_start_offset = self._get_code_for_execution()
         if not code_str:
             return
+        self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
         return self.model.execute_async(code_str, self.view.filename)
@@ -232,10 +233,7 @@ class PythonFileInterpreterPresenter(QObject):
         else:
             code_str = editor.text()
             line_from = 0
-        # Pad code out with empty lines so that reported line numbers
-        # do not have to be adjusted
-        padded = '\n'*line_from + code_str
-        return padded, line_from
+        return code_str, line_from
 
     def _on_exec_success(self, task_result):
         self.view.editor.updateCompletionAPI(self.model.generate_calltips())
@@ -244,13 +242,14 @@ class PythonFileInterpreterPresenter(QObject):
     def _on_exec_error(self, task_error):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
                                          task_error.stack
+        exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH:]
         if hasattr(exc_value, 'lineno'):
-            lineno = exc_value.lineno
+            lineno = exc_value.lineno + self._code_start_offset
         elif exc_stack is not None:
-            lineno = exc_stack[-1][1]
+            lineno = exc_stack[-1][1] + self._code_start_offset
         else:
             lineno = -1
-        sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')
+        sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + os.linesep)
         self.view.editor.updateProgressMarker(lineno, True)
         self._finish(success=False, elapsed_time=task_error.elapsed_time)
 

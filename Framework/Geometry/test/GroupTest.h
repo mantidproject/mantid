@@ -1,12 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_GROUPTEST_H_
 #define MANTID_GEOMETRY_GROUPTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;
@@ -367,16 +374,11 @@ public:
     Group_const_sptr null;
 
     TS_ASSERT_THROWS(null * null, std::invalid_argument);
-// AppleClang gives a warning if we don't use the result
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-comparison"
-#endif
+    // clang gives a warning if we don't use the result
+    GNU_DIAG_OFF("unused-comparison")
     TS_ASSERT_THROWS(null == null, std::invalid_argument);
     TS_ASSERT_THROWS(null != null, std::invalid_argument);
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+    GNU_DIAG_ON("unused-comparison")
     TS_ASSERT_THROWS(three * null, std::invalid_argument);
     TS_ASSERT_THROWS(null * three, std::invalid_argument);
 

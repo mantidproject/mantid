@@ -1,31 +1,37 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTMESHOBJECT__
 #define MANTID_TESTMESHOBJECT__
 
-#include "MantidGeometry/Objects/MeshObject.h"
-
 #include "MantidGeometry/Math/Algebra.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/MeshObjectCommon.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <vector>
-#include <algorithm>
-#include <ctime>
 
-#include "boost/shared_ptr.hpp"
 #include "boost/make_shared.hpp"
+#include "boost/shared_ptr.hpp"
 
-#include <gmock/gmock.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
@@ -37,7 +43,7 @@ namespace {
 // -----------------------------------------------------------------------------
 class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(nextValue, double());
   MOCK_METHOD2(nextValue, double(double, double));
   MOCK_METHOD2(nextInt, int(int, int));
@@ -48,14 +54,14 @@ public:
   MOCK_METHOD2(setRange, void(const double, const double));
   MOCK_CONST_METHOD0(min, double());
   MOCK_CONST_METHOD0(max, double());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   /**
-  * Create cube of side length size with specified centre,
-  * parellel to axes and non-negative vertex coordinates.
-  */
+   * Create cube of side length size with specified centre,
+   * parellel to axes and non-negative vertex coordinates.
+   */
   double min = 0.0 - 0.5 * size;
   double max = 0.5 * size;
   std::vector<V3D> vertices;
@@ -68,7 +74,7 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   vertices.emplace_back(centre + V3D(max, min, min));
   vertices.emplace_back(centre + V3D(min, min, min));
 
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   // top face of cube - z max
   triangles.insert(triangles.end(), {0, 1, 2});
   triangles.insert(triangles.end(), {2, 1, 3});
@@ -96,16 +102,16 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
 
 std::unique_ptr<MeshObject> createCube(const double size) {
   /**
-  * Create cube of side length size with vertex at origin,
-  * parellel to axes and non-negative vertex coordinates.
-  */
+   * Create cube of side length size with vertex at origin,
+   * parellel to axes and non-negative vertex coordinates.
+   */
   return createCube(size, V3D(0.5 * size, 0.5 * size, 0.5 * size));
 }
 
 std::unique_ptr<MeshObject> createOctahedron() {
   /**
-  * Create octahedron with vertices on the axes at -1 & +1.
-  */
+   * Create octahedron with vertices on the axes at -1 & +1.
+   */
   // The octahedron is made slightly bigger than this to
   // ensure interior points are not rounded to be outside
   // Opposite vertices have indices differing by 3.
@@ -118,7 +124,7 @@ std::unique_ptr<MeshObject> createOctahedron() {
   vertices.emplace_back(V3D(0, -u, 0));
   vertices.emplace_back(V3D(0, 0, -u));
 
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   // +++ face
   triangles.insert(triangles.end(), {0, 1, 2});
   //++- face
@@ -144,10 +150,10 @@ std::unique_ptr<MeshObject> createOctahedron() {
 
 std::unique_ptr<MeshObject> createLShape() {
   /**
-  * Create an L shape with vertices at
-  * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
-  *  where Z = 0 or 1.
-  */
+   * Create an L shape with vertices at
+   * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
+   *  where Z = 0 or 1.
+   */
   std::vector<V3D> vertices;
   vertices.emplace_back(V3D(0, 0, 0));
   vertices.emplace_back(V3D(2, 0, 0));
@@ -162,7 +168,7 @@ std::unique_ptr<MeshObject> createLShape() {
   vertices.emplace_back(V3D(1, 2, 1));
   vertices.emplace_back(V3D(0, 2, 1));
 
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   // z min
   triangles.insert(triangles.end(), {0, 5, 1});
   triangles.insert(triangles.end(), {1, 3, 2});
@@ -195,7 +201,7 @@ std::unique_ptr<MeshObject> createLShape() {
       std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
-}
+} // namespace
 
 class MeshObjectTest : public CxxTest::TestSuite {
 
@@ -208,7 +214,7 @@ public:
     vertices.emplace_back(V3D(0, 1, 0));
     vertices.emplace_back(V3D(0, 0, 1));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {1, 2, 3});
     triangles.insert(triangles.end(), {2, 1, 0});
     triangles.insert(triangles.end(), {3, 0, 1});
@@ -224,14 +230,9 @@ public:
 
   void testClone() {
     auto geom_obj = createOctahedron();
-    TS_ASSERT_THROWS_NOTHING(geom_obj->clone());
-  }
-
-  void testTooManyVertices() {
-    auto tooManyVertices = std::vector<V3D>(70000);
-    auto triangles = std::vector<uint16_t>(1000);
-    TS_ASSERT_THROWS_ANYTHING(
-        MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
+    std::unique_ptr<IObject> cloned;
+    TS_ASSERT_THROWS_NOTHING(cloned.reset(geom_obj->clone()));
+    TS_ASSERT(cloned);
   }
 
   void testMaterial() {
@@ -242,7 +243,7 @@ public:
     vertices.emplace_back(V3D(0, 1, 0));
     vertices.emplace_back(V3D(0, 0, 1));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {1, 2, 3});
     triangles.insert(triangles.end(), {2, 1, 0});
     triangles.insert(triangles.end(), {3, 0, 1});
@@ -268,8 +269,9 @@ public:
     auto testMaterial =
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
     auto geom_obj = createOctahedron();
-    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
-    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    std::unique_ptr<IObject> cloned_obj;
+    TS_ASSERT_THROWS_NOTHING(
+        cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      cloned_obj->material().numberDensity(), 1e-12);
   }
@@ -903,8 +905,8 @@ public:
   Test solid angle calculation for a cube.
   */
   {
-    auto geom_obj = createCube(1.0);
-    double satol = 1e-3; // tolerance for solid angle
+    auto geom_obj = createCube(1.0); // Cube centre at 0.5, 0.5, 0.5
+    double satol = 1e-3;             // tolerance for solid angle
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
 
     TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(1.5, 0.5, 0.5)), M_PI * 2.0 / 3.0,
@@ -954,6 +956,40 @@ public:
     TS_ASSERT_THROWS_NOTHING(geom_obj->getTriangles());
     TS_ASSERT_THROWS_NOTHING(geom_obj->getVertices());
   }
+
+  void testRotation()
+  /* Test Rotating a mesh */
+  {
+    auto lShape = createLShape();
+    const double valueList[] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+    const std::vector<double> rotationMatrix =
+        std::vector<double>(std::begin(valueList), std::end(valueList));
+    const Kernel::Matrix<double> rotation =
+        Kernel::Matrix<double>(rotationMatrix);
+
+    const double checkList[] = {0,  0, 0, 0,  2, 0, -1, 2, 0, -1, 1, 0,
+                                -2, 1, 0, -2, 0, 0, 0,  0, 1, 0,  2, 1,
+                                -1, 2, 1, -1, 1, 1, -2, 1, 1, -2, 0, 1};
+    auto checkVector =
+        std::vector<double>(std::begin(checkList), std::end(checkList));
+
+    TS_ASSERT_THROWS_NOTHING(lShape->rotate(rotation));
+    auto rotated = lShape->getVertices();
+    TS_ASSERT_DELTA(rotated, checkVector, 1e-8);
+  }
+  void testTranslation()
+  /* Test Translating a mesh */
+  {
+    auto octahedron = createOctahedron();
+    V3D translation = V3D(1, 2, 3);
+    const double checkList[] = {2, 2, 3, 1, 3, 3, 1, 2, 4,
+                                0, 2, 3, 1, 1, 3, 1, 2, 2};
+    auto checkVector =
+        std::vector<double>(std::begin(checkList), std::end(checkList));
+    TS_ASSERT_THROWS_NOTHING(octahedron->translate(translation));
+    auto moved = octahedron->getVertices();
+    TS_ASSERT_DELTA(moved, checkVector, 1e-8);
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -973,6 +1009,22 @@ public:
         smallCube(createCube(0.2)) {
     testPoints = create_test_points();
     testRays = create_test_rays();
+    translation = create_translation_vector();
+    rotation = create_rotation_matrix();
+  }
+
+  void test_rotate(const Kernel::Matrix<double> &) {
+    const size_t number(10000);
+    for (size_t i = 0; i < number; ++i) {
+      octahedron->rotate(rotation);
+    }
+  }
+
+  void test_translate(Kernel::V3D) {
+    const size_t number(10000);
+    for (size_t i = 0; i < number; ++i) {
+      octahedron->translate(translation);
+    }
   }
 
   void test_isOnSide() {
@@ -1112,6 +1164,19 @@ public:
     return output;
   }
 
+  V3D create_translation_vector() {
+    V3D translate = Kernel::V3D(5, 5, 15);
+    return translate;
+  }
+
+  Kernel::Matrix<double> create_rotation_matrix() {
+    double valueList[] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+    const std::vector<double> rotationMatrix =
+        std::vector<double>(std::begin(valueList), std::end(valueList));
+    Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
+    return rotation;
+  }
+
 private:
   Mantid::Kernel::MersenneTwister rng;
   std::unique_ptr<MeshObject> octahedron;
@@ -1119,6 +1184,8 @@ private:
   std::unique_ptr<MeshObject> smallCube;
   std::vector<V3D> testPoints;
   std::vector<Track> testRays;
+  V3D translation;
+  Kernel::Matrix<double> rotation;
 };
 
 #endif // MANTID_TESTMESHOBJECT__

@@ -10,7 +10,7 @@ Description
 -----------
 
 The format of the saved ascii CSV file for a 1D worksspace consists of
-three columns where the numbers of each row are seperated by the
+three columns where the numbers of each row are separated by the
 Separator and each line by the LineSeparator.
 
 The format of the saved CSV file for a 2D workspace is as follows::

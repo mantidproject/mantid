@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_PEAKSTATISTICSTOOLSTEST_H_
 #define MANTID_CRYSTAL_PEAKSTATISTICSTOOLSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/PeakStatisticsTools.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::Crystal::PeakStatisticsTools;
@@ -70,7 +76,7 @@ public:
           PointGroupFactory::Instance().createPointGroup("1"))
       : UniqueReflectionCollection(reflections, pointGroup) {}
 };
-}
+} // namespace
 
 class PeakStatisticsToolsTest : public CxxTest::TestSuite {
 public:

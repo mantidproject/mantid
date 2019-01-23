@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_FAKEMDEVENTDATATEST_H_
 #define MANTID_MDEVENTS_FAKEMDEVENTDATATEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/FakeMDEventData.h"
-#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidAPI/Run.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/BinMD.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

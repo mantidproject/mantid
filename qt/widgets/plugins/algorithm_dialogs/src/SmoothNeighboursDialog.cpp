@@ -1,7 +1,13 @@
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/SmoothNeighboursDialog.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QGroupBox>
 

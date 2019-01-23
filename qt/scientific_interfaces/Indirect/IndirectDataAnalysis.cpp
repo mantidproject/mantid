@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------
 // Includes
 //----------------------
@@ -80,10 +86,11 @@ void IndirectDataAnalysis::initLayout() {
             SLOT(showMessageBox(const QString &)));
   }
 
+  connect(m_uiForm.twIDATabs, SIGNAL(currentChanged(int)), this,
+          SLOT(tabChanged(int)));
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
 }
@@ -119,11 +126,10 @@ void IndirectDataAnalysis::loadSettings() {
 }
 
 /**
- * Private slot, called when the Run button is pressed.  Runs current tab.
+ * Sets the active workspace in the selected tab
  */
-void IndirectDataAnalysis::run() {
-  const unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
-  m_tabs[currentTab]->runTab();
+void IndirectDataAnalysis::tabChanged(int index) {
+  m_tabs[index]->setActiveWorkspace();
 }
 
 /**

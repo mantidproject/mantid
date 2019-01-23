@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
-using Geometry::Instrument_const_sptr;
-using Geometry::IObjComponent_const_sptr;
 using Geometry::IComponent_const_sptr;
 using Geometry::IDetector_const_sptr;
+using Geometry::IObjComponent_const_sptr;
+using Geometry::Instrument_const_sptr;
 
 /**
  * Constructor taking an observation object
@@ -61,10 +67,10 @@ double ModeratorChopperResolution::energyWidth(const double deltaE) const {
   moderatorVar *= moderatorVar;
 
   const double stdDevChopPulse = m_chopper->pulseTimeVariance();
-  double chopperVar = ((stdDevChopPulse / modChopTime) *
-                       (1.0 +
-                        ((m_modChopDist + m_chopSampleDist) / sampleToDetDist) *
-                            std::pow(ef / ei, 3)));
+  double chopperVar =
+      ((stdDevChopPulse / modChopTime) *
+       (1.0 + ((m_modChopDist + m_chopSampleDist) / sampleToDetDist) *
+                  std::pow(ef / ei, 3)));
   chopperVar *= chopperVar;
 
   const double energyRes = 2.0 * ei * std::sqrt(moderatorVar + chopperVar);
@@ -81,5 +87,5 @@ void ModeratorChopperResolution::initCaches() {
   m_modChopDist = m_observation.moderatorToFirstChopperDistance();
   m_chopSampleDist = m_observation.firstChopperToSampleDistance();
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

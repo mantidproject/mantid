@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * FilterByTimeTest.h
  *
@@ -12,10 +18,9 @@
 
 #include "MantidAlgorithms/FilterByTime2.h"
 #include "MantidDataHandling/LoadEventPreNexus2.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -81,7 +86,7 @@ public:
   }
 
   /** Test Filter by relative time and absolute time
-    */
+   */
   void testExecEventWorkspace_relativeTime_and_absolute_time() {
     std::string outputWS;
     this->setUp_Event();

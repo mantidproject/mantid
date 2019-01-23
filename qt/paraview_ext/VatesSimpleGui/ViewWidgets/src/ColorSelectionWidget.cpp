@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <cfloat>
 
 #include "MantidKernel/ConfigService.h"
@@ -7,9 +13,9 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
 #include "pqPresetDialog.h"
-#include "vtk_jsoncpp.h"
-#include "vtkSMTransferFunctionPresets.h"
 #include "vtkNew.h"
+#include "vtkSMTransferFunctionPresets.h"
+#include "vtk_jsoncpp.h"
 
 #include <QDir>
 #include <QDoubleValidator>
@@ -491,6 +497,6 @@ void ColorSelectionWidget::loadFromProject(const std::string &lines) {
   m_ui.maxValLineEdit->setText(QString::number(max));
 }
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

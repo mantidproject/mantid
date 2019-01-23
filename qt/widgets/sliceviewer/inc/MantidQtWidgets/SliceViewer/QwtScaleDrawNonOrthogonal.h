@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef QWT_SCALE_DRAW_NON_ORTHOGONAL_H
 #define QWT_SCALE_DRAW_NON_ORTHOGONAL_H
 
-#include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "qwt_scale_draw.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
 #include "qwt_plot.h"
+#include "qwt_scale_draw.h"
 #include <functional>
 
 class QwtScaleDrawNonOrthogonal : public QwtScaleDraw {

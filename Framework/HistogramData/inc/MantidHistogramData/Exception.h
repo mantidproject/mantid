@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/DllConfig.h"
 #include <stdexcept>
 
@@ -11,6 +17,6 @@ class MANTID_HISTOGRAMDATA_DLL InvalidBinEdgesError
 public:
   InvalidBinEdgesError(const char *what);
 };
-}
-}
-}
+} // namespace Exception
+} // namespace HistogramData
+} // namespace Mantid

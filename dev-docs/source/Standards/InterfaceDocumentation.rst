@@ -10,7 +10,7 @@ Interface Documentation
 Summary
 =======
 
-This page deals with the specifics of how to document Custom Interfaces. For a more general guide to the Mantid documentation system see `Documentation Guide For Devs <DocumentationGuideForDevs.html>`__.
+This page deals with the specifics of how to document Custom Interfaces. For a more general guide to the Mantid documentation system see :ref:`Documentation Guide For Devs <DocumentationGuideForDevs>`.
 
 The ``interface`` Directive
 ===========================

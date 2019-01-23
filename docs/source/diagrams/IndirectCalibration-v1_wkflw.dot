@@ -7,7 +7,7 @@ digraph IndirectCalibration {
     AutoScaleFactor [label="1 / (sum / (num_spectra / num_zero_spectra))"]
   }
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     UseAutoScale [label="ScaleFactor = 1?"]
     MultipleFiles [label="Multiple Files?"]

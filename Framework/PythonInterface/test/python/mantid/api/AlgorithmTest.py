@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import six
 
 import unittest
 import json
-from mantid.api import AlgorithmID, AlgorithmManager
+from mantid.api import AlgorithmID, AlgorithmManager, FrameworkManagerImpl
 from testhelpers import run_algorithm
 
 class AlgorithmTest(unittest.TestCase):
@@ -11,6 +17,7 @@ class AlgorithmTest(unittest.TestCase):
     _load = None
 
     def setUp(self):
+        FrameworkManagerImpl.Instance()
         if self._load is None:
             self.__class__._load = AlgorithmManager.createUnmanaged('Load')
             self._load.initialize()

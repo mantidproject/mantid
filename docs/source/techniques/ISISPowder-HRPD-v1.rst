@@ -253,7 +253,7 @@ The full path to the YAML configuration file. This file is described
 in detail here:
 :ref:`configuration_files_isis-powder-diffraction-ref`.  It is
 recommended to set this parameter at object creation instead of when
-executing a method as it will warn if any parameters are overriden in
+executing a method as it will warn if any parameters are overridden in
 the scripting window.
 
 *Note: This should be the full path to the file including extension*

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CONJOINWORKSPACESTEST_H_
 #define CONJOINWORKSPACESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConjoinWorkspaces.h"
-#include "MantidAlgorithms/CropWorkspace.h"
-#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/ConjoinWorkspaces.h"
+#include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

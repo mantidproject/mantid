@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/IntegrateEPP.h"
 
 #include "MantidAPI/ITableWorkspace.h"
@@ -9,8 +15,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 namespace {
 /// A private namespace defining property name constants.
@@ -19,8 +25,8 @@ const static std::string EPP_WORKSPACE{"EPPWorkspace"};
 const static std::string INPUT_WORKSPACE{"InputWorkspace"};
 const static std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
 const static std::string WIDTH{"HalfWidthInSigmas"};
-}
-}
+} // namespace PropertyNames
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateEPP)

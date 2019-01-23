@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_PEAKBACKGROUNDTEST_H_
 #define MANTID_CRYSTAL_PEAKBACKGROUNDTEST_H_
 
@@ -33,7 +39,7 @@ IPeaksWorkspace_sptr make_peaks_workspace(const V3D &hklPeak) {
   return peakWS;
 }
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 // Mock Background strategy
 class MockIMDIterator : public IMDIterator {
@@ -67,8 +73,8 @@ public:
   MOCK_CONST_METHOD0(getLinearIndex, size_t());
   MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
 };
-}
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+} // namespace
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class PeakBackgroundTest : public CxxTest::TestSuite {
 public:

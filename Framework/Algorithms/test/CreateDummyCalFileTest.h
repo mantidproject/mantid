@@ -1,24 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CREATEDUMMYCALFILETEST_H_
 #define CREATEDUMMYCALFILETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateDummyCalFile.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CreateDummyCalFile.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include <Poco/File.h>
-#include <fstream>
 #include <cstring>
+#include <fstream>
 #include <vector>
 
 using namespace Mantid::API;

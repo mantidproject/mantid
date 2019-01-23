@@ -1,17 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidHistogramData/Histogram.h"
+
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <climits>
@@ -25,6 +33,7 @@ DECLARE_ALGORITHM(CalculateFlatBackground)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 /// Enumeration for the different operating modes.
 enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
@@ -162,7 +171,7 @@ void CalculateFlatBackground::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   // For logging purposes.
@@ -188,9 +197,9 @@ void CalculateFlatBackground::exec() {
         // Do nothing.
         // not every spectra is the monitor or detector, some spectra have no
         // instrument components attached.
-        g_log.information(" Can not find detector for spectra N: " +
-                          std::to_string(i) +
-                          " Processing background anyway\n");
+        g_log.information(
+            " Can not find detector for spectra N: " + std::to_string(i) +
+            " Processing background anyway\n");
       } else if (spectrumInfo.isMonitor(i)) {
         skipCalculation = true;
       }
@@ -216,7 +225,8 @@ void CalculateFlatBackground::exec() {
       g_log.debug() << "The background for spectra index " << i
                     << "was calculated to be " << background << '\n';
       g_log.warning() << "Problem with calculating the background number of "
-                         "counts spectrum with index " << i << ".";
+                         "counts spectrum with index "
+                      << i << ".";
       if (removeBackground) {
         g_log.warning() << " The spectrum has been left unchanged.\n";
       } else {
@@ -278,12 +288,12 @@ void CalculateFlatBackground::exec() {
 }
 
 /**
-* Checks that the range parameters have been set correctly.
-* @param startX the starting point
-* @param endX the ending point
-* @throw std::invalid_argument if XMin or XMax are not set, or XMax is less
-* than XMin
-*/
+ * Checks that the range parameters have been set correctly.
+ * @param startX the starting point
+ * @param endX the ending point
+ * @throw std::invalid_argument if XMin or XMax are not set, or XMax is less
+ * than XMin
+ */
 void CalculateFlatBackground::checkRange(double &startX, double &endX) {
   // use the overloaded operator =() to get the X value stored in each property
   startX = getProperty("StartX");
@@ -297,20 +307,20 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
 }
 
 /**
-* Gets the mean number of counts in each bin the background region and the
-* variance (error^2) of that number.
-* @param histogram the histogram to operate on
-* @param background an output variable for the calculated background
-* @param variance an output variable for background's variance.
-* @param startX an X-value in the first bin that will be considered, must not
-* be greater endX
-* @param endX an X-value in the last bin that will be considered, must not
-* less than startX
-* @throw out_of_range if either startX or endX are out of the range of X-values
-* in the specified spectrum
-* @throw invalid_argument if endX has the value of first X-value one of the
-* spectra
-*/
+ * Gets the mean number of counts in each bin the background region and the
+ * variance (error^2) of that number.
+ * @param histogram the histogram to operate on
+ * @param background an output variable for the calculated background
+ * @param variance an output variable for background's variance.
+ * @param startX an X-value in the first bin that will be considered, must not
+ * be greater endX
+ * @param endX an X-value in the last bin that will be considered, must not
+ * less than startX
+ * @throw out_of_range if either startX or endX are out of the range of X-values
+ * in the specified spectrum
+ * @throw invalid_argument if endX has the value of first X-value one of the
+ * spectra
+ */
 void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
                                    double &background, double &variance,
                                    const double startX,
@@ -364,19 +374,18 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
 }
 
 /**
-* Uses linear algorithm to do the fitting.
-* @param histogram the histogram to fit
-* @param background an output variable for the calculated background
-* @param variance an output variable for background's variance, currently always
-* zero.
-* @param startX an X value in the first bin to be included in the fit
-* @param endX an X value in the last bin to be included in the fit
-*/
+ * Uses linear algorithm to do the fitting.
+ * @param histogram the histogram to fit
+ * @param background an output variable for the calculated background
+ * @param variance an output variable for background's variance, currently
+ * always zero.
+ * @param startX an X value in the first bin to be included in the fit
+ * @param endX an X value in the last bin to be included in the fit
+ */
 void CalculateFlatBackground::LinearFit(
     const HistogramData::Histogram &histogram, double &background,
     double &variance, const double startX, const double endX) {
-  MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create(
-      "Workspace2D", 1, histogram.x().size(), histogram.y().size());
+  MatrixWorkspace_sptr WS = create<Workspace2D>(1, histogram);
   WS->setHistogram(0, histogram);
   IAlgorithm_sptr childAlg = createChildAlgorithm("Fit");
 
@@ -424,13 +433,13 @@ void CalculateFlatBackground::LinearFit(
 }
 
 /**
-* Utilizes cyclic boundary conditions when calculating the
-* average in the window.
-* @param histogram the histogram to operate on
-* @param background an output variable for the calculated background
-* @param variance an output variable for background's variance.
-* @param windowWidth the width of the averaging window in bins
-*/
+ * Utilizes cyclic boundary conditions when calculating the
+ * average in the window.
+ * @param histogram the histogram to operate on
+ * @param background an output variable for the calculated background
+ * @param variance an output variable for background's variance.
+ * @param windowWidth the width of the averaging window in bins
+ */
 void CalculateFlatBackground::MovingAverage(
     const HistogramData::Histogram &histogram, double &background,
     double &variance, const size_t windowWidth) const {

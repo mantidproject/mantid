@@ -1,22 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERS_H_
 #define MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidCurveFitting/Functions/BackgroundFunction.h"
-#include "MantidCurveFitting/Functions/Polynomial.h"
-#include "MantidCurveFitting/Functions/BackToBackExponential.h"
-#include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidCurveFitting/Functions/BackToBackExponential.h"
+#include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
+#include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -32,27 +38,6 @@ namespace Algorithms {
   [ASSUMPTIONS]
   1.   CYRSTAL LATTICE IS CORRECT!  AS FOR FITTING INSTRUMENT PARAMETER, IT IS A
   GIVEN VALUE.
-
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport RefinePowderInstrumentParameters
     : public API::Algorithm,
@@ -197,7 +182,7 @@ private:
 };
 
 /** Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
-  */
+ */
 inline double linearInterpolateX(double x0, double xf, double y0, double yf,
                                  double y) {
   double x = ((xf - x0) * y - (xf * y0 - x0 * yf)) / (yf - y0);
@@ -205,7 +190,7 @@ inline double linearInterpolateX(double x0, double xf, double y0, double yf,
 }
 
 /** Formula for linear interpolation: Y = ( (xf*y0-x0*yf) + x*(yf-y0) )/(xf-x0)
-  */
+ */
 inline double linearInterpolateY(double x0, double xf, double y0, double yf,
                                  double x) {
   double y = ((xf * y0 - x0 * yf) + x * (yf - y0)) / (xf - x0);

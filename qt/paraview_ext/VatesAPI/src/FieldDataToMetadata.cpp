@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/FieldDataToMetadata.h"
-#include <boost/algorithm/string.hpp>
-#include "vtkFieldData.h"
 #include "vtkCharArray.h"
+#include "vtkFieldData.h"
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace VATES {
@@ -33,5 +39,5 @@ std::string FieldDataToMetadata::execute(vtkFieldData *fieldData,
   }
   return sXml;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

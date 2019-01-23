@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UnitLabel.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -45,7 +51,7 @@ PyObject *utf8ToUnicode(UnitLabel &self) {
   const auto &label = self.utf8();
   return PyUnicode_FromWideChar(label.c_str(), label.size());
 }
-}
+} // namespace
 
 void export_UnitLabel() {
   class_<UnitLabel>("UnitLabel", no_init)

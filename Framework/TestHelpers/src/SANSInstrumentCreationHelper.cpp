@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -75,8 +81,8 @@ void SANSInstrumentCreationHelper::runLoadInstrument(
   Mantid::DataHandling::LoadInstrument loadInst;
   loadInst.initialize();
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  loadInst.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" +
-                                            instrumentID + "_Definition.xml");
+  loadInst.setPropertyValue("Filename",
+                            "unit_testing/" + instrumentID + "_Definition.xml");
   loadInst.setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
   loadInst.setProperty("RewriteSpectraMap",
                        Mantid::Kernel::OptionalBool(false));
@@ -135,8 +141,8 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
   for (size_t ix = 0; ix < nXbins; ix++) {
     for (size_t iy = 0; iy < nYbins; iy++) {
       workspace->getSpectrum(wi).setSpectrumNo(specnum_t(wi));
-      workspace->getSpectrum(wi)
-          .setDetectorID(detid_t(1000000 + iy * 1000 + ix));
+      workspace->getSpectrum(wi).setDetectorID(
+          detid_t(1000000 + iy * 1000 + ix));
       wi++;
     }
   }

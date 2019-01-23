@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
+from mantid.api import FrameworkManager
 import math
 
 from sans.common.general_functions import (create_unmanaged_algorithm)
@@ -13,6 +19,11 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class SANSScaleTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
+
     @staticmethod
     def _get_workspace():
         sample_name = "CreateSampleWorkspace"
@@ -53,7 +64,7 @@ class SANSScaleTest(unittest.TestCase):
         height = 2.0
         scale = 7.2
         state = self._get_sample_state(width=width, height=height, thickness=3.0, scale=scale,
-                                       shape=SampleShape.CylinderAxisUp)
+                                       shape=SampleShape.Cylinder)
         serialized_state = state.property_manager
         scale_name = "SANSScale"
         scale_options = {"SANSState": serialized_state,

@@ -1,5 +1,11 @@
-#include "MantidKernel/Logger.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MultiFileValidator.h"
+#include "MantidKernel/Logger.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -7,7 +13,7 @@ namespace Kernel {
 namespace {
 // static logger
 Logger g_log("MultiFileValidator");
-}
+} // namespace
 
 /// Default constructor.
 MultiFileValidator::MultiFileValidator()

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDFDATASETPLOTDATA_H_
 #define MDFDATASETPLOTDATA_H_
 
@@ -13,13 +19,13 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
 class ErrorCurve;
 }
-}
+} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -57,8 +63,8 @@ private:
   bool m_showDataErrorBars; ///< Flag to show/hide the data error bars
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFDATASETPLOTDATA_H_*/

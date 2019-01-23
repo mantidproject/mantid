@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "FitParameterTie.h"
 #include "MantidAPI/CompositeFunction.h"
 #include <QRegExp>
@@ -106,10 +112,10 @@ QString FitParameterTie::exprRHS() const {
 }
 
 /**
- * When a new function is added the function indeces in the tying expression
+ * When a new function is added the function indices in the tying expression
  * must
  * be changed.
- * @param i :: The index at wich the function is inserted. All old indeces
+ * @param i :: The index at which the function is inserted. All old indices
  * starting
  *   from i (inclusive) must be incremented.
  */
@@ -122,10 +128,10 @@ void FitParameterTie::functionInserted(int i) {
 }
 
 /**
- * When a function is deleted the function indeces in the tying expression must
+ * When a function is deleted the function indices in the tying expression must
  * be changed or the tie may become invalid if the deleted function is used in
  * the tie.
- * @param i :: The index of the deleted function. All old indeces starting
+ * @param i :: The index of the deleted function. All old indices starting
  *   from i+1 must be decremented.
  * @return true if the tie remains valid and false otherwise.
  */

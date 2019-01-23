@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 Tests masking functionality specific to WISH. Working masking behaviour is critical in general, but is heavily used on WISH.
@@ -5,12 +11,12 @@ Tests masking functionality specific to WISH. Working masking behaviour is criti
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import os
 from mantid.simpleapi import *
 
 
-class WishMasking(stresstesting.MantidStressTest):
+class WishMasking(systemtesting.MantidSystemTest):
 
         # Utility function will return the masking corresponding to a workspace index from a cal file.
     def get_masking_for_index(self, cal_file, requested_index):
@@ -29,9 +35,9 @@ class WishMasking(stresstesting.MantidStressTest):
                 continue
 
     # Tests that the cal file is being created in the expected way.
-        #  1) Uses the masks to create a cal file
-        #  2) Read the cal file
-        #  3) Use the known masking boundaries to determine whether the cal file has been created propertly accoring to the function inputs.
+        # 1) Uses the masks to create a cal file
+        # 2) Read the cal file
+        # 3) Use the known masking boundaries to determine whether the cal file has been created propertly according to the function inputs.
         #pylint: disable=too-many-arguments
     def do_test_cal_file(self, masked_workspace, should_invert, expected_masking_identifier, expected_not_masking_identifier, masking_edge):
 

@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/TransformMD.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -42,16 +48,16 @@ void TransformMD::init() {
                   "Any input MDWorkspace.");
 
   std::vector<double> defaultScaling(1, 1.0);
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Scaling", defaultScaling),
-      "Scaling value multiplying each coordinate. Default "
-      "1.\nEither a single value or a list for each dimension.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Scaling", std::move(defaultScaling)),
+                  "Scaling value multiplying each coordinate. Default "
+                  "1.\nEither a single value or a list for each dimension.");
 
   std::vector<double> defaultOffset(1, 0.0);
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Offset", defaultOffset),
-      "Offset value to add to each coordinate. Default 0.\nEither "
-      "a single value or a list for each dimension.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Offset", std::move(defaultOffset)),
+                  "Offset value to add to each coordinate. Default 0.\nEither "
+                  "a single value or a list for each dimension.");
 
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -88,10 +94,10 @@ void TransformMD::doTransform(
 
 //----------------------------------------------------------------------------------------------
 /** Swap the array elements
-*
-* @param array :: signal array
-* @param arrayLength :: length of signal array
-*/
+ *
+ * @param array :: signal array
+ * @param arrayLength :: length of signal array
+ */
 void TransformMD::reverse(signal_t *array, size_t arrayLength) {
   for (size_t i = 0; i < (arrayLength / 2); i++) {
     signal_t temp = array[i];
@@ -266,5 +272,5 @@ TransformMD::transposeMD(MDHistoWorkspace_sptr &toTranspose,
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_COMPOSITEVALIDATOR_H_
 #define MANTID_KERNEL_COMPOSITEVALIDATOR_H_
 
@@ -17,27 +23,6 @@ namespace Kernel {
 
     @author Russell Taylor, Janik Zikovsky
     @date Aug 25, 2011
-
-    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 enum class CompositeRelation { AND = 0, OR = 1 };
@@ -66,6 +51,18 @@ public:
   /// The argument is used to feed into the validator constructor
   template <typename T, typename U> void add(const U &arg) {
     this->add(boost::make_shared<T>(arg));
+  }
+  /// Returns true if the child list contains a validator of the specified
+  /// template type
+  template <typename T> bool contains() {
+    for (const auto &validator : m_children) {
+      // avoid boost::dynamic_pointer cast to avoid constructing
+      // a temporary shared_ptr type
+      if (dynamic_cast<T *>(validator.get())) {
+        return true;
+      }
+    }
+    return false;
   }
 
 private:

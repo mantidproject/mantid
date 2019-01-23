@@ -1,25 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h"
 
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Statistics.h"
 
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
-#include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 
@@ -360,12 +366,14 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   stringstream zss;
   zss << setw(20) << "d_h" << setw(20) << "Z DataY" << setw(20) << "Z ModelY"
       << setw(20) << "Z DiffY" << setw(20) << "DiffY\n";
+  const auto &X = m_dataWS->x(0);
+  const auto &Y = m_dataWS->y(2);
   for (size_t i = 0; i < z0.size(); ++i) {
-    double d_h = m_dataWS->x(0)[i];
+    double d_h = X[i];
     double zdatay = z0[i];
     double zmodely = z1[i];
     double zdiffy = z2[i];
-    double diffy = m_dataWS->y(2)[i];
+    double diffy = Y[i];
     zss << setw(20) << d_h << setw(20) << zdatay << setw(20) << zmodely
         << setw(20) << zdiffy << setw(20) << diffy << '\n';
   }
@@ -373,7 +381,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 }
 
 /** Fit function to data
-  */
+ */
 bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
                                                    double &gslchi2) {
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
@@ -406,7 +414,7 @@ bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
 }
 
 /** Calculate function's statistic
-  */
+ */
 double RefinePowderInstrumentParameters::calculateFunctionStatistic(
     IFunction_sptr func, MatrixWorkspace_sptr dataws, size_t workspaceindex) {
   // 1. Fix all parameters of the function
@@ -445,7 +453,7 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
 }
 
 /** Refine instrument parameters by Monte Carlo method
-  */
+ */
 void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
     TableWorkspace_sptr parameterWS, bool fit2) {
   // 1. Get function's parameter names
@@ -517,9 +525,9 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
 }
 
 /** Core Monte Carlo random walk on parameter-space
-  * Arguments
-  * - fit2: boolean.  if True,then do Simplex fit for each step
-  */
+ * Arguments
+ * - fit2: boolean.  if True,then do Simplex fit for each step
+ */
 void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     vector<string> parnames, vector<double> lowerbounds,
     vector<double> upperbounds, vector<double> stepsizes, size_t maxsteps,
@@ -777,7 +785,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
 }
 
 /** Get the names of the parameters of D-TOF conversion function
-  */
+ */
 void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
     vector<string> &parnames) {
   // 1. Clear output
@@ -792,7 +800,7 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
 }
 
 /** Calculate the function
-  */
+ */
 double RefinePowderInstrumentParameters::calculateD2TOFFunction(
     API::IFunction_sptr func, API::FunctionDomain1DVector domain,
     API::FunctionValues &values, const Mantid::HistogramData::HistogramY &rawY,
@@ -836,8 +844,8 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(
 //------------------------------- Processing Inputs
 //----------------------------------------
 /** Genearte peaks from input workspace
-  * m_Peaks are stored in a map.  (HKL) is the key
-  */
+ * m_Peaks are stored in a map.  (HKL) is the key
+ */
 void RefinePowderInstrumentParameters::genPeaksFromTable(
     DataObjects::TableWorkspace_sptr peakparamws) {
   // 1. Check and clear input and output
@@ -967,8 +975,8 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
 }
 
 /** Import the Monte Carlo related parameters from table
-  * Arguments
-  */
+ * Arguments
+ */
 void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
     TableWorkspace_sptr tablews, vector<string> parameternames,
     vector<double> &stepsizes, vector<double> &lowerbounds,
@@ -1077,7 +1085,7 @@ hkl, double lattice)
 */
 
 /** Calculate value n for thermal neutron peak profile
-  */
+ */
 void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
     IFunction_sptr m_Function, const HistogramX &xVals, vector<double> &vec_n) {
   if (m_Function->name() != "ThermalNeutronDtoTOFFunction") {
@@ -1101,8 +1109,8 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
 //-------------------------------------------------------------------
 
 /** Get peak positions from peak functions
-  * Arguments:
-  * Output: outWS  1 spectrum .  dspacing - peak center
+ * Arguments:
+ * Output: outWS  1 spectrum .  dspacing - peak center
  */
 void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
     bool montecarlo, size_t numbestfit) {
@@ -1196,8 +1204,8 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
 }
 
 /** Generate a Monte Carlo result table containing the N best results
-  * Column: chi2, parameter1, parameter2, ... ...
-  */
+ * Column: chi2, parameter1, parameter2, ... ...
+ */
 DataObjects::TableWorkspace_sptr
 RefinePowderInstrumentParameters::genMCResultTable() {
   // 1. Create table workspace
@@ -1227,9 +1235,9 @@ RefinePowderInstrumentParameters::genMCResultTable() {
 
 /** Generate an output table workspace containing the fitted instrument
  * parameters.
-  * Requirement (1): The output table workspace should be usable by Le Bail
+ * Requirement (1): The output table workspace should be usable by Le Bail
  * Fitting
-  */
+ */
 DataObjects::TableWorkspace_sptr
 RefinePowderInstrumentParameters::genOutputInstrumentParameterTable() {
   //  TableWorkspace is not copyable (default CC is incorrect and no point in

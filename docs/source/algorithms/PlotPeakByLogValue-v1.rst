@@ -81,7 +81,7 @@ The possible flags are:
   The index of the spectrum being fitted
 
 :code:`$basename`
-  A convinience flag for :code:`$wsname_$wsindex` (the same format the fit
+  A convenience flag for :code:`$wsname_$wsindex` (the same format the fit
   result and parameter output takes)
 
 :code:`$outputname`

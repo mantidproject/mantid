@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
@@ -177,7 +183,7 @@ class DarkRunNormalizationExtractor(object):
         @param prop: the property from which we extract the frames
         @returns the number of good frames
         '''
-        # Since we are dealing with a cummulative sample log, we can extract
+        # Since we are dealing with a cumulative sample log, we can extract
         # the total number of good frames by looking at the last frame
         frames = prop.value
         return frames[-1]

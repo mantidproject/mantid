@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_HFIRSANSNORMALISE_H_
 #define MANTID_ALGORITHMS_HFIRSANSNORMALISE_H_
 
@@ -29,7 +35,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_HFIRSANSNORMALISE_H_*/

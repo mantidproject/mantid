@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_ELASTICWINDOWTEST_H_
 #define MANTID_ALGORITHMS_ELASTICWINDOWTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/ConvertSpectrumAxis.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/SetInstrumentParameter.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid;

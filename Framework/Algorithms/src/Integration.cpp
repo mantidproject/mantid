@@ -1,12 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -23,6 +32,7 @@ DECLARE_ALGORITHM(Integration)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace HistogramData;
 
 /** Initialisation method.
  *
@@ -111,7 +121,7 @@ void Integration::exec() {
     maxWsIndex = numberOfSpectra - 1;
   }
   auto rangeListCheck = [minWsIndex, maxWsIndex](
-      const std::vector<double> &list, const char *name) {
+                            const std::vector<double> &list, const char *name) {
     if (!list.empty() &&
         list.size() != static_cast<size_t>(maxWsIndex - minWsIndex) + 1) {
       std::ostringstream sout;
@@ -150,9 +160,9 @@ void Integration::exec() {
   }
 
   // Create the 2D workspace (with 1 bin) for the output
-  MatrixWorkspace_sptr outputWorkspace =
-      API::WorkspaceFactory::Instance().create(
-          localworkspace, maxWsIndex - minWsIndex + 1, 2, 1);
+
+  MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(
+      *localworkspace, maxWsIndex - minWsIndex + 1, BinEdges(2));
   auto rebinned_input =
       boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
   auto rebinned_output =
@@ -336,8 +346,8 @@ void Integration::exec() {
 }
 
 /**
-* Uses rebin to reduce event workspaces to a single bin histogram
-*/
+ * Uses rebin to reduce event workspaces to a single bin histogram
+ */
 API::MatrixWorkspace_sptr
 Integration::rangeFilterEventWorkspace(API::MatrixWorkspace_sptr workspace,
                                        double minRange, double maxRange) {

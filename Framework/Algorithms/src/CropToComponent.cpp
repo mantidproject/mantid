@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAlgorithms/CropToComponent.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAlgorithms/CropToComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidIndexing/Conversion.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace {
 std::vector<size_t>
@@ -23,13 +29,13 @@ getDetectorIndices(const Mantid::API::MatrixWorkspace &workspace,
   }
   return detIndices;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CropToComponent)

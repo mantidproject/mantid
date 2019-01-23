@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_SYMMETRYOPERATIONTEST_H_
 #define MANTID_GEOMETRY_SYMMETRYOPERATIONTEST_H_
 
@@ -9,8 +15,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -442,9 +448,10 @@ private:
     SymmetryOperation symOpMatrix = symOp * identity;
     int determinant = abs(symOpMatrix.matrix().determinant());
 
-    TSM_ASSERT_EQUALS(symOp.identifier() + ": Determinant of symmetry "
-                                           "operation matrix is expected to be "
-                                           "1. Actual value: " +
+    TSM_ASSERT_EQUALS(symOp.identifier() +
+                          ": Determinant of symmetry "
+                          "operation matrix is expected to be "
+                          "1. Actual value: " +
                           boost::lexical_cast<std::string>(determinant),
                       determinant, 1);
   }

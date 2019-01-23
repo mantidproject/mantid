@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -21,9 +27,10 @@ void EQSANSPatchSensitivity::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("PatchWorkspace", "", Direction::Input),
       "Workspace defining the patch. Masked detectors will be patched.");
-  declareProperty("UseLinearRegression", true, "If true, a linear regression "
-                                               "will be used instead of "
-                                               "computing the average");
+  declareProperty("UseLinearRegression", true,
+                  "If true, a linear regression "
+                  "will be used instead of "
+                  "computing the average");
   declareProperty("OutputMessage", "", Direction::Output);
 }
 

@@ -12,7 +12,7 @@ Description
 Export a sample log, which is of type TimeSeriesProperty, in a Workspace to a MatrixWorkspace.
 
 The output workspace can be either a MatrixWorkspace or an EventWorkspace.
-If the output workspace is choosen to be an EventWorkspace, there are some limitations to it.
+If the output workspace is chosen to be an EventWorkspace, there are some limitations to it.
 
 Output TimeSeries Log to MatrixWorkspace
 ########################################

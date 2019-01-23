@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_FILEDESCRIPTORTEST_H_
 #define MANTID_KERNEL_FILEDESCRIPTORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cstdio>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FileDescriptor.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 using Mantid::Kernel::FileDescriptor;
 

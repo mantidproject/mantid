@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADVTK_H_
 #define LOADVTK_H_
 
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
 
 class vtkUnsignedShortArray;
 class vtkDataSet;
@@ -52,7 +58,7 @@ private:
 
   void exec() override;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SLICEVIEWER_PROXYCOMPOSITEPEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_PROXYCOMPOSITEPEAKSPRESENTER_H_
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
-#include <boost/shared_ptr.hpp>
 #include <QObject>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -99,7 +105,7 @@ private:
   /// Register an assoicated view.
   UpdateableOnDemand *m_updateableView;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

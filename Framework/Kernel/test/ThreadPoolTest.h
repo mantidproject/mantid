@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef THREADPOOLTEST_H_
 #define THREADPOOLTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include <MantidKernel/Timer.h>
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
 #include <MantidKernel/FunctionTask.h>
 #include <MantidKernel/ProgressText.h>
 #include <MantidKernel/ThreadPool.h>
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
+#include <MantidKernel/Timer.h>
 
 #include <Poco/Thread.h>
 

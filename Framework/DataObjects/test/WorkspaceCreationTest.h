@@ -1,17 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_WORKSPACECREATIONTEST_H_
 #define MANTID_DATAOBJECTS_WORKSPACECREATIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/StorageMode.h"
 #include "MantidTypes/SpectrumDefinition.h"
-#include "MantidAPI/Run.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/ParallelRunner.h"
@@ -111,7 +118,7 @@ void run_indexInfo_legacy_compatibility_partitioned_workspace_failure(
     TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(0).setSpectrumNo(7));
   }
 }
-}
+} // namespace
 
 class WorkspaceCreationTest : public CxxTest::TestSuite {
 public:
@@ -411,6 +418,30 @@ public:
     TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
     check_indices_no_detectors(*ws);
     check_zeroed_data(*ws);
+  }
+
+  void test_create_parent_numeric_vertical_axis() {
+    constexpr size_t parentNhist{3};
+    const auto parent = create<Workspace2D>(parentNhist, Histogram(Points{1}));
+    NumericAxis *parentAxis = new NumericAxis({-1.5, -0.5, 2.3});
+    parent->replaceAxis(1, parentAxis);
+    constexpr size_t nhist{2};
+    const auto ws = create<Workspace2D>(*parent, nhist, parent->histogram(0));
+    auto axis = ws->getAxis(1);
+    TS_ASSERT_DIFFERS(dynamic_cast<NumericAxis *>(axis), nullptr)
+    TS_ASSERT_EQUALS(axis->length(), nhist);
+  }
+
+  void test_create_parent_bin_edge_vertical_axis() {
+    constexpr size_t parentNhist{3};
+    const auto parent = create<Workspace2D>(parentNhist, Histogram(Points{1}));
+    BinEdgeAxis *parentAxis = new BinEdgeAxis({-1.5, -0.5, 2.3, 3.4});
+    parent->replaceAxis(1, parentAxis);
+    constexpr size_t nhist{2};
+    const auto ws = create<Workspace2D>(*parent, nhist, parent->histogram(0));
+    auto axis = ws->getAxis(1);
+    TS_ASSERT_DIFFERS(dynamic_cast<BinEdgeAxis *>(axis), nullptr)
+    TS_ASSERT_EQUALS(axis->length(), nhist + 1);
   }
 
   void test_create_drop_events() {

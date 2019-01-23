@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 #include "DPDFFitControl.h"
+#include "DPDFDisplayControl.h"
 #include "DPDFFitOptionsBrowser.h"
 #include "DPDFInputDataControl.h"
-#include "DPDFDisplayControl.h"
 // Mantid headers from other projects
-#include "MantidAPI/IFunction.h"
-#include "MantidQtWidgets/Common/FunctionBrowser.h"
-#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FunctionBrowser.h"
 // 3rd party library headers
-#include <QMessageBox>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
 #include <QSignalMapper>
@@ -37,9 +43,9 @@ namespace DynamicPDF {
  */
 FitControl::FitControl(QWidget *parent)
     : QWidget(parent), m_functionBrowser{nullptr}, m_fitOptionsBrowser{nullptr},
-      m_inputDataControl{nullptr}, m_displayControl{nullptr}, m_fitRunner(),
-      m_individualFitName{"DPDFIndivFit"},
-      m_modelEvaluationName{"DPDFModelEval"} {
+      m_inputDataControl{nullptr}, m_displayControl{nullptr},
+      m_fitRunner(), m_individualFitName{"DPDFIndivFit"}, m_modelEvaluationName{
+                                                              "DPDFModelEval"} {
   this->initLayout();
 }
 
@@ -157,8 +163,8 @@ void FitControl::slotEvaluateModel(const QString &, const QString &) {
 }
 
 /*
-* @brief Emit signal after model evaluation
-*/
+ * @brief Emit signal after model evaluation
+ */
 void FitControl::finishModelEvaluation(bool error) {
   if (error) {
     return;
@@ -398,6 +404,6 @@ void FitControl::initCustomModels() {
   menuCustom->addAction(actionLoad);
   menuCustom->addAction(actionDelete);
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

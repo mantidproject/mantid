@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_BOOLEANBINARYOPERATIONMDTEST_H_
 #define MANTID_MDALGORITHMS_BOOLEANBINARYOPERATIONMDTEST_H_
 
@@ -9,7 +15,7 @@
 
 using namespace Mantid::MDAlgorithms;
 using namespace testing;
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockBooleanBinaryOperationMD : public BooleanBinaryOperationMD {
 public:
   MOCK_METHOD0(initExtraProperties, void());
@@ -17,7 +23,7 @@ public:
                void(Mantid::DataObjects::MDHistoWorkspace_sptr,
                     Mantid::DataObjects::MDHistoWorkspace_const_sptr));
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 class BooleanBinaryOperationMDTest : public CxxTest::TestSuite {
 public:
   void test_basics() {

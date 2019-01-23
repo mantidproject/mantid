@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PEAKFUNCTIONINTEGRATOR_H
 #define PEAKFUNCTIONINTEGRATOR_H
 
@@ -18,26 +24,6 @@ namespace API {
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 24/04/2014
-
-    Copyright © 2014,2015 PSI-MSS
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 struct MANTID_API_DLL IntegrationResult {
@@ -75,7 +61,7 @@ protected:
 };
 
 double MANTID_API_DLL gsl_peak_wrapper(double x, void *parameters);
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // PEAKFUNCTIONINTEGRATOR_H

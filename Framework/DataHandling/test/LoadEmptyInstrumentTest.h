@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADEMPTYINSTRUMENTTEST_H_
 #define LOADEMPTYINSTRUMENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -25,6 +31,13 @@ using ScopedFileHelper::ScopedFile;
 
 class LoadEmptyInstrumentTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadEmptyInstrumentTest *createSuite() {
+    return new LoadEmptyInstrumentTest();
+  }
+  static void destroySuite(LoadEmptyInstrumentTest *suite) { delete suite; }
+
   /// Helper that checks that each spectrum has one detector
   void check_workspace_detectors(MatrixWorkspace_sptr output,
                                  size_t numberDetectors) {
@@ -38,14 +51,14 @@ public:
   ScopedFile createIDFFileObject(const std::string &idf_filename,
                                  const std::string &idf_file_contents) {
     const std::string instrument_dir =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "/IDFs_for_UNIT_TESTING/";
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
 
   void testExecSLS() {
     LoadEmptyInstrument loaderSLS;
+    loaderSLS.setRethrows(true);
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
     TS_ASSERT(loaderSLS.isInitialized());
@@ -62,7 +75,7 @@ public:
                                  loaderSLS.getPropertyValue("OutputWorkspace"));
     TS_ASSERT(!result.compare(wsName));
 
-    TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
+    loaderSLS.execute();
 
     TS_ASSERT(loaderSLS.isExecuted());
 
@@ -141,7 +154,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+                            "unit_testing/IDF_for_UNIT_TESTING2.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -429,7 +442,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING4.xml");
+                            "unit_testing/IDF_for_UNIT_TESTING4.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -706,8 +719,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+    loader.setPropertyValue("Filename", "unit_testing/DUM_Definition.xml");
     loader.setProperty("MakeEventWorkspace", asEvent);
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyDUMInstrumentTest";
@@ -909,8 +921,9 @@ public:
     AnalysisDataService::Instance().remove(wsName);
 
     loaderEMU2.initialize();
-    loaderEMU2.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
+    loaderEMU2.setRethrows(true);
+    loaderEMU2.setPropertyValue("Filename",
+                                "unit_testing/EMU_for_UNIT_TESTING.XML");
     wsName = "LoadEmptyInstrumentParamEMU2Test";
     loaderEMU2.setPropertyValue("OutputWorkspace", wsName);
 
@@ -1003,6 +1016,98 @@ public:
       errorMsg = "Unexpected exception";
     }
     TS_ASSERT_EQUALS(errorMsg, "No detectors found in instrument");
+  }
+
+  void test_output_workspace_contains_instrument_with_expected_name() {
+    LoadEmptyInstrument alg;
+    alg.setChild(true);
+    const std::string inputFile =
+        "unit_testing/SMALLFAKE_example_geometry.hdf5";
+    alg.initialize();
+    alg.setPropertyValue("Filename", inputFile);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWs =
+        alg.getProperty("OutputWorkspace");
+
+    auto &componentInfo = outputWs->componentInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()),
+                     "SmallFakeTubeInstrument");
+  }
+
+  void test_load_loki() {
+    LoadEmptyInstrument alg;
+    alg.setChild(true);
+    const std::string inputFile = "LOKI_Definition.hdf5";
+    alg.initialize();
+    alg.setPropertyValue("Filename", inputFile);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWs =
+        alg.getProperty("OutputWorkspace");
+
+    auto &componentInfo = outputWs->componentInfo();
+    auto &detectorInfo = outputWs->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
+
+    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1]);
+  }
+
+  void test_load_loki_from_instrument_name() {
+    LoadEmptyInstrument alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("InstrumentName", "LOKI");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWs =
+        alg.getProperty("OutputWorkspace");
+
+    auto &componentInfo = outputWs->componentInfo();
+    auto &detectorInfo = outputWs->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
+
+    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1]);
+  }
+
+  void test_compare_wish_idf_vs_nexus() {
+    // Now rerun
+    LoadEmptyInstrument alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("Filename", "WISH_Definition_10Panels.hdf5");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    Mantid::API::MatrixWorkspace_sptr wish_nexus =
+        alg.getProperty("OutputWorkspace");
+
+    // Now re-run
+    alg.setPropertyValue("Filename", "WISH_Definition_10Panels.xml");
+    alg.execute();
+    Mantid::API::MatrixWorkspace_sptr wish_xml =
+        alg.getProperty("OutputWorkspace");
+
+    // Sanity check that we are not comparing the same instrument (i.e. via some
+    // smart caching)
+    TSM_ASSERT("Premise of comparision test broken!",
+               wish_xml->getInstrument()->baseInstrument().get() !=
+                   wish_nexus->getInstrument()->baseInstrument().get());
+
+    const auto &wish_nexus_detinfo = wish_nexus->detectorInfo();
+    const auto &wish_xml_detinfo = wish_xml->detectorInfo();
+    TS_ASSERT_EQUALS(wish_nexus_detinfo.size(), wish_xml_detinfo.size());
+    for (size_t i = 0; i < wish_nexus_detinfo.size(); ++i) {
+      TSM_ASSERT_EQUALS("Detector position mismatch",
+                        wish_nexus_detinfo.position(i),
+                        wish_xml_detinfo.position(i));
+    }
   }
 
 private:

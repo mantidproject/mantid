@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_ICOMPONENT_H_
 #define MANTID_GEOMETRY_ICOMPONENT_H_
 
@@ -6,9 +12,9 @@
 #include "MantidKernel/V3D.h"
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -41,27 +47,6 @@ are relatives, i.e. defined with respect to the parent
 IComponent. The orientation is stored as a Kernel::Quaternion.
 Each IComponent has a defined bounding box which at the moment
 is cuboid.
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class MANTID_GEOMETRY_DLL IComponent {
@@ -97,8 +82,8 @@ public:
   // otherwise absolute
   virtual void setPos(double, double, double) = 0;
   /** Set the position of the component
-  *  The position is with respect to the parent component
-  */
+   *  The position is with respect to the parent component
+   */
   virtual void setPos(const Kernel::V3D &) = 0;
   //! Set the orientation Kernel::Quaternion relative to parent (if present)
   // otherwise absolute
@@ -130,8 +115,8 @@ public:
   virtual void getBoundingBox(BoundingBox &boundingBox) const = 0;
 
   /** Gets the scaling factor of the object for the Object Component.
-    * @return a vector with 1 in all 3 directions.
-    */
+   * @return a vector with 1 in all 3 directions.
+   */
   virtual Kernel::V3D getScaleFactor() const {
     return Kernel::V3D(1.0, 1.0, 1.0);
   }
@@ -178,7 +163,7 @@ public:
                                            bool recursive = true) const = 0;
   //@}
   /** Prints a text representation of itself
-  */
+   */
   virtual void printSelf(std::ostream &) const = 0;
   //! Returns true if the Component is parametrized (has a parameter map)
   virtual bool isParametrized() const = 0;

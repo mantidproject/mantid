@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_
 #define MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_
 
-#include "ui_UserFunctionDialog.h"
 #include "DllOption.h"
+#include "ui_UserFunctionDialog.h"
 
 #include <QMap>
 #include <QSet>
@@ -73,7 +79,7 @@ private:
   QLineEdit *m_name;
   QTextEdit *m_comment;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_

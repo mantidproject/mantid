@@ -27,7 +27,7 @@ There are 4 available fit modes used to scale and shift the high angle bank data
 Can Runs
 ############
 
-When can runs are provided they are processed separately using the same merge forumla above, and then subtracted from the processed sample run. If can runs are provided as inputs then the scale and shift factors are determined as part of fitting by operating on a workspace calculated from: 
+When can runs are provided they are processed separately using the same merge formula above, and then subtracted from the processed sample run. If can runs are provided as inputs then the scale and shift factors are determined as part of fitting by operating on a workspace calculated from: 
 
 .. math:: 
    \frac{C_{sample}(Q)}{N_{sample}(Q)} - \frac{C_{can}(Q)}{N_{can}(Q)}

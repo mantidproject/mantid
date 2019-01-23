@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_
 #define MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_
 
@@ -6,14 +12,14 @@
 #include "MantidDataHandling/DownloadInstrument.h"
 #include "MantidKernel/ConfigService.h"
 
-#include <Poco/Net/HTTPResponse.h>
-#include <Poco/Glob.h>
 #include <Poco/File.h>
+#include <Poco/Glob.h>
+#include <Poco/Net/HTTPResponse.h>
 #include <Poco/Path.h>
 
+#include <cstdio>
 #include <fstream>
 #include <string>
-#include <cstdio>
 
 using Mantid::DataHandling::DownloadInstrument;
 using namespace Mantid::DataHandling;
@@ -89,7 +95,7 @@ private:
     return Poco::Net::HTTPResponse::HTTP_FOUND;
   }
 };
-}
+} // namespace
 
 class DownloadInstrumentTest : public CxxTest::TestSuite {
 public:

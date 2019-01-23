@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
@@ -16,15 +22,11 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <BRepPrimAPI_MakeCylinder.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {
@@ -447,6 +449,6 @@ TopoDS_Shape Cylinder::createShape() {
   return BRepPrimAPI_MakeCylinder(gpA, Radius, 1000.0, 2.0 * M_PI).Solid();
 }
 #endif
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

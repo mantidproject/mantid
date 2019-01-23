@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -23,9 +29,9 @@ using namespace API;
 SaveVTK::SaveVTK() : m_Xmin(0), m_Xmax(0) {}
 
 /**
-* Initilisation method.
-* Simply declares the properties that this algorithm possesses
-*/
+ * Initilisation method.
+ * Simply declares the properties that this algorithm possesses
+ */
 void SaveVTK::init() {
   // Declare mandatory properties
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -47,9 +53,9 @@ void SaveVTK::init() {
 }
 
 /**
-* Executes the algorithm.
-* Saves the workspace specified by the user to the VTK XML format
-*/
+ * Executes the algorithm.
+ * Saves the workspace specified by the user to the VTK XML format
+ */
 void SaveVTK::exec() {
   std::string filename = getProperty("Filename");
   g_log.debug() << "Parameters: Filename='" << filename << "'\n";
@@ -141,8 +147,8 @@ void SaveVTK::exec() {
 }
 
 /**
-* Check the validity of the optional parameters
-*/
+ * Check the validity of the optional parameters
+ */
 void SaveVTK::checkOptionalProperties() {
   m_Xmin = getProperty("Xminimum");
   m_Xmax = getProperty("Xmaximum");
@@ -154,13 +160,13 @@ void SaveVTK::checkOptionalProperties() {
 }
 
 /**
-* Write a histogram as a VTK <Piece .../> block
-* @param outVTP :: The output stream
-* @param xValue :: The x data
-* @param yValue :: The y data
-* @param errors :: The error data
-* @param index :: The histogram number
-*/
+ * Write a histogram as a VTK <Piece .../> block
+ * @param outVTP :: The output stream
+ * @param xValue :: The x data
+ * @param yValue :: The y data
+ * @param errors :: The error data
+ * @param index :: The histogram number
+ */
 void SaveVTK::writeVTKPiece(std::ostream &outVTP,
                             const std::vector<double> &xValue,
                             const std::vector<double> &yValue,
@@ -223,5 +229,5 @@ void SaveVTK::writeVTKPiece(std::ostream &outVTP,
   // End of this piece
   outVTP << "</Piece>\n";
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

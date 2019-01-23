@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_MEMORYTEST_H_
 #define MANTID_KERNEL_MEMORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/ThreadPool.h"
 
 using namespace Mantid::Kernel;

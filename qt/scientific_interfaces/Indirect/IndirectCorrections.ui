@@ -114,26 +114,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pbRun">
-        <property name="text">
-         <string>Run</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_11">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QPushButton" name="pbManageDirs">
         <property name="text">
          <string>Manage Directories</string>
@@ -148,7 +128,6 @@
  <tabstops>
   <tabstop>twTabs</tabstop>
   <tabstop>pbHelp</tabstop>
-  <tabstop>pbRun</tabstop>
   <tabstop>pbManageDirs</tabstop>
  </tabstops>
  <resources/>

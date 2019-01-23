@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import FunctionFactory, Workspace, AlgorithmManager, IFunction1D
 
 
@@ -17,7 +23,7 @@ class FunctionWrapper(object):
                 return wrapper(fun, *args, **kwargs)
         return FunctionWrapper(fun, **kwargs)
 
-    def __init__ (self, name, **kwargs):
+    def __init__(self, name, **kwargs):
         """
         Called when creating an instance
 
@@ -762,11 +768,12 @@ def _create_wrapper_function(name):
     return wrapper_function
 
 
-def _attach_wrappers(source_module):
+def _wrappers():
+    wrappers = []
     for name in FunctionFactory.getFunctionNames():
         # Wrap all registered functions which are not in the black list
         if name not in _do_not_wrap:
-            setattr(source_module, name, _create_wrapper_function(name))
+            yield name, _create_wrapper_function(name)
 
 
 _ExportedIFunction1D = IFunction1D

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INDIRECTFITPROPERTYBROWSER_H_
 #define INDIRECTFITPROPERTYBROWSER_H_
 
@@ -59,7 +65,7 @@ public:
 
   void setCustomSettingEnabled(const QString &customName, bool enabled);
 
-  void moveCustomFunctionsToEnd();
+  void setFitEnabled(bool enable) override;
 
   void addCheckBoxFunctionGroup(
       const QString &groupName,
@@ -74,6 +80,7 @@ public:
   void addComboBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions);
+  void clearFitTypeComboBox();
 
   void setBackgroundOptions(const QStringList &backgrounds);
 
@@ -117,16 +124,21 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
-  void updateParameterValues(const QHash<QString, double> &parameterValues);
-
-  void updateParameterValues(PropertyHandler *functionHandler,
-                             const QHash<QString, double> &parameterValues);
+  void updateTies();
+  void updateTie(std::size_t index);
+  void addTie(const QString &tie);
+  void removeTie(const QString &parameter);
+  void updateErrors();
+  void clearErrors();
 
   void removeFunction(PropertyHandler *handler) override;
 
+  void setWorkspaceIndex(int i) override;
+
+  void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
+
 public slots:
   void fit() override;
-
   void sequentialFit() override;
 
 protected slots:
@@ -143,8 +155,6 @@ protected slots:
   void clear() override;
 
   void clearAllCustomFunctions();
-
-  void updatePlotGuess();
 
   void browserVisibilityChanged(bool isVisible);
 

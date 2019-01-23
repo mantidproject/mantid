@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_CRYSTALSTRUCTURETEST_H_
 #define MANTID_GEOMETRY_CRYSTALSTRUCTURETEST_H_
 
@@ -7,8 +13,8 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
-#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

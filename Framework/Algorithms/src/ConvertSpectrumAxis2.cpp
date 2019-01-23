@@ -1,12 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -26,6 +34,8 @@ DECLARE_ALGORITHM(ConvertSpectrumAxis2)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
+using namespace HistogramData;
 
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
@@ -39,15 +49,9 @@ void ConvertSpectrumAxis2::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
-  std::vector<std::string> targetOptions(7);
-  targetOptions[0] = "Theta";
-  targetOptions[1] = "SignedTheta";
-  targetOptions[2] = "ElasticQ";
-  targetOptions[3] = "ElasticQSquared";
-  targetOptions[4] = "theta";
-  targetOptions[5] = "signed_theta";
-  targetOptions[6] = "ElasticDSpacing";
-
+  std::vector<std::string> targetOptions{
+      "Theta", "SignedTheta",  "ElasticQ",       "ElasticQSquared",
+      "theta", "signed_theta", "ElasticDSpacing"};
   declareProperty(
       "Target", "", boost::make_shared<StringListValidator>(targetOptions),
       "The unit to which spectrum axis is converted to - \"theta\" (for the "
@@ -67,8 +71,9 @@ void ConvertSpectrumAxis2::init() {
                   "Value of fixed energy in meV : EI (EMode=Direct) or EF "
                   "(EMode=Indirect))");
 
-  declareProperty("OrderAxis", true, "Whether or not to sort the resulting"
-                                     " spectrum axis.");
+  declareProperty("OrderAxis", true,
+                  "Whether or not to sort the resulting"
+                  " spectrum axis.");
 }
 
 void ConvertSpectrumAxis2::exec() {
@@ -110,10 +115,10 @@ void ConvertSpectrumAxis2::exec() {
 }
 
 /** Converts X axis to theta representation
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input Workspace
-*/
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input Workspace
+ */
 void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           const std::string &targetUnit,
                                           API::MatrixWorkspace_sptr &inputWS) {
@@ -150,10 +155,10 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
 }
 
 /** Convert X axis to Elastic Q representation
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input workspace
-*/
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input workspace
+ */
 void ConvertSpectrumAxis2::createElasticQMap(
     API::Progress &progress, const std::string &targetUnit,
     API::MatrixWorkspace_sptr &inputWS) {
@@ -210,12 +215,12 @@ void ConvertSpectrumAxis2::createElasticQMap(
 }
 
 /** Create the final output workspace after converting the X axis
-* @returns the final output workspace
-*
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input workspace
-*/
+ * @returns the final output workspace
+ *
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input workspace
+ */
 MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     API::Progress &progress, const std::string &targetUnit,
     API::MatrixWorkspace_sptr &inputWS) {
@@ -224,8 +229,12 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   NumericAxis *newAxis = nullptr;
   if (m_toOrder) {
     // Can not re-use the input one because the spectra are re-ordered.
-    outputWorkspace = WorkspaceFactory::Instance().create(
-        inputWS, m_indexMap.size(), inputWS->x(0).size(), inputWS->y(0).size());
+    HistogramBuilder builder;
+    builder.setX(inputWS->x(0).size());
+    builder.setY(inputWS->y(0).size());
+    builder.setDistribution(inputWS->isDistribution());
+    outputWorkspace =
+        create<MatrixWorkspace>(*inputWS, m_indexMap.size(), builder.build());
     std::vector<double> axis;
     axis.reserve(m_indexMap.size());
     for (const auto &it : m_indexMap) {
@@ -312,9 +321,9 @@ double ConvertSpectrumAxis2::getEfixed(
 }
 
 /** Emplaces inside the ordered or unordered index registry
-* @param value :: value to insert
-* @param wsIndex :: workspace index
-*/
+ * @param value :: value to insert
+ * @param wsIndex :: workspace index
+ */
 void ConvertSpectrumAxis2::emplaceIndexMap(double value, size_t wsIndex) {
   if (m_toOrder) {
     m_indexMap.emplace(value, wsIndex);

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayLengthValidator.h"
 
 #include <boost/make_shared.hpp>
@@ -192,5 +198,5 @@ template class ArrayLengthValidator<std::string>;
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class ArrayLengthValidator<long>;
 #endif
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

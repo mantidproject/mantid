@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MPI_SERIALIZE_HPP___
 #define MPI_SERIALIZE_HPP___
 
@@ -146,11 +152,11 @@ template <class Archive>
 inline void load_construct_data(Archive &ar,
                                 Mantid::DataObjects::EventList *elist,
                                 const unsigned int /*file_version*/
-                                ) {
+) {
   // default just uses the default constructor to initialize
   // previously allocated memory.
   new (elist) Mantid::DataObjects::EventList();
 }
-}
-}
+} // namespace serialization
+} // namespace boost
 #endif

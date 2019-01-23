@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include <Poco/ActiveResult.h>
-#include <qcoreapplication.h>
 #include <QMessageBox>
+#include <qcoreapplication.h>
 
 using namespace std;
 using namespace MantidQt;
@@ -106,9 +112,9 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName,
 }
 
 /**
-* This creates an algorithm dialog (the default property entry thingie).
-* Helper function not required by interface
-*/
+ * This creates an algorithm dialog (the default property entry thingie).
+ * Helper function not required by interface
+ */
 MantidQt::API::AlgorithmDialog *
 MantidTreeModel::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
   QHash<QString, QString> presets;

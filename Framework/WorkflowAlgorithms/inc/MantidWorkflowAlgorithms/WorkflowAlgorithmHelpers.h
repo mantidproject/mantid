@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKFLOWALGORITHMHELPERS_H_
 #define WORKFLOWALGORITHMHELPERS_H_
 
-#include <string>
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/PropertyManager.h"
+#include <string>
 
 namespace WorkflowAlgorithmHelpers {
 /// Function to get double property or instrument parameter value
@@ -27,6 +33,6 @@ bool getBoolPropOrParam(const std::string &pmProp,
                         const std::string &instParam,
                         Mantid::API::MatrixWorkspace_sptr &ws,
                         const bool overrideValue = false);
-}
+} // namespace WorkflowAlgorithmHelpers
 
 #endif /* WORKFLOWALGORITHMHELPERS_H_ */

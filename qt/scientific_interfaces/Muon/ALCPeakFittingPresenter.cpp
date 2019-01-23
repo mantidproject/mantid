@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCPeakFittingPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -100,7 +106,7 @@ void ALCPeakFittingPresenter::onFittedPeaksChanged() {
   IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
   auto dataWS = m_model->data();
   if (fittedPeaks && dataWS) {
-    auto x = dataWS->x(0);
+    const auto &x = dataWS->x(0);
     m_view->setFittedCurve(
         *(QwtHelper::curveDataFromFunction(fittedPeaks, x.rawData())));
     m_view->setFunction(fittedPeaks);
@@ -148,7 +154,7 @@ bool ALCPeakFittingPresenter::plotGuessOnGraph() {
   auto func = m_view->function("");
   auto dataWS = m_model->data();
   if (func && dataWS) {
-    auto xdata = dataWS->x(0);
+    const auto &xdata = dataWS->x(0);
     m_view->setFittedCurve(
         *(QwtHelper::curveDataFromFunction(func, xdata.rawData())));
     plotted = true;

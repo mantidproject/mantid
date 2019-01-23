@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_HYSPECSCHARPFCORRECTIONTEST_H_
 #define MANTID_ALGORITHMS_HYSPECSCHARPFCORRECTIONTEST_H_
 
@@ -47,7 +53,7 @@ public:
     TS_ASSERT(outputWS);
     auto histo = outputWS->histogram(0);
     auto x = histo.points();
-    auto y = histo.y();
+    const auto &y = histo.y();
     for (size_t i = 0; i < x.size(); ++i) {
       if (x[i] < 4) {
         TS_ASSERT_LESS_THAN(y[i], 0);

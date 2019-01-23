@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifdef _MSC_VER
 #pragma warning(disable : 4250) // Disable warning regarding inheritance via
                                 // dominance, we have no way around it with the
                                 // design
 #endif
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/PropertyManager.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 
-using Mantid::PythonInterface::Registry::createPropertyManager;
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::PropertyManager;
 using Mantid::Kernel::PropertyManager_sptr;
+using Mantid::PythonInterface::Registry::createPropertyManager;
 
 using namespace boost::python;
 

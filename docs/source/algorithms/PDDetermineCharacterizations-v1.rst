@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm takes an ``InputWorkspace`` and ``Characterizations``
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ and
+:ref:`TableWorkspace <Table Workspaces>` and
 creates a PropertyManager with the appropriate characterization runs.
 This is done by determining the effective accelerator frequency and
 center wavelength and choosing the appropriate row from the table.
@@ -19,10 +19,10 @@ This algorithm is one of the workflow algorithms that helps
 :ref:`algm-SNSPowderReduction` and its child algorithm
 :ref:`algm-AlignAndFocusPowder`.
 
-Determing Frequency and Wavelength
-##################################
+Determining Frequency and Wavelength
+####################################
 
-The freqency is found by inspecting the logs (in order)
+The frequency is found by inspecting the logs (in order)
 ``SpeedRequest1``, ``Speed1``, and ``frequency``. Whichever one has a
 nonzero value is used.  Simlilarly, the wavelength is taken by
 inspecting ``LambdaRequest`` then ``Lambda``. If either the frequency
@@ -58,14 +58,14 @@ wavelength_min      double       0
 wavelength_max      double       0
 =================== ============ ======= ============
 
-In the case of extra columns existing in the `TableWorkspace
-<TableWorkspace>`__ denoting ``SampleContainer`` information: if the
+In the case of extra columns existing in the :ref:`TableWorkspace
+<Table Workspaces>` denoting ``SampleContainer`` information: if the
 ``SampleContainer`` isn't a property on the workspace, or the value
 isn't one of the column labels, the value of the ``container`` column
-in the supplied `TableWorkspace <TableWorkspace>`__ will be used
+in the supplied :ref:`TableWorkspace <Table Workspaces>` will be used
 instead.
 
-For a description of the  `TableWorkspace <TableWorkspace>`__
+For a description of the  :ref:`TableWorkspace <Table Workspaces>`
 see :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>`.
 
 .. categories::

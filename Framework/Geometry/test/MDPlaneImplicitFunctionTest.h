@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDGEOMETRY_MDIMPLICITFUNCTIONTEST_H_
 #define MANTID_MDGEOMETRY_MDIMPLICITFUNCTIONTEST_H_
 
-#include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
+#include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;

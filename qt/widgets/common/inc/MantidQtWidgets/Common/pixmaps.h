@@ -31,14 +31,14 @@
 #ifndef MANTIDQT_API_PIXMAPS_H
 #define MANTIDQT_API_PIXMAPS_H
 
-#include <MantidQtWidgets/Common/DllOption.h>
 #include "qpixmap.h"
+#include <MantidQtWidgets/Common/DllOption.h>
 
 namespace MantidQt {
 namespace API {
 /** Function that returns a QPixmap given a string name. */
 EXPORT_OPT_MANTIDQT_COMMON QPixmap getQPixmap(const std::string &name);
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQT_API_PIXMAPS_H

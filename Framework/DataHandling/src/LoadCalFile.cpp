@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
@@ -339,11 +345,11 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
         << " errors (invalid Detector ID's) found when reading .cal file '"
         << calFileName << "'.\n";
   if (doGroup && (!hasGrouped))
-    Logger("LoadCalFile").warning() << "'" << calFileName
-                                    << "' has no spectra grouped\n";
+    Logger("LoadCalFile").warning()
+        << "'" << calFileName << "' has no spectra grouped\n";
   if (doMask && (!hasUnmasked))
-    Logger("LoadCalFile").warning() << "'" << calFileName
-                                    << "' masks all spectra\n";
+    Logger("LoadCalFile").warning()
+        << "'" << calFileName << "' masks all spectra\n";
 }
 
 /**
@@ -369,5 +375,5 @@ Parallel::ExecutionMode LoadCalFile::getParallelExecutionMode(
   return Parallel::ExecutionMode::Identical;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

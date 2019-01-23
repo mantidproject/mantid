@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H
 
@@ -7,8 +13,8 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
-#include <vector>
 #include <initializer_list>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,27 +26,6 @@ class IReflSettingsView;
 
 ReflSettingsPresenter is a presenter class for the widget 'Settings' in the
 ISIS Reflectometry Interface.
-
-Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSettingsPresenter
     : public IReflSettingsPresenter {
@@ -78,7 +63,8 @@ private:
   void getExpDefaults();
   void getInstDefaults();
   void handleSettingsChanged();
-  bool hasReductionTypes(const std::string &reductionType) const;
+  bool hasReductionTypes(const std::string &summationType) const;
+  bool hasIncludePartialBinsOption(const std::string &summationType) const;
   void handleSummationTypeChange();
   static QString asAlgorithmPropertyBool(bool value);
   Mantid::Geometry::Instrument_const_sptr
@@ -106,6 +92,6 @@ private:
   std::string m_currentInstrumentName;
   int m_group;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H */

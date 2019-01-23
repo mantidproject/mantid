@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef UNWRAPPEDCYLINDER_H
 #define UNWRAPPEDCYLINDER_H
 
@@ -7,8 +13,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
-* Implementation of UnwrappedSurface as a cylinder
-*/
+ * Implementation of UnwrappedSurface as a cylinder
+ */
 class UnwrappedCylinder : public RotationSurface {
 public:
   UnwrappedCylinder(const InstrumentActor *rootActor,
@@ -21,7 +27,7 @@ protected:
   void rotate(const UnwrappedDetector &udet,
               Mantid::Kernel::Quat &R) const override;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // UNWRAPPEDCYLINDER_H

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -104,6 +110,6 @@ makeFileBackedMDEWwithMDFrame(const std::string &wsName, bool fileBacked,
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
 }
 
-} // namespace
-}
-}
+} // namespace MDAlgorithmsTestHelper
+} // namespace MDAlgorithms
+} // namespace Mantid

@@ -73,7 +73,7 @@ Usage
 .. testoutput:: ExConvertToDiffractionMDWorkspace
    :options: +ELLIPSIS
 
-   Resulting MD workspace has 81... events and 3 dimensions
+   Resulting MD workspace has ... events and 3 dimensions
    Workspace Type is:  MDEventWorkspace<MDEvent,3>
 
 

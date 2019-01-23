@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/CompositeValidator.h"
 #include <boost/python/class.hpp>
 #include <boost/python/default_call_policies.hpp>
@@ -5,8 +11,8 @@
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
 
-using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::CompositeRelation;
+using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::IValidator;
 using Mantid::Kernel::IValidator_sptr;
 using namespace boost::python;
@@ -32,7 +38,7 @@ createCompositeValidator(const boost::python::list &validators,
   }
   return composite;
 }
-}
+} // namespace
 
 void export_CompositeValidator() {
   enum_<CompositeRelation>("CompositeRelation")
@@ -45,7 +51,8 @@ void export_CompositeValidator() {
            make_constructor(
                &createCompositeValidator, default_call_policies(),
                (arg("validators"), arg("relation") = CompositeRelation::AND)))
-      .def("add", (void (CompositeValidator::*)(IValidator_sptr)) &
-                      CompositeValidator::add,
+      .def("add",
+           (void (CompositeValidator::*)(IValidator_sptr)) &
+               CompositeValidator::add,
            (arg("self"), arg("other")), "Add another validator to the list");
 }

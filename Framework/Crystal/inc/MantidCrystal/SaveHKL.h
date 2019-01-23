@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_SAVEHKL_H_
 #define MANTID_CRYSTAL_SAVEHKL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -51,7 +57,7 @@ private:
   void sizeBanks(std::string bankName, int &nCols, int &nRows);
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_SAVEHKL_H_ */

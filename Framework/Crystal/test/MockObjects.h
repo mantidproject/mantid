@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * MockObjects.h
  *
@@ -17,7 +23,7 @@
 namespace Mantid {
 namespace Crystal {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 // Mock Background strategy
 class MockBackgroundStrategy : public BackgroundStrategy {
@@ -32,8 +38,10 @@ public:
 
 class MockICluster : public ICluster {
 public:
-  MOCK_CONST_METHOD1(integrate, ClusterIntegratedValues(boost::shared_ptr<
-                                    const Mantid::API::IMDHistoWorkspace> ws));
+  MOCK_CONST_METHOD1(
+      integrate,
+      ClusterIntegratedValues(
+          boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws));
   MOCK_CONST_METHOD1(
       writeTo, void(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws));
   MOCK_CONST_METHOD0(getLabel, size_t());
@@ -49,8 +57,8 @@ public:
   }
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
-}
-}
+GNU_DIAG_ON_SUGGEST_OVERRIDE
+} // namespace Crystal
+} // namespace Mantid
 
 #endif /* MOCKOBJECTS_H_ */

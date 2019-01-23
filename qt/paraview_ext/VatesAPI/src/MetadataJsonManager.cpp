@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include <json/json.h>
-#include <json/writer.h>
 #include <json/reader.h>
+#include <json/writer.h>
 
 namespace Mantid {
 namespace VATES {
@@ -82,5 +88,5 @@ void MetadataJsonManager::setSpecialCoordinates(int specialCoordinates) {
  * @returns The special coordinates.
  */
 int MetadataJsonManager::getSpecialCoordinates() { return specialCoordinates; }
-}
-}
+} // namespace VATES
+} // namespace Mantid

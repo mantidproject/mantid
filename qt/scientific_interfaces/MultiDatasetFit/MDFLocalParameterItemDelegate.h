@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDFLOCALPARAMETERITEMDELEGATE_H_
 #define MDFLOCALPARAMETERITEMDELEGATE_H_
 
@@ -54,8 +60,8 @@ private:
   mutable LocalParameterEditor *m_currentEditor;
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFLOCALPARAMETERITEMDELEGATE_H_*/
