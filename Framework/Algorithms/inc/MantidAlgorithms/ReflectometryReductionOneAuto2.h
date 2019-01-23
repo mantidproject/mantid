@@ -77,9 +77,9 @@ private:
                               const double defaultValue);
   void setOutputWorkspaces(std::vector<std::string> &IvsLamGroup,
                            std::string const &outputIvsLam,
-                           std::vector<std::string> &IvsQGroup,
+                           std::vector<std::string> &IvsQBinnedGroup,
                            std::string const &outputIvsQBinned,
-                           std::vector<std::string> &IvsQUnbinnedGroup,
+                           std::vector<std::string> &IvsQGroup,
                            std::string const &outputIvsQ);
 };
 
