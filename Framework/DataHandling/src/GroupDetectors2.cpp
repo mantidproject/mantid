@@ -112,52 +112,46 @@ void GroupDetectors2::init() {
       Kernel::make_unique<FileProperty>("MapFile", "",
                                         FileProperty::OptionalLoad, exts),
       "A file that consists of lists of spectra numbers to group. See the "
-      "help\n"
-      "for the file format");
+      "help for the file format");
   declareProperty(
       "IgnoreGroupNumber", true,
-      "This option is only relevant if you're using MapFile.\n"
-      "If true the spectra will numbered sequentially, starting from one.\n"
-      "Otherwise, the group number will be used for the spectrum numbers.");
+      "If true, use sequential spectrum numbers, otherwise use the group "
+      "number from MapFile as spectrum numbers.");
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "GroupingPattern", "", Direction::Input),
                   "Describes how this algorithm should group the detectors. "
-                  "See full instruction list.");
+                  "See the help for full instructions.");
   declareProperty(
       make_unique<ArrayProperty<specnum_t>>("SpectraList"),
-      "An array containing a list of the spectrum numbers to combine\n"
+      "An array containing a list of the spectrum numbers to combine "
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
   declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "An array of detector IDs to combine (WorkspaceIndexList is "
-                  "ignored if this is\n"
-                  "set)");
+                  "ignored if this is set)");
   declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
   declareProperty(
       "KeepUngroupedSpectra", false,
-      "If true ungrouped spectra will be copied to the output workspace\n"
+      "If true ungrouped spectra will be copied to the output workspace "
       "and placed after the groups");
 
-  std::vector<std::string> groupTypes(2);
-  groupTypes[0] = "Sum";
-  groupTypes[1] = "Average";
+  const std::vector<std::string> groupTypes{"Sum", "Average"};
   using Mantid::Kernel::StringListValidator;
   declareProperty(
       "Behaviour", "Sum", boost::make_shared<StringListValidator>(groupTypes),
       "Whether to sum or average the values when grouping detectors.");
   // Are we preserving event workspaces?
   declareProperty("PreserveEvents", true,
-                  "Keep the output workspace as an "
-                  "EventWorkspace, if the input has "
-                  "events.");
+                  "Keep the output workspace as an EventWorkspace, if the "
+                  "input has events.");
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "CopyGroupingFromWorkspace", "", Direction::Input,
           PropertyMode::Optional),
-      "The name of a workspace to copy the grouping from.\n "
+      "The name of a workspace to copy the grouping from. "
       "This can be either a normal workspace or a grouping workspace, but they "
-      "must be from the same instrument.\n"
-      "Detector ids are used to match up the spectra to be grouped.\n"
+      "must be from the same instrument. "
+      "Detector ids are used to match up the spectra to be grouped. "
       "If this option is selected all file and list options will be ignored.");
 }
 
