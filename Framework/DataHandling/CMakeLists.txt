@@ -143,7 +143,6 @@
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
-	src/SNSDataArchive.cpp
 	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
@@ -339,7 +338,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/RotateSource.h
-	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
