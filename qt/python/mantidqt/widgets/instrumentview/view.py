@@ -13,12 +13,11 @@ Contains the Python wrapper class for the C++ instrument widget
 from __future__ import (absolute_import, unicode_literals)
 
 # 3rdparty imports
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.utils.qt import import_qt
-
 
 # import widget class from C++ wrappers
 InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
@@ -35,8 +34,14 @@ class InstrumentView(QWidget):
     _presenter = None
     _widget = None
 
+    close_signal = Signal()
+
     def __init__(self, presenter, name, parent=None):
         super(InstrumentView, self).__init__(parent)
+
+        if self.make_widget(name):
+            return
+
         self._presenter = presenter
 
         self.setWindowTitle(name)
@@ -44,5 +49,33 @@ class InstrumentView(QWidget):
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(InstrumentWidget(name))
+
+        layout.addWidget(self.widget)
         self.setLayout(layout)
+
+        self.close_signal.connect(self._run_close)
+
+    def make_widget(self, name):
+        # try:
+        self.widget = InstrumentWidget(name)
+        # return True
+        # except Exception:
+        #     logger.error("Workspace could not be opened successfully. It might contain invalid values.")
+        #     self.widget = None
+        #     return False
+
+    def close_later(self):
+        """
+        Emits a signal to the main GUI thread that triggers the built-in close method.
+
+        This function can be called from outside the main GUI thread. It is currently
+        used to close the window when the relevant workspace is deleted.
+
+        When the signal is emitted, the execution returns to the GUI thread, and thus
+        GUI code can be executed.
+        """
+        self.close_signal.emit()
+
+    @Slot()
+    def _run_close(self):
+        self.close()
