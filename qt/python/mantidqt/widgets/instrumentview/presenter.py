@@ -51,9 +51,7 @@ class InstrumentViewPresenter(ObservingPresenter):
                                but if it isn't - it does nothing
         """
         if self.ws_name == workspace_name:
-            # if the observer is not cleared here then the C++ object is never freed,
-            # and observers keep getting created, and triggering on ADS events
-            self.ads_observer = None
+            self.clear_observer()
             self.view.emit_close()
 
     def replace_workspace(self, workspace_name, workspace):
