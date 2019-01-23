@@ -17,12 +17,12 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 
-#include <cxxtest/TestSuite.h>
-#include <fstream>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/SAX/InputSource.h>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -63,7 +63,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", m_emptyInstrument));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFile));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -130,7 +131,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", m_emptyInstrument))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFile))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
@@ -152,7 +154,8 @@ public:
 
   void test_ignore_detectors_without_spectra() {
     auto histogram = m_emptyInstrument->histogram(0);
-    MatrixWorkspace_sptr ws = create<Workspace2D>(*m_emptyInstrument, 1, histogram);
+    MatrixWorkspace_sptr ws =
+        create<Workspace2D>(*m_emptyInstrument, 1, histogram);
     ws->getSpectrum(0).copyInfoFrom(m_emptyInstrument->getSpectrum(7));
     GenerateGroupingPowder alg;
     alg.setChild(true);
@@ -175,7 +178,8 @@ public:
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> doc{parser.parse(&source)};
     ShowDetIDsOnly filter;
-    Poco::XML::NodeIterator nodeIter{doc, Poco::XML::NodeFilter::SHOW_ELEMENT, &filter};
+    Poco::XML::NodeIterator nodeIter{doc, Poco::XML::NodeFilter::SHOW_ELEMENT,
+                                     &filter};
     auto node = nodeIter.nextNode();
     TS_ASSERT(node)
     TS_ASSERT_EQUALS(node->nodeName(), "detids")
