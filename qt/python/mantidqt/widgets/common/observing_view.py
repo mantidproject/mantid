@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from __future__ import (absolute_import, division, print_function)
+
 
 class ObservingView:
     """
@@ -29,6 +31,12 @@ class ObservingView:
     TITLE_STRING = "{} - Mantid"
 
     def __init__(self, _):
+        """
+        This __init__ is added to conform with the Qt super-class constructor, and is
+        called when the super(..., self).__init__ is executed in the view inheriting this.
+
+        It is not strictly required, but it prevents an inspection warning in PyCharm.
+        """
         pass
 
     def emit_close(self):
