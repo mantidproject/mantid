@@ -2,8 +2,8 @@ from qtpy.QtCore import QObject, Signal, Slot
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QApplication, QMenu, QInputDialog
 
-from markers import VerticalMarker, PeakMarker
-from mouse_state_machine import StateMachine
+from .markers import VerticalMarker, PeakMarker
+from .mouse_state_machine import StateMachine
 
 
 class FitInteractiveTool(QObject):

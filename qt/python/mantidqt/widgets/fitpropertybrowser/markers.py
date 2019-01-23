@@ -1,7 +1,8 @@
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
 from qtpy.QtCore import Qt, QObject, Signal
 from qtpy.QtGui import QCursor
+
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
 
 
 class VerticalMarker(QObject):

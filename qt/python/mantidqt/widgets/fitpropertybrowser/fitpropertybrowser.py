@@ -13,9 +13,10 @@ import re
 
 from qtpy.QtCore import Qt, Signal, Slot
 
-from mantid.simpleapi import mtd
 from mantid.api import AlgorithmManager
+from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
+
 from .interactive_tool import FitInteractiveTool
 
 
