@@ -29,7 +29,7 @@ from mantid import logger
 
 
 class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
-    temp_workspace_list = ['__sa', '__flux', '__run', '__md', '__data', '__norm',
+    temp_workspace_list = ['__run', '__md', '__data', '__norm',
                            '__bkg', '__bkg_md', '__bkg_data', '__bkg_norm',
                            '__normalizedData', '__normalizedBackground',
                            'PreprocessedDetectorsWS']
@@ -63,6 +63,8 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.copyProperties('LoadEventNexus', ['FilterByTofMin', 'FilterByTofMax'])
 
         # Vanadium SA and flux
+        self.declareProperty("ReuseSAFlux", True, "If True then if a previous SolidAngle and Flux has been loaded "
+                             "it will be reused otherwise it will be loaded.")
         self.declareProperty(FileProperty(name="SolidAngle",defaultValue="",action=FileAction.Load,
                                           extensions=[".nxs"]),
                              doc="An input workspace containing momentum integrated vanadium (a measure"
@@ -131,6 +133,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.setPropertyGroup("BackgroundScale","Background")
 
         # Vanadium
+        self.setPropertyGroup("ReuseSAFlux","Vanadium")
         self.setPropertyGroup("SolidAngle","Vanadium")
         self.setPropertyGroup("Flux","Vanadium")
         self.setPropertyGroup("MomentumMin","Vanadium")
@@ -170,8 +173,13 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         _masking = bool(self.getProperty("MaskFile").value)
         _outWS_name = self.getPropertyValue("OutputWorkspace")
 
-        LoadNexus(Filename=self.getProperty("SolidAngle").value, OutputWorkspace='__sa')
-        LoadNexus(Filename=self.getProperty("Flux").value, OutputWorkspace='__flux')
+        if self.getProperty("ReuseSAFlux").value and mtd.doesExist('__sa') and mtd.doesExist('__flux'):
+            logger.notice("Reusing previously loaded SolidAngle and Flux workspaces. "
+                          "Set ReuseSAFlux to False if new files are selected or you change the momentum range.")
+        else:
+            logger.notice("Loading SolidAngle and Flux from file")
+            LoadNexus(Filename=self.getProperty("SolidAngle").value, OutputWorkspace='__sa')
+            LoadNexus(Filename=self.getProperty("Flux").value, OutputWorkspace='__flux')
 
         if _masking:
             LoadMask(Instrument=mtd['__sa'].getInstrument().getName(),
