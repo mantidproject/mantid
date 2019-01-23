@@ -336,7 +336,7 @@ public:
     // Every leaf has 2 points in it
     generators.emplace_back(std::make_unique<CheckBasicSplitting>(2, lowerLeft, upperRight));
     // Every leaf has 2 points close to boundaries in it
-    generators.emplace_back(std::make_unique<CheckPreciseSplitting>(4, lowerLeft, upperRight, 0.0001));
+    generators.emplace_back(std::make_unique<CheckPreciseSplitting>(4, lowerLeft, upperRight, 0.000001));
 
     for(auto& gen: generators)
       TSM_ASSERT_EQUALS(gen->description().c_str(),
@@ -384,9 +384,9 @@ private:
     for(const auto& pt: points)
       mdEvents.emplace_back(.0f ,.0f , pt.data());
 
-    auto topNode = tb.distribute(mdEvents);
+    auto topNodeWithError = tb.distribute(mdEvents);
 
-    return compareTrees(res, topNode), true;
+    return compareTrees(res, topNodeWithError.root);
   }
 
 };
