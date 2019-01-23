@@ -347,7 +347,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertEqual(self.fit_browser.getFittingFunction()[:14], 'name=Gaussian,')
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.0, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
-        self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.07, 2)
+        self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
 
     def test_move_peak(self):
         yield self.start()
@@ -355,20 +355,21 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.drag_mouse(1.0, 4.2, 1.5, 4.2)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
-        self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.07, 2)
+        self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
         yield self.drag_mouse(1.5, 4.4, 1.2, 4.4)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
-        self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.07, 2)
+        self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
         yield self.drag_mouse(1.5, 4.05, 1.2, 4.05)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
-        self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.07, 2)
+        self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
 
     def test_change_peak_fwhm(self):
         yield self.start()
         self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
-        yield self.drag_mouse(1.035, 4.2, 1.5, 4.2)
+        w = self.fit_browser.getPeakFwhmOf('f0')
+        yield self.drag_mouse(1.0 + w / 2, 4.2, 1.5, 4.2)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.0, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 1.0, 1)
@@ -383,13 +384,15 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.tool.add_peak(1.5, 4.4)
         self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 4)
         yield self.drag_mouse(1.0, 4.295, 1.75, 4.45)
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakCentreOf('f0') > 1.7)
         yield self.drag_mouse(1.5, 4.395, 0.9, 4.12)
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakCentreOf('f1') < 1.0)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.75, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.35, 1)
-        self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.07, 2)
+        self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f1'), 0.9, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f1'), 4.12, 1)
-        self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f1'), 0.07, 2)
+        self.assertTrue(self.fit_browser.getPeakFwhmOf('f1') != 0.0)
 
     def test_update_peaks(self):
         yield self.start()
@@ -423,7 +426,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.0, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 4.2, 1)
-        self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.07, 2)
+        self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
 
     def test_select_peak_type_context_menu(self):
         yield self.start()
@@ -439,7 +442,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.25, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 4.4, 1)
-        self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.07, 2)
+        self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
         self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=Lorentzian'))
 
     def test_add_background_context_menu(self):
