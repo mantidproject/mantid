@@ -41,16 +41,16 @@ struct Morton96 {
   uint64_t lower;
   uint32_t upper;
 
-  Morton96(const uint128_t &cmpl);
+  explicit Morton96(const uint128_t &cmpl);
   template <typename IntT> Morton96(const IntT &smth_int);
   uint128_t to_uint128_t() const;
 
-  friend bool operator<(const Morton96 &a, const Morton96 &b);
-  friend bool operator>(const Morton96 &a, const Morton96 &b);
-  friend bool operator>=(const Morton96 &a, const Morton96 &b);
-  friend bool operator<=(const Morton96 &a, const Morton96 &b);
-  friend bool operator==(const Morton96 &a, const Morton96 &b);
-  friend bool operator!=(const Morton96 &a, const Morton96 &b);
+  bool operator<(const Morton96 &b) const;
+  bool operator>(const Morton96 &b) const;
+  bool operator>=(const Morton96 &b) const;
+  bool operator<=(const Morton96 &b) const;
+  bool operator==(const Morton96 &b) const;
+  bool operator!=(const Morton96 &b) const;
   friend uint128_t operator-(const Morton96 &a, const Morton96 &b);
   template <typename T> uint128_t operator+(const T &b) const;
   Morton96 operator+(const Morton96 &b) const;
@@ -81,37 +81,37 @@ inline uint128_t Morton96::to_uint128_t() const {
   return uni.smpl;
 }
 
-inline bool operator<(const Morton96 &a, const Morton96 &b) {
-  if (a.upper != b.upper)
-    return a.upper < b.upper;
+inline bool Morton96::operator<(const Morton96 &b) const {
+  if (upper != b.upper)
+    return upper < b.upper;
   else
-    return a.lower < b.lower;
+    return lower < b.lower;
 }
 
-inline bool operator>(const Morton96 &a, const Morton96 &b) {
-  if (a.upper != b.upper)
-    return a.upper > b.upper;
+inline bool Morton96::operator>(const Morton96 &b) const{
+  if (upper != b.upper)
+    return upper > b.upper;
   else
-    return a.lower > b.lower;
+    return lower > b.lower;
 }
 
-inline bool operator==(const Morton96 &a, const Morton96 &b) {
+inline bool Morton96::operator==(const Morton96 &b) const {
 
-  return a.lower == b.lower && a.upper == b.upper;
+  return lower == b.lower && upper == b.upper;
 }
 
-inline bool operator>=(const Morton96 &a, const Morton96 &b) {
-  return a > b || a == b;
+inline bool Morton96::operator>=(const Morton96 &b) const {
+  return *this > b || *this == b;
 }
 
-inline bool operator<=(const Morton96 &a, const Morton96 &b) {
+inline bool Morton96::operator<=(const Morton96 &b) const {
 
-  return a < b || a == b;
+  return *this < b || *this == b;
 }
 
-inline bool operator!=(const Morton96 &a, const Morton96 &b) {
+inline bool Morton96::operator!=(const Morton96 &b) const {
 
-  return a.lower != b.lower || a.upper != b.upper;
+  return lower != b.lower || upper != b.upper;
 }
 
 inline uint128_t operator-(const Morton96 &a, const Morton96 &b) {
