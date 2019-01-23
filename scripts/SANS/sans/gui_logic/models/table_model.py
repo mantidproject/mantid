@@ -188,7 +188,7 @@ class TableModel(object):
             self._table_entries[row].update_attribute('sample_thickness', rounded_file_thickness)
             self._table_entries[row].update_attribute('sample_height', rounded_file_height)
             self._table_entries[row].update_attribute('sample_width', rounded_file_width)
-            if self.table_entries[row].sample_shape_string == "":
+            if self._table_entries[row].sample_shape_string == "":
                 self._table_entries[row].update_attribute('sample_shape', file_information.get_shape())
             self._table_entries[row].file_finding = False
             self.reset_row_state(row)
