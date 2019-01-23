@@ -61,6 +61,12 @@ struct EventAccessor {};
 
 template <size_t nd> class DLLExport MDLeanEvent {
 public:
+  /**
+   * Additional index type defenitions
+   */
+  using IntT = typename IndexTypes<nd, coord_t>::IntType;
+  using MortonT = typename IndexTypes<nd, coord_t>::MortonType;
+
   template <class Accessor>
   /**
    * Internal structure to avoid the direct exposing of retrieve
@@ -76,14 +82,11 @@ public:
     retrieveIndex(MDLeanEvent<nd>& event, const MDSpaceBounds<nd>& space) {
       event.retrieveIndex(space);
     }
+    static typename std::enable_if<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value, MortonT>::type
+    getIndex(const MDLeanEvent<nd>& event) { return event.getIndex(); }
   };
   template <class Accessor>
   friend struct AccessFor;
-  /**
-   * Additional index type defenitions
-   */
-  using IntT = typename IndexTypes<nd, coord_t>::IntType;
-  using MortonT = typename IndexTypes<nd, coord_t>::MortonType;
 protected:
   /** The signal (aka weight) from the neutron event.
    * Will be exactly 1.0 unless modified at some point.
@@ -118,11 +121,14 @@ protected:
   void retrieveIndex(const MDSpaceBounds<nd>& space) {
     index = coordinatesToIndex(center, space);
   }
+
   void retrieveCoordinates(const MDSpaceBounds<nd>& space) {
     auto coords = indexToCoordinates(index, space);
     for(unsigned i = 0; i < nd; ++i)
       center[i] = coords[i];
   }
+
+  const MortonT getIndex() const { return index; }
 public:
   /* Will be keeping functions inline for (possible?) performance improvements
    */
@@ -227,8 +233,6 @@ public:
    * @return pointer to the fixed-size array.
    * */
   const coord_t *getCenter() const { return center; }
-
-  const MortonT getIndex() const { return index; }
 
   //---------------------------------------------------------------------------------------------
   /** Returns the array of coordinates, as a pointer to a non-const

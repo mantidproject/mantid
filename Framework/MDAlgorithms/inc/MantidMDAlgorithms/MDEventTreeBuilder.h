@@ -164,7 +164,7 @@ sortEvents(std::vector<MDEventType<ND>>& mdEvents) {
   tbb::task_scheduler_init init{m_numWorkers};
   tbb::parallel_sort(mdEvents.begin(), mdEvents.end(),
       [] (const MDEventType<ND>& a, const MDEventType<ND>& b) {
-    return a.getIndex() < b.getIndex();
+    return IndexCoordinateSwitcher::getIndex(a)< IndexCoordinateSwitcher::getIndex(b);
   });
 }
 
@@ -244,11 +244,11 @@ distributeEvents(Task& tsk, const WORKER_TYPE& wtp) {
 
     const auto boxEventStart = eventIt;
 
-    if (md_structure_ws::morton_contains<MortonT>(boxLower, boxUpper,eventIt->getIndex()))
+    if (md_structure_ws::morton_contains<MortonT>(boxLower, boxUpper,IndexCoordinateSwitcher::getIndex(*eventIt)))
       eventIt = std::upper_bound(boxEventStart, tsk.end, boxUpper,
                                  [](const MortonT& m,
                                     const typename std::iterator_traits<EventIterator>::value_type& event){
-                                   return m < event.getIndex();
+                                   return m < IndexCoordinateSwitcher::getIndex(event);
                                  });
 
     /* Add new child box. */
