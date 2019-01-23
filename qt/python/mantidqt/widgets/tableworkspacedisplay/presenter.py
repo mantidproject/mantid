@@ -15,10 +15,10 @@ from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
+from mantidqt.widgets.common.observing_presenter import ObservingPresenter
 from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
 from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
-from mantidqt.widgets.common.observing_presenter import ObservingPresenter
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
 from .model import TableWorkspaceDisplayModel
@@ -52,8 +52,10 @@ class TableWorkspaceDisplay(ObservingPresenter):
         :param model: Model to be used by the widget. Passed in as parameter to allow mocking
         :param view: View to be used by the widget. Passed in as parameter to allow mocking
         :param name: Custom name for the window
+        :param ads_observer: ADS observer to be used by the presenter. If not provided the default
+                             one is used. Mainly intended for testing.
         """
-        # Create model and view, or accept mocked versions
+
         self.model = model if model else TableWorkspaceDisplayModel(ws)
         self.name = self.model.get_name() if name is None else name
         self.view = view if view else TableWorkspaceDisplayView(self, parent, self.name)
@@ -61,10 +63,7 @@ class TableWorkspaceDisplay(ObservingPresenter):
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
 
-        if ads_observer:
-            self.ads_observer = ads_observer
-        else:
-            self.ads_observer = WorkspaceDisplayADSObserver(self)
+        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
 
         self.update_column_headers()
         self.load_data(self.view)

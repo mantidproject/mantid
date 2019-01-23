@@ -34,6 +34,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter):
         :param parent: Parent of the widget
         :param model: Model to be used by the widget. Passed in as parameter to allow mocking
         :param view: View to be used by the widget. Passed in as parameter to allow mocking
+        :param ads_observer: ADS observer to be used by the presenter. If not provided the default
+                             one is used. Mainly intended for testing.
         """
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
@@ -43,10 +45,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter):
 
         self.plot = plot
 
-        if ads_observer:
-            self.ads_observer = ads_observer
-        else:
-            self.ads_observer = WorkspaceDisplayADSObserver(self)
+        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
 
         self.setup_tables()
 
