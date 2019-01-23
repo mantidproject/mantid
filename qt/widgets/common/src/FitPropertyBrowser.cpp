@@ -3383,11 +3383,12 @@ QString FitPropertyBrowser::addFunction(const QString &fnName) {
 }
 
 PropertyHandler *FitPropertyBrowser::getPeakHandler(const QString &prefix) {
-  if (prefix.isEmpty()) throw std::runtime_error("Peak function prefix cannot be empty");
+  if (prefix.isEmpty())
+    throw std::runtime_error("Peak function prefix cannot be empty");
   auto const indexList = prefix.split(".");
   auto const n = indexList.size() - 1;
   auto handler = getHandler();
-  for(int i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     auto const index = indexList[i].mid(1).toInt();
     handler = handler->getHandler(index);
   }
@@ -3416,15 +3417,13 @@ double FitPropertyBrowser::getPeakHeightOf(const QString &prefix) {
   return handler->height();
 }
 
-void FitPropertyBrowser::setPeakFwhmOf(
-    const QString &prefix, double value) {
+void FitPropertyBrowser::setPeakFwhmOf(const QString &prefix, double value) {
   auto handler = getPeakHandler(prefix);
   handler->setFwhm(value);
   handler->updateParameters();
 }
 
-double FitPropertyBrowser::getPeakFwhmOf(
-    const QString &prefix) {
+double FitPropertyBrowser::getPeakFwhmOf(const QString &prefix) {
   auto handler = getPeakHandler(prefix);
   return handler->fwhm();
 }
@@ -3433,7 +3432,7 @@ QStringList FitPropertyBrowser::getPeakPrefixes() const {
   QStringList peaks;
   auto parentHandler = getHandler();
   auto nFunctions = parentHandler->cfun()->nFunctions();
-  for(size_t i = 0; i < nFunctions; ++i) {
+  for (size_t i = 0; i < nFunctions; ++i) {
     auto handler = parentHandler->getHandler(i);
     if (handler->pfun()) {
       peaks << handler->functionPrefix();
