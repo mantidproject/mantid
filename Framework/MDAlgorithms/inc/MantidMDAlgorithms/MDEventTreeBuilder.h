@@ -58,9 +58,13 @@ public:
                     const size_t& threshold,
                     const API::BoxController_sptr &bc,
                     const MDSpaceBounds<ND>& space);
-  BoxBase* distribute(std::vector<MDEventType<ND>> &mdEvents);
+  struct TreeWithIndexError{
+    BoxBase* root;
+    MDCoordinate<ND> err;
+  };
+  TreeWithIndexError distribute(std::vector<MDEventType<ND>> &mdEvents);
 private:
-  void retrieveIndex(std::vector<MDEventType<ND>>& mdEvents, const MDSpaceBounds<ND>& space);
+  MDCoordinate<ND> retrieveIndex(std::vector<MDEventType<ND>>& mdEvents, const MDSpaceBounds<ND>& space);
   void sortEvents(std::vector<MDEventType<ND>>& mdEvents);
   BoxBase* doDistributeEvents(std::vector<MDEventType<ND>>& mdEvents);
   void distributeEvents(Task& tsk, const WORKER_TYPE& wtp);
@@ -109,12 +113,14 @@ MDEventTreeBuilder(const int& numWorkers,
    * @param tsk :: top level task to start building the box structure
    */
 template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
-DataObjects::MDBoxBase<MDEventType<ND>, ND>*
+typename MDEventTreeBuilder<ND, MDEventType, EventIterator>::
+TreeWithIndexError
 MDEventTreeBuilder<ND, MDEventType, EventIterator>::
 distribute(std::vector<MDEvent> &mdEvents) {
-  retrieveIndex(mdEvents, m_space);
+  auto err = retrieveIndex(mdEvents, m_space);
   sortEvents(mdEvents);
-  return doDistributeEvents(mdEvents);
+  auto root = doDistributeEvents(mdEvents);
+  return {root, err};
 }
 
 template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
@@ -150,11 +156,24 @@ doDistributeEvents(std::vector<MDEventType<ND>>& mdEvents) {
 }
 
 template<size_t ND, template <size_t> class MDEventType, typename EventIterator>
-void MDEventTreeBuilder<ND, MDEventType, EventIterator>::
+MDCoordinate<ND> MDEventTreeBuilder<ND, MDEventType, EventIterator>::
 retrieveIndex(std::vector<MDEventType<ND>>& mdEvents, const MDSpaceBounds<ND>& space) {
+  std::vector<MDCoordinate<ND>> perThread(m_numWorkers, MDCoordinate<ND>(0));
 #pragma omp parallel for num_threads(m_numWorkers)
-  for(size_t i = 0; i < mdEvents.size(); ++i)
+  for(size_t i = 0; i < mdEvents.size(); ++i) {
+    MDCoordinate<ND> oldCoord{mdEvents[i].getCenter()};
     IndexCoordinateSwitcher::retrieveIndex(mdEvents[i], space);
+    MDCoordinate<ND> newCoord = MDEvent::indexToCoordinates(IndexCoordinateSwitcher::getIndex(mdEvents[i]), space);
+    newCoord -= oldCoord;
+    MDCoordinate<ND>& threadErr = perThread[omp_get_thread_num()];
+    for(size_t d = 0; d < ND; ++d)
+      threadErr[d] = std::max(threadErr[d], fabs(newCoord[d]));
+  }
+  MDCoordinate<ND> maxErr(0);
+  for(const auto& err: perThread)
+    for(size_t d = 0; d < ND; ++d)
+      maxErr[d] = std::max(maxErr[d], err[d]);
+  return maxErr;
 }
 
 

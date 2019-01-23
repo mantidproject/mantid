@@ -180,10 +180,10 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
   using EventDistributor = MDEventTreeBuilder<ND, MDEventType, typename std::vector<MDEventType<ND>>::iterator>;
   EventDistributor distributor(nThreads, mdEvents.size() / nThreads/ 10, bc, space);
 
-  auto root = distributor.distribute(mdEvents);
-  m_OutWSWrapper->pWorkspace()->setBox(root);
-  root->calculateGridCaches();
-
+  auto rootAndErr = distributor.distribute(mdEvents);
+  m_OutWSWrapper->pWorkspace()->setBox(rootAndErr.root);
+  rootAndErr.root->calculateGridCaches();
+  g_Log.information("Error with using Morton indexes is:\n" + toString(rootAndErr.err));
   pProgress->report(1);
 }
 
