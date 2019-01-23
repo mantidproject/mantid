@@ -145,6 +145,7 @@ Improvements
 - :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
 - :ref:`Functions <FitFunctionsInPython>` may now have their constraint penalties for fitting set in python using ``function.setConstraintPenaltyFactor("parameterName", double)``.
 - :py:obj:`mantid.kernel.Logger` now handles unicode in python2
+- :py:meth:`mantid.api.ITableWorkspace.columnTypes` now returns human readable strings for non-primitive column types.
 
 
 Bugfixes
