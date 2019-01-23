@@ -97,14 +97,14 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("ApplyCalibration", '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
-                             doc='Calibration will be applied using this TableWorkspace using ApplyCalibration.')
+                             doc='Calibration will be applied using this TableWorkspace using :ref:`ApplyCalibration <algm-ApplyCalibration>`.')
         self.declareProperty(FileProperty(name="DetCal",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".detcal"]),
                              "Load an ISAW DetCal calibration onto the data from a file. See :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`")
         self.declareProperty(MatrixWorkspaceProperty("CopyInstrumentParameters", '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
-                             doc='The input workpsace from which CopyInstrumentParameters will copy parameters to data')
+                             doc='The input workpsace from which :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` will copy parameters to data')
         self.declareProperty(FileProperty(name="MaskFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml",".msk"]),
                              "Masking file for masking. Supported file format is XML and ISIS ASCII. See :ref:`LoadMask <algm-LoadMask>`")
