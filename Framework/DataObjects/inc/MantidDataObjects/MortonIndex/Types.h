@@ -88,7 +88,7 @@ inline bool Morton96::operator<(const Morton96 &b) const {
     return lower < b.lower;
 }
 
-inline bool Morton96::operator>(const Morton96 &b) const{
+inline bool Morton96::operator>(const Morton96 &b) const {
   if (upper != b.upper)
     return upper > b.upper;
   else
