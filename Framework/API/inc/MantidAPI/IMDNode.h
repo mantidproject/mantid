@@ -10,10 +10,10 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace Mantid {
 namespace Kernel {
@@ -138,8 +138,8 @@ public:
                         Mantid::Geometry::MDImplicitFunction *function) = 0;
 
   /// Fill a vector with all the boxes who are satisfying the condition
-  virtual void getBoxes(std::vector<IMDNode *>& outBoxes, std::function<bool(IMDNode *)> cond) = 0;
-
+  virtual void getBoxes(std::vector<IMDNode *> &outBoxes,
+                        std::function<bool(IMDNode *)> cond) = 0;
 
   // -------------------------------- Events-Related
   // -------------------------------------------

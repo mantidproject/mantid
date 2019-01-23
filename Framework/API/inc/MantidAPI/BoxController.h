@@ -291,16 +291,15 @@ public:
     std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
     m_numMDGridBoxes[depth] = 0;
   }
-  void incGridBoxesCounter(size_t depth, size_t inc=1) {
+  void incGridBoxesCounter(size_t depth, size_t inc = 1) {
     std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
     m_numMDGridBoxes[depth] += inc;
   }
 
-  void incBoxesCounter(size_t depth, size_t inc=1) {
+  void incBoxesCounter(size_t depth, size_t inc = 1) {
     std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
     m_numMDBoxes[depth] += inc;
   }
-
 
   /** Call to track the number of MDBoxes are contained in the MDEventWorkspace
    * This should be called when a MDBox gets split into a MDGridBox.

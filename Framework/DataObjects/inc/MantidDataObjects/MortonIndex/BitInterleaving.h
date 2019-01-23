@@ -15,7 +15,6 @@
 
 #include "Types.h"
 
-
 /**
  * Pad an integer with a given number of padding bits.
  *
@@ -57,7 +56,7 @@ template <> inline uint32_t pad<1, uint16_t, uint32_t>(uint16_t v) {
   return x;
 }
 
-template <> inline  uint16_t compact<1, uint16_t, uint32_t>(uint32_t x) {
+template <> inline uint16_t compact<1, uint16_t, uint32_t>(uint32_t x) {
   x &= 0x55555555;
   x = (x | x >> 1) & 0x33333333;
   x = (x | x >> 2) & 0xf0f0f0f;
@@ -334,12 +333,11 @@ IntArray<ND, IntT> deinterleave(const MortonT z) {
 }
 
 template <size_t ND, typename IntT>
-IntArray<ND, IntT> deinterleave(const Morton96& z) {
-  return deinterleave<ND, IntT, uint128_t >(z.to_uint128_t());
+IntArray<ND, IntT> deinterleave(const Morton96 &z) {
+  return deinterleave<ND, IntT, uint128_t>(z.to_uint128_t());
 }
 
-template <size_t ND, typename IntT, typename MortonT>
-struct Interleaver {
+template <size_t ND, typename IntT, typename MortonT> struct Interleaver {
   static MortonT interleave(const IntArray<ND, IntT> &coord) {
     return ::interleave<ND, IntT, MortonT>(coord);
   }
@@ -349,8 +347,7 @@ struct Interleaver {
   }
 };
 
-template <size_t ND, typename IntT>
-struct Interleaver<ND, IntT, Morton96> {
+template <size_t ND, typename IntT> struct Interleaver<ND, IntT, Morton96> {
   static Morton96 interleave(const IntArray<ND, IntT> &coord) {
     return ::interleave<ND, IntT>(coord);
   }
@@ -360,6 +357,4 @@ struct Interleaver<ND, IntT, Morton96> {
   }
 };
 
-
-
-#endif //MANTID_DATAOBJECTS_MORTONINDEX_BITINTERLEAVING_H_
+#endif // MANTID_DATAOBJECTS_MORTONINDEX_BITINTERLEAVING_H_

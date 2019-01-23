@@ -29,7 +29,8 @@ initiated)
 *@returns shared pointer to new solver, which corresponds to the workspace
 */
 
-ConvToMDSelector::ConvToMDSelector(ConvToMDSelector::ConverterType tp) : converterType(tp) {}
+ConvToMDSelector::ConvToMDSelector(ConvToMDSelector::ConverterType tp)
+    : converterType(tp) {}
 
 boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     API::MatrixWorkspace_sptr inputWS,
@@ -64,14 +65,14 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     switch (inputWSType) {
     case (EventWS):
       // check if user set a property to use indexing
-      if(converterType == ConvToMDSelector::DEFAULT)
+      if (converterType == ConvToMDSelector::DEFAULT)
         res = boost::make_shared<ConvToMDEventsWS>();
       else
         res = boost::make_shared<ConvToMDEventsWSIndexing>();
       break;
     case (Matrix2DWS):
-       res = boost::make_shared<ConvToMDHistoWS>();
-       break;
+      res = boost::make_shared<ConvToMDHistoWS>();
+      break;
     default:
       throw(std::logic_error("ConvToDataObjectsSelector: requested converter "
                              "for unknown ws type"));

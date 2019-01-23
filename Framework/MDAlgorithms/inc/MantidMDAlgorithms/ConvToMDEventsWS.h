@@ -9,16 +9,16 @@
 //
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 
-#include <vector>
 #include <tbb/parallel_sort.h>
+#include <vector>
 
 #include <chrono>
 
@@ -50,6 +50,7 @@ public:
 
 protected:
   DataObjects::EventWorkspace_const_sptr m_EventWS;
+
 private:
   // function runs the conversion on
   size_t conversionChunk(size_t workspaceIndex) override;
@@ -59,7 +60,8 @@ private:
    * events to the workspace itself    */
   template <class T> size_t convertEventList(size_t workspaceIndex);
 
-  virtual void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
+  virtual void appendEventsFromInputWS(API::Progress *pProgress,
+                                       const API::BoxController_sptr &bc);
 };
 
 } // namespace MDAlgorithms

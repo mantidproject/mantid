@@ -66,10 +66,11 @@ public:
         const size_t boxID = UNDEF_SIZET);
 
   using EventIterator = typename std::vector<MDE>::const_iterator;
-//  template <typename EventIterator>
+  //  template <typename EventIterator>
   MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,
-  const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-      &extentsVector, EventIterator begin, EventIterator end);
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+            &extentsVector,
+        EventIterator begin, EventIterator end);
 
   MDBox(const MDBox<MDE, nd> &other, Mantid::API::BoxController *const otherBC);
 
@@ -210,7 +211,8 @@ public:
                 bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function) override;
 
-  void getBoxes(std::vector<API::IMDNode *>& outBoxes, std::function<bool(API::IMDNode *)> cond) final override;
+  void getBoxes(std::vector<API::IMDNode *> &outBoxes,
+                std::function<bool(API::IMDNode *)> cond) final override;
   //------------------------------------------------------------------------------------------------------------------------------------
   void transformDimensions(std::vector<double> &scaling,
                            std::vector<double> &offset) override;

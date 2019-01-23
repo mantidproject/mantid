@@ -120,9 +120,11 @@ void ConvertToMD::init() {
                   "demand in order to reduce memory use.");
 
   std::vector<std::string> converterType{"default", "indexed"};
-  auto loadTypeValidator = boost::make_shared<StringListValidator>(converterType);
+  auto loadTypeValidator =
+      boost::make_shared<StringListValidator>(converterType);
   declareProperty("ConverterType", "default", loadTypeValidator,
-                  "[default, indexed], indexed is the experimental type that can speedup the conversion process"
+                  "[default, indexed], indexed is the experimental type that "
+                  "can speedup the conversion process"
                   "for the big files using the indexing.");
 }
 //----------------------------------------------------------------------------------------------
@@ -144,14 +146,15 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     result["Filename"] = "Filename must be given if FileBackEnd is required.";
   }
 
-  if(treeBuilderType.find("indexed") != std::string::npos) {
+  if (treeBuilderType.find("indexed") != std::string::npos) {
     if (fileBackEnd)
       result["ConverterType"] += "No file back end implemented "
                                  "for indexed version of algorithm. ";
 
     if (topLevelSplittingChecked)
-      result["ConverterType"] += "The usage of top level splitting is "
-                                 "not possible for indexed version of algorithm. ";
+      result["ConverterType"] +=
+          "The usage of top level splitting is "
+          "not possible for indexed version of algorithm. ";
 
     bool validSplitInfo = !split_into.empty();
     if (validSplitInfo) {
@@ -162,9 +165,10 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
                                       [&n](int i) { return i == n; });
     }
     if (!validSplitInfo)
-      result["ConverterType"] += "The split parameter should be the same for"
-                                 " all dimensions and be equal the power of 2 for"
-                                 " indexed version of algorithm. ";
+      result["ConverterType"] +=
+          "The split parameter should be the same for"
+          " all dimensions and be equal the power of 2 for"
+          " indexed version of algorithm. ";
   }
 
   std::vector<double> minVals = this->getProperty("MinValues");
@@ -283,7 +287,9 @@ void ConvertToMD::exec() {
   // factory, (will throw if logic is wrong and ChildAlgorithm is not found
   // among existing)
   ConvToMDSelector::ConverterType convType =
-      getPropertyValue("ConverterType") == "indexed" ? ConvToMDSelector::INDEXED : ConvToMDSelector::DEFAULT;
+      getPropertyValue("ConverterType") == "indexed"
+          ? ConvToMDSelector::INDEXED
+          : ConvToMDSelector::DEFAULT;
   ConvToMDSelector AlgoSelector(convType);
   this->m_Convertor = AlgoSelector.convSelector(m_InWS2D, this->m_Convertor);
 

@@ -406,9 +406,9 @@ void MDBoxBase<MDE, nd>::calcCaches(EventIterator begin, EventIterator end) {
   m_signal = 0;
   m_errorSquared = 0;
   m_totalWeight = 0;
-  coord_t* centroid = m_centroid;
+  coord_t *centroid = m_centroid;
   std::fill_n(centroid, nd, 0.0f);
-  for(auto it = begin; it != end; ++it) {
+  for (auto it = begin; it != end; ++it) {
     auto evSignal = it->getSignal();
     m_signal += evSignal;
     m_errorSquared += it->getErrorSquared();
@@ -426,7 +426,6 @@ void MDBoxBase<MDE, nd>::calcCaches(EventIterator begin, EventIterator end) {
     centroid[d] *= reciprocal;
   }
 }
-
 
 } // namespace DataObjects
 } // namespace Mantid

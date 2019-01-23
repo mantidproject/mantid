@@ -139,7 +139,8 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
 }
 
-void ConvToMDEventsWS::appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+void ConvToMDEventsWS::appendEventsFromInputWS(
+    API::Progress *pProgress, const API::BoxController_sptr &bc) {
   // Is the access to input events thread-safe?
   // bool MultiThreadedAdding = m_EventWS->threadSafe();
   // preprocessed detectors insure that each detector has its own spectra
