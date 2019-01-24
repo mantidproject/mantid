@@ -190,16 +190,17 @@ public:
     TS_ASSERT_EQUALS(node->nodeName(), "detids")
     TS_ASSERT_EQUALS(node->innerText(), "4")
     node = nodeIter.nextNode();
+    in.close();
     TS_ASSERT(!node)
     if (xmlExists) {
       xmlFile.remove();
     }
+    // Just in case something went wrong.
     Poco::File parFile{parFilename(xmlFilename)};
     if (parFile.exists()) {
-      // Just in case something went wrong.
       parFile.remove();
-    }
-  }
+     }
+   }
 
 private:
   struct ShowDetIDsOnly : Poco::XML::NodeFilter {
@@ -213,10 +214,9 @@ private:
   };
 
   MatrixWorkspace_sptr m_emptyInstrument;
-  std::string parFilename(const std::string &xmlFilename) {
-    std::string parFile = xmlFilename;
-    parFile.replace(parFile.end() - 3, parFile.end(), "par");
-    return parFile;
+  static std::string parFilename(std::string filename) {
+    filename.replace(filename.end() - 3, filename.end(), "par");
+    return filename;
   }
 };
 
