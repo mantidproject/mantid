@@ -75,12 +75,10 @@ private:
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
                               const double defaultValue);
-  void setOutputWorkspaces(std::vector<std::string> &IvsLamGroup,
-                           std::string const &outputIvsLam,
+  void setOutputWorkspaces(WorkspaceNames const &outputGroupNames,
+                           std::vector<std::string> &IvsLamGroup,
                            std::vector<std::string> &IvsQBinnedGroup,
-                           std::string const &outputIvsQBinned,
-                           std::vector<std::string> &IvsQGroup,
-                           std::string const &outputIvsQ);
+                           std::vector<std::string> &IvsQGroup);
 };
 
 } // namespace Algorithms

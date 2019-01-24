@@ -191,20 +191,18 @@ std::string ReflectometryReductionOneAuto2::getRunNumberForWorkspaceGroup(
 }
 
 // Get output workspace names from the user-specified properties, or default
-// names
-// if the properties were not specified
+// names if the properties were not specified
 auto ReflectometryReductionOneAuto2::getOutputWorkspaceNames()
     -> WorkspaceNames {
   WorkspaceNames result;
   MatrixWorkspace_const_sptr matrixWs = getProperty("InputWorkspace");
 
   std::string runNumber;
-  if (matrixWs)
+  if (matrixWs) {
     runNumber = getRunNumber(*matrixWs);
-  else {
+  } else {
     // Casting to WorkspaceGroup doesn't work - I think because InputWorkspace
-    // is
-    // declared as a MatrixWorkspace - so get it from the ADS instead
+    // is declared as a MatrixWorkspace - so get it from the ADS instead
     auto groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
         getPropertyValue("InputWorkspace"));
     runNumber = getRunNumberForWorkspaceGroup(groupWs);
@@ -762,29 +760,29 @@ bool ReflectometryReductionOneAuto2::checkGroups() {
 }
 
 void ReflectometryReductionOneAuto2::setOutputWorkspaces(
-    std::vector<std::string> &IvsLamGroup, std::string const &outputIvsLam,
+    WorkspaceNames const &outputGroupNames,
+    std::vector<std::string> &IvsLamGroup,
     std::vector<std::string> &IvsQBinnedGroup,
-    std::string const &outputIvsQBinned, std::vector<std::string> &IvsQGroup,
-    std::string const &outputIvsQ) {
+    std::vector<std::string> &IvsQGroup) {
   // Group the IvsQ and IvsLam workspaces
   Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
   groupAlg->setChild(false);
   groupAlg->setRethrows(true);
   if (!IvsLamGroup.empty()) {
     groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
-    groupAlg->setProperty("OutputWorkspace", outputIvsLam);
+    groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsLam);
     groupAlg->execute();
   }
   groupAlg->setProperty("InputWorkspaces", IvsQBinnedGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
+  groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsQBinned);
   groupAlg->execute();
   groupAlg->setProperty("InputWorkspaces", IvsQGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsQ);
+  groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsQ);
   groupAlg->execute();
 
-  setPropertyValue("OutputWorkspace", outputIvsQ);
-  setPropertyValue("OutputWorkspaceBinned", outputIvsQBinned);
-  setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
+  setPropertyValue("OutputWorkspace", outputGroupNames.iVsQ);
+  setPropertyValue("OutputWorkspaceBinned", outputGroupNames.iVsQBinned);
+  setPropertyValue("OutputWorkspaceWavelength", outputGroupNames.iVsLam);
 }
 
 /** Process groups. Groups are processed differently depending on transmission
@@ -915,8 +913,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
                    alg->getPropertyValue("MomentumTransferStep"));
   setPropertyValue("ScaleFactor", alg->getPropertyValue("ScaleFactor"));
 
-  setOutputWorkspaces(IvsLamGroup, output.iVsLam, IvsQBinnedGroup,
-                      output.iVsQBinned, IvsQGroup, output.iVsQ);
+  setOutputWorkspaces(output, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
 
   if (!polarizationAnalysisOn) {
     // No polarization analysis. Reduction stops here
@@ -961,8 +958,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     }
   }
 
-  setOutputWorkspaces(IvsLamGroup, output.iVsLam, IvsQBinnedGroup,
-                      output.iVsQBinned, IvsQGroup, output.iVsQ);
+  setOutputWorkspaces(output, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
 
   return true;
 }
