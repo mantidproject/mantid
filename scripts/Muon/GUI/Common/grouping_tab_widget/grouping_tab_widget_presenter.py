@@ -65,8 +65,9 @@ class GroupingTabPresenter(object):
             instrument, n_detectors, main_field)
         return text
 
-    def update_description_text(self):
-        description_text = self.text_for_description()
+    def update_description_text(self, description_text=''):
+        if not description_text:
+            description_text = self.text_for_description()
         self._view.set_description_text(description_text)
 
     def add_pair_from_grouping_table(self, group_name1, group_name2):
@@ -100,7 +101,7 @@ class GroupingTabPresenter(object):
         file_filter = file_utils.filter_for_extensions(["xml"])
         filename = self._view.show_file_browser_and_return_selection(file_filter, [""])
 
-        groups, pairs = xml_utils.load_grouping_from_XML(filename)
+        groups, pairs, description = xml_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
         for group in groups:
@@ -110,7 +111,7 @@ class GroupingTabPresenter(object):
 
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
-        self.update_description_text()
+        self.update_description_text(description)
 
         self.groupingNotifier.notify_subscribers()
 
@@ -164,7 +165,7 @@ class GroupingTabPresenter(object):
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename)
+            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename, description=self._view.get_description_text())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

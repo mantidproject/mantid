@@ -1,7 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
+from Muon.GUI.Common.message_box import warning, question
 
+import os
 
 class GroupingTabView(QtGui.QWidget):
 
@@ -84,7 +86,7 @@ class GroupingTabView(QtGui.QWidget):
 
         self.description_edit = QtGui.QLineEdit(self)
         self.description_edit.setText("")
-        self.description_edit.setReadOnly(True)
+        self.description_edit.setReadOnly(False)
         self.description_edit.setToolTip("Description of the data : Instrument, number of detectors "
                                          "and main field direction.")
         self.description_edit.setObjectName("descriptionEdit")
@@ -115,6 +117,9 @@ class GroupingTabView(QtGui.QWidget):
     def set_description_text(self, text):
         self.description_edit.setText(text)
 
+    def get_description_text(self):
+        return self.description_edit.text()
+
     def show_file_browser_and_return_selection(self, file_filter, search_directories):
         default_directory = search_directories[0]
         chosen_file = QtGui.QFileDialog.getOpenFileName(self, "Select file", default_directory,
@@ -122,8 +127,22 @@ class GroupingTabView(QtGui.QWidget):
         return str(chosen_file)
 
     def show_file_save_browser_and_return_selection(self):
-        chosen_file = QtGui.QFileDialog.getSaveFileName(self, "Select file")
-        return str(chosen_file)
+        chosen_file = str(QtGui.QFileDialog.getSaveFileName(self, "Select file", '', 'XML files (*.xml)'))
+        if chosen_file == '':
+            return chosen_file
+
+        path_extension = os.path.splitext(chosen_file)
+
+        if path_extension[1] == '.xml':
+            return chosen_file
+        else:
+            updated_file = path_extension[0] + '.xml'
+            if os.path.isfile(updated_file):
+                if question('File {} already exists do you want to overwrite it?'.format(updated_file), parent=self):
+                    return path_extension[0] + '.xml'
+                else:
+                    return ''
+            return path_extension[0] + '.xml'
 
     # ------------------------------------------------------------------------------------------------------------------
     # Signal / slot connections

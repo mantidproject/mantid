@@ -40,7 +40,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = instrument_directory + grouping_file
-    new_groups, new_pairs = xml_utils.load_grouping_from_XML(filename)
+    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
     return new_groups, new_pairs
 
 
