@@ -11,62 +11,67 @@ import sys
 
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
-
-from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
-from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
-from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
+from mantid.kernel import ConfigServiceImpl
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 from save_python import getWidgetIfOpen
+from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
+import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+
 
 Name = "Muon_Analysis_2"
 
+
 muonGUI = None
+SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
 
-class MuonAnalysis2Gui(QtGui.QMainWindow):
+def check_facility():
+    """
+    Get the currently set facility and check if it is in the list
+    of supported facilities, raising an AttributeError if not.
+    """
+    current_facility = ConfigServiceImpl.Instance().getFacility().name()
+    if current_facility not in SUPPORTED_FACILITIES:
+        raise AttributeError("Your facility {} is not supported by MuonAnalysis 2.0, so you"
+                             "will not be able to load any files. \n \n"
+                             "Supported facilities are :"
+                             + "\n - ".join(SUPPORTED_FACILITIES))
+
+
+class MuonAnalysisGui(QtGui.QMainWindow):
+    """
+    The Muon Analaysis 2.0 interface.
+    """
+
+    @staticmethod
+    def warning_popup(message):
+        message_box.warning(str(message))
 
     def __init__(self, parent=None):
-        super(MuonAnalysis2Gui, self).__init__(parent)
+        super(MuonAnalysisGui, self).__init__(parent)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
-        self._context = MuonContext(Name)
+        try:
+            check_facility()
+        except AttributeError as error:
+            self.warning_popup(error.args[0])
 
-        self.loadWidget = DummyLabelWidget(self._context, LoadText, self)
-        self.dockWidget = DockWidget(self._context, self)
+        # initialise the data storing classes of the interface
+        self.loaded_data = MuonLoadData()
+        self.context = MuonDataContext(load_data=self.loaded_data)
 
-        self.helpWidget = DummyLabelWidget(self._context, HelpText, self)
+        # construct all the widgets.
+        self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(self.loadWidget.widget)
-        splitter.addWidget(self.dockWidget.widget)
-        splitter.addWidget(self.helpWidget.widget)
+        splitter.addWidget(self.load_widget.load_widget_view)
 
         self.setCentralWidget(splitter)
-        self.setWindowTitle(Name)
+        self.setWindowTitle("Muon Analysis version 2")
 
-        self.dockWidget.setUpdateContext(self.update)
-
-    def saveToProject(self):
-        return self._context.save()
-
-    def update(self):
-        # update load
-        self.loadWidget.updateContext()
-        self.dockWidget.updateContext()
-        self.helpWidget.updateContext()
-
-        self.dockWidget.loadFromContext()
-
-    def loadFromContext(self, project):
-        self._context.loadFromProject(project)
-        self.loadWidget.loadFromContext()
-        self.dockWidget.loadFromContext()
-        self.helpWidget.loadFromContext()
-
-    # cancel algs if window is closed
     def closeEvent(self, event):
-        self.dockWidget.closeEvent(event)
-        global muonGUI
-        muonGUI.deleteLater()
-        muonGUI = None
+        self.load_widget = None
 
 
 def qapp():
@@ -85,11 +90,10 @@ def main():
         return widget
     app = qapp()
     try:
-        muon = MuonAnalysis2Gui()
+        global muon
+        muon = MuonAnalysisGui()
         muon.resize(700, 700)
-        muon.setProperty("launcher", Name)
         muon.show()
-        muon.setAccessibleName(Name)
         app.exec_()
         return muon
     except RuntimeError as error:
@@ -110,8 +114,10 @@ def saveToProject():
 def loadFromProject(project):
     global muonGUI
     muonGUI = main()
+    muonGUI.dock_widget.loadFromProject(project)
     muonGUI.loadFromContext(project)
     return muonGUI
+
 
 if __name__ == '__main__':
     muon = main()

@@ -12,33 +12,37 @@ for presenting and generating the reduction settings.
 
 from __future__ import (absolute_import, division, print_function)
 
-import os
 import copy
+import csv
+import os
+import sys
 import time
-from mantid.kernel import Logger, ConfigService
-from mantid.api import (FileFinder)
+import traceback
 
-from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
-from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
-from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
-from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
-from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument)
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
-from sans.user_file.user_file_reader import UserFileReader
+from mantid.api import (FileFinder)
+from mantid.kernel import Logger, ConfigService
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
+from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
+                                       add_dir_to_datasearch, remove_dir_from_datasearch)
+from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
-from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
-from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
-from ui.sans_isis.work_handler import WorkHandler
-from ui.sans_isis import SANSSaveOtherWindow
+from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
+from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
+from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
+from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
+from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
+from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
+from sans.sans_batch import SANSCentreFinder
+from sans.user_file.user_file_reader import UserFileReader
+from ui.sans_isis import SANSSaveOtherWindow
+from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
+from ui.sans_isis.work_handler import WorkHandler
 
 try:
     import mantidplot
@@ -92,6 +96,9 @@ class RunTabPresenter(object):
 
         def on_load_clicked(self):
             self._presenter.on_load_clicked()
+
+        def on_export_table_clicked(self):
+            self._presenter.on_export_table_clicked()
 
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
@@ -282,6 +289,7 @@ class RunTabPresenter(object):
         """
         Loads the user file. Populates the models and the view.
         """
+        error_msg = "Loading of the user file failed"
         try:
             # 1. Get the user file path from the view
             user_file_path = self._view.get_user_file_path()
@@ -294,31 +302,44 @@ class RunTabPresenter(object):
                 raise RuntimeError(
                     "The user path {} does not exist. Make sure a valid user file path"
                     " has been specified.".format(user_file_path))
-            self._table_model.user_file = user_file_path
-            # Clear out the current view
-            self._view.reset_all_fields_to_default()
+        except RuntimeError as path_error:
+            self.display_errors(path_error, error_msg + " when finding file.")
+        else:
+            try:
+                self._table_model.user_file = user_file_path
+                # Clear out the current view
+                self._view.reset_all_fields_to_default()
 
-            # 3. Read and parse the user file
-            user_file_reader = UserFileReader(user_file_path)
-            user_file_items = user_file_reader.read_user_file()
+                # 3. Read and parse the user file
+                user_file_reader = UserFileReader(user_file_path)
+                user_file_items = user_file_reader.read_user_file()
+            except (RuntimeError, ValueError) as e:
+                self.display_errors(e, error_msg + " when reading file.", use_error_name=True)
+            else:
+                try:
+                    # 4. Populate the model
+                    self._state_model = StateGuiModel(user_file_items)
+                    # 5. Update the views.
+                    self._update_view_from_state_model()
+                    self._beam_centre_presenter.update_centre_positions(self._state_model)
 
-            # 4. Populate the model
-            self._state_model = StateGuiModel(user_file_items)
-            # 5. Update the views.
-            self._update_view_from_state_model()
-            self._beam_centre_presenter.update_centre_positions(self._state_model)
+                    self._beam_centre_presenter.on_update_rows()
+                    self._masking_table_presenter.on_update_rows()
+                    self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
-            self._beam_centre_presenter.on_update_rows()
-            self._masking_table_presenter.on_update_rows()
-            self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
+                    # 6. Warning if user file did not contain a recognised instrument
+                    if self._view.instrument == SANSInstrument.NoInstrument:
+                        raise RuntimeError("User file did not contain a SANS Instrument.")
 
-            # 6. Warning if user file did not contain a recognised instrument
-            if self._view.instrument == SANSInstrument.NoInstrument:
-                raise RuntimeError("User file did not contain a SANS Instrument.")
-
-        except Exception as e:
-            self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
-            self.display_warning_box('Warning', 'Loading of the user file failed.', str(e))
+                except RuntimeError as instrument_e:
+                    # Only catch the error we know about
+                    # If a new exception is caused, we can now see the stack trace
+                    self.display_errors(instrument_e, error_msg + " when reading instrument.")
+                except Exception as other_error:
+                    # If we don't catch all exceptions, SANS can fail to open if last loaded
+                    # user file contains an error
+                    traceback.print_exc()
+                    self.display_errors(other_error, "Unknown error in loading user file.", use_error_name=True)
 
     def on_batch_file_load(self):
         """
@@ -330,6 +351,10 @@ class RunTabPresenter(object):
 
             if not batch_file_path:
                 return
+
+            datasearch_dirs = ConfigService["datasearch.directories"]
+            batch_file_directory, datasearch_dirs = add_dir_to_datasearch(batch_file_path, datasearch_dirs)
+            ConfigService["datasearch.directories"] = datasearch_dirs
 
             if not os.path.exists(batch_file_path):
                 raise RuntimeError(
@@ -348,6 +373,10 @@ class RunTabPresenter(object):
                 self._add_row_to_table_model(row, index)
             self._table_model.remove_table_entries([len(parsed_rows)])
         except RuntimeError as e:
+            if batch_file_directory:
+                # Remove added directory from datasearch.directories
+                ConfigService["datasearch.directories"] = remove_dir_from_datasearch(batch_file_directory, datasearch_dirs)
+
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
@@ -544,14 +573,69 @@ class RunTabPresenter(object):
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box("Warning", "Process halted", str(e))
 
+    def on_export_table_clicked(self):
+        non_empty_rows = self.get_row_indices()
+        if len(non_empty_rows) == 0:
+            self.sans_logger.notice("Cannot export table as it is empty.")
+            return
+
+        # Python 2 and 3 take input in different modes for writing lists to csv files
+        if sys.version_info[0] == 2:
+            open_type = 'wb'
+        else:
+            open_type = 'w'
+
+        try:
+            self._view.disable_buttons()
+
+            default_filename = self._table_model.batch_file
+            filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
+
+            if filename:
+                self.sans_logger.notice("Starting export of table.")
+                if filename[-4:] != '.csv':
+                    filename += '.csv'
+
+                with open(filename, open_type) as outfile:
+                    # Pass filewriting object rather than filename to make testing easier
+                    writer = csv.writer(outfile)
+                    self._export_table(writer, non_empty_rows)
+                    self.sans_logger.notice("Table exporting finished.")
+
+            self._view.enable_buttons()
+        except Exception as e:
+            self._view.enable_buttons()
+            self.sans_logger.error("Export halted due to : {}".format(str(e)))
+            self.display_warning_box("Warning", "Export halted", str(e))
+
     def on_multiperiod_changed(self, show_periods):
         if show_periods:
             self._view.show_period_columns()
         else:
             self._view.hide_period_columns()
 
+    def display_errors(self, error, context_msg, use_error_name=False):
+        """
+        Code for alerting the user to a caught error
+        :param error: a caught exception
+        :param context_msg: string. Text to explain what SANS was trying to do
+                            when the error occurred. e.g. 'Loading of the user file failed'.
+        :param use_error_name: bool. If True, append type of error (e.g. RuntimeError) to context_msg
+        :return:
+        """
+        logger_msg = context_msg
+        if use_error_name:
+            logger_msg += " {}:".format(type(error).__name__)
+        logger_msg += " {}"
+        self.sans_logger.error(logger_msg.format(str(error)))
+        self.display_warning_box('Warning', context_msg, str(error))
+
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
+
+    def display_save_file_box(self, title, default_path, file_filter):
+        filename = self._view.display_save_file_box(title, default_path, file_filter)
+        return filename
 
     def notify_progress(self, row, out_shift_factors, out_scale_factors):
         self.increment_progress()
@@ -1122,6 +1206,40 @@ class RunTabPresenter(object):
 
     def get_cell_value(self, row, column):
         return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
+
+    def _export_table(self, filewriter, rows):
+        """
+        Take the current table model, and create a comma delimited csv file
+        :param filewriter: File object to be written to
+        :param rows: list of indices for non-empty rows
+        :return: Nothing
+        """
+        for row in rows:
+                table_row = self._table_model.get_table_entry(row).to_batch_list()
+                batch_file_row = self._create_batch_entry_from_row(table_row)
+                filewriter.writerow(batch_file_row)
+
+    @staticmethod
+    def _create_batch_entry_from_row(row):
+        batch_file_keywords = ["sample_sans",
+                               "output_as",
+                               "sample_trans",
+                               "sample_direct_beam",
+                               "can_sans",
+                               "can_trans",
+                               "can_direct_beam",
+                               "user_file"]
+
+        loop_range = min(len(row), len(batch_file_keywords))
+        new_row = [''] * (2 * loop_range)
+
+        for i in range(loop_range):
+            key = batch_file_keywords[i]
+            value = row[i]
+            new_row[2*i] = key
+            new_row[2*i + 1] = value
+
+        return new_row
 
     # ------------------------------------------------------------------------------------------------------------------
     # Settings

@@ -52,7 +52,18 @@ public:
   template <typename T, typename U> void add(const U &arg) {
     this->add(boost::make_shared<T>(arg));
   }
-  std::list<IValidator_sptr> getChildren() const { return m_children; };
+  /// Returns true if the child list contains a validator of the specified
+  /// template type
+  template <typename T> bool contains() {
+    for (const auto &validator : m_children) {
+      // avoid boost::dynamic_pointer cast to avoid constructing
+      // a temporary shared_ptr type
+      if (dynamic_cast<T *>(validator.get())) {
+        return true;
+      }
+    }
+    return false;
+  }
 
 private:
   /// Verify the value with the child validators

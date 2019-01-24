@@ -55,6 +55,7 @@ set ( UI_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog
 include_directories ( inc inc/MantidQtWidgets/Plugins/AlgorithmDialogs )
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
+  QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
@@ -70,6 +71,31 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
     ${OPENGL_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtOpenGL
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+  OSX_INSTALL_RPATH
+    @loader_path/../../Contents/MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../../${LIB_DIR}"
+  INSTALL_DIR_BASE
+    ${PLUGINS_DIR}
+)
+
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
+  QT_VERSION 5
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  PRECOMPILED
+    inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${QT_LIBRARIES}
+    ${OPENGL_LIBRARIES}
   QT5_LINK_LIBS
     Qt5::OpenGL
   MTD_QT_LINK_LIBS
@@ -79,5 +105,5 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
   LINUX_INSTALL_RPATH
     "\$ORIGIN/../../${LIB_DIR}"
   INSTALL_DIR_BASE
-    ${PLUGINS_DIR}
+    ${WORKBENCH_PLUGINS_DIR}
 )

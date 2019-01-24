@@ -196,13 +196,10 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
     m_jumpModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex);
 }
 
-void JumpFitDataPresenter::dialogExecuted(IAddWorkspaceDialog const *dialog,
-                                          QDialog::DialogCode result) {
-  if (result == QDialog::Rejected &&
-      m_jumpModel->numberOfWorkspaces() > m_dataIndex)
+void JumpFitDataPresenter::closeDialog() {
+  if (m_jumpModel->numberOfWorkspaces() > m_dataIndex)
     m_jumpModel->removeWorkspace(m_dataIndex);
-  else
-    IndirectFitDataPresenter::dialogExecuted(dialog, result);
+  IndirectFitDataPresenter::closeDialog();
 }
 
 std::unique_ptr<IAddWorkspaceDialog>

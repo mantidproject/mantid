@@ -10,7 +10,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
@@ -18,8 +17,10 @@
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -37,6 +38,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Geometry;
 using Types::Core::DateAndTime;
 
@@ -543,10 +545,12 @@ void FilterEvents::groupOutputWorkspace() {
   }
 
   // set the group workspace as output workspace
-  declareProperty(
-      make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "OutputWorkspace", groupname, Direction::Output),
-      "Name of the workspace to be created as the output of grouping ");
+  if (!this->existsProperty("OutputWorkspace")) {
+    declareProperty(
+        make_unique<WorkspaceProperty<WorkspaceGroup>>(
+            "OutputWorkspace", groupname, Direction::Output),
+        "Name of the workspace to be created as the output of grouping ");
+  }
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   API::WorkspaceGroup_sptr workspace_group =
@@ -1169,11 +1173,13 @@ void FilterEvents::createOutputWorkspaces() {
 
       // create these output properties
       if (!this->m_toGroupWS) {
-        declareProperty(
-            Kernel::make_unique<
-                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                propertynamess.str(), wsname.str(), Direction::Output),
-            "Output");
+        if (!this->existsProperty(propertynamess.str())) {
+          declareProperty(
+              Kernel::make_unique<
+                  API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                  propertynamess.str(), wsname.str(), Direction::Output),
+              "Output");
+        }
         setProperty(propertynamess.str(), optws);
       }
 
@@ -1262,11 +1268,13 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // Set (property) to output workspace and set to ADS
     if (m_toGroupWS) {
-      declareProperty(
-          Kernel::make_unique<
-              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-              propertynamess.str(), wsname.str(), Direction::Output),
-          "Output");
+      if (!this->existsProperty(propertynamess.str())) {
+        declareProperty(
+            Kernel::make_unique<
+                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                propertynamess.str(), wsname.str(), Direction::Output),
+            "Output");
+      }
       setProperty(propertynamess.str(), optws);
 
       g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
@@ -1353,11 +1361,13 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
       } else {
         propertynamess << "OutputWorkspace_" << wsgroup;
       }
-      declareProperty(
-          Kernel::make_unique<
-              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-              propertynamess.str(), wsname.str(), Direction::Output),
-          "Output");
+      if (!this->existsProperty(propertynamess.str())) {
+        declareProperty(
+            Kernel::make_unique<
+                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                propertynamess.str(), wsname.str(), Direction::Output),
+            "Output");
+      }
       setProperty(propertynamess.str(), optws);
 
       g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
@@ -1388,8 +1398,7 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 void FilterEvents::setupDetectorTOFCalibration() {
   // Set output correction workspace and set to output
   const size_t numhist = m_eventWS->getNumberHistograms();
-  MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", numhist, 2, 2));
+  MatrixWorkspace_sptr corrws = create<Workspace2D>(numhist, Points(2));
   setProperty("OutputTOFCorrectionWorkspace", corrws);
 
   // Set up the size of correction and output correction workspace

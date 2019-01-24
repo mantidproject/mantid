@@ -1129,7 +1129,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     for (size_t i = 0; i <= numBins; i++) {
       E_transfer.push_back(Emin + static_cast<double>(i) * dE);
     }
-    ws->mutableX(j) = E_transfer;
+    ws->mutableX(j) = std::move(E_transfer);
   }
 
   // set axis, correspondent to the X-values

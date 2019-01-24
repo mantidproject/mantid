@@ -25,10 +25,16 @@ Improvements
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
+- New TOPAZ instrument geometry for 2019 run cycle
 
 
 Single Crystal Diffraction
 --------------------------
+
+New Algorithms
+##############
+
+- The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal diffraction measurements.
 
 Improvements
 ############
@@ -41,7 +47,9 @@ Improvements
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 - SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
 - :ref:`IntegratePeaksUsingClusters <algm-IntegratePeaksUsingClusters>` will now treat NaN's as background.
+- SCD Event Data Reduction Diffraction Interface now adds goniometer for CORELLI and used proton charge as monitor count if no monitors are in input file.
 - :ref:`SetCrystalLocation <algm-SetCrystalLocation>` is a new algorithm to set the sample location in events workspaces.
+- :ref:`OptimizeCrystalPlacementByRun <algm-OptimizeCrystalPlacementByRun>` is new algorithm to update the sample position for each run in a peaks workspace.
 
 Bugfixes
 ########
@@ -52,7 +60,7 @@ Bugfixes
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` does not have duplicate peak numbers when saving PeaksWorkspaces with more than one RunNumber.
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now loads the calibration from the peaks file correctly.
 
-- :ref:`OptimizeCrystalPlacement <algm-OptimizeCrystalPlacement>` now updates the sample location used by peaks.  Previously, the sample was effectively left unmoved. Default for indexing tolerance was lowered to 0.15.
+- :ref:`OptimizeCrystalPlacement <algm-OptimizeCrystalPlacement>` now updates the sample location used by peaks.  Previously, the sample was effectively left unmoved. Default for indexing tolerance was lowered to 0.15 and can now be called more than once without error.
 
 Powder Diffraction
 ------------------
