@@ -93,6 +93,7 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.update_view_from_model()
 
         self.groupingNotifier.notify_subscribers()
+        self.handle_update_all_clicked()
 
     def handle_load_grouping_from_file(self):
         # Only XML format
