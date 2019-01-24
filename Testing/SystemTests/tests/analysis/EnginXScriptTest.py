@@ -20,8 +20,8 @@ ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))
 root_directory = os.path.join(DIRS[0], "ENGINX")
 cal_directory = os.path.join(root_directory, "cal")
 focus_directory = os.path.join(root_directory, "focus")
-param_deltas = [0, 50, 0, 20]
-cal_deltas = [0, 2, 20, 10, 10, 50, 5e3, 10, 1e6, 1, 200, 50, 5e2, 5, 20, 2]
+param_deltas = [0.1, 0.1, 1, 2]
+cal_deltas = [0.1, 90000, 0.8, 52000, 1, 0.1, 4, 3, 250, 9, 800, 1.5, 10, 0.5, 5, 0.5]
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
@@ -187,10 +187,9 @@ def _compare_tableworkspaces(workspace, ref_file, delta):
     if passed:
 
         for i in range(ws.columnCount()):
-            newcolumn = [abs(a - b) for a, b in zip(loaded.column(i), ws.column(i))]
-            max_diff = max(newcolumn)
-            mantid.kernel.logger.information("maximum difference = " + str(max_diff) + "\ndelta =" + str(delta[i]))
-            if not (max_diff <= delta[i]):
+            newcolumn = [rel_err_less_delta(a, b, delta[i]) for a, b in zip(loaded.column(i), ws.column(i))]
+            mantid.kernel.logger.warning("newcolumn = {}".format(all(newcolumn)))
+            if not all(newcolumn):
                 passed = False
                 mantid.kernel.logger.warning("data in: " + workspace + " and " + ref_file + " did not match")
 
@@ -199,3 +198,29 @@ def _compare_tableworkspaces(workspace, ref_file, delta):
         passed = False
 
     return passed
+
+
+# borrowed from EnggCalibrationTest
+def rel_err_less_delta(val, ref, epsilon):
+    """
+    Checks that a value 'val' does not differ from a reference value 'ref' by 'epsilon'
+    or more. This method compares the relative error. An epsilon of 0.1 means a relative
+    difference of 10 % = 100*0.1 %
+
+    @param val :: value obtained from a calculation or algorithm
+    @param ref :: (expected) reference value
+    @param epsilon :: acceptable relative error (error tolerance)
+
+    @returns if val differs in relative terms from ref by less than epsilon
+    """
+    if 0 == ref:
+        return abs(ref-val) < epsilon
+    check = (abs((ref - val) / ref) < epsilon)
+
+    mantid.kernel.logger.warning("check value = {}".format((abs((ref - val) / ref))))
+    mantid.kernel.logger.warning("ref = {}".format(epsilon))
+    if not check:
+        mantid.kernel.logger.warning("Value '{0}' differs from reference '{1}' by more than required epsilon '{2}' "
+                                     "(relative)".format(val, ref, epsilon))
+
+    return check
