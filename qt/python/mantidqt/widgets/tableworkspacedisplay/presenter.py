@@ -56,7 +56,7 @@ class TableWorkspaceDisplay(ObservingPresenter):
         """
 
         self.model = model if model else TableWorkspaceDisplayModel(ws)
-        self.name = self.model.get_name() if name is None else name
+        self.name = name if name else self.model.get_name()
         self.view = view if view else TableWorkspaceDisplayView(self, parent, self.name)
         self.parent = parent
         self.plot = plot
@@ -83,6 +83,9 @@ class TableWorkspaceDisplay(ObservingPresenter):
     def replace_workspace(self, workspace_name, workspace):
         if self.model.workspace_equals(workspace_name):
             self.model = TableWorkspaceDisplayModel(workspace)
+            # block signals to prevent triggering of handleItemChanged event
+            # which causes an infinite recursion and a stack overflow error
+            self.view.blockSignals(True)
             self.load_data(self.view)
             self.view.emit_repaint()
 

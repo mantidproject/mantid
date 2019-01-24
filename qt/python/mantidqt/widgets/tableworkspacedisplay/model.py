@@ -107,7 +107,8 @@ class TableWorkspaceDisplayModel:
     def sort(self, column_index, sort_ascending):
         column_name = self.ws.getColumnNames()[column_index]
         if self.is_peaks_workspace():
-            SortPeaksWorkspace(self.ws, ColumnNameToSortBy=column_name, SortAscending=sort_ascending)
+            SortPeaksWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, ColumnNameToSortBy=column_name,
+                               SortAscending=sort_ascending)
         else:
-            SortTableWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, Columns=[column_name],
-                               Ascending=[sort_ascending])
+            SortTableWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, Columns=column_name,
+                               Ascending=sort_ascending)
