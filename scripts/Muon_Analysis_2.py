@@ -13,9 +13,6 @@ import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 from mantid.kernel import ConfigServiceImpl
 from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
-from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
-from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
 from save_python import getWidgetIfOpen
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 import Muon.GUI.Common.message_box as message_box
@@ -43,7 +40,7 @@ def check_facility():
                              + "\n - ".join(SUPPORTED_FACILITIES))
 
 
-class MuonAnalysis4Gui(QtGui.QMainWindow):
+class MuonAnalysisGui(QtGui.QMainWindow):
     """
     The Muon Analaysis 2.0 interface.
     """
@@ -53,7 +50,7 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         message_box.warning(str(message))
 
     def __init__(self, parent=None):
-        super(MuonAnalysis4Gui, self).__init__(parent)
+        super(MuonAnalysisGui, self).__init__(parent)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         try:
@@ -79,60 +76,7 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
     def closeEvent(self, event):
-        print("Muon Analysis Close Event")
-        self.load_widget.load_widget_view = None
-        self.load_widget.load_run_view = None
-        self.load_widget.load_file_view = None
-
-
-class MuonAnalysis2Gui(QtGui.QMainWindow):
-
-    def __init__(self, parent=None):
-        super(MuonAnalysis2Gui, self).__init__(parent)
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
-
-        self.add_table_workspace()
-
-        self._context = MuonContext(Name)
-
-        self.loadWidget = DummyLabelWidget(self._context, LoadText, self)
-        self.dockWidget = DockWidget(self._context, self)
-
-        self.helpWidget = DummyLabelWidget(self._context, HelpText, self)
-
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(self.loadWidget.widget)
-        splitter.addWidget(self.dockWidget.widget)
-        splitter.addWidget(self.helpWidget.widget)
-
-        self.setCentralWidget(splitter)
-        self.setWindowTitle(Name)
-
-        self.dockWidget.setUpdateContext(self.update)
-
-    def saveToProject(self):
-        return self._context.save()
-
-    def update(self):
-        # update load
-        self.loadWidget.updateContext()
-        self.dockWidget.updateContext()
-        self.helpWidget.updateContext()
-
-        self.dockWidget.loadFromContext()
-
-    def loadFromContext(self, project):
-        self._context.loadFromProject(project)
-        self.loadWidget.loadFromContext()
-        self.dockWidget.loadFromContext()
-        self.helpWidget.loadFromContext()
-
-    # cancel algs if window is closed
-    def closeEvent(self, event):
-        self.dockWidget.closeEvent(event)
-        global muonGUI
-        muonGUI.deleteLater()
-        muonGUI = None
+        self.load_widget = None
 
 
 def qapp():
@@ -152,7 +96,7 @@ def main():
     app = qapp()
     try:
         global muon
-        muon = MuonAnalysis4Gui()
+        muon = MuonAnalysisGui()
         muon.resize(700, 700)
         muon.show()
         app.exec_()
@@ -176,7 +120,7 @@ def loadFromProject(project):
     global muonGUI
     muonGUI = main()
     muonGUI.dock_widget.loadFromProject(project)
-    # muonGUI.loadFromContext(project)
+    muonGUI.loadFromContext(project)
     return muonGUI
 
 

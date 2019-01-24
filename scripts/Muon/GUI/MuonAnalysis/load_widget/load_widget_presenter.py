@@ -1,8 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
 from mantid import ConfigService
-from mantid import AnalysisDataService
+
+CO_ADD = 'Co-Add'
+SIMULTANEOUS = 'Simultaneous'
 
 
 class LoadWidgetPresenter(object):
@@ -56,13 +64,13 @@ class LoadWidgetPresenter(object):
 
         selection = self._view.get_multiple_loading_combo_text()
 
-        if selection == "Co-Add":
-            self.load_file_widget.update_multiple_loading_behaviour("Co-Add")
-            self.load_run_widget.update_multiple_loading_behaviour("Co-Add")
+        if selection == CO_ADD:
+            self.load_file_widget.update_multiple_loading_behaviour(CO_ADD)
+            self.load_run_widget.update_multiple_loading_behaviour(CO_ADD)
 
-        if selection == "Simultaneous":
-            self.load_file_widget.update_multiple_loading_behaviour("Simultaneous")
-            self.load_run_widget.update_multiple_loading_behaviour("Simultaneous")
+        if selection == SIMULTANEOUS:
+            self.load_file_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
+            self.load_run_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
 
         self.clear_data_and_view()
 
@@ -126,8 +134,6 @@ class LoadWidgetPresenter(object):
             self.outer = outer  # handle to containing class
 
         def notify_subscribers(self, arg=None):
-            AnalysisDataService.clear()
-
             Observable.notify_subscribers(self, arg)
 
     class InstrumentObserver(Observer):

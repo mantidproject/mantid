@@ -8,7 +8,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
-
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
@@ -115,6 +114,7 @@ class MuonDataContext(object):
 
     @property
     def instrument(self):
+        ConfigService['default.instrument'] = 'EMU'
         inst = ConfigService.getInstrument().name()
         return inst
 
@@ -181,7 +181,7 @@ class MuonDataContext(object):
             # return the first workspace in the group
             return self.current_data["OutputWorkspace"][0].workspace
         else:
-            return self.current_data["OutputWorkspace"].workspace
+            return self.current_data["OutputWorkspace"][0].workspace
 
     @property
     def period_string(self):

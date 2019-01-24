@@ -156,8 +156,7 @@ class MuonWorkspaceWrapper(object):
             self._workspace_name = ""
             self._directory_structure = ""
         else:
-            raise RuntimeWarning(
-                "Cannot remove workspace from ADS with name : {}".format(self._workspace_name))
+            pass
 
     def add_directory_structure(self):
         """

@@ -17,6 +17,9 @@ set ( TEST_PY_FILES
    load_file_widget/loadfile_view_test.py
    load_run_widget/loadrun_presenter_increment_decrement_test.py
    load_run_widget/loadrun_view_test.py
+   loading_tab/loadwidget_presenter_test.py
+   loading_tab/loadwidget_presenter_multiple_file_test.py
+   loading_tab/loadwidget_presenter_failure_test.py
    grouping_tab/grouping_table_presenter_test.py
    grouping_tab/pairing_table_presenter_test.py
    grouping_tab/grouping_tab_presenter_test.py
