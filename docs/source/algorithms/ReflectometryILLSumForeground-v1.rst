@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm is typically the second step in the reflectometry reduction workflow. It consumes the output of :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, producing a workspace with a single single spectrum.
+This algorithm is typically the second step in the reflectometry reduction workflow. It consumes the output of :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, producing a workspace with a single spectrum.
 
 The reflectivity output of this algorithm can be forwarded to :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>` or, in case of polarization analysis, :ref:`ReflectometryILLPolarizationCor <algm-ReflectometryILLPolarizationCor>`.
 
