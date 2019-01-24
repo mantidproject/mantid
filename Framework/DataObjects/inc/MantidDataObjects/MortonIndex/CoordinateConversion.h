@@ -191,8 +191,7 @@ MDCoordinate<nd> indexToCoordinates(const MortonT &idx,
 template <size_t nd, typename IntT, typename MortonT, typename coord_t = float>
 MortonT coordinatesToIndex(coord_t *coord, const MDSpaceBounds<nd> &space) {
   return Interleaver<nd, IntT, MortonT>::interleave(
-      morton_index::ConvertCoordinatesToIntegerRange<nd, IntT>(space,
-                                                                  coord));
+      morton_index::ConvertCoordinatesToIntegerRange<nd, IntT>(space, coord));
 }
 
 } // namespace morton_index

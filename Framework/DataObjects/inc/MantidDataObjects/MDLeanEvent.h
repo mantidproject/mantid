@@ -80,7 +80,8 @@ public:
     }
     static typename std::enable_if<std::is_same<
         EventAccessor, typename Accessor::EventAccessType>::value>::type
-    retrieveIndex(MDLeanEvent<nd> &event, const morton_index::MDSpaceBounds<nd> &space) {
+    retrieveIndex(MDLeanEvent<nd> &event,
+                  const morton_index::MDSpaceBounds<nd> &space) {
       event.retrieveIndex(space);
     }
     static typename std::enable_if<
@@ -118,8 +119,7 @@ protected:
 
 protected:
   void retrieveIndex(const morton_index::MDSpaceBounds<nd> &space) {
-    index =
-        morton_index::coordinatesToIndex<nd, IntT, MortonT>(center, space);
+    index = morton_index::coordinatesToIndex<nd, IntT, MortonT>(center, space);
   }
 
   void retrieveCoordinates(const morton_index::MDSpaceBounds<nd> &space) {
