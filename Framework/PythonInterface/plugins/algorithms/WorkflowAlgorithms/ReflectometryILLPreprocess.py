@@ -217,10 +217,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              doc='Last histogram index used for peak fitting.')
         self.declareProperty(Prop.XMIN,
                              defaultValue=Property.EMPTY_DBL,
-                             doc='Minimum x value (unit wavelength) used for peak finding the peak position.')
+                             doc='Minimum x value (unit wavelength) used for peak fitting.')
         self.declareProperty(Prop.XMAX,
                              defaultValue=Property.EMPTY_DBL,
-                             doc='Maximum x value (unit wavelength) used for peak finding the peak position.')
+                             doc='Maximum x value (unit wavelength) used for peak fitting.')
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
