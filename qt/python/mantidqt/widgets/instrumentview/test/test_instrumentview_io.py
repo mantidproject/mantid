@@ -11,7 +11,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder, InstrumentViewDecoder
-from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.qt.test import GuiTest
 
