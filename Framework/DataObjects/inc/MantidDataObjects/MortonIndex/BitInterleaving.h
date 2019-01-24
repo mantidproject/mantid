@@ -148,73 +148,73 @@ using uint128_t = boost::multiprecision::uint128_t;
 template <> inline uint128_t pad<1, uint32_t, uint128_t>(uint32_t v) {
   using namespace boost::multiprecision::literals;
   uint128_t x(v);
-  x &= 0xffffffff_cppui128;
-  x = (x | x << 16) & 0xffff0000ffff_cppui128;
-  x = (x | x << 8) & 0xff00ff00ff00ff_cppui128;
-  x = (x | x << 4) & 0xf0f0f0f0f0f0f0f_cppui128;
-  x = (x | x << 2) & 0x3333333333333333_cppui128;
-  x = (x | x << 1) & 0x5555555555555555_cppui128;
+  x &= uint128_t("0xffffffff");
+  x = (x | x << 16) & uint128_t("0xffff0000ffff");
+  x = (x | x << 8) & uint128_t("0xff00ff00ff00ff");
+  x = (x | x << 4) & uint128_t("0xf0f0f0f0f0f0f0f");
+  x = (x | x << 2) & uint128_t("0x3333333333333333");
+  x = (x | x << 1) & uint128_t("0x5555555555555555");
   return x;
 }
 
 template <> inline uint32_t compact<1, uint32_t, uint128_t>(uint128_t x) {
   using namespace boost::multiprecision::literals;
-  x &= 0x5555555555555555_cppui128;
-  x = (x | x >> 1) & 0x3333333333333333_cppui128;
-  x = (x | x >> 2) & 0xf0f0f0f0f0f0f0f_cppui128;
-  x = (x | x >> 4) & 0xff00ff00ff00ff_cppui128;
-  x = (x | x >> 8) & 0xffff0000ffff_cppui128;
-  x = (x | x >> 16) & 0xffffffff_cppui128;
+  x &= uint128_t("0x5555555555555555");
+  x = (x | x >> 1) & uint128_t("0x3333333333333333");
+  x = (x | x >> 2) & uint128_t("0xf0f0f0f0f0f0f0f");
+  x = (x | x >> 4) & uint128_t("0xff00ff00ff00ff");
+  x = (x | x >> 8) & uint128_t("0xffff0000ffff");
+  x = (x | x >> 16) & uint128_t("0xffffffff");
   return (uint32_t)x;
 }
 
 template <> inline uint128_t pad<2, uint32_t, uint128_t>(uint32_t v) {
   using namespace boost::multiprecision::literals;
   uint128_t x(v);
-  x &= 0xffffffff_cppui128;
-  x = (x | x << 32) & 0xffff00000000ffff_cppui128;
-  x = (x | x << 16) & 0xff0000ff0000ff0000ff_cppui128;
-  x = (x | x << 8) & 0xf00f00f00f00f00f00f00f_cppui128;
-  x = (x | x << 4) & 0xc30c30c30c30c30c30c30c3_cppui128;
-  x = (x | x << 2) & 0x249249249249249249249249_cppui128;
+  x &= uint128_t("0xffffffff");
+  x = (x | x << 32) & uint128_t("0xffff00000000ffff");
+  x = (x | x << 16) & uint128_t("0xff0000ff0000ff0000ff");
+  x = (x | x << 8) & uint128_t("0xf00f00f00f00f00f00f00f");
+  x = (x | x << 4) & uint128_t("0xc30c30c30c30c30c30c30c3");
+  x = (x | x << 2) & uint128_t("0x249249249249249249249249");
   return x;
 }
 
 template <> inline uint32_t compact<2, uint32_t, uint128_t>(uint128_t x) {
   using namespace boost::multiprecision::literals;
-  x &= 0x249249249249249249249249_cppui128;
-  x = (x | x >> 2) & 0xc30c30c30c30c30c30c30c3_cppui128;
-  x = (x | x >> 4) & 0xf00f00f00f00f00f00f00f_cppui128;
-  x = (x | x >> 8) & 0xff0000ff0000ff0000ff_cppui128;
-  x = (x | x >> 16) & 0xffff00000000ffff_cppui128;
-  x = (x | x >> 32) & 0xffffffff_cppui128;
+  x &= uint128_t("0x249249249249249249249249");
+  x = (x | x >> 2) & uint128_t("0xc30c30c30c30c30c30c30c3");
+  x = (x | x >> 4) & uint128_t("0xf00f00f00f00f00f00f00f");
+  x = (x | x >> 8) & uint128_t("0xff0000ff0000ff0000ff");
+  x = (x | x >> 16) & uint128_t("0xffff00000000ffff");
+  x = (x | x >> 32) & uint128_t("0xffffffff");
   return (uint32_t)x;
 }
 
 template <> inline uint128_t pad<3, uint32_t, uint128_t>(uint32_t v) {
   using namespace boost::multiprecision::literals;
   uint128_t x(v);
-  x &= 0xffffffff_cppui128;
-  x = (x | x << 64) & 0xffc0000000000000003fffff_cppui128;
-  x = (x | x << 32) & 0xffc00000003ff800000007ff_cppui128;
-  x = (x | x << 16) & 0xf80007c0003f0000f80007c0003f_cppui128;
-  x = (x | x << 8) & 0xc0380700c0380700c0380700c03807_cppui128;
-  x = (x | x << 4) & 0x8430843084308430843084308430843_cppui128;
-  x = (x | x << 2) & 0x9090909090909090909090909090909_cppui128;
-  x = (x | x << 1) & 0x11111111111111111111111111111111_cppui128;
+  x &= uint128_t("0xffffffff");
+  x = (x | x << 64) & uint128_t("0xffc0000000000000003fffff");
+  x = (x | x << 32) & uint128_t("0xffc00000003ff800000007ff");
+  x = (x | x << 16) & uint128_t("0xf80007c0003f0000f80007c0003f");
+  x = (x | x << 8) & uint128_t("0xc0380700c0380700c0380700c03807");
+  x = (x | x << 4) & uint128_t("0x8430843084308430843084308430843");
+  x = (x | x << 2) & uint128_t("0x9090909090909090909090909090909");
+  x = (x | x << 1) & uint128_t("0x11111111111111111111111111111111");
   return x;
 }
 
 template <> inline uint32_t compact<3, uint32_t, uint128_t>(uint128_t x) {
   using namespace boost::multiprecision::literals;
-  x &= 0x11111111111111111111111111111111_cppui128;
-  x = (x | x >> 1) & 0x9090909090909090909090909090909_cppui128;
-  x = (x | x >> 2) & 0x8430843084308430843084308430843_cppui128;
-  x = (x | x >> 4) & 0xc0380700c0380700c0380700c03807_cppui128;
-  x = (x | x >> 8) & 0xf80007c0003f0000f80007c0003f_cppui128;
-  x = (x | x >> 16) & 0xffc00000003ff800000007ff_cppui128;
-  x = (x | x >> 32) & 0xffc0000000000000003fffff_cppui128;
-  x = (x | x >> 64) & 0xffffffff_cppui128;
+  x &= uint128_t("0x11111111111111111111111111111111");
+  x = (x | x >> 1) & uint128_t("0x9090909090909090909090909090909");
+  x = (x | x >> 2) & uint128_t("0x8430843084308430843084308430843");
+  x = (x | x >> 4) & uint128_t("0xc0380700c0380700c0380700c03807");
+  x = (x | x >> 8) & uint128_t("0xf80007c0003f0000f80007c0003f");
+  x = (x | x >> 16) & uint128_t("0xffc00000003ff800000007ff");
+  x = (x | x >> 32) & uint128_t("0xffc0000000000000003fffff");
+  x = (x | x >> 64) & uint128_t("0xffffffff");
   return (uint32_t)x;
 }
 
@@ -223,71 +223,71 @@ using uint256_t = boost::multiprecision::uint256_t;
 template <> inline uint256_t pad<2, uint64_t, uint256_t>(uint64_t v) {
   using namespace boost::multiprecision::literals;
   uint256_t x(v);
-  x &= 0xffffffffffffffff_cppui256;
-  x = (x | x << 64) & 0xffffffff0000000000000000ffffffff_cppui256;
-  x = (x | x << 32) & 0xffff00000000ffff00000000ffff00000000ffff_cppui256;
-  x = (x | x << 16) & 0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff_cppui256;
-  x = (x | x << 8) & 0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f_cppui256;
-  x = (x | x << 4) & 0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3_cppui256;
+  x &= uint256_t("0xffffffffffffffff");
+  x = (x | x << 64) & uint256_t("0xffffffff0000000000000000ffffffff");
+  x = (x | x << 32) & uint256_t("0xffff00000000ffff00000000ffff00000000ffff");
+  x = (x | x << 16) & uint256_t("0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff");
+  x = (x | x << 8) & uint256_t("0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f");
+  x = (x | x << 4) & uint256_t("0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3");
   x = (x | x << 2) &
-      0x249249249249249249249249249249249249249249249249_cppui256;
+      uint256_t("0x249249249249249249249249249249249249249249249249");
   return x;
 }
 
 template <> inline uint64_t compact<2, uint64_t, uint256_t>(uint256_t x) {
   using namespace boost::multiprecision::literals;
-  x &= 0x249249249249249249249249249249249249249249249249_cppui256;
-  x = (x | x >> 2) & 0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3_cppui256;
-  x = (x | x >> 4) & 0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f_cppui256;
-  x = (x | x >> 8) & 0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff_cppui256;
-  x = (x | x >> 16) & 0xffff00000000ffff00000000ffff00000000ffff_cppui256;
-  x = (x | x >> 32) & 0xffffffff0000000000000000ffffffff_cppui256;
-  x = (x | x >> 64) & 0xffffffffffffffff_cppui256;
+  x &= uint256_t("0x249249249249249249249249249249249249249249249249");
+  x = (x | x >> 2) & uint256_t("0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3");
+  x = (x | x >> 4) & uint256_t("0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f");
+  x = (x | x >> 8) & uint256_t("0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff");
+  x = (x | x >> 16) & uint256_t("0xffff00000000ffff00000000ffff00000000ffff");
+  x = (x | x >> 32) & uint256_t("0xffffffff0000000000000000ffffffff");
+  x = (x | x >> 64) & uint256_t("0xffffffffffffffff");
   return (uint64_t)x;
 }
 
 template <> inline uint256_t pad<3, uint64_t, uint256_t>(uint64_t v) {
   using namespace boost::multiprecision::literals;
   uint256_t x(v);
-  x &= 0xffffffffffffffff_cppui256;
+  x &= uint256_t("0xffffffffffffffff");
   x = (x | x << 128) &
-      0xfffff800000000000000000000000000000007ffffffffff_cppui256;
+      uint256_t("0xfffff800000000000000000000000000000007ffffffffff");
   x = (x | x << 64) &
-      0xfffff80000000000000007ffffc0000000000000003fffff_cppui256;
+      uint256_t("0xfffff80000000000000007ffffc0000000000000003fffff");
   x = (x | x << 32) &
-      0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff_cppui256;
+      uint256_t("0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff");
   x = (x | x << 16) &
-      0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f_cppui256;
+      uint256_t("0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f");
   x = (x | x << 8) &
-      0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807_cppui256;
+      uint256_t("0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807");
   x = (x | x << 4) &
-      0x843084308430843084308430843084308430843084308430843084308430843_cppui256;
+      uint256_t("0x843084308430843084308430843084308430843084308430843084308430843");
   x = (x | x << 2) &
-      0x909090909090909090909090909090909090909090909090909090909090909_cppui256;
+      uint256_t("0x909090909090909090909090909090909090909090909090909090909090909");
   x = (x | x << 1) &
-      0x1111111111111111111111111111111111111111111111111111111111111111_cppui256;
+      uint256_t("0x1111111111111111111111111111111111111111111111111111111111111111");
   return x;
 }
 
 template <> inline uint64_t compact<3, uint64_t, uint256_t>(uint256_t x) {
   using namespace boost::multiprecision::literals;
   x &=
-      0x1111111111111111111111111111111111111111111111111111111111111111_cppui256;
+      uint256_t("0x1111111111111111111111111111111111111111111111111111111111111111");
   x = (x | x >> 1) &
-      0x909090909090909090909090909090909090909090909090909090909090909_cppui256;
+      uint256_t("0x909090909090909090909090909090909090909090909090909090909090909");
   x = (x | x >> 2) &
-      0x843084308430843084308430843084308430843084308430843084308430843_cppui256;
+      uint256_t("0x843084308430843084308430843084308430843084308430843084308430843");
   x = (x | x >> 4) &
-      0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807_cppui256;
+      uint256_t("0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807");
   x = (x | x >> 8) &
-      0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f_cppui256;
+      uint256_t("0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f");
   x = (x | x >> 16) &
-      0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff_cppui256;
+      uint256_t("0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff");
   x = (x | x >> 32) &
-      0xfffff80000000000000007ffffc0000000000000003fffff_cppui256;
+      uint256_t("0xfffff80000000000000007ffffc0000000000000003fffff");
   x = (x | x >> 64) &
-      0xfffff800000000000000000000000000000007ffffffffff_cppui256;
-  x = (x | x >> 128) & 0xffffffffffffffff_cppui256;
+      uint256_t("0xfffff800000000000000000000000000000007ffffffffff");
+  x = (x | x >> 128) & uint256_t("0xffffffffffffffff");
   return (uint64_t)x;
 }
 
