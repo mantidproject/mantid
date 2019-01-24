@@ -72,12 +72,6 @@ void SCDCalibratePanels::exec() {
   }
   findU(peaksWs);
 
-  std::vector<Peak> &peaks = peaksWs->getPeaks();
-  auto it = std::remove_if(peaks.begin(), peaks.end(), [](const Peak &pk) {
-    return pk.getHKL() == V3D(0, 0, 0);
-  });
-  peaks.erase(it, peaks.end());
-
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
   bool changeT0 = getProperty("ChangeT0");
@@ -431,15 +425,6 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   ub_alg->setProperty("gamma", gamma);
   ub_alg->executeAsChildAlg();
 
-  // Reindex peaks with new UB
-  Mantid::API::IAlgorithm_sptr alg =
-      createChildAlgorithm("OptimizeCrystalPlacement");
-  alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
-  alg->setPropertyValue("ModifiedPeaksWorkspace", peaksWs->getName());
-  alg->setProperty("AdjustSampleOffsets", true);
-  alg->setProperty("MaxAngularChange", 0.0);
-  alg->setProperty("MaxIndexingError", 0.15);
-  alg->executeAsChildAlg();
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
 
