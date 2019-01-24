@@ -397,8 +397,10 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
         boost::algorithm::equals(shape, ShapeArgs::HOLLOW_CYLINDER));
   } else {
     std::stringstream msg;
-    msg << "Unknown 'Shape' argument '" << shape << "' provided in 'Geometry' property. Allowed values are "
-        << ShapeArgs::CSG << "," << ShapeArgs::FLAT_PLATE << "," << ShapeArgs::CYLINDER << "," << ShapeArgs::HOLLOW_CYLINDER;
+    msg << "Unknown 'Shape' argument '" << shape
+        << "' provided in 'Geometry' property. Allowed values are "
+        << ShapeArgs::CSG << "," << ShapeArgs::FLAT_PLATE << ","
+        << ShapeArgs::CYLINDER << "," << ShapeArgs::HOLLOW_CYLINDER;
     throw std::invalid_argument(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {

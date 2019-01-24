@@ -49,13 +49,13 @@ void CylinderAbsorption::defineProperties() {
 
 namespace { // anonymous
             /*
- * <type name="userShape"> <cylinder id="sample-shape">
- *    <centre-of-bottom-base x="0" y="-0.03485" z="0"/>
- *    <axis x="0" y="1" z="0"/>
- *    <height val="0.0697"/>
- *    <radius val="0.00315"/>
- * </cylinder> </type>
- */
+             * <type name="userShape"> <cylinder id="sample-shape">
+             *    <centre-of-bottom-base x="0" y="-0.03485" z="0"/>
+             *    <axis x="0" y="1" z="0"/>
+             *    <height val="0.0697"/>
+             *    <radius val="0.00315"/>
+             * </cylinder> </type>
+             */
 // to simplify other code, return values in cm
 double getParameterFromXml(const std::string &xml,
                            const std::string &paramName) {
@@ -114,8 +114,8 @@ void CylinderAbsorption::retrieveProperties() {
   } else {
     g_log.notice("Did not get shape xml");
   }
-  m_cylHeight *= 0.01;                               // now in m
-  m_cylRadius *= 0.01;                               // now in m
+  m_cylHeight *= 0.01; // now in m
+  m_cylRadius *= 0.01; // now in m
 
   g_log.information() << "Creating cylinder with radius=" << m_cylRadius
                       << "m, height=" << m_cylHeight << "m\n";

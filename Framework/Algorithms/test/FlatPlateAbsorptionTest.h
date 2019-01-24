@@ -88,8 +88,8 @@ private:
 
   /// set what is used for all - intentionally skip the sample information
   void configureAbsCommon(Mantid::Algorithms::FlatPlateAbsorption &alg,
-                             MatrixWorkspace_sptr &inputWS,
-                             const std::string &outputWSname) {
+                          MatrixWorkspace_sptr &inputWS,
+                          const std::string &outputWSname) {
     if (!alg.isInitialized())
       alg.initialize();
     alg.setRethrows(true); // required to get the proper behavior of failed exec

@@ -94,7 +94,7 @@ public:
         Mantid::Kernel::make_unique<FloatProperty>("Height", 4), "");
     geometry->declareProperty(
         Mantid::Kernel::make_unique<FloatProperty>("Radius", 0.4), "");
-    std::vector<double> center{ 0, 0, 0 };
+    std::vector<double> center{0, 0, 0};
     geometry->declareProperty(Mantid::Kernel::make_unique<FloatArrayProperty>(
                                   "Center", std::move(center)),
                               "");
@@ -164,8 +164,8 @@ private:
 
   /// set what is used for all - intentionally skip the sample information
   void configureAbsCommon(Mantid::Algorithms::CylinderAbsorption &alg,
-                             MatrixWorkspace_sptr &inputWS,
-                             const std::string &outputWSname) {
+                          MatrixWorkspace_sptr &inputWS,
+                          const std::string &outputWSname) {
     if (!alg.isInitialized())
       alg.initialize();
 
