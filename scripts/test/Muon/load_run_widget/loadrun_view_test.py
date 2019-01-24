@@ -1,4 +1,4 @@
-from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
+from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 import unittest
 from Muon.GUI.Common import mock_widget
 
