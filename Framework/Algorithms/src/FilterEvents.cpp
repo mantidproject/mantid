@@ -545,10 +545,12 @@ void FilterEvents::groupOutputWorkspace() {
   }
 
   // set the group workspace as output workspace
-  declareProperty(
-      make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "OutputWorkspace", groupname, Direction::Output),
-      "Name of the workspace to be created as the output of grouping ");
+  if (!this->existsProperty("OutputWorkspace")) {
+    declareProperty(
+        make_unique<WorkspaceProperty<WorkspaceGroup>>(
+            "OutputWorkspace", groupname, Direction::Output),
+        "Name of the workspace to be created as the output of grouping ");
+  }
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   API::WorkspaceGroup_sptr workspace_group =
@@ -1171,11 +1173,13 @@ void FilterEvents::createOutputWorkspaces() {
 
       // create these output properties
       if (!this->m_toGroupWS) {
-        declareProperty(
-            Kernel::make_unique<
-                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                propertynamess.str(), wsname.str(), Direction::Output),
-            "Output");
+        if (!this->existsProperty(propertynamess.str())) {
+          declareProperty(
+              Kernel::make_unique<
+                  API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                  propertynamess.str(), wsname.str(), Direction::Output),
+              "Output");
+        }
         setProperty(propertynamess.str(), optws);
       }
 
@@ -1264,11 +1268,13 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // Set (property) to output workspace and set to ADS
     if (m_toGroupWS) {
-      declareProperty(
-          Kernel::make_unique<
-              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-              propertynamess.str(), wsname.str(), Direction::Output),
-          "Output");
+      if (!this->existsProperty(propertynamess.str())) {
+        declareProperty(
+            Kernel::make_unique<
+                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                propertynamess.str(), wsname.str(), Direction::Output),
+            "Output");
+      }
       setProperty(propertynamess.str(), optws);
 
       g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
@@ -1355,11 +1361,13 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
       } else {
         propertynamess << "OutputWorkspace_" << wsgroup;
       }
-      declareProperty(
-          Kernel::make_unique<
-              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-              propertynamess.str(), wsname.str(), Direction::Output),
-          "Output");
+      if (!this->existsProperty(propertynamess.str())) {
+        declareProperty(
+            Kernel::make_unique<
+                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                propertynamess.str(), wsname.str(), Direction::Output),
+            "Output");
+      }
       setProperty(propertynamess.str(), optws);
 
       g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
