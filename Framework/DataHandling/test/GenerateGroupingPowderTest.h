@@ -199,8 +199,8 @@ public:
     Poco::File parFile{parFilename(xmlFilename)};
     if (parFile.exists()) {
       parFile.remove();
-     }
-   }
+    }
+  }
 
 private:
   struct ShowDetIDsOnly : Poco::XML::NodeFilter {
