@@ -157,6 +157,20 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   alg->setProperty<double>("FilterMonByTimeStop",
                            getProperty("FilterMonByTimeStop"));
 
+  // determine if loading logs
+  bool loadLogs = (rowIndex == 0); // only load logs for first chunk
+  if (!loadLogs) {
+    // logs are needed for any of these
+    const double filterByTimeStart = getProperty("FilterByTimeStart");
+    const double filterByTimeStop = getProperty("FilterByTimeStop");
+    const double filterMonByTimeStart = getProperty("FilterMonByTimeStart");
+    const double filterMonByTimeStop = getProperty("FilterMonByTimeStop");
+    loadLogs = (!isEmpty(filterByTimeStart)) || (!isEmpty(filterByTimeStop)) ||
+               (!isEmpty(filterMonByTimeStart)) ||
+               (!isEmpty(filterMonByTimeStop));
+  }
+  alg->setProperty<bool>("LoadLogs", loadLogs);
+
   // set chunking information
   if (rowCount > 0.) {
     const std::vector<string> COL_NAMES = m_chunkingTable->getColumnNames();
@@ -206,8 +220,8 @@ LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp,
 /** Execute the algorithm.
  */
 void LoadEventAndCompress::exec() {
-  std::string filename = getPropertyValue("Filename");
-  double filterBadPulses = getProperty("FilterBadPulses");
+  const std::string filename = getPropertyValue("Filename");
+  const double filterBadPulses = getProperty("FilterBadPulses");
 
   m_chunkingTable = determineChunk(filename);
 
@@ -226,7 +240,27 @@ void LoadEventAndCompress::exec() {
 
   for (size_t i = 1; i < numRows; ++i) {
     MatrixWorkspace_sptr temp = loadChunk(i);
+
+    // copy logs if need to filter events
+    if (filterBadPulses > 0.) {
+      auto copyLogsAlg = createChildAlgorithm("CopyLogs");
+      copyLogsAlg->setProperty("InputWorkspace", resultWS);
+      copyLogsAlg->setProperty("OutputWorkspace", temp);
+      copyLogsAlg->setProperty("MergeStrategy", "WipeExisting");
+      copyLogsAlg->executeAsChildAlg();
+      temp = copyLogsAlg->getProperty("OutputWorkspace");
+    }
+
+    // process the data
     temp = processChunk(temp, filterBadPulses);
+
+    // remove logs
+    auto removeLogsAlg = createChildAlgorithm("RemoveLogs");
+    removeLogsAlg->setProperty("Workspace", temp);
+    removeLogsAlg->executeAsChildAlg();
+    temp = removeLogsAlg->getProperty("Workspace");
+
+    // accumulate data
     auto plusAlg = createChildAlgorithm("Plus");
     plusAlg->setProperty("LHSWorkspace", resultWS);
     plusAlg->setProperty("RHSWorkspace", temp);
