@@ -65,7 +65,6 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.table_e = self.add_table("E values")
 
         self.resize(600, 400)
-        self.show()
 
     def add_table(self, label):
         tab = MatrixWorkspaceTableView(self)

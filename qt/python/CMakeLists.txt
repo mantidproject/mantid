@@ -103,11 +103,12 @@ endif ()
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_table_view_model.py
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_io.py
 
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_workbench_table_widget_item.py
-
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_io.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
   )

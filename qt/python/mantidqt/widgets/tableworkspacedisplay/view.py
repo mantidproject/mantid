@@ -55,7 +55,6 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.setWindowFlags(Qt.Window)
 
         self.resize(600, 400)
-        self.show()
 
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
