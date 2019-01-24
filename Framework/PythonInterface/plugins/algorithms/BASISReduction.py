@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
@@ -26,15 +26,15 @@ DEFAULT_MASK_GROUP_DIR = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015'
 DEFAULT_CONFIG_DIR = config['instrumentDefinition.directory']
 
 # BASIS allows two possible reflections, with associated default properties
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
 REFLECTIONS_DICT = {'silicon111': {'name': 'silicon111',
                                    'energy_bins': [-150, 0.4, 500],  # micro-eV
-                                   'q_bins': [0.3, 0.2, 1.9],  # inverse Angstroms
+                                   'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
                                    'banks': 'bank1,bank3,bank4',
                                    'mask_file': 'BASIS_Mask_default_111.xml',
                                    'parameter_file': 'BASIS_silicon_111_Parameters.xml',
-                                   'default_energy': 2.0826,  # mili-eV
-                                   'vanadium_bins': [-0.0034, 0.068, 0.0034]  # mili-eV
+                                   'default_energy': 2.0826,  # meV
+                                   'vanadium_bins': [-0.0034, 0.068, 0.0034]
                                    },
                     'silicon311': {'name': 'silicon311',
                                    'energy_bins': [-740, 1.6, 740],
@@ -42,12 +42,12 @@ REFLECTIONS_DICT = {'silicon111': {'name': 'silicon111',
                                    'banks': 'bank2',
                                    'mask_file': 'BASIS_Mask_default_311.xml',
                                    'parameter_file': 'BASIS_silicon_311_Parameters.xml',
-                                   'default_energy': 7.6368,  # mili-eV
-                                   'vanadium_bins': [-0.015, 0.030, 0.015]# mili-eV
+                                   'default_energy': 7.6368,  # meV
+                                   'vanadium_bins': [-0.015, 0.030, 0.015]
                                    }
                     }
 
-#pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
 
 
 class BASISReduction(PythonAlgorithm):
@@ -116,15 +116,15 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty('MonitorNorm', True,
                              'Normalization with wavelength-dependent monitor counts')
         self.declareProperty('ExcludeTimeSegment', '',
-                             'Exclude a contigous time segment; '+
-                             'Examples: "71546:0-60" filter run 71546 from '+
-                             'start to 60 seconds, "71546:300-600", '+
+                             'Exclude a contigous time segment; ' +
+                             'Examples: "71546:0-60" filter run 71546 from ' +
+                             'start to 60 seconds, "71546:300-600", ' +
                              '"71546:120-end" from 120s to the end of the run')
         grouping_type = ['None', 'Low-Resolution', 'By-Tube']
         self.declareProperty('GroupDetectors', 'None',
                              StringListValidator(grouping_type),
                              'Switch for grouping detectors')
-        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra '+
+        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra ' +
                              'to intensity of spectrum with lowest Q?')
 
         # Properties affected by the reflection selected
@@ -180,7 +180,7 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertyGroup('NormWavelengthRange', titleDivideByVanadium)
 
         # Properties setting the saving of NSXPE file
-        title_nxspe= 'Save to NXSPE'
+        title_nxspe = 'Save to NXSPE'
         self.declareProperty('SaveNXSPE', False, direction=Direction.Input,
                              doc='Do we save to NXSPE format?')
         nxspe_enabled = EnabledWhenProperty('SaveNXSPE',
@@ -204,7 +204,7 @@ class BASISReduction(PythonAlgorithm):
                              doc='Output dynamic susceptibility (Xqw)')
         self.setPropertyGroup('OutputSusceptibility', titleAddionalOutput)
 
-    #pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches
     def PyExec(self):
         config['default.facility'] = 'SNS'
         config['default.instrument'] = self._long_inst
@@ -250,9 +250,9 @@ class BASISReduction(PythonAlgorithm):
         self._dMask = _dMask[1]
         sapi.DeleteWorkspace(_dMask[0])
 
-        ############################
-        ##  Process the Vanadium  ##
-        ############################
+        ##########################
+        #  Process the Vanadium  #
+        ##########################
 
         norm_runs = self.getProperty('NormRunNumbers').value
         if self._doNorm and bool(norm_runs):
@@ -290,9 +290,9 @@ class BASISReduction(PythonAlgorithm):
                 self._normWs = self._group_and_SofQW(normWs, self._etBins,
                                                      isSample=False)
 
-        ##########################
-        ##  Process the sample  ##
-        ##########################
+        ########################
+        #  Process the sample  #
+        ########################
         self._run_list = self._get_runs(self.getProperty('RunNumbers').value,
                                         doIndiv=self._doIndiv)
         for run_set in self._run_list:
@@ -337,13 +337,13 @@ class BASISReduction(PythonAlgorithm):
             # Output Dave and Nexus files
             extension = '_divided.dat' if self._doNorm else '.dat'
             dave_grp_filename = self._make_run_name(self._samWsRun, False) + \
-                                extension
+                extension
             sapi.SaveDaveGrp(Filename=dave_grp_filename,
                              InputWorkspace=self._samSqwWs,
                              ToMicroEV=True)
             extension = '_divided_sqw.nxs' if self._doNorm else '_sqw.nxs'
             processed_filename = self._make_run_name(self._samWsRun, False) + \
-                                 extension
+                extension
             sapi.SaveNexus(Filename=processed_filename,
                            InputWorkspace=self._samSqwWs)
 
@@ -412,7 +412,7 @@ class BASISReduction(PythonAlgorithm):
         """
         Make name like BSS_24234_event.nxs
         """
-        return '{0}_{1}_event.nxs'.format(self._short_inst,str(run))
+        return '{0}_{1}_event.nxs'.format(self._short_inst, str(run))
 
     def _sum_runs(self, run_set, sam_ws, mon_ws, extra_ext=None):
         """
@@ -598,7 +598,7 @@ class BASISReduction(PythonAlgorithm):
         splitter = sapi.CreateEmptyTableWorkspace(OutputWorkspace='splitter')
         splitter.addColumn('double', 'start')
         splitter.addColumn('double', 'stop')
-        splitter.addColumn('str', 'target') #, 'str')
+        splitter.addColumn('str', 'target')
         if a == 0.0:
             splitter.addRow([b, inf, '0'])
         elif b == inf:
@@ -657,6 +657,7 @@ class BASISReduction(PythonAlgorithm):
             self._as_json['properties'].update(forced)
         r = mtd[ws_name].mutableRun()
         r.addProperty('asString', json.dumps(self._as_json), True)
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
