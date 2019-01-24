@@ -146,7 +146,7 @@ template <> inline uint16_t compact<3, uint16_t, uint64_t>(uint64_t x) {
 using uint128_t = boost::multiprecision::uint128_t;
 
 template <> inline uint128_t pad<1, uint32_t, uint128_t>(uint32_t v) {
-  using namespace boost::multiprecision::literals;
+
   uint128_t x(v);
   x &= uint128_t("0xffffffff");
   x = (x | x << 16) & uint128_t("0xffff0000ffff");
@@ -158,7 +158,7 @@ template <> inline uint128_t pad<1, uint32_t, uint128_t>(uint32_t v) {
 }
 
 template <> inline uint32_t compact<1, uint32_t, uint128_t>(uint128_t x) {
-  using namespace boost::multiprecision::literals;
+
   x &= uint128_t("0x5555555555555555");
   x = (x | x >> 1) & uint128_t("0x3333333333333333");
   x = (x | x >> 2) & uint128_t("0xf0f0f0f0f0f0f0f");
@@ -169,7 +169,7 @@ template <> inline uint32_t compact<1, uint32_t, uint128_t>(uint128_t x) {
 }
 
 template <> inline uint128_t pad<2, uint32_t, uint128_t>(uint32_t v) {
-  using namespace boost::multiprecision::literals;
+
   uint128_t x(v);
   x &= uint128_t("0xffffffff");
   x = (x | x << 32) & uint128_t("0xffff00000000ffff");
@@ -181,7 +181,7 @@ template <> inline uint128_t pad<2, uint32_t, uint128_t>(uint32_t v) {
 }
 
 template <> inline uint32_t compact<2, uint32_t, uint128_t>(uint128_t x) {
-  using namespace boost::multiprecision::literals;
+
   x &= uint128_t("0x249249249249249249249249");
   x = (x | x >> 2) & uint128_t("0xc30c30c30c30c30c30c30c3");
   x = (x | x >> 4) & uint128_t("0xf00f00f00f00f00f00f00f");
@@ -192,7 +192,7 @@ template <> inline uint32_t compact<2, uint32_t, uint128_t>(uint128_t x) {
 }
 
 template <> inline uint128_t pad<3, uint32_t, uint128_t>(uint32_t v) {
-  using namespace boost::multiprecision::literals;
+
   uint128_t x(v);
   x &= uint128_t("0xffffffff");
   x = (x | x << 64) & uint128_t("0xffc0000000000000003fffff");
@@ -206,7 +206,7 @@ template <> inline uint128_t pad<3, uint32_t, uint128_t>(uint32_t v) {
 }
 
 template <> inline uint32_t compact<3, uint32_t, uint128_t>(uint128_t x) {
-  using namespace boost::multiprecision::literals;
+
   x &= uint128_t("0x11111111111111111111111111111111");
   x = (x | x >> 1) & uint128_t("0x9090909090909090909090909090909");
   x = (x | x >> 2) & uint128_t("0x8430843084308430843084308430843");
@@ -221,7 +221,7 @@ template <> inline uint32_t compact<3, uint32_t, uint128_t>(uint128_t x) {
 using uint256_t = boost::multiprecision::uint256_t;
 
 template <> inline uint256_t pad<2, uint64_t, uint256_t>(uint64_t v) {
-  using namespace boost::multiprecision::literals;
+
   uint256_t x(v);
   x &= uint256_t("0xffffffffffffffff");
   x = (x | x << 64) & uint256_t("0xffffffff0000000000000000ffffffff");
@@ -238,7 +238,7 @@ template <> inline uint256_t pad<2, uint64_t, uint256_t>(uint64_t v) {
 }
 
 template <> inline uint64_t compact<2, uint64_t, uint256_t>(uint256_t x) {
-  using namespace boost::multiprecision::literals;
+
   x &= uint256_t("0x249249249249249249249249249249249249249249249249");
   x = (x | x >> 2) &
       uint256_t("0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3");
@@ -253,7 +253,7 @@ template <> inline uint64_t compact<2, uint64_t, uint256_t>(uint256_t x) {
 }
 
 template <> inline uint256_t pad<3, uint64_t, uint256_t>(uint64_t v) {
-  using namespace boost::multiprecision::literals;
+
   uint256_t x(v);
   x &= uint256_t("0xffffffffffffffff");
   x = (x | x << 128) &
@@ -281,7 +281,7 @@ template <> inline uint256_t pad<3, uint64_t, uint256_t>(uint64_t v) {
 }
 
 template <> inline uint64_t compact<3, uint64_t, uint256_t>(uint256_t x) {
-  using namespace boost::multiprecision::literals;
+
   x &= uint256_t(
       "0x1111111111111111111111111111111111111111111111111111111111111111");
   x = (x | x >> 1) &
