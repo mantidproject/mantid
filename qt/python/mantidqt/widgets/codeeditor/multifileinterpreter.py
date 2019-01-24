@@ -39,6 +39,7 @@ class MultiPythonFileInterpreter(QWidget):
 
         # attributes
         self.default_content = default_content
+        self.default_content_filepath = osp.expanduser("~/.mantid/default_editor_content.py")
 
         # widget setup
         self._tabs = self.create_tabwidget()
@@ -56,13 +57,10 @@ class MultiPythonFileInterpreter(QWidget):
 
     def append_new_editor(self, content=None, filename=None):
         if content is None:
-            filepath = osp.expanduser("~/.mantid/default_editor_content.py")
-            if osp.isfile(filepath):
-                with open(filepath, 'r') as f:
-                    content = "".join(f.readlines())
+            if osp.isfile(self.default_content_filepath):
+                with open(self.default_content_filepath, 'r') as f:
+                    content = f.read()
             else:
-                with open(filepath, 'w') as f:
-                    f.write(self.default_content)
                 content = self.default_content
 
         interpreter = PythonFileInterpreter(content, filename=filename,
