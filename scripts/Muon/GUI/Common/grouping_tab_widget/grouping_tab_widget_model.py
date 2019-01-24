@@ -66,11 +66,11 @@ class GroupingTabModel(object):
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
-        self._data.groups[group.name] = group
+        self._data.add_group(group)
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
-        self._data.pairs[pair.name] = pair
+        self._data.add_pair(pair)
 
     def remove_groups_by_name(self, name_list):
         for name in name_list:

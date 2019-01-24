@@ -63,13 +63,17 @@ class GroupingTablePresenter(object):
 
     def add_group(self, group):
         """Adds a group to the model and view"""
-        if self._view.num_rows() >= maximum_number_of_groups:
-            self._view.warning_popup("Cannot add more than {} groups.".format(maximum_number_of_groups))
-            return
-        self.add_group_to_view(group)
-        self.add_group_to_model(group)
-        self._view.notify_data_changed()
-        self.notify_data_changed()
+        try:
+            if self._view.num_rows() >= maximum_number_of_groups:
+                self._view.warning_popup("Cannot add more than {} groups.".format(maximum_number_of_groups))
+                return
+            # self.add_group_to_view(group)
+            self.add_group_to_model(group)
+            self.update_view_from_model()
+            self._view.notify_data_changed()
+            self.notify_data_changed()
+        except ValueError as error:
+            self._view.warning_popup(error)
 
     def add_group_to_model(self, group):
         self._model.add_group(group)
@@ -112,7 +116,10 @@ class GroupingTablePresenter(object):
         if col == 1 and not self.validate_detector_ids(changed_item):
             update_model = False
         if update_model:
-            self.update_model_from_view()
+            try:
+                self.update_model_from_view()
+            except ValueError as error:
+                self._view.warning_popup(error)
 
         self.update_view_from_model()
         self._view.notify_data_changed()

@@ -144,6 +144,8 @@ class GroupingTabView(QtGui.QWidget):
                     return ''
             return path_extension[0] + '.xml'
 
+    def display_warning_box(self, message):
+        warning(message, self)
     # ------------------------------------------------------------------------------------------------------------------
     # Signal / slot connections
     # ------------------------------------------------------------------------------------------------------------------

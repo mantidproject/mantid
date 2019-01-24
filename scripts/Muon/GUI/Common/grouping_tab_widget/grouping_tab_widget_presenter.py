@@ -103,11 +103,14 @@ class GroupingTabPresenter(object):
 
         groups, pairs, description = xml_utils.load_grouping_from_XML(filename)
 
-        self._model.clear()
-        for group in groups:
-            self._model.add_group(group)
-        for pair in pairs:
-            self._model.add_pair(pair)
+        try:
+            self._model.clear()
+            for group in groups:
+                self._model.add_group(group)
+            for pair in pairs:
+                self._model.add_pair(pair)
+        except ValueError as error:
+            self._view.display_warning_box(error)
 
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
