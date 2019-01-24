@@ -366,15 +366,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>MantidQt::API::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

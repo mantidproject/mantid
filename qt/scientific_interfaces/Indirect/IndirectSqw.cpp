@@ -17,6 +17,10 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
@@ -206,9 +210,11 @@ void IndirectSqw::plotRqwContour() {
 
     convertToSpectrumAxis(sampleName, outputName);
 
-    auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
-    if (rqwWorkspace)
-      m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+    if (doesExistInADS(outputName)) {
+      auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
+      if (rqwWorkspace)
+        m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+    }
   } else {
     emit showMessageBox("Invalid filename.");
   }
