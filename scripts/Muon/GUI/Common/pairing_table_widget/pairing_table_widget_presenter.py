@@ -51,10 +51,16 @@ class PairingTablePresenter(object):
         self.guessAlphaNotifier.notify_subscribers([pair_name, group1, group2])
 
     def handle_data_change(self, row, col):
-        changed_item = self._view.get_table_item_text(row, col)
+        changed_item = self._view.get_table_contents()[row][col]
         update_model = True
         if col == 0 and not self.validate_pair_name(changed_item):
             update_model = False
+        if col == 1:
+            if changed_item == self._view.get_table_item_text(row, 2):
+                update_model = False
+        if col == 2:
+            if changed_item == self._view.get_table_item_text(row, 1):
+                update_model = False
         if col == 3:
             if not self.validate_alpha(changed_item):
                 update_model = False

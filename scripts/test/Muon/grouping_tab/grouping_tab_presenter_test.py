@@ -23,7 +23,6 @@ else:
 
 
 class GroupingTabPresenterTest(unittest.TestCase):
-
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
@@ -66,7 +65,6 @@ class GroupingTabPresenterTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
     # ------------------------------------------------------------------------------------------------------------------
-
     def test_context_menu_add_pair_adds_pair_if_two_groups_selected(self):
         self.grouping_table_view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
         self.grouping_table_view.contextMenuEvent(0)
@@ -92,14 +90,18 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.assertEqual(self.grouping_table_view.num_rows(), 0)
         self.assertEqual(self.pairing_table_view.num_rows(), 0)
 
-    def test_that_load_grouping_triggers_the_correct_function(self):
-        self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
+    @mock.patch("Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML")
+    def test_that_load_grouping_triggers_the_correct_function(self, mock_load):
+        self.view.show_file_browser_and_return_selection = mock.MagicMock(return_value="grouping.xml")
+        groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
+                  MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
+        pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
+        mock_load.return_value = (groups, pairs)
 
-        with mock.patch("Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
-            self.view.load_grouping_button.clicked.emit(True)
+        self.view.load_grouping_button.clicked.emit(True)
 
-            self.assertEqual(mock_load.call_count, 1)
-            self.assertEqual(mock_load.call_args[0][0], "grouping.xml")
+        self.assertEqual(mock_load.call_count, 1)
+        self.assertEqual(mock_load.call_args[0][0], "grouping.xml")
 
     def test_that_load_grouping_inserts_loaded_groups_and_pairs_correctly(self):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
@@ -107,7 +109,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
                   MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
         pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
 
-        with mock.patch("Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
+        with mock.patch(
+                "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs
             mock_load.return_value = (groups, pairs)
             self.view.load_grouping_button.clicked.emit(True)
@@ -123,7 +126,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
         # Save functionality is tested elsewhere
         self.view.show_file_save_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
 
-        with mock.patch("Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.save_grouping_to_XML") as mock_save:
+        with mock.patch(
+                "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.save_grouping_to_XML") as mock_save:
             self.view.save_grouping_button.clicked.emit(True)
 
             self.assertEqual(mock_save.call_count, 1)
@@ -135,6 +139,14 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
         self.presenter.thread_manager.process.assert_called_once_with(self.presenter.listener,
                                                                       self.presenter.calculate_all_data, 0, [1])
+
+    def test_removing_group_removes_linked_pairs(self):
+        self.add_three_groups()
+        self.add_two_pairs()
+
+        self.presenter.grouping_table_widget.remove_last_row_in_view_and_model()
+
+        self.assertEqual(self.model.pair_names, ['long1'])
 
 
 if __name__ == '__main__':
