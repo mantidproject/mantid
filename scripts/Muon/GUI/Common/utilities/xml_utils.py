@@ -65,14 +65,10 @@ def save_grouping_to_XML(groups, pairs, filename, save=True, description=''):
         root.set('description', description)
 
     # handle groups
-    group_nodes = _create_XML_subElement_for_groups(root, groups)
-    for child in group_nodes:
-        root.extend(child)
+    _create_XML_subElement_for_groups(root, groups)
 
     # handle pairs
-    pair_nodes = _create_XML_subElement_for_pairs(root, pairs)
-    for child in pair_nodes:
-        root.extend(child)
+    _create_XML_subElement_for_pairs(root, pairs)
 
     tree = ET.ElementTree(root)
     if save:
