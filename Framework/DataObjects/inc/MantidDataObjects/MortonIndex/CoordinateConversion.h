@@ -14,7 +14,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace md_structure_ws {
+namespace morton_index {
 
 template <size_t ND, typename IntT, typename MortonT> class MortonMask {
 public:
@@ -184,17 +184,17 @@ float ConvertCoordinateFromIntegerRange(IntT value, float lower, float upper) {
 template <size_t nd, typename IntT, typename MortonT>
 MDCoordinate<nd> indexToCoordinates(const MortonT &idx,
                                     const MDSpaceBounds<nd> &space) {
-  return md_structure_ws::ConvertCoordinatesFromIntegerRange<nd, IntT>(
+  return morton_index::ConvertCoordinatesFromIntegerRange<nd, IntT>(
       space, Interleaver<nd, IntT, MortonT>::deinterleave(idx));
 }
 
 template <size_t nd, typename IntT, typename MortonT, typename coord_t = float>
 MortonT coordinatesToIndex(coord_t *coord, const MDSpaceBounds<nd> &space) {
   return Interleaver<nd, IntT, MortonT>::interleave(
-      md_structure_ws::ConvertCoordinatesToIntegerRange<nd, IntT>(space,
+      morton_index::ConvertCoordinatesToIntegerRange<nd, IntT>(space,
                                                                   coord));
 }
 
-} // namespace md_structure_ws
+} // namespace morton_index
 
 #endif // MANTID_DATAOBJECTS_MORTONINDEX_COORDINATE_CONVERSION_H_

@@ -169,7 +169,7 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress,
   std::vector<MDEventType<ND>> mdEvents =
       convertEvents<EventType, ND, MDEventType>();
 
-  MDSpaceBounds<ND> space;
+  morton_index::MDSpaceBounds<ND> space;
   const auto &pws{m_OutWSWrapper->pWorkspace()};
   for (size_t ax = 0; ax < ND; ++ax) {
     space(ax, 0) = pws->getDimension(ax)->getMinimum();

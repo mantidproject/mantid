@@ -111,7 +111,7 @@ public:
   void test_retrieve_coordinates() {
     constexpr size_t ND(4);
 
-    MDSpaceBounds<ND> bounds;
+    morton_index::MDSpaceBounds<ND> bounds;
     // clang-format off
     bounds <<
            0.0f, 2.0f,
@@ -120,7 +120,7 @@ public:
         5.0f, 15.0f;
     // clang-format on
 
-    MDCoordinate<ND> floatCoord;
+    morton_index::MDCoordinate<ND> floatCoord;
     floatCoord << 1.5f, 10.0f, 5.0f, 5.0f;
 
     MDLeanEvent<ND> event(0.0f, 0.0f, &floatCoord[0]);

@@ -11,25 +11,27 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <ostream>
 
+namespace morton_index {
+
 using uint128_t = boost::multiprecision::uint128_t;
 
-template <size_t ND, typename IntT>
+template<size_t ND, typename IntT>
 using IntArray = Eigen::Array<IntT, static_cast<int>(ND), 1>;
 
-template <size_t ND>
+template<size_t ND>
 using MDCoordinate = Eigen::Array<float, static_cast<int>(ND), 1>;
 
-template <size_t ND>
+template<size_t ND>
 using MDSpaceBounds = Eigen::Array<float, static_cast<int>(ND), 2>;
-template <size_t ND>
+template<size_t ND>
 using MDSpaceDimensions = Eigen::Array<float, static_cast<int>(ND), 1>;
-template <size_t ND>
+template<size_t ND>
 using MDSpaceSteps = Eigen::Array<float, static_cast<int>(ND), 1>;
 
-template <typename CoordT, size_t ND>
+template<typename CoordT, size_t ND>
 using AffineND = Eigen::Transform<CoordT, static_cast<int>(ND), Eigen::Affine>;
 
-template <size_t ND>
+template<size_t ND>
 using BinIndices = Eigen::Matrix<size_t, 1, static_cast<int>(ND)>;
 
 /**
@@ -42,7 +44,7 @@ struct Morton96 {
   uint32_t upper;
 
   explicit Morton96(const uint128_t &cmpl);
-  template <typename IntT> Morton96(const IntT &smth_int);
+  template<typename IntT> Morton96(const IntT &smth_int);
   uint128_t to_uint128_t() const;
 
   bool operator<(const Morton96 &b) const;
@@ -52,10 +54,10 @@ struct Morton96 {
   bool operator==(const Morton96 &b) const;
   bool operator!=(const Morton96 &b) const;
   friend uint128_t operator-(const Morton96 &a, const Morton96 &b);
-  template <typename T> uint128_t operator+(const T &b) const;
+  template<typename T> uint128_t operator+(const T &b) const;
   Morton96 operator+(const Morton96 &b) const;
-  template <typename T> uint128_t operator/(const T &b) const;
-  template <typename T> uint128_t operator*(const T &b) const;
+  template<typename T> uint128_t operator/(const T &b) const;
+  template<typename T> uint128_t operator*(const T &b) const;
   friend std::ostream &operator<<(std::ostream &os, const Morton96 &morton96);
 };
 #pragma pack(pop)
@@ -69,7 +71,7 @@ inline Morton96::Morton96(const uint128_t &smpl) {
   lower = uni.cmpl[0];
 }
 
-template <typename IntT>
+template<typename IntT>
 inline Morton96::Morton96(const IntT &smth_int)
     : Morton96(uint128_t(smth_int)) {}
 
@@ -118,7 +120,7 @@ inline uint128_t operator-(const Morton96 &a, const Morton96 &b) {
   return a.to_uint128_t() - b.to_uint128_t();
 }
 
-template <typename T> inline uint128_t Morton96::operator+(const T &b) const {
+template<typename T> inline uint128_t Morton96::operator+(const T &b) const {
   return to_uint128_t() + b;
 }
 
@@ -126,11 +128,11 @@ inline Morton96 Morton96::operator+(const Morton96 &b) const {
   return Morton96(to_uint128_t() + b.to_uint128_t());
 }
 
-template <typename T> inline uint128_t Morton96::operator/(const T &b) const {
+template<typename T> inline uint128_t Morton96::operator/(const T &b) const {
   return to_uint128_t() / b;
 }
 
-template <typename T> inline uint128_t Morton96::operator*(const T &b) const {
+template<typename T> inline uint128_t Morton96::operator*(const T &b) const {
   return to_uint128_t() * b;
 }
 
@@ -145,32 +147,32 @@ inline std::ostream &operator<<(std::ostream &os, const Morton96 &morton96) {
  * size is number_of_dimensions * sizeof(coordinate_type)
  * @tparam SZ :: the size of accesible memory.
  */
-template <size_t SZ> struct MortonIndex {
+template<size_t SZ> struct MortonIndex {
   using type = boost::multiprecision::uint256_t;
 };
 
-template <> struct MortonIndex<1> { using type = uint8_t; };
+template<> struct MortonIndex<1> { using type = uint8_t; };
 
-template <> struct MortonIndex<2> { using type = uint16_t; };
+template<> struct MortonIndex<2> { using type = uint16_t; };
 
-template <> struct MortonIndex<4> { using type = uint32_t; };
+template<> struct MortonIndex<4> { using type = uint32_t; };
 
-template <> struct MortonIndex<8> { using type = uint64_t; };
+template<> struct MortonIndex<8> { using type = uint64_t; };
 
-template <> struct MortonIndex<12> { using type = Morton96; };
+template<> struct MortonIndex<12> { using type = Morton96; };
 
-template <> struct MortonIndex<16> { using type = uint128_t; };
+template<> struct MortonIndex<16> { using type = uint128_t; };
 
 /**
  * This structure binds floating point types to
  * the unsigned integer types of the same width
  * @tparam FP :: floating point type.
  */
-template <typename FP> struct UnderlyingInt {};
+template<typename FP> struct UnderlyingInt {};
 
-template <> struct UnderlyingInt<float> { using type = uint32_t; };
+template<> struct UnderlyingInt<float> { using type = uint32_t; };
 
-template <> struct UnderlyingInt<double> { using type = uint64_t; };
+template<> struct UnderlyingInt<double> { using type = uint64_t; };
 
 /**
  * This structure determines Morton index type and
@@ -179,8 +181,10 @@ template <> struct UnderlyingInt<double> { using type = uint64_t; };
  * @tparam ND :: number of dimensions
  * @tparam FP :: floating point type
  */
-template <size_t ND, typename FP> struct IndexTypes {
+template<size_t ND, typename FP> struct IndexTypes {
   using MortonType = typename MortonIndex<ND * sizeof(FP)>::type;
   using IntType = typename UnderlyingInt<FP>::type;
 };
+
+} // morton_index
 #endif // MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_

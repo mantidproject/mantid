@@ -62,8 +62,8 @@ public:
   /**
    * Additional index type defenitions
    */
-  using IntT = typename IndexTypes<nd, coord_t>::IntType;
-  using MortonT = typename IndexTypes<nd, coord_t>::MortonType;
+  using IntT = typename morton_index::IndexTypes<nd, coord_t>::IntType;
+  using MortonT = typename morton_index::IndexTypes<nd, coord_t>::MortonType;
 
   template <class Accessor>
   /**
@@ -75,12 +75,12 @@ public:
     static typename std::enable_if<std::is_same<
         EventAccessor, typename Accessor::EventAccessType>::value>::type
     retrieveCoordinates(MDLeanEvent<nd> &event,
-                        const MDSpaceBounds<nd> &space) {
+                        const morton_index::MDSpaceBounds<nd> &space) {
       event.retrieveCoordinates(space);
     }
     static typename std::enable_if<std::is_same<
         EventAccessor, typename Accessor::EventAccessType>::value>::type
-    retrieveIndex(MDLeanEvent<nd> &event, const MDSpaceBounds<nd> &space) {
+    retrieveIndex(MDLeanEvent<nd> &event, const morton_index::MDSpaceBounds<nd> &space) {
       event.retrieveIndex(space);
     }
     static typename std::enable_if<
@@ -117,14 +117,14 @@ protected:
 #pragma pack(pop)
 
 protected:
-  void retrieveIndex(const MDSpaceBounds<nd> &space) {
+  void retrieveIndex(const morton_index::MDSpaceBounds<nd> &space) {
     index =
-        md_structure_ws::coordinatesToIndex<nd, IntT, MortonT>(center, space);
+        morton_index::coordinatesToIndex<nd, IntT, MortonT>(center, space);
   }
 
-  void retrieveCoordinates(const MDSpaceBounds<nd> &space) {
+  void retrieveCoordinates(const morton_index::MDSpaceBounds<nd> &space) {
     auto coords =
-        md_structure_ws::indexToCoordinates<nd, IntT, MortonT>(index, space);
+        morton_index::indexToCoordinates<nd, IntT, MortonT>(index, space);
     for (unsigned i = 0; i < nd; ++i)
       center[i] = coords[i];
   }
