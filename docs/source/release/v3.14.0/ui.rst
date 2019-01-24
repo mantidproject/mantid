@@ -104,9 +104,9 @@ Changes
 Logging
 -------
 
-changes
+Changes
 #######
 
- - Increased the log level from information to notice when creating an instrument geometry
+ - Increased the log level from information to notice when creating an instrument geometry.
 
 :ref:`Release 3.14.0 <v3.14.0>`
