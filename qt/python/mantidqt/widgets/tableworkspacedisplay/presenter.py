@@ -85,7 +85,7 @@ class TableWorkspaceDisplay(ObservingPresenter):
         if self.model.workspace_equals(workspace_name):
             self.model = TableWorkspaceDisplayModel(workspace)
             self.load_data(self.view)
-            self.view.repaint_later()
+            self.view.emit_repaint()
 
     def handleItemChanged(self, item):
         """

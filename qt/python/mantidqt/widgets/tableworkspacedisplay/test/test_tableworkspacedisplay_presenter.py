@@ -584,7 +584,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
                 'mantidqt.widgets.tableworkspacedisplay.presenter.TableWorkspaceDisplay.load_data') as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME + "123", ws)
             self.assertNotCalled(mock_load_data)
-            self.assertNotCalled(view.repaint_later)
+            self.assertNotCalled(view.emit_repaint)
 
     @with_mock_presenter()
     def test_replace(self, ws, view, presenter):
@@ -594,7 +594,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
                 'mantidqt.widgets.tableworkspacedisplay.presenter.TableWorkspaceDisplay.load_data') as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME, ws)
             mock_load_data.assert_called_once_with(view)
-            view.repaint_later.assert_called_once_with()
+            view.emit_repaint.assert_called_once_with()
 
 
 if __name__ == '__main__':

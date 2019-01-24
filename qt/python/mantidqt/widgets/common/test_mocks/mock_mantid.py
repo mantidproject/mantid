@@ -110,3 +110,5 @@ class MockWorkspace:
         self.rowCount = Mock(return_value=self.row_count)
 
         self.column = Mock(return_value=[1] * self.row_count)
+
+        self.emit_repaint = Mock()
