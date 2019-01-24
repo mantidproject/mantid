@@ -13,7 +13,7 @@ import sys
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QVariant, Qt, Signal, Slot
+from qtpy.QtCore import QVariant, Qt, Signal
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox,
                             QStyledItemDelegate, QTableWidget)
@@ -66,6 +66,9 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
 
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
+
+        self.resize(600, 400)
+        self.show()
 
     def resizeEvent(self, event):
         QTableWidget.resizeEvent(self, event)
