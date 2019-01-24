@@ -134,7 +134,8 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InputWorkspace", m_emptyInstrument))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFilename))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("GroupingFilename", xmlFilename))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -168,7 +169,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFilename))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("GroupingFilename", xmlFilename))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
