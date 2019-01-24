@@ -218,8 +218,8 @@ class MDEventTreeBuilderTest : public CxxTest::TestSuite {
   using TreeBuilder =
       Mantid::MDAlgorithms::MDEventTreeBuilder<ND, MDEventTml, MDEventIterator>;
 
-  const std::array<double, 3> lowerLeft = { {0, 0, 0} };
-  const std::array<double, 3> upperRight = { {8, 8, 8} };
+  const std::array<double, 3> lowerLeft = {{0, 0, 0}};
+  const std::array<double, 3> upperRight = {{8, 8, 8}};
   const size_t splitTreshold = 10;
 
   /**
