@@ -293,6 +293,9 @@ void ConvertToMD::exec() {
   ConvToMDSelector AlgoSelector(convType);
   this->m_Convertor = AlgoSelector.convSelector(m_InWS2D, this->m_Convertor);
 
+  if(!this->m_Convertor)
+    std::cout << "\n\nInvalid convertor\n\n";
+
   bool ignoreZeros = getProperty("IgnoreZeroSignals");
   // initiate conversion and estimate amount of job to do
   size_t n_steps =

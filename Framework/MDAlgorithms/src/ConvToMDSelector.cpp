@@ -85,6 +85,8 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
         res = boost::make_shared<ConvToMDEventsWS>();
       else
         res = boost::make_shared<ConvToMDEventsWSIndexing>();
+    } else {
+      res = boost::make_shared<ConvToMDHistoWS>();
     }
   }
 
