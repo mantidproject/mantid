@@ -48,17 +48,17 @@ class subPlot(QtWidgets.QWidget):
         for subplot in self.plotObjects.keys():
             self.emit_subplot_range(subplot)
 
-    def add_annotate(self,subplotName,label):
-       if subplotName not in self._context.subplots.keys():
-          print("Unknown subplot selected "+subplotName)
-          return
-       self._context.add_annotate(subplotName, label)
+    def add_annotate(self, subplotName, label):
+        if subplotName not in self._context.subplots.keys():
+            print("Unknown subplot selected " + subplotName)
+            return
+        self._context.add_annotate(subplotName, label)
 
     def add_vline(self, subplotName, xvalue, name):
-       if subplotName not in self._context.subplots.keys():
-          print("Unknown subplot selected "+subplotName)
-          return
-       self._context.add_vline(subplotName, xvalue, name)
+        if subplotName not in self._context.subplots.keys():
+            print("Unknown subplot selected " + subplotName)
+            return
+        self._context.add_vline(subplotName, xvalue, name)
 
     # plot a workspace, if a new subplot create it.
     def plot(self, subplotName, workspace, specNum=1):
@@ -130,7 +130,8 @@ class subPlot(QtWidgets.QWidget):
         # change
         else:
             self._selector_window = self._createSelectWindow(names)
-            self._selector_window.subplotSelectorSignal.connect(self._get_rm_window)
+            self._selector_window.subplotSelectorSignal.connect(
+                self._get_rm_window)
             self._selector_window.closeEventSignal.connect(
                 self._close_selector_window)
             self._selector_window.setMinimumSize(300, 100)
@@ -153,7 +154,7 @@ class subPlot(QtWidgets.QWidget):
     def _create_rm_window(self, subplotName):
         line_names = self._context.subplots[subplotName].lines.keys()
         vline_names = self._context.subplots[subplotName].vlines
-        return RemovePlotWindow(lines=line_names,vlines=vline_names, subplot=subplotName, parent=self)
+        return RemovePlotWindow(lines=line_names, vlines=vline_names, subplot=subplotName, parent=self)
 
     def _get_rm_window(self, subplotName):
         # always close selector after making a selection
@@ -170,7 +171,8 @@ class subPlot(QtWidgets.QWidget):
         # remove the lines from the subplot
         for name in names:
             if self._rm_window.getState(name):
-                self._context.subplots[self._rm_window.subplot].removeLine(name)
+                self._context.subplots[
+                    self._rm_window.subplot].removeLine(name)
             else:
                 remove_subplot = False
         # if all of the lines have been removed -> delete subplot
@@ -190,5 +192,5 @@ class subPlot(QtWidgets.QWidget):
         self._rm_window.close
         self._rm_window = None
 
-    def _remove_subplot(self,subplotName):
-        return # need to do once auto grid complete
+    def _remove_subplot(self, subplotName):
+        return  # need to do once auto grid complete

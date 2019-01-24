@@ -9,7 +9,15 @@ from __future__ import absolute_import, print_function
 
 class Label(object):
 
-    def __init__(self, text, xvalue,xrelative, yvalue, yrelative,rotation =0, protected = False):
+    def __init__(
+      self,
+      text,
+      xvalue,
+      xrelative,
+      yvalue,
+      yrelative,
+      rotation=0,
+      protected=False):
         self._text = text
         self._xvalue = xvalue
         self._xrelative = xrelative
@@ -32,17 +40,17 @@ class Label(object):
 
     def get_xval(self, x_range):
         if self._xrelative:
-           return self._xvalue
+            return self._xvalue
         else:
-           return self.relative(self._xvalue,x_range)
+            return self.relative(self._xvalue, x_range)
 
     def get_yval(self, y_range):
         if self._yrelative:
-           return self._yvalue
+            return self._yvalue
         else:
-           return self.relative(self._yvalue,y_range)
+            return self.relative(self._yvalue, y_range)
 
-    def in_x_range(self,x_range):
+    def in_x_range(self, x_range):
         if self._xvalue < x_range[0] or self._xvalue > x_range[1]:
             return False
         return True
@@ -50,6 +58,4 @@ class Label(object):
     def relative(self, value, value_range):
         if value < value_range[0] or value > value_range[1]:
             return None
-        return (value - value_range[0])/(value_range[1]-value_range[0])
-
-
+        return (value - value_range[0]) / (value_range[1] - value_range[0])
