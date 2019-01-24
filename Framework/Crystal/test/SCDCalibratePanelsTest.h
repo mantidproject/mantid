@@ -56,7 +56,6 @@ public:
     alg->setProperty("alpha", 90.0);
     alg->setProperty("beta", 90.0);
     alg->setProperty("gamma", 120.0);
-    alg->setProperty("ChangeL1", false);
     alg->setPropertyValue("DetCalFilename", "/tmp/topaz.detcal"); // deleteme
     TS_ASSERT(alg->execute());
 
@@ -67,20 +66,20 @@ public:
     // TODO: Some of the fit parameters that are below are extermly sensitive to
     // rounding errors in the algorithm LoadIsawPeaks and floating point math in
     // the instrument code. Ideally the assertions should be on something else.
-    TS_ASSERT_DELTA(-0.0050, results->cell<double>(0, 1), 1e-3);
-    TS_ASSERT_DELTA(0.0013, results->cell<double>(1, 1), 4e-4);
-    TS_ASSERT_DELTA(0.0008, results->cell<double>(2, 1), 3e-4);
+    TS_ASSERT_DELTA(-0.0031, results->cell<double>(0, 1), 1e-3);
+    TS_ASSERT_DELTA(0.0008, results->cell<double>(1, 1), 4e-4);
+    TS_ASSERT_DELTA(-0.00009, results->cell<double>(2, 1), 3e-4);
     TS_ASSERT_DELTA(
-        -1.05, results->cell<double>(3, 1) + results->cell<double>(5, 1), 0.05);
+        -1.41, results->cell<double>(3, 1) + results->cell<double>(5, 1), 0.05);
     TS_ASSERT_DELTA(0.0, results->cell<double>(4, 1), 1.1);
-    TS_ASSERT_DELTA(-6.31219, results->cell<double>(5, 1), 1.e-2);
+    TS_ASSERT_DELTA(-70.7942, results->cell<double>(5, 1), 1.e-2);
     TS_ASSERT_DELTA(1.0024, results->cell<double>(6, 1), 5e-3);
     TS_ASSERT_DELTA(0.9986, results->cell<double>(7, 1), 1e-2);
     TS_ASSERT_DELTA(0.2710, results->cell<double>(9, 1), 0.2);
     ITableWorkspace_sptr resultsL1 =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
             "params_L1");
-    TS_ASSERT_DELTA(-0.00761, resultsL1->cell<double>(2, 1), .01);
+    TS_ASSERT_DELTA(0.00529, resultsL1->cell<double>(2, 1), .01);
   }
 };
 
