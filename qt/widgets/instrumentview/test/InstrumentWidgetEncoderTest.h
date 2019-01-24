@@ -9,15 +9,14 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/NDArray.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h"
 
-#include <cxxtest/TestSuite.h>
-
-// PythonInterpreter and QApplicationHolder imports
-#include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 #include <QApplication>
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
@@ -62,9 +61,7 @@ static PythonInterpreter PYTHON_INTERPRETER;
 class QApplicationHolder : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
-    int argc(0);
-    char **argv = {};
-    m_app = new QApplication(argc, argv);
+    m_app = new QApplication(m_argc, m_argv);
 
     qRegisterMetaType<std::string>("StdString");
     qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
@@ -77,6 +74,10 @@ public:
     return true;
   }
 
+  int m_argc = 1;
+  GNU_DIAG_OFF("pedantic")
+  char *m_argv[1] = {"InstrumentWidgetTest"};
+  GNU_DIAG_ON("pedantic")
   QApplication *m_app;
 };
 
