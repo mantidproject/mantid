@@ -10,7 +10,6 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
-import os
 import os.path as osp
 
 # 3rd party imports
@@ -57,8 +56,8 @@ class MultiPythonFileInterpreter(QWidget):
 
     def append_new_editor(self, content=None, filename=None):
         if content is None:
-            filepath = os.path.expanduser("~/.mantid/default_editor_content.py")
-            if os.path.isfile(filepath):
+            filepath = osp.expanduser("~/.mantid/default_editor_content.py")
+            if osp.isfile(filepath):
                 with open(filepath, 'r') as f:
                     content = "".join(f.readlines())
             else:
