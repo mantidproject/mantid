@@ -67,25 +67,8 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
 
-        self.resize(600, 400)
-        self.show()
-
-    def repaint_later(self):
-        self.repaint_signal.emit()
-
-    @Slot()
-    def _run_repaint(self):
-        self.viewport().update()
-
-    @Slot()
-    def _run_close(self):
-        self.close()
-
-    @Slot(str)
-    def _run_rename(self, new_name):
-        self._rename(new_name)
-
-    def resizeEvent(self, _):
+    def resizeEvent(self, event):
+        QTableWidget.resizeEvent(self, event)
         header = self.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
 
