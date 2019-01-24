@@ -115,7 +115,7 @@ void InstrumentWidgetDecoder::decodeRenderTab(
   auto surface = obj->getSurface();
   surface->setShowPeakLabelsFlag(map[QString("showLabels")].toBool());
   surface->setShowPeakRowsFlag(map[QString("showRows")].toBool());
-  surface->setPeakLabelPrecision(map[QString("labelPrecision")].toBool());
+  surface->setPeakLabelPrecision(map[QString("labelPrecision")].toInt());
   surface->setShowPeakRelativeIntensityFlag(
       map[QString("showRelativeIntensity")].toBool());
 
@@ -133,7 +133,7 @@ void InstrumentWidgetDecoder::decodeColorBar(const QMap<QString, QVariant> &map,
   bar->setScaleType(scaleType);
   try {
     bar->setNthPower(power);
-  } catch (const std::runtime_error &e) {
+  } catch (const std::runtime_error &) {
     // Do nothing, because this is where the power was loaded in as 0.
   }
 

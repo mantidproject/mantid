@@ -25,7 +25,7 @@ INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
                                                      u'freeDrawButton': False, u'ringEllipseButton': False},
                                     u'maskWorkspaceSaved': False},
                                   u'renderTab': {u'displayWireframe': False, u'displayLighting': False,
-                                                 u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': True,
+                                                 u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': False,
                                                  u'colorBar': {u'max': u'40', u'scaleType': 0, u'power': u'2',
                                                                u'min': u'40'},
                                                  u'showLabels': True, u'flipView': False, u'displayDetectorsOnly': True,
@@ -48,19 +48,20 @@ INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
 class InstrumentViewEncoderTest(GuiTest):
     def setUp(self):
         self.encoder = InstrumentViewEncoder()
-        ws = CreateSampleWorkspace()
-        self.instrumentView = InstrumentViewPresenter(ws)
+        CreateSampleWorkspace(OutputWorkspace="ws")
+        self.instrumentView = InstrumentViewDecoder().decode(INSTRUMENT_VIEW_DICT)
 
     def test_encoder_is_in_encoder_factory(self):
         # Shows that the decoder has been registered on import of something from mantidqt.widget.instrumentview
-        found_encoder = EncoderFactory.find_encoder(self.instrumentView.view)
+        found_encoder = EncoderFactory.find_encoder(self.instrumentView)
         self.assertIs(InstrumentViewEncoder, found_encoder.__class__)
 
     def test_encoder_encode_function_returns_none_when_obj_is_none(self):
         self.assertIs(None, self.encoder.encode(None))
 
     def test_encoder_encodes_a_dict_similar_to_set_dict(self):
-        self.assertDictEqual(self.encoder.encode(self.instrumentView.view), INSTRUMENT_VIEW_DICT)
+        self.maxDiff = None
+        self.assertDictEqual(self.encoder.encode(self.instrumentView), INSTRUMENT_VIEW_DICT)
 
 
 class InstrumentViewDecoderTest(GuiTest):
