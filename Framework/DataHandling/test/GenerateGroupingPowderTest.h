@@ -20,6 +20,7 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
+#include <Poco/File.h>
 #include <Poco/SAX/InputSource.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -70,11 +71,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    const std::string parFile = parFilename(xmlFile);
+    const std::string parFile{parFilename(xmlFile)};
 
     // Check the results
     // par file
-    std::ifstream pf(parFile.c_str());
+    std::ifstream pf(parFile);
     std::size_t nDet;
     pf >> nDet;
     TS_ASSERT_EQUALS(nDet, 14);
@@ -126,29 +127,30 @@ public:
     GenerateGroupingPowder alg;
     alg.setChild(true);
     alg.setRethrows(true);
-    const std::string xmlFile("PowderGrouping.xml");
+    const std::string xmlFilename("PowderGrouping.xml");
     constexpr double step = 10;
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InputWorkspace", m_emptyInstrument))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFile))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFilename))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    const std::string parFile = parFilename(xmlFile);
-    const bool xmlExists = access(xmlFile.c_str(), F_OK) == 0;
+    Poco::File parFile{parFilename(xmlFilename)};
+    Poco::File xmlFile{xmlFilename};
+    const bool xmlExists = xmlFile.exists();
     TS_ASSERT(xmlExists)
-    const bool parExists = access(parFile.c_str(), F_OK) == 0;
+    const bool parExists = parFile.exists();
     TS_ASSERT(!parExists)
     if (xmlExists) {
-      remove(xmlFile.c_str());
+      xmlFile.remove();
     }
     if (parExists) {
       // Just in case something went wrong.
-      remove(parFile.c_str());
+      parFile.remove();
     }
   }
 
@@ -160,20 +162,21 @@ public:
     GenerateGroupingPowder alg;
     alg.setChild(true);
     alg.setRethrows(true);
-    const std::string xmlFile("PowderGrouping.xml");
+    const std::string xmlFilename("PowderGrouping.xml");
     constexpr double step = 10;
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFile))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFilename))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    const bool xmlExists = access(xmlFile.c_str(), F_OK) == 0;
+    Poco::File xmlFile{xmlFilename};
+    const bool xmlExists = xmlFile.exists();
     TS_ASSERT(xmlExists)
-    std::ifstream in(xmlFile);
+    std::ifstream in(xmlFilename);
     Poco::XML::InputSource source{in};
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> doc{parser.parse(&source)};
@@ -187,12 +190,12 @@ public:
     node = nodeIter.nextNode();
     TS_ASSERT(!node)
     if (xmlExists) {
-      remove(xmlFile.c_str());
+      xmlFile.remove();
     }
-    const std::string parFile = parFilename(xmlFile);
-    if (access(parFile.c_str(), F_OK) == 0) {
+    Poco::File parFile{parFilename(xmlFilename)};
+    if (parFile.exists()) {
       // Just in case something went wrong.
-      remove(parFile.c_str());
+      parFile.remove();
     }
   }
 
