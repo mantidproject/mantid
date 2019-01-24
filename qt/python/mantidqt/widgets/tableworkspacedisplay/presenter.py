@@ -90,8 +90,6 @@ class TableWorkspaceDisplay(ObservingPresenter):
     def handleItemChanged(self, item):
         """
         :type item: WorkbenchTableWidgetItem
-        :param item:
-        :return:
         """
         try:
             self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), item.is_v3d)
