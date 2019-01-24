@@ -97,7 +97,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         item.row.assert_called_once_with()
         item.column.assert_called_once_with()
-        ws.setCell.assert_called_once_with(5, 5, "magic parameter")
+        ws.setCell.assert_called_once_with(5, 5, "magic parameter", notify_replace=False)
         item.update.assert_called_once_with()
         item.reset.assert_called_once_with()
 

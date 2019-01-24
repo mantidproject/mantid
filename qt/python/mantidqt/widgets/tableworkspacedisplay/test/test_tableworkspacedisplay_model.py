@@ -71,7 +71,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
 
         # check that the correct conversion function was retrieved
         # -> the one for the column for which the data is being set
-        model.ws.setCell.assert_called_once_with(expected_row, expected_col, test_data)
+        model.ws.setCell.assert_called_once_with(expected_row, expected_col, test_data, notify_replace=False)
 
     @with_mock_model
     def test_set_cell_data_v3d(self, model):
@@ -87,7 +87,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
 
         # check that the correct conversion function was retrieved
         # -> the one for the column for which the data is being set
-        model.ws.setCell.assert_called_once_with(expected_row, expected_col, V3D(1, 2, 3))
+        model.ws.setCell.assert_called_once_with(expected_row, expected_col, V3D(1, 2, 3), notify_replace=False)
 
     def test_no_raise_with_supported_workspace(self):
         from mantid.simpleapi import CreateEmptyTableWorkspace
