@@ -34,12 +34,13 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         twoTheta122 = outWS.detectorTwoTheta(det122)
         self.assertAlmostEquals(twoTheta122, 0.057659886309975004, delta=1.e-13)
 
-        twoTheta = outWS.run().getLogData("TwoTheta").value
+        twoTheta = outWS.run().getLogData("reduction.two_theta").value
         self.assertAlmostEquals(twoTheta, 1.5371900428796, delta=1.e-13)
 
-        peakPosition = outWS.run().getLogData("foreground.centre_workspace_index").value
+        peakPosition = outWS.run().getLogData("reduction.foreground.centre_workspace_index").value
         twoTheta2 = numpy.rad2deg(outWS.spectrumInfo().twoTheta(peakPosition))
         self.assertAlmostEquals(twoTheta2, twoTheta, delta=1.e-13)
+        self.assertEquals(mtd.getObjectNames(), [])
 
     def testDefaultRunFIGARO(self):
         args = {
@@ -56,6 +57,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         det122 = outWS.getDetector(122)
         twoTheta122 = outWS.detectorTwoTheta(det122)
         self.assertAlmostEquals(twoTheta122, 0.03060663990053301, delta=1.e-13)
+        self.assertEquals(mtd.getObjectNames(), [])
 
     def testFlatBackgroundSubtraction(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -82,6 +84,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                 numpy.testing.assert_equal(ys, [0.] * outWS.blocksize())
             else:
                 numpy.testing.assert_almost_equal(ys, [10.] * outWS.blocksize())
+        self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def _backgroundSubtraction(self, subtractionType):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -109,6 +112,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                 numpy.testing.assert_almost_equal(ys, [0] * outWS.blocksize())
             else:
                 numpy.testing.assert_almost_equal(ys, [10.] * outWS.blocksize())
+        self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testLinearFlatBackgroundSubtraction(self):
         self._backgroundSubtraction('Background Linear Fit')
@@ -139,6 +143,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             numpy.testing.assert_equal(ys, bkgLevel)
+        self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testForegroundBackgroundRanges(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -200,6 +205,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                 numpy.testing.assert_equal(ys, [0.0] * outWS.blocksize())
             else:
                 numpy.testing.assert_equal(ys, [-5.0] * outWS.blocksize())
+        self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testAsymmetricForegroundRanges(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -231,13 +237,14 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getNumberHistograms(), 100)
         logs = outWS.run()
-        properties = ['foreground.first_workspace_index',
-                      'foreground.centre_workspace_index',
-                      'foreground.last_workspace_index']
+        properties = ['reduction.foreground.first_workspace_index',
+                      'reduction.foreground.centre_workspace_index',
+                      'reduction.foreground.last_workspace_index']
         values = [21, 23, 24]
         for p, val in zip(properties, values):
             self.assertTrue(logs.hasProperty(p))
             self.assertEqual(logs.getProperty(p).value, val)
+        self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testWaterWorkspace(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
@@ -263,6 +270,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             numpy.testing.assert_equal(ys, [1.0] * outWS.blocksize())
+        self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testCleanupOFF(self):
         # test if intermediate workspaces exist:
@@ -299,19 +307,20 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
-        print(mtd.getObjectNames())
-        self.assertEquals(mtd.getObjectNames(), ['outWS_cloned_for_flat_bkg_',
-                                                 'outWS_detectors_',
-                                                 'outWS_flat_background_',
-                                                 'outWS_flat_background_subtracted_',
-                                                 'outWS_in_wavelength_',
-                                                 'outWS_monitors_',
-                                                 'outWS_transposed_clone_',
-                                                 'outWS_transposed_flat_background_',
-                                                 'outWS_water_calibrated_',
-                                                 'outWS_water_detectors_',
-                                                 'outWS_water_rebinned_',
-                                                 'peakTable'])
+        wsInADS = mtd.getObjectNames()
+        self.assertEquals(len(wsInADS), 12)
+        self.assertEquals(wsInADS, ['outWS_cloned_for_flat_bkg_',
+                                    'outWS_detectors_',
+                                    'outWS_flat_background_',
+                                    'outWS_flat_background_subtracted_',
+                                    'outWS_in_wavelength_',
+                                    'outWS_monitors_',
+                                    'outWS_transposed_clone_',
+                                    'outWS_transposed_flat_background_',
+                                    'outWS_water_calibrated_',
+                                    'outWS_water_detectors_',
+                                    'outWS_water_rebinned_',
+                                    'peakTable'])
         mtd.clear()
 
     def testTwoInputFiles(self):
@@ -326,6 +335,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        self.assertEquals(mtd.getObjectNames(), [])
 
     def create_sample_workspace(self, name, numMonitors=0):
         args = {
@@ -345,6 +355,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         loadInstrument = create_algorithm('LoadInstrument', **loadInstrArgs)
         loadInstrument.setLogging(False)
         loadInstrument.execute()
+        self.assertEquals(mtd.getObjectNames(), [name])
 
     def testBeamCentreBraggAngelInput(self):
         args = {
@@ -358,9 +369,10 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(outWS.getRun().getProperty('peak_position').value, 10.23)
-        self.assertEquals(outWS.getRun().getProperty('foreground.centre_workspace_index').value, 10)
+        self.assertEquals(outWS.getRun().getProperty('reduction.line_position').value, 10.23)
+        self.assertEquals(outWS.getRun().getProperty('reduction.foreground.centre_workspace_index').value, 10)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        self.assertEquals(mtd.getObjectNames(), [])
 
     def testBeamCentreFit(self):
         args = {
@@ -372,24 +384,29 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
-        self.assertAlmostEquals(outWS.getRun().getProperty('peak_position').value, 202.1773407538167, delta=1.e-13)
-        self.assertEquals(outWS.getRun().getProperty('foreground.centre_workspace_index').value, 202)
+        self.assertAlmostEquals(outWS.getRun().getProperty('reduction.line_position').value,
+                                202.1773407538167,
+                                delta=1.e-13)
+        self.assertEquals(outWS.getRun().getProperty('reduction.foreground.centre_workspace_index').value, 202)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+        print(mtd.getObjectNames())
 
     def testUnitConversion(self):
         args = {
             'Run': 'ILL/D17/317369',
             'OutputWorkspace': 'outWS',
-            'RangeLower': 2.,
-            'RangeUpper': 20,
+            'FitRangeLower': 2.,
+            'FitRangeUpper': 20,
             'rethrow': True,
             'child': True
         }
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
-        self.assertAlmostEquals(outWS.getRun().getProperty('peak_position').value, 202.17752545515665, delta=1.e-13)
-        self.assertEquals(outWS.getRun().getProperty('foreground.centre_workspace_index').value, 202)
+        self.assertAlmostEquals(outWS.getRun().getProperty('reduction.line_position').value,
+                                202.17752545515665,
+                                delta=1.e-13)
+        self.assertEquals(outWS.getRun().getProperty('reduction.foreground.centre_workspace_index').value, 202)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
 if __name__ == "__main__":

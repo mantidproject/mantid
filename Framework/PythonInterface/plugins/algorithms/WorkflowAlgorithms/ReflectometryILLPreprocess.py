@@ -24,6 +24,10 @@ class Prop:
     BEAM_ANGLE = 'BraggAngle'
     BEAM_CENTRE = 'BeamCentre'
     BEAM_POS_WS = 'DirectBeamPosition'
+    START_WS_INDEX = 'FitStartWorkspaceIndex'
+    END_WS_INDEX = 'FitEndWorkspaceIndex'
+    XMIN = 'FitRangeLower'
+    XMAX = 'FitRangeUpper'
     BKG_METHOD = 'FlatBackground'
     CLEANUP = 'Cleanup'
     FLUX_NORM_METHOD = 'FluxNormalisation'
@@ -38,10 +42,6 @@ class Prop:
     SLIT_NORM = 'SlitNormalisation'
     SUBALG_LOGGING = 'SubalgorithmLogging'
     WATER_REFERENCE = 'WaterWorkspace'
-    START_WS_INDEX = 'StartWorkspaceIndex'
-    END_WS_INDEX = 'EndWorkspaceIndex'
-    XMIN = 'RangeLower'
-    XMAX = 'RangeUpper'
 
 
 class BkgMethod:
@@ -108,11 +108,15 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws = self._inputWS()
 
+        self._instrumentName = ws.getInstrument().getName()
+
         ws, monWS = self._extractMonitors(ws)
 
-        ws = self._peakFitting(ws)
+        ws, peak = self._peakFitting(ws)
 
-        ws = self._moveDetector(ws)
+        twoTheta = self._addSampleLogInfo(ws, peak)
+
+        ws = self._moveDetector(ws, twoTheta)
 
         ws = self._waterCalibration(ws)
 
@@ -210,46 +214,46 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(Prop.START_WS_INDEX,
                              validator=wsIndexRange,
                              defaultValue=0,
-                             doc='Start histogram index used for peak fitting.')
+                             doc='Start workspace index used for peak fitting.')
         self.declareProperty(Prop.END_WS_INDEX,
                              validator=wsIndexRange,
                              defaultValue=255,
-                             doc='Last histogram index used for peak fitting.')
+                             doc='Last workspace index used for peak fitting.')
         self.declareProperty(Prop.XMIN,
                              defaultValue=Property.EMPTY_DBL,
-                             doc='Minimum x value (unit wavelength) used for peak fitting.')
+                             doc='Minimum x value (unit Angstrom) used for peak fitting.')
         self.declareProperty(Prop.XMAX,
                              defaultValue=Property.EMPTY_DBL,
-                             doc='Maximum x value (unit wavelength) used for peak fitting.')
+                             doc='Maximum x value (unit Angstrom) used for peak fitting.')
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
         if self.getProperty(Prop.INPUT_WS).isDefault and len(self.getProperty(Prop.RUN).value) == 0:
-            issues[Prop.RUN] = "Provide at least an input file or alternatively an input workspace."
+            issues[Prop.RUN] = 'Provide at least an input file or alternatively an input workspace.'
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
-                issues[Prop.BKG_METHOD] = "Cannot calculate flat background if both upper and lower background widths are zero."
+                issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
             if not self.getProperty(Prop.INPUT_WS).isDefault and self.getProperty(Prop.BEAM_POS_WS).isDefault \
                     and self.getProperty(Prop.BEAM_CENTRE).isDefault:
-                issues[Prop.BEAM_POS_WS] = "Cannot subtract flat background without knowledge of peak position/foreground centre."
-                issues[Prop.BEAM_CENTRE] = "Cannot subtract flat background without knowledge of peak position/foreground centre."
+                issues[Prop.BEAM_POS_WS] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
+                issues[Prop.BEAM_CENTRE] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
         if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
             beamCentre = self.getProperty(Prop.BEAM_CENTRE).value
             if beamCentre < 0. or beamCentre > 255.:
-                issues[Prop.BEAM_CENTRE] = "Value should be between 0 and 255."
+                issues[Prop.BEAM_CENTRE] = 'Value should be between 0 and 255.'
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             xmin = self.getProperty(Prop.XMIN).value
             xmax = self.getProperty(Prop.XMAX).value
             if xmax < xmin:
-                issues[Prop.XMIN] = "Must be smaller than RangeUpper."
+                issues[Prop.XMIN] = 'Must be smaller than RangeUpper.'
         if not self.getProperty(Prop.START_WS_INDEX).isDefault \
                 and not self.getProperty(Prop.END_WS_INDEX).isDefault:
             minIndex = self.getProperty(Prop.START_WS_INDEX).value
             maxIndex = self.getProperty(Prop.END_WS_INDEX).value
             if maxIndex < minIndex:
-                issues[Prop.START_WS_INDEX] = "Must be smaller then EndWorkspaceIndex."
+                issues[Prop.START_WS_INDEX] = 'Must be smaller than EndWorkspaceIndex.'
         return issues
 
     def _convertToWavelength(self, ws):
@@ -337,21 +341,22 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         inputFiles = inputFiles.replace(',', '+')
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
-            loadOption = {'XUnit': 'TimeOfFlight'}
-            loadOption['BeamCentre'] = 0.0
+            loadOption = {'XUnit': 'TimeOfFlight',
+                          'BeamCentre': 0.0}
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
             ws = LoadAndMerge(Filename=inputFiles,
                               LoaderName='LoadILLReflectometry',
-                              LoaderVersion=1,
+                              LoaderVersion=-1,
                               LoaderOptions=loadOption,
                               OutputWorkspace=mergedWSName,
                               EnableLogging=self._subalgLogging)
         else:
             ws = self.getProperty(Prop.INPUT_WS).value
+            self._cleanup.protect(ws)
         return ws
 
     def _peakFitting(self, ws):
-        """Return the raw input workspace with sample log information."""
+        """Add peak and foreground information to the sample logs."""
         # Convert to wavelength
         l1 = ws.spectrumInfo().l1()
         hists = ws.getNumberHistograms()
@@ -360,9 +365,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         theta = ws.spectrumInfo().twoTheta(mindex) / 2.
         if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
             tableWithBeamPos = self.getProperty(Prop.BEAM_POS_WS).value
-            self.beamPos = tableWithBeamPos.cell('PeakCentre', 0)
+            linePosition = tableWithBeamPos.cell('PeakCentre', 0)
         elif not self.getProperty(Prop.BEAM_CENTRE).isDefault:
-            self.beamPos = self.getProperty(Prop.BEAM_CENTRE).value
+            linePosition = self.getProperty(Prop.BEAM_CENTRE).value
         else:
             # Fit peak position
             peakWSName = self._names.withSuffix('peak')
@@ -378,66 +383,77 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             if not self.getProperty(Prop.END_WS_INDEX).isDefault:
                 args['EndWorkspaceIndex'] = self.getPropertyValue(Prop.END_WS_INDEX).value
             FindReflectometryLines(**args)
-            self.beamPos = mtd[peakWSName].readY(0)[0]
+            linePosition = mtd[peakWSName].readY(0)[0]
+            self._cleanup.cleanup(peakWSName)
+        return ws, linePosition
+
+    def _addSampleLogInfo(self, ws, linePosition):
+        """Add foreground indices and linePosition to the sample logs, names start with reduction."""
         # Add the fractional workspace index of the beam position to the sample logs of ws.
-        logargs = {'Workspace': ws, 'LogType': 'Number', 'EnableLogging': self._subalgLogging}
-        logargs['LogName'] = 'peak_position'
-        logargs['LogText'] = format(self.beamPos, '.13f')
-        logargs['NumberType'] = 'Double'
-        AddSampleLog(**logargs)
+        AddSampleLog(Workspace=ws,
+                     LogType='Number',
+                     LogName='reduction.line_position',
+                     LogText=format(linePosition, '.13f'),
+                     NumberType='Double',
+                     EnableLogging=self._subalgLogging)
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
-        self.beamPosIndex = int(numpy.rint(self.beamPos))
-        if self.beamPosIndex > 255:
-            self.beamPosIndex = 255
+        beamPosIndex = int(numpy.rint(linePosition))
+        if beamPosIndex > 255:
+            beamPosIndex = 255
             self.self.log().warning('Is it a monitor spectrum?')
         sign = self._workspaceIndexDirection(ws)
-        startIndex = self.beamPosIndex - sign * hws[0]
-        endIndex = self.beamPosIndex + sign * hws[1]
+        startIndex = beamPosIndex - sign * hws[0]
+        endIndex = beamPosIndex + sign * hws[1]
         if startIndex > endIndex:
             endIndex, startIndex = startIndex, endIndex
-        logargs['LogName'] = common.SampleLogs.FOREGROUND_START
-        logargs['LogText'] = str(startIndex)
-        logargs['NumberType'] = 'Int'
-        AddSampleLog(**logargs)
-        logargs['LogName'] = common.SampleLogs.FOREGROUND_CENTRE
-        logargs['LogText'] = str(self.beamPosIndex)
-        AddSampleLog(**logargs)
-        logargs['LogName'] = common.SampleLogs.FOREGROUND_END
-        logargs['LogText'] = str(endIndex)
-        AddSampleLog(**logargs)
-        return ws
-
-    def _moveDetector(self, ws):
-        """Perform detector position correction for reflected beams only."""
-        # Write twoTheta to sample logs
-        # Add theta to the sample logs of ws.
+        AddSampleLog(Workspace=ws,
+                     LogType='Number',
+                     LogName=common.SampleLogs.FOREGROUND_START,
+                     LogText=str(startIndex),
+                     NumberType='Int',
+                     EnableLogging=self._subalgLogging)
+        AddSampleLog(Workspace=ws,
+                     LogType='Number',
+                     LogName=common.SampleLogs.FOREGROUND_CENTRE,
+                     LogText=str(beamPosIndex),
+                     NumberType='Int',
+                     EnableLogging=self._subalgLogging)
+        AddSampleLog(Workspace=ws,
+                     LogType='Number',
+                     LogName=common.SampleLogs.FOREGROUND_END,
+                     LogText=str(endIndex),
+                     NumberType='Int',
+                     EnableLogging=self._subalgLogging)
+        # Add two theta to the sample logs of ws.
         if not self.getProperty(Prop.BEAM_ANGLE).isDefault:
             twoTheta = self.getProperty(Prop.BEAM_ANGLE).value
         else:
             spectrum_info = ws.spectrumInfo()
-            twoTheta = numpy.rad2deg(spectrum_info.twoTheta(self.beamPosIndex))
-        logargs = {'Workspace': ws,
-                   'LogType': 'Number',
-                   'EnableLogging': self._subalgLogging}
-        logargs['LogName'] = 'twoTheta'
-        logargs['LogText'] = format(twoTheta, '.13f')
-        logargs['NumberType'] = 'Double'
-        logargs['LogUnit'] = 'Degrees'
-        AddSampleLog(**logargs)
+            twoTheta = numpy.rad2deg(spectrum_info.twoTheta(int(numpy.rint(linePosition))))
+        AddSampleLog(Workspace=ws,
+                     LogType='Number',
+                     LogName=common.SampleLogs.TWO_THETA,
+                     LogText=format(twoTheta, '.13f'),
+                     NumberType='Double',
+                     LogUnit='Degrees',
+                     EnableLogging=self._subalgLogging)
+        return twoTheta
+
+    def _moveDetector(self, ws, twoTheta):
+        """Perform detector position correction for reflected beams only."""
         if self.getProperty(Prop.BEAM_ANGLE).isDefault:
             return ws
         # Move detector
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
-        self.instrumentName = ws.run().get('instrument.name').value
         SpecularReflectionPositionCorrect(InputWorkspace=ws,
                                           OutputWorkspace=detectorMovedWSName,
                                           TwoTheta=twoTheta,
                                           DetectorCorrectionType='RotateAroundSample',
                                           DetectorComponentName='detector',
                                           DetectorFacesSample=True,
-                                          PixelSize=common.pixelSize(self.instrumentName),
-                                          DirectLinePosition=self.beamPos,
+                                          PixelSize=common.pixelSize(self._instrumentName),
+                                          #DirectLinePosition=linePosition,
                                           EnableLogging=self._subalgLogging)
         detectorMovedWS = mtd[detectorMovedWSName]
         self._cleanup.cleanup(ws)
@@ -479,10 +495,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Normalise ws to slit opening."""
         if self.getProperty(Prop.SLIT_NORM).value == SlitNorm.OFF:
             return ws
-        r = ws.run()
-        self.instrumentName = r.get('instrument.name').value
-        slit2width = r.get(common.slitSizeLogEntry(self.instrumentName, 1))
-        slit3width = r.get(common.slitSizeLogEntry(self.instrumentName, 2))
+        run = ws.run()
+        slit2width = run.get(common.slitSizeLogEntry(self._instrumentName, 1))
+        slit3width = run.get(common.slitSizeLogEntry(self._instrumentName, 2))
         if slit2width is None or slit3width is None:
             self.log().warning('Slit information not found in sample logs. Slit normalisation disabled.')
             return ws

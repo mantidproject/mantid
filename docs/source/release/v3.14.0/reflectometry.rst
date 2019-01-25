@@ -31,8 +31,9 @@ Improved
 - Common naming of slit component name and size properties across algorithms.
 - :ref:`algm-SpecularReflectionPositionCorrect` is now compatible with the reflectometers at ILL.
 - :ref:`algm-CreateTransmissionWorkspace` and :ref:`algm-CreateTransmissionWorkspaceAuto` now use NormalizeByIntegratedMontitors instead of using MonitorIntegrationWavelengthMin and MonitorIntegrationWavelengthMax being defined, to determine how to normalize. 
-- :ref:`algm-ReflectometryILLPreprocess` does not accept and will not output an `DirectBeamPosition` and `OutputBeamPositionWorkspace`, respectively. However, new input properties are present to refine the peak fitting. In general, D17 and Figaro instrument definition files are modified to let the Spectrum numbers begin with index 0 instead of 1. The peak position are now present in the SampleLog information as documented.
-- :ref:`algm-LoadILLReflectometry` lets spectrum numbers start with 0 instead of 1. This applied to detector IDs as well.
+- :ref:`algm-ReflectometryILLPreprocess` does not accept and will not output an `DirectBeamPosition` and `OutputBeamPositionWorkspace`, respectively. However, new input properties are present to refine the peak fitting. The peak position and two theta scattering anlge are now present in the SampleLog information as documented.
+- ILL's D17 and Figaro instrument definition files are modified to let the detector Id's begin with index 0 instead of 1.
+- :ref:`algm-LoadILLReflectometry` lets spectrum numbers start with 0 instead of 1.
 
 Bug fixes
 #########

@@ -33,9 +33,9 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
         if chopper1Phase > 360.:
             # CH1.phase on FIGARO is set to an arbitrary value (999.9)
             chopper1Phase = 0.
-        try:
+        if sampleLogs.hasProperty('CollAngle.open_offset'):
             openoffset = sampleLogs.getProperty('CollAngle.open_offset').value
-        except:
+        else:
             openoffset = sampleLogs.getProperty('CollAngle.openOffset').value
         return 45. - (chopper2Phase - chopper1Phase) - openoffset
 
@@ -122,10 +122,11 @@ def instrumentName(ws):
 
 
 class SampleLogs:
-    FOREGROUND_CENTRE = 'foreground.centre_workspace_index'
-    FOREGROUND_END = 'foreground.last_workspace_index'
-    FOREGROUND_START = 'foreground.first_workspace_index'
-    SUM_TYPE = 'foreground.summation_type'
+    FOREGROUND_CENTRE = 'reduction.foreground.centre_workspace_index'
+    FOREGROUND_END = 'reduction.foreground.last_workspace_index'
+    FOREGROUND_START = 'reduction.foreground.first_workspace_index'
+    SUM_TYPE = 'reduction.foreground.summation_type'
+    TWO_THETA = 'reduction.two_theta'
 
 
 class WSCleanup:

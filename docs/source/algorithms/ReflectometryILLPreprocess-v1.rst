@@ -27,11 +27,11 @@ The *OutputWorkspace* can be further fed to :ref:`ReflectometryILLSumForeground 
 
 The algorithm adds the following sample log entries to the *OutputWorkspace*:
 
-* peak_position : the peak position (workspace index) used to define the :math:`\theta` angles (detector positions)
-* foreground.centre_workspace_index
-* foreground.last_workspace_index
-* foreground.first_workspace_index
-* theta.at_peak_position : the two theta value in degrees
+* reduction.line_position : the peak position (workspace index) used to define the :math:'2\theta2 angles (detector positions)
+* reduction.foreground.centre_workspace_index
+* reduction.foreground.last_workspace_index
+* reduction.foreground.first_workspace_index
+* reduction.two_theta : the two theta scattering angle in degrees
 
 The workflow diagram below gives an overview of the algorithm:
 
@@ -44,7 +44,7 @@ A fitting of the present peak position takes place in order to determine the det
 For preventing fitting of the present peak position, the property *BeamCentre* allows to provide a peak position.
 A use case is to enter a direct peak position, which can be obtained from the direct beam workspaces sample logs, when the *Run* is a reflected beam.
 
-Alternatively, the properties *BraggAngle* and *DirectBeamPositionWorkspace* affect the pixel :math:`\theta` angles. They map directly to the corresponding properties of :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`.
+Alternatively, the properties *BraggAngle* and *DirectBeamPositionWorkspace* affect the pixel :math:'2\theta' angles. They map directly to the corresponding properties of :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`.
 
 Foreground and backgrounds
 ##########################
