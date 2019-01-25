@@ -27,8 +27,13 @@ def _normalize_by_index(workspace, index):
         y_values = workspace.readY(idx)
         y_errors = workspace.readE(idx)
 
+        # Avoid divide by zero
+        if y_values[index] == 0.0:
+            scale = np.reciprocal(1.0e-8)
+        else:
+            scale = np.reciprocal(y_values[index])
+
         # Normalise y values
-        scale = np.reciprocal(y_values[index])
         y_values_normalised = scale * y_values
 
         # Propagate y errors: C = A / B ; dC = sqrt( (dA/B)^2 + (A*dB/B^2)^2 )
