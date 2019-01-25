@@ -123,7 +123,7 @@ void CylinderAbsorption::retrieveProperties() {
     throw std::runtime_error(
         "Need to specify both height and radius of cylinder");
   }
-  if (m_cylHeight == 0. || m_cylRadius == 0.)
+  if (m_cylHeight <= 0. || m_cylRadius <= 0.)
     throw std::runtime_error("Failed to specify height and radius of cylinder");
 
   m_numSlices = getProperty("NumberOfSlices");
