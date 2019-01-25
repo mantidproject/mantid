@@ -20,6 +20,25 @@ import mantidqt.icons
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 
 
+class MatrixWorkspaceTableView(QTableView):
+    def __init__(self, parent):
+        super(MatrixWorkspaceTableView, self).__init__(parent)
+        self.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+        header = self.horizontalHeader()
+        header.sectionDoubleClicked.connect(self.handle_double_click)
+
+    def resizeEvent(self, event):
+        super(MatrixWorkspaceTableView, self).resizeEvent(event)
+
+        header = self.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Interactive)
+
+    def handle_double_click(self, section):
+        header = self.horizontalHeader()
+        header.resizeSection(section, header.defaultSectionSize())
+
+
 class MatrixWorkspaceDisplayView(QTabWidget):
     def __init__(self, presenter, parent=None, name=''):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
@@ -51,8 +70,8 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.show()
 
     def add_table(self, label):
-        tab = QTableView()
-        tab.setSelectionBehavior(QAbstractItemView.SelectItems)
+        tab = MatrixWorkspaceTableView(self)
+
         self.addTab(tab, label)
         self.tabs.append(tab)
         return tab

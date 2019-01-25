@@ -215,8 +215,8 @@ void DetectorEfficiencyCor::correctForEfficiency(
   auto &yout = m_outputWS->mutableY(spectraIn);
   auto &eout = m_outputWS->mutableE(spectraIn);
   // Need the original values so this is not a reference
-  auto yValues = m_inputWS->y(spectraIn);
-  auto eValues = m_inputWS->e(spectraIn);
+  const auto yValues = m_inputWS->y(spectraIn);
+  const auto eValues = m_inputWS->e(spectraIn);
 
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds

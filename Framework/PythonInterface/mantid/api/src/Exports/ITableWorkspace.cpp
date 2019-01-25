@@ -303,20 +303,18 @@ PyObject *row(ITableWorkspace &self, int row) {
  * @param self A reference to the TableWorkspace python object that we were
  * called on
  */
-PyObject *columnTypes(ITableWorkspace &self) {
+boost::python::list columnTypes(ITableWorkspace &self) {
   int numCols = static_cast<int>(self.columnCount());
 
-  PyObject *list = PyList_New(numCols);
+  boost::python::list types;
 
   for (int col = 0; col < numCols; col++) {
-    Mantid::API::Column_const_sptr column = self.getColumn(col);
-    const std::type_info &typeID = column->get_type_info();
-    if (PyList_SetItem(list, col, FROM_CSTRING(typeID.name()))) {
-      throw std::runtime_error("Error while building list");
-    }
+    const auto column = self.getColumn(col);
+    const auto &type = column->type();
+    types.append(type);
   }
 
-  return list;
+  return types;
 }
 
 /**

@@ -8,7 +8,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
-
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 

@@ -76,4 +76,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Parallel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Parallel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
