@@ -5,26 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mock import Mock
-
-from mantidqt.widgets.common.observing_view import ObservingView
-from mantidqt.widgets.common.test_mocks.mock_qt import MockQtEvent, MockQtSignal
-
-
-class MockObservingView(ObservingView):
-    def __init__(self, _):
-        ObservingView.__init__(self, _)
-        self.close_signal = MockQtSignal()
-        self.rename_signal = MockQtSignal()
-        self.presenter = Mock()
-        self.presenter.clear_observer = Mock()
-        self.setWindowTitle = Mock()
+from mantidqt.widgets.common.test_mocks.mock_observing import MockObservingView
+from mantidqt.widgets.common.test_mocks.mock_qt import MockQtEvent
 
 
 class ObservingViewTest(unittest.TestCase):

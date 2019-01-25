@@ -16,10 +16,10 @@ from mantidqt.widgets.common.test_mocks.mock_qt import MockQtSignal
 
 class MockObservingView(ObservingView):
     def __init__(self, _):
-        ObservingView.__init__(self, _)
         self.close_signal = MockQtSignal()
         self.rename_signal = MockQtSignal()
-        self.presenter = Mock(spec={'clear_observer'})
+        self.presenter = Mock()
+        self.presenter.clear_observer = Mock()
         self.setWindowTitle = Mock()
 
 
