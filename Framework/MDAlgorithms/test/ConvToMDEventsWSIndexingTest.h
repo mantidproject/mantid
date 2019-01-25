@@ -345,10 +345,10 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDEventTreeBuilderTest *createSuite() {
+  static ConvToMDEventsWSIndexingTest *createSuite() {
     return new MDEventTreeBuilderTest();
   }
-  static void destroySuite(MDEventTreeBuilderTest *suite) { delete suite; }
+  static void destroySuite(ConvToMDEventsWSIndexingTest *suite) { delete suite; }
 
   void test_sructure() {
 
