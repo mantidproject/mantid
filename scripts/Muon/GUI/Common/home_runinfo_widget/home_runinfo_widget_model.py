@@ -10,6 +10,7 @@ from Muon.GUI.Common.muon_context import MuonContext
 
 mev_conversion_factor = 1000000
 
+
 class HomeRunInfoWidgetModel(object):
 
     def __init__(self, muon_data=MuonContext()):
