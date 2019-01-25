@@ -94,7 +94,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
   }
 
 #pragma omp parallel for
-  for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra;
+  for (int workspaceIndex = 0; workspaceIndex < static_cast<int>(m_NSpectra);
        ++workspaceIndex) {
     const Mantid::DataObjects::EventList &el =
         m_EventWS->getSpectrum(workspaceIndex);
