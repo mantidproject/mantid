@@ -101,8 +101,13 @@ This can be done in two ways:
 
        <Mantid Build Directory>\bin\Debug;
        <Mantid Source Directory>\external\src\ThirdParty\bin;
+       <Mantid Source Directory>\external\src\ThirdParty\bin\mingw;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\python2.7;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\plugins;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt4\bin;
        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\bin;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\qt4\lib;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\lib;
        %PATH%
 
 The semi-colon delimited list of paths should end in ``;%PATH%`` so that we prepend to the existing list of paths rather than overwriting them.
