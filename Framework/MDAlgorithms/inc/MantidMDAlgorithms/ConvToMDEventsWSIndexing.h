@@ -20,6 +20,13 @@ class Progress;
 }
 namespace MDAlgorithms {
 
+#if BOOST_VERSION <= 106100
+class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
+  void appendEventsFromInputWS(API::Progress *pProgress,
+                               const API::BoxController_sptr &bc) override;
+};
+#else
+
 /**
  * This class creates the MDWorkspace from the collection of
  * ToF events: converts to the MD events with proper Nd
@@ -275,7 +282,7 @@ ConvToMDEventsWSIndexing::mdEventType() {
     return LEAN;
   return NONE;
 }
-
+#endif /*BOOST_VERSION <= 106100*/
 } // namespace MDAlgorithms
 } // namespace Mantid
 

@@ -119,13 +119,18 @@ void ConvertToMD::init() {
                   "workspace. The workspace will load data from the file on "
                   "demand in order to reduce memory use.");
 
+#if BOOST_VERSION > 106100
   std::vector<std::string> converterType{"default", "indexed"};
+#else
+  std::vector<std::string> converterType{"default"};
+#endif
   auto loadTypeValidator =
       boost::make_shared<StringListValidator>(converterType);
   declareProperty("ConverterType", "default", loadTypeValidator,
                   "[default, indexed], indexed is the experimental type that "
                   "can speedup the conversion process"
                   "for the big files using the indexing.");
+
 }
 //----------------------------------------------------------------------------------------------
 
