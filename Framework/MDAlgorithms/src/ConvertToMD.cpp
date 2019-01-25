@@ -130,7 +130,6 @@ void ConvertToMD::init() {
                   "[default, indexed], indexed is the experimental type that "
                   "can speedup the conversion process"
                   "for the big files using the indexing.");
-
 }
 //----------------------------------------------------------------------------------------------
 

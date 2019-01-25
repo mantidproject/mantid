@@ -17,6 +17,6 @@ void ConvToMDEventsWSIndexing::appendEventsFromInputWS(
     API::Progress *pProgress, const API::BoxController_sptr &bc) {
   appendEventsFromInputWS<8>(pProgress, bc);
 }
-#endif //BOOST_VERSION <= 106100
+#endif // BOOST_VERSION <= 106100
 } // namespace MDAlgorithms
 } // namespace Mantid
