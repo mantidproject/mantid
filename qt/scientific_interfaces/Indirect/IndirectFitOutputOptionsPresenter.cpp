@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -13,8 +13,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
-    IIndirectFitOutputOptionsModel *model, IIndirectFitOutputOptionsView *view)
-    : QObject(nullptr), m_model(model), m_view(view) {
+    std::unique_ptr<IIndirectFitOutputOptionsModel> model,
+    IIndirectFitOutputOptionsView *view)
+    : QObject(nullptr), m_model(std::move(model)), m_view(view) {
   setMultiWorkspaceOptionsVisible(false);
 
   connect(m_view, SIGNAL(groupWorkspaceChanged(std::string const &)), this,

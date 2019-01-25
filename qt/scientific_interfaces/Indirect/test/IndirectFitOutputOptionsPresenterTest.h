@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -127,7 +127,7 @@ public:
     m_model = std::make_unique<MockIndirectFitOutputOptionsModel>();
 
     m_presenter = std::make_unique<IndirectFitOutputOptionsPresenter>(
-        m_model.get(), m_view.get());
+        m_model, m_view.get());
   }
 
   void tearDown() override {

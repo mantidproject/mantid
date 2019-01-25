@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -14,7 +14,7 @@ namespace IDA {
 
 IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
     : IIndirectFitOutputOptionsView(parent),
-      m_outputOptions(new Ui::IndirectFitOutputOptions) {
+      m_outputOptions(std::make_unique<Ui::IndirectFitOutputOptions>()) {
   m_outputOptions->setupUi(this);
 
   connect(m_outputOptions->cbGroupWorkspace,

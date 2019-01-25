@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -22,8 +22,9 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsPresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
-                                    IIndirectFitOutputOptionsView *view);
+  IndirectFitOutputOptionsPresenter(
+      std::unique_ptr<IIndirectFitOutputOptionsModel> model,
+      IIndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
 
   void setMultiWorkspaceOptionsVisible(bool visible);
@@ -59,7 +60,7 @@ private:
 
   void displayWarning(std::string const &message);
 
-  IIndirectFitOutputOptionsModel *m_model;
+  std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
   IIndirectFitOutputOptionsView *m_view;
 };
 
