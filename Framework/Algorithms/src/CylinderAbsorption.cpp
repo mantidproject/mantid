@@ -48,8 +48,8 @@ void CylinderAbsorption::defineProperties() {
 }
 
 // returns an empty string if anything is wrong
-void
-CylinderAbsorption::getShapeFromSample(const Geometry::IObject &sampleShape) {
+void CylinderAbsorption::getShapeFromSample(
+    const Geometry::IObject &sampleShape) {
   if ((!isEmpty(m_cylHeight)) && (!isEmpty(m_cylRadius)))
     return; // nothing to update
   if (!sampleShape.hasValidShape())
