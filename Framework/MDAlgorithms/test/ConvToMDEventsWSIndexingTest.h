@@ -13,6 +13,10 @@
 #include <ostream>
 #include <stdexcept>
 
+#ifdef _WIN32
+  #define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif
+
 /**
  * Class that stores the fixed 3d tree structure with
  * split parameter = 2 for every dim and the depth = 3:
