@@ -292,10 +292,8 @@ def convert_bank_name_to_detector_type_isis(detector_name):
     """
     detector_name = detector_name.upper()
     detector_name = detector_name.strip()
-    print("name: ", detector_name)
     if detector_name == "REAR-DETECTOR" or detector_name == "MAIN-DETECTOR-BANK" or detector_name == "DETECTORBENCH" \
             or detector_name == "REAR" or detector_name == "MAIN":
-        print("IN LAB!")
         detector_type = DetectorType.LAB
     elif detector_name == "FRONT-DETECTOR" or detector_name == "HAB" or detector_name == "FRONT":
         detector_type = DetectorType.HAB

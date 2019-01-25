@@ -341,7 +341,6 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
             else:
                 is_trans = False
             move_alg.setProperty("IsTransmissionWorkspace", is_trans)
-
             for workspace in workspace_list:
                 zero_alg.setProperty("Workspace", workspace)
                 zero_alg.execute()
