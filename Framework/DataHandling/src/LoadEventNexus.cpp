@@ -688,6 +688,17 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
                                    true);
   }
+  // set more properties on the workspace
+  try {
+    // this is a static method that is why it is passing the
+    // file object and the file path
+    loadEntryMetadata<EventWorkspaceCollection_sptr>(m_filename, m_ws,
+                                                     m_top_entry_name);
+  } catch (std::runtime_error &e) {
+    // Missing metadata is not a fatal error. Log and go on with your life
+    g_log.error() << "Error loading metadata: " << e.what() << '\n';
+  }
+  
   m_ws->setNPeriods(
       static_cast<size_t>(nPeriods),
       periodLog); // This is how many workspaces we are going to make.
@@ -775,17 +786,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   std::string outName = getPropertyValue("OutputWorkspace");
   if (AnalysisDataService::Instance().doesExist(outName))
     AnalysisDataService::Instance().remove(outName);
-
-  // set more properties on the workspace
-  try {
-    // this is a static method that is why it is passing the
-    // file object and the file path
-    loadEntryMetadata<EventWorkspaceCollection_sptr>(m_filename, m_ws,
-                                                     m_top_entry_name);
-  } catch (std::runtime_error &e) {
-    // Missing metadata is not a fatal error. Log and go on with your life
-    g_log.error() << "Error loading metadata: " << e.what() << '\n';
-  }
 
   // --------------------------- Time filtering
   // ------------------------------------
