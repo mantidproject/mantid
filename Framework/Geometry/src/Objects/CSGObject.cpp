@@ -2178,6 +2178,14 @@ detail::ShapeInfo::GeometryShape CSGObject::shape() const {
   }
 }
 
+const detail::ShapeInfo &CSGObject::shapeInfo() const {
+  if (m_handler->hasShapeInfo()) {
+    return m_handler->shapeInfo();
+  } else {
+    throw std::logic_error("CSGObject has no ShapeInfo to return");
+  }
+}
+
 /**
  * get info on standard shapes
  */
