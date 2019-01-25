@@ -14,6 +14,7 @@ set ( QT5_SRC_FILES
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser.cpp
@@ -21,6 +22,7 @@ set ( QT5_SRC_FILES
   src/HelpWindow.cpp
   # todo: move this to the instrument view library when the slice
   # viewer library is removed
+  src/IndirectFitPropertyBrowser.cpp
   src/InputController.cpp
   src/InterfaceFactory.cpp
   src/InterfaceManager.cpp
@@ -96,9 +98,11 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
+  inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/GenericDialog.h
+  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h

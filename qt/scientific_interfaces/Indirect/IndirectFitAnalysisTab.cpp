@@ -112,39 +112,39 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this,
           SLOT(setModelFitFunction()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(fitScheduled()), this,
-          SLOT(singleFit()));
-  connect(m_fitPropertyBrowser, SIGNAL(sequentialFitScheduled()), this,
-          SLOT(executeFit()));
+  //connect(m_fitPropertyBrowser, SIGNAL(fitScheduled()), this,
+  //        SLOT(singleFit()));
+  //connect(m_fitPropertyBrowser, SIGNAL(sequentialFitScheduled()), this,
+  //        SLOT(executeFit()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
-          SLOT(setModelStartX(double)));
-  connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
-          SLOT(setModelEndX(double)));
+  //connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
+  //        SLOT(setModelStartX(double)));
+  //connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
+  //        SLOT(setModelEndX(double)));
 
-  connect(m_fitPropertyBrowser,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)));
+  //connect(m_fitPropertyBrowser,
+  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
+  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)));
 
-  connect(m_fitPropertyBrowser,
-          SIGNAL(customBoolChanged(const QString &, bool)), this,
-          SIGNAL(customBoolChanged(const QString &, bool)));
+  //connect(m_fitPropertyBrowser,
+  //        SIGNAL(customBoolChanged(const QString &, bool)), this,
+  //        SIGNAL(customBoolChanged(const QString &, bool)));
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(setModelFitFunction()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SIGNAL(functionChanged()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(updatePlotOptions()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(updateResultOptions()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(updateParameterValues()));
+  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+  //        SIGNAL(functionChanged()));
+  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+  //        SLOT(updatePlotOptions()));
+  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+  //        SLOT(updateResultOptions()));
+  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+  //        SLOT(updateParameterValues()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(updatePlotGuess()));
-  connect(m_fitPropertyBrowser, SIGNAL(workspaceNameChanged(const QString &)),
-          this, SLOT(updatePlotGuess()));
+  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+  //        SLOT(updatePlotGuess()));
+  //connect(m_fitPropertyBrowser, SIGNAL(workspaceNameChanged(const QString &)),
+  //        this, SLOT(updatePlotGuess()));
 
   connect(m_plotPresenter.get(),
           SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
@@ -155,8 +155,10 @@ void IndirectFitAnalysisTab::setup() {
 
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
-  connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
-          SLOT(updateAvailableFitTypes()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
+          SLOT(updateDataReferences()));
+  //connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
+  //        SLOT(updateAvailableFitTypes()));
 
   connectDataAndSpectrumPresenters();
   connectDataAndPlotPresenters();
@@ -208,8 +210,8 @@ void IndirectFitAnalysisTab::connectSpectrumAndPlotPresenters() {
 void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(setBrowserWorkspace(std::size_t)));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(updateAttributeValues()));
+  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+  //        SLOT(updateAttributeValues()));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(updateAttributeValues()));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
@@ -223,18 +225,18 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(updateParameterValues()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)),
-          m_plotPresenter.get(), SLOT(setStartX(double)));
-  connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)),
-          m_plotPresenter.get(), SLOT(setEndX(double)));
-  connect(m_fitPropertyBrowser, SIGNAL(updatePlotSpectrum(int)),
-          m_plotPresenter.get(), SLOT(updatePlotSpectrum(int)));
-  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
-          SLOT(setBrowserWorkspaceIndex(int)));
-  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
-          SLOT(updateAttributeValues()));
-  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
-          SLOT(updateParameterValues()));
+  //connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)),
+  //        m_plotPresenter.get(), SLOT(setStartX(double)));
+  //connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)),
+  //        m_plotPresenter.get(), SLOT(setEndX(double)));
+  //connect(m_fitPropertyBrowser, SIGNAL(updatePlotSpectrum(int)),
+  //        m_plotPresenter.get(), SLOT(updatePlotSpectrum(int)));
+  //connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+  //        SLOT(setBrowserWorkspaceIndex(int)));
+  //connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+  //        SLOT(updateAttributeValues()));
+  //connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+  //        SLOT(updateParameterValues()));
 
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(setBrowserStartX(double)));
@@ -245,27 +247,27 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
   connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)), this,
           SLOT(updateFitBrowserParameterValues()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+  //connect(m_fitPropertyBrowser, SIGNAL(xRangeChanged(double, double)),
+  //        m_plotPresenter.get(), SLOT(updateGuess()));
   connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)),
           m_plotPresenter.get(), SLOT(updateGuess()));
   connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)),
           m_plotPresenter.get(), SLOT(updateGuess()));
 
-  connect(m_fitPropertyBrowser,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-          m_plotPresenter.get(), SLOT(updateRangeSelectors()));
-  connect(m_fitPropertyBrowser,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+  //connect(m_fitPropertyBrowser,
+  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+  //        m_plotPresenter.get(), SLOT(updateRangeSelectors()));
+  //connect(m_fitPropertyBrowser,
+  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+  //        m_plotPresenter.get(), SLOT(updateGuess()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
-          m_plotPresenter.get(), SLOT(updatePlots()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
+  //        m_plotPresenter.get(), SLOT(updatePlots()));
+  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
+  //        m_plotPresenter.get(), SLOT(updateGuess()));
 
-  connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), m_plotPresenter.get(),
-          SLOT(enablePlotGuessInSeparateWindow()));
+  //connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), m_plotPresenter.get(),
+  //        SLOT(enablePlotGuessInSeparateWindow()));
 }
 
 void IndirectFitAnalysisTab::connectDataAndSpectrumPresenters() {
@@ -284,10 +286,10 @@ void IndirectFitAnalysisTab::connectDataAndFitBrowserPresenters() {
           SLOT(updateBrowserFittingRange()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(setBrowserWorkspace()));
-  connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
-          SLOT(setDataTableStartX(double)));
-  connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
-          SLOT(setDataTableEndX(double)));
+  //connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
+  //        SLOT(setDataTableStartX(double)));
+  //connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
+  //        SLOT(setDataTableEndX(double)));
 }
 
 void IndirectFitAnalysisTab::setFitDataPresenter(
@@ -760,9 +762,9 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   m_plotPresenter->updatePlots();
   updatePlotOptions();
 
-  connect(m_fitPropertyBrowser,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+  //connect(m_fitPropertyBrowser,
+  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+  //        m_plotPresenter.get(), SLOT(updateGuess()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(fitAlgorithmComplete(bool)));
 }
@@ -1054,9 +1056,9 @@ void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
-  disconnect(m_fitPropertyBrowser,
-             SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-             m_plotPresenter.get(), SLOT(updateGuess()));
+  //disconnect(m_fitPropertyBrowser,
+  //           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+  //           m_plotPresenter.get(), SLOT(updateGuess()));
 
   setAlgorithmProperties(fitAlgorithm);
 
@@ -1121,6 +1123,10 @@ void IndirectFitAnalysisTab::setPlotOptions(
     plotList << "All";
   plotList.append(options.toList());
   cbPlotType->addItems(plotList);
+}
+
+void IndirectFitAnalysisTab::updateDataReferences() {
+  m_fitPropertyBrowser->updateFunctionBrowserData(m_fittingModel->numberOfWorkspaces());
 }
 
 /**

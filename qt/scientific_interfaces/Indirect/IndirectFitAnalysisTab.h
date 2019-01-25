@@ -208,6 +208,7 @@ protected slots:
 
   virtual void updatePlotOptions() = 0;
 
+  void updateDataReferences();
   void updateResultOptions();
   void saveResult();
 

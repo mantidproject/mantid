@@ -293,3 +293,15 @@ signals:
     void endXChanged(double);
     void fittingDone(const QString &);
 };
+
+// ---------------------------------
+// Indirect Fit Property Browser
+// ---------------------------------
+class IndirectFitPropertyBrowser : public QDockWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
+%End
+public:
+    IndirectFitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
+    void init();
+};
