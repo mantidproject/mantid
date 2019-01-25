@@ -20,12 +20,13 @@ from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               CreateSingleValuedWorkspace, LoadNexus,
                               MultiplyMD, LoadIsawDetCal, LoadMask,
                               CopyInstrumentParameters,
-                              ApplyCalibration,
+                              ApplyCalibration, CopySample,
                               RecalculateTrajectoriesExtents,
                               ConvertToMDMinMaxGlobal,
                               CropWorkspaceForMDNorm)
 from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLengthValidator, FloatArrayProperty, Direction, Property
 from mantid import logger
+import numpy as np
 
 
 class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
@@ -68,7 +69,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="SolidAngle",defaultValue="",action=FileAction.Load,
                                           extensions=[".nxs"]),
                              doc="An input workspace containing momentum integrated vanadium (a measure"
-                             "of the solid angle). See :ref:`MDnormSCD <algm-MDnormSCD>` for details")
+                             "of the solid angle). See :ref:`MDNormSCD <algm-MDNormSCD>` for details")
         self.declareProperty(FileProperty(name="Flux",defaultValue="",action=FileAction.Load,
                                           extensions=[".nxs"]),
                              "An input workspace containing momentum dependent flux. See :ref:`MDnormSCD <algm-MDnormSCD>` for details")
@@ -78,8 +79,8 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                              doc="Maximum value in momentum. The min of this value and the flux momentum maximum will be used.")
 
         # UBMatrix
-        self.declareProperty(FileProperty(name="UBMatrix",defaultValue="",action=FileAction.Load,
-                                          extensions=[".mat", ".ub", ".txt"]),
+        self.declareProperty(MultipleFileProperty(name="UBMatrix",
+                                                  extensions=[".mat", ".ub", ".txt"]),
                              doc="Path to an ISAW-style UB matrix text file. See :ref:`LoadIsawUB <algm-LoadIsawUB>`")
         # Goniometer
         self.declareProperty('SetGoniometer', False, "Set which Goniometer to use. See :ref:`SetGoniometer <algm-SetGoniometer>`")
@@ -89,6 +90,8 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.setPropertySettings('Axis0', condition)
         self.setPropertySettings('Axis1', condition)
         self.setPropertySettings('Axis2', condition)
+        self.declareProperty(FloatArrayProperty('OmegaOffset', [], direction=Direction.Input),
+                             doc="Offset to apply to the omega rotation of the Goniometer. Need to provide one value for every run.")
 
         # Corrections
         self.declareProperty(FileProperty(name="LoadInstrument",defaultValue="",action=FileAction.OptionalLoad,
@@ -97,14 +100,17 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("ApplyCalibration", '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
-                             doc='Calibration will be applied using this TableWorkspace using :ref:`ApplyCalibration <algm-ApplyCalibration>`.')
+                             doc='Calibration will be applied using this TableWorkspace using '
+                             ':ref:`ApplyCalibration <algm-ApplyCalibration>`.')
         self.declareProperty(FileProperty(name="DetCal",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".detcal"]),
-                             "Load an ISAW DetCal calibration onto the data from a file. See :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`")
+                             "Load an ISAW DetCal calibration onto the data from a file. "
+                             "See :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`")
         self.declareProperty(MatrixWorkspaceProperty("CopyInstrumentParameters", '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
-                             doc='The input workpsace from which :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` will copy parameters to data')
+                             doc='The input workpsace from which :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` '
+                             'will copy parameters to data')
         self.declareProperty(FileProperty(name="MaskFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml",".msk"]),
                              "Masking file for masking. Supported file format is XML and ISIS ASCII. See :ref:`LoadMask <algm-LoadMask>`")
@@ -145,6 +151,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.setPropertyGroup("Axis0","Goniometer")
         self.setPropertyGroup("Axis1","Goniometer")
         self.setPropertyGroup("Axis2","Goniometer")
+        self.setPropertyGroup("OmegaOffset","Goniometer")
 
         # Corrections
         self.setPropertyGroup("LoadInstrument","Corrections")
@@ -161,6 +168,20 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.setPropertyGroup("Dimension1Binning","Projection and binning")
         self.setPropertyGroup("Dimension2Binning","Projection and binning")
 
+    def validateInputs(self):
+        issues = {}
+
+        UBs = self.getProperty("UBMatrix").value
+        Omega = self.getProperty("OmegaOffset").value
+        runs = self.getProperty("Filename").value
+        if not (len(UBs) == 1 or len(UBs) == len(runs)):
+            issues["UBMatrix"] = "Must provide one matrix, or a separate UB matrix for every run"
+
+        if not (len(Omega) == 0 or len(Omega) == len(runs)):
+            issues["OmegaOffset"] = "Must be either empty or provide one value for every run"
+
+        return issues
+
     def PyExec(self):
         # remove possible old temp workspaces
         [DeleteWorkspace(ws) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
@@ -172,6 +193,12 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self._copy_params = bool(self.getProperty("CopyInstrumentParameters").value)
         _masking = bool(self.getProperty("MaskFile").value)
         _outWS_name = self.getPropertyValue("OutputWorkspace")
+        _UB = self.getProperty("UBMatrix").value
+        if len(_UB) == 1:
+            _UB = np.tile(_UB, len(self.getProperty("Filename").value))
+        _offsets = self.getProperty("OmegaOffset").value
+        if len(_offsets) == 0:
+            _offsets = np.zeros(len(self.getProperty("Filename").value))
 
         if self.getProperty("ReuseSAFlux").value and mtd.doesExist('__sa') and mtd.doesExist('__flux'):
             logger.notice("Reusing previously loaded SolidAngle and Flux workspaces. "
@@ -205,21 +232,15 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                 mtd['__flux'].setY(spectrumNumber,(Y-Y.min())/(Y.max()-Y.min()))
 
         if _background:
-            self.load_file_and_apply(self.getProperty("Background").value, '__bkg')
+            self.load_file_and_apply(self.getProperty("Background").value, '__bkg', 0)
 
         progress = Progress(self, 0.0, 1.0, len(self.getProperty("Filename").value))
 
-        for run in self.getProperty("Filename").value:
+        for n, run in enumerate(self.getProperty("Filename").value):
             logger.notice("Working on " + run)
 
-            self.load_file_and_apply(run, '__run')
-
-            if self.getProperty('SetGoniometer').value:
-                SetGoniometer(Workspace='__run',
-                              Goniometers=self.getProperty('Goniometers').value,
-                              Axis0=self.getProperty('Axis0').value,
-                              Axis1=self.getProperty('Axis1').value,
-                              Axis2=self.getProperty('Axis2').value)
+            self.load_file_and_apply(run, '__run', _offsets[n])
+            LoadIsawUB('__run', _UB[n])
 
             MinValues, MaxValues = ConvertToMDMinMaxGlobal(InputWorkspace='__run',
                                                            QDimensions='Q3D',
@@ -255,7 +276,10 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
             DeleteWorkspace('__md')
 
             if _background:
-                # Set background Goniometer to be the same as data
+                # Set background Goniometer and UB to be the same as data
+                CopySample(InputWorkspace='__run',OutputWorkspace='__bkg',
+                           CopyName=False,CopyMaterial=False,CopyEnvironment=False,CopyShape=False,
+                           CopyLattice=True)
                 mtd['__bkg'].run().getGoniometer().setR(mtd['__run'].run().getGoniometer().getR())
 
                 ConvertToMD(InputWorkspace='__bkg',
@@ -312,7 +336,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         # remove temp workspaces
         [DeleteWorkspace(ws) for ws in self.temp_workspace_list if mtd.doesExist(ws)]
 
-    def load_file_and_apply(self, filename, ws_name):
+    def load_file_and_apply(self, filename, ws_name, offset):
         Load(Filename=filename,
              OutputWorkspace=ws_name,
              FilterByTofMin=self.getProperty("FilterByTofMin").value,
@@ -326,9 +350,31 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         if self._copy_params:
             CopyInstrumentParameters(OutputWorkspace=ws_name, InputWorkspace=self.getProperty("CopyInstrumentParameters").value)
         MaskDetectors(Workspace=ws_name,MaskedWorkspace='__sa')
+
+        if offset != 0:
+            if self.getProperty('SetGoniometer').value:
+                SetGoniometer(Workspace=ws_name,
+                              Goniometers=self.getProperty('Goniometers').value,
+                              Axis0='{},0,1,0,1'.format(offset),
+                              Axis1=self.getProperty('Axis0').value,
+                              Axis2=self.getProperty('Axis1').value,
+                              Axis3=self.getProperty('Axis2').value)
+            else:
+                SetGoniometer(Workspace=ws_name,
+                              Axis0='{},0,1,0,1'.format(offset),
+                              Axis1='omega,0,1,0,1',
+                              Axis2='chi,0,0,1,1',
+                              Axis3='phi,0,1,0,1')
+        else:
+            if self.getProperty('SetGoniometer').value:
+                SetGoniometer(Workspace=ws_name,
+                              Goniometers=self.getProperty('Goniometers').value,
+                              Axis0=self.getProperty('Axis0').value,
+                              Axis1=self.getProperty('Axis1').value,
+                              Axis2=self.getProperty('Axis2').value)
+
         ConvertUnits(InputWorkspace=ws_name,OutputWorkspace=ws_name,Target='Momentum')
         CropWorkspaceForMDNorm(InputWorkspace=ws_name,OutputWorkspace=ws_name,XMin=self.XMin,XMax=self.XMax)
-        LoadIsawUB(ws_name,self.getProperty("UBMatrix").value)
 
 
 AlgorithmFactory.subscribe(SingleCrystalDiffuseReduction)
