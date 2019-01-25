@@ -620,8 +620,7 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
       } else if (binning.size() == 1) {
         auto step = binning[0];
         double nsteps = (dimMax - dimMin) / step;
-        if (nsteps + 1 - std::ceil(nsteps) >= 1e-4)
-        {
+        if (nsteps + 1 - std::ceil(nsteps) >= 1e-4) {
           nsteps = std::ceil(nsteps);
         } else {
           nsteps = std::floor(nsteps);
@@ -633,8 +632,7 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
         auto step = binning[1];
         dimMax = static_cast<coord_t>(binning[2]);
         double nsteps = (dimMax - dimMin) / step;
-        if (nsteps + 1 - std::ceil(nsteps) >= 1e-4)
-        {
+        if (nsteps + 1 - std::ceil(nsteps) >= 1e-4) {
           nsteps = std::ceil(nsteps);
         } else {
           nsteps = std::floor(nsteps);
