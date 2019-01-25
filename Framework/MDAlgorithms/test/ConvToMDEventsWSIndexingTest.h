@@ -209,7 +209,7 @@ private:
 
 using Mantid::MDAlgorithms::ConvToMDEventsWSIndexing;
 
-class MDEventTreeBuilderTest : public CxxTest::TestSuite {
+class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
   static constexpr size_t ND = 3;
   using Point = std::array<Mantid::coord_t, ND>;
   using Points = std::vector<Point>;
