@@ -13,16 +13,18 @@ import sys
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QVariant, Qt
+from qtpy.QtCore import QVariant, Qt, Signal, Slot
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox,
                             QStyledItemDelegate, QTableWidget)
 
 import mantidqt.icons
+from mantidqt.widgets.common.observing_view import ObservingView
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 
 
 class PreciseDoubleFactory(QItemEditorFactory):
+
     def __init__(self):
         QItemEditorFactory.__init__(self)
 
@@ -36,7 +38,11 @@ class PreciseDoubleFactory(QItemEditorFactory):
         return widget
 
 
-class TableWorkspaceDisplayView(QTableWidget):
+class TableWorkspaceDisplayView(QTableWidget, ObservingView):
+    close_signal = Signal()
+    rename_signal = Signal(str)
+    repaint_signal = Signal()
+
     def __init__(self, presenter, parent=None, name=''):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
@@ -54,6 +60,10 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
 
+        self.close_signal.connect(self._run_close)
+        self.rename_signal.connect(self._run_rename)
+        self.repaint_signal.connect(self._run_repaint)
+
         self.resize(600, 400)
         self.show()
 
@@ -64,6 +74,21 @@ class TableWorkspaceDisplayView(QTableWidget):
         QTableWidget.resizeEvent(self, event)
         header = self.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
+
+    def emit_repaint(self):
+        self.repaint_signal.emit()
+
+    @Slot()
+    def _run_repaint(self):
+        self.viewport().update()
+
+    @Slot()
+    def _run_close(self):
+        self.close()
+
+    @Slot(str)
+    def _run_rename(self, new_name):
+        self._rename(new_name)
 
     def handle_double_click(self, section):
         header = self.horizontalHeader()
