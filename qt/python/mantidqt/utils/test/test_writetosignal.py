@@ -12,11 +12,15 @@ from __future__ import (absolute_import)
 import unittest
 
 import sys
-from mock import patch, Mock
 from qtpy.QtCore import QCoreApplication, QObject
 
 from mantidqt.utils.qt.test import GuiTest
 from mantidqt.utils.writetosignal import WriteToSignal
+
+if sys.version_info.major == 2:
+    from mock import patch
+else:
+    from unittest.mock import patch
 
 
 class Receiver(QObject):
