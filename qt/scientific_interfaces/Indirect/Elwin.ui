@@ -24,7 +24,7 @@
        <number>4</number>
       </property>
       <item>
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="cbInstrument">
         <item>
          <property name="text">
           <string>IRIS</string>
@@ -68,7 +68,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox_2">
+       <widget class="QComboBox" name="cbAnalyser">
         <property name="minimumSize">
          <size>
           <width>160</width>
@@ -100,7 +100,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox_3">
+       <widget class="QComboBox" name="cbReflection">
         <property name="minimumSize">
          <size>
           <width>160</width>
@@ -115,6 +115,27 @@
         <item>
          <property name="text">
           <string>004</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Extention:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbExtention">
+        <item>
+         <property name="text">
+          <string>red</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>sqw</string>
          </property>
         </item>
        </widget>
@@ -477,6 +498,7 @@
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>

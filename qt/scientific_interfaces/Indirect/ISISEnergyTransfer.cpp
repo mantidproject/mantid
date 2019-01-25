@@ -462,6 +462,7 @@ void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
 void ISISEnergyTransfer::setInstrumentDefault() {
   QMap<QString, QString> instDetails = getInstrumentDetails();
 
+	auto const fff = instDetails.value("instrument").toStdString();
   // Set the search instrument for runs
   m_uiForm.dsRunFiles->setInstrumentOverride(instDetails["instrument"]);
 

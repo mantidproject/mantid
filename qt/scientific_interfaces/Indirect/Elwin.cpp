@@ -13,6 +13,7 @@
 
 #include <QFileInfo>
 
+#include <algorithm>
 #include <qwt_plot.h>
 
 using namespace Mantid::API;
@@ -154,6 +155,12 @@ void Elwin::setup() {
 
   m_dblManager->setValue(m_properties["BackgroundStart"], -0.24);
   m_dblManager->setValue(m_properties["BackgroundEnd"], -0.22);
+
+  auto data = m_uiForm.cbInstrument->currentText().toStdString();
+  std::transform(data.begin(), data.end(), data.begin(), std::tolower);
+  m_uiForm.dsInputFiles->setInstrumentOverride(QString::fromStdString(data));
+  m_uiForm.dsInputFiles->setSearchTextEndExtention("_graphite002_red.nxs");
+  ;
 }
 
 void Elwin::run() {
