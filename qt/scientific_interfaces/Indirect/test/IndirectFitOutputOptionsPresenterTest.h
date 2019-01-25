@@ -127,7 +127,7 @@ public:
     m_model = std::make_unique<MockIndirectFitOutputOptionsModel>();
 
     m_presenter = std::make_unique<IndirectFitOutputOptionsPresenter>(
-        m_model, m_view.get());
+        m_model.get(), m_view.get());
   }
 
   void tearDown() override {

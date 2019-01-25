@@ -22,9 +22,8 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsPresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectFitOutputOptionsPresenter(
-      std::unique_ptr<IIndirectFitOutputOptionsModel> model,
-      IIndirectFitOutputOptionsView *view);
+  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
+                                    IIndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
 
   void setMultiWorkspaceOptionsVisible(bool visible);
@@ -60,7 +59,7 @@ private:
 
   void displayWarning(std::string const &message);
 
-  std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
+  IIndirectFitOutputOptionsModel *m_model;
   IIndirectFitOutputOptionsView *m_view;
 };
 

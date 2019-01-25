@@ -288,7 +288,7 @@ void IndirectFitAnalysisTab::setOutputOptionsView(
     IIndirectFitOutputOptionsView *view) {
   m_outOptionsPresenter =
       Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(
-          std::make_unique<IndirectFitOutputOptionsModel>(), view);
+          new IndirectFitOutputOptionsModel(), view);
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(
