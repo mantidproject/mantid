@@ -9,6 +9,7 @@
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include <QFileInfo>
 
@@ -19,25 +20,31 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
 
-std::string createRangeString(std::size_t from, std::size_t to) {
+WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+std::string createRangeString(std::size_t const &from, std::size_t const &to) {
   return std::to_string(from) + "-" + std::to_string(to);
 }
 
-std::string createGroupString(std::size_t start, std::size_t size) {
+std::string createGroupString(std::size_t const &start,
+                              std::size_t const &size) {
   return createRangeString(start, start + size - 1);
 }
 
-std::string createGroupingString(std::size_t groupSize,
-                                 std::size_t numberOfGroups) {
+std::string createGroupingString(std::size_t const &groupSize,
+                                 std::size_t const &numberOfGroups) {
   auto groupingString = createRangeString(0, groupSize - 1);
   for (auto i = groupSize; i < groupSize * numberOfGroups; i += groupSize)
     groupingString += "," + createGroupString(i, groupSize);
   return groupingString;
 }
 
-std::string createDetectorGroupingString(std::size_t groupSize,
-                                         std::size_t numberOfGroups,
-                                         std::size_t numberOfDetectors) {
+std::string createDetectorGroupingString(std::size_t const &groupSize,
+                                         std::size_t const &numberOfGroups,
+                                         std::size_t const &numberOfDetectors) {
   const auto groupingString = createGroupingString(groupSize, numberOfGroups);
   const auto remainder = numberOfDetectors % numberOfGroups;
   if (remainder == 0)
@@ -47,8 +54,8 @@ std::string createDetectorGroupingString(std::size_t groupSize,
                            numberOfDetectors - 1);
 }
 
-std::string createDetectorGroupingString(std::size_t numberOfDetectors,
-                                         std::size_t numberOfGroups) {
+std::string createDetectorGroupingString(std::size_t const &numberOfDetectors,
+                                         std::size_t const &numberOfGroups) {
   const auto groupSize = numberOfDetectors / numberOfGroups;
   if (groupSize == 0)
     return createRangeString(0, numberOfDetectors - 1);
@@ -67,6 +74,14 @@ getCustomGroupingNumbers(std::string const &customString) {
       customGroupingNumbers.emplace_back(std::stoull(string));
   return customGroupingNumbers;
 }
+
+void ungroupWorkspace(std::string const &workspaceName) {
+  auto ungroup = AlgorithmManager::Instance().create("UnGroupWorkspace");
+  ungroup->initialize();
+  ungroup->setProperty("InputWorkspace", workspaceName);
+  ungroup->execute();
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -292,9 +307,11 @@ QString ISISEnergyTransfer::validateDetectorGrouping() const {
 }
 
 void ISISEnergyTransfer::run() {
-  IAlgorithm_sptr reductionAlg =
+  auto reductionAlg =
       AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
   reductionAlg->initialize();
+  //reductionAlg->setChild(true);
+  //reductionAlg->setAlwaysStoreInADS(true);
   BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
   QString instName = getInstrumentConfiguration()->getInstrumentName();
@@ -397,32 +414,25 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  if (error)
-    return;
+  auto const outputGroup =
+      getADSWorkspaceGroup("IndirectEnergyTransfer_Workspaces");
+  if (!error && !outputGroup->isEmpty()) {
+    m_pythonExportWsName = outputGroup->getNames()[0];
+    m_outputWorkspaces = outputGroup->getNames();
 
-  WorkspaceGroup_sptr energyTransferOutputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          "IndirectEnergyTransfer_Workspaces");
-  if (energyTransferOutputGroup->size() == 0)
-    return;
+    ungroupWorkspace(outputGroup->getName());
 
-  // Set workspace for Python export as the first result workspace
-  m_pythonExportWsName = energyTransferOutputGroup->getNames()[0];
-  m_outputWorkspaces = energyTransferOutputGroup->getNames();
-  // Ungroup the output workspace
-  energyTransferOutputGroup->removeAll();
-  AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
-
-  // Enable plotting and saving
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.cbPlotType->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.ckSaveAclimax->setEnabled(true);
-  m_uiForm.ckSaveASCII->setEnabled(true);
-  m_uiForm.ckSaveDaveGrp->setEnabled(true);
-  m_uiForm.ckSaveNexus->setEnabled(true);
-  m_uiForm.ckSaveNXSPE->setEnabled(true);
-  m_uiForm.ckSaveSPE->setEnabled(true);
+    // Enable plotting and saving
+    m_uiForm.pbPlot->setEnabled(true);
+    m_uiForm.cbPlotType->setEnabled(true);
+    m_uiForm.pbSave->setEnabled(true);
+    m_uiForm.ckSaveAclimax->setEnabled(true);
+    m_uiForm.ckSaveASCII->setEnabled(true);
+    m_uiForm.ckSaveDaveGrp->setEnabled(true);
+    m_uiForm.ckSaveNexus->setEnabled(true);
+    m_uiForm.ckSaveNXSPE->setEnabled(true);
+    m_uiForm.ckSaveSPE->setEnabled(true);
+  }
 }
 
 int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
