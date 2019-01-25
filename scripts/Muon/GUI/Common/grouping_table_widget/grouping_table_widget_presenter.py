@@ -50,7 +50,8 @@ class GroupingTablePresenter(object):
         return True
 
     def validate_detector_ids(self, text):
-        if re.match(run_utils.run_string_regex, text):
+        # detector_list = run_utils.run_string_to_list(text)
+        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text)) <= self._model._data.num_detectors:
             return True
         self._view.warning_popup("Invalid detector list.")
         return False
@@ -119,6 +120,7 @@ class GroupingTablePresenter(object):
             try:
                 self.update_model_from_view()
             except ValueError as error:
+                self._model.remove_pairs_with_removed_name(self._view.get_table_item_text(row, 0))
                 self._view.warning_popup(error)
 
         self.update_view_from_model()
