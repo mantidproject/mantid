@@ -45,8 +45,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
       m_buttonOpt(Text), m_fileProblem(""), m_entryNumProblem(""),
       m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
       m_liveButtonState(Hide), m_showValidator(true), m_foundFiles(),
-      m_lastFoundFiles(), m_lastDir(), m_fileFilter(), m_pool(),
-      m_searchTextEnd("") {
+      m_lastFoundFiles(), m_lastDir(), m_fileFilter(), m_pool() {
 
   m_uiForm.setupUi(this);
 
@@ -489,10 +488,6 @@ void MWRunFiles::setInstrumentOverride(const QString &instName) {
   findFiles(true);
 }
 
-void MWRunFiles::setSearchTextEndExtention(const QString &endText) {
-  m_searchTextEnd = endText;
-}
-
 /**
  * Set the file text.  This is different to setText in that it emits findFiles,
  *as well
@@ -577,7 +572,7 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
 
     // See if we can just prepend the instrument and be done
     if (boost::regex_match(searchText.toStdString(), runNumbers)) {
-      searchText = m_defaultInstrumentName + searchText + m_searchTextEnd;
+      searchText = m_defaultInstrumentName + searchText;
     }
     // If it is a list we need to prepend the instrument to all run numbers
     else if (boost::regex_match(searchText.toStdString(), runNumberList)) {
@@ -585,8 +580,7 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
       QStringList newRunNumbers;
 
       for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it)
-        newRunNumbers << m_defaultInstrumentName + (*it).simplified() +
-                             m_searchTextEnd;
+        newRunNumbers << m_defaultInstrumentName + (*it).simplified();
 
       searchText = newRunNumbers.join(",");
     }

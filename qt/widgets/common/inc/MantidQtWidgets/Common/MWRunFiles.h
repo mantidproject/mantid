@@ -147,8 +147,6 @@ public:
   QString getInstrumentOverride();
   /// Overrides the value of default instrument
   void setInstrumentOverride(const QString &instName);
-  /// Sets the value to be added to the end of the search text
-  void setSearchTextEndExtention(const QString &endText);
   /// Set the input read-only or not
   void setReadOnly(bool readOnly);
   /// Get the last directory
@@ -274,8 +272,6 @@ private:
   QString m_fileFilter;
   /// Cache the default instrument name
   QString m_defaultInstrumentName;
-  /// Cache an extention onto the end of the search text
-  QString m_searchTextEnd;
   /// Expanded user input
   QString m_valueForProperty;
   /// Handle to a find files thread pool manager
