@@ -215,6 +215,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         Gcf.set_active(self)
 
     def _widgetclosed(self):
+        # this method is called both if the user closes the window through the X
+        # and if they select the plot in plot manager and click delete
+        if self.toolbar:
+            self.toolbar.destroy()
+
         if self.window._destroying:
             return
         self.window._destroying = True
@@ -231,7 +236,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # line is run, leading to a useless AttributeError.
 
     def _get_toolbar(self, canvas, parent):
-            return WorkbenchNavigationToolbar(canvas, parent, False)
+        return WorkbenchNavigationToolbar(canvas, parent, False)
 
     def resize(self, width, height):
         'set the canvas size in pixels'
@@ -267,8 +272,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             return
         self.window._destroying = True
         self.window.destroyed.connect(self._widgetclosed)
-        if self.toolbar:
-            self.toolbar.destroy()
         self.window.close()
 
     def grid_toggle(self):
