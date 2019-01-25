@@ -157,7 +157,7 @@ class MuonDataContext(object):
         if self.check_group_contains_valid_detectors(group):
             self._groups[group.name] = group
         else:
-            raise ValueError('Detectors in group {} not in instrument'.format(group.name))
+            raise ValueError('Invalid detectors in group {}'.format(group.name))
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
@@ -303,7 +303,7 @@ class MuonDataContext(object):
             self.add_pair(pair)
 
     def check_group_contains_valid_detectors(self, group):
-        if max(group.detectors) > self.num_detectors:
+        if max(group.detectors) > self.num_detectors or min(group.detectors) < 1:
             return False
         else:
             return True

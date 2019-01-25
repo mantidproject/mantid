@@ -45,6 +45,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
                                               self.grouping_table_widget,
                                               self.pairing_table_widget)
 
+        self.view.display_warning_box = mock.MagicMock()
+
     def add_three_groups(self):
         testgroup1 = MuonGroup(group_name="fwd", detector_ids=[1, 2, 3, 4, 5])
         testgroup2 = MuonGroup(group_name="bwd", detector_ids=[6, 7, 8, 9, 10])
@@ -121,6 +123,23 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.assertEqual(self.pairing_table_view.num_rows(), 1)
             self.assertEqual(self.pairing_table_view.pairing_table.cellWidget(0, 1).currentText(), "grp1")
             self.assertEqual(self.pairing_table_view.pairing_table.cellWidget(0, 2).currentText(), "grp2")
+
+    def test_loading_does_not_insert_invalid_groups(self):
+        self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
+        groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
+                  MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 1000])]
+        pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
+        with mock.patch(
+                "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
+            # mock the loading to return set groups/pairs
+            mock_load.return_value = (groups, pairs, 'description')
+            self.view.load_grouping_button.clicked.emit(True)
+
+            self.view.display_warning_box.assert_called_once_with('Invalid detectors in group grp2')
+            six.assertCountEqual(self, self.model.group_names, ["grp1"])
+            six.assertCountEqual(self, self.model.pair_names, [])
+            self.assertEqual(self.grouping_table_view.num_rows(), 1)
+            self.assertEqual(self.pairing_table_view.num_rows(), 0)
 
     def test_that_save_grouping_triggers_the_correct_function(self):
         # Save functionality is tested elsewhere

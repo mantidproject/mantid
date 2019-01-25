@@ -110,7 +110,7 @@ class GroupingTabPresenter(object):
             for pair in pairs:
                 self._model.add_pair(pair)
         except ValueError as error:
-            self._view.display_warning_box(error)
+            self._view.display_warning_box(str(error))
 
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
