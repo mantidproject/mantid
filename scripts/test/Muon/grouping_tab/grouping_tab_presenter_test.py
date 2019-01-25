@@ -96,7 +96,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         groups = [MuonGroup(group_name="grp1", detector_ids=[1, 2, 3, 4, 5]),
                   MuonGroup(group_name="grp2", detector_ids=[6, 7, 8, 9, 10])]
         pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
-        mock_load.return_value = (groups, pairs)
+        mock_load.return_value = (groups, pairs, 'description')
 
         self.view.load_grouping_button.clicked.emit(True)
 
@@ -112,7 +112,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         with mock.patch(
                 "Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs
-            mock_load.return_value = (groups, pairs)
+            mock_load.return_value = (groups, pairs, 'description')
             self.view.load_grouping_button.clicked.emit(True)
 
             six.assertCountEqual(self, self.model.group_names, ["grp1", "grp2"])
