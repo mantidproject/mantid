@@ -134,9 +134,9 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
 
-    m_presenter.reset();
-    m_model.reset();
     m_view.reset();
+    m_presenter.reset(); /// The model is destructed by the presenter
+    m_model.release();
   }
 
   ///----------------------------------------------------------------------

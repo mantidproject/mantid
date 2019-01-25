@@ -13,8 +13,21 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
+    IIndirectFitOutputOptionsView *view)
+    : QObject(nullptr),
+      m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
+  setUpPresenter();
+}
+
+IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
     IIndirectFitOutputOptionsModel *model, IIndirectFitOutputOptionsView *view)
     : QObject(nullptr), m_model(model), m_view(view) {
+  setUpPresenter();
+}
+
+IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() {}
+
+void IndirectFitOutputOptionsPresenter::setUpPresenter() {
   setMultiWorkspaceOptionsVisible(false);
 
   connect(m_view, SIGNAL(groupWorkspaceChanged(std::string const &)), this,
@@ -24,8 +37,6 @@ IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
   connect(m_view, SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
   connect(m_view, SIGNAL(saveClicked()), this, SLOT(saveResult()));
 }
-
-IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() {}
 
 void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(
     bool visible) {

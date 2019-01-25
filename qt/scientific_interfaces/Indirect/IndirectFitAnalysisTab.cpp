@@ -287,8 +287,7 @@ void IndirectFitAnalysisTab::setSpectrumSelectionView(
 void IndirectFitAnalysisTab::setOutputOptionsView(
     IIndirectFitOutputOptionsView *view) {
   m_outOptionsPresenter =
-      Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(
-          new IndirectFitOutputOptionsModel(), view);
+      Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(

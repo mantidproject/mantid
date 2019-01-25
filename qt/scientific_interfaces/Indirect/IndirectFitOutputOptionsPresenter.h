@@ -22,6 +22,7 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsPresenter : public QObject {
   Q_OBJECT
 public:
+  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view);
   IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
                                     IIndirectFitOutputOptionsView *view);
   ~IndirectFitOutputOptionsPresenter() override;
@@ -54,12 +55,14 @@ private slots:
   void saveResult();
 
 private:
+  void setUpPresenter();
+
   void plotResult(std::string const &selectedGroup);
   void setSaving(bool saving);
 
   void displayWarning(std::string const &message);
 
-  IIndirectFitOutputOptionsModel *m_model;
+  std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
   IIndirectFitOutputOptionsView *m_view;
 };
 
