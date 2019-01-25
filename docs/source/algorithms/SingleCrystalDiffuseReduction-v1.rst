@@ -226,13 +226,18 @@ Usage
                                  OutputWorkspace='output',
                                  SetGoniometer=True,
                                  Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                 QDimension1='1,1,0',
-                                 QDimension2='1,-1,0',
-                                 QDimension3='0,0,1',
+                                 QDimension0='1,1,0',
+                                 QDimension1='1,-1,0',
+                                 QDimension2='0,0,1',
                                  Dimension0Binning='-7.5375,0.075,7.5375',
-                                 Dimension1Binning='-13.165625,0.131,13.165625',
+                                 Dimension1Binning='-13.165625,0.13100125,13.165625',
                                  Dimension2Binning='-0.1,0.1',
                                  SymmetryOperations="P 31 2 1")
+
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   c = ax.pcolormesh(mtd['output'],vmin=0, vmax=1e-5)
+   fig.colorbar(c)
+   plt.show()
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg_HH0.png
 

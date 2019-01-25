@@ -117,11 +117,11 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
         self.copyProperties('MDNorm', ['SymmetryOperations'])
 
-        self.declareProperty(FloatArrayProperty('QDimension1', [1, 0, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('QDimension0', [1, 0, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
                              "The first Q projection axis")
-        self.declareProperty(FloatArrayProperty('QDimension2', [0, 1, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('QDimension1', [0, 1, 0], FloatArrayLengthValidator(3), direction=Direction.Input),
                              "The second Q projection axis")
-        self.declareProperty(FloatArrayProperty('QDimension3', [0, 0, 1], FloatArrayLengthValidator(3), direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty('QDimension2', [0, 0, 1], FloatArrayLengthValidator(3), direction=Direction.Input),
                              "The third Q projection axis")
 
         self.copyProperties('MDNorm', ['Dimension0Binning', 'Dimension1Binning', 'Dimension2Binning'])
@@ -161,9 +161,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.setPropertyGroup("MaskFile","Corrections")
 
         # Projection and binning
+        self.setPropertyGroup("QDimension0","Projection and binning")
         self.setPropertyGroup("QDimension1","Projection and binning")
         self.setPropertyGroup("QDimension2","Projection and binning")
-        self.setPropertyGroup("QDimension3","Projection and binning")
         self.setPropertyGroup("Dimension0Binning","Projection and binning")
         self.setPropertyGroup("Dimension1Binning","Projection and binning")
         self.setPropertyGroup("Dimension2Binning","Projection and binning")
@@ -263,14 +263,11 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                    OutputNormalizationWorkspace='__norm',
                    TemporaryNormalizationWorkspace='__norm' if mtd.doesExist('__norm') else None,
                    OutputWorkspace='__normalizedData',
+                   QDimension0=self.getProperty('QDimension0').value,
                    QDimension1=self.getProperty('QDimension1').value,
                    QDimension2=self.getProperty('QDimension2').value,
-                   QDimension3=self.getProperty('QDimension3').value,
-                   Dimension0Name='QDimension1',
                    Dimension0Binning=self.getProperty('Dimension0Binning').value,
-                   Dimension1Name='QDimension2',
                    Dimension1Binning=self.getProperty('Dimension1Binning').value,
-                   Dimension2Name='QDimension3',
                    Dimension2Binning=self.getProperty('Dimension2Binning').value,
                    SymmetryOperations=self.getProperty('SymmetryOperations').value)
             DeleteWorkspace('__md')
@@ -298,14 +295,11 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                        OutputNormalizationWorkspace='__bkg_norm',
                        TemporaryNormalizationWorkspace='__bkg_norm' if mtd.doesExist('__bkg_norm') else None,
                        OutputWorkspace='__normalizedBackground',
+                       QDimension0=self.getProperty('QDimension0').value,
                        QDimension1=self.getProperty('QDimension1').value,
                        QDimension2=self.getProperty('QDimension2').value,
-                       QDimension3=self.getProperty('QDimension3').value,
-                       Dimension0Name='QDimension1',
                        Dimension0Binning=self.getProperty('Dimension0Binning').value,
-                       Dimension1Name='QDimension2',
                        Dimension1Binning=self.getProperty('Dimension1Binning').value,
-                       Dimension2Name='QDimension3',
                        Dimension2Binning=self.getProperty('Dimension2Binning').value,
                        SymmetryOperations=self.getProperty('SymmetryOperations').value)
                 DeleteWorkspace('__bkg_md')
