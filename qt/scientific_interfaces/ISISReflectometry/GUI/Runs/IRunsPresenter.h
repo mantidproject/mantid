@@ -13,34 +13,19 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflRunsTabPresenter
+/** @class IRunsPresenter
 
-IReflRunsTabPresenter is an interface which defines the functions any
+IRunsPresenter is an interface which defines the functions any
 reflectometry interface presenter needs to support.
 */
-class IReflRunsTabPresenter {
+class IRunsPresenter {
 public:
-  virtual ~IReflRunsTabPresenter() = default;
+  virtual ~IRunsPresenter() = default;
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void settingsChanged() = 0;
+  virtual void notifyInstrumentChanged() = 0;
 
-  enum Flag {
-    SearchFlag,
-    StartAutoreductionFlag,
-    PauseAutoreductionFlag,
-    TimerEventFlag,
-    ICATSearchCompleteFlag,
-    TransferFlag,
-    InstrumentChangedFlag,
-    GroupChangedFlag,
-    StartMonitorFlag,
-    StopMonitorFlag,
-    StartMonitorCompleteFlag
-  };
-
-  // Tell the presenter something happened
-  virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
   virtual bool isAutoreducing() const = 0;
   virtual bool isProcessing() const = 0;
 };

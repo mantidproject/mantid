@@ -24,6 +24,7 @@ public:
   bool hasGroupWithName(std::string const &groupName) const;
   boost::optional<int> indexOfGroupWithName(std::string const &groupName);
   void removeGroup(int index);
+  void removeAllGroups();
 
   std::vector<Group> &groups();
   std::vector<Group> const &groups() const;
@@ -43,7 +44,9 @@ void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
 
 void appendEmptyGroup(ReductionJobs &jobs);
 void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup);
+void ensureAtLeastOneGroupExists(ReductionJobs &jobs);
 void removeGroup(ReductionJobs &jobs, int groupIndex);
+void removeAllRowsAndGroups(ReductionJobs &jobs);
 
 bool setGroupName(ReductionJobs &jobs, int groupIndex,
                   std::string const &newValue);

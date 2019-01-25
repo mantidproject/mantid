@@ -57,6 +57,12 @@ bool ReductionJobs::hasGroupWithName(std::string const &groupName) const {
 
 void ReductionJobs::removeGroup(int index) {
   m_groups.erase(m_groups.begin() + index);
+  ensureAtLeastOneGroupExists(*this);
+}
+
+void ReductionJobs::removeAllGroups() {
+  m_groups.clear();
+  ensureAtLeastOneGroupExists(*this);
 }
 
 std::vector<Group> &ReductionJobs::groups() { return m_groups; }
@@ -69,9 +75,21 @@ std::string ReductionJobs::nextEmptyGroupName() {
   return name;
 }
 
+/* This function is called after deleting groups to ensure that the model
+ * always contains at least one group - it adds an empty group if
+ * required. This is to mimic behaviour of the JobTreeView, which cannot delete
+ * the last group/row so it always leaves at least one empty group.
+ */
+void ensureAtLeastOneGroupExists(ReductionJobs &jobs) {
+  if (jobs.groups().size() == 0)
+    appendEmptyGroup(jobs);
+}
+
 void removeGroup(ReductionJobs &jobs, int groupIndex) {
   jobs.removeGroup(groupIndex);
 }
+
+void removeAllRowsAndGroups(ReductionJobs &jobs) { jobs.removeAllGroups(); }
 
 void appendEmptyRow(ReductionJobs &jobs, int groupIndex) {
   jobs.groups()[groupIndex].appendEmptyRow();

@@ -4,18 +4,15 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "QtReflRunsTabView.h"
-#include "IReflRunsTabPresenter.h"
+#include "RunsView.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
-#include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
 #include <QMessageBox>
 
@@ -29,27 +26,26 @@ using namespace MantidQt::MantidWidgets;
  * @param parent :: The parent of this view
  * @param makeRunsTableView :: The factory for the RunsTableView.
  */
-QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
-                                     RunsTableViewFactory makeRunsTableView)
-    : MantidWidget(parent), m_presenter(nullptr),
+RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
+    : MantidWidget(parent), m_notifyee(nullptr),
       m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()) {
   initLayout();
 }
-void QtReflRunsTabView::loginFailed(std::string const &fullError) {
+void RunsView::loginFailed(std::string const &fullError) {
   QMessageBox::critical(this, QString::fromStdString(fullError),
                         "Login Failed!");
 }
 
-void QtReflRunsTabView::subscribe(IReflRunsTabPresenter *presenter) {
-  m_presenter = presenter;
+void RunsView::subscribe(RunsViewSubscriber *notifyee) {
+  m_notifyee = notifyee;
 }
 
-IRunsTableView *QtReflRunsTabView::table() const { return m_tableView; }
+IRunsTableView *RunsView::table() const { return m_tableView; }
 
 /**
 Initialise the Interface
 */
-void QtReflRunsTabView::initLayout() {
+void RunsView::initLayout() {
   ui.setupUi(this);
 
   ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
@@ -93,13 +89,13 @@ void QtReflRunsTabView::initLayout() {
   //        SLOT(instrumentChanged(int)));
 }
 
-void QtReflRunsTabView::noActiveICatSessions() {
+void RunsView::noActiveICatSessions() {
   QMessageBox::information(
       this, "Login Failed",
       "Error Logging in: Please press 'Search' to try again.");
 }
 
-void QtReflRunsTabView::missingRunsToTransfer() {
+void RunsView::missingRunsToTransfer() {
   QMessageBox::critical(this, "No runs selected",
                         "Error: Please select at least one run to transfer.");
 }
@@ -109,7 +105,7 @@ void QtReflRunsTabView::missingRunsToTransfer() {
  * according to whether processing is running or not.
  * @param isProcessing: Whether processing is running
  */
-void QtReflRunsTabView::updateMenuEnabledState(bool isProcessing) {
+void RunsView::updateMenuEnabledState(bool isProcessing) {
 
   for (auto &command : m_commands) {
     command->updateEnabledState(isProcessing);
@@ -120,7 +116,7 @@ void QtReflRunsTabView::updateMenuEnabledState(bool isProcessing) {
  * Sets the "Autoreduce" button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
+void RunsView::setAutoreduceButtonEnabled(bool enabled) {
 
   ui.buttonAutoreduce->setEnabled(enabled);
 }
@@ -129,7 +125,7 @@ void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
  * Sets the "Autoreduce" button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QtReflRunsTabView::setAutoreducePauseButtonEnabled(bool enabled) {
+void RunsView::setAutoreducePauseButtonEnabled(bool enabled) {
 
   ui.buttonAutoreducePause->setEnabled(enabled);
 }
@@ -138,7 +134,7 @@ void QtReflRunsTabView::setAutoreducePauseButtonEnabled(bool enabled) {
  * Sets the "Transfer" button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QtReflRunsTabView::setTransferButtonEnabled(bool enabled) {
+void RunsView::setTransferButtonEnabled(bool enabled) {
 
   ui.buttonTransfer->setEnabled(enabled);
 }
@@ -147,7 +143,7 @@ void QtReflRunsTabView::setTransferButtonEnabled(bool enabled) {
  * Sets the "Instrument" combo box enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
+void RunsView::setInstrumentComboEnabled(bool enabled) {
 
   ui.comboSearchInstrument->setEnabled(enabled);
 }
@@ -156,7 +152,7 @@ void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
  * Sets the search text box enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QtReflRunsTabView::setSearchTextEntryEnabled(bool enabled) {
+void RunsView::setSearchTextEntryEnabled(bool enabled) {
 
   ui.textSearch->setEnabled(enabled);
 }
@@ -165,7 +161,7 @@ void QtReflRunsTabView::setSearchTextEntryEnabled(bool enabled) {
  * Sets the search button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
+void RunsView::setSearchButtonEnabled(bool enabled) {
 
   ui.buttonSearch->setEnabled(enabled);
 }
@@ -174,7 +170,7 @@ void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
  * Sets the start-monitor button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QtReflRunsTabView::setStartMonitorButtonEnabled(bool enabled) {
+void RunsView::setStartMonitorButtonEnabled(bool enabled) {
 
   ui.buttonMonitor->setEnabled(enabled);
 }
@@ -183,7 +179,7 @@ void QtReflRunsTabView::setStartMonitorButtonEnabled(bool enabled) {
  * Sets the stop-monitor enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QtReflRunsTabView::setStopMonitorButtonEnabled(bool enabled) {
+void RunsView::setStopMonitorButtonEnabled(bool enabled) {
 
   ui.buttonStopMonitor->setEnabled(enabled);
 }
@@ -195,8 +191,8 @@ available instruments in the table view
 @param defaultInstrumentIndex : The index of the instrument to have selected by
 default
 */
-void QtReflRunsTabView::setInstrumentList(
-    const std::vector<std::string> &instruments, int defaultInstrumentIndex) {
+void RunsView::setInstrumentList(const std::vector<std::string> &instruments,
+                                 int defaultInstrumentIndex) {
   ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
     ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
@@ -208,7 +204,7 @@ Set the range of the progress bar
 @param min : The minimum value of the bar
 @param max : The maxmimum value of the bar
 */
-void QtReflRunsTabView::setProgressRange(int min, int max) {
+void RunsView::setProgressRange(int min, int max) {
   ui.progressBar->setRange(min, max);
   ProgressableView::setProgressRange(min, max);
 }
@@ -217,20 +213,18 @@ void QtReflRunsTabView::setProgressRange(int min, int max) {
 Set the status of the progress bar
 @param progress : The current value of the bar
 */
-void QtReflRunsTabView::setProgress(int progress) {
-  ui.progressBar->setValue(progress);
-}
+void RunsView::setProgress(int progress) { ui.progressBar->setValue(progress); }
 
 /**
  * Clear the progress
  */
-void QtReflRunsTabView::clearProgress() { ui.progressBar->reset(); }
+void RunsView::clearProgress() { ui.progressBar->reset(); }
 
 /**
 Set a new model for search results
 @param model : the model to be attached to the search results
 */
-void QtReflRunsTabView::showSearch(ReflSearchModel_sptr model) {
+void RunsView::showSearch(ReflSearchModel_sptr model) {
   m_searchModel = model;
   ui.tableSearchResults->setModel(m_searchModel.get());
   ui.tableSearchResults->resizeColumnsToContents();
@@ -238,9 +232,9 @@ void QtReflRunsTabView::showSearch(ReflSearchModel_sptr model) {
 
 /** Start an icat search
  */
-void QtReflRunsTabView::startIcatSearch() {
+void RunsView::startIcatSearch() {
   m_algoRunner.get()->disconnect(); // disconnect any other connections
-  m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
+  m_notifyee->notifySearch();
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(icatSearchComplete()), Qt::UniqueConnection);
 }
@@ -248,44 +242,40 @@ void QtReflRunsTabView::startIcatSearch() {
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
-void QtReflRunsTabView::icatSearchComplete() {
-  m_presenter->notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
-}
+void RunsView::icatSearchComplete() { m_notifyee->notifyICATSearchComplete(); }
 
 /**
 This slot notifies the presenter that the "search" button has been pressed
 */
-void QtReflRunsTabView::on_actionSearch_triggered() { startIcatSearch(); }
+void RunsView::on_actionSearch_triggered() { startIcatSearch(); }
 
 /**
 This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
-void QtReflRunsTabView::on_actionAutoreduce_triggered() {
-  m_presenter->notify(IReflRunsTabPresenter::StartAutoreductionFlag);
+void RunsView::on_actionAutoreduce_triggered() {
+  m_notifyee->notifyStartAutoreduction();
 }
 
 /**
 This slot conducts a search operation before notifying the presenter that the
 "pause autoreduce" button has been pressed
 */
-void QtReflRunsTabView::on_actionAutoreducePause_triggered() {
-  m_presenter->notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
+void RunsView::on_actionAutoreducePause_triggered() {
+  m_notifyee->notifyPauseAutoreduction();
 }
 
 /**
 This slot notifies the presenter that the "transfer" button has been pressed
 */
-void QtReflRunsTabView::on_actionTransfer_triggered() {
-  m_presenter->notify(IReflRunsTabPresenter::Flag::TransferFlag);
-}
+void RunsView::on_actionTransfer_triggered() { m_notifyee->notifyTransfer(); }
 
 /**
    This slot is called each time the timer times out
 */
-void QtReflRunsTabView::timerEvent(QTimerEvent *event) {
+void RunsView::timerEvent(QTimerEvent *event) {
   if (event->timerId() == m_timer.timerId()) {
-    m_presenter->notify(IReflRunsTabPresenter::TimerEventFlag);
+    m_notifyee->notifyTimerEvent();
   } else {
     QWidget::timerEvent(event);
   }
@@ -293,18 +283,18 @@ void QtReflRunsTabView::timerEvent(QTimerEvent *event) {
 
 /** start the timer
  */
-void QtReflRunsTabView::startTimer(const int millisecs) {
+void RunsView::startTimer(const int millisecs) {
   m_timer.start(millisecs, this);
 }
 
 /** stop
  */
-void QtReflRunsTabView::stopTimer() { m_timer.stop(); }
+void RunsView::stopTimer() { m_timer.stop(); }
 
 /**
 This slot shows the slit calculator
 */
-void QtReflRunsTabView::slitCalculatorTriggered() {
+void RunsView::slitCalculatorTriggered() {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->currentText().toStdString());
   m_calculator->show();
@@ -314,7 +304,7 @@ void QtReflRunsTabView::slitCalculatorTriggered() {
 This slot is triggered when the user right clicks on the search results table
 @param pos : The position of the right click within the table
 */
-void QtReflRunsTabView::showSearchContextMenu(const QPoint &pos) {
+void RunsView::showSearchContextMenu(const QPoint &pos) {
   if (!ui.tableSearchResults->indexAt(pos).isValid())
     return;
 
@@ -328,21 +318,21 @@ void QtReflRunsTabView::showSearchContextMenu(const QPoint &pos) {
  * notifies the main presenter and updates the Slit Calculator
  * @param index : The index of the combo box
  */
-void QtReflRunsTabView::instrumentChanged(int index) {
+void RunsView::instrumentChanged(int index) {
   ui.textSearch->clear();
   if (m_searchModel)
     m_searchModel->clear();
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
-  // m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+  m_notifyee->notifyInstrumentChanged();
 }
 
 /**
 Get the selected instrument for searching
 @returns the selected instrument to search for
 */
-std::string QtReflRunsTabView::getSearchInstrument() const {
+std::string RunsView::getSearchInstrument() const {
   return ui.comboSearchInstrument->currentText().toStdString();
 }
 
@@ -350,7 +340,7 @@ std::string QtReflRunsTabView::getSearchInstrument() const {
 Get the indices of the highlighted search result rows
 @returns a set of ints containing the selected row numbers
 */
-std::set<int> QtReflRunsTabView::getSelectedSearchRows() const {
+std::set<int> RunsView::getSelectedSearchRows() const {
   std::set<int> rows;
   auto selectionModel = ui.tableSearchResults->selectionModel();
   if (selectionModel) {
@@ -365,7 +355,7 @@ std::set<int> QtReflRunsTabView::getSelectedSearchRows() const {
 Get the indices of all search result rows
 @returns a set of ints containing the row numbers
 */
-std::set<int> QtReflRunsTabView::getAllSearchRows() const {
+std::set<int> RunsView::getAllSearchRows() const {
   std::set<int> rows;
   if (!ui.tableSearchResults || !ui.tableSearchResults->model())
     return rows;
@@ -375,21 +365,13 @@ std::set<int> QtReflRunsTabView::getAllSearchRows() const {
   return rows;
 }
 
-/**
-Get a pointer to the presenter that's currently controlling this view.
-@returns A pointer to the presenter
-*/
-IReflRunsTabPresenter *QtReflRunsTabView::getPresenter() const {
-  return m_presenter;
-}
-
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>
-QtReflRunsTabView::getAlgorithmRunner() const {
+RunsView::getAlgorithmRunner() const {
   return m_algoRunner;
 }
 
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>
-QtReflRunsTabView::getMonitorAlgorithmRunner() const {
+RunsView::getMonitorAlgorithmRunner() const {
   return m_monitorAlgoRunner;
 }
 
@@ -397,24 +379,23 @@ QtReflRunsTabView::getMonitorAlgorithmRunner() const {
 Get the string the user wants to search for.
 @returns The search string
 */
-std::string QtReflRunsTabView::getSearchString() const {
+std::string RunsView::getSearchString() const {
   return ui.textSearch->text().toStdString();
 }
 
-void MantidQt::CustomInterfaces::QtReflRunsTabView::on_buttonMonitor_clicked() {
+void MantidQt::CustomInterfaces::RunsView::on_buttonMonitor_clicked() {
   startMonitor();
 }
 
-void MantidQt::CustomInterfaces::QtReflRunsTabView::
-    on_buttonStopMonitor_clicked() {
+void MantidQt::CustomInterfaces::RunsView::on_buttonStopMonitor_clicked() {
   stopMonitor();
 }
 
 /** Start live data monitoring
  */
-void QtReflRunsTabView::startMonitor() {
+void RunsView::startMonitor() {
   m_monitorAlgoRunner.get()->disconnect(); // disconnect any other connections
-  m_presenter->notify(IReflRunsTabPresenter::StartMonitorFlag);
+  m_notifyee->notifyStartMonitor();
   connect(m_monitorAlgoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(startMonitorComplete()), Qt::UniqueConnection);
 }
@@ -422,15 +403,13 @@ void QtReflRunsTabView::startMonitor() {
 /**
 This slot notifies the presenter that the monitoring algorithm finished
 */
-void QtReflRunsTabView::startMonitorComplete() {
-  m_presenter->notify(IReflRunsTabPresenter::StartMonitorCompleteFlag);
+void RunsView::startMonitorComplete() {
+  m_notifyee->notifyStartMonitorComplete();
 }
 
 /** Stop live data monitoring
  */
-void QtReflRunsTabView::stopMonitor() {
-  m_presenter->notify(IReflRunsTabPresenter::StopMonitorFlag);
-}
+void RunsView::stopMonitor() { m_notifyee->notifyStopMonitor(); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

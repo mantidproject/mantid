@@ -7,13 +7,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "../ISISReflectometry/GUI/RunsTable/IRunsTableView.h"
 #include "../ISISReflectometry/IReflAsciiSaver.h"
+#include "../ISISReflectometry/IReflAutoreduction.h"
 #include "../ISISReflectometry/IReflBatchPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowView.h"
-#include "../ISISReflectometry/IReflRunsTabPresenter.h"
-#include "../ISISReflectometry/IReflRunsTabView.h"
+#include "../ISISReflectometry/IReflMessageHandler.h"
+#include "../ISISReflectometry/IReflSearcher.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -37,62 +37,21 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockReflSearchModel : public ReflSearchModel {
 public:
-  MockReflSearchModel()
-      : ReflSearchModel(ITableWorkspace_sptr(), std::string()) {}
+  MockReflSearchModel(std::string const &run, std::string const &description,
+                      std::string const &location)
+      : ReflSearchModel(ITableWorkspace_sptr(), std::string()),
+        m_result(run, description, location) {}
   ~MockReflSearchModel() override {}
   MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
+  MOCK_METHOD2(setError, void(int, std::string const &));
+
+  SearchResult const &getRowData(int) const override { return m_result; }
+
+private:
+  SearchResult m_result;
 };
 
 /**** Views ****/
-
-class MockRunsTabView : public IReflRunsTabView {
-public:
-  MockRunsTabView() {
-    ON_CALL(*this, table()).WillByDefault(testing::Return(m_tableView));
-  }
-
-  // IO
-  MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
-  MOCK_CONST_METHOD0(getAllSearchRows, std::set<int>());
-  MOCK_CONST_METHOD0(getSearchString, std::string());
-  MOCK_CONST_METHOD0(getSearchInstrument, std::string());
-  MOCK_CONST_METHOD0(getTransferMethod, std::string());
-  MOCK_CONST_METHOD0(getAlgorithmRunner,
-                     boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
-  MOCK_CONST_METHOD0(getMonitorAlgorithmRunner,
-                     boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
-  MOCK_CONST_METHOD0(getSelectedGroup, int());
-  MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
-  MOCK_METHOD0(setTableCommandsProxy, void());
-  MOCK_METHOD0(setRowCommandsProxy, void());
-  MOCK_METHOD0(clearCommands, void());
-  MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
-  MOCK_METHOD1(updateMenuEnabledState, void(bool));
-  MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
-  MOCK_METHOD1(setAutoreducePauseButtonEnabled, void(bool));
-  MOCK_METHOD1(setTransferButtonEnabled, void(bool));
-  MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
-  MOCK_METHOD1(subscribe, void(IReflRunsTabPresenter *));
-  MOCK_CONST_METHOD0(table, IRunsTableView *());
-  MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
-  MOCK_METHOD1(setSearchButtonEnabled, void(bool));
-  MOCK_METHOD1(setStartMonitorButtonEnabled, void(bool));
-  MOCK_METHOD1(setStopMonitorButtonEnabled, void(bool));
-  MOCK_METHOD1(startTimer, void(const int));
-  MOCK_METHOD0(stopTimer, void());
-  MOCK_METHOD0(startIcatSearch, void());
-  MOCK_METHOD0(startMonitor, void());
-  MOCK_METHOD0(stopMonitor, void());
-  MOCK_METHOD0(updateMonitorRunning, void());
-  MOCK_METHOD0(updateMonitorStopped, void());
-
-  // Calls we don't care about
-  void showSearch(ReflSearchModel_sptr) override{};
-  IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
-
-private:
-  IRunsTableView *m_tableView;
-};
 
 class MockMainWindowView : public IReflMainWindowView {
 public:
@@ -110,18 +69,6 @@ public:
 
 /**** Presenters ****/
 
-class MockRunsTabPresenter : public IReflRunsTabPresenter {
-public:
-  MOCK_CONST_METHOD0(isAutoreducing, bool());
-  MOCK_METHOD0(settingsChanged, void());
-  void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
-  void acceptMainPresenter(IReflBatchPresenter *presenter) override {
-    UNUSED_ARG(presenter);
-  }
-  bool isProcessing() const override { return false; }
-  ~MockRunsTabPresenter() override{};
-};
-
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
@@ -129,6 +76,29 @@ public:
   bool isProcessing() const override { return false; }
 
   ~MockMainWindowPresenter() override{};
+};
+
+class MockReflBatchPresenter : public IReflBatchPresenter {
+public:
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+
+  MOCK_METHOD2(completedRowReductionSuccessfully,
+               void(GroupData const &, std::string const &));
+
+  MOCK_METHOD2(completedGroupReductionSuccessfully,
+               void(GroupData const &, std::string const &));
+
+  /// Transmission runs for a specific run angle
+  MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
+  /// Whether there are per-angle transmission runs specified
+  MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
+  /// Set the instrument name
+  MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &));
+  /// Data processing check for all groups
+  MOCK_CONST_METHOD0(isProcessing, bool());
+  MOCK_CONST_METHOD0(requestClose, bool());
+  MOCK_METHOD0(settingsChanged, void());
 };
 
 /**** Progress ****/
@@ -163,6 +133,32 @@ public:
                           std::vector<std::string> const &,
                           FileFormatOptions const &));
   virtual ~MockReflAsciiSaver() = default;
+};
+
+class MockReflSearcher : public IReflSearcher {
+public:
+  MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
+};
+
+/**** Catalog ****/
+class MockMessageHandler : public IReflMessageHandler {
+public:
+  MOCK_METHOD2(giveUserCritical,
+               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
+};
+
+/**** Autoreduction ****/
+class MockReflAutoreduction : public IReflAutoreduction {
+public:
+  MOCK_CONST_METHOD0(running, bool());
+  MOCK_CONST_METHOD1(searchStringChanged, bool(const std::string &));
+  MOCK_CONST_METHOD0(searchResultsExist, bool());
+  MOCK_METHOD0(setSearchResultsExist, void());
+
+  MOCK_METHOD1(setupNewAutoreduction, bool(const std::string &));
+  MOCK_METHOD0(pause, bool());
+  MOCK_METHOD0(stop, void());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

@@ -25,10 +25,22 @@ public:
                      std::vector<std::string> const &instruments,
                      double thetaTolerance, ReductionJobs reductionJobs);
 
+  void mergeAdditionalJobs(ReductionJobs const &jobs);
+  ReductionJobs const &reductionJobs() const;
+  void notifyRemoveAllRowsAndGroupsRequested();
+
+  // RunsTableViewSubscriber overrides
   void notifyProcessRequested() override;
   void notifyPauseRequested() override;
+  void notifyInsertRowRequested() override;
+  void notifyInsertGroupRequested() override;
+  void notifyDeleteRowRequested() override;
+  void notifyDeleteGroupRequested() override;
+  void notifyFilterChanged(std::string const &filterValue) override;
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
+
+  // JobTreeViewSubscriber overrides
   void notifyCellTextChanged(
       MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
       std::string const &oldValue, std::string const &newValue) override;
@@ -37,19 +49,10 @@ public:
   void notifyRemoveRowsRequested(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
           &locationsOfRowsToRemove) override;
+  void notifyCutRowsRequested() override;
   void notifyCopyRowsRequested() override;
   void notifyPasteRowsRequested() override;
-  void notifyCutRowsRequested() override;
   void notifyFilterReset() override;
-  void notifyFilterChanged(std::string const &filterValue) override;
-
-  void notifyInsertRowRequested() override;
-  void notifyInsertGroupRequested() override;
-  void notifyDeleteRowRequested() override;
-  void notifyDeleteGroupRequested() override;
-
-  void mergeAdditionalJobs(ReductionJobs const &jobs);
-  ReductionJobs const &reductionJobs() const;
 
 private:
   void
@@ -71,8 +74,10 @@ private:
   void removeRowsAndGroupsFromView(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
           &locations);
+  void removeAllRowsAndGroupsFromView();
   void removeRowsAndGroupsFromModel(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> locations);
+  void removeAllRowsAndGroupsFromModel();
 
   void appendRowsToGroupsInView(std::vector<int> const &groupIndices);
   void appendRowsToGroupsInModel(std::vector<int> const &groupIndices);

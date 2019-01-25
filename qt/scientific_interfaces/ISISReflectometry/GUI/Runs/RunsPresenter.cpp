@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ReflRunsTabPresenter.h"
+#include "RunsPresenter.h"
 #include "IReflMainWindowPresenter.h"
 #include "IReflMessageHandler.h"
-#include "IReflRunsTabView.h"
+#include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -21,6 +21,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "ReflAutoreduction.h"
 #include "ReflCatalogSearcher.h"
 #include "ReflFromStdStringMap.h"
 #include "ReflNexusMeasurementItemSource.h"
@@ -61,16 +62,19 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param defaultInstrumentIndex The index of the instrument to have selected by
  * default.
  * @param messageHandler :: A handler to pass messages to the user
+ * @param autoreduction :: [input] The autoreduction implementation
  * @param searcher :: [input] The search implementation
  */
-ReflRunsTabPresenter::ReflRunsTabPresenter(
-    IReflRunsTabView *mainView, ProgressableView *progressableView,
+RunsPresenter::RunsPresenter(
+    IRunsView *mainView, ProgressableView *progressableView,
     RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
     std::vector<std::string> const &instruments, int defaultInstrumentIndex,
     IReflMessageHandler *messageHandler,
+    boost::shared_ptr<IReflAutoreduction> autoreduction,
     boost::shared_ptr<IReflSearcher> searcher)
-    : m_view(mainView), m_progressView(progressableView),
-      m_makeRunsTablePresenter(makeRunsTablePresenter),
+    : m_autoreduction(autoreduction), m_view(mainView),
+      m_progressView(progressableView),
+      m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
       m_searcher(searcher), m_instrumentChanged(false),
       m_thetaTolerance(thetaTolerance) {
@@ -81,6 +85,9 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
 
   m_view->setInstrumentList(instruments, defaultInstrumentIndex);
 
+  if (!m_autoreduction)
+    m_autoreduction.reset(new ReflAutoreduction());
+
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
@@ -88,7 +95,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   updateViewWhenMonitorStopped();
 }
 
-ReflRunsTabPresenter::~ReflRunsTabPresenter() {
+RunsPresenter::~RunsPresenter() {
   if (m_monitorAlg)
     stopObserving(m_monitorAlg);
 }
@@ -96,77 +103,58 @@ ReflRunsTabPresenter::~ReflRunsTabPresenter() {
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
  */
-void ReflRunsTabPresenter::acceptMainPresenter(
-    IReflBatchPresenter *mainPresenter) {
+void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
   // presenter with the list of commands
 
-  // for (const auto &presenter : m_tablePresenters)
-  //  presenter->accept(this);
+  //  tablePresenter()->accept(this);
 
   // Note this must be done here since notifying the gdpp of its view
   // will cause it to request settings only accessible via the main
   // presenter.
 }
 
-void ReflRunsTabPresenter::settingsChanged() {
-  // assert(static_cast<std::size_t>(group) < m_tablePresenters.size());
-  // m_tablePresenters[group]->settingsChanged();
+void RunsPresenter::settingsChanged() {
+  // tablePresenter()->settingsChanged();
 }
 
 /**
 Used by the view to tell the presenter something has changed
 */
-void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
-  switch (flag) {
-  case IReflRunsTabPresenter::SearchFlag:
-    // Start the search algorithm. If it is not started, make sure
-    // autoreduction is not left running
-    if (!search())
-      stopAutoreduction();
-    break;
-  case IReflRunsTabPresenter::StartAutoreductionFlag:
-    startNewAutoreduction();
-    break;
-  case IReflRunsTabPresenter::PauseAutoreductionFlag:
-    pauseAutoreduction();
-    break;
-  case IReflRunsTabPresenter::TimerEventFlag:
-    checkForNewRuns();
-    break;
-  case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
-    icatSearchComplete();
-    break;
-  }
-  case IReflRunsTabPresenter::TransferFlag:
-    transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
-    break;
-  case IReflRunsTabPresenter::InstrumentChangedFlag:
-    changeInstrument();
-    break;
-  case IReflRunsTabPresenter::GroupChangedFlag:
-    changeGroup();
-    break;
-  case IReflRunsTabPresenter::StartMonitorFlag:
-    startMonitor();
-    break;
-  case IReflRunsTabPresenter::StopMonitorFlag:
-    stopMonitor();
-    break;
-  case IReflRunsTabPresenter::StartMonitorCompleteFlag:
-    startMonitorComplete();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
+
+void RunsPresenter::notifySearch() {
+  // Start the search algorithm. If it is not started, make sure
+  // autoreduction is not left running
+  if (!search())
+    stopAutoreduction();
 }
+
+void RunsPresenter::notifyStartAutoreduction() { startNewAutoreduction(); }
+
+void RunsPresenter::notifyPauseAutoreduction() { pauseAutoreduction(); }
+
+void RunsPresenter::notifyTimerEvent() { checkForNewRuns(); }
+
+void RunsPresenter::notifyICATSearchComplete() { icatSearchComplete(); }
+
+void RunsPresenter::notifyTransfer() {
+  transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
+}
+
+void RunsPresenter::notifyInstrumentChanged() { changeInstrument(); }
+
+void RunsPresenter::notifyStartMonitor() { startMonitor(); }
+
+void RunsPresenter::notifyStopMonitor() { stopMonitor(); }
+
+void RunsPresenter::notifyStartMonitorComplete() { startMonitorComplete(); }
 
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
  * there was a problem */
-bool ReflRunsTabPresenter::search() {
+bool RunsPresenter::search() {
   auto const searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
@@ -216,7 +204,7 @@ bool ReflRunsTabPresenter::search() {
 /** Populates the search results table
  * @param searchAlg : [input] The search algorithm
  */
-void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
+void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (!searchAlg->isExecuted())
     return;
 
@@ -239,22 +227,19 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 /** Searches ICAT for runs with given instrument and investigation id, transfers
  * runs to table and processes them. Clears any existing table data first.
  */
-void ReflRunsTabPresenter::startNewAutoreduction() {
+void RunsPresenter::startNewAutoreduction() {
   if (requireNewAutoreduction()) {
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
     // We'll prompt the user to check it's ok to delete existing rows
 
-    // TODO: enable autoprocessing
-    //   auto tablePresenter = getTablePresenter(group);
-    //   tablePresenter->setPromptUser(false);
-    //   try {
-    //     tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
-    //   } catch (const DataProcessorPresenter::DeleteAllRowsCancelledException
-    //   &)
-    //   {
-    //     return;
-    //   }
+    // tablePresenter()->setPromptUser(false);
+    // try {
+    //  tablePresenter()->notify(DataProcessorPresenter::DeleteAllFlag);
+    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
+    //{
+    //  return;
+    //}
   }
 
   if (setupNewAutoreduction(m_view->getSearchString()))
@@ -265,22 +250,21 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
  * either the search number, transfer method or instrument has changed
  * @return : Boolean on whether to start a new autoreduction
  */
-bool ReflRunsTabPresenter::requireNewAutoreduction() const {
+bool RunsPresenter::requireNewAutoreduction() const {
   bool searchNumChanged =
-      m_autoreduction.searchStringChanged(m_view->getSearchString());
+      m_autoreduction->searchStringChanged(m_view->getSearchString());
 
   return searchNumChanged || m_instrumentChanged;
 }
 
-bool ReflRunsTabPresenter::setupNewAutoreduction(
-    const std::string &searchString) {
-  return m_autoreduction.setupNewAutoreduction(searchString);
+bool RunsPresenter::setupNewAutoreduction(const std::string &searchString) {
+  return m_autoreduction->setupNewAutoreduction(searchString);
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
  *  any new runs in the table.
  */
-void ReflRunsTabPresenter::checkForNewRuns() {
+void RunsPresenter::checkForNewRuns() {
   // Stop notifications during processing
   m_view->stopTimer();
 
@@ -291,44 +275,42 @@ void ReflRunsTabPresenter::checkForNewRuns() {
 
 /** Run an autoreduction process based on the latest search results
  */
-void ReflRunsTabPresenter::autoreduceNewRuns() {
+void RunsPresenter::autoreduceNewRuns() {
 
-  m_autoreduction.setSearchResultsExist();
+  m_autoreduction->setSearchResultsExist();
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0) {
     transfer(rowsToTransfer, TransferMatch::Strict);
     // TODO: enable autoprocessing
-    //    auto tablePresenter = getTablePresenter(autoreductionGroup());
-    //    tablePresenter->setPromptUser(false);
-    //    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
+    //    tablePresenter()->setPromptUser(false);
+    //    tablePresenter()->notify(DataProcessorPresenter::ProcessAllFlag);
   } else {
     // confirmReductionCompleted();
   }
 }
 
-void ReflRunsTabPresenter::pauseAutoreduction() {
+void RunsPresenter::pauseAutoreduction() {
   // TODO: enable autoprocessing
   //  if (isAutoreducing())
-  //    getTablePresenter(autoreductionGroup())
-  //        ->notify(DataProcessorPresenter::PauseFlag);
+  //    tablePresenter()->notify(DataProcessorPresenter::PauseFlag);
 }
 
-void ReflRunsTabPresenter::stopAutoreduction() {
+void RunsPresenter::stopAutoreduction() {
   m_view->stopTimer();
-  m_autoreduction.stop();
+  m_autoreduction->stop();
 }
 
-bool ReflRunsTabPresenter::isAutoreducing() const {
-  return m_autoreduction.running();
+bool RunsPresenter::isAutoreducing() const {
+  return m_autoreduction->running();
 }
 
-bool ReflRunsTabPresenter::isProcessing() const {
+bool RunsPresenter::isProcessing() const {
   // TODO define this properly when we enable processing
   return false;
 }
 
-void ReflRunsTabPresenter::icatSearchComplete() {
+void RunsPresenter::icatSearchComplete() {
   // Populate the search results
   auto algRunner = m_view->getAlgorithmRunner();
   IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
@@ -339,22 +321,22 @@ void ReflRunsTabPresenter::icatSearchComplete() {
   }
 }
 
-RunsTablePresenter *ReflRunsTabPresenter::tablePresenter() const {
+RunsTablePresenter *RunsPresenter::tablePresenter() const {
   return m_tablePresenter.get();
 }
 
-bool ReflRunsTabPresenter::shouldUpdateExistingSearchResults() const {
+bool RunsPresenter::shouldUpdateExistingSearchResults() const {
   // Existing search results should be updated rather than replaced if
   // autoreduction is running and has valid results
   return m_searchModel && isAutoreducing() &&
-         m_autoreduction.searchResultsExist();
+         m_autoreduction->searchResultsExist();
 }
 
 /** Check that the given rows are valid for a transfer and warn the user if not
  * @param rowsToTransfer : a set of row indices to transfer
  * @return : true if valid, false if not
  */
-bool ReflRunsTabPresenter::validateRowsToTransfer(
+bool RunsPresenter::validateRowsToTransfer(
     const std::set<int> &rowsToTransfer) {
   // Check that we have something to transfer
   if (rowsToTransfer.size() == 0) {
@@ -367,7 +349,7 @@ bool ReflRunsTabPresenter::validateRowsToTransfer(
 /** Set up the progress bar
  */
 ProgressPresenter
-ReflRunsTabPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
+RunsPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
 
   auto start = double(0.0);
   auto end = static_cast<double>(rowsToTransfer.size());
@@ -412,15 +394,15 @@ RunDescriptionMetadata metadataFromDescription(std::string const &description) {
  * the transfer criteria
  * @return : The runs to transfer as a vector of maps
  */
-void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
-                                    const TransferMatch matchType) {
+void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
+                             const TransferMatch matchType) {
   UNUSED_ARG(matchType);
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
     auto jobs = tablePresenter()->reductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
-      auto &result = (*m_searchModel)[rowIndex];
+      auto &result = m_searchModel->getRowData(rowIndex);
       auto resultMetadata = metadataFromDescription(result.description);
       auto row = validateRowFromRunAndTheta(jobs, result.runNumber,
                                             resultMetadata.theta);
@@ -440,20 +422,18 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
  */
-void ReflRunsTabPresenter::updateWidgetEnabledState() const {
-  auto const processing = isProcessing();
-  auto const autoreducing = isAutoreducing();
-
+void RunsPresenter::updateWidgetEnabledState() const {
   // Update the menus
-  m_view->updateMenuEnabledState(processing);
+  // TODO: reinstate isProcessing when implemented
+  m_view->updateMenuEnabledState(false /*isProcessing()*/);
 
   // Update components
-  m_view->setTransferButtonEnabled(!processing && !autoreducing);
-  m_view->setInstrumentComboEnabled(!processing && !autoreducing);
-  m_view->setAutoreducePauseButtonEnabled(autoreducing);
-  m_view->setSearchTextEntryEnabled(!autoreducing);
-  m_view->setSearchButtonEnabled(!autoreducing);
-  m_view->setAutoreduceButtonEnabled(!autoreducing && !processing);
+  m_view->setTransferButtonEnabled(/*!isProcessing() &&*/ !isAutoreducing());
+  m_view->setInstrumentComboEnabled(/*!isProcessing() &&*/ !isAutoreducing());
+  m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
+  m_view->setSearchTextEntryEnabled(!isAutoreducing());
+  m_view->setSearchButtonEnabled(!isAutoreducing());
+  m_view->setAutoreduceButtonEnabled(!isAutoreducing() /*&& !isProcessing()*/);
 }
 
 /** Changes the current instrument in the data processor widget. Also clears
@@ -461,33 +441,34 @@ void ReflRunsTabPresenter::updateWidgetEnabledState() const {
  * and the table selection model and updates the config service, printing an
  * information message
  */
-void ReflRunsTabPresenter::changeInstrument() {
+void RunsPresenter::changeInstrument() {
   auto const instrument = m_view->getSearchInstrument();
-  m_mainPresenter->setInstrumentName(instrument);
+  if (m_mainPresenter)
+    m_mainPresenter->setInstrumentName(instrument);
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
   m_instrumentChanged = true;
 }
 
-void ReflRunsTabPresenter::changeGroup() { updateWidgetEnabledState(); }
+void RunsPresenter::changeGroup() { updateWidgetEnabledState(); }
 
-void ReflRunsTabPresenter::handleError(const std::string &message,
-                                       const std::exception &e) {
+void RunsPresenter::handleError(const std::string &message,
+                                const std::exception &e) {
   m_messageHandler->giveUserCritical(message + ": " + std::string(e.what()),
                                      "Error");
 }
 
-void ReflRunsTabPresenter::handleError(const std::string &message) {
+void RunsPresenter::handleError(const std::string &message) {
   m_messageHandler->giveUserCritical(message, "Error");
 }
 
-std::string ReflRunsTabPresenter::liveDataReductionAlgorithm() {
+std::string RunsPresenter::liveDataReductionAlgorithm() {
   return "ReflectometryReductionOneLiveData";
 }
 
 std::string
-ReflRunsTabPresenter::liveDataReductionOptions(const std::string &instrument) {
+RunsPresenter::liveDataReductionOptions(const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tab. We
   // don't have a group associated with live data. This is not ideal but for
   // now just use the first group.
@@ -503,7 +484,7 @@ ReflRunsTabPresenter::liveDataReductionOptions(const std::string &instrument) {
   return optionsString;
 }
 
-IAlgorithm_sptr ReflRunsTabPresenter::setupLiveDataMonitorAlgorithm() {
+IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   auto alg = AlgorithmManager::Instance().create("StartLiveData");
   alg->initialize();
   alg->setChild(true);
@@ -529,24 +510,24 @@ IAlgorithm_sptr ReflRunsTabPresenter::setupLiveDataMonitorAlgorithm() {
   return alg;
 }
 
-void ReflRunsTabPresenter::updateViewWhenMonitorStarting() {
+void RunsPresenter::updateViewWhenMonitorStarting() {
   m_view->setStartMonitorButtonEnabled(false);
   m_view->setStopMonitorButtonEnabled(false);
 }
 
-void ReflRunsTabPresenter::updateViewWhenMonitorStarted() {
+void RunsPresenter::updateViewWhenMonitorStarted() {
   m_view->setStartMonitorButtonEnabled(false);
   m_view->setStopMonitorButtonEnabled(true);
 }
 
-void ReflRunsTabPresenter::updateViewWhenMonitorStopped() {
+void RunsPresenter::updateViewWhenMonitorStopped() {
   m_view->setStartMonitorButtonEnabled(true);
   m_view->setStopMonitorButtonEnabled(false);
 }
 
 /** Start live data monitoring
  */
-void ReflRunsTabPresenter::startMonitor() {
+void RunsPresenter::startMonitor() {
   try {
     auto alg = setupLiveDataMonitorAlgorithm();
     if (!alg)
@@ -563,7 +544,7 @@ void ReflRunsTabPresenter::startMonitor() {
 
 /** Callback called when the monitor algorithm has been started
  */
-void ReflRunsTabPresenter::startMonitorComplete() {
+void RunsPresenter::startMonitorComplete() {
   auto algRunner = m_view->getMonitorAlgorithmRunner();
   m_monitorAlg = algRunner->getAlgorithm()->getProperty("MonitorLiveData");
   if (m_monitorAlg) {
@@ -576,7 +557,7 @@ void ReflRunsTabPresenter::startMonitorComplete() {
 
 /** Stop live data monitoring
  */
-void ReflRunsTabPresenter::stopMonitor() {
+void RunsPresenter::stopMonitor() {
   if (!m_monitorAlg)
     return;
 
@@ -588,7 +569,7 @@ void ReflRunsTabPresenter::stopMonitor() {
 
 /** Handler called when the monitor algorithm finishes
  */
-void ReflRunsTabPresenter::finishHandle(const IAlgorithm *alg) {
+void RunsPresenter::finishHandle(const IAlgorithm *alg) {
   UNUSED_ARG(alg);
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
@@ -597,8 +578,8 @@ void ReflRunsTabPresenter::finishHandle(const IAlgorithm *alg) {
 
 /** Handler called when the monitor algorithm errors
  */
-void ReflRunsTabPresenter::errorHandle(const IAlgorithm *alg,
-                                       const std::string &what) {
+void RunsPresenter::errorHandle(const IAlgorithm *alg,
+                                const std::string &what) {
   UNUSED_ARG(alg);
   UNUSED_ARG(what);
   stopObserving(m_monitorAlg);

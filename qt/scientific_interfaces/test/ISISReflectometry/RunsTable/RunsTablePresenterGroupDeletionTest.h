@@ -63,7 +63,7 @@ public:
     presenter.notifyDeleteGroupRequested();
 
     auto &groups = jobsFromPresenter(presenter).groups();
-    TS_ASSERT_EQUALS(0, groups.size());
+    TS_ASSERT_EQUALS(1, groups.size());
 
     verifyAndClearExpectations();
   }
