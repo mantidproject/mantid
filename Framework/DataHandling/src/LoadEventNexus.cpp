@@ -698,7 +698,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // Missing metadata is not a fatal error. Log and go on with your life
     g_log.error() << "Error loading metadata: " << e.what() << '\n';
   }
-  
+
   m_ws->setNPeriods(
       static_cast<size_t>(nPeriods),
       periodLog); // This is how many workspaces we are going to make.
