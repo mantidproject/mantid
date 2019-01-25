@@ -121,8 +121,8 @@ public:
     DataObjects::Workspace2D_sptr pdfws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
-    const auto R = pdfws->x(0);
-    const auto GofR = pdfws->y(0);
+    const auto &R = pdfws->x(0);
+    const auto &GofR = pdfws->y(0);
 
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
@@ -155,8 +155,8 @@ public:
     DataObjects::Workspace2D_sptr pdfws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
-    const auto R = pdfws->x(0);
-    const auto GofR = pdfws->y(0);
+    const auto &R = pdfws->x(0);
+    const auto &GofR = pdfws->y(0);
 
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);

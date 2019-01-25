@@ -23,7 +23,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsModel
     : public IIndirectFitOutputOptionsModel {
 public:
   IndirectFitOutputOptionsModel();
-  ~IndirectFitOutputOptionsModel() = default;
+  virtual ~IndirectFitOutputOptionsModel() override = default;
 
   void
   setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) override;

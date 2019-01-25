@@ -31,7 +31,7 @@ protected:
   void setRunEnabled(bool enable) override;
 
 private:
-  void setupFitTab() override; 
+  void setupFitTab() override;
 
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::MSDFit> m_uiForm;

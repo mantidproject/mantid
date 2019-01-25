@@ -25,6 +25,10 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 std::string cutLastOf(std::string const &str, std::string const &delimiter) {
   auto const cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
@@ -495,6 +499,9 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
   if (spectra.empty())
     throw std::runtime_error(
         "Fitting Data must consist of one or more spectra.");
+  if (workspaceName.empty() || !doesExistInADS(workspaceName))
+    throw std::runtime_error("A valid sample file needs to be selected.");
+
   addWorkspace(workspaceName, DiscontinuousSpectra<std::size_t>(spectra));
 }
 
@@ -832,7 +839,7 @@ IndirectFittingModel::createSingleFitOutputName(const std::string &formatString,
 }
 
 std::string IndirectFittingModel::getOutputBasename() const {
-  return cutLastOf(sequentialFitOutputName(),"_Results");
+  return cutLastOf(sequentialFitOutputName(), "_Results");
 }
 
 void IndirectFittingModel::cleanFailedRun(IAlgorithm_sptr fittingAlgorithm) {

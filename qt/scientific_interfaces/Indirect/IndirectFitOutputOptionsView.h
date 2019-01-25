@@ -12,7 +12,7 @@
 #include "DllConfig.h"
 #include "IIndirectFitOutputOptionsView.h"
 
-#include <QMessageBox>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,7 +24,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitOutputOptionsView
 
 public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
-  virtual ~IndirectFitOutputOptionsView();
+  virtual ~IndirectFitOutputOptionsView() override;
 
   void setGroupWorkspaceComboBoxVisible(bool visible) override;
   void setWorkspaceComboBoxVisible(bool visible) override;

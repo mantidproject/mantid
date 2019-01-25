@@ -164,9 +164,16 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp,
                                                                spectraNames)
 
-            layout = go.Layout(yaxis={'title': {'text':ylabel}},
-                               xaxis={'title': {'text':xlabel}},
-                               margin={'l':40,'r':0,'t':0,'b':40})
+            # plotly seems to change the way to set the axes labels
+            # randomly and within a version. Just give up and try both.
+            try:
+                layout = go.Layout(yaxis={'title': ylabel},
+                                   xaxis={'title': xlabel},
+                                   margin={'l': 40, 'r': 0, 't': 0, 'b': 40})
+            except RuntimeError:
+                layout = go.Layout(yaxis={'title': {'text': ylabel}},
+                                   xaxis={'title': {'text': xlabel}},
+                                   margin={'l': 40, 'r': 0, 't': 0, 'b': 40})
 
             fig = go.Figure(data=traces, layout=layout)
 
@@ -201,7 +208,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
             data.append(go.Scatter(x=x, y=y, name=label, visible=visible))
 
-        (xlabel, ylabel) = self.getAxesLabels(wksp, utf8=False)
+        (xlabel, ylabel) = self.getAxesLabels(wksp, utf8=True)
 
         return (data, xlabel, ylabel)
 

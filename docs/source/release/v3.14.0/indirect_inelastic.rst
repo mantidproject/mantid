@@ -72,6 +72,8 @@ Bugfixes
 - An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading
   a reduced file.
 - The output workspace ending with _Results now contains workspaces with corrected names which detail the fit functions used.
+- Selecting multiple data using the All Spectra checkbox without first selected a sample file used to cause an unexpected error.
+  This is now prevented. Meaningful error messages are also displayed when a sample or resolution file are not selected.
 
 
 Data Corrections Interface

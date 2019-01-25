@@ -130,9 +130,7 @@ void IqtFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void IqtFit::setRunEnabled(bool enable) {
-  m_uiForm->pbRun->setEnabled(enable);
-}
+void IqtFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

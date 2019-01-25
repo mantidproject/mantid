@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict>
+    <key>CFBundlePackageType</key>              <string>APPL</string>
+    <key>CFBundleInfoDictionaryVersion</key>    <string>6.0</string>
+    <key>CFBundleName</key>                     <string>MantidWorkbench</string>
+    <key>CFBundleExecutable</key>               <string>MantidWorkbench</string>
+    <key>CFBundleIconFile</key>                 <string>MantidWorkbench.icns</string>
+    <key>CFBundleIdentifier</key>               <string>appified.$USER.MantidWorkbench</string>
+    <key>CFBundleVersion</key>                  <string>0.1</string>
+    <key>CFBundleGetInfoString</key>            <string>0.1 launch the Mantid Workbench</string>
+    <key>CFBundleShortVersionString</key>       <string>0.1</string>
+</dict></plist>
+

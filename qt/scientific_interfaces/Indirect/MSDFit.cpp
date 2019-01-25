@@ -69,9 +69,7 @@ void MSDFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void MSDFit::setRunEnabled(bool enable) {
-  m_uiForm->pbRun->setEnabled(enable);
-}
+void MSDFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

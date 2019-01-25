@@ -69,7 +69,11 @@ add_dependencies ( PythonInterface ScriptsDotPth )
 set ( _scripts_pth_install "${CMAKE_CURRENT_BINARY_DIR}/mantid-scripts.pth.install" )
 string ( REPLACE ";" "\n" _pth_list_install "${_pth_list_install}" )
 file ( WRITE ${_scripts_pth_install} "${_pth_list_install}\n" )
+
 install ( FILES ${_scripts_pth_install} DESTINATION ${BIN_DIR}
+  RENAME mantid-scripts.pth
+)
+install ( FILES ${_scripts_pth_install} DESTINATION ${WORKBENCH_BIN_DIR}
   RENAME mantid-scripts.pth
 )
 

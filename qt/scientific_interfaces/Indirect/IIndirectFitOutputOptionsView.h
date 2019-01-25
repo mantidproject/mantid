@@ -10,8 +10,6 @@
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
