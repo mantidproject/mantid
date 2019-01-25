@@ -472,9 +472,9 @@ PyObject *cell(ITableWorkspace &self, const object &value, int row_or_col) {
  * @param row_or_col An integer giving the row if value is a string or the
  * column if value is an index
  */
-void setCellImpl(ITableWorkspace &self, const object &col_or_row,
-                 const int row_or_col, const object &value,
-                 const bool &notify_replace) {
+void setCell(ITableWorkspace &self, const object &col_or_row,
+             const int row_or_col, const object &value,
+             const bool &notify_replace) {
   Mantid::API::Column_sptr column;
   int row(-1);
   getCellLoc(self, col_or_row, row_or_col, column, row);
@@ -483,17 +483,6 @@ void setCellImpl(ITableWorkspace &self, const object &col_or_row,
   if (notify_replace) {
     self.modified();
   }
-}
-
-void setCell(ITableWorkspace &self, const object &col_or_row,
-             const int row_or_col, const object &value) {
-  setCellImpl(self, col_or_row, row_or_col, value, true);
-}
-void setCellNoNotify(ITableWorkspace &self, const object &col_or_row,
-                     const int row_or_col, const object &value,
-                     const object &notify_replace) {
-  bool notify = extract<bool>(notify_replace)();
-  setCellImpl(self, col_or_row, row_or_col, value, notify);
 }
 } // namespace
 
@@ -687,14 +676,7 @@ void export_ITableWorkspace() {
 
       .def("setCell", &setCell,
            (arg("self"), arg("row_or_column"), arg("column_or_row"),
-            arg("value")),
-           "Sets the value of a given cell. If the row_or_column argument is a "
-           "number then it is interpreted as a row otherwise it "
-           "is interpreted as a column name.")
-
-      .def("setCell", &setCellNoNotify,
-           (arg("self"), arg("row_or_column"), arg("column_or_row"),
-            arg("value"), arg("notify_replace")),
+            arg("value"), arg("notify_replace") = true),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name. If notify replace is false, then "

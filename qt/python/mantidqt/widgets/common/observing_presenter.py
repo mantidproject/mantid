@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-class ObservingPresenter:
+class ObservingPresenter(object):
     """
     This class provides some common functions for classes that need to be observable.
     It is not a GUI class, and if used, should be inherited by the presenter.

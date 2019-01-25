@@ -27,6 +27,7 @@ class InstrumentViewPresenter(ObservingPresenter):
     view = None
 
     def __init__(self, ws, parent=None, ads_observer=None):
+        super(InstrumentViewPresenter, self).__init__()
         self.ws_name = ws.name()
         self.view = InstrumentView(self, self.ws_name, parent)
 

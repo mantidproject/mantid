@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-class ObservingView:
+class ObservingView(object):
     """
     This class provides some common functions needed across views observing the ADS.
     It runs the close_signal so that the view is closed from the GUI thread,
@@ -29,15 +29,6 @@ class ObservingView:
     """
 
     TITLE_STRING = "{} - Mantid"
-
-    def __init__(self, _):
-        """
-        This __init__ is added to conform with the Qt super-class constructor, and is
-        called when the super(..., self).__init__ is executed in the view inheriting this.
-
-        It is not strictly required, but it prevents an inspection warning in PyCharm.
-        """
-        pass
 
     def emit_close(self):
         """
