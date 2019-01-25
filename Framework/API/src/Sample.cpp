@@ -121,7 +121,7 @@ void Sample::setShape(const IObject_sptr &shape) {
 /** Return the material.
  * @return A reference to the material the sample is composed of
  */
-const Material Sample::getMaterial() const { return m_shape->material(); }
+const Material &Sample::getMaterial() const { return m_shape->material(); }
 
 /**
  * Return a reference to the sample environment that this sample is attached to

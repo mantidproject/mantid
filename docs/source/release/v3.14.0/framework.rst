@@ -90,6 +90,7 @@ Improvements
 - All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``).
 - Various clarifications and additional links in the geometry and material documentation pages
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
+- :ref:`SetSampleMaterial <algm-SetSampleMaterial>` and :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` accept number densities as formula units per cubic Ångström in addition to atoms per cubic Ångström.
 
 Bugfixes
 ########
@@ -153,6 +154,7 @@ Improvements
 - :py:meth:`mantid.api.ITableWorkspace.columnTypes` now returns human readable strings for non-primitive column types.
 - It is now possible to build custom materials with :class:`mantid.kernel.MaterialBuilder` without setting a formula or atomic number. In this case, all cross sections and number density have to be given.
 - Python plotting now handles `twinx` and `twiny` axes for workspaces.
+- :py:obj:`mantid.kernel.MaterialBuilder` now supports number densities in formula units per cubic Ånström.
 
 Bugfixes
 ########

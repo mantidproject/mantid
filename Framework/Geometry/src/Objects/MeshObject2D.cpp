@@ -375,7 +375,7 @@ MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
   throw std::runtime_error("Not implemented");
 }
 
-const Kernel::Material MeshObject2D::material() const { return m_material; }
+const Kernel::Material &MeshObject2D::material() const { return m_material; }
 
 const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 

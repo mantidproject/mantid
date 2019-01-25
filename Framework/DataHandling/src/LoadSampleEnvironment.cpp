@@ -21,6 +21,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <Poco/File.h>
@@ -111,6 +112,10 @@ void LoadSampleEnvironment::init() {
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
+  const std::vector<std::string> units({"Atoms", "Formula Units"});
+  declareProperty("NumberDensityUnit", units.front(),
+                  boost::make_shared<StringListValidator>(units),
+                  "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
   std::string formulaGrp("By Formula or Atomic Number");
@@ -126,6 +131,7 @@ void LoadSampleEnvironment::init() {
 
   std::string densityGrp("Sample Density");
   setPropertyGroup("SampleNumberDensity", densityGrp);
+  setPropertyGroup("NumberDensityUnit", densityGrp);
   setPropertyGroup("ZParameter", densityGrp);
   setPropertyGroup("UnitCellVolume", densityGrp);
   setPropertyGroup("SampleMassDensity", densityGrp);
@@ -138,6 +144,9 @@ void LoadSampleEnvironment::init() {
                                             "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings("SampleMassDensity", make_unique<EnabledWhenProperty>(
                                                "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("NumberDensityUnit",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SampleNumberDensity", Kernel::IS_NOT_DEFAULT));
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
@@ -205,6 +214,13 @@ void LoadSampleEnvironment::exec() {
     params.incoherentXSection = getProperty("IncoherentXSection");
     params.attenuationXSection = getProperty("AttenuationXSection");
     params.scatteringXSection = getProperty("ScatteringXSection");
+    const std::string numberDensityUnit = getProperty("NumberDensityUnit");
+    if (numberDensityUnit == "Atoms") {
+      params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
+    } else {
+      params.numberDensityUnit =
+          MaterialBuilder::NumberDensityUnit::FormulaUnits;
+    }
     binaryStlReader = std::make_unique<LoadBinaryStl>(filename, params);
     asciiStlReader = std::make_unique<LoadAsciiStl>(filename, params);
   } else {
