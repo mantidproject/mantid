@@ -116,7 +116,7 @@ class subPlot(QtWidgets.QWidget):
             self.canvas.draw()
 
     def _rm(self):
-        names = self._context.subplots.keys()
+        names = list(self._context.subplots.keys())
         # if the remove window is not visable
         if self._rm_window is not None:
             self._raise_rm_window()
