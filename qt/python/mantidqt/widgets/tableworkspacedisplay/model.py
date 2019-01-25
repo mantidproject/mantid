@@ -42,7 +42,6 @@ class TableWorkspaceDisplayModel:
         self.ws = ws
         self.ws_num_rows = self.ws.rowCount()
         self.ws_num_cols = self.ws.columnCount()
-        self.ws_column_types = self.ws.columnTypes()
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
 
