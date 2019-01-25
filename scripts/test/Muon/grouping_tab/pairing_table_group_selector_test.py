@@ -188,7 +188,7 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_1')
         self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
 
-    def test_group_cannot_be_changed_to_match_other_group(self):
+    def test_group_changed_to_other_group_switches_groups(self):
         self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
 
@@ -202,8 +202,8 @@ class GroupSelectorTest(unittest.TestCase):
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 3)
         self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 3)
-        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_0')
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
+        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_1')
+        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_0')
 
 
 

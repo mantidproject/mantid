@@ -32,11 +32,11 @@ class GroupingTabModel(object):
 
     @property
     def groups(self):
-        return self._data.groups.values()
+        return list(self._data.groups.values())
 
     @property
     def pairs(self):
-        return self._data.pairs.values()
+        return list(self._data.pairs.values())
 
     @property
     def group_names(self):

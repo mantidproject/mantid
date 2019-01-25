@@ -51,16 +51,17 @@ class PairingTablePresenter(object):
         self.guessAlphaNotifier.notify_subscribers([pair_name, group1, group2])
 
     def handle_data_change(self, row, col):
-        changed_item = self._view.get_table_contents()[row][col]
+        table = self._view.get_table_contents()
+        changed_item = table[row][col]
         update_model = True
         if col == 0 and not self.validate_pair_name(changed_item):
             update_model = False
         if col == 1:
             if changed_item == self._view.get_table_item_text(row, 2):
-                update_model = False
+                table[row][2] = self._model.pairs[row].forward_group
         if col == 2:
             if changed_item == self._view.get_table_item_text(row, 1):
-                update_model = False
+                table[row][1] = self._model.pairs[row].backward_group
         if col == 3:
             if not self.validate_alpha(changed_item):
                 update_model = False
@@ -73,13 +74,14 @@ class PairingTablePresenter(object):
                 self._view.pairing_table.blockSignals(False)
 
         if update_model:
-            self.update_model_from_view()
+            self.update_model_from_view(table)
 
         self.update_view_from_model()
         self.notify_data_changed()
 
-    def update_model_from_view(self):
-        table = self._view.get_table_contents()
+    def update_model_from_view(self, table=None):
+        if not table:
+            table = self._view.get_table_contents()
         self._model.clear_pairs()
         for entry in table:
             pair = MuonPair(pair_name=str(entry[0]),
