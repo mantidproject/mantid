@@ -5,6 +5,7 @@ from Muon.GUI.Common.message_box import warning, question
 
 import os
 
+
 class GroupingTabView(QtGui.QWidget):
 
     def __init__(self, grouping_table, pairing_table, parent=None):
