@@ -107,9 +107,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_instrument_changed(self):
-        """
-        User changes the selected instrument.
-        """
+        """User changes the selected instrument."""
         instrument = self._view.get_instrument()
         current_instrument = self._view.cached_instrument
         if instrument != self._model._data.instrument:
@@ -130,9 +128,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_dead_time_browse_clicked(self):
-        """
-        User selects the option to Browse for a nexus file to load dead times from.
-        """
+        """User selects the option to Browse for a nexus file to load dead times from."""
         filename = self._view.show_file_browser_and_return_selection(
             filter_for_extensions(['nxs']), [''], multiple_files=False)[0]
         name = load_utils.load_dead_time_from_filename(filename)
@@ -147,9 +143,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.warning_popup("Dead time table cannot be loaded")
 
     def handle_user_selects_dead_time_from_data(self):
-        """
-        User chooses to load dead time from the currently loaded workspace.
-        """
+        """User chooses to load dead time from the currently loaded workspace."""
         dtc = self._model.get_dead_time_table_from_data()
         if dtc is not None:
             self._model.set_dead_time_from_data()
@@ -160,31 +154,23 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.set_dead_time_label("No loaded dead time")
 
     def set_dead_time_text_to_default(self):
-        """
-        by default the dead time text should onl contain 0.0.
-        """
+        """by default the dead time text should onl contain 0.0."""
         dead_time_text = self.dead_time_from_data_text([0.0])
         self._view.set_dead_time_label(dead_time_text)
 
     def handle_dead_time_from_file_selected(self):
-        """
-        User has selected the dead time "from Table Workspace" option.
-        """
+        """User has selected the dead time "from Table Workspace" option."""
         table_names = load_utils.get_table_workspace_names_from_ADS()
         self._view.populate_dead_time_combo(table_names)
         self.set_dead_time_text_to_default()
 
     def handle_dead_time_unselected(self):
-        """
-        User has set dead time combo to 'None'.
-        """
+        """User has set dead time combo to 'None'."""
         self.set_dead_time_text_to_default()
         self._model.set_dead_time_to_none()
 
     def handle_dead_time_from_file_changed(self):
-        """
-        The user changes the selected Table Workspace to use as dead time.
-        """
+        """The user changes the selected Table Workspace to use as dead time."""
         selection = self._view.get_dead_time_file_selection()
         if selection == "None" or selection == "":
             self.handle_dead_time_unselected()

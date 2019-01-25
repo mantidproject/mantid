@@ -78,7 +78,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def setup_interface(self):
         self.setObjectName("InstrumentWidget")
-        # self.resize(500, 100)
 
         self.setup_instrument_row()
         self.setup_time_zero_row()
@@ -99,18 +98,7 @@ class InstrumentWidgetView(QtGui.QWidget):
                            "padding-right: 10px;"
                            ' color: grey; }')
 
-        self.vertical_layout = QtGui.QVBoxLayout()
-
-        self.vertical_layout.addItem(self.horizontal_layout)
-        self.vertical_layout.addItem(self.horizontal_layout_2)
-        self.vertical_layout.addItem(self.horizontal_layout_3)
-        self.vertical_layout.addItem(self.horizontal_layout_4)
-        self.vertical_layout.addItem(self.dead_time_file_layout)
-        # self.vertical_layout.addItem(self.horizontal_layout_5)
-        self.vertical_layout.addItem(self.horizontal_layout_6)
-
         self.group.setLayout(self.layout)
-        # self.group.setLayout(self.vertical_layout)
 
         self.group2 = QtGui.QGroupBox("Rebin")
         self.group2.setFlat(False)
@@ -243,7 +231,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_2 = QtGui.QHBoxLayout()
         self.horizontal_layout_2.setObjectName("horizontalLayout2")
-        # self.horizontal_layout_2.addWidget(self.timezero_edit)
         self.horizontal_layout_2.addSpacing(10)
         self.horizontal_layout_2.addWidget(self.timezero_unit_label)
         self.horizontal_layout_2.addWidget(self.timezero_checkbox)
@@ -296,7 +283,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.firstgooddata_unit_label = QtGui.QLabel(self)
         self.firstgooddata_unit_label.setObjectName("firstgooddataUnitLabel")
-        self.firstgooddata_unit_label.setText(u" µs (From data file ")  # "micro seconds ( ")
+        self.firstgooddata_unit_label.setText(u" U+03BCs (From data file ")
 
         self.firstgooddata_checkbox = QtGui.QCheckBox(self)
         self.firstgooddata_checkbox.setObjectName("firstgooddataCheckbox")
@@ -308,7 +295,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_3 = QtGui.QHBoxLayout()
         self.horizontal_layout_3.setObjectName("horizontalLayout3")
-        # self.horizontal_layout_3.addWidget(self.firstgooddata_edit)
         self.horizontal_layout_3.addSpacing(10)
         self.horizontal_layout_3.addWidget(self.firstgooddata_unit_label)
         self.horizontal_layout_3.addWidget(self.firstgooddata_checkbox)
@@ -542,10 +528,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_steps_edit.hide()
         self.rebin_variable_label.hide()
         self.rebin_variable_edit.hide()
-
-        # self.layout.addWidget(self.rebin_label, 5, 0)
-        # self.layout.addWidget(self.rebin_selector, 5, 1)
-        # self.layout.addItem(self.horizontal_layout_5, 5, 2)
 
     def rebin_fixed_hidden(self, hidden=True):
         if hidden:
