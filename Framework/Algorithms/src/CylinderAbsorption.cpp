@@ -47,56 +47,37 @@ void CylinderAbsorption::defineProperties() {
       "calculation");
 }
 
-namespace { // anonymous
-            /*
-             * <type name="userShape"> <cylinder id="sample-shape">
-             *    <centre-of-bottom-base x="0" y="-0.03485" z="0"/>
-             *    <axis x="0" y="1" z="0"/>
-             *    <height val="0.0697"/>
-             *    <radius val="0.00315"/>
-             * </cylinder> </type>
-             */
-// to simplify other code, return values in cm
-double getParameterFromXml(const std::string &xml,
-                           const std::string &paramName) {
-  const std::string error =
-      "Failed to find parameter \"" + paramName + "\" in shape xml";
-  auto start = xml.find(paramName);
-  if (start == std::string::npos) {
-    throw std::runtime_error(error);
-  }
-  start += paramName.size();
-  start = xml.find("val=\"", start);
-  if (start == std::string::npos) {
-    throw std::runtime_error(error);
-  }
-  start += std::string("val=\"").size();
-  auto end = xml.find("\"", start);
-  if (end == std::string::npos) {
-    throw std::runtime_error(error);
-  }
-
-  // return a value in cm when the xml is in m
-  return 100. * boost::lexical_cast<double>(xml.substr(start, end - start));
-}
-
 // returns an empty string if anything is wrong
-std::string getSampleXml(const Geometry::IObject &sampleShape) {
+void
+CylinderAbsorption::getShapeFromSample(const Geometry::IObject &sampleShape) {
+  if ((!isEmpty(m_cylHeight)) && (!isEmpty(m_cylRadius)))
+    return; // nothing to update
   if (!sampleShape.hasValidShape())
-    return std::string();
+    return; // no valid shape
   if (sampleShape.shape() !=
       Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
-    return std::string();
+    return; // not a cylinder
+
+  // get to the underlying ShapeInfo object
   const auto csgshape = dynamic_cast<const CSGObject *>(&sampleShape);
-  const std::string shapeXml = csgshape->getShapeXML();
-  return shapeXml;
+  if (!csgshape)
+    return;
+  const auto &shapeObj = csgshape->shapeInfo();
+
+  if (isEmpty(m_cylRadius))
+    m_cylRadius = shapeObj.radius();
+  if (isEmpty(m_cylHeight))
+    m_cylHeight = shapeObj.height();
 }
-} // anonymous namespace
 
 /// Fetch the properties and set the appropriate member variables
 void CylinderAbsorption::retrieveProperties() {
   m_cylHeight = getProperty("CylinderSampleHeight"); // in cm
+  if (!isEmpty(m_cylHeight))
+    m_cylHeight *= 0.01;                             // now in m
   m_cylRadius = getProperty("CylinderSampleRadius"); // in cm
+  if (!isEmpty(m_cylRadius))
+    m_cylRadius *= 0.01; // now in m
 
   // this declares that at least part of the built-in sample geometry should be
   // ignored and use the supplied parameters instead
@@ -104,27 +85,17 @@ void CylinderAbsorption::retrieveProperties() {
 
   // get the missing parameters from the sample shape
   const auto &sampleShape = m_inputWS->sample().getShape();
-  std::string shapeXml = getSampleXml(sampleShape);
-  if (!shapeXml.empty()) {
-    g_log.information(shapeXml);
-    if (isEmpty(m_cylHeight))
-      m_cylHeight = getParameterFromXml(shapeXml, "height");
-    if (isEmpty(m_cylRadius))
-      m_cylRadius = getParameterFromXml(shapeXml, "radius");
-  } else {
-    g_log.notice("Did not get shape xml");
-  }
-  m_cylHeight *= 0.01; // now in m
-  m_cylRadius *= 0.01; // now in m
+  getShapeFromSample(sampleShape);
 
   g_log.information() << "Creating cylinder with radius=" << m_cylRadius
                       << "m, height=" << m_cylHeight << "m\n";
   if (isEmpty(m_cylHeight) || isEmpty(m_cylRadius)) {
-    throw std::runtime_error(
+    throw std::invalid_argument(
         "Need to specify both height and radius of cylinder");
   }
   if (m_cylHeight <= 0. || m_cylRadius <= 0.)
-    throw std::runtime_error("Failed to specify height and radius of cylinder");
+    throw std::invalid_argument(
+        "Failed to specify height and radius of cylinder");
 
   m_numSlices = getProperty("NumberOfSlices");
   m_sliceThickness = m_cylHeight / m_numSlices;
