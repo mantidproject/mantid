@@ -152,8 +152,12 @@ void MDNorm::init() {
   for (std::size_t i = 0; i < 6; i++) {
     std::string propName = "Dimension" + Strings::toString(i) + "Name";
     std::string propBinning = "Dimension" + Strings::toString(i) + "Binning";
+    std::string defaultName = "";
+    if (i < 3) {
+      defaultName = "QDimension" + Strings::toString(i);
+    }
     declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
-                        propName, "", Direction::Input),
+                        propName, defaultName, Direction::Input),
                     "Name for the " + Strings::toString(i) +
                         "th dimension. Leave blank for NONE.");
     auto atMost3 = boost::make_shared<ArrayLengthValidator<double>>(0, 3);
