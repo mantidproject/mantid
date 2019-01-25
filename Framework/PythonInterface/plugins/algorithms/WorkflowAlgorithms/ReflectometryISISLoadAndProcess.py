@@ -128,7 +128,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Copy properties from the child reduction algorithm"""
         self._reduction_properties = [
             'SummationType', 'ReductionType', 'IncludePartialBins',
-            'AnalysisMode', 'ProcessingInstructions', 'CorrectDetectors',
+            'AnalysisMode', 'ProcessingInstructions', 'ThetaIn', 'ThetaLogName', 'CorrectDetectors',
             'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
             'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
@@ -182,7 +182,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             # Check that the monitors workspace is also loaded
             if not AnalysisDataService.doesExist(workspace_name + '_monitors'):
                 self.log().information('Workspace ' + workspace_name + ' exists but ' +
-                                       workspace + '_monitors does not')
+                                       workspace_name + '_monitors does not')
                 return False
         else:
             # If not slicing, check that it's a Workspace2D
