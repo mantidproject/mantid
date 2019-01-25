@@ -7,6 +7,8 @@
 #ifndef MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXINGTEST_H_
 #define MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXINGTEST_H_
 
+#if BOOST_VERSION > 106100
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
@@ -346,7 +348,7 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ConvToMDEventsWSIndexingTest *createSuite() {
-    return new MDEventTreeBuilderTest();
+    return new ConvToMDEventsWSIndexingTest();
   }
   static void destroySuite(ConvToMDEventsWSIndexingTest *suite) {
     delete suite;
@@ -424,5 +426,5 @@ private:
     return compareTrees(res, topNodeWithError.root);
   }
 };
-
+#endif // #if BOOST_VERSION > 106100
 #endif /* MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXINGTEST_H_ */
