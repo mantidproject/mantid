@@ -8,6 +8,7 @@ from Muon.GUI.Common.observer_pattern import Observable
 
 pair_columns = ['pair_name', 'group_1', 'group_2', 'alpha']
 
+
 class PairingTablePresenter(object):
 
     def __init__(self, view, model):
@@ -67,12 +68,9 @@ class PairingTablePresenter(object):
             if not self.validate_alpha(changed_item):
                 update_model = False
             else:
-                self._view.pairing_table.blockSignals(True)
                 rounded_item = '{:.3f}'.format(float(changed_item)) if '{:.3f}'.format(float(changed_item)) != '0.000'\
                     else '{:.3g}'.format(float(changed_item))
-
-                self._view.pairing_table.item(row, col).setText(rounded_item)
-                self._view.pairing_table.blockSignals(False)
+                table[row][col] = rounded_item
 
         if update_model:
             self.update_model_from_view(table)
