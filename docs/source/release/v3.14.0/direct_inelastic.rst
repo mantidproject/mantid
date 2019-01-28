@@ -32,6 +32,7 @@ Improvements
 
 - :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
 - The upper limit of the empty container scaling factor in :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` has been removed.
+- The new property in :ref:`DirectILLReduction <algm-DirectILLReduction>`, ``EnergyRebinning``, allows mixing automatic bin widths with user specified ones when rebinning the energy transfer axis.
 
 Bugfixes
 ########
