@@ -330,13 +330,11 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   g_log.debug() << "Instrument name: " << instrumentName << '\n';
   if (m_instrument == Supported::D17) {
     m_detectorAngleName = "dan.value";
-    m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::FIGARO) {
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
-    m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     // FIGARO: find out which of the four choppers are used
     NXFloat firstChopper =
