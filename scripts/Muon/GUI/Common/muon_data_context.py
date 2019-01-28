@@ -26,6 +26,7 @@ from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calcu
 
 from collections import OrderedDict
 
+from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl, ConfigService
 
 
@@ -34,7 +35,10 @@ def get_default_grouping(workspace, instrument, main_field_direction):
     if instrument == "MUSR":
         parameter_name += " - " + main_field_direction
     try:
-        grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+        if isinstance(workspace, WorkspaceGroup):
+            grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
+        else:
+            grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
     except IndexError:
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
@@ -178,16 +182,26 @@ class MuonDataContext(object):
 
     @property
     def loaded_workspace(self):
+        return self.current_data["OutputWorkspace"][0].workspace
+
+    @property
+    def loaded_workspace_as_group(self):
         if self.is_multi_period():
-            # return the first workspace in the group
-            return self.current_data["OutputWorkspace"][0].workspace
+            workspace_group = WorkspaceGroup()
+            for workspace_wrapper in self.current_data["OutputWorkspace"]:
+                workspace_group.addWorkspace(workspace_wrapper.workspace)
+            return workspace_group
         else:
             return self.current_data["OutputWorkspace"][0].workspace
 
     @property
     def period_string(self):
-        # Get the period string i.e. "1+2-3+4" to be used in workspace naming.
-        return "1"
+        summed_periods = self.loaded_data["SummedPeriods"] if 'SummedPeriods' in self.loaded_data else [1]
+        subtracted_periods = self.loaded_data["SubtractedPeriods"] if 'SubtractedPeriods' in self.loaded_data else []
+        if subtracted_periods:
+            return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
+        else:
+            return '+'.join([str(period) for period in summed_periods])
 
     @property
     def num_detectors(self):
