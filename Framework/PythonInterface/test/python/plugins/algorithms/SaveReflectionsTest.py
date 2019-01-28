@@ -140,11 +140,15 @@ class SaveReflectionsTest(unittest.TestCase):
     def test_save_jana_format_modulated(self):
         # Arrange
         workspace = self._create_modulated_peak_table()
+        reference_result = self._get_reference_result("jana_format_modulated.hkl")
         file_name = os.path.join(self._test_dir, "test_jana_modulated.hkl")
         output_format = "Jana"
 
         # Act
-        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+        SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format)
+
+        # Assert
+        self.assertTrue(compare_file(reference_result, file_name))
 
     def test_save_GSAS_format(self):
         # Arrange

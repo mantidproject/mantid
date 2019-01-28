@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
 import numpy as np
-from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, ITableWorkspaceProperty
+from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, ITableWorkspaceProperty, IPeaksWorkspace
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import SaveHKL
 
@@ -168,9 +168,6 @@ class JanaFormat(object):
         :param file_name: the file name to output data to.
         :param workspace: the PeaksWorkspace to write to file.
         """
-        if has_modulated_indexing(workspace):
-            raise NotImplementedError("Cannot currently save modulated structures to Jana format")
-        self._cache_instrument_params(workspace)
         with open(file_name, 'w') as f_handle:
             self.write_header(f_handle, workspace)
             self.write_peaks(f_handle, workspace)
@@ -181,11 +178,13 @@ class JanaFormat(object):
         :param f_handle: handle to the file to write to.
         :param workspace: the PeaksWorkspace to save to file.
         """
-        sample = workspace.sample()
-        lattice = sample.getOrientedLattice()
-        lattice_params = [lattice.a(), lattice.b(), lattice.c(), lattice.alpha(), lattice.beta(), lattice.gamma()]
-        lattice_params = "".join(["{: >10.4f}".format(value) for value in lattice_params])
-        f_handle.write("# Lattice parameters   {}\n".format(lattice_params))
+        if isinstance(workspace, IPeaksWorkspace):
+            sample = workspace.sample()
+            lattice = sample.getOrientedLattice()
+            lattice_params = [lattice.a(), lattice.b(), lattice.c(), lattice.alpha(), lattice.beta(), lattice.gamma()]
+            lattice_params = "".join(["{: >10.4f}".format(value) for value in lattice_params])
+            f_handle.write("# Lattice parameters   {}\n".format(lattice_params))
+
         f_handle.write("(3i5,2f12.2,i5,4f10.4)\n")
 
     def write_peaks(self, f_handle, workspace):
@@ -219,29 +218,21 @@ class JanaFormat(object):
         f_handle.write("{SigInt: >12.2f}".format(**peak))
         f_handle.write("{: >5.0f}".format(1))
         f_handle.write("{Wavelength: >10.4f}".format(**peak))
-        f_handle.write("{: >10.4f}".format(self._get_two_theta(peak['DetID'])))
+        f_handle.write("{: >10.4f}".format(self._get_two_theta(peak)))
         f_handle.write("{: >10.4f}{: >10.4f}{: >10.4f}".format(1.0, 0.0, 0.0))
         f_handle.write("\n")
 
-    def _get_two_theta(self, det_id):
-        """Get the two theta value for this peak
-        :param det_id: the detector ID of this Peak
+    def _get_two_theta(self, peak):
+        """Get the two theta value for this peak.
+
+        This is just Bragg's law relating wavelength to scattering angle.
+        :param peak: peak object to get the scattering angle for.
+        :returns: the scattering angle for the peak.
         """
-        det = self._instrument.getDetector(det_id)
-        return np.degrees(det.getTwoTheta(self._instrument.getPos(), self._z_axis))
-
-    def _cache_instrument_params(self, workspace):
-        """Cache some parameters about the instrument
-
-        This stores some of the instrument parameters at the start
-        of execution so we can quickly access them later.
-
-        :param workspace: the PeaksWorkspace to cache instrument data from.
-        """
-        self._instrument = workspace.getInstrument()
-        frame = self._instrument.getReferenceFrame()
-        self._z_axis = frame.vecPointingAlongBeam()
-
+        d = peak['DSpacing']
+        wavelength = peak['Wavelength']
+        theta = 2.*np.arcsin(0.5*(wavelength / d))
+        return np.rad2deg(theta)
 
 # ------------------------------------------------------------------------------------------------------
 
