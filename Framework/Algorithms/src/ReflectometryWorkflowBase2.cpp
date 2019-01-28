@@ -151,6 +151,7 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
   setPropertyGroup("Params", "Transmission");
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
+  setPropertyGroup("ScaleRHSWorkspace", "Transmission");
 }
 
 /** Initialize properties used for stitching transmission runs
@@ -178,7 +179,7 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
                                            Direction::Input),
-      "Whether the right-hand-side or left-hand-side workspace is scaled. "
+      "Scale the right-hand-side or left-hand-side workspace. "
 	  "Only used if a second transmission run is provided.");
 }
 
@@ -668,6 +669,7 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
       alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
       alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
       alg->setPropertyValue("Params", getPropertyValue("Params"));
+      alg->setPropertyValue("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
     }
   }
 
