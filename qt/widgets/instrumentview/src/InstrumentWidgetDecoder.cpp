@@ -71,6 +71,7 @@ void InstrumentWidgetDecoder::decodeTabs(const QMap<QString, QVariant> &map,
 
 void InstrumentWidgetDecoder::decodeMaskTab(const QMap<QString, QVariant> &map,
                                             InstrumentWidgetMaskTab *obj) {
+  connect(this, SIGNAL(shapeCreated()), obj, SLOT(shapeCreated()));
   const auto activeTools = map[QString("activeTools")].toMap();
   const auto activeType = map[QString("activeType")].toMap();
 
@@ -145,7 +146,7 @@ void InstrumentWidgetDecoder::decodeTreeTab(const QMap<QString, QVariant> &map,
                                             InstrumentWidgetTreeTab *obj) {
   auto names = map[QString("expandedItems")].toList();
   if (names.size() > 0) {
-    for (auto &name : names) {
+    for (const auto &name : names) {
       auto index = obj->m_instrumentTree->findComponentByName(name.toString());
       obj->m_instrumentTree->setExpanded(index, true);
     }
@@ -155,6 +156,7 @@ void InstrumentWidgetDecoder::decodeTreeTab(const QMap<QString, QVariant> &map,
 
 void InstrumentWidgetDecoder::decodePickTab(const QMap<QString, QVariant> &map,
                                             InstrumentWidgetPickTab *obj) {
+  connect(this, SIGNAL(shapeCreated()), obj, SLOT(shapeCreated()));
   obj->m_zoom->setChecked(map[QString("zoom")].toBool());
   obj->m_edit->setChecked(map[QString("edit")].toBool());
   obj->m_ellipse->setChecked(map[QString("ellipse")].toBool());
@@ -208,30 +210,32 @@ void InstrumentWidgetDecoder::decodeSurface(
 
 void InstrumentWidgetDecoder::decodeMaskShapes(const QList<QVariant> &list,
                                                Shape2DCollection &obj) {
-  connect(this, SIGNAL(shapeCreated()), &obj, SIGNAL(shapeCreated()));
   for (const auto &shape : list) {
-    Shape2D *created_shape = this->decodeShape(shape.toMap());
+    auto created_shape = this->decodeShape(shape.toMap());
     obj.m_shapes.push_back(created_shape);
     emit shapeCreated();
   }
+
+  std::cout << list.size() << " " << obj.m_shapes.size() << "/n";
 }
 
 Shape2D *
 InstrumentWidgetDecoder::decodeShape(const QMap<QString, QVariant> &map) {
   const auto type = map[QString("type")].toString().toStdString();
 
-  Shape2D *shape = nullptr;
-  if (type == "ellipse") {
-    shape = this->decodeEllipse(map[QString("subShapeMap")].toMap());
-  } else if (type == "rectangle") {
-    shape = this->decodeRectangle(map[QString("subShapeMap")].toMap());
-  } else if (type == "ring") {
-    shape = this->decodeRing(map[QString("subShapeMap")].toMap());
-  } else if (type == "free") {
-    shape = this->decodeFree(map[QString("subShapeMap")].toMap());
-  } else {
-    throw std::runtime_error("InstrumentView - Could not decode shape");
-  }
+  auto shape = [&]() {
+    if (type == "ellipse") {
+      return this->decodeEllipse(map[QString("subShapeMap")].toMap());
+    } else if (type == "rectangle") {
+      return this->decodeRectangle(map[QString("subShapeMap")].toMap());
+    } else if (type == "ring") {
+      return this->decodeRing(map[QString("subShapeMap")].toMap());
+    } else if (type == "free") {
+      return this->decodeFree(map[QString("subShapeMap")].toMap());
+    } else {
+      throw std::runtime_error("InstrumentView - Could not decode shape");
+    }
+  }();
 
   shape->setScalable(map[QString("scalable")].toBool());
   shape->edit(map[QString("editing")].toBool());

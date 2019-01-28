@@ -62,15 +62,18 @@ class ProjectLoader(object):
 
             # Load interfaces
             if self.project_reader.interface_list is not None:
-                for interface in self.project_reader.interface_list:
-                    # Find decoder
-                    decoder = self.decoder_factory.find_decoder(interface["tag"])
-
-                    # Decode and Show the interface
-                    decoded_interface = decoder.decode(interface, directory)
-                    decoded_interface.show()
+                self.load_interfaces(directory)
 
         return workspace_success
+
+    def load_interfaces(self, directory):
+        for interface in self.project_reader.interface_list:
+            # Find decoder
+            decoder = self.decoder_factory.find_decoder(interface["tag"])
+
+            # Decode and Show the interface
+            decoded_interface = decoder.decode(interface, directory)
+            decoded_interface.show()
 
 
 class ProjectReader(object):

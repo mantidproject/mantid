@@ -128,6 +128,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save settings for the widget tab to a project file
   virtual std::string saveToProject() const;
+  virtual std::string type() const { return "base"; }
 
   // --- Properties. for gui interaction --- //
 
@@ -218,6 +219,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "ellipse"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -244,6 +246,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "rectangle"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -280,6 +283,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "ring"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -315,6 +319,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "free"; }
 
 protected:
   void drawShape(QPainter &painter) const override;

@@ -17,6 +17,8 @@
 #include "MantidQtWidgets/InstrumentView/MaskBinsData.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/Shape2D.h"
+#include "MantidQtWidgets/InstrumentView/Projection3D.h"
+#include "MantidQtWidgets/InstrumentView/Viewport.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -54,13 +56,16 @@ private:
   QMap<QString, QVariant> encodeBinMask(const BinMask &obj);
   QMap<QString, QVariant> encodeSurface(const ProjectionSurface_sptr &obj);
 
-  QMap<QString, QVariant> encodeShape(Shape2D *obj);
-  QMap<QString, QVariant> encodeEllipse(Shape2DEllipse *obj);
-  QMap<QString, QVariant> encodeRectangle(Shape2DRectangle *obj);
-  QMap<QString, QVariant> encodeRing(Shape2DRing *obj);
-  QMap<QString, QVariant> encodeFree(Shape2DFree *obj);
+  QMap<QString, QVariant> encodeViewPort(const Viewport &obj);
+  QMap<QString, QVariant> encodeProjection3D(const Projection3D &obj);
 
-  QList<QVariant> encodeMaskShapes(Shape2DCollection &obj);
+  QMap<QString, QVariant> encodeShape(const Shape2D *obj);
+  QMap<QString, QVariant> encodeEllipse(const Shape2DEllipse *obj);
+  QMap<QString, QVariant> encodeRectangle(const Shape2DRectangle *obj);
+  QMap<QString, QVariant> encodeRing(const Shape2DRing *obj);
+  QMap<QString, QVariant> encodeFree(const Shape2DFree *obj);
+
+  QList<QVariant> encodeMaskShapes(const Shape2DCollection &obj);
   QMap<QString, QVariant> encodeShapeProperties(const Shape2D *obj);
   QList<QVariant> encodeAlignmentInfo(const ProjectionSurface_sptr &obj);
 

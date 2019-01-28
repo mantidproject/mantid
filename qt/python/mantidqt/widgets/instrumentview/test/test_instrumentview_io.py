@@ -14,34 +14,64 @@ from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder, Instrument
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.qt.test import GuiTest
 
+import os
 
-INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
-                        u'tabs': {u'maskTab': {
-                                    u'activeType': {
-                                        u'roiOn': False, u'groupingOn': False, u'maskingOn': True},
-                                    u'activeTools': {u'ellipseButton': False, u'moveButton': True,
-                                                     u'pointerButton': False, u'ringRectangleButton': False,
-                                                     u'freeDrawButton': False, u'ringEllipseButton': False},
-                                    u'maskWorkspaceSaved': False},
-                                  u'renderTab': {u'displayWireframe': False, u'displayLighting': False,
-                                                 u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': False,
-                                                 u'colorBar': {u'max': u'40', u'scaleType': 0, u'power': u'2',
-                                                               u'min': u'40'},
-                                                 u'showLabels': True, u'flipView': False, u'displayDetectorsOnly': True,
-                                                 u'displayAxes': False, u'axesView': 0, u'showRows': True,
-                                                 u'useOpenGL': True, u'showRelativeIntensity': False},
-                                  u'treeTab': {u'expandedItems': []},
-                                  u'pickTab': {u'freeDraw': False, u'ringEllipse': False, u'edit': False,
-                                               u'tube': False, u'peakSelect': False, u'zoom': False, u'one': True,
-                                               u'ringRectangle': False, u'peak': False, u'ellipse': False,
-                                               u'rectangle': False}}, u'surfaceType': 0,
-                        u'actor': {u'binMasks': [], u'fileName': u'viridis'},
-                        u'energyTransfer': [0.0, 20000.0],
-                        u'surface': {u'shapes': [], u'alignmentInfo': [], u'backgroundColor': {u'blue': 0,
-                                                                                               u'alpha': 255,
-                                                                                               u'green': 0,
-                                                                                               u'red': 0}},
-                        u'currentTab': 0}
+if os.name == 'nt':
+    INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
+                            u'tabs': {u'maskTab': {
+                                u'activeType': {
+                                    u'roiOn': False, u'groupingOn': False, u'maskingOn': True},
+                                u'activeTools': {u'ellipseButton': False, u'moveButton': True,
+                                                 u'pointerButton': False, u'ringRectangleButton': False,
+                                                 u'freeDrawButton': False, u'ringEllipseButton': False},
+                                u'maskWorkspaceSaved': False},
+                                u'renderTab': {u'displayWireframe': False, u'displayLighting': False,
+                                               u'labelPrecision': 2, u'useUCorrection': False, u'autoScaling': True,
+                                               u'colorBar': {u'max': u'40', u'scaleType': 0, u'power': u'2',
+                                                             u'min': u'40'},
+                                               u'showLabels': True, u'flipView': False, u'displayDetectorsOnly': True,
+                                               u'displayAxes': True, u'axesView': 0, u'showRows': True,
+                                               u'useOpenGL': True, u'showRelativeIntensity': False},
+                                u'treeTab': {u'expandedItems': []},
+                                u'pickTab': {u'freeDraw': False, u'ringEllipse': False, u'edit': False,
+                                             u'tube': False, u'peakSelect': False, u'zoom': False, u'one': True,
+                                             u'ringRectangle': False, u'peak': False, u'ellipse': False,
+                                             u'rectangle': False}}, u'surfaceType': 0,
+                            u'actor': {u'binMasks': [], u'fileName': u'viridis'},
+                            u'energyTransfer': [0.0, 20000.0],
+                            u'surface': {u'shapes': [], u'alignmentInfo': [], u'backgroundColor': {u'blue': 0,
+                                                                                                   u'alpha': 255,
+                                                                                                   u'green': 0,
+                                                                                                   u'red': 0}},
+                            u'currentTab': 0}
+else:
+    INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
+                            u'tabs': {u'maskTab': {
+                                u'activeType': {
+                                    u'roiOn': False, u'groupingOn': False, u'maskingOn': True},
+                                u'activeTools': {u'ellipseButton': False, u'moveButton': True,
+                                                 u'pointerButton': False, u'ringRectangleButton': False,
+                                                 u'freeDrawButton': False, u'ringEllipseButton': False},
+                                u'maskWorkspaceSaved': False},
+                                u'renderTab': {u'displayWireframe': False, u'displayLighting': False,
+                                               u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': True,
+                                               u'colorBar': {u'max': u'40', u'scaleType': 0, u'power': u'2',
+                                                             u'min': u'40'},
+                                               u'showLabels': True, u'flipView': False, u'displayDetectorsOnly': True,
+                                               u'displayAxes': False, u'axesView': 0, u'showRows': True,
+                                               u'useOpenGL': True, u'showRelativeIntensity': False},
+                                u'treeTab': {u'expandedItems': []},
+                                u'pickTab': {u'freeDraw': False, u'ringEllipse': False, u'edit': False,
+                                             u'tube': False, u'peakSelect': False, u'zoom': False, u'one': True,
+                                             u'ringRectangle': False, u'peak': False, u'ellipse': False,
+                                             u'rectangle': False}}, u'surfaceType': 0,
+                            u'actor': {u'binMasks': [], u'fileName': u'viridis'},
+                            u'energyTransfer': [0.0, 20000.0],
+                            u'surface': {u'shapes': [], u'alignmentInfo': [], u'backgroundColor': {u'blue': 0,
+                                                                                                   u'alpha': 255,
+                                                                                                   u'green': 0,
+                                                                                                   u'red': 0}},
+                            u'currentTab': 0}
 
 
 class InstrumentViewEncoderTest(GuiTest):

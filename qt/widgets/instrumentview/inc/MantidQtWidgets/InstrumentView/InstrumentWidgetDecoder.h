@@ -39,7 +39,7 @@ public:
 signals:
   void shapeCreated();
 
-protected:
+private:
   void decodeTabs(const QMap<QString, QVariant> &map, InstrumentWidget &obj);
 
   void decodeMaskTab(const QMap<QString, QVariant> &map,
