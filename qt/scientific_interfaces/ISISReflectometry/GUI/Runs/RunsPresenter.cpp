@@ -208,7 +208,6 @@ void RunsPresenter::autoreductionPaused() {
 }
 
 void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
-  UNUSED_ARG(instrumentName)
   m_instrumentChanged = true;
   m_view->setSearchInstrument(instrumentName);
   tablePresenter()->instrumentChanged(instrumentName);
