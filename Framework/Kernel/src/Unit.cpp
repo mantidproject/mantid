@@ -1274,7 +1274,7 @@ Unit *Temperature::clone() const { return new Temperature(*this); }
 
 // ================================================================================
 
-double timeConversionFloat(std::string input_unit, std::string output_unit) {
+double timeConversionValue(std::string input_unit, std::string output_unit) {
   std::map<std::string, double> timesList;
   double seconds = 1.0e9;
   double milliseconds = 1.0e-3 * seconds;
@@ -1297,10 +1297,10 @@ double timeConversionFloat(std::string input_unit, std::string output_unit) {
   double input_float = timesList[input_unit];
   double output_float = timesList[output_unit];
   if (input_float == 0)
-    throw std::runtime_error("timeConversionFloat: input unit " + input_unit +
+    throw std::runtime_error("timeConversionValue: input unit " + input_unit +
                              " not known.");
   if (output_float == 0)
-    throw std::runtime_error("timeConversionFloat: output unit " + input_unit +
+    throw std::runtime_error("timeConversionValue: output unit " + input_unit +
                              " not known.");
   return input_float / output_float;
 }
