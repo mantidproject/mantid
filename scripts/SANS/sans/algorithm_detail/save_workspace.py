@@ -56,6 +56,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options, transmission_
     elif file_format is SaveType.NXcanSAS:
         file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
+        save_options.update(transmission_workspaces)
     elif file_format is SaveType.NistQxy:
         file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")
         save_name = "SaveNISTDAT"

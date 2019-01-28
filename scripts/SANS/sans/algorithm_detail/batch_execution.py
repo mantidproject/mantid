@@ -1103,13 +1103,13 @@ def get_all_names_to_save(reduction_packages, save_can):
             if reduced_hab:
                 names_to_save.append((reduced_hab.name(), trans_name, transCan_name))
             if reduced_lab_can:
-                names_to_save.append(reduced_lab_can.name())
+                names_to_save.append((reduced_lab_can.name(), '', transCan_name))
             if reduced_hab_can:
-                names_to_save.append(reduced_hab_can.name())
+                names_to_save.append((reduced_hab_can.name(), '', transCan_name))
             if reduced_lab_sample:
-                names_to_save.append(reduced_lab_sample.name())
+                names_to_save.append((reduced_lab_sample.name(), trans_name, ''))
             if reduced_hab_sample:
-                names_to_save.append(reduced_hab_sample.name())
+                names_to_save.append((reduced_hab_sample.name(), trans_name, ''))
 
         # If we have merged reduction then store the
         elif reduced_merged:
