@@ -30,12 +30,24 @@ class HomeRunInfoWidgetModel(object):
         else:
             return "Log not found"
 
-    def get_counts_in_MeV(self):
+    def get_total_counts(self):
         workspace = self._data.loaded_workspace
         total = 0
         for i in range(workspace.getNumberHistograms()):
             total += sum(workspace.dataY(i))
-        return total / mev_conversion_factor
+
+        return total
+
+    def get_counts_in_MeV(self, counts):
+        return counts / mev_conversion_factor
+
+    def get_counts_per_good_frame(self, counts):
+        good_frames = self.get_log_value("goodfrm")
+
+        return counts/good_frames
+
+    def get_counts_per_good_frame_per_detector(self, counts):
+        return self.get_counts_per_good_frame(counts)/self._data.num_detectors()
 
     def get_average_temperature(self):
         # TODO : This implementation does not match the one in the C++ code
