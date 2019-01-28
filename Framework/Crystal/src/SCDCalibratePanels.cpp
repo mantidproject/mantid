@@ -420,13 +420,12 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   ub_alg->executeAsChildAlg();
 
   // Reindex peaks with new UB
-  Mantid::API::IAlgorithm_sptr alg =
-      createChildAlgorithm("IndexPeaks");
+  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
   alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
   alg->setProperty("Tolerance", 0.15);
   alg->executeAsChildAlg();
   int numIndexed = alg->getProperty("NumIndexed");
-  g_log.notice() << "Number Indexed = "<< numIndexed << "\n";
+  g_log.notice() << "Number Indexed = " << numIndexed << "\n";
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
 
