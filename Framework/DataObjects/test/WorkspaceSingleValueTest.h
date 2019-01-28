@@ -24,44 +24,44 @@ class WorkspaceSingleValueTest : public CxxTest::TestSuite {
 public:
   void testConstructorDefaults() {
     WorkspaceSingleValue ws;
-    TS_ASSERT_DELTA(0.0, ws.dataX(0)[0], 1e-6);
-    TS_ASSERT_DELTA(0.0, ws.dataY(0)[0], 1e-6);
-    TS_ASSERT_DELTA(0.0, ws.dataE(0)[0], 1e-6);
+    TS_ASSERT_DELTA(0.0, ws.x(0)[0], 1e-6);
+    TS_ASSERT_DELTA(0.0, ws.y(0)[0], 1e-6);
+    TS_ASSERT_DELTA(0.0, ws.e(0)[0], 1e-6);
   }
   void testConstructor() {
     WorkspaceSingleValue ws(1, 2);
-    TS_ASSERT_DELTA(0.0, ws.dataX(0)[0], 1e-6);
-    TS_ASSERT_DELTA(1, ws.dataY(0)[0], 1e-6);
-    TS_ASSERT_DELTA(2, ws.dataE(0)[0], 1e-6);
+    TS_ASSERT_DELTA(0.0, ws.x(0)[0], 1e-6);
+    TS_ASSERT_DELTA(1, ws.y(0)[0], 1e-6);
+    TS_ASSERT_DELTA(2, ws.e(0)[0], 1e-6);
   }
 
   void testClone() {
     WorkspaceSingleValue ws(2.0, 0.1);
     auto cloned = ws.clone();
 
-    TS_ASSERT_EQUALS(ws.dataX(0)[0], cloned->dataX(0)[0]);
-    TS_ASSERT_EQUALS(ws.dataY(0)[0], cloned->dataY(0)[0]);
-    TS_ASSERT_EQUALS(ws.dataE(0)[0], cloned->dataE(0)[0]);
+    TS_ASSERT_EQUALS(ws.x(0)[0], cloned->x(0)[0]);
+    TS_ASSERT_EQUALS(ws.y(0)[0], cloned->y(0)[0]);
+    TS_ASSERT_EQUALS(ws.e(0)[0], cloned->e(0)[0]);
   }
 
   void testsetgetXvector() {
     WorkspaceSingleValue ws;
     Mantid::MantidVec v1(1, 1.1);
-    ws.dataX(0) = v1;
-    TS_ASSERT_EQUALS(v1, ws.dataX(0));
+    ws.mutableX(0) = v1;
+    TS_ASSERT_EQUALS(v1, ws.x(0).rawData());
   }
   void testsetgetYvector() {
     WorkspaceSingleValue ws;
     Mantid::MantidVec v1(1, 1.1);
-    ws.dataY(0) = v1;
-    TS_ASSERT_EQUALS(v1, ws.dataY(0));
+    ws.mutableY(0) = v1;
+    TS_ASSERT_EQUALS(v1, ws.y(0).rawData());
   }
 
   void testsetgetEvector() {
     WorkspaceSingleValue ws;
     Mantid::MantidVec v1(1, 1.1);
-    ws.dataE(0) = v1;
-    TS_ASSERT_EQUALS(v1, ws.dataE(0));
+    ws.mutableE(0) = v1;
+    TS_ASSERT_EQUALS(v1, ws.e(0).rawData());
   }
 
   void testgetNumDims() {

@@ -8,9 +8,9 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -21,6 +21,7 @@ namespace Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HyspecScharpfCorrection)
@@ -105,7 +106,7 @@ void HyspecScharpfCorrection::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<API::MatrixWorkspace>(*m_inputWS);
   }
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();

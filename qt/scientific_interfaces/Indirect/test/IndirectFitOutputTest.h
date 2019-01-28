@@ -35,7 +35,7 @@ createPopulatedworkspace(std::vector<double> const &xValues,
   createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
   createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
                                         verticalAxisNames);
-  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "workspace");
+  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "OutputResults");
   createWorkspaceAlgorithm->execute();
   return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
 }
@@ -81,14 +81,6 @@ WorkspaceGroup_sptr getPopulatedGroup(std::size_t const &size) {
   return group;
 }
 
-/// Store workspaces in ADS and won't destruct the ADS when leaving scope
-void storeWorkspacesInADS(WorkspaceGroup_sptr group,
-                          ITableWorkspace_sptr table) {
-  SetUpADSWithWorkspace ads("ResultGroup", group);
-  ads.addOrReplace("ResultWorkspaces", group);
-  ads.addOrReplace("ParameterTable", table);
-}
-
 std::unique_ptr<IndirectFitOutput>
 createFitOutput(WorkspaceGroup_sptr resultGroup,
                 ITableWorkspace_sptr parameterTable,
@@ -96,17 +88,6 @@ createFitOutput(WorkspaceGroup_sptr resultGroup,
                 std::size_t spectrum) {
   return std::make_unique<IndirectFitOutput>(
       resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
-}
-
-/// This will return fit output with workspaces still stored in the ADS
-std::unique_ptr<IndirectFitOutput> getFitOutputData() {
-  auto const group = getPopulatedGroup(2);
-  auto const table = getPopulatedTable(2);
-  IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-
-  storeWorkspacesInADS(group, table);
-
-  return createFitOutput(group, table, group, data, 0);
 }
 
 std::unordered_map<std::string, std::string>
@@ -147,10 +128,10 @@ public:
   test_that_the_group_workspaces_stored_are_equal_to_the_workspaces_inputed() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
 
     TS_ASSERT_EQUALS(output->getLastResultGroup(), group);
     TS_ASSERT_EQUALS(output->getLastResultWorkspace(), group);
@@ -160,48 +141,48 @@ public:
   test_that_isSpectrumFit_returns_false_if_the_spectrum_has_not_been_previously_fit() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
 
-    TS_ASSERT(!output->isSpectrumFit(data, 7));
+    TS_ASSERT(!output->isSpectrumFit(data.get(), 7));
   }
 
   void
   test_that_isSpectrumFit_returns_true_if_the_spectrum_has_been_previously_fit() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
 
-    TS_ASSERT(output->isSpectrumFit(data, 0));
+    TS_ASSERT(output->isSpectrumFit(data.get(), 0));
   }
 
   void
   test_that_getParameters_returns_an_empty_map_when_the_spectrum_number_provided_is_out_of_range() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
 
-    TS_ASSERT(output->getParameters(data, 7).empty());
+    TS_ASSERT(output->getParameters(data.get(), 7).empty());
   }
 
   void
   test_that_getParameters_returns_the_correct_parameter_values_when_the_spectrum_number_and_IndirectFitData_provided_is_valid() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
 
-    auto const parameters = output->getParameters(data, 0);
+    auto const parameters = output->getParameters(data.get(), 0);
     TS_ASSERT_EQUALS(parameters.size(), 2);
     TS_ASSERT_EQUALS(parameters.at("Height_Err").value, 0.047);
     TS_ASSERT_EQUALS(parameters.at("Msd_Err").value, 0.514);
@@ -211,24 +192,24 @@ public:
   test_that_getResultLocation_returns_none_when_the_spectrum_number_provided_is_out_of_range() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
 
-    TS_ASSERT(!output->getResultLocation(data, 7));
+    TS_ASSERT(!output->getResultLocation(data.get(), 7));
   }
 
   void
   test_that_getResultLocation_returns_the_ResultLocation_when_the_spectrum_number_and_IndirectFitData_provided_is_valid() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
 
-    auto const resultLocation = output->getResultLocation(data, 0);
+    auto const resultLocation = output->getResultLocation(data.get(), 0);
     TS_ASSERT(resultLocation);
     TS_ASSERT_EQUALS(resultLocation->result.lock(), group);
   }
@@ -237,10 +218,10 @@ public:
   test_that_getResultParameterNames_gets_the_parameter_names_which_were_provided_as_input_data() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
     std::vector<std::string> const expectedParameters{
         "Height", "Height_Err", "Msd", "Msd_Err", "Chi_squared"};
     auto const parameters = output->getResultParameterNames();
@@ -265,15 +246,15 @@ public:
   test_that_mapParameterNames_will_remap_the_parameters_to_correspond_to_the_provided_parameter_names() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
     auto const newParameterNames =
         getNewParameterNames({"Height_Err", "Msd_Err"});
-    output->mapParameterNames(newParameterNames, data);
+    output->mapParameterNames(newParameterNames, data.get());
 
-    auto const parameters = output->getParameters(data, 0);
+    auto const parameters = output->getParameters(data.get(), 0);
     TS_ASSERT_EQUALS(parameters.size(), 2);
     TS_ASSERT_EQUALS(parameters.at("Width_Err").value, 0.047);
     TS_ASSERT_EQUALS(parameters.at("MSD_Err").value, 0.514);
@@ -283,14 +264,14 @@ public:
   test_that_mapParameterNames_will_not_remap_the_parameters_when_the_provided_old_parameter_names_do_not_exist() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
     auto const newParameterNames = getNewParameterNames({"None1", "None2"});
-    output->mapParameterNames(newParameterNames, data);
+    output->mapParameterNames(newParameterNames, data.get());
 
-    auto const parameters = output->getParameters(data, 0);
+    auto const parameters = output->getParameters(data.get(), 0);
     TS_ASSERT(parameters.at("Height_Err").value);
     TS_ASSERT(parameters.at("Msd_Err").value);
   }
@@ -299,57 +280,99 @@ public:
   test_that_addOutput_will_add_new_fitData_without_overwriting_existing_data() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
+    auto const data1 = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data1, 0);
-    IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));
-    output->addOutput(group, table, group, data2, 0);
+    auto const output = createFitOutput(group, table, group, data1.get(), 0);
+    auto const data2 = std::make_unique<IndirectFitData>(getIndirectFitData(2));
+    output->addOutput(group, table, group, data2.get(), 0);
 
-    TS_ASSERT(!output->getParameters(data1, 0).empty());
-    TS_ASSERT(!output->getParameters(data2, 0).empty());
+    TS_ASSERT(!output->getParameters(data1.get(), 0).empty());
+    TS_ASSERT(!output->getParameters(data2.get(), 0).empty());
   }
 
   void test_that_removeOutput_will_erase_the_provided_fitData() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data, 0);
-    output->removeOutput(data);
+    auto const output = createFitOutput(group, table, group, data.get(), 0);
+    output->removeOutput(data.get());
 
-    TS_ASSERT(output->getParameters(data, 0).empty());
-    TS_ASSERT(!output->getResultLocation(data, 0));
+    TS_ASSERT(output->getParameters(data.get(), 0).empty());
+    TS_ASSERT(!output->getResultLocation(data.get(), 0));
   }
 
   void test_that_removeOutput_will_not_delete_fitData_which_is_not_specified() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
+    auto const data1 = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data1, 0);
-    IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));
-    output->addOutput(group, table, group, data2, 0);
-    output->removeOutput(data2);
+    auto const output = createFitOutput(group, table, group, data1.get(), 0);
+    auto const data2 = std::make_unique<IndirectFitData>(getIndirectFitData(2));
+    output->addOutput(group, table, group, data2.get(), 0);
+    output->removeOutput(data2.get());
 
-    TS_ASSERT(!output->getParameters(data1, 0).empty());
-    TS_ASSERT(output->getParameters(data2, 0).empty());
+    TS_ASSERT(!output->getParameters(data1.get(), 0).empty());
+    TS_ASSERT(output->getParameters(data2.get(), 0).empty());
   }
 
   void
   test_that_removeOutput_does_not_throw_when_provided_fitData_which_does_not_exist() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
-    IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
+    auto const data1 = std::make_unique<IndirectFitData>(getIndirectFitData(5));
     storeWorkspacesInADS(group, table);
 
-    auto const output = createFitOutput(group, table, group, data1, 0);
-    IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));
+    auto const output = createFitOutput(group, table, group, data1.get(), 0);
+    auto const data2 = std::make_unique<IndirectFitData>(getIndirectFitData(2));
 
-    TS_ASSERT_THROWS_NOTHING(output->removeOutput(data2));
+    TS_ASSERT_THROWS_NOTHING(output->removeOutput(data2.get()));
   }
+
+  void
+  test_that_the_resultworkspace_is_renamed_to_have_the_correct_name_after_a_fit_is_executed() {
+    auto const group = getPopulatedGroup(1);
+    auto const table = getPopulatedTable(2);
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
+    storeWorkspacesInADS(group, table);
+
+    (void)createFitOutput(group, table, group, data.get(), 0);
+
+    TS_ASSERT(m_ads->doesExist("ConvFit_1L_Result"));
+  }
+
+  void
+  test_that_the_resultworkspace_is_renamed_to_have_the_correct_name_after_a_fit_is_executed_with_multiple_data() {
+    (void)getFitOutputData();
+    TS_ASSERT(m_ads->doesExist("MultiConvFit_1L__s0_to_4_Result"));
+  }
+
+private:
+  /// This will return fit output with workspaces still stored in the ADS
+  std::unique_ptr<IndirectFitOutput> getFitOutputData() {
+    auto const group = getPopulatedGroup(2);
+    auto const table = getPopulatedTable(2);
+    auto const data = std::make_unique<IndirectFitData>(getIndirectFitData(5));
+
+    storeWorkspacesInADS(group, table);
+
+    return createFitOutput(group, table, group, data.get(), 0);
+  }
+
+  /// Store workspaces in ADS and won't destruct the ADS when leaving scope
+  void storeWorkspacesInADS(WorkspaceGroup_sptr group,
+                            ITableWorkspace_sptr table) {
+    std::string const nameStart = group->size() > 1 ? "Multi" : "";
+    m_ads = std::make_unique<SetUpADSWithWorkspace>(
+        nameStart + "ConvFit_1L_Workspaces", group);
+    m_ads->addOrReplace(nameStart + "ConvFit_1L_Results_1", group);
+    m_ads->addOrReplace(nameStart + "ConvFit_1L_Parameters", table);
+  }
+
+  std::unique_ptr<SetUpADSWithWorkspace> m_ads;
 };
 
 #endif // MANTID_INDIRECTFITOUTPUTTEST_H

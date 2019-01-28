@@ -110,7 +110,7 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
                 raise RuntimeError("Could not compare old and new values for 'MDNorm_high' log. "+
                                    "Make sure the length of the old data is equal to the number of spectra")
         run_obj.addProperty('MDNorm_high', [xmax]*num_spectra, True)
-        run_obj.addProperty('MDNorm_spectra_index', numpy.arange(num_spectra).tolist(), True)
+        run_obj.addProperty('MDNorm_spectra_index', numpy.arange(num_spectra, dtype=float).tolist(), True)
         self.setProperty('OutputWorkspace', out_ws)
 
 # Register algorithm with Mantid.

@@ -47,8 +47,6 @@ rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction,
                       int &entryExit);
 
 MANTID_GEOMETRY_DLL void checkVertexLimit(size_t nVertices);
-MANTID_GEOMETRY_DLL std::vector<uint32_t>
-getTriangles_uint32(const std::vector<uint16_t> &input);
 MANTID_GEOMETRY_DLL const BoundingBox &
 getBoundingBox(const std::vector<Kernel::V3D> &vertices, BoundingBox &cacheBB);
 MANTID_GEOMETRY_DLL void

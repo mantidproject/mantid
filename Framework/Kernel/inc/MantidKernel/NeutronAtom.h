@@ -109,7 +109,7 @@ MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
 MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const NeutronAtom &other);
 
 /// Utility function to calculate scattering lengths from cross-sections.
-MANTID_KERNEL_DLL void calculateScatteringLengths(NeutronAtom *atom);
+MANTID_KERNEL_DLL void calculateScatteringLengths(NeutronAtom &atom);
 
 } // Namespace PhysicalConstants
 } // Namespace Mantid

@@ -110,6 +110,7 @@ class AsyncTaskResult(object):
 
     def __init__(self, elapsed_time):
         self.elapsed_time = elapsed_time
+        self.timestamp = time.ctime()
 
 
 class AsyncTaskSuccess(AsyncTaskResult):

@@ -27,6 +27,7 @@ mtd_add_sip_module (
   PYQT_VERSION 4
   INCLUDE_DIRS
     ${PYTHON_INCLUDE_PATH}
+    ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt4
@@ -51,19 +52,22 @@ mtd_add_sip_module (
   PYQT_VERSION 5
   INCLUDE_DIRS
     ${PYTHON_INCLUDE_PATH}
+    ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt5
     Qt5::Core
     Qt5::Gui
-    Qt5::Widgets
+Qt5::Widgets
     Qt5::Qscintilla
     ${Boost_LIBRARIES}
     API
   INSTALL_DIR
-    ${LIB_DIR}/mantidqt
+    ${WORKBENCH_LIB_DIR}/mantidqt
   LINUX_INSTALL_RPATH
     "\$ORIGIN/.."
+  OSX_INSTALL_RPATH
+    "@loader_path/.." 
   FOLDER Qt5
 )
 

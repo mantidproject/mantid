@@ -53,9 +53,9 @@ void ConvFit::setupFitTab() {
   setConvolveMembers(true);
 
   setSampleWSSuffices({"_red", "_sqw"});
-  setSampleFBSuffices({"_red.nxs", "_sqw.nxs"});
+  setSampleFBSuffices({"_red.nxs", "_sqw.nxs", "_sqw.dave"});
   setResolutionWSSuffices({"_res", "_red", "_sqw"});
-  setResolutionFBSuffices({"_res.nxs", "_red.nxs", "_sqw.nxs"});
+  setResolutionFBSuffices({"_res.nxs", "_red.nxs", "_sqw.nxs", "_sqw.dave"});
 
   // Initialise fitTypeStrings
   m_fitStrings["None"] = "";
@@ -66,7 +66,7 @@ void ConvFit::setupFitTab() {
   m_fitStrings["ElasticDiffSphere"] = "EDS";
   m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
   m_fitStrings["StretchedExpFT"] = "SFT";
-  m_fitStrings["TeixeiraWaterSQE"] = "Teixeria1L";
+  m_fitStrings["Teixeira Water"] = "TxWater";
 
   auto &functionFactory = FunctionFactory::Instance();
   auto lorentzian = functionFactory.createFunction("Lorentzian");

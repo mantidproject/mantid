@@ -76,7 +76,7 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonCurveFittingModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/_plugins )
+mtd_install_targets( TARGETS PythonCurveFittingModule INSTALL_DIRS ${BIN_DIR}/mantid/_plugins ${WORKBENCH_BIN_DIR}/mantid/_plugins )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/_plugins )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/_plugins ${WORKBENCH_BIN_DIR}/mantid/_plugins)

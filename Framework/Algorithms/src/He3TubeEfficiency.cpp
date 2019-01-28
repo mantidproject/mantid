@@ -9,10 +9,10 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -36,6 +36,7 @@ const double TOL = 1.0e-8;
 namespace Mantid {
 namespace Algorithms {
 
+using namespace DataObjects;
 using namespace HistogramData;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(He3TubeEfficiency)
@@ -100,7 +101,7 @@ void He3TubeEfficiency::exec() {
   m_outputWS = this->getProperty("OutputWorkspace");
 
   if (m_outputWS != m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<API::MatrixWorkspace>(*m_inputWS);
   }
 
   // Get the detector parameters

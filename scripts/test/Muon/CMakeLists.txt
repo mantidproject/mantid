@@ -20,6 +20,10 @@ set ( TEST_PY_FILES
    loading_tab/loadwidget_presenter_test.py
    loading_tab/loadwidget_presenter_multiple_file_test.py
    loading_tab/loadwidget_presenter_failure_test.py
+   grouping_tab/grouping_table_presenter_test.py
+   grouping_tab/pairing_table_presenter_test.py
+   grouping_tab/pairing_table_group_selector_test.py
+   grouping_tab/pairing_table_alpha_test.py
    LoadWidgetModel_test.py
    LoadWidgetPresenter_test.py
    LoadWidgetView_test.py
