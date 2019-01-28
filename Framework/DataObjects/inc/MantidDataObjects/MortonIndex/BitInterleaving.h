@@ -40,7 +40,6 @@ template <size_t N, typename IntT, typename MortonT> IntT compact(MortonT) {
   throw std::runtime_error("No compact() specialisation.");
 }
 
-
 #if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
 /* Bit masks used for pad and compact operations are derived using
  * docs/bit_padding_generator.py. */

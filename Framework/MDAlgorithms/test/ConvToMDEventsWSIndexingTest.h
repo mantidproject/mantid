@@ -13,7 +13,6 @@
 #include <ostream>
 #include <stdexcept>
 
-
 #ifdef _WIN32
 #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
@@ -356,9 +355,12 @@ public:
   void test_sructure() {
 #if BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
     try {
-      checkStructure(SimpleInput(11).generate(), lowerLeft, upperRight, splitTreshold);
-    } catch(std::runtime_error& exception) {
-      TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") != std::string::npos, true);
+      checkStructure(SimpleInput(11).generate(), lowerLeft, upperRight,
+                     splitTreshold);
+    } catch (std::runtime_error &exception) {
+      TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
+                           std::string::npos,
+                       true);
     }
 #else
     static std::vector<std::unique_ptr<InputGenerator>> generators;

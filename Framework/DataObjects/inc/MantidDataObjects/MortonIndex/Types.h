@@ -15,14 +15,14 @@
 #if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
 #include <boost/multiprecision/cpp_int.hpp>
 namespace morton_index {
-  using uint128_t = boost::multiprecision::uint128_t;
-  using uint256_t = boost::multiprecision::uint256_t;
-} // morton_index
+using uint128_t = boost::multiprecision::uint128_t;
+using uint256_t = boost::multiprecision::uint256_t;
+} // namespace morton_index
 #else
 namespace morton_index {
-  using uint128_t = uint64_t;
-  using uint256_t = uint64_t;
-} // morton_index
+using uint128_t = uint64_t;
+using uint256_t = uint64_t;
+} // namespace morton_index
 #endif // BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
 
 namespace morton_index {
@@ -159,9 +159,7 @@ inline std::ostream &operator<<(std::ostream &os, const Morton96 &morton96) {
  * size is number_of_dimensions * sizeof(coordinate_type)
  * @tparam SZ :: the size of accesible memory.
  */
-template <size_t SZ> struct MortonIndex {
-  using type = uint256_t;
-};
+template <size_t SZ> struct MortonIndex { using type = uint256_t; };
 
 template <> struct MortonIndex<1> { using type = uint8_t; };
 
