@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
+from mantid.simpleapi import ReflectometryILLPreprocess
 import numpy.testing
 from testhelpers import (assertRaisesNothing, create_algorithm, illhelpers)
 import unittest
@@ -69,7 +70,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'BeamCentre': 49,
+            'LinePosition': 49,
             'FluxNormalisation': 'Normalisation OFF',
             'rethrow': True,
             'child': True
@@ -96,7 +97,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'BeamCentre': 49,
+            'LinePosition': 49,
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': subtractionType,
             'rethrow': True,
@@ -130,7 +131,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'BeamCentre': 49,
+            'LinePosition': 49,
             'FluxNormalisation': 'Normalisation OFF',
             'FlatBackground': 'Background OFF',
             'rethrow': True,
@@ -177,7 +178,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'BeamCentre': 30,
+            'LinePosition': 30,
             'ForegroundHalfWidth': [1],
             'LowAngleBkgOffset': len(lowerExclusionIndices),
             'LowAngleBkgWidth': len(lowerBkgIndices),
@@ -225,7 +226,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         args = {
             'InputWorkspace': inWSName,
             'OutputWorkspace': 'unused_for_child',
-            'BeamCentre': 23,
+            'LinePosition': 23,
             'ForegroundHalfWidth': [2, 1],
             'FlatBackground': 'Background OFF',
             'FluxNormalisation': 'Normalisation OFF',
@@ -357,11 +358,11 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         loadInstrument.execute()
         self.assertEquals(mtd.getObjectNames(), [name])
 
-    def testBeamCentreBraggAngelInput(self):
+    def testLinePositionTwoThetaInput(self):
         args = {
             'Run': 'ILL/D17/317369',
-            'BeamCentre': 10.23,
-            'BraggAngle': 20.23,
+            'LinePosition': 10.23,
+            'TwoTheta': 20.23 * 2.,
             'OutputWorkspace': 'outWS',
             'rethrow': True,
             'child': True
@@ -374,7 +375,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
         self.assertEquals(mtd.getObjectNames(), [])
 
-    def testBeamCentreFit(self):
+    def testTwoThetaFit(self):
         args = {
             'Run': 'ILL/D17/317369',
             'OutputWorkspace': 'outWS',
@@ -396,7 +397,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             'Run': 'ILL/D17/317369',
             'OutputWorkspace': 'outWS',
             'FitRangeLower': 2.,
-            'FitRangeUpper': 20,
+            'FitRangeUpper': 20.,
             'rethrow': True,
             'child': True
         }
@@ -408,6 +409,21 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                                 delta=1.e-13)
         self.assertEquals(outWS.getRun().getProperty('reduction.foreground.centre_workspace_index').value, 202)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+
+    def testDirectBeamInputForDetectorRotation(self):
+        direct = ReflectometryILLPreprocess(Run='ILL/D17/317369',
+                                            TwoTheta=60.0,
+                                            LinePosition=101.2)
+        self.assertEquals(direct.run().getLogData('reduction.line_position').value, 101.2)
+        self.assertEquals(direct.run().getLogData('reduction.two_theta').value, 60.0)
+        self.assertEquals(direct.getAxis(0).getUnit().caption(), 'Wavelength')
+        reflected = ReflectometryILLPreprocess(Run='ILL/D17/317370',
+                                               TwoTheta=80.0,
+                                               DirectLineWorkspace=direct)
+        self.assertEquals(reflected.run().getLogData('reduction.line_position').value, 201.6745481268582)
+        self.assertEquals(reflected.run().getLogData('reduction.two_theta').value, 80.0)
+        self.assertEquals(reflected.getAxis(0).getUnit().caption(), 'Wavelength')
+
 
 if __name__ == "__main__":
     unittest.main()

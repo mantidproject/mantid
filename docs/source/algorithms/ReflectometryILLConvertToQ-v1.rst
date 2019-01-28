@@ -26,8 +26,6 @@ Usage
 
 .. testcode:: NonpolarizedEx
 
-   from directtools import SampleLogs
-
    # Use same foreground and background settings for direct and reflected
    # beams.
    # Python dictionaries can be passed to algorithms as 'keyword arguments'.
@@ -45,9 +43,6 @@ Usage
        **settings
    )
    # For reflected angle calibration:
-   directLogs = SampleLogs(direct)
-   peakX = directLogs.peak_position
-   twoTheta = directLogs.twoTheta
    directFgd = ReflectometryILLSumForeground(
        Inputworkspace=direct,
        WavelengthRange=[2, 15])
@@ -55,8 +50,7 @@ Usage
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       BeamCentre=peakX,
-       BraggAngle=twoTheta,
+       DirectLineWorkspace=direct,
        **settings
    )
    
@@ -98,8 +92,6 @@ Output:
 
 .. testcode:: PolarizedEx
 
-   from directtools import SampleLogs
-
    # Use same foreground and background settings for direct and reflected
    # beams.
    # Python dictionaries can be passed to algorithms as 'keyword arguments'.
@@ -117,9 +109,6 @@ Output:
        **settings
    )
    # For reflected angle calibration:
-   directLogs = SampleLogs(direct)
-   peakX = directLogs.peak_position
-   twoTheta = directLogs.twoTheta
    directFgd = ReflectometryILLSumForeground(
        InputWorkspace=direct,
        WavelengthRange=[2, 15]
@@ -133,8 +122,7 @@ Output:
    # Reflected beam. Flippers set to '++'
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       BeamCentre=peakX,
-       BraggAngle=twoTheta,
+       DirectLineWorkspace=direct,
        **settings
    )
 
@@ -147,8 +135,7 @@ Output:
    # Reload the reflected beam. We will fake the '--' flipper settings
    reflected00 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       BeamCentre=peakX,
-       BraggAngle=twoTheta,
+       DirectLineWorkspace=direct,
        **settings
    )
 

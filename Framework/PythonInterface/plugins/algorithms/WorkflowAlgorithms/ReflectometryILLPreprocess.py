@@ -21,8 +21,6 @@ import ReflectometryILL_common as common
 
 
 class Prop:
-    BEAM_ANGLE = 'BraggAngle'
-    BEAM_CENTRE = 'BeamCentre'
     BEAM_POS_WS = 'DirectBeamPosition'
     START_WS_INDEX = 'FitStartWorkspaceIndex'
     END_WS_INDEX = 'FitEndWorkspaceIndex'
@@ -30,16 +28,19 @@ class Prop:
     XMAX = 'FitRangeUpper'
     BKG_METHOD = 'FlatBackground'
     CLEANUP = 'Cleanup'
+    DIRECT_LINE_WORKSPACE = 'DirectLineWorkspace'
     FLUX_NORM_METHOD = 'FluxNormalisation'
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     HIGH_BKG_OFFSET = 'HighAngleBkgOffset'
     HIGH_BKG_WIDTH = 'HighAngleBkgWidth'
     INPUT_WS = 'InputWorkspace'
+    LINE_POSITION = 'LinePosition'
     LOW_BKG_OFFSET = 'LowAngleBkgOffset'
     LOW_BKG_WIDTH = 'LowAngleBkgWidth'
     OUTPUT_WS = 'OutputWorkspace'
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
+    TWO_THETA = 'TwoTheta'
     SUBALG_LOGGING = 'SubalgorithmLogging'
     WATER_REFERENCE = 'WaterWorkspace'
 
@@ -112,11 +113,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws, monWS = self._extractMonitors(ws)
 
-        ws, peak = self._peakFitting(ws)
+        ws, linePosition = self._peakFitting(ws)
 
-        twoTheta = self._addSampleLogInfo(ws, peak)
+        twoTheta = self._addSampleLogInfo(ws, linePosition)
 
-        ws = self._moveDetector(ws, twoTheta)
+        ws = self._moveDetector(ws, twoTheta, linePosition)
 
         ws = self._waterCalibration(ws)
 
@@ -155,10 +156,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='A beam position table corresponding to InputWorkspace.')
-        self.declareProperty(Prop.BEAM_ANGLE,
+        self.declareProperty(Prop.TWO_THETA,
                              defaultValue=Property.EMPTY_DBL,
-                             doc='A user-defined beam angle (unit degrees).')
-        self.declareProperty(name=Prop.BEAM_CENTRE,
+                             doc='A user-defined scattering angle 2 theta (unit degrees).')
+        self.declareProperty(name=Prop.LINE_POSITION,
                              defaultValue=Property.EMPTY_DBL,
                              doc='A workspace index corresponding to the beam centre between 0.0 and 255.0')
         self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
@@ -225,6 +226,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(Prop.XMAX,
                              defaultValue=Property.EMPTY_DBL,
                              doc='Maximum x value (unit Angstrom) used for peak fitting.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_LINE_WORKSPACE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='A direct beam workspace for reference.')
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -235,13 +241,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
                 issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
             if not self.getProperty(Prop.INPUT_WS).isDefault and self.getProperty(Prop.BEAM_POS_WS).isDefault \
-                    and self.getProperty(Prop.BEAM_CENTRE).isDefault:
+                    and self.getProperty(Prop.LINE_POSITION).isDefault:
                 issues[Prop.BEAM_POS_WS] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
-                issues[Prop.BEAM_CENTRE] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
-        if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
-            beamCentre = self.getProperty(Prop.BEAM_CENTRE).value
+                issues[Prop.LINE_POSITION] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
+        if not self.getProperty(Prop.LINE_POSITION).isDefault:
+            beamCentre = self.getProperty(Prop.LINE_POSITION).value
             if beamCentre < 0. or beamCentre > 255.:
-                issues[Prop.BEAM_CENTRE] = 'Value should be between 0 and 255.'
+                issues[Prop.LINE_POSITION] = 'Value should be between 0 and 255.'
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             xmin = self.getProperty(Prop.XMIN).value
@@ -366,8 +372,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
             tableWithBeamPos = self.getProperty(Prop.BEAM_POS_WS).value
             linePosition = tableWithBeamPos.cell('PeakCentre', 0)
-        elif not self.getProperty(Prop.BEAM_CENTRE).isDefault:
-            linePosition = self.getProperty(Prop.BEAM_CENTRE).value
+        elif not self.getProperty(Prop.LINE_POSITION).isDefault:
+            linePosition = self.getProperty(Prop.LINE_POSITION).value
         else:
             # Fit peak position
             peakWSName = self._names.withSuffix('peak')
@@ -426,8 +432,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                      NumberType='Int',
                      EnableLogging=self._subalgLogging)
         # Add two theta to the sample logs of ws.
-        if not self.getProperty(Prop.BEAM_ANGLE).isDefault:
-            twoTheta = self.getProperty(Prop.BEAM_ANGLE).value
+        if not self.getProperty(Prop.TWO_THETA).isDefault:
+            twoTheta = self.getProperty(Prop.TWO_THETA).value
         else:
             spectrum_info = ws.spectrumInfo()
             twoTheta = numpy.rad2deg(spectrum_info.twoTheta(int(numpy.rint(linePosition))))
@@ -436,15 +442,17 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                      LogName=common.SampleLogs.TWO_THETA,
                      LogText=format(twoTheta, '.13f'),
                      NumberType='Double',
-                     LogUnit='Degrees',
+                     LogUnit='degree',
                      EnableLogging=self._subalgLogging)
         return twoTheta
 
-    def _moveDetector(self, ws, twoTheta):
+    def _moveDetector(self, ws, twoTheta, linePosition):
         """Perform detector position correction for reflected beams only."""
-        if self.getProperty(Prop.BEAM_ANGLE).isDefault:
+        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
             return ws
         # Move detector
+        directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
+        directLinePosition = directLineWS.run().getLogData('reduction.line_position').value
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
         SpecularReflectionPositionCorrect(InputWorkspace=ws,
                                           OutputWorkspace=detectorMovedWSName,
@@ -453,7 +461,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                           DetectorComponentName='detector',
                                           DetectorFacesSample=True,
                                           PixelSize=common.pixelSize(self._instrumentName),
-                                          #DirectLinePosition=linePosition,
+                                          LinePosition=linePosition,
+                                          DirectLinePosition=directLinePosition,
+                                          DirectLineWorkspace=directLineWS,
                                           EnableLogging=self._subalgLogging)
         detectorMovedWS = mtd[detectorMovedWSName]
         self._cleanup.cleanup(ws)

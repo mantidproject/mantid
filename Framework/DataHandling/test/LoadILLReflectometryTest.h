@@ -54,6 +54,9 @@ private:
     // detector IDs start with 0
     TS_ASSERT_EQUALS(output->getSpectrum(0).getDetectorIDs(),
                      std::set<Mantid::detid_t>{0})
+    // sample log entry must exist
+    TS_ASSERT(output->run().hasProperty("reduction.two_theta"))
+    TS_ASSERT_EQUALS(output->run().getProperty("reduction.two_theta")->units(), "degree")
   }
 
   static double detCounts(MatrixWorkspace_sptr output) {

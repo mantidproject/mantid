@@ -27,10 +27,10 @@ The *OutputWorkspace* can be further fed to :ref:`ReflectometryILLSumForeground 
 
 The algorithm adds the following sample log entries to the *OutputWorkspace*:
 
-* reduction.line_position : the peak position (workspace index) used to define the :math:'2\theta2 angles (detector positions)
 * reduction.foreground.centre_workspace_index
 * reduction.foreground.last_workspace_index
 * reduction.foreground.first_workspace_index
+* reduction.line_position : the peak position (workspace index) used to define the :math:'2\theta2 angles (detector positions)
 * reduction.two_theta : the two theta scattering angle in degrees
 
 The workflow diagram below gives an overview of the algorithm:
@@ -41,10 +41,10 @@ Detector angles
 ###############
 
 A fitting of the present peak position takes place in order to determine the detector angles.
-For preventing fitting of the present peak position, the property *BeamCentre* allows to provide a peak position.
+For preventing fitting of the present peak position, the property *LinePosition* allows to provide a peak position.
 A use case is to enter a direct peak position, which can be obtained from the direct beam workspaces sample logs, when the *Run* is a reflected beam.
 
-Alternatively, the properties *BraggAngle* and *DirectBeamPositionWorkspace* affect the pixel :math:'2\theta' angles. They map directly to the corresponding properties of :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`.
+Alternatively, the properties *TwoTheta* and *DirectBeamPosition* affect the pixel :math:'2\theta' angles. They the latter maps directly to the corresponding properties of :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`.
 
 Foreground and backgrounds
 ##########################
@@ -56,12 +56,12 @@ Background, on the other hand, is a set of pixels which are be used for fitting 
 The foreground pixels are defined by the foreground centre and *ForegroundHalfWidth* property. In normal use cases, the foreground center (workspace index) is taken from the fitting in :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`. This can be overridden by giving the pixel as *BeamCentre*. Fractional values are rounded to nearest integer. The full process of deciding the foreground centre is as follows:
 
 * If *Run* is given then data is loaded using :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`:
-    * If *BeamCentre* is set, it is passed over to :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`.
-    * Otherwise, :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` will fit the beam centre.
+    * If *TwoTheta* is set, it is passed over to :ref:`SpecularReflectionPositionCorrect <algm-SpecularReflectionPositionCorrect>`.
+    * Otherwise, the line position will be determined by peak fitting.
     * Use the beam centre returned by the :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`, rounded to nearest integer, as the foreground centre.
 * If *InputWorkspace* is given:
-    * If *BeamPositionWorkspace* is given, take the beam centre from there, round it to nearest integer and use as the foreground centre.
-    * If *BeamCentre* is given, round the value to nearest integer and use as the foreground centre.
+    * If *DirectBeamPosition* is given, take the beam centre from there, round it to nearest integer and use as the foreground centre.
+    * If *TwoTheta* is given, round the value to nearest integer and use as the foreground centre.
     * Otherwise fit the beam centre using similar method to :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` and use the rounded result as the foreground centre.
 
 *ForegroundHalfWidth* is a list of one or two values. If a single value is given, then this number of pixels on both sides of the centre pixel are included in the foreground. For example, ``ForegroundHalfWidth=[3]`` means three pixel on both sides are included, making the foreground seven pixels wide in total. ``ForegroundHalfWidth=[0]`` means that only the centre pixel is included. When two values are given, then the foreground is asymmetric around the centre. For instance, ``ForegroundHalfWidth[2,5]`` indicates that two pixel at lower :math:`\theta` and five pixels at higher :math:`\theta` are included in the foreground.
@@ -107,7 +107,7 @@ The following figure exemplifies the foreground and background for the D17 instr
 InputWorkspace
 ##############
 
-The *InputWorkspace* and *BeamPositionWorkspace* can be used instead of *Run* if the data is already loaded into Mantid for example using :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`. This option exists mainly for testing purposes.
+The *InputWorkspace* and *DirectBeamWorkspace* can be used instead of *Run* if the data is already loaded into Mantid for example using :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`. This option exists mainly for testing purposes.
 
 Usage
 -----
@@ -115,8 +115,6 @@ Usage
 **Example - Load direct and reflected beams**
 
 .. testcode:: ForegroundWidthsEx
-
-   from directtools import SampleLogs
 
    # Use same foreground and background settings for direct and reflected
    # beams.
@@ -134,29 +132,24 @@ Usage
        **settings
    )
    # For reflected angle calibration:
-   directLogs = SampleLogs(direct)
-   peakX = directLogs.peak_position
-   twoTheta = directLogs.twoTheta
-
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       BeamCentre=peakX,
-       BraggAngle=twoTheta,
+       DirectLineWorkspace=direct,
        **settings
    )
 
    # Check foreground settings from sample logs
    logs = SampleLogs(reflected)
-   print('Reflected beam centre: {}'.format(logs.foreground.centre_workspace_index))
+   print('Reflected line position: {}'.format(logs.reduction.foreground.centre_workspace_index))
    # Half widths + centre pixel
-   width = logs.foreground.last_workspace_index - logs.foreground.first_workspace_index + 1
+   width = logs.reduction.foreground.last_workspace_index - logs.reduction.foreground.first_workspace_index + 1
    print('Foreground width: {}'.format(width))
 
 Output:
 
 .. testoutput:: ForegroundWidthsEx
 
-   Reflected beam centre: 202
+   Reflected line position: 202
    Foreground width: 11
 
 .. categories::
