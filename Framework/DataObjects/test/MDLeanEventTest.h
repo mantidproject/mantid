@@ -130,7 +130,7 @@ public:
       EventAccess::retrieveIndex(event, bounds);
     } catch (std::runtime_error &exception) {
       TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
-          std::string::npos,
+                           std::string::npos,
                        true);
     }
 #else
