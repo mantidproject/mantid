@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -375,7 +374,7 @@ void FindPeakBackground::setFitWindow(const std::vector<double> &fitwindow) {
  */
 void FindPeakBackground::createOutputWorkspaces() {
   // Set up output table workspace
-  m_outPeakTableWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_outPeakTableWS = boost::make_shared<TableWorkspace>();
   m_outPeakTableWS->addColumn("int", "wksp_index");
   m_outPeakTableWS->addColumn("int", "peak_min_index");
   m_outPeakTableWS->addColumn("int", "peak_max_index");

@@ -51,6 +51,4 @@ elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
   set_target_properties ( ${_target_name} PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}" )
 endif ()
 
-# Installation
-install ( TARGETS PythonInterfaceCore ${SYSTEM_PACKAGE_TARGET} DESTINATION
-          ${LIB_DIR} )
+mtd_install_targets( TARGETS PythonInterfaceCore INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR} )

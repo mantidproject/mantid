@@ -64,6 +64,7 @@ Bugfixes
 - Project recovery will now successfully recover live data, it will however be unable to recover any data that was up at the time, but will start the live data streams again from scratch.
 - If an empty group workspace is present in the ADS it will no longer crash the save thread of project recovery and instead will delete it from the ADS and ignore it.
 - A bug has been fixed in Indirect I(Q,t) interface when analyzing IN16B reduced data.
+- :ref:`SavePlot1D <algm-SavePlot1D>` has been updated to follow changes to the plotly api.
 
 MantidPlot
 ----------
@@ -91,5 +92,21 @@ Changes
 
 BugFixes
 ########
+
+Instrument View
+---------------
+
+Changes
+#######
+ - The miniplot on the pick tab of the instrument view now shows the HKL values for peaks when viewing a summed collection of detectors.
+
+
+Logging
+-------
+
+Changes
+#######
+
+ - Increased the log level from information to notice when creating an instrument geometry.
 
 :ref:`Release 3.14.0 <v3.14.0>`

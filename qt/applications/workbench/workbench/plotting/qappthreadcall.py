@@ -24,10 +24,11 @@ class QAppThreadCall(QObject):
     """
 
     def __init__(self, callee):
-        self.qApp = QApplication.instance()
-
         QObject.__init__(self)
-        self.moveToThread(self.qApp.thread())
+        qapp = QApplication.instance()
+        if qapp is not None:
+            self.moveToThread(qapp.thread())
+            self.qApp = qapp
         self.callee = callee
         # Help should then give the correct doc
         self.__call__.__func__.__doc__ = callee.__doc__

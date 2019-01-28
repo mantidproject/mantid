@@ -13,7 +13,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/V3D.h"
-#include <vector>
 
 namespace Mantid {
 //-----------------------------------------------------------------------------
@@ -69,7 +68,7 @@ public:
   /// Get a reference to the sample's environment
   const Geometry::SampleEnvironment &getEnvironment() const;
   /// Set the environment used to contain the sample
-  void setEnvironment(Geometry::SampleEnvironment *env);
+  void setEnvironment(std::unique_ptr<Geometry::SampleEnvironment> env);
   //@}
 
   /** @name Access the sample's lattice structure and orientation */

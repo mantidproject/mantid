@@ -33,6 +33,9 @@ Improved
 * Added save_can option to output unsubtracted can and sample workspaces.
 * Added transmission sample and can data to XML and H5 files when provided.
 * Added transmission sample/can to unsubtracted sample/can XML and H5 files when "Save Can" option selected.
+* Can separate items in variable q binning with commas or spaces. E.g. L/Q 0.0, 0.02 0.3 0.05, 0.8
+* Can export table as a csv, which can be re-loaded as a batch file.
+* File path to batch file will be added to your directories automatically upon loading
 
 Bug fixes
 #########
@@ -42,7 +45,9 @@ Bug fixes
 * The GUI no longer hangs whilst searching the archive for files.
 * Updated the options and units displayed in wavelength and momentum range combo boxes.
 * Fixed a bug which crashed the beam centre finder if a phi mask was set.
-* Removed option to process in non-compatibility mode to avoid calculation issues
+* Removed option to process in non-compatibility mode to avoid calculation issues.
+* GUI can correctly read user files with variable step sizes, in /LOG and /LIN modes.
+* Fixed occasional crash when entering data into table.
 
 Improvements
 ############

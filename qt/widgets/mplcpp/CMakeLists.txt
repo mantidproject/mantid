@@ -67,6 +67,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
     PythonInterfaceCore
   INSTALL_DIR
     ${LIB_DIR}
+    ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries

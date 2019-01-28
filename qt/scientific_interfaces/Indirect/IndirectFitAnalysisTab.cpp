@@ -946,7 +946,7 @@ void IndirectFitAnalysisTab::plotSpectrum(
     if (boost::contains(parameter, parameterToPlot)) {
       auto it = labels.find(parameter);
       if (it != labels.end())
-        IndirectTab::plotSpectrum(name, static_cast<int>(it->second));
+        IndirectTab::plotSpectrum(name, static_cast<int>(it->second), true);
     }
   }
 }
@@ -955,7 +955,7 @@ void IndirectFitAnalysisTab::plotSpectrum(
     Mantid::API::MatrixWorkspace_sptr workspace) {
   const auto name = QString::fromStdString(workspace->getName());
   for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-    IndirectTab::plotSpectrum(name, static_cast<int>(i));
+    IndirectTab::plotSpectrum(name, static_cast<int>(i), true);
 }
 
 /**

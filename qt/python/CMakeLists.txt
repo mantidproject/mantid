@@ -69,6 +69,11 @@ endif ()
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
 
+    mantidqt/plotting/test/test_figuretype.py
+    mantidqt/plotting/test/test_functions.py
+
+    mantidqt/project/test/test_plotssaver.py
+    mantidqt/project/test/test_plotsloader.py
     mantidqt/project/test/test_project.py
     mantidqt/project/test/test_projectloader.py
     mantidqt/project/test/test_projectsaver.py
@@ -90,13 +95,25 @@ endif ()
 
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
+    mantidqt/widgets/test/test_fitpropertybrowser.py
 
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
 
+    mantidqt/widgets/common/test/test_workspacedisplay_ads_observer.py
+    mantidqt/widgets/common/test/test_observing_presenter.py
+    mantidqt/widgets/common/test/test_observing_view.py
+
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
-    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_tableviewmodel.py
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_table_view_model.py
+
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
   )
 
   # Tests

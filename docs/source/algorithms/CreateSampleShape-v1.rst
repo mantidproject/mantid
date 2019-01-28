@@ -13,10 +13,12 @@ Creates a shape object that defines the sample and sets the sample for
 the given workspace. Shapes are defined using XML descriptions that can
 be found :ref:`here <HowToDefineGeometricShape>`.
 
+.. note:: It is recommended that you use :ref:`SetSample <algm-SetSample>` instead.
+
 Usage
 -----
 
-**Example - A Sphere**  
+**Example - A Sphere**
 
 .. testcode:: Sphere
 
@@ -28,7 +30,7 @@ Usage
       </sphere>'''
     CreateSampleShape(ws,shape_xml)
 
-**Example - A ball with a cylinder carved out of the middle**  
+**Example - A ball with a cylinder carved out of the middle**
 
 .. testcode:: BallwithHole
 

@@ -624,7 +624,7 @@ endif()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
@@ -680,5 +680,7 @@ configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-          DESTINATION ${BIN_DIR} RENAME Mantid.properties
-)
+          DESTINATION ${BIN_DIR} RENAME Mantid.properties )
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+          DESTINATION ${WORKBENCH_BIN_DIR} RENAME Mantid.properties )

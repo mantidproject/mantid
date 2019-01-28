@@ -60,7 +60,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="SelectData">
        <property name="sizePolicy">
@@ -120,7 +120,7 @@
              <x>0</x>
              <y>0</y>
              <width>903</width>
-             <height>696</height>
+             <height>679</height>
             </rect>
            </property>
            <property name="minimumSize">
@@ -466,6 +466,45 @@
                   </layout>
                  </item>
                  <item>
+                  <widget class="QComboBox" name="axisCORELLI_cmbx">
+                   <item>
+                    <property name="text">
+                     <string>Select Goniometer Axis for CORELLI only</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BL9:Mot:Sample:Axis1</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BL9:Mot:Sample:Axis2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BL9:Mot:Sample:Axis3</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BL9:Mot:Sample:Axis4</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BL9:Mot:Sample:Axis5</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>BL9:Mot:Sample:Axis6</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QCheckBox" name="LoadDetCal_ckbx">
                    <property name="toolTip">
                     <string>Optionally, apply&lt;br&gt; calibration  information from the specified .DetCal file(s).</string>
@@ -662,8 +701,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>903</width>
-             <height>696</height>
+             <width>343</width>
+             <height>436</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -1133,8 +1172,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>903</width>
-             <height>696</height>
+             <width>393</width>
+             <height>759</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -1975,8 +2014,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>903</width>
-             <height>696</height>
+             <width>317</width>
+             <height>360</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -2570,8 +2609,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>903</width>
-             <height>696</height>
+             <width>362</width>
+             <height>202</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -2824,8 +2863,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>903</width>
-             <height>696</height>
+             <width>560</width>
+             <height>764</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_17">

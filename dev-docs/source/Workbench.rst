@@ -30,7 +30,7 @@ using the cmake flag ``PACKAGE_WORKBENCH=ON``.
 
 Developing and debugging with PyCharm on Windows
 ################################################
-The first thing that needs to be done is creating the PyCharm project and configuring the project settings. Please follow the instructions at :ref:`GettingStartedWithPyCharm`.
+The first thing that needs to be done is creating the PyCharm project and configuring the project settings. Please follow the instructions at :ref:`setting-up-pycharm-on-windows`.
 
 After the project settings have been configured, a Run/Debug configuration needs to be created. To edit the configurations go to ``Run->Run...`` and select ``Edit Configurations``. Select ``Templates->Python``, and hit the green ``+`` in the top left.
 The necessary changes to the configuration are:
@@ -90,23 +90,3 @@ For example to run the MatrixWorkspaceDisplay:
 2. Set the Script Path to ``<Mantid Source Dir>/qt/python/mantidqt/widgets/matrixworkspaceviewer``. This package has a ``__main__.py`` file which makes it runnable.
 3. You might have to CHANGE back the working directory to ``<Mantid Build Dir>/bin/Debug``.
 4. Click OK, then running the configration should start the MatrixWorkspaceDisplay.
-
-Remote Debugging with PyCharm
------------------------------
-
-This requires a PyCharm Professional license for the Remote Debugging feature.
-
-This approach can be used to debug unit tests. However, as the required package ``pydevd`` is not shipped with Mantid, we need to manually add it at runtime. This can be done by appending a directory that contains the installed ``pydevd`` package on the ``PYTHONPATH``. The following code does so at runtime::
-
-    PYTHON_ROOT="<Change this to point to a Python installation that has pydevd installed>"
-    PYTHON_ROOT="c:/users/qbr77747/apps/miniconda3"
-    import os
-    import sys
-    sys.path.append(os.path.join(PYTHON_ROOT, "lib/site-packages"))
-    import pydevd
-    pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
-
-
-A Remote Debugging configration needs to be setup to use the ``44444`` port (can be changed, but it needs to be reflected in the code), and running before the tests are run!
-
-The ``pydevd`` package does not have to be installed on Python 2. As of 12/11/2018 installing ``pydevd`` on a separate installation with Python 3.7, and adding the code above successfully connects.
