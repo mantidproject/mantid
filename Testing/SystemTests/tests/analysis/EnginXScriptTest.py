@@ -7,14 +7,15 @@
 
 from __future__ import (absolute_import, division, print_function)
 import os
-import systemtesting
+import platform
 import shutil
-import mantid.kernel
+import systemtesting
+
 import mantid.simpleapi as simple
+
 from mantid import config
 from Engineering.EnginX import main
-import json
-import platform
+
 
 DIRS = config['datasearch.directories'].split(';')
 ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))),
@@ -70,8 +71,8 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         if _current_os_has_gsl_lvl2():
-            return ("cropped", "engggui_calibration_bank_cropped.nxs.nxs",
-                    "engg_calibration_banks_parameters", "engggui_calibration_cropped_parameters.nxs")
+            return ("cropped", "engggui_calibration_bank_cropped.nxs",
+                    "engg_calibration_banks_parameters", "engggui_calibration_bank_cropped_parameters.nxs")
         return ("cropped", "engggui_calibration_bank_cropped.nxs_gsl1.nxs",
                 "engg_calibration_banks_parameters", "engggui_calibration_cropped_parameters_gsl1.nxs")
 
@@ -92,7 +93,7 @@ class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
             return("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
                    "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs")
         return ("engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
-                   "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters_gsl1.nxs")
+                "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters_gsl1.nxs")
 
     def cleanup(self):
         simple.mtd.clear()
@@ -167,68 +168,6 @@ def _try_delete(path):
             os.remove(path)
     except OSError:
         print("Could not delete output file at: ", path)
-
-
-def _setup_focus():
-    os.makedirs(focus_directory)
-    main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=focus_directory,
-         crop_type="spectra", crop_on="1-20")
-    simple.mtd.clear()
-
-
-#  substitute for using table workspace as ref-files as tolerance doesn't work on compareworkspace for tableworkspaces
-def _compare_tableworkspaces(workspace, ref_file, delta):
-    loaded = simple.Load(os.path.join(ref_dir, ref_file))
-    ws = simple.mtd[workspace]
-    passed = True
-    if not (ws.rowCount() == loaded.rowCount()):
-        mantid.kernel.logger.warning("number of rows in: " + workspace + " and " + ref_file + " did not match")
-        passed = False
-    if not (ws.columnCount() == loaded.columnCount()):
-        mantid.kernel.logger.warning("number of columns in: " + workspace + " and " + ref_file + " did not match")
-        passed = False
-    if passed:
-
-        for i in range(ws.columnCount()):
-            newcolumn = [rel_err_less_delta(a, b, delta[i]) for a, b in zip(loaded.column(i), ws.column(i))]
-            mantid.kernel.logger.warning("newcolumn = {}".format(all(newcolumn)))
-            if not all(newcolumn):
-                passed = False
-                mantid.kernel.logger.warning("data in: " + workspace + " and " + ref_file + " did not match")
-
-    if not (ws.getColumnNames() == loaded.getColumnNames()):
-        mantid.kernel.logger.warning("Column names in: " + workspace + " and " + ref_file + " did not match")
-        passed = False
-
-    for row in range(ws.rowCount()):
-        mantid.kernel.logger.warning(json.dumps(ws.row(row)))
-
-    return passed
-
-
-# borrowed from EnggCalibrationTest
-def rel_err_less_delta(val, ref, epsilon):
-    """
-    Checks that a value 'val' does not differ from a reference value 'ref' by 'epsilon'
-    or more. This method compares the relative error. An epsilon of 0.1 means a relative
-    difference of 10 % = 100*0.1 %
-
-    @param val :: value obtained from a calculation or algorithm
-    @param ref :: (expected) reference value
-    @param epsilon :: acceptable relative error (error tolerance)
-
-    @returns if val differs in relative terms from ref by less than epsilon
-    """
-    if 0 == ref:
-        return abs(ref-val) < epsilon
-    check = (abs((ref - val) / ref) < epsilon)
-
-
-    if not check:
-        mantid.kernel.logger.warning("Value '{0}' differs from reference '{1}' by more than required epsilon '{2}' "
-                                     "(relative)".format(val, ref, epsilon))
-
-    return check
 
 
 def _current_os_has_gsl_lvl2():
