@@ -190,14 +190,8 @@ void SCDCalibratePanels::exec() {
   for (int i = 0; i < nPeaks; i++) {
     PARALLEL_START_INTERUPT_REGION
     DataObjects::Peak &peak = peaksWs->getPeak(i);
-    V3D hkl =
-        V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
-            boost::math::iround(peak.getL()));
-    V3D Q2 = lattice0.qFromHKL(hkl);
     try {
       peak.setInstrument(inst2);
-      peak.setQSampleFrame(Q2);
-      peak.setHKL(hkl);
     } catch (const std::exception &exc) {
       g_log.notice() << "Problem in applying calibration to peak " << i << " : "
                      << exc.what() << "\n";
@@ -425,6 +419,14 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   ub_alg->setProperty("gamma", gamma);
   ub_alg->executeAsChildAlg();
 
+  // Reindex peaks with new UB
+  Mantid::API::IAlgorithm_sptr alg =
+      createChildAlgorithm("IndexPeaks");
+  alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
+  alg->setProperty("Tolerance", 0.15);
+  alg->executeAsChildAlg();
+  int numIndexed = alg->getProperty("NumIndexed");
+  g_log.notice() << "Number Indexed = "<< numIndexed << "\n";
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
 
@@ -581,11 +583,11 @@ void SCDCalibratePanels::saveXmlFile(
 
     Quat relRot = bank->getRelativeRot();
 
-    std::vector<double> relRotAngles = relRot.getEulerAngles("YZY");
+    std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
 
-    writeXmlParameter(oss3, "roty", relRotAngles[0]);
-    writeXmlParameter(oss3, "rotz", relRotAngles[1]);
-    writeXmlParameter(oss3, "roty", relRotAngles[2]);
+    writeXmlParameter(oss3, "rotx", relRotAngles[0]);
+    writeXmlParameter(oss3, "roty", relRotAngles[1]);
+    writeXmlParameter(oss3, "rotz", relRotAngles[2]);
 
     V3D pos1 = bank->getRelativePos();
     writeXmlParameter(oss3, "x", pos1.X());

@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SCDPanelErrors.h"
+#include "MantidCrystal/IndexPeaks.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -108,8 +109,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
     algx->setLogging(false);
     algx->setProperty<Workspace_sptr>("Workspace", inputW);
     algx->setPropertyValue("ComponentName", detname);
-    algx->setProperty("X", 0.0);
-    algx->setProperty("Y", 1.0);
+    algx->setProperty("X", 1.0);
+    algx->setProperty("Y", 0.0);
     algx->setProperty("Z", 0.0);
     algx->setProperty("Angle", rotx);
     algx->setPropertyValue("RelativeRotation", "1");
@@ -125,8 +126,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
     algy->setProperty<Workspace_sptr>("Workspace", inputW);
     algy->setPropertyValue("ComponentName", detname);
     algy->setProperty("X", 0.0);
-    algy->setProperty("Y", 0.0);
-    algy->setProperty("Z", 1.0);
+    algy->setProperty("Y", 1.0);
+    algy->setProperty("Z", 0.0);
     algy->setProperty("Angle", roty);
     algy->setPropertyValue("RelativeRotation", "1");
     algy->execute();
@@ -141,8 +142,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
     algz->setProperty<Workspace_sptr>("Workspace", inputW);
     algz->setPropertyValue("ComponentName", detname);
     algz->setProperty("X", 0.0);
-    algz->setProperty("Y", 1.0);
-    algz->setProperty("Z", 0.0);
+    algz->setProperty("Y", 0.0);
+    algz->setProperty("Z", 1.0);
     algz->setProperty("Angle", rotz);
     algz->setPropertyValue("RelativeRotation", "1");
     algz->execute();
@@ -186,8 +187,17 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex,
                scaley, m_bank, cloned);
 
+
   auto inputP =
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(cloned);
+  IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "IndexPeaks", -1);
+  alg->initialize();
+  alg->setChild(true);
+  alg->setLogging(false);
+  alg->setProperty("PeaksWorkspace", inputP);
+  alg->setProperty("Tolerance", 0.15);
+  alg->execute();
   auto inst = inputP->getInstrument();
   Geometry::OrientedLattice lattice =
       inputP->mutableSample().getOrientedLattice();
@@ -198,6 +208,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
     try {
+      if (hkl == V3D(0, 0, 0)) throw std::runtime_error("unindexed peak");
       DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
                               hkl, peak.getGoniometerMatrix());
       Units::Wavelength wl;
@@ -210,9 +221,9 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
       out[i * 3 + 1] = Q3[1] - Q2[1];
       out[i * 3 + 2] = Q3[2] - Q2[2];
     } catch (std::runtime_error &) {
-      out[i * 3] = std::numeric_limits<double>::infinity();
-      out[i * 3 + 1] = std::numeric_limits<double>::infinity();
-      out[i * 3 + 2] = std::numeric_limits<double>::infinity();
+      out[i * 3] = 0.15; //std::numeric_limits<double>::infinity();
+      out[i * 3 + 1] = 0.15; //std::numeric_limits<double>::infinity();
+      out[i * 3 + 2] = 0.15; //std::numeric_limits<double>::infinity();
     }
   }
 }
