@@ -21,6 +21,8 @@ set ( SRC_FILES
 	IndirectCorrections.cpp
 	IndirectDataAnalysis.cpp
 	IndirectDataAnalysisTab.cpp
+	IndirectDataManipulation.cpp
+	IndirectDataManipulationTab.cpp
 	IndirectDataReduction.cpp
 	IndirectDataReductionTab.cpp
 	IndirectDataTablePresenter.cpp
@@ -98,6 +100,8 @@ set ( INC_FILES
 	IndirectCorrections.h
 	IndirectDataAnalysis.h
 	IndirectDataAnalysisTab.h
+	IndirectDataManipulation.h
+	IndirectDataManipulationTab.h
 	IndirectDataReduction.h
 	IndirectDataReductionTab.h
 	IndirectDataTablePresenter.h
@@ -169,6 +173,8 @@ set ( MOC_FILES
     IndirectCorrections.h
     IndirectDataAnalysis.h
     IndirectDataAnalysisTab.h
+    IndirectDataManipulation.h
+    IndirectDataManipulationTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDataTablePresenter.h
@@ -225,6 +231,7 @@ set ( UI_FILES
    IndirectBayes.ui
    IndirectCorrections.ui
    IndirectDataAnalysis.ui
+   IndirectDataManipulation.ui
    IndirectDataReduction.ui
    IndirectDiffractionReduction.ui
    IndirectFitDataView.ui
