@@ -85,7 +85,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
   std::vector<MDEventType<ND>> mdEvents;
   mdEvents.reserve(m_EventWS->getNumberEvents());
 
-  const auto &pws{m_OutWSWrapper->pWorkspace()};
+  const auto &pws = m_OutWSWrapper->pWorkspace();
   std::array<std::pair<coord_t, coord_t>, ND> bounds;
   for (size_t ax = 0; ax < ND; ++ax) {
     bounds[ax] = std::make_pair(pws->getDimension(ax)->getMinimum(),
