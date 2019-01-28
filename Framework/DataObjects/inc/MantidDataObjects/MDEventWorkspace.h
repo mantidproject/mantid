@@ -187,7 +187,7 @@ public:
   /** Set the base-level box contained within.
    * Used in file loading */
   inline void setBox(API::IMDNode *box) override {
-    if (!data)
+    if (data)
       delete data;
     data = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
   }
