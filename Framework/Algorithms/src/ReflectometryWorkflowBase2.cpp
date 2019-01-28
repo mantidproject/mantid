@@ -175,6 +175,11 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
                   "End wavelength (angstroms) for stitching transmission runs "
                   "together. Only used if a second transmission run is "
                   "provided.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
+                                           Direction::Input),
+      "Whether the right-hand-side or left-hand-side workspace is scaled. "
+	  "Only used if a second transmission run is provided.");
 }
 
 /** Initialize algorithmic correction properties
