@@ -137,7 +137,7 @@ class WorkspaceWidget(PluginWidget):
                     presenter.view.show()
                 except ValueError:
                     logger.error(
-                        "Could not open workspace: {0} with either MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
+                        "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])

@@ -104,6 +104,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("TimeAxisStep", 40.0,
                              doc="Binning step size for the time axis. TOF for detector binning, wavelength for constant Q")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
+        self.declareProperty("CleanupBadData", True, doc="If true, we crop the points consistent with R=0")
         self.declareProperty("ConstQTrim", 0.5,
                              doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
         self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
@@ -485,8 +486,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             if low_q is not None and high_q is not None:
                 break
 
+        cleanup = self.getProperty("CleanupBadData").value
         crop = self.getProperty("CropFirstAndLastPoints").value
-        if low_q is not None and high_q is not None:
+        if cleanup and low_q is not None and high_q is not None:
             # Get rid of first and last Q points to avoid edge effects
             if crop:
                 low_q += 1
@@ -495,7 +497,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             q_rebin = CropWorkspace(InputWorkspace=q_rebin,
                                     OutputWorkspace=str(q_rebin),
                                     XMin=data_x[low_q], XMax=data_x[high_q])
-        else:
+        elif cleanup:
             logger.error("Data is all zeros. Check your TOF ranges.")
 
         # Clean up the workspace for backward compatibility
