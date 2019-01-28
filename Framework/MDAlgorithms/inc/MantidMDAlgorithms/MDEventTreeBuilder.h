@@ -281,15 +281,17 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
 
     const auto boxEventStart = eventIt;
 
-    if (morton_index::morton_contains<MortonT>(
-            boxLower, boxUpper, IndexCoordinateSwitcher::getIndex(*eventIt)))
-      eventIt = std::upper_bound(
-          boxEventStart, tsk.end, boxUpper,
-          [](const MortonT &m,
-             const typename std::iterator_traits<EventIterator>::value_type
-                 &event) {
-            return m < IndexCoordinateSwitcher::getIndex(event);
-          });
+    if(eventIt < tsk.end) {
+      if (morton_index::morton_contains<MortonT>(
+          boxLower, boxUpper, IndexCoordinateSwitcher::getIndex(*eventIt)))
+        eventIt = std::upper_bound(
+            boxEventStart, tsk.end, boxUpper,
+            [](const MortonT &m,
+               const typename std::iterator_traits<EventIterator>::value_type
+               &event) {
+              return m < IndexCoordinateSwitcher::getIndex(event);
+            });
+    }
 
     /* Add new child box. */
     /* As we are adding as we iterate over Morton numbers and parent events
