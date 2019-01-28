@@ -94,10 +94,10 @@ class ConvertMultipleRunsToSingleCrystalMD(DataProcessorAlgorithm):
 
         # Convert Settings
         self.declareProperty('QFrame', 'Q_sample', validator=StringListValidator(['Q_sample', 'HKL']),
-                             doc='Selects Q-dimensions of the output workspace. Q (sample frame): '
-                             'Wave-vector converted into the frame of the sample (taking out the '
-                             'goniometer rotation). HKL: Use the sample’s UB matrix to convert '
-                             'Wave-vector to crystal’s HKL indices.')
+                             doc="Selects Q-dimensions of the output workspace. Q (sample frame): "
+                             "Wave-vector converted into the frame of the sample (taking out the "
+                             "goniometer rotation). HKL: Use the sample's UB matrix to convert "
+                             "Wave-vector to crystal's HKL indices.")
 
         self.copyProperties('ConvertToMD', ['Uproj', 'Vproj', 'Wproj',
                                             'MinValues', 'MaxValues', 'SplitInto', 'SplitThreshold',
