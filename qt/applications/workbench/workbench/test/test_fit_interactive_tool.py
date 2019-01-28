@@ -101,6 +101,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(lambda: not self.fit_browser.isVisible())
         self.assertFalse(self.fit_browser.isVisible())
         self.assertGreaterEqual(self.draw_count, 1)
+        self.w.close()
 
     def test_dock_undock(self):
         yield self.start()
@@ -117,6 +118,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.isVisible())
         self.assertFalse(self.fit_browser.tool is None)
         self.assertEqual(self.draw_count, 3)
+        self.w.close()
 
     def test_zoom_on_off(self):
         yield self.start(fit=False)
@@ -124,6 +126,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(self.fit_browser.toolbar_state_checker.is_tool_active)
         yield self.start_fit()
         self.assertFalse(self.fit_browser.toolbar_state_checker.is_tool_active())
+        self.w.close()
 
     def test_pan_on_off(self):
         yield self.start(fit=False)
@@ -131,6 +134,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(self.fit_browser.toolbar_state_checker.is_tool_active)
         yield self.start_fit()
         self.assertFalse(self.fit_browser.toolbar_state_checker.is_tool_active())
+        self.w.close()
 
     def test_zoom_active_fit_inactive(self):
         yield self.start()
@@ -142,6 +146,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         canvas = self.w.childAt(pos)
         yield self.move_start_x(canvas, pos, 0.5)
         self.assertAlmostEqual(self.fit_browser.startX(), start_x, 2)
+        self.w.close()
 
     def test_pan_active_fit_inactive(self):
         yield self.start()
@@ -153,6 +158,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         canvas = self.w.childAt(pos)
         yield self.move_start_x(canvas, pos, 0.5)
         self.assertAlmostEqual(self.fit_browser.startX(), start_x, 2)
+        self.w.close()
 
     def test_resize(self):
         yield self.start()
@@ -165,6 +171,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.w.resize(width, 400)
         yield
         self.assertEqual(self.draw_count, 1)
+        self.w.close()
 
     def test_fit_range(self):
         yield self.start()
@@ -179,6 +186,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.startX(), start_x + 0.5, 1)
         yield self.move_end_x(canvas, pos, -0.25)
         self.assertAlmostEqual(self.fit_browser.endX(), end_x - 0.25, 1)
+        self.w.close()
 
     def test_fit_range_start_moved_too_far(self):
         yield self.start()
@@ -194,6 +202,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(new_end_x, end_x - 0.5, 1)
         yield self.move_start_x(canvas, pos, 1.0)
         self.assertAlmostEqual(self.fit_browser.startX(), new_end_x)
+        self.w.close()
 
     def test_fit_range_end_moved_too_far(self):
         yield self.start()
@@ -209,6 +218,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(new_start_x, start_x + 0.5, 1)
         yield self.move_end_x(canvas, pos, -1.0)
         self.assertAlmostEqual(self.fit_browser.endX(), new_start_x)
+        self.w.close()
 
     def test_fit_range_moved_start_outside(self):
         yield self.start()
@@ -217,6 +227,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         canvas = self.w.childAt(pos)
         yield self.move_start_x(canvas, pos, -2.0, try_other_way_if_failed=False)
         self.assertTrue(abs(start_x_pxl - self.fit_browser.tool.fit_start_x.get_x_in_pixels()) < 5)
+        self.w.close()
 
     def test_fit_range_moved_end_outside(self):
         yield self.start()
@@ -225,36 +236,43 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         canvas = self.w.childAt(pos)
         yield self.move_end_x(canvas, pos, 2.0, try_other_way_if_failed=False)
         self.assertTrue(abs(end_x_pxl - self.fit_browser.tool.fit_end_x.get_x_in_pixels()) < 5)
+        self.w.close()
 
     def test_fit_range_set_start(self):
         yield self.start()
         self.fit_browser.setStartX(0.7)
         self.assertAlmostEqual(self.fit_browser.tool.fit_start_x.x, 0.7)
+        self.w.close()
 
     def test_fit_range_set_start_outside(self):
         yield self.start()
         self.fit_browser.setStartX(0.1)
         self.assertAlmostEqual(self.fit_browser.tool.fit_start_x.x, 0.1)
+        self.w.close()
 
     def test_fit_range_set_start_outside_right(self):
         yield self.start()
         self.fit_browser.setStartX(2.0)
         self.assertAlmostEqual(self.fit_browser.tool.fit_start_x.x, self.fit_browser.endX())
+        self.w.close()
 
     def test_fit_range_set_end(self):
         yield self.start()
         self.fit_browser.setEndX(1.0)
         self.assertAlmostEqual(self.fit_browser.tool.fit_end_x.x, 1.0)
+        self.w.close()
 
     def test_fit_range_set_end_outside(self):
         yield self.start()
         self.fit_browser.setEndX(2.0)
         self.assertAlmostEqual(self.fit_browser.tool.fit_end_x.x, 2.0)
+        self.w.close()
 
     def test_fit_range_set_end_outside_left(self):
         yield self.start()
         self.fit_browser.setEndX(0.3)
         self.assertAlmostEqual(self.fit_browser.tool.fit_end_x.x, self.fit_browser.startX())
+        self.w.close()
 
     def test_fit(self):
         yield self.start()
@@ -273,6 +291,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 0)
         self.assertEqual(len(self.fit_browser.fit_result_lines), 0)
         self.assertGreaterEqual(self.draw_count, 1)
+        self.w.close()
 
     def start_emu(self):
         res1 = Load(r'emu00006473.nxs', OutputWorkspace='ws1')
@@ -283,6 +302,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         trigger_action(find_action_with_text(self.w, 'Fit'))
         yield 0.1
         self.fit_browser = manager.fit_browser
+        self.w.close()
 
     def test_ws_index(self):
         yield self.start_emu()
@@ -300,6 +320,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.setWorkspaceIndex(0)
         yield self.wait_for_true(lambda: self.fit_browser.workspaceIndex() == 2)
         self.assertEqual(self.fit_browser.workspaceIndex(), 2)
+        self.w.close()
 
     def test_hidden_fit_for_images(self):
         if 'ws1' in mtd:
@@ -321,6 +342,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.fit()
         yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
         self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
+        self.w.close()
 
     def test_fit_names_ending_with_Raw(self):
         """
@@ -331,6 +353,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.fit()
         yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
         self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
+        self.w.close()
 
     def test_fit_output_name_non_default(self):
         yield self.start(ws_name='ws')
@@ -339,6 +362,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.fit_browser.fit()
         yield self.wait_for_true(lambda: len(self.fit_browser.fit_result_lines) == 2)
         self.assertEqual(len(self.fit_browser.fit_result_lines), 2)
+        self.w.close()
 
     def test_add_peak(self):
         yield self.start()
@@ -348,6 +372,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.0, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
         self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
+        self.w.close()
 
     def test_move_peak(self):
         yield self.start()
@@ -364,6 +389,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.5, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
         self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
+        self.w.close()
 
     def test_change_peak_fwhm(self):
         yield self.start()
@@ -377,6 +403,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.0, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 0.2, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.5, 1)
+        self.w.close()
 
     def test_add_two_peaks(self):
         yield self.start()
@@ -393,6 +420,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f1'), 0.9, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f1'), 4.12, 1)
         self.assertTrue(self.fit_browser.getPeakFwhmOf('f1') != 0.0)
+        self.w.close()
 
     def test_update_peaks(self):
         yield self.start()
@@ -409,10 +437,12 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.tool.get_override_cursor(1.5, 4.3) is None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(1.55, 4.3) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(1.45, 4.3) is not None)
+        self.w.close()
 
     def test_context_menu_no_crash(self):
         yield self.start(fit=False)
         yield self.context_menu()
+        self.w.close()
 
     def test_add_peak_context_menu(self):
         yield self.start()
@@ -427,6 +457,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakCentreOf('f0'), 1.0, 1)
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 4.2, 1)
         self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
+        self.w.close()
 
     def test_select_peak_type_context_menu(self):
         yield self.start()
@@ -444,6 +475,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakHeightOf('f0'), 4.4, 1)
         self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
         self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=Lorentzian'))
+        self.w.close()
 
     def test_add_background_context_menu(self):
         yield self.start()
@@ -458,6 +490,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(lambda: self.fit_browser.sizeOfFunctionsGroup() == 3)
         self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
         self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=Polynomial'))
+        self.w.close()
 
     def test_add_other_context_menu(self):
         yield self.start()
@@ -472,17 +505,20 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(lambda: self.fit_browser.sizeOfFunctionsGroup() == 3)
         self.assertEqual(self.fit_browser.sizeOfFunctionsGroup(), 3)
         self.assertTrue(self.fit_browser.getFittingFunction().startswith('name=ExpDecay'))
+        self.w.close()
 
     def test_plot_guess_doesnt_crash_without_function(self):
         yield self.start()
         action = find_action_with_text(self.fit_browser, 'Plot Guess')
         trigger_action(action)
+        self.w.close()
 
     def test_plot_guess_doesnt_crash_without_workspace(self):
         yield self.start()
         DeleteWorkspace('ws')
         action = find_action_with_text(self.fit_browser, 'Plot Guess')
         trigger_action(action)
+        self.w.close()
 
     def test_plot_guess(self):
         yield self.start()
@@ -490,6 +526,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         action = find_action_with_text(self.fit_browser, 'Plot Guess')
         trigger_action(action)
         trigger_action(action)
+        self.w.close()
 
     def test_add_function_with_peaks_creates_markers(self):
         yield self.start()
@@ -502,6 +539,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+        self.w.close()
 
     def test_load_function_with_peaks_creates_markers(self):
         yield self.start()
@@ -516,6 +554,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+        self.w.close()
 
     def test_reload_function_with_peaks_updates_markers(self):
         yield self.start()
@@ -532,6 +571,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+        self.w.close()
 
     def test_load_different_function_updates_markers(self):
         yield self.start()
@@ -548,6 +588,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+        self.w.close()
 
     def test_clear_function_updates_markers(self):
         yield self.start()
@@ -557,6 +598,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         trigger_action(action)
         yield self.wait_for_true(lambda: len(self.fit_browser.tool.peak_markers) == 0)
         self.assertEqual(len(self.fit_browser.tool.peak_markers), 0)
+        self.w.close()
 
 
 runTests(TestFitPropertyBrowser)
