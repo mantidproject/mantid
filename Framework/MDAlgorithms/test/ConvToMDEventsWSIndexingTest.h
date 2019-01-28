@@ -371,7 +371,8 @@ public:
     // Every leaf has 2 points in it
     generators.emplace_back(new CheckBasicSplitting(2, lowerLeft, upperRight));
     // Every leaf has 2 points close to boundaries in it
-    generators.emplace_back(new CheckPreciseSplitting( 4, lowerLeft, upperRight, 0.000001));
+    generators.emplace_back(
+        new CheckPreciseSplitting(4, lowerLeft, upperRight, 0.000001));
 
     for (auto &gen : generators)
       TSM_ASSERT_EQUALS(
@@ -424,7 +425,7 @@ private:
 
     MDEventStore mdEvents(points.size());
     for (size_t k = 0; k < points.size(); ++k)
-      for(size_t d = 0; d < ND; ++d)
+      for (size_t d = 0; d < ND; ++d)
         mdEvents[k].setCenter(d, points[k][d]);
 
     auto topNodeWithError = tb.distribute(mdEvents);
