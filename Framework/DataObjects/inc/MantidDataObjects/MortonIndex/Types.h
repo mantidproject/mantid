@@ -8,12 +8,24 @@
 #define MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
 
 #include <Eigen/Dense>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <ostream>
 
-namespace morton_index {
+#define MULTIPRECISION_BOOST_VALID_VERSION 106100
 
-using uint128_t = boost::multiprecision::uint128_t;
+#if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
+#include <boost/multiprecision/cpp_int.hpp>
+namespace morton_index {
+  using uint128_t = boost::multiprecision::uint128_t;
+  using uint256_t = boost::multiprecision::uint256_t;
+} // morton_index
+#else
+namespace morton_index {
+  using uint128_t = uint64_t;
+  using uint256_t = uint64_t;
+} // morton_index
+#endif // BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
+
+namespace morton_index {
 
 template <size_t ND, typename IntT>
 using IntArray = Eigen::Array<IntT, static_cast<int>(ND), 1>;
@@ -148,7 +160,7 @@ inline std::ostream &operator<<(std::ostream &os, const Morton96 &morton96) {
  * @tparam SZ :: the size of accesible memory.
  */
 template <size_t SZ> struct MortonIndex {
-  using type = boost::multiprecision::uint256_t;
+  using type = uint256_t;
 };
 
 template <> struct MortonIndex<1> { using type = uint8_t; };

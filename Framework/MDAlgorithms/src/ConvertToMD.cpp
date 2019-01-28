@@ -119,7 +119,7 @@ void ConvertToMD::init() {
                   "workspace. The workspace will load data from the file on "
                   "demand in order to reduce memory use.");
 
-#if BOOST_VERSION > 106100
+#if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
   std::vector<std::string> converterType{"default", "indexed"};
 #else
   std::vector<std::string> converterType{"default"};

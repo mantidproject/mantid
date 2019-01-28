@@ -7,13 +7,12 @@
 #ifndef MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXINGTEST_H_
 #define MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXINGTEST_H_
 
-#if BOOST_VERSION > 106100
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 #include <ostream>
 #include <stdexcept>
+
 
 #ifdef _WIN32
 #define __PRETTY_FUNCTION__ __FUNCSIG__
@@ -355,7 +354,13 @@ public:
   }
 
   void test_sructure() {
-
+#if BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
+    try {
+      checkStructure(SimpleInput(11).generate(), lowerLeft, upperRight, splitTreshold);
+    } catch(std::runtime_error& exception) {
+      TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") != std::string::npos, true);
+    }
+#else
     static std::vector<std::unique_ptr<InputGenerator>> generators;
     // All points in one child node
     generators.emplace_back(std::make_unique<SimpleInput>(11));
@@ -373,6 +378,7 @@ public:
           gen->description().c_str(),
           checkStructure(gen->generate(), lowerLeft, upperRight, splitTreshold),
           true);
+#endif // MULTIPRECISION_BOOST_VALID_VERSION
   }
 
 private:
@@ -426,5 +432,5 @@ private:
     return compareTrees(res, topNodeWithError.root);
   }
 };
-#endif // #if BOOST_VERSION > 106100
+
 #endif /* MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXINGTEST_H_ */

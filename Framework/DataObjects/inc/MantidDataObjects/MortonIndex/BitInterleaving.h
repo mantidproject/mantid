@@ -11,8 +11,6 @@
 #include <cinttypes>
 #include <cstddef>
 
-#include <boost/multiprecision/cpp_int.hpp>
-
 #include "Types.h"
 
 namespace morton_index {
@@ -42,6 +40,8 @@ template <size_t N, typename IntT, typename MortonT> IntT compact(MortonT) {
   throw std::runtime_error("No compact() specialisation.");
 }
 
+
+#if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
 /* Bit masks used for pad and compact operations are derived using
  * docs/bit_padding_generator.py. */
 /* For more details see docs/bit_interleaving.md. */
@@ -143,8 +143,6 @@ template <> inline uint16_t compact<3, uint16_t, uint64_t>(uint64_t x) {
   return (uint16_t)x;
 }
 
-using uint128_t = boost::multiprecision::uint128_t;
-
 template <> inline uint128_t pad<1, uint32_t, uint128_t>(uint32_t v) {
 
   uint128_t x(v);
@@ -217,8 +215,6 @@ template <> inline uint32_t compact<3, uint32_t, uint128_t>(uint128_t x) {
   x = (x | x >> 64) & uint128_t("0xffffffff");
   return (uint32_t)x;
 }
-
-using uint256_t = boost::multiprecision::uint256_t;
 
 template <> inline uint256_t pad<2, uint64_t, uint256_t>(uint64_t v) {
 
@@ -305,7 +301,7 @@ template <> inline uint64_t compact<3, uint64_t, uint256_t>(uint256_t x) {
   x = (x | x >> 128) & uint256_t("0xffffffffffffffff");
   return (uint64_t)x;
 }
-
+#endif // BOOST_VERSION >= 106100
 /**
  * Interleaves an integer coordinate.
  *
