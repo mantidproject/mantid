@@ -12,7 +12,6 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include <algorithm>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <cmath>
 #include <cstring>
 #include <numeric>
