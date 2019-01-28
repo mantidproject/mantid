@@ -220,6 +220,8 @@ class MainWindow(QMainWindow):
         # uses default configuration as necessary
         self.readSettings(CONF)
 
+        self.editor.restore_session_tabs()
+
         self.setup_layout()
         self.create_actions()
         self.populate_menus()
@@ -422,10 +424,9 @@ class MainWindow(QMainWindow):
                 event.ignore()
                 return
 
+        self.writeSettings(CONF)  # write current window information to global settings object
         # Close editors
         if self.editor.app_closing():
-            self.writeSettings(CONF)  # write current window information to global settings object
-
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa

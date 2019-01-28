@@ -97,6 +97,9 @@ class MultiFileEditor(PluginWidget):
         '''This is used by MainWindow to execute a file after opening it'''
         return self.editors.execute_current()
 
+    def restore_session_tabs(self):
+        self.editors.restore_session_tabs()
+
     # ----------- Plugin API --------------------
 
     def app_closing(self):
@@ -128,11 +131,14 @@ class MultiFileEditor(PluginWidget):
     def get_plugin_title(self):
         return "Editor"
 
-    def readSettings(self, _):
-        pass
+    def readSettings(self, settings):
+        try:
+            self.editors.prev_session_tabs = settings.get('Editor/SessionTabs')
+        except KeyError:
+            pass
 
-    def writeSettings(self, _):
-        pass
+    def writeSettings(self, settings):
+        settings.set('Editor/SessionTabs', self.editors.tab_filepaths)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
