@@ -281,14 +281,14 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
 
     const auto boxEventStart = eventIt;
 
-    if(eventIt < tsk.end) {
+    if (eventIt < tsk.end) {
       if (morton_index::morton_contains<MortonT>(
-          boxLower, boxUpper, IndexCoordinateSwitcher::getIndex(*eventIt)))
+              boxLower, boxUpper, IndexCoordinateSwitcher::getIndex(*eventIt)))
         eventIt = std::upper_bound(
             boxEventStart, tsk.end, boxUpper,
             [](const MortonT &m,
                const typename std::iterator_traits<EventIterator>::value_type
-               &event) {
+                   &event) {
               return m < IndexCoordinateSwitcher::getIndex(event);
             });
     }
