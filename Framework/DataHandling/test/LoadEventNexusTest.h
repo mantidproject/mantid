@@ -167,25 +167,25 @@ public:
                      (150 * 150) + 2) // Two monitors
   }
 
-  // void xtest_load_event_nexus_v20_ess_integration_2018() {
-  //   const std::string file = "V20_ESSIntegration_2018-12-13_0942.nxs";
-  //   LoadEventNexus alg;
-  //   alg.setChild(true);
-  //   alg.setRethrows(true);
-  //   alg.initialize();
-  //   alg.setProperty("Filename", file);
-  //   alg.setProperty("OutputWorkspace", "dummy_for_child");
-  //   alg.execute();
-  //   Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-  //   auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
-  //   TS_ASSERT(eventWS);
-  //
-  //   TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 43277);
-  //   TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
-  //                    (300 * 300) + 2) // Two monitors
-  //   TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
-  //   TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
-  // }
+  void test_load_event_nexus_v20_ess_integration_2018() {
+    const std::string file = "V20_ESSIntegration_2018-12-13_0942.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 43277);
+    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
+                     (300 * 300) + 2) // Two monitors
+    TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
+  }
 
   void test_load_event_nexus_sans2d_ess() {
     const std::string file = "SANS2D_ESS_example.nxs";
