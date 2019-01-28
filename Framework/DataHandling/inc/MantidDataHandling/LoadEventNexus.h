@@ -652,12 +652,10 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
                 std::multiplies<int64_t>());
             boost::scoped_array<char> val_array(new char[total_length]);
             file.getData(val_array.get());
-            file.closeData();
             name = std::string(val_array.get(), total_length);
           }
         }
         file.closeData();
-
         if (!name.empty()) {
           WS->mutableSample().setName(name);
         }
