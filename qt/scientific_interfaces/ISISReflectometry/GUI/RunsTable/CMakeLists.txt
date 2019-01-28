@@ -11,6 +11,7 @@ set ( RUNS_TABLE_SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( RUNS_TABLE_INC_FILES
+    IRunsTablePresenter.h
     IRunsTableView.h
     RunsTableView.h
     RegexRowFilter.h

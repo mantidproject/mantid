@@ -96,7 +96,7 @@ void ExperimentView::initLayout() {
   // connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
   //         SLOT(requestExpDefaults()));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(summationTypeChanged(int)));
+          SLOT(onSummationTypeChanged(int)));
   connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this,
           SLOT(onNewPerThetaDefaultsRowRequested()));
 }
@@ -165,9 +165,28 @@ void ExperimentView::connectSettingsChange(QTableWidget &edit) {
           SLOT(onPerAngleDefaultsChanged(int, int)));
 }
 
-void ExperimentView::disableAll() { m_ui.expSettingsGrid->setEnabled(false); }
+void ExperimentView::setEnabledStateForAllWidgets(bool enabled) {
+  m_ui.optionsTable->setEnabled(enabled);
+  m_ui.analysisModeComboBox->setEnabled(enabled);
+  m_ui.startOverlapEdit->setEnabled(enabled);
+  m_ui.endOverlapEdit->setEnabled(enabled);
+  m_ui.polCorrComboBox->setEnabled(enabled);
+  m_ui.CRhoEdit->setEnabled(enabled);
+  m_ui.CAlphaEdit->setEnabled(enabled);
+  m_ui.CApEdit->setEnabled(enabled);
+  m_ui.CPpEdit->setEnabled(enabled);
+  stitchOptionsLineEdit().setEnabled(enabled);
+  m_ui.reductionTypeComboBox->setEnabled(enabled);
+  m_ui.summationTypeComboBox->setEnabled(enabled);
+  m_ui.includePartialBinsCheckBox->setEnabled(enabled);
+  m_ui.floodCorComboBox->setEnabled(enabled);
+  m_ui.floodWorkspaceWsSelector->setEnabled(enabled);
+  m_ui.debugCheckBox->setEnabled(enabled);
+}
 
-void ExperimentView::enableAll() { m_ui.expSettingsGrid->setEnabled(true); }
+void ExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
+
+void ExperimentView::enableAll() { setEnabledStateForAllWidgets(true); }
 
 void ExperimentView::registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg) {
   registerExperimentSettingsWidgets(alg);
@@ -194,7 +213,7 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
-void ExperimentView::summationTypeChanged(int reductionTypeIndex) {
+void ExperimentView::onSummationTypeChanged(int reductionTypeIndex) {
   UNUSED_ARG(reductionTypeIndex);
   m_notifyee->notifySummationTypeChanged();
 }

@@ -29,6 +29,10 @@ RunsTablePresenter::RunsTablePresenter(
   m_view->subscribe(this);
 }
 
+void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
+
 ReductionJobs const &RunsTablePresenter::reductionJobs() const {
   return m_model;
 }
@@ -88,9 +92,13 @@ void RunsTablePresenter::removeGroupsFromModel(
     removeGroup(m_model, *it);
 }
 
-void RunsTablePresenter::notifyPauseRequested() {}
+void RunsTablePresenter::notifyReductionResumed() {
+  m_mainPresenter->notifyReductionResumed();
+}
 
-void RunsTablePresenter::notifyProcessRequested() {}
+void RunsTablePresenter::notifyReductionPaused() {
+  m_mainPresenter->notifyReductionPaused();
+}
 
 void RunsTablePresenter::notifyInsertRowRequested() {
   auto selected = m_view->jobs().selectedRowLocations();
@@ -112,7 +120,44 @@ void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
   }
 }
 
+void RunsTablePresenter::notifyInstrumentChanged() {
+  auto const instrumentName = m_view->getInstrumentName();
+  if (m_mainPresenter)
+    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+}
+
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
+
+void RunsTablePresenter::updateWidgetEnabledState(bool isProcessing) {
+  m_view->setJobsTableEnabled(!isProcessing);
+  m_view->setInstrumentSelectorEnabled(!isProcessing);
+  m_view->setProcessButtonEnabled(!isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Process, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Pause, isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::InsertRow, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::InsertGroup, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::DeleteRow, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::DeleteGroup, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Copy, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Paste, !isProcessing);
+  m_view->setActionEnabled(IRunsTableView::Action::Cut, !isProcessing);
+}
+
+void RunsTablePresenter::reductionResumed() { updateWidgetEnabledState(true); }
+
+void RunsTablePresenter::reductionPaused() { updateWidgetEnabledState(false); }
+
+void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
+
+void RunsTablePresenter::autoreductionPaused() { reductionPaused(); }
+
+void RunsTablePresenter::instrumentChanged(std::string const &instrumentName) {
+  m_view->setInstrumentName(instrumentName);
+}
+
+void RunsTablePresenter::settingsChanged() {
+  // TODO: reset state in reduction jobs
+}
 
 void RunsTablePresenter::appendRowsToGroupsInView(
     std::vector<int> const &groupIndices) {

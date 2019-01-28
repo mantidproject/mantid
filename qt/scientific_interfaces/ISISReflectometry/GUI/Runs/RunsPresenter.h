@@ -10,9 +10,8 @@
 #include "DllConfig.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/IRunsView.h"
-#include "GUI/RunsTable/RunsTablePresenter.h"
+#include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
-#include "IReflBatchPresenter.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
@@ -69,12 +68,24 @@ public:
   RunsPresenter(RunsPresenter &&) = default;
   RunsPresenter &operator=(RunsPresenter &&) = default;
 
+  // IRunsPresenter overrides
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  bool isProcessing() const override;
+  bool isAutoreducing() const override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyReductionResumed() override;
+  void notifyReductionPaused() override;
+  void reductionPaused() override;
+  void reductionResumed() override;
+  void autoreductionResumed() override;
+  void autoreductionPaused() override;
+  void instrumentChanged(std::string const &instrumentName) override;
+  void settingsChanged() override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
-  void notifyStartAutoreduction() override;
-  void notifyPauseAutoreduction() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
   void notifyTimerEvent() override;
   void notifyICATSearchComplete() override;
   void notifyTransfer() override;
@@ -83,16 +94,10 @@ public:
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
 
-  void settingsChanged() override;
-
-  bool isAutoreducing() const override;
-  bool isProcessing() const override;
-
 protected:
-  RunsTablePresenter *tablePresenter() const;
+  IRunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
   boost::shared_ptr<IReflAutoreduction> m_autoreduction;
-  void startNewAutoreduction();
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The current transfer method
@@ -105,13 +110,17 @@ private:
   ProgressableView *m_progressView;
   RunsTablePresenterFactory m_makeRunsTablePresenter;
   /// The data processor presenters stored in a vector
-  std::unique_ptr<RunsTablePresenter> m_tablePresenter;
+  std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The main presenter
   IReflBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
   IReflMessageHandler *m_messageHandler;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
+  /// The list of instruments
+  std::vector<std::string> m_instruments;
+  /// The default index in the instrument list
+  int m_defaultInstrumentIndex;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
   /// The name to use for the live data workspace
@@ -124,18 +133,14 @@ private:
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   /// autoreduction
   bool requireNewAutoreduction() const;
-  bool setupNewAutoreduction(const std::string &searchString);
   void checkForNewRuns();
   void autoreduceNewRuns();
-  void pauseAutoreduction();
   void stopAutoreduction();
   bool shouldUpdateExistingSearchResults() const;
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer,
                 const TransferMatch matchType = TransferMatch::Any);
-  void changeInstrument();
-  void changeGroup();
   void updateWidgetEnabledState() const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);

@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentPresenter.h"
+#include "../../IReflBatchPresenter.h"
 #include "../../Reduction/ParseReflectometryStrings.h"
 #include "../../Reduction/ValidatePerThetaDefaults.h"
 #include "PerThetaDefaultsTableValidator.h"
@@ -18,6 +19,11 @@ ExperimentPresenter::ExperimentPresenter(IExperimentView *view,
     : m_view(view), m_model(std::move(experiment)),
       m_thetaTolerance(defaultsThetaTolerance) {
   m_view->subscribe(this);
+}
+
+void ExperimentPresenter::acceptMainPresenter(
+    IReflBatchPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
   notifySettingsChanged();
 }
 
@@ -26,6 +32,7 @@ Experiment const &ExperimentPresenter::experiment() const { return m_model; }
 void ExperimentPresenter::notifySettingsChanged() {
   auto validationResult = updateModelFromView();
   showValidationResult(validationResult);
+  m_mainPresenter->notifySettingsChanged();
 }
 
 void ExperimentPresenter::notifySummationTypeChanged() {
@@ -57,11 +64,16 @@ void ExperimentPresenter::notifyPerAngleDefaultsChanged(int, int column) {
               .perThetaValidationErrors()
               .fullTableError() == ThetaValuesValidationError::NonUniqueTheta)
     m_view->showPerAngleThetasNonUnique(m_thetaTolerance);
+  m_mainPresenter->notifySettingsChanged();
 }
 
-void ExperimentPresenter::onReductionPaused() { m_view->enableAll(); }
+void ExperimentPresenter::reductionPaused() { m_view->enableAll(); }
 
-void ExperimentPresenter::onReductionResumed() { m_view->disableAll(); }
+void ExperimentPresenter::reductionResumed() { m_view->disableAll(); }
+
+void ExperimentPresenter::autoreductionPaused() { reductionPaused(); }
+
+void ExperimentPresenter::autoreductionResumed() { reductionResumed(); }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const correctionType = polarizationCorrectionTypeFromString(

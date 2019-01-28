@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_INSTRUMENTPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentPresenter.h"
+#include "../../ReflMockObjects.h"
 #include "MockInstrumentView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -15,6 +16,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -30,6 +32,12 @@ public:
   static void destroySuite(InstrumentPresenterTest *suite) { delete suite; }
 
   InstrumentPresenterTest() : m_view() {}
+
+  void testPresenterSubscribesToView() {
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
 
   void testSetValidWavelengthRange() {
     auto const range = RangeInLambda(1.5, 14);
@@ -192,7 +200,7 @@ public:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
-    presenter.onReductionPaused();
+    presenter.reductionPaused();
 
     verifyAndClear();
   }
@@ -201,13 +209,23 @@ public:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
-    presenter.onReductionResumed();
+    presenter.reductionResumed();
+
+    verifyAndClear();
+  }
+
+  void testSettingsChangedNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifySettingsChanged();
 
     verifyAndClear();
   }
 
 private:
   NiceMock<MockInstrumentView> m_view;
+  NiceMock<MockReflBatchPresenter> m_mainPresenter;
 
   Instrument makeModel() {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
@@ -219,7 +237,9 @@ private:
   }
 
   InstrumentPresenter makePresenter() {
-    return InstrumentPresenter(&m_view, makeModel());
+    auto presenter = InstrumentPresenter(&m_view, makeModel());
+    presenter.acceptMainPresenter(&m_mainPresenter);
+    return presenter;
   }
 
   void verifyAndClear() {

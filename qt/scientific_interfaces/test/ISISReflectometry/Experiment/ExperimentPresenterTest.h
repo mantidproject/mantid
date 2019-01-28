@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
+#include "../../ReflMockObjects.h"
 #include "MockExperimentView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -15,6 +16,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -38,11 +40,17 @@ public:
 
   ExperimentPresenterTest() : m_view() {}
 
+  void testPresenterSubscribesToView() {
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
   void testAllWidgetsAreEnabledWhenReductionPaused() {
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
-    presenter.onReductionPaused();
+    presenter.reductionPaused();
 
     verifyAndClear();
   }
@@ -51,7 +59,7 @@ public:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
-    presenter.onReductionResumed();
+    presenter.reductionResumed();
 
     verifyAndClear();
   }
@@ -383,8 +391,23 @@ public:
     runTestForInvalidPerAngleOptions(optionsTable, 0, 7);
   }
 
+  void testChangingSettingsNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testChangingPerAngleDefaultsNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifyPerAngleDefaultsChanged(0, 0);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
+  NiceMock<MockReflBatchPresenter> m_mainPresenter;
   double m_thetaTolerance{0.01};
 
   Experiment makeModel() {
@@ -407,7 +430,7 @@ private:
     // return something sensible
     auto presenter =
         ExperimentPresenter(&m_view, makeModel(), m_thetaTolerance);
-    verifyAndClear();
+    presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
 

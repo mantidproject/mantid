@@ -30,6 +30,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter,
 public:
   SavePresenter(ISaveView *view, std::unique_ptr<IReflAsciiSaver> saver);
 
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
@@ -39,16 +40,19 @@ public:
   void notifyAutosaveEnabled() override;
   void notifySavePathChanged() override;
 
-  void completedGroupReductionSuccessfully(
+  void reductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) override;
-  void completedRowReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
-  void onAnyReductionPaused() override;
-  void onAnyReductionResumed() override;
+  void
+  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
+                           std::string const &workspaceName) override;
+  void reductionPaused() override;
+  void reductionResumed() override;
+  void autoreductionPaused() override;
+  void autoreductionResumed() override;
 
 private:
+  IReflBatchPresenter *m_mainPresenter;
   bool isValidSaveDirectory(std::string const &directory);
   void onSavePathChanged();
   void warnInvalidSaveDirectory();
@@ -80,8 +84,6 @@ private:
   /// The view
   ISaveView *m_view;
   std::unique_ptr<IReflAsciiSaver> m_saver;
-  /// The main presenter
-  IReflBatchPresenter *m_mainPresenter;
   bool m_shouldAutosave;
 };
 } // namespace CustomInterfaces

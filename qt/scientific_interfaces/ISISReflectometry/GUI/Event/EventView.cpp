@@ -36,7 +36,7 @@ void EventView::initLayout() {
 void EventView::initUniformSliceTypeLayout() {
   m_uniformGroup = makeQWidgetGroup(m_ui.uniformEdit, m_ui.uniformLabel);
   connect(m_ui.uniformButton, SIGNAL(toggled(bool)), this,
-          SLOT(toggleUniform(bool)));
+          SLOT(onToggleUniform(bool)));
 
   connect(m_ui.uniformEvenEdit, SIGNAL(valueChanged(int)), this,
           SLOT(onUniformEvenChanged(int)));
@@ -76,13 +76,13 @@ void EventView::initUniformEvenSliceTypeLayout() {
   m_uniformEvenGroup =
       makeQWidgetGroup(m_ui.uniformEvenEdit, m_ui.uniformEvenLabel);
   connect(m_ui.uniformEvenButton, SIGNAL(toggled(bool)), this,
-          SLOT(toggleUniformEven(bool)));
+          SLOT(onToggleUniformEven(bool)));
 }
 
 void EventView::initCustomSliceTypeLayout() {
   m_customGroup = makeQWidgetGroup(m_ui.customEdit, m_ui.customLabel);
   connect(m_ui.customButton, SIGNAL(toggled(bool)), this,
-          SLOT(toggleCustom(bool)));
+          SLOT(onToggleCustom(bool)));
 }
 
 void EventView::initLogValueSliceTypeLayout() {
@@ -90,7 +90,7 @@ void EventView::initLogValueSliceTypeLayout() {
       makeQWidgetGroup(m_ui.logValueTypeEdit, m_ui.logValueTypeLabel,
                        m_ui.logValueEdit, m_ui.logValueLabel);
   connect(m_ui.logValueButton, SIGNAL(toggled(bool)), this,
-          SLOT(toggleLogValue(bool)));
+          SLOT(onToggleLogValue(bool)));
 }
 
 void EventView::enableSliceType(SliceType sliceType) {
@@ -185,27 +185,27 @@ void EventView::disableSliceTypeSelection() {
 
 void EventView::enableSliceTypeSelection() { m_sliceTypeRadioButtons.enable(); }
 
-void EventView::toggleUniform(bool isChecked) {
+void EventView::onToggleUniform(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::Uniform);
 }
 
-void EventView::toggleUniformEven(bool isChecked) {
+void EventView::onToggleUniformEven(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::UniformEven);
 }
 
-void EventView::toggleCustom(bool isChecked) {
+void EventView::onToggleCustom(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::Custom);
 }
 
-void EventView::toggleLogValue(bool isChecked) {
+void EventView::onToggleLogValue(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::LogValue);
 }
 
-void EventView::toggleDisabledSlicing(bool isChecked) {
+void EventView::onToggleDisabledSlicing(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::None);
 }

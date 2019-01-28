@@ -51,11 +51,11 @@ public:
   void subscribe(EventViewSubscriber *notifyee) override;
 
 public slots:
-  void toggleUniform(bool isChecked);
-  void toggleUniformEven(bool isChecked);
-  void toggleCustom(bool isChecked);
-  void toggleLogValue(bool isChecked);
-  void toggleDisabledSlicing(bool isChecked);
+  void onToggleUniform(bool isChecked);
+  void onToggleUniformEven(bool isChecked);
+  void onToggleCustom(bool isChecked);
+  void onToggleLogValue(bool isChecked);
+  void onToggleDisabledSlicing(bool isChecked);
 
   void onUniformEvenChanged(int);
   void onUniformSecondsChanged(double);

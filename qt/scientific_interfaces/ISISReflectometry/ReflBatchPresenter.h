@@ -37,35 +37,43 @@ public:
                      std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                      std::unique_ptr<ISavePresenter> savePresenter);
 
-  /// Returns values passed for 'Transmission run(s)'
-  MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(const double angle) const override;
-  /// Whether there are per-angle transmission runs specified
-  bool hasPerAngleOptions() const override;
-  /// Set the instrument name
-  void setInstrumentName(const std::string &instName) const override;
-
-  /// Returns whether the Runs Tab is currently processing any runs
-  bool isProcessing() const override;
-  void settingsChanged() override;
+  // IReflBatchPresenter overrides
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
+  void notifyReductionCompletedForGroup(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
+  void notifyReductionCompletedForRow(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionCompleted() override;
+  void notifyInstrumentChanged(const std::string &instName) override;
+  void notifySettingsChanged() override;
+  bool hasPerAngleOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angle) const override;
   bool requestClose() const override;
-
-  void completedGroupReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
-  void completedRowReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
+  bool isProcessing() const override;
+  bool isAutoreducing() const override;
 
 private:
-  /// Pauses reduction in the Runs Tab
-  void pauseReduction() const;
-  /// Resumes reduction in the Runs Tab
-  void resumeReduction() const;
-  /// The view we are handling
-  IReflBatchView *m_view;
+  void reductionResumed();
+  void reductionPaused();
+  void reductionCompletedForGroup(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName);
+  void
+  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
+                           std::string const &workspaceName);
+  void autoreductionResumed();
+  void autoreductionPaused();
+  void autoreductionCompleted();
+  void instrumentChanged(const std::string &instName);
+  void settingsChanged();
+  // The view we are handling (currently unused)
+  /*IReflBatchView *m_view;*/
   /// The presenter of tab 'Runs'
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   /// The presenter of tab 'Event Handling'
@@ -75,6 +83,10 @@ private:
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   /// The presenter of tab 'Save ASCII'
   std::unique_ptr<ISavePresenter> m_savePresenter;
+  /// True if currently reducing runs
+  bool m_isProcessing;
+  /// True if autoprocessing is currently running (i.e. polling for new runs)
+  bool m_isAutoreducing;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -7,7 +7,9 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
+#include "../Runs/IRunsPresenter.h"
 #include "DllConfig.h"
+#include "IRunsTablePresenter.h"
 #include "IRunsTableView.h"
 #include "JobsViewUpdater.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
@@ -19,26 +21,37 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter
-    : public RunsTableViewSubscriber {
+    : public IRunsTablePresenter,
+      public RunsTableViewSubscriber {
 public:
   RunsTablePresenter(IRunsTableView *view,
                      std::vector<std::string> const &instruments,
                      double thetaTolerance, ReductionJobs reductionJobs);
 
-  void mergeAdditionalJobs(ReductionJobs const &jobs);
-  ReductionJobs const &reductionJobs() const;
   void notifyRemoveAllRowsAndGroupsRequested();
 
+  // IRunsTablePresenter overrides
+  void acceptMainPresenter(IRunsPresenter *mainPresenter) override;
+  ReductionJobs const &reductionJobs() const override;
+  void mergeAdditionalJobs(ReductionJobs const &jobs) override;
+  void instrumentChanged(std::string const &instrumentName) override;
+  void settingsChanged() override;
+
   // RunsTableViewSubscriber overrides
-  void notifyProcessRequested() override;
-  void notifyPauseRequested() override;
+  void notifyReductionResumed() override;
+  void notifyReductionPaused() override;
   void notifyInsertRowRequested() override;
   void notifyInsertGroupRequested() override;
   void notifyDeleteRowRequested() override;
   void notifyDeleteGroupRequested() override;
   void notifyFilterChanged(std::string const &filterValue) override;
+  void notifyInstrumentChanged() override;
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
+  void reductionPaused() override;
+  void reductionResumed() override;
+  void autoreductionPaused() override;
+  void autoreductionResumed() override;
 
   // JobTreeViewSubscriber overrides
   void notifyCellTextChanged(
@@ -99,6 +112,7 @@ private:
   updateRowField(MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex,
                  int column, std::string const &oldValue,
                  std::string const &newValue);
+  void updateWidgetEnabledState(bool isProcessing);
 
   static auto constexpr DEPTH_LIMIT = 2;
 
@@ -109,6 +123,7 @@ private:
   ReductionJobs m_model;
   double m_thetaTolerance;
   JobsViewUpdater m_jobViewUpdater;
+  IRunsPresenter *m_mainPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

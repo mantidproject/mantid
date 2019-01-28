@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SavePresenter.h"
+#include "../../IReflBatchPresenter.h"
 #include "../../IReflMainWindowPresenter.h"
 #include "ISaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -35,6 +36,10 @@ SavePresenter::SavePresenter(ISaveView *view,
   m_view->subscribe(this);
 }
 
+void SavePresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
+
 void SavePresenter::notifyPopulateWorkspaceList() { populateWorkspaceList(); }
 
 void SavePresenter::notifyFilterWorkspaceList() { filterWorkspaceNames(); }
@@ -45,23 +50,33 @@ void SavePresenter::notifySaveSelectedWorkspaces() { saveSelectedWorkspaces(); }
 
 void SavePresenter::notifySuggestSaveDir() { suggestSaveDir(); }
 
-void SavePresenter::notifyAutosaveDisabled() { disableAutosave(); }
+void SavePresenter::notifyAutosaveDisabled() {
+  disableAutosave();
+  m_mainPresenter->notifySettingsChanged();
+}
 
-void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
+void SavePresenter::notifyAutosaveEnabled() {
+  enableAutosave();
+  m_mainPresenter->notifySettingsChanged();
+}
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 
-void SavePresenter::onAnyReductionPaused() {
+void SavePresenter::reductionPaused() {
   populateWorkspaceList();
   m_view->enableAutosaveControls();
   m_view->enableFileFormatAndLocationControls();
 }
 
-void SavePresenter::onAnyReductionResumed() {
+void SavePresenter::reductionResumed() {
   m_view->disableAutosaveControls();
   if (shouldAutosave())
     m_view->disableFileFormatAndLocationControls();
 }
+
+void SavePresenter::autoreductionPaused() { reductionPaused(); }
+
+void SavePresenter::autoreductionResumed() { reductionResumed(); }
 
 void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
@@ -80,7 +95,9 @@ void SavePresenter::onSavePathChanged() {
     warnInvalidSaveDirectory();
 }
 
-void SavePresenter::completedGroupReductionSuccessfully(
+bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
+
+void SavePresenter::reductionCompletedForGroup(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
   UNUSED_ARG(group);
@@ -93,9 +110,7 @@ void SavePresenter::completedGroupReductionSuccessfully(
   }
 }
 
-bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
-
-void SavePresenter::completedRowReductionSuccessfully(
+void SavePresenter::reductionCompletedForRow(
     MantidWidgets::DataProcessor::GroupData const &group,
     std::string const &workspaceName) {
   if (!MantidWidgets::DataProcessor::canPostprocess(group) &&

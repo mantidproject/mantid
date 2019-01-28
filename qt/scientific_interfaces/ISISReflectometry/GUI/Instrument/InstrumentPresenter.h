@@ -11,7 +11,6 @@
 #include "../../Reduction/Instrument.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
-#include "IReflBatchPresenter.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -28,17 +27,23 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
 public:
   // TODO Inject the Instrument model into the constructor.
   InstrumentPresenter(IInstrumentView *view, Instrument instrument);
-
   Instrument const &instrument() const;
 
-  void notifySettingsChanged() override;
+  // IInstrumentPresenver overrides
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void reductionPaused() override;
+  void reductionResumed() override;
+  void autoreductionPaused() override;
+  void autoreductionResumed() override;
+  void instrumentChanged(std::string const &instrumentName) override;
 
-  void onReductionPaused() override;
-  void onReductionResumed() override;
+  // InstrumentViewSubscriber overrides
+  void notifySettingsChanged() override;
 
 private:
   IInstrumentView *m_view;
   Instrument m_model;
+  IReflBatchPresenter *m_mainPresenter;
 
   boost::optional<RangeInLambda> wavelengthRangeFromView();
   boost::optional<RangeInLambda> monitorBackgroundRangeFromView();

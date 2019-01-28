@@ -21,7 +21,11 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using namespace testing;
+using testing::AtLeast;
+using testing::Mock;
+using testing::NiceMock;
+using testing::Return;
+using testing::_;
 
 //=====================================================================================
 // Functional tests
@@ -43,7 +47,32 @@ public:
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
 
-  void testMakePresenter() { auto presenter = makePresenter(); }
+  void testCreatePresenterSubscribesToView() {
+    EXPECT_CALL(m_view, subscribe(_)).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testCreatePresenterGetsRunsTableView() {
+    EXPECT_CALL(m_view, table()).Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testCreatePresenterSetsInstrumentList() {
+    auto const defaultInstrumentIndex = 0;
+    EXPECT_CALL(m_view,
+                setInstrumentList(m_instruments, defaultInstrumentIndex))
+        .Times(1);
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
+
+  void testCreatePresenterUpdatesView() {
+    expectUpdateViewWhenMonitorStopped();
+    auto presenter = makePresenter();
+    verifyAndClear();
+  }
 
   void testSettingsChanged() {
     // TODO
@@ -77,39 +106,77 @@ public:
     // TODO: add this test when python runner implemented
   }
 
-  void testStartNewAutoreduction() {
+  void testNotifyReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getSearchString()).Times(2);
-    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
-        .WillOnce(Return(true));
-    expectCheckForNewRuns();
-    presenter.notifyStartAutoreduction();
+    EXPECT_CALL(m_mainPresenter, notifyReductionResumed());
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
-  void testStartNewAutoreductionWarnsUserIfTableChanged() {
+  void testNotifyReductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyReductionPaused());
+    presenter.notifyReductionPaused();
+    verifyAndClear();
+  }
+
+  void testReductionResumed() {}
+
+  void testReductionPaused() {}
+
+  void testNotifyAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyAutoreductionResumed());
+    presenter.notifyAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testNotifyAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyAutoreductionPaused());
+    presenter.notifyAutoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testAutoreductionResumedWithNewSettings() {
+    auto settingsChanged = true;
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getSearchString()).Times(2);
+    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
+        .WillOnce(Return(settingsChanged));
+    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
+        .WillOnce(Return(true));
+    expectCheckForNewRuns();
+    expectWidgetsEnabledForAutoreducing();
+    presenter.autoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionResumedWithSameSettings() {
+    auto settingsChanged = false;
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getSearchString()).Times(2);
+    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
+        .WillOnce(Return(settingsChanged));
+    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
+        .WillOnce(Return(true));
+    expectCheckForNewRuns();
+    expectWidgetsEnabledForAutoreducing();
+    presenter.autoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionResumedWarnsUserIfTableChanged() {
     // TODO
-  }
-
-  void testStartRepeatAutoreduction() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getSearchString()).Times(2);
-    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
-        .WillOnce(Return(true));
-    expectCheckForNewRuns();
-    presenter.notifyStartAutoreduction();
-    verifyAndClear();
   }
 
   void testPauseAutoreduction() {
-    // TODO
-    // auto presenter = makePresenter();
-    // presenter.notifyPauseAutoreduction();
-    // verifyAndClear();
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, stopTimer()).Times(1);
+    EXPECT_CALL(*m_autoreduction, stop()).Times(1);
+    expectWidgetsEnabledForPaused();
+    presenter.autoreductionPaused();
+    verifyAndClear();
   }
 
   void testAutoreductionPollsForNewRunsOnTimerEvent() {
@@ -140,7 +207,9 @@ public:
   void testTransferWithAutoreductionRunning() {
     auto presenter = makePresenter();
     expectGetValidSearchRowSelection(presenter);
-    EXPECT_CALL(*m_autoreduction, running()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(1)
+        .WillOnce(Return(true));
     expectCreateEndlessProgressIndicator();
     presenter.notifyTransfer();
     verifyAndClear();
@@ -149,7 +218,9 @@ public:
   void testTransferWithAutoreductionStopped() {
     auto presenter = makePresenter();
     expectGetValidSearchRowSelection(presenter);
-    EXPECT_CALL(*m_autoreduction, running()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(1)
+        .WillOnce(Return(false));
     expectCreatePercentageProgressIndicator();
     presenter.notifyTransfer();
     verifyAndClear();
@@ -161,7 +232,7 @@ public:
     EXPECT_CALL(m_view, getSearchInstrument())
         .Times(1)
         .WillOnce(Return(instrument));
-    EXPECT_CALL(m_mainPresenter, setInstrumentName(instrument)).Times(1);
+    EXPECT_CALL(m_mainPresenter, notifyInstrumentChanged(instrument)).Times(1);
     presenter.notifyInstrumentChanged();
     verifyAndClear();
   }
@@ -211,16 +282,7 @@ private:
   };
 
   RunsPresenterFriend makePresenter() {
-    auto defaultInstrumentIndex = 0;
-    EXPECT_CALL(m_view, subscribe(_)).Times(1);
-    EXPECT_CALL(m_runsTableView, subscribe(_)).Times(1);
-    EXPECT_CALL(m_view, table()).Times(1).WillOnce(Return(&m_runsTableView));
-    EXPECT_CALL(m_runsTableView, jobs()).Times(1).WillOnce(ReturnRef(m_jobs));
-    EXPECT_CALL(m_view,
-                setInstrumentList(m_instruments, defaultInstrumentIndex))
-        .Times(1);
-    expectUpdateViewWhenMonitorStopped();
-
+    auto const defaultInstrumentIndex = 0;
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView,
         MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance),
@@ -228,7 +290,6 @@ private:
         &m_messageHandler, m_autoreduction, m_searcher);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
-    verifyAndClear();
     return presenter;
   }
 
@@ -297,13 +358,77 @@ private:
     EXPECT_CALL(m_progressView, setProgressRange(_, _)).Times(2);
   }
 
+  void expectWidgetsEnabledForAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, updateMenuEnabledState(false));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
+    EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(true));
+    EXPECT_CALL(m_view, setTransferButtonEnabled(false));
+  }
+
+  void expectWidgetsEnabledForProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, updateMenuEnabledState(true));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
+    EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+    EXPECT_CALL(m_view, setTransferButtonEnabled(false));
+  }
+
+  void expectWidgetsEnabledForProcessingAndAutoreducing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, updateMenuEnabledState(true));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
+    EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(true));
+    EXPECT_CALL(m_view, setTransferButtonEnabled(false));
+  }
+
+  void expectWidgetsEnabledForPaused() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, updateMenuEnabledState(false));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
+    EXPECT_CALL(m_view, setSearchTextEntryEnabled(true));
+    EXPECT_CALL(m_view, setSearchButtonEnabled(true));
+    EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
+    EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+    EXPECT_CALL(m_view, setTransferButtonEnabled(true));
+  }
+
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
-  MockRunsView m_view;
-  MockRunsTableView m_runsTableView;
-  MockReflBatchPresenter m_mainPresenter;
-  MockProgressableView m_progressView;
-  MockMessageHandler m_messageHandler;
+  NiceMock<MockRunsView> m_view;
+  NiceMock<MockRunsTableView> m_runsTableView;
+  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockProgressableView> m_progressView;
+  NiceMock<MockMessageHandler> m_messageHandler;
   boost::shared_ptr<MockReflAutoreduction> m_autoreduction;
   boost::shared_ptr<MockReflSearcher> m_searcher;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;

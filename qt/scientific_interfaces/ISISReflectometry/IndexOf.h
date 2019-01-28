@@ -21,6 +21,15 @@ boost::optional<int> indexOf(Container const &container, Predicate pred) {
   else
     return boost::none;
 }
+
+template <typename Container, typename ValueType>
+boost::optional<int> indexOfValue(Container const &container, ValueType value) {
+  auto maybeItemIt = std::find(container.cbegin(), container.cend(), value);
+  if (maybeItemIt != container.cend())
+    return static_cast<int>(std::distance(container.cbegin(), maybeItemIt));
+  else
+    return boost::none;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INDEXOF_H

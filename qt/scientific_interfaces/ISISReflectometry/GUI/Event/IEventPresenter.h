@@ -22,8 +22,11 @@ to be implemented by a concrete 'Event' presenter
 class IEventPresenter {
 public:
   virtual ~IEventPresenter() = default;
-  virtual void onReductionPaused() = 0;
-  virtual void onReductionResumed() = 0;
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
+  virtual void reductionPaused() = 0;
+  virtual void reductionResumed() = 0;
+  virtual void autoreductionPaused() = 0;
+  virtual void autoreductionResumed() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

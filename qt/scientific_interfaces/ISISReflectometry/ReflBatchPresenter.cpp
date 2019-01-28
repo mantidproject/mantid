@@ -11,12 +11,18 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IReflBatchView.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+// unnamed namespace
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+}
 
 /** Constructor
  * @param view :: [input] The view we are managing
@@ -35,43 +41,112 @@ ReflBatchPresenter::ReflBatchPresenter(
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
     std::unique_ptr<ISavePresenter> savePresenter)
-    : m_view(view), m_runsPresenter(std::move(runsPresenter)),
+    : /*m_view(view),*/ m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)) {
+      m_savePresenter(std::move(savePresenter)), m_isProcessing(false),
+      m_isAutoreducing(false) {
+  UNUSED_ARG(view);
 
   // Tell the tab presenters that this is going to be the main presenter
+  m_savePresenter->acceptMainPresenter(this);
+  m_eventPresenter->acceptMainPresenter(this);
+  m_experimentPresenter->acceptMainPresenter(this);
+  m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
-
-  // Trigger the setting of the current instrument name in settings tab
-  m_runsPresenter->notifyInstrumentChanged();
 }
 
 bool ReflBatchPresenter::requestClose() const { return true; }
 
-void ReflBatchPresenter::completedGroupReductionSuccessfully(
+void ReflBatchPresenter::notifyInstrumentChanged(
+    const std::string &instrumentName) {
+  instrumentChanged(instrumentName);
+}
+
+void ReflBatchPresenter::notifySettingsChanged() { settingsChanged(); }
+
+void ReflBatchPresenter::notifyReductionResumed() { reductionResumed(); }
+
+void ReflBatchPresenter::notifyReductionPaused() { reductionPaused(); }
+
+void ReflBatchPresenter::notifyReductionCompletedForGroup(
     GroupData const &group, std::string const &workspaceName) {
-  m_savePresenter->completedGroupReductionSuccessfully(group, workspaceName);
+  reductionCompletedForGroup(group, workspaceName);
 }
 
-void ReflBatchPresenter::completedRowReductionSuccessfully(
+void ReflBatchPresenter::notifyReductionCompletedForRow(
     GroupData const &group, std::string const &workspaceName) {
-  m_savePresenter->completedRowReductionSuccessfully(group, workspaceName);
+  reductionCompletedForRow(group, workspaceName);
 }
 
-void ReflBatchPresenter::notifyReductionPaused() {
-  m_savePresenter->onAnyReductionPaused();
-  m_eventPresenter->onReductionPaused();
-  m_experimentPresenter->onReductionPaused();
-  m_instrumentPresenter->onReductionPaused();
+void ReflBatchPresenter::notifyAutoreductionResumed() {
+  autoreductionResumed();
 }
 
-void ReflBatchPresenter::notifyReductionResumed() {
-  m_savePresenter->onAnyReductionResumed();
-  m_eventPresenter->onReductionResumed();
-  m_experimentPresenter->onReductionResumed();
-  m_instrumentPresenter->onReductionResumed();
+void ReflBatchPresenter::notifyAutoreductionPaused() { autoreductionPaused(); }
+
+void ReflBatchPresenter::notifyAutoreductionCompleted() {
+  autoreductionCompleted();
+}
+
+void ReflBatchPresenter::reductionResumed() {
+  m_isProcessing = true;
+  m_savePresenter->reductionResumed();
+  m_eventPresenter->reductionResumed();
+  m_experimentPresenter->reductionResumed();
+  m_instrumentPresenter->reductionResumed();
+  m_runsPresenter->reductionResumed();
+}
+
+void ReflBatchPresenter::reductionPaused() {
+  m_isProcessing = false;
+  m_savePresenter->reductionPaused();
+  m_eventPresenter->reductionPaused();
+  m_experimentPresenter->reductionPaused();
+  m_instrumentPresenter->reductionPaused();
+  m_runsPresenter->reductionPaused();
+
+  // Also stop autoreduction
+  autoreductionPaused();
+}
+
+void ReflBatchPresenter::reductionCompletedForGroup(
+    GroupData const &group, std::string const &workspaceName) {
+  m_savePresenter->reductionCompletedForGroup(group, workspaceName);
+}
+
+void ReflBatchPresenter::reductionCompletedForRow(
+    GroupData const &group, std::string const &workspaceName) {
+  m_savePresenter->reductionCompletedForRow(group, workspaceName);
+}
+
+void ReflBatchPresenter::autoreductionResumed() {
+  m_isAutoreducing = true;
+  m_savePresenter->autoreductionResumed();
+  m_eventPresenter->autoreductionResumed();
+  m_experimentPresenter->autoreductionResumed();
+  m_instrumentPresenter->autoreductionResumed();
+  m_runsPresenter->autoreductionResumed();
+}
+
+void ReflBatchPresenter::autoreductionPaused() {
+  m_isAutoreducing = false;
+  m_savePresenter->autoreductionPaused();
+  m_eventPresenter->autoreductionPaused();
+  m_experimentPresenter->autoreductionPaused();
+  m_instrumentPresenter->autoreductionPaused();
+  m_runsPresenter->autoreductionPaused();
+}
+
+void ReflBatchPresenter::autoreductionCompleted() {}
+
+void ReflBatchPresenter::instrumentChanged(const std::string &instrumentName) {
+  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
+                                                      instrumentName);
+  g_log.information() << "Instrument changed to " << instrumentName;
+  m_runsPresenter->instrumentChanged(instrumentName);
+  m_instrumentPresenter->instrumentChanged(instrumentName);
 }
 
 void ReflBatchPresenter::settingsChanged() {
@@ -97,20 +172,16 @@ bool ReflBatchPresenter::hasPerAngleOptions() const {
 }
 
 /**
-Tells the setting tab presenter what to set its current instrument name to
-* @param instName : The name of the instrument to be set
-*/
-void ReflBatchPresenter::setInstrumentName(
-    const std::string & /*instName*/) const {
-  return; // TODO m_settingsPresenter->setInstrumentName(instName);
-}
-
-/**
-Checks whether or not data is currently being processed in the Runs Tab
+Checks whether or not data is currently being processed in this batch
 * @return : Bool on whether data is being processed
 */
-bool ReflBatchPresenter::isProcessing() const {
-  return m_runsPresenter->isProcessing();
-}
+bool ReflBatchPresenter::isProcessing() const { return m_isProcessing; }
+
+/**
+Checks whether or not autoprocessing is currently running in this batch
+* i.e. whether we are polling for new runs
+* @return : Bool on whether data is being processed
+*/
+bool ReflBatchPresenter::isAutoreducing() const { return m_isAutoreducing; }
 } // namespace CustomInterfaces
 } // namespace MantidQt

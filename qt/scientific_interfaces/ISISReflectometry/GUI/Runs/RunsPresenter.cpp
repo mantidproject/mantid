@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
+#include "../../IReflBatchPresenter.h"
+#include "../RunsTable/RunsTablePresenter.h"
 #include "IReflMainWindowPresenter.h"
 #include "IReflMessageHandler.h"
 #include "IRunsView.h"
@@ -12,7 +14,6 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/CatalogInfo.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UserCatalogInfo.h"
@@ -46,11 +47,6 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// unnamed namespace
-namespace {
-Mantid::Kernel::Logger g_log("Reflectometry GUI");
-}
-
 /** Constructor
  * @param mainView :: [input] The view we're managing
  * @param progressableView :: [input] The view reporting progress
@@ -76,14 +72,14 @@ RunsPresenter::RunsPresenter(
       m_progressView(progressableView),
       m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_searcher(searcher), m_instrumentChanged(false),
-      m_thetaTolerance(thetaTolerance) {
+      m_searcher(searcher), m_instruments(instruments),
+      m_defaultInstrumentIndex(defaultInstrumentIndex),
+      m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
   m_tablePresenter = m_makeRunsTablePresenter(m_view->table());
-
-  m_view->setInstrumentList(instruments, defaultInstrumentIndex);
+  m_tablePresenter->acceptMainPresenter(this);
 
   if (!m_autoreduction)
     m_autoreduction.reset(new ReflAutoreduction());
@@ -105,6 +101,9 @@ RunsPresenter::~RunsPresenter() {
  */
 void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
+  // Must do this after setting main presenter or notifications don't get
+  // through
+  m_view->setInstrumentList(m_instruments, m_defaultInstrumentIndex);
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
   // presenter with the list of commands
@@ -114,10 +113,6 @@ void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   // Note this must be done here since notifying the gdpp of its view
   // will cause it to request settings only accessible via the main
   // presenter.
-}
-
-void RunsPresenter::settingsChanged() {
-  // tablePresenter()->settingsChanged();
 }
 
 /**
@@ -131,10 +126,6 @@ void RunsPresenter::notifySearch() {
     stopAutoreduction();
 }
 
-void RunsPresenter::notifyStartAutoreduction() { startNewAutoreduction(); }
-
-void RunsPresenter::notifyPauseAutoreduction() { pauseAutoreduction(); }
-
 void RunsPresenter::notifyTimerEvent() { checkForNewRuns(); }
 
 void RunsPresenter::notifyICATSearchComplete() { icatSearchComplete(); }
@@ -143,13 +134,87 @@ void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
 }
 
-void RunsPresenter::notifyInstrumentChanged() { changeInstrument(); }
+void RunsPresenter::notifyInstrumentChanged() {
+  auto const instrumentName = m_view->getSearchInstrument();
+  if (m_mainPresenter)
+    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+}
+
+void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
+  m_mainPresenter->notifyInstrumentChanged(instrumentName);
+}
+
+void RunsPresenter::notifyReductionResumed() {
+  m_mainPresenter->notifyReductionResumed();
+}
+
+void RunsPresenter::notifyReductionPaused() {
+  m_mainPresenter->notifyReductionPaused();
+}
+
+void RunsPresenter::notifyAutoreductionResumed() {
+  m_mainPresenter->notifyAutoreductionResumed();
+}
+
+void RunsPresenter::notifyAutoreductionPaused() {
+  m_mainPresenter->notifyAutoreductionPaused();
+}
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
 
 void RunsPresenter::notifyStopMonitor() { stopMonitor(); }
 
 void RunsPresenter::notifyStartMonitorComplete() { startMonitorComplete(); }
+
+void RunsPresenter::reductionResumed() {
+  updateWidgetEnabledState();
+  tablePresenter()->reductionResumed();
+}
+
+void RunsPresenter::reductionPaused() {
+  updateWidgetEnabledState();
+  tablePresenter()->reductionPaused();
+}
+
+/** Searches ICAT for runs with given instrument and investigation id, transfers
+ * runs to table and processes them. Clears any existing table data first.
+ */
+void RunsPresenter::autoreductionResumed() {
+  if (requireNewAutoreduction()) {
+    // If starting a brand new autoreduction, delete all rows / groups in
+    // existing table first
+    // We'll prompt the user to check it's ok to delete existing rows
+
+    // tablePresenter()->setPromptUser(false);
+    // try {
+    //  tablePresenter()->notify(DataProcessorPresenter::DeleteAllFlag);
+    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
+    //{
+    //  return;
+    //}
+  }
+
+  if (m_autoreduction->setupNewAutoreduction(m_view->getSearchString()))
+    checkForNewRuns();
+
+  updateWidgetEnabledState();
+  tablePresenter()->autoreductionResumed();
+}
+
+void RunsPresenter::autoreductionPaused() {
+  m_view->stopTimer();
+  m_autoreduction->stop();
+  updateWidgetEnabledState();
+  tablePresenter()->autoreductionPaused();
+}
+
+void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
+  m_instrumentChanged = true;
+  m_view->setSearchInstrument(instrumentName);
+  tablePresenter()->instrumentChanged(instrumentName);
+}
+
+void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
@@ -224,28 +289,6 @@ void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   }
 }
 
-/** Searches ICAT for runs with given instrument and investigation id, transfers
- * runs to table and processes them. Clears any existing table data first.
- */
-void RunsPresenter::startNewAutoreduction() {
-  if (requireNewAutoreduction()) {
-    // If starting a brand new autoreduction, delete all rows / groups in
-    // existing table first
-    // We'll prompt the user to check it's ok to delete existing rows
-
-    // tablePresenter()->setPromptUser(false);
-    // try {
-    //  tablePresenter()->notify(DataProcessorPresenter::DeleteAllFlag);
-    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
-    //{
-    //  return;
-    //}
-  }
-
-  if (setupNewAutoreduction(m_view->getSearchString()))
-    checkForNewRuns();
-}
-
 /** Determines whether to start a new autoreduction. Starts a new one if the
  * either the search number, transfer method or instrument has changed
  * @return : Boolean on whether to start a new autoreduction
@@ -255,10 +298,6 @@ bool RunsPresenter::requireNewAutoreduction() const {
       m_autoreduction->searchStringChanged(m_view->getSearchString());
 
   return searchNumChanged || m_instrumentChanged;
-}
-
-bool RunsPresenter::setupNewAutoreduction(const std::string &searchString) {
-  return m_autoreduction->setupNewAutoreduction(searchString);
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
@@ -282,18 +321,9 @@ void RunsPresenter::autoreduceNewRuns() {
 
   if (rowsToTransfer.size() > 0) {
     transfer(rowsToTransfer, TransferMatch::Strict);
-    // TODO: enable autoprocessing
-    //    tablePresenter()->setPromptUser(false);
-    //    tablePresenter()->notify(DataProcessorPresenter::ProcessAllFlag);
   } else {
-    // confirmReductionCompleted();
+    m_mainPresenter->notifyAutoreductionCompleted();
   }
-}
-
-void RunsPresenter::pauseAutoreduction() {
-  // TODO: enable autoprocessing
-  //  if (isAutoreducing())
-  //    tablePresenter()->notify(DataProcessorPresenter::PauseFlag);
 }
 
 void RunsPresenter::stopAutoreduction() {
@@ -301,13 +331,12 @@ void RunsPresenter::stopAutoreduction() {
   m_autoreduction->stop();
 }
 
-bool RunsPresenter::isAutoreducing() const {
-  return m_autoreduction->running();
+bool RunsPresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
 }
 
-bool RunsPresenter::isProcessing() const {
-  // TODO define this properly when we enable processing
-  return false;
+bool RunsPresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
 }
 
 void RunsPresenter::icatSearchComplete() {
@@ -321,7 +350,7 @@ void RunsPresenter::icatSearchComplete() {
   }
 }
 
-RunsTablePresenter *RunsPresenter::tablePresenter() const {
+IRunsTablePresenter *RunsPresenter::tablePresenter() const {
   return m_tablePresenter.get();
 }
 
@@ -424,34 +453,16 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
  */
 void RunsPresenter::updateWidgetEnabledState() const {
   // Update the menus
-  // TODO: reinstate isProcessing when implemented
-  m_view->updateMenuEnabledState(false /*isProcessing()*/);
+  m_view->updateMenuEnabledState(isProcessing());
 
   // Update components
-  m_view->setTransferButtonEnabled(/*!isProcessing() &&*/ !isAutoreducing());
-  m_view->setInstrumentComboEnabled(/*!isProcessing() &&*/ !isAutoreducing());
-  m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
+  m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing());
   m_view->setSearchButtonEnabled(!isAutoreducing());
-  m_view->setAutoreduceButtonEnabled(!isAutoreducing() /*&& !isProcessing()*/);
+  m_view->setAutoreduceButtonEnabled(!isAutoreducing() && !isProcessing());
+  m_view->setAutoreducePauseButtonEnabled(isAutoreducing());
+  m_view->setTransferButtonEnabled(!isProcessing() && !isAutoreducing());
 }
-
-/** Changes the current instrument in the data processor widget. Also clears
- * the
- * and the table selection model and updates the config service, printing an
- * information message
- */
-void RunsPresenter::changeInstrument() {
-  auto const instrument = m_view->getSearchInstrument();
-  if (m_mainPresenter)
-    m_mainPresenter->setInstrumentName(instrument);
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                      instrument);
-  g_log.information() << "Instrument changed to " << instrument;
-  m_instrumentChanged = true;
-}
-
-void RunsPresenter::changeGroup() { updateWidgetEnabledState(); }
 
 void RunsPresenter::handleError(const std::string &message,
                                 const std::exception &e) {

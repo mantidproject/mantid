@@ -39,8 +39,8 @@ subclass.
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsViewSubscriber {
 public:
   virtual void notifySearch() = 0;
-  virtual void notifyStartAutoreduction() = 0;
-  virtual void notifyPauseAutoreduction() = 0;
+  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyTimerEvent() = 0;
   virtual void notifyICATSearchComplete() = 0;
   virtual void notifyTransfer() = 0;
@@ -84,6 +84,7 @@ public:
   virtual std::set<int> getSelectedSearchRows() const = 0;
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
+  virtual void setSearchInstrument(std::string const &instrumentName) = 0;
   virtual std::string getSearchString() const = 0;
 
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>

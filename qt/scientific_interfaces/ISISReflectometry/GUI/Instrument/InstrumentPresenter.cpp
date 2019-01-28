@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentPresenter.h"
+#include "IReflBatchPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,16 +24,33 @@ InstrumentPresenter::InstrumentPresenter(IInstrumentView *view,
                                          Instrument instrument)
     : m_view(view), m_model(std::move(instrument)) {
   m_view->subscribe(this);
+}
+
+void InstrumentPresenter::acceptMainPresenter(
+    IReflBatchPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
   notifySettingsChanged();
 }
 
-void InstrumentPresenter::notifySettingsChanged() { updateModelFromView(); }
+void InstrumentPresenter::notifySettingsChanged() {
+  updateModelFromView();
+  m_mainPresenter->notifySettingsChanged();
+}
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
 
-void InstrumentPresenter::onReductionPaused() { m_view->enableAll(); }
+void InstrumentPresenter::reductionPaused() { m_view->enableAll(); }
 
-void InstrumentPresenter::onReductionResumed() { m_view->disableAll(); }
+void InstrumentPresenter::reductionResumed() { m_view->disableAll(); }
+
+void InstrumentPresenter::autoreductionPaused() { reductionPaused(); }
+
+void InstrumentPresenter::autoreductionResumed() { reductionResumed(); }
+
+void InstrumentPresenter::instrumentChanged(std::string const &instrumentName) {
+  UNUSED_ARG(instrumentName);
+  // TODO: set defaults for the given instrument
+}
 
 boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
   auto range = RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());

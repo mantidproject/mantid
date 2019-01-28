@@ -11,7 +11,6 @@
 #include "../../Reduction/Slicing.h"
 #include "IEventPresenter.h"
 #include "IEventView.h"
-#include "IReflBatchPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -27,8 +26,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL EventPresenter
 public:
   EventPresenter(IEventView *view);
 
-  void onReductionPaused() override;
-  void onReductionResumed() override;
+  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void reductionPaused() override;
+  void reductionResumed() override;
+  void autoreductionPaused() override;
+  void autoreductionResumed() override;
 
   void notifySliceTypeChanged(SliceType newSliceType) override;
   void notifyUniformSliceCountChanged(int sliceCount) override;
@@ -42,6 +44,7 @@ public:
   Slicing const &slicing() const;
 
 private:
+  IReflBatchPresenter *m_mainPresenter;
   Slicing m_slicing;
   void setUniformSlicingByNumberOfSlicesFromView();
   void setUniformSlicingByTimeFromView();

@@ -6,11 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_ISAVEPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_ISAVEPRESENTER_H
-#include "../../IReflBatchPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class IReflBatchPresenter;
 
 /** @class ISavePresenter
 
@@ -21,17 +22,21 @@ class ISavePresenter {
 public:
   virtual ~ISavePresenter() = default;
 
-  virtual void completedGroupReductionSuccessfully(
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
+
+  virtual void reductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
 
-  virtual void completedRowReductionSuccessfully(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) = 0;
+  virtual void
+  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
+                           std::string const &workspaceName) = 0;
 
   /// Tell the presenter something happened
-  virtual void onAnyReductionPaused() = 0;
-  virtual void onAnyReductionResumed() = 0;
+  virtual void reductionPaused() = 0;
+  virtual void reductionResumed() = 0;
+  virtual void autoreductionPaused() = 0;
+  virtual void autoreductionResumed() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

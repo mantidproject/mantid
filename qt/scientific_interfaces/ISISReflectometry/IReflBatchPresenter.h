@@ -28,26 +28,27 @@ public:
 
   virtual void notifyReductionPaused() = 0;
   virtual void notifyReductionResumed() = 0;
-
-  virtual void completedRowReductionSuccessfully(
+  virtual void notifyReductionCompletedForGroup(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
-
-  virtual void completedGroupReductionSuccessfully(
+  virtual void notifyReductionCompletedForRow(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceName) = 0;
+  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyAutoreductionCompleted() = 0;
+  virtual void notifyInstrumentChanged(const std::string &instName) = 0;
+  virtual void notifySettingsChanged() = 0;
 
   /// Transmission runs for a specific run angle
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getOptionsForAngle(const double angle) const = 0;
   /// Whether there are per-angle transmission runs specified
   virtual bool hasPerAngleOptions() const = 0;
-  /// Set the instrument name
-  virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
+  virtual bool isAutoreducing() const = 0;
   virtual bool requestClose() const = 0;
-  virtual void settingsChanged() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
