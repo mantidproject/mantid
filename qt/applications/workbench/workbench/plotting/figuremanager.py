@@ -259,6 +259,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         del self._ads_observer
         for id in self._cids:
             self.canvas.mpl_disconnect(id)
+        self.window.close()
+
+        try:
+            Gcf.destroy(self.num)
+        except AttributeError:
+            pass
+            # It seems that when the python session is killed,
+            # Gcf can get destroyed before the Gcf.destroy
+            # line is run, leading to a useless AttributeError.
 
     def grid_toggle(self):
         """
