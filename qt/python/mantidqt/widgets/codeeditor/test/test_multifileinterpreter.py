@@ -46,6 +46,12 @@ class MultiPythonFileInterpreterTest(GuiTest):
         widget.restore_session_tabs()
         self.assertEqual(1, widget.editor_count)  # default empty tab should be open
 
+    def test_tab_session_restore_path_doesnt_exist(self):
+        widget = MultiPythonFileInterpreter()
+        widget.prev_session_tabs = ['FileDoesntExist']
+        widget.restore_session_tabs()
+        self.assertEqual(1, widget.editor_count)  # default empty tab should be open
+
 
 if __name__ == '__main__':
     unittest.main()
