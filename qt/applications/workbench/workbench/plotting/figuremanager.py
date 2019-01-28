@@ -13,28 +13,29 @@ from functools import wraps
 
 # 3rdparty imports
 import matplotlib
-from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
-from qtpy.QtCore import Qt, QObject
+from matplotlib.backend_bases import FigureManagerBase
+from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
+from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
 from six import text_type
 
 # local imports
 from mantid.api import AnalysisDataServiceObserver
 from mantid.plots import MantidAxes
-from workbench.plotting.figurewindow import FigureWindow
-from mantidqt.plotting.figuretype import figure_type, FigureType
-from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.toolbar import WorkbenchNavigationToolbar
-from workbench.plotting.qappthreadcall import QAppThreadCall
+from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+from workbench.plotting.figurewindow import FigureWindow
+from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
+from workbench.plotting.qappthreadcall import QAppThreadCall
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 
 
 def _catch_exceptions(func):
     """
     Catch all exceptions in method and print a traceback to stderr
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -132,8 +133,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.show = QAppThreadCall(self._show_orig)
         self._window_activated_orig = self._window_activated
         self._window_activated = QAppThreadCall(self._window_activated_orig)
-        self._widgetclosed_orig = self._widgetclosed
-        self._widgetclosed = QAppThreadCall(self._widgetclosed_orig)
         self.set_window_title_orig = self.set_window_title
         self.set_window_title = QAppThreadCall(self.set_window_title_orig)
         self.fig_visibility_changed_orig = self.fig_visibility_changed
@@ -142,7 +141,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window = FigureWindow(canvas)
         self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
-        self.window.closing.connect(self._widgetclosed)
+        self.window.closing.connect(self.destroy)
         self.window.visibility_changed.connect(self.fig_visibility_changed)
 
         self.window.setWindowTitle("Figure %d" % num)
@@ -170,6 +169,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
             tbs_height = 0
@@ -196,6 +196,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # This will be called whenever the current axes is changed
             if self.toolbar is not None:
                 self.toolbar.update()
+
         canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
@@ -213,27 +214,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def _window_activated(self):
         Gcf.set_active(self)
-
-    def _widgetclosed(self):
-        # this method is called both if the user closes the window through the X
-        # and if they select the plot in plot manager and click delete
-        if self.toolbar:
-            self.toolbar.destroy()
-
-        if self.window._destroying:
-            return
-        self.window._destroying = True
-        self._ads_observer.observeAll(False)
-        del self._ads_observer
-        for id in self._cids:
-            self.canvas.mpl_disconnect(id)
-        try:
-            Gcf.destroy(self.num)
-        except AttributeError:
-            pass
-            # It seems that when the python session is killed,
-            # Gcf can get destroyed before the Gcf.destroy
-            # line is run, leading to a useless AttributeError.
 
     def _get_toolbar(self, canvas, parent):
         return WorkbenchNavigationToolbar(canvas, parent, False)
@@ -268,11 +248,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # check for qApp first, as PySide deletes it in its atexit handler
         if QApplication.instance() is None:
             return
+
         if self.window._destroying:
             return
         self.window._destroying = True
-        self.window.destroyed.connect(self._widgetclosed)
-        self.window.close()
+
+        if self.toolbar:
+            self.toolbar.destroy()
+        self._ads_observer.observeAll(False)
+        del self._ads_observer
+        for id in self._cids:
+            self.canvas.mpl_disconnect(id)
 
     def grid_toggle(self):
         """
@@ -381,12 +367,13 @@ def new_figure_manager_given_figure(num, figure):
 if __name__ == '__main__':
     # testing code
     import numpy as np
+
     qapp = QApplication([' '])
     qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
     if hasattr(Qt, 'AA_EnableHighDpiScaling'):
         qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
-    x = np.linspace(0, 10*np.pi, 1000)
+    x = np.linspace(0, 10 * np.pi, 1000)
     cx, sx = np.cos(x), np.sin(x)
     fig_mgr_1 = new_figure_manager(1)
     fig1 = fig_mgr_1.canvas.figure
