@@ -636,7 +636,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
 
   // get the sample name - nested try/catch to leave the handle in an
   // appropriate state
-  try {
+  if (exists(file, "sample")) {
     file.openGroup("sample", "NXsample");
     try {
       if (exists(file, "name")) {
@@ -666,8 +666,6 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
       // let it drop on floor if an exception occurs while reading sample
     }
     file.closeGroup();
-  } catch (::NeXus::Exception &) {
-    // If an exception occurs while opening the group "sample"
   }
 
   // get the duration
