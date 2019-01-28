@@ -978,7 +978,13 @@ def save_to_file(reduction_packages, save_can):
     save_info = state.save
     file_formats = save_info.file_format
     for name_to_save in workspaces_names_to_save:
-        save_workspace_to_file(name_to_save, file_formats, name_to_save)
+        if isinstance(name_to_save, tuple):
+            transmission = name_to_save[1]
+            transmission_can = name_to_save[2]
+            name_to_save = name_to_save[0]
+            save_workspace_to_file(name_to_save, file_formats, name_to_save, transmission, transmission_can)
+        else:
+            save_workspace_to_file(name_to_save, file_formats, name_to_save)
 
 
 def delete_reduced_workspaces(reduction_packages):
@@ -1084,13 +1090,18 @@ def get_all_names_to_save(reduction_packages, save_can):
         reduced_lab_sample = reduction_package.reduced_lab_sample
         reduced_hab_sample = reduction_package.reduced_hab_sample
 
+        transmission = reduction_package.unfitted_transmission
+        transmission_can = reduction_package.unfitted_transmission_can
+        trans_name = '' if not transmission else transmission.name()
+        transCan_name = '' if not transmission_can else transmission_can.name()
+
         if save_can:
             if reduced_merged:
-                names_to_save.append(reduced_merged.name())
+                names_to_save.append((reduced_merged.name(), trans_name, transCan_name))
             if reduced_lab:
-                names_to_save.append(reduced_lab.name())
+                names_to_save.append((reduced_lab.name(), trans_name, transCan_name))
             if reduced_hab:
-                names_to_save.append(reduced_hab.name())
+                names_to_save.append((reduced_hab.name(), trans_name, transCan_name))
             if reduced_lab_can:
                 names_to_save.append(reduced_lab_can.name())
             if reduced_hab_can:
@@ -1102,23 +1113,27 @@ def get_all_names_to_save(reduction_packages, save_can):
 
         # If we have merged reduction then store the
         elif reduced_merged:
-            names_to_save.append(reduced_merged.name())
+            names_to_save.append((reduced_merged.name(), trans_name, transCan_name))
         else:
             if reduced_lab:
-                names_to_save.append(reduced_lab.name())
+                names_to_save.append((reduced_lab.name(), trans_name, transCan_name))
             if reduced_hab:
-                names_to_save.append(reduced_hab.name())
+                names_to_save.append((reduced_hab.name(), trans_name, transCan_name))
 
     # We might have some workspaces as duplicates (the group workspaces), so make them unique
     return set(names_to_save)
 
 
-def save_workspace_to_file(workspace_name, file_formats, file_name):
+def save_workspace_to_file(workspace_name, file_formats, file_name,
+                           transmission_name='', transmission_can_name=''):
     """
     Saves the workspace to the different file formats specified in the state object.
 
     :param workspace_name: the name of the output workspace and also the name of the file
     :param file_formats: a list of file formats to save
+    :param transmission_name: name of sample transmission workspace to save to file
+            for CanSAS algorithm. Only some workspaces have a corresponding transmission workspace.
+    :param transmission_can_name: name of can transmission workspace. As above.
     """
     save_name = "SANSSave"
     save_options = {"InputWorkspace": workspace_name}
@@ -1128,6 +1143,8 @@ def save_workspace_to_file(workspace_name, file_formats, file_name):
         save_options.update({"Nexus": True})
     if SaveType.CanSAS in file_formats:
         save_options.update({"CanSAS": True})
+        save_options.update({"Transmission": transmission_name})
+        save_options.update({"TransmissionCan": transmission_can_name})
     if SaveType.NXcanSAS in file_formats:
         save_options.update({"NXcanSAS": True})
     if SaveType.NistQxy in file_formats:
