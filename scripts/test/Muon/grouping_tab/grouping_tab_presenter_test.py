@@ -68,6 +68,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
     # TESTS
     # ------------------------------------------------------------------------------------------------------------------
     def test_context_menu_add_pair_adds_pair_if_two_groups_selected(self):
+        self.assertEqual(self.pairing_table_view.num_rows(), 2)
         self.grouping_table_view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
         self.grouping_table_view.contextMenuEvent(0)
         self.grouping_table_view.add_pair_action.triggered.emit(True)
@@ -153,11 +154,13 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.assertEqual(mock_save.call_args[0][-1], "grouping.xml")
 
     def test_update_all_calculates_groups_and_pairs(self):
-        self.presenter.thread_manager = mock.MagicMock()
+        self.presenter.update_thread = mock.MagicMock()
         self.view.update_button.clicked.emit(True)
 
-        self.presenter.thread_manager.process.assert_called_once_with(self.presenter.listener,
-                                                                      self.presenter.calculate_all_data, 0, [1])
+        self.presenter.update_thread.threadWrapperSetUp.assert_called_once_with(self.presenter.disable_editing,
+                                                                                self.presenter.enable_editing,
+                                                                                self.view.display_warning_box)
+        self.presenter.update_thread.start.assert_called_once_with()
 
     def test_removing_group_removes_linked_pairs(self):
         self.add_three_groups()

@@ -48,6 +48,8 @@ class GroupingTabPresenter(object):
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
 
+        self.update_thread = self.create_update_thread()
+
     def show(self):
         self._view.show()
 
@@ -129,8 +131,6 @@ class GroupingTabPresenter(object):
         self._model.show_all_groups_and_pairs()
 
     def handle_update_all_clicked(self):
-
-        self.update_thread = self.create_update_thread()
         self.update_thread.threadWrapperSetUp(self.disable_editing,
                                               self.enable_editing,
                                               self._view.display_warning_box)
