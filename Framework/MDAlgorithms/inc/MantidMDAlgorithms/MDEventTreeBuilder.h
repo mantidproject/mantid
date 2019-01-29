@@ -325,7 +325,7 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
         {boxEventStart, eventIt}, {boxLower, boxUpper}, newBox});
   }
   // sorting is needed due to fast finding the proper box for given coordinate,
-  // during drawing
+  // during drawing, for splitInto != 2 Z-curve gives wrong order
   std::sort(children.begin(), children.end(),
             [](RecursionHelper &a, RecursionHelper &b) {
               unsigned i = ND;
@@ -347,7 +347,7 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
 
   ++tsk.level;
   for (auto &ch : children) {
-    Task task{ch.box,
+    Task newTask{ch.box,
               ch.eventRange.first,
               ch.eventRange.second,
               ch.mortonBounds.first,
@@ -355,10 +355,10 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
               tsk.maxDepth,
               tsk.level};
     if (wtp == MASTER &&
-        (size_t)std::distance(task.begin, task.end) < m_eventsThreshold)
-      pushTask(std::move(task));
+        (size_t)std::distance(newTask.begin, newTask.end) < m_eventsThreshold)
+      pushTask(std::move(newTask));
     else
-      distributeEvents(task, wtp);
+      distributeEvents(newTask, wtp);
   }
 }
 

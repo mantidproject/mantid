@@ -15,37 +15,6 @@
 #include <iostream>
 
 namespace morton_index {
-
-template <size_t ND, typename IntT, typename MortonT> class MortonMask {
-public:
-  const static MortonT mask[];
-};
-
-/**
- * Performs a dimension-wise comparison on two Morton numbers by masking the
- * bits of each interleaved integer.
- *
- * @param a Left hand operand
- * @param b Right hand operand
- * @return True if comparison passes for all dimensions
- */
-template <size_t ND, typename IntT, typename MortonT>
-bool masked_morton_lte(const MortonT a, const MortonT b) {
-  using MMask = MortonMask<ND, IntT, MortonT>;
-
-  /* For each dimension */
-  for (size_t i = 0; i < ND; i++) {
-    /* Perform comparison on masked morton numbers */
-    if ((a | MMask::mask[i]) > (b | MMask::mask[i])) {
-      /* Return on the first failed comparison */
-      return false;
-    }
-  }
-
-  /* All comparisons passed */
-  return true;
-}
-
 /**
  * Checks if a point defined by a Morton number is within the box bounds (as
  * defined by an upper and lower Morton number).

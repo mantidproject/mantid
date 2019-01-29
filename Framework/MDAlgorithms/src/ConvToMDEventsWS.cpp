@@ -132,7 +132,6 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
 
   appendEventsFromInputWS(pProgress, bc);
 
-  // m_OutWSWrapper->refreshCentroid();
   pProgress->report();
 
   /// Set the special coordinate system flag on the output workspace.

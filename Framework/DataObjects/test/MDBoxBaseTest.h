@@ -57,7 +57,7 @@ public:
 
   // Not to be pure virtual
   void getBoxes(std::vector<API::IMDNode *> &,
-                std::function<bool(API::IMDNode *)>) override {}
+                const std::function<bool(API::IMDNode *)> &) override {}
 
   uint64_t getNPoints() const override {
     return 0;
