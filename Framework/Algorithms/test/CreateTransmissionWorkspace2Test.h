@@ -363,6 +363,32 @@ public:
     TS_ASSERT_DELTA(outLam->x(0)[3], 2.0924, 0.0001);
   }
 
+  void test_two_transmission_runs_stitch_ScaleRHSWorkspace() {
+
+    CreateTransmissionWorkspace2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
+    alg.setProperty("SecondTransmissionRun", m_multiDetectorWS);
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("Params", "0.1");
+    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setPropertyValue("ScaleRHSWorkspace", false);
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 126);
+    TS_ASSERT(outLam->x(0)[0] >= 1.5);
+    TS_ASSERT(outLam->x(0)[7] <= 15.0);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[1], 1.8924, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[2], 1.9924, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 2.0924, 0.0001);
+  }
+
   void test_one_run_store_in_ADS() {
     AnalysisDataService::Instance().clear();
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
