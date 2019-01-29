@@ -64,7 +64,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         """
         Called when the ADS is deleted all of its workspaces
         """
-        self.window.close()
+        self.window.emit_close()
 
     @_catch_exceptions
     def deleteHandle(self, _, workspace):
@@ -85,7 +85,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             if isinstance(ax, MantidAxes):
                 empty_axes = empty_axes & ax.remove_workspace_artists(workspace)
         if empty_axes:
-            self.window.close()
+            self.window.emit_close()
         else:
             self.canvas.draw_idle()
 
