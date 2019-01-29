@@ -16,11 +16,36 @@ from mock import Mock, call
 from qtpy import QtCore
 from qtpy.QtCore import Qt
 
+from mantidqt.widgets.common.test_mocks.mock_mantid import AXIS_INDEX_FOR_HORIZONTAL, AXIS_INDEX_FOR_VERTICAL, \
+    MockMantidAxis, MockMantidSymbol, MockMantidUnit, MockSpectrum, MockWorkspace
+from mantidqt.widgets.common.test_mocks.mock_qt import MockQModelIndex
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import \
-    MockQModelIndex, MockWorkspace, setup_common_for_test_data, AXIS_INDEX_FOR_VERTICAL, MockMantidAxis, MockSpectrum, \
-    MockMantidSymbol, AXIS_INDEX_FOR_HORIZONTAL, MockMantidUnit
+
+
+def setup_common_for_test_data():
+    """
+    Common configuration of variables and mocking for testing
+    MatrixWorkspaceDisplayTableViewModel's data and headerData functions
+    """
+    # Create some mock data for the mock workspace
+    row = 2
+    column = 2
+    # make a workspace with 0s
+    mock_data = [0] * 10
+    # set one of them to be not 0
+    mock_data[column] = 999
+    model_type = MatrixWorkspaceTableViewModelType.x
+    # pass onto the MockWorkspace so that it returns it when read from the TableViewModel
+    ws = MockWorkspace(read_return=mock_data)
+    ws.hasMaskedBins = Mock(return_value=True)
+    ws.maskedBinsIndices = Mock(return_value=[column])
+    model = MatrixWorkspaceTableViewModel(ws, model_type)
+    # The model retrieves the spectrumInfo object, and our MockWorkspace has already given it
+    # the MockSpectrumInfo, so all that needs to be done here is to set up the correct method Mocks
+    model.ws_spectrum_info.hasDetectors = Mock(return_value=True)
+    index = MockQModelIndex(row, column)
+    return ws, model, row, index
 
 
 class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):

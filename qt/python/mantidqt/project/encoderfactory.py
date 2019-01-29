@@ -10,14 +10,14 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 
 class EncoderFactory(object):
-    encoder_list = []
+    encoder_list = set([])
 
     @classmethod
     def find_encoder(cls, obj):
         """
         This assumes that obj is of a class that has an encode else it returns None
         :param obj: The object for encoding
-        :return: Encoder or None; Returns the Encoder of the obj
+        :return: Encoder or None; Returns the Encoder of the obj or None.
         """
         for encoder in cls.encoder_list:
             if encoder().has_tag(obj.__class__.__name__):
@@ -26,8 +26,8 @@ class EncoderFactory(object):
 
     @classmethod
     def register_encoder(cls, encoder):
-        for encoder_ in cls.encoder_list:
-            if encoder is encoder_:
-                # It's a duplicate
-                return
-        cls.encoder_list.append(encoder)
+        """
+        This adds the passed encoder's class to the available encoders in the Factory
+        :param encoder: Class of Encoder; The class of the encoder to be added to the list.
+        """
+        cls.encoder_list.add(encoder)

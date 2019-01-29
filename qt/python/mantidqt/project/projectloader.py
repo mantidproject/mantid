@@ -62,15 +62,24 @@ class ProjectLoader(object):
 
             # Load interfaces
             if self.project_reader.interface_list is not None:
-                for interface in self.project_reader.interface_list:
-                    # Find decoder
-                    decoder = self.decoder_factory.find_decoder(interface["tag"])
-
-                    # Decode and Show the interface
-                    decoded_interface = decoder.decode(interface, directory)
-                    decoded_interface.show()
+                self.load_interfaces(directory)
 
         return workspace_success
+
+    def load_interfaces(self, directory):
+        for interface in self.project_reader.interface_list:
+            # Find decoder
+            decoder = self.decoder_factory.find_decoder(interface["tag"])
+
+            # Decode and Show the interface
+            try:
+                decoded_interface = decoder.decode(interface, directory)
+                decoded_interface.show()
+            except Exception as e:
+                # Catch any exception and log it for the encoder
+                if isinstance(e, KeyboardInterrupt):
+                    raise KeyboardInterrupt(e)
+                logger.warning("Project Loader: An interface could not be loaded error: " + str(e))
 
 
 class ProjectReader(object):
@@ -92,5 +101,7 @@ class ProjectReader(object):
                 self.workspace_names = json_data["workspaces"]
                 self.plot_list = json_data["plots"]
                 self.interface_list = json_data["interfaces"]
-        except Exception:
+        except Exception as e:
+            if isinstance(e, KeyboardInterrupt):
+                raise KeyboardInterrupt(e)
             logger.warning("JSON project file unable to be loaded/read")

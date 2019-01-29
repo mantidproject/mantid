@@ -14,6 +14,11 @@ class DecoderFactory(object):
 
     @classmethod
     def find_decoder(cls, tag):
+        """
+        This assumes that tag is present in a decoder and if it cannot find a decoder with the tag it raises ValueError
+        :param tag: String; The tag used for saving and thus to be reused for loading that encoder back.
+        :return: Decoder object; The object of a decoder for the tag that was passed.
+        """
         for decoder in cls.decoder_list:
             if tag in decoder.tags:
                 return decoder()
@@ -21,8 +26,9 @@ class DecoderFactory(object):
 
     @classmethod
     def register_decoder(cls, decoder):
-        for decoder_ in cls.decoder_list:
-            if decoder is decoder_:
-                # It's a duplicate
-                return
-        cls.decoder_list.append(decoder)
+        """
+        Will register the decoder class with the factory
+        :param decoder: The Decoder class; to be registered with the Factory
+        """
+        if decoder not in cls.decoder_list:
+            cls.decoder_list.append(decoder)

@@ -5,8 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
 
 """
 The aim of this module is to provide a swap-in object for
@@ -25,6 +23,7 @@ only the ones that have been necessary so far. If another function
 needs to be mocked it can be freely added in the relevant class below
 and it should not break any existing tests.
 """
+from __future__ import (absolute_import, division, print_function)
 
 
 from mock import Mock

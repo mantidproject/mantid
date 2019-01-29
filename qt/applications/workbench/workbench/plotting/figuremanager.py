@@ -92,7 +92,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
     def replaceHandle(self, _, workspace):
         """
         Called when the ADS has replaced a workspace with one of the same name.
-        If this workspace is attached tho this figure then its data is updated
+        If this workspace is attached to this figure then its data is updated
         :param _: The name of the workspace. Unused
         :param workspace: A reference to the new workspace
         """

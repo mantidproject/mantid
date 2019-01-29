@@ -35,10 +35,10 @@ class InstrumentViewDecoder(InstrumentViewAttributes):
 
     def decode(self, obj_dic, project_path=None):
         """
-
-        :param obj_dic:
-        :param project_path:
-        :return:
+        Decode a InstrumentView Dictionary from project Save and return the object created
+        :param obj_dic: Dict; A dictionary containing the information for an InstrumentView
+        :param project_path: String; The location of the project save location
+        :return: InstrumentView's View; The View object with correct state is returned.
         """
         load_mask = True
 
@@ -51,14 +51,14 @@ class InstrumentViewDecoder(InstrumentViewAttributes):
 
         # Make the widget
         ws = ADS.retrieve(obj_dic["workspaceName"])
-        instrument_view_presenter = InstrumentViewPresenter(ws)
-        instrument_widget = instrument_view_presenter.view.cpp_widget
+        instrument_view = InstrumentViewPresenter(ws).view
+        instrument_widget = instrument_view.widget
 
         #  Then 'decode' set the values from the dictionary
         self.widget_decoder.decode(obj_dic, instrument_widget, project_path, load_mask)
 
         # Show the end result
-        return instrument_view_presenter.view
+        return instrument_view
 
     @classmethod
     def has_tag(cls, tag):
@@ -71,6 +71,12 @@ class InstrumentViewEncoder(InstrumentViewAttributes):
         self.widget_encoder = _InstrumentWidgetEncoder()
 
     def encode(self, obj, project_path=None):
+        """
+        Encode a InstrumentView object and return a dictionary containing it's state
+        :param obj: InstrumentView; The window object
+        :param project_path: String; The path to where the project is being saved
+        :return: Dict; Containing the details of the instrument view
+        """
         save_mask = True
 
         if obj is None:

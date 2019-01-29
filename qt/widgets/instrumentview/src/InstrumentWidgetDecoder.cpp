@@ -115,7 +115,7 @@ void InstrumentWidgetDecoder::decodeRenderTab(
   auto surface = obj->getSurface();
   surface->setShowPeakLabelsFlag(map[QString("showLabels")].toBool());
   surface->setShowPeakRowsFlag(map[QString("showRows")].toBool());
-  surface->setPeakLabelPrecision(map[QString("labelPrecision")].toBool());
+  surface->setPeakLabelPrecision(map[QString("labelPrecision")].toInt());
   surface->setShowPeakRelativeIntensityFlag(
       map[QString("showRelativeIntensity")].toBool());
 
@@ -133,7 +133,7 @@ void InstrumentWidgetDecoder::decodeColorBar(const QMap<QString, QVariant> &map,
   bar->setScaleType(scaleType);
   try {
     bar->setNthPower(power);
-  } catch (const std::runtime_error &e) {
+  } catch (const std::runtime_error &) {
     // Do nothing, because this is where the power was loaded in as 0.
   }
 
@@ -145,7 +145,7 @@ void InstrumentWidgetDecoder::decodeTreeTab(const QMap<QString, QVariant> &map,
                                             InstrumentWidgetTreeTab *obj) {
   auto names = map[QString("expandedItems")].toList();
   if (names.size() > 0) {
-    for (auto &name : names) {
+    for (const auto &name : names) {
       auto index = obj->m_instrumentTree->findComponentByName(name.toString());
       obj->m_instrumentTree->setExpanded(index, true);
     }
@@ -195,6 +195,14 @@ void InstrumentWidgetDecoder::decodeBinMasks(const QList<QVariant> &list,
 void InstrumentWidgetDecoder::decodeSurface(
     const QMap<QString, QVariant> &map,
     boost::shared_ptr<ProjectionSurface> obj) {
+
+  auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
+  // Decide Projection3D stuff
+  if (map[QString("projection3DSuccess")].toBool() && projection3D) {
+    this->decodeProjection3D(map[QString("projection3D")].toMap(),
+                             *projection3D);
+  }
+
   QMap<QString, QVariant> color = map[QString("backgroundColor")].toMap();
   QColor qColor(color[QString("red")].toInt(), color[QString("green")].toInt(),
                 color[QString("blue")].toInt(),
@@ -206,11 +214,35 @@ void InstrumentWidgetDecoder::decodeSurface(
   this->decodeAlignmentInfo(map[QString("alignmentInfo")].toList(), obj);
 }
 
+void InstrumentWidgetDecoder::decodeProjection3D(
+    const QMap<QString, QVariant> &map, Projection3D &obj) {
+  this->decodeViewPort(map[QString("viewport")].toMap(), obj.m_viewport);
+}
+
+void InstrumentWidgetDecoder::decodeViewPort(const QMap<QString, QVariant> &map,
+                                             Viewport &obj) {
+  auto translationMap = map[QString("translation")].toMap();
+  auto rotationList = map[QString("rotation")].toList();
+
+  obj.m_xTrans = translationMap[QString("xTrans")].toDouble();
+  obj.m_yTrans = translationMap[QString("yTrans")].toDouble();
+  obj.m_zoomFactor = map[QString("zoom")].toDouble();
+
+  // Sort out the rotation
+  double w, a, b, c;
+  w = rotationList[0].toDouble();
+  a = rotationList[1].toDouble();
+  b = rotationList[2].toDouble();
+  c = rotationList[3].toDouble();
+  Mantid::Kernel::Quat quat(w, a, b, c);
+  obj.setRotation(quat);
+}
+
 void InstrumentWidgetDecoder::decodeMaskShapes(const QList<QVariant> &list,
                                                Shape2DCollection &obj) {
   connect(this, SIGNAL(shapeCreated()), &obj, SIGNAL(shapeCreated()));
   for (const auto &shape : list) {
-    Shape2D *created_shape = this->decodeShape(shape.toMap());
+    auto created_shape = this->decodeShape(shape.toMap());
     obj.m_shapes.push_back(created_shape);
     emit shapeCreated();
   }
@@ -220,23 +252,26 @@ Shape2D *
 InstrumentWidgetDecoder::decodeShape(const QMap<QString, QVariant> &map) {
   const auto type = map[QString("type")].toString().toStdString();
 
-  Shape2D *shape = nullptr;
-  if (type == "ellipse") {
-    shape = this->decodeEllipse(map[QString("subShapeMap")].toMap());
-  } else if (type == "rectangle") {
-    shape = this->decodeRectangle(map[QString("subShapeMap")].toMap());
-  } else if (type == "ring") {
-    shape = this->decodeRing(map[QString("subShapeMap")].toMap());
-  } else if (type == "free") {
-    shape = this->decodeFree(map[QString("subShapeMap")].toMap());
-  } else {
-    throw std::runtime_error("InstrumentView - Could not decode shape");
-  }
+  auto shape = [&]() {
+    if (type == "ellipse") {
+      return this->decodeEllipse(map[QString("subShapeMap")].toMap());
+    } else if (type == "rectangle") {
+      return this->decodeRectangle(map[QString("subShapeMap")].toMap());
+    } else if (type == "ring") {
+      return this->decodeRing(map[QString("subShapeMap")].toMap());
+    } else if (type == "free") {
+      return this->decodeFree(map[QString("subShapeMap")].toMap());
+    } else {
+      throw std::runtime_error("InstrumentView - Could not decode shape");
+    }
+  }();
 
-  shape->setScalable(map[QString("scalable")].toBool());
-  shape->edit(map[QString("editing")].toBool());
-  shape->setSelected(map[QString("selected")].toBool());
-  shape->setVisible(map[QString("visible")].toBool());
+  // Set the properties of the overall shape object from the properties map.
+  auto properties = map[QString("properties")].toMap();
+  shape->setScalable(properties[QString("visible")].toBool());
+  shape->setVisible(properties[QString("scalable")].toBool());
+  shape->edit(properties[QString("editing")].toBool());
+  shape->setSelected(properties[QString("selected")].toBool());
 
   QMap<QString, QVariant> color1 = map[QString("color")].toMap();
   QColor qColor(

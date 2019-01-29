@@ -1265,7 +1265,6 @@ void InstrumentWidget::handleWorkspaceReplacement(
       bool resetGeometry =
           matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
       try {
-        // Will segfault if the
         if (matrixWS == m_instrumentActor->getWorkspace() && !resetGeometry) {
           m_instrumentActor->updateColors();
           setupColorMap();

@@ -42,7 +42,6 @@ class TableWorkspaceDisplayModel:
         self.ws = ws
         self.ws_num_rows = self.ws.rowCount()
         self.ws_num_cols = self.ws.columnCount()
-        self.ws_column_types = self.ws.columnTypes()
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
 
@@ -86,4 +85,13 @@ class TableWorkspaceDisplayModel:
         # from the string to that it can be properly set
         if is_v3d:
             data = self._get_v3d_from_str(data)
-        self.ws.setCell(row, col, data)
+        # The False stops the replace workspace ADS event from being triggered
+        # The replace event causes the TWD model to be replaced, which in turn
+        # deletes the previous table item objects, however this happens
+        # at the same time as we are trying to locally update the data in the
+        # item object itself, which causes a Qt exception that the object has
+        # already been deleted and a crash
+        self.ws.setCell(row, col, data, notify_replace=False)
+
+    def workspace_equals(self, workspace_name):
+        return self.ws.name() == workspace_name

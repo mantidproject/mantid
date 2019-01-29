@@ -16,9 +16,11 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 #include "MantidQtWidgets/InstrumentView/MaskBinsData.h"
+#include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/Shape2D.h"
 #include "MantidQtWidgets/InstrumentView/Shape2DCollection.h"
+#include "MantidQtWidgets/InstrumentView/Viewport.h"
 
 #include <QList>
 #include <QMap>
@@ -39,7 +41,7 @@ public:
 signals:
   void shapeCreated();
 
-protected:
+private:
   void decodeTabs(const QMap<QString, QVariant> &map, InstrumentWidget &obj);
 
   void decodeMaskTab(const QMap<QString, QVariant> &map,
@@ -60,6 +62,9 @@ protected:
   void decodeBinMasks(const QList<QVariant> &list, MaskBinsData &obj);
   void decodeSurface(const QMap<QString, QVariant> &map,
                      boost::shared_ptr<ProjectionSurface> obj);
+  void decodeProjection3D(const QMap<QString, QVariant> &map,
+                          Projection3D &obj);
+  void decodeViewPort(const QMap<QString, QVariant> &map, Viewport &obj);
   void decodeMaskShapes(const QList<QVariant> &list, Shape2DCollection &obj);
 
   Shape2D *decodeShape(const QMap<QString, QVariant> &map);

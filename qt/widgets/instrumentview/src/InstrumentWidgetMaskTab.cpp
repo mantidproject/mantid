@@ -44,6 +44,7 @@
 #endif
 #endif
 
+#include <Poco/Path.h>
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
@@ -1375,7 +1376,8 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
     } else {
       workingDir = QString::fromStdString(projectPath);
     }
-    auto fileName = workingDir.toStdString() + "/" + name;
+    Poco::Path filepath(workingDir.toStdString());
+    auto fileName = filepath.append(name).toString();
 
     // get masked detector workspace from actor
     const auto &actor = m_instrWidget->getInstrumentActor();
