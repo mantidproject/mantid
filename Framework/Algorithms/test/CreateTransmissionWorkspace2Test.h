@@ -375,7 +375,7 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setPropertyValue("ProcessingInstructions", "2");
     alg.setPropertyValue("OutputWorkspace", "outWS");
-    alg.setPropertyValue("ScaleRHSWorkspace", false);
+    alg.setProperty("ScaleRHSWorkspace", false);
     alg.execute();
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
 
