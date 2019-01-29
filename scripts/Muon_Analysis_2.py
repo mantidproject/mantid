@@ -69,7 +69,8 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
-        self.home_tab = HomeTabWidget(self.context)
+        self.home_tab = HomeTabWidget(self.context, self)
+
         self.setup_tabs()
         self.help_widget = HelpWidget()
 
@@ -94,13 +95,6 @@ class MuonAnalysisGui(QtGui.QMainWindow):
             self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
-
-
-    def closeEvent(self, event):
-        print("Muon Analysis Close Event")
-        self.load_widget.load_widget_view = None
-        self.load_widget.load_run_view = None
-        self.load_widget.load_file_view = None
 
     def setup_tabs(self):
         """

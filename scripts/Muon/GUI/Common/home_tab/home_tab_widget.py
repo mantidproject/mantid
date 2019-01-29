@@ -26,7 +26,7 @@ from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabPresenter
 
 
 class HomeTabWidget(object):
-    def __init__(self, context):
+    def __init__(self, context, parent):
         self.inst_view = InstrumentWidgetView()
         self.grp_view = HomeGroupingWidgetView()
         self.plot_view = HomePlotWidgetView()
@@ -40,7 +40,7 @@ class HomeTabWidget(object):
         self.run_info_widget = HomeRunInfoWidgetPresenter(self.run_info_view,
                                                           HomeRunInfoWidgetModel(muon_data=context))
 
-        self.home_tab_view = HomeTabView(parent=None,
+        self.home_tab_view = HomeTabView(parent=parent,
                                          widget_list=[self.inst_view,
                                                       self.grp_view,
                                                       self.plot_view,

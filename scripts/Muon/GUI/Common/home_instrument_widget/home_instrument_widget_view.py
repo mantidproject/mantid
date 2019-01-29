@@ -27,7 +27,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._cached_instrument = ["None", "None"]
 
         self.setup_interface()
-        self.apply_to_all_hidden(True)
         self.dead_time_file_loader_hidden(True)
         self.dead_time_other_file_hidden(True)
 
@@ -56,26 +55,6 @@ class InstrumentWidgetView(QtGui.QWidget):
             lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
         self.deadtime_file_selector.currentIndexChanged.connect(self.on_dead_time_file_combo_changed)
 
-    def apply_to_all_hidden(self, hidden=True):
-        if hidden:
-            self.apply_all_label.hide()
-            self.apply_all_checkbox.hide()
-        if not hidden:
-            self.apply_all_label.setVisible(True)
-            self.apply_all_checkbox.setVisible(True)
-
-    def setup_filter_row(self):
-        self.apply_all_label = QtGui.QLabel(self)
-        self.apply_all_label.setObjectName("applyAllLabel")
-        self.apply_all_label.setText("Apply to all loaded data ")
-
-        self.apply_all_checkbox = QtGui.QCheckBox(self)
-
-        self.horizontal_layout_6 = QtGui.QHBoxLayout()
-        self.horizontal_layout_6.setObjectName("horizontalLayout6")
-        self.horizontal_layout_6.addWidget(self.apply_all_label)
-        self.horizontal_layout_6.addWidget(self.apply_all_checkbox)
-
     def setup_interface(self):
         self.setObjectName("InstrumentWidget")
 
@@ -84,7 +63,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.setup_first_good_data_row()
         self.setup_dead_time_row()
         self.setup_rebin_row()
-        self.setup_filter_row()
 
         self.group = QtGui.QGroupBox("Run Pre-processing Parameters")
         self.group.setFlat(False)

@@ -30,6 +30,7 @@ class HomeTabView(QtGui.QWidget):
 
         if self._widget_list:
             for i, widget in enumerate(self._widget_list):
+                widget.setParent(self)
                 self.vertical_layout.addWidget(widget)
 
         self.setLayout(self.vertical_layout)
