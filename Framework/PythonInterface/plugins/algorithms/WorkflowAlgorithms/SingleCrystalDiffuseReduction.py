@@ -22,7 +22,6 @@ from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               CopyInstrumentParameters,
                               ApplyCalibration, CopySample,
                               RecalculateTrajectoriesExtents,
-                              ConvertToMDMinMaxGlobal,
                               CropWorkspaceForMDNorm)
 from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLengthValidator, FloatArrayProperty, Direction, Property
 from mantid import logger
@@ -231,6 +230,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                 Y = mtd['__flux'].readY(spectrumNumber)
                 mtd['__flux'].setY(spectrumNumber,(Y-Y.min())/(Y.max()-Y.min()))
 
+        MinValues = [-self.XMax*2]*3
+        MaxValues = [self.XMax*2]*3
+
         if _background:
             self.load_file_and_apply(self.getProperty("Background").value, '__bkg', 0)
 
@@ -241,11 +243,6 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
             self.load_file_and_apply(run, '__run', _offsets[n])
             LoadIsawUB('__run', _UB[n])
-
-            MinValues, MaxValues = ConvertToMDMinMaxGlobal(InputWorkspace='__run',
-                                                           QDimensions='Q3D',
-                                                           dEAnalysisMode='Elastic',
-                                                           Q3DFrames='Q')
 
             ConvertToMD(InputWorkspace='__run',
                         OutputWorkspace='__md',
