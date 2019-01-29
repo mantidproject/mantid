@@ -174,3 +174,6 @@ class MultiPythonFileInterpreter(QWidget):
     def save_current_file(self):
         """Save the current file"""
         self.current_editor().save()
+
+    def toggle_comment_current(self):
+        self.current_editor().toggle_comment()

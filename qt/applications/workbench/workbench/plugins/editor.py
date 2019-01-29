@@ -51,14 +51,23 @@ class MultiFileEditor(PluginWidget):
         self.setLayout(layout)
 
         # attributes
-        self.run_action = create_action(self, "Run",
-                                        on_triggered=self.editors.execute_current,
-                                        shortcut=("Ctrl+Return", "Ctrl+Enter"),
-                                        shortcut_context=Qt.ApplicationShortcut)
-        self.abort_action = create_action(self, "Abort",
-                                          on_triggered=self.editors.abort_current)
+        self.run_action = create_action(
+            self, "Run",
+            on_triggered=self.editors.execute_current,
+            shortcut=("Ctrl+Return", "Ctrl+Enter"),
+            shortcut_context=Qt.ApplicationShortcut)
 
-        self.editor_actions = [self.run_action, self.abort_action]
+        self.abort_action = create_action(
+            self, "Abort", on_triggered=self.editors.abort_current)
+
+        self.toggle_comment_action = create_action(
+            self, r"Comment/Uncomment",
+            on_triggered=self.editors.toggle_comment_current,
+            shortcut="Ctrl+M",
+            shortcut_context=Qt.ApplicationShortcut)
+
+        self.editor_actions = [self.run_action, self.abort_action,
+                               self.toggle_comment_action]
 
     def execute_current(self):
         '''This is used by MainWindow to execute a file after opening it'''

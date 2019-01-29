@@ -150,6 +150,57 @@ class PythonFileInterpreter(QWidget):
     def set_status_message(self, msg):
         self.status.showMessage(msg)
 
+    def toggle_comment(self):
+        if self.editor.selectedText == '':   # If nothing selected, do nothing
+            return
+
+        lines = self.editor.text().split('\n')
+        selection_idxs = list(self.editor.getSelection())
+        selected_lines = lines[selection_idxs[0]:selection_idxs[2] + 1]
+
+        if self._are_comments(selected_lines) is True:
+            selected_lines, leading_whitespaces = self._uncomment_lines(selected_lines)
+            # Track deleted whitespace on last line to keep highlighting consistent
+            selection_idxs[-1] -= 1 + leading_whitespaces % 4
+        else:
+            selected_lines = self._comment_lines(selected_lines)
+            selection_idxs[-1] += 2
+
+        # Note caret position to restore later
+        caret_position = self.editor.getCursorPosition()
+
+        # Replace selected lines with commented/uncommented lines
+        lines[selection_idxs[0]:selection_idxs[2] + 1] = selected_lines
+        self.editor.setText('\n'.join(lines))
+
+        # Restore caret position and highlighting
+        self.editor.setCursorPosition(*caret_position)
+        self.editor.setSelection(*selection_idxs)
+
+    def _comment_lines(self, lines):
+        for i in range(len(lines)):
+            if lines[i].startswith('#'):
+                lines[i] = '#' + lines[i]
+            else:
+                lines[i] = '# ' + lines[i]
+        return lines
+
+    def _uncomment_lines(self, lines):
+        for i in range(len(lines)):
+            lines[i] = lines[i].replace('#', '', 1)
+            # Remove whitespaces such that indents are multiples of 4
+            leading_whitespaces = len(lines[i]) - len(lines[i].lstrip('\t '))
+            lines[i] = lines[i][leading_whitespaces % 4:]
+        return lines, leading_whitespaces
+
+    def _are_comments(self, code_lines):
+        for line in code_lines:
+            if not line.strip():
+                continue
+            if not line.strip().startswith('#'):
+                return False
+        return True
+
     def _setup_editor(self, default_content, filename):
         editor = self.editor
 

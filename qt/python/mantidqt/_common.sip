@@ -118,8 +118,10 @@ public:
 
   void enableAutoCompletion(AutoCompletionSource source);
   void disableAutoCompletion();
+  void getCursorPosition(int *line, int *index) const;
   void setCaretLineBackgroundColor (const QColor & col);
   void setCaretLineVisible(bool enable);
+  void setCursorPosition(int line, int index);
   void setIndentationsUseTabs(bool tabs);
   void setFileName(const QString &filename);
   void setMarginWidth(int margin, int width);
