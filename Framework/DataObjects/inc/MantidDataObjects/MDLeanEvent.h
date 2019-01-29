@@ -71,14 +71,14 @@ public:
    * union fields)
    */
   struct AccessFor {
-    static std::enable_if_t<std::is_same<
-        EventAccessor, typename Accessor::EventAccessType>::value>
+    static std::enable_if_t<
+        std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
     retrieveCoordinates(MDLeanEvent<nd> &event,
                         const morton_index::MDSpaceBounds<nd> &space) {
       event.retrieveCoordinates(space);
     }
-    static std::enable_if_t<std::is_same<
-        EventAccessor, typename Accessor::EventAccessType>::value>
+    static std::enable_if_t<
+        std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
     retrieveIndex(MDLeanEvent<nd> &event,
                   const morton_index::MDSpaceBounds<nd> &space) {
       event.retrieveIndex(space);

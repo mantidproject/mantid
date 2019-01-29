@@ -17,7 +17,6 @@
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 
-
 namespace Mantid {
 // Forward declarations
 namespace API {

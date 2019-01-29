@@ -36,9 +36,8 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
 private:
   // Returns number of workers for parallel parts
   int numWorkers() {
-    return this->m_NumThreads < 0 ?
-    PARALLEL_GET_MAX_THREADS :
-    std::max(1, this->m_NumThreads);
+    return this->m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS
+                                  : std::max(1, this->m_NumThreads);
   }
 
   template <size_t ND> MD_EVENT_TYPE mdEventType();
@@ -121,7 +120,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     const typename std::vector<EventType> &events = *events_ptr;
     std::vector<MDEventType<ND>> mdEventsForSpectrum;
     // Iterators to start/end
-    for (const auto &event: events) {
+    for (const auto &event : events) {
       double val = localUnitConv.convertUnits(event.tof());
       double signal = event.weight();
       double errorSq = event.errorSquared();

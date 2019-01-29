@@ -173,7 +173,7 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::retrieveIndex(
   std::vector<morton_index::MDCoordinate<ND>> perThread(
       m_numWorkers, morton_index::MDCoordinate<ND>(0));
 #pragma omp parallel for num_threads(m_numWorkers)
-  for (int64_t i = 0; i < static_cast<int64_t >(mdEvents.size()); ++i) {
+  for (int64_t i = 0; i < static_cast<int64_t>(mdEvents.size()); ++i) {
     morton_index::MDCoordinate<ND> oldCoord{mdEvents[i].getCenter()};
     IndexCoordinateSwitcher::retrieveIndex(mdEvents[i], space);
     morton_index::MDCoordinate<ND> newCoord =

@@ -9,7 +9,7 @@
 
 #include <Eigen/Dense>
 #include <ostream>
-//boost::multiprecision has knawn bug in versions
+// boost::multiprecision has knawn bug in versions
 // less 1.61
 #define MULTIPRECISION_BOOST_VALID_VERSION 106100
 

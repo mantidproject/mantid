@@ -402,7 +402,8 @@ public:
 
 template <typename MDE, size_t nd>
 template <typename EventIterator>
-void MDBoxBase<MDE, nd>::calcCaches(const EventIterator &begin, const EventIterator &end) {
+void MDBoxBase<MDE, nd>::calcCaches(const EventIterator &begin,
+                                    const EventIterator &end) {
   m_signal = 0;
   m_errorSquared = 0;
   m_totalWeight = 0;
