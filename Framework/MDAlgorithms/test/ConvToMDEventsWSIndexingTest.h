@@ -430,7 +430,9 @@ private:
 
     auto topNodeWithError = tb.distribute(mdEvents);
 
-    return compareTrees(res, topNodeWithError.root);
+    auto check = compareTrees(res, topNodeWithError.root);
+    delete topNodeWithError.root;
+    return check;
   }
 };
 
