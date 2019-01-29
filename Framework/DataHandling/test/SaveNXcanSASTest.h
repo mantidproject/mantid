@@ -536,10 +536,10 @@ private:
                       double xmin, double xmax, double xerror, bool hasDx) {
     auto numAttributes = data.getNumAttrs();
     if (hasDx) {
-      TSM_ASSERT_EQUALS("Should have 8 attribute", 8, numAttributes);
+      TSM_ASSERT_EQUALS("Should have 9 attributes", 9, numAttributes);
     } else {
       TSM_ASSERT_EQUALS(
-          "Should have 6 attribute, since Q_uncertainty is not present", 6,
+          "Should have 7 attributes, since Q_uncertainty is not present", 7,
           numAttributes);
     }
 
