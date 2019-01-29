@@ -84,6 +84,8 @@ template <typename T, typename U>
 std::vector<T> readNexusAnyVector(::NeXus::File &file, size_t size,
                                   bool close_file) {
   if (sizeof(T) < sizeof(U)) {
+    if (close_file)
+      file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnyVector");
   } else if (std::is_same<T, U>::value) {
@@ -108,6 +110,8 @@ std::vector<T>
 readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
                  const std::vector<int64_t> &size, bool close_file) {
   if (sizeof(T) < sizeof(U)) {
+    if (close_file)
+      file.closeData();
     throw std::runtime_error(
         "Downcasting is forbidden in NeXusIOHelper::readNexusAnySlab");
   } else if (std::is_same<T, U>::value) {

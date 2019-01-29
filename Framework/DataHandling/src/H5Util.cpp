@@ -708,6 +708,7 @@ bool checkVariableLengthStringSupport() {
   const auto expected = makeHdf5VersionNumber(1, 8, 16); // Minimum expected
   return (actual > expected);
 }
+
 } // namespace H5Util
 } // namespace DataHandling
 } // namespace Mantid

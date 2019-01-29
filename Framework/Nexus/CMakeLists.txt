@@ -1,20 +1,24 @@
 set ( SRC_FILES
-        src/MuonNexusReader.cpp
-        src/NexusClasses.cpp
-        src/NexusFileIO.cpp
+  src/MuonNexusReader.cpp
+  src/NexusClasses.cpp
+  src/NexusFileIO.cpp
 )
 
 set ( INC_FILES
-        inc/MantidNexus/MuonNexusReader.h
-        inc/MantidNexus/NexusClasses.h
-        inc/MantidNexus/NexusFileIO.h
-        inc/MantidNexus/NexusIOHelper.h
+  inc/MantidNexus/MuonNexusReader.h
+  inc/MantidNexus/NexusClasses.h
+  inc/MantidNexus/NexusFileIO.h
+  inc/MantidNexus/NexusIOHelper.h
+)
+
+set ( TEST_FILES
+  NexusIOHelperTest.h
 )
 
 if (COVERALLS)
-    foreach( loop_var ${SRC_FILES} ${INC_FILES})
-      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
-    endforeach(loop_var)
+  foreach( loop_var ${SRC_FILES} ${INC_FILES})
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+  endforeach(loop_var)
 endif()
 
 add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
@@ -37,6 +41,9 @@ set_property ( TARGET Nexus PROPERTY FOLDER "MantidFramework" )
 include_directories ( inc )
 
 target_link_libraries ( Nexus LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${NEXUS_C_LIBRARIES} ${NEXUS_LIBRARIES} )
+
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings
