@@ -47,6 +47,7 @@ public:
       : m_filename(filename), m_setMaterial(true), m_params(params) {}
   virtual ~LoadStl() = default;
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
+  virtual ~LoadStl() = default;
 
 protected:
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;
