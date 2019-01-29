@@ -66,7 +66,6 @@ public:
         const size_t boxID = UNDEF_SIZET);
 
   using EventIterator = typename std::vector<MDE>::const_iterator;
-  //  template <typename EventIterator>
   MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,
         const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
             &extentsVector,

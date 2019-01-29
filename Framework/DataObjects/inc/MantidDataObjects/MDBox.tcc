@@ -111,7 +111,6 @@ TMDE(MDBox)::MDBox(
  * @param end :: iterator before ened (not included)
  */
 template <typename MDE, size_t nd>
-//  template <typename EventIterator> //can be done for every collection
 MDBox<MDE, nd>::MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,
       const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
       &extentsVector, EventIterator begin, EventIterator end) :
