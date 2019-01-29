@@ -122,11 +122,11 @@ void ConvertToMD::init() {
 #if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
   std::vector<std::string> converterType{"Default", "Indexed"};
 #else
-  std::vector<std::string> converterType{"default"};
+  std::vector<std::string> converterType{"Default"};
 #endif
   auto loadTypeValidator =
       boost::make_shared<StringListValidator>(converterType);
-  declareProperty("ConverterType", "default", loadTypeValidator,
+  declareProperty("ConverterType", "Default", loadTypeValidator,
                   "[Default, Indexed], indexed is the experimental type that "
                   "can speedup the conversion process"
                   "for the big files using the indexing.");
