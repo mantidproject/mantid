@@ -44,6 +44,7 @@
 #endif
 #endif
 
+#include <Poco/Path.h>
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
@@ -60,7 +61,6 @@
 #include <QTextEdit>
 #include <QToolTip>
 #include <QVBoxLayout>
-#include <Poco/Path.h>
 
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 

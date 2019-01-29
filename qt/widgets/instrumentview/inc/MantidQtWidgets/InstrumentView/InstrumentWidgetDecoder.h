@@ -62,7 +62,8 @@ private:
   void decodeBinMasks(const QList<QVariant> &list, MaskBinsData &obj);
   void decodeSurface(const QMap<QString, QVariant> &map,
                      boost::shared_ptr<ProjectionSurface> obj);
-  void decodeProjection3D(const QMap<QString, QVariant> &map, Projection3D &obj);
+  void decodeProjection3D(const QMap<QString, QVariant> &map,
+                          Projection3D &obj);
   void decodeViewPort(const QMap<QString, QVariant> &map, Viewport &obj);
   void decodeMaskShapes(const QList<QVariant> &list, Shape2DCollection &obj);
 

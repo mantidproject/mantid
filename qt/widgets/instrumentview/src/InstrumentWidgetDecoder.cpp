@@ -199,7 +199,8 @@ void InstrumentWidgetDecoder::decodeSurface(
   auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
   // Decide Projection3D stuff
   if (map[QString("projection3DSuccess")].toBool() && projection3D) {
-    this->decodeProjection3D(map[QString("projection3D")].toMap(), *projection3D);
+    this->decodeProjection3D(map[QString("projection3D")].toMap(),
+                             *projection3D);
   }
 
   QMap<QString, QVariant> color = map[QString("backgroundColor")].toMap();
@@ -215,8 +216,8 @@ void InstrumentWidgetDecoder::decodeSurface(
 
 void InstrumentWidgetDecoder::decodeProjection3D(
     const QMap<QString, QVariant> &map, Projection3D &obj) {
-      this->decodeViewPort(map[QString("viewport")].toMap(), obj.m_viewport);
-    }
+  this->decodeViewPort(map[QString("viewport")].toMap(), obj.m_viewport);
+}
 
 void InstrumentWidgetDecoder::decodeViewPort(const QMap<QString, QVariant> &map,
                                              Viewport &obj) {

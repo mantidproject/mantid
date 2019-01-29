@@ -53,7 +53,7 @@ void Shape2DCollection::draw(QPainter &painter) const {
       nonscalable << shape;
     }
   }
-  
+
   // first draw the scalable ones
   painter.save();
   painter.setTransform(m_transform);
