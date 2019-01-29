@@ -29,6 +29,9 @@ public:
   int getSelectedSpectrumIndex() const;
   bool isCurrentlySelected(std::size_t dataIndex, std::size_t spectrum) const;
 
+  void setFitSingleSpectrumIsFitting(bool fitting);
+  void setFitSingleSpectrumEnabled(bool enable);
+
 public slots:
   void setStartX(double);
   void setEndX(double);
