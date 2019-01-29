@@ -116,7 +116,7 @@ protected:
   };
 #pragma pack(pop)
 
-protected:
+private:
   void retrieveIndex(const morton_index::MDSpaceBounds<nd> &space) {
     index = morton_index::coordinatesToIndex<nd, IntT, MortonT>(center, space);
   }

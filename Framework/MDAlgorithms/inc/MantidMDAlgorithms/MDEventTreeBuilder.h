@@ -57,7 +57,7 @@ public:
   };
 
 public:
-  MDEventTreeBuilder(const int &numWorkers, const size_t &threshold,
+  MDEventTreeBuilder(const int numWorkers, const size_t threshold,
                      const API::BoxController_sptr &bc,
                      const morton_index::MDSpaceBounds<ND> &space);
   struct TreeWithIndexError {
@@ -100,7 +100,7 @@ private:
 template <size_t ND, template <size_t> class MDEventType,
           typename EventIterator>
 MDEventTreeBuilder<ND, MDEventType, EventIterator>::MDEventTreeBuilder(
-    const int &numWorkers, const size_t &threshold,
+    const int numWorkers, const size_t threshold,
     const API::BoxController_sptr &bc,
     const morton_index::MDSpaceBounds<ND> &space)
     : m_numWorkers(numWorkers), m_eventsThreshold(threshold),
@@ -111,7 +111,7 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::MDEventTreeBuilder(
           std::numeric_limits<IntT>::max())} {
   for (size_t ax = 0; ax < ND; ++ax) {
     m_extents.emplace_back();
-    m_extents.rbegin()->setExtents(space(ax, 0), space(ax, 1));
+    m_extents.back().setExtents(space(ax, 0), space(ax, 1));
   }
 }
 
@@ -173,7 +173,7 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::retrieveIndex(
   std::vector<morton_index::MDCoordinate<ND>> perThread(
       m_numWorkers, morton_index::MDCoordinate<ND>(0));
 #pragma omp parallel for num_threads(m_numWorkers)
-  for (int i = 0; i < static_cast<int>(mdEvents.size()); ++i) {
+  for (int64_t i = 0; i < static_cast<int64_t >(mdEvents.size()); ++i) {
     morton_index::MDCoordinate<ND> oldCoord{mdEvents[i].getCenter()};
     IndexCoordinateSwitcher::retrieveIndex(mdEvents[i], space);
     morton_index::MDCoordinate<ND> newCoord =
@@ -218,9 +218,9 @@ std::unique_ptr<
 MDEventTreeBuilder<ND, MDEventType, EventIterator>::popTask() {
   std::lock_guard<std::mutex> g(m_mutex);
   if (m_tasks.empty())
-    return std::unique_ptr<Task>(nullptr);
+    return {nullptr};
   else {
-    std::unique_ptr<Task> task{new Task(m_tasks.front())};
+    std::unique_ptr<Task> task = std::make_unique<Task>(m_tasks.front());
     m_tasks.pop();
     return task;
   }
@@ -235,6 +235,8 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::waitAndLaunchSlave() {
       distributeEvents(*pTsk.get(), SLAVE);
     else if (m_masterFinished)
       break;
+    else
+      std::this_thread::sleep_for(std::chrono::nanoseconds(100));
   }
 }
 
@@ -308,7 +310,7 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
 
     BoxBase *newBox;
     if (std::distance(boxEventStart, eventIt) <=
-            static_cast<int>(splitThreshold) ||
+            static_cast<int64_t>(splitThreshold) ||
         tsk.maxDepth == 1) {
       for (auto it = boxEventStart; it < eventIt; ++it)
         IndexCoordinateSwitcher::retrieveCoordinates(*it, m_space);

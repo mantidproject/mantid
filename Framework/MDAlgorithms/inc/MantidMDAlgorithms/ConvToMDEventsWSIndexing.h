@@ -36,11 +36,9 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
 private:
   // Returns number of workers for parallel parts
   int numWorkers() {
-    int nThreads = (this->m_NumThreads == 0); // 1 thread if 0
-    if (!nThreads)
-      nThreads = this->m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS
-                                        : this->m_NumThreads;
-    return nThreads;
+    return this->m_NumThreads < 0 ?
+    PARALLEL_GET_MAX_THREADS :
+    std::max(1, this->m_NumThreads);
   }
 
   template <size_t ND> MD_EVENT_TYPE mdEventType();

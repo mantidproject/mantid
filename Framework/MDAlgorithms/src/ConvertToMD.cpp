@@ -171,8 +171,8 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     if (!validSplitInfo)
       result["ConverterType"] +=
           "The split parameter should be the same for"
-          " all dimensions and be equal the power of 2 for"
-          " indexed version of algorithm. ";
+          " all dimensions and be equal the power of 2"
+          " (2 ,4, 8, 16,..) for indexed version of algorithm. ";
   }
 
   std::vector<double> minVals = this->getProperty("MinValues");

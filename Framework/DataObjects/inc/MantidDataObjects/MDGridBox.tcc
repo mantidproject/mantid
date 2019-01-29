@@ -391,7 +391,9 @@ TMDE(void MDGridBox)::refreshCache(Kernel::ThreadScheduler *ts) {
 //-----------------------------------------------------------------------------------------------
 /**
  * Calculates caches for grid box recursively,
- * considering leafs have computed values.
+ * assuming leafs have computed values.
+ * Calculates caches for MDGridBoxes based on
+ * children caches, does nothing with MDBoxes
  */
 TMDE(void MDGridBox)::calculateGridCaches() {
   // Clear your total
