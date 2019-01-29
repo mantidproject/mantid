@@ -19,9 +19,6 @@
 
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
-#include "MantidKernel/ConfigService.h"
-#include <Poco/NObserver.h>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -35,18 +32,14 @@ class IndirectDataManipulation : public MantidQt::API::UserSubWindow {
 
 public:
   explicit IndirectDataManipulation(QWidget *parent = nullptr);
-  ~IndirectDataManipulation() override;
+  ~IndirectDataManipulation() override{};
 
   static std::string name() { return "Data Manipulation"; }
   static QString categoryInfo() { return "Indirect"; }
 
 private:
-  void
-  handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+  void initLayout() override{};
 
-  Poco::NObserver<IndirectDataManipulation,
-                  Mantid::Kernel::ConfigValChangeNotification>
-      m_changeObserver;
   std::map<unsigned int, IndirectDataManipulationTab *> m_tabs;
 
   Ui::IndirectDataManipulation m_uiForm;
