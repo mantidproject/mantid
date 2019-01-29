@@ -157,13 +157,6 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
     end = run.getProperty("run_end")->value();
     out << end.toSimpleString();
   }
-
-  // Add the end time for the run
-  out << "\nGood frames: ";
-  if (run.hasProperty("goodfrm")) {
-    out << run.getProperty("goodfrm")->value();
-  }
-
   // Add counts to run information
   out << "\nCounts: ";
   double counts(0.0);
@@ -174,6 +167,21 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // output this number to three decimal places
   out << std::setprecision(3);
   out << counts / 1000000 << " MEv";
+  // Add the end time for the run
+  out << "\nGood frames: ";
+  if (run.hasProperty("goodfrm")) {
+    auto goodFrames = run.getProperty("goodfrm")->value();
+    out << goodFrames;
+  // Add counts divided by good frames to run information
+  out << "\nCounts/Good frames: ";
+  out << std::setprecision(3);
+  auto countsPerFrame = counts / std::stod(goodFrames);
+  out << countsPerFrame << " Events per frame";
+  // Add counts per detector per good frame
+  out << "\nCounts/(Good frames*number detectors): ";
+  out << std::setprecision(3);
+  out << countsPerFrame/runWs->getNumberHistograms() << " Events per frame per detector";
+  }
   // Add average temperature.
   out << "\nAverage Temperature: ";
   if (run.hasProperty("Temp_Sample")) {
