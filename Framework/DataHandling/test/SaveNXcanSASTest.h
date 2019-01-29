@@ -565,9 +565,11 @@ private:
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
     // I_uncertainties attribute
-    auto errorAlternativeAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        data, sasDataIUncertaintiesAttr);
-    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute, sasDataIdev);
+    auto errorAlternativeAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(
+            data, sasDataIUncertaintiesAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute,
+                      sasDataIdev);
 
     // Q_indices attribute
     auto qAttribute =
@@ -593,8 +595,8 @@ private:
 
     // I data set uncertainties attribute
     auto uncertaintiesIAttribute =
-        Mantid::DataHandling::H5Util::readAttributeAsString(intensityDataSet,
-                                                            sasUncertaintiesAttr);
+        Mantid::DataHandling::H5Util::readAttributeAsString(
+            intensityDataSet, sasUncertaintiesAttr);
     TSM_ASSERT_EQUALS("Should be just Idev", uncertaintiesIAttribute,
                       sasDataIdev);
 
@@ -637,7 +639,8 @@ private:
       auto qErrorAlternativeAttribute =
           Mantid::DataHandling::H5Util::readAttributeAsString(
               data, sasDataQUncertaintiesAttr);
-      TSM_ASSERT_EQUALS("Should be just Qdev", qErrorAlternativeAttribute, sasDataQdev);
+      TSM_ASSERT_EQUALS("Should be just Qdev", qErrorAlternativeAttribute,
+                        sasDataQdev);
     } else {
       do_assert_that_Q_dev_information_is_not_present(data);
     }
@@ -672,9 +675,11 @@ private:
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
     // I_uncertainties attribute
-    auto errorAlternativeAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
-        data, sasDataIUncertaintiesAttr);
-    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute, sasDataIdev);
+    auto errorAlternativeAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(
+            data, sasDataIUncertaintiesAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute,
+                      sasDataIdev);
 
     // Q_indices attribute
     auto qAttribute =
