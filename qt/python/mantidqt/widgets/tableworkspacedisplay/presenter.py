@@ -83,9 +83,6 @@ class TableWorkspaceDisplay(ObservingPresenter):
     def replace_workspace(self, workspace_name, workspace):
         if self.model.workspace_equals(workspace_name):
             self.model = TableWorkspaceDisplayModel(workspace)
-            # block signals to prevent triggering of handleItemChanged event
-            # which causes an infinite recursion and a stack overflow error
-            self.view.blockSignals(True)
             self.load_data(self.view)
             self.view.emit_repaint()
 
@@ -160,11 +157,6 @@ class TableWorkspaceDisplay(ObservingPresenter):
         selected_rows_str = ",".join([str(row) for row in selected_rows_list])
 
         self.model.delete_rows(selected_rows_str)
-
-        # Reverse the list so that we delete in order from bottom -> top
-        # this prevents the row index from shifting up when deleting rows above
-        for row in reversed(selected_rows_list):
-            self.view.removeRow(row)
 
     def _get_selected_columns(self, max_selected=None, message_if_over_max=None):
         selection_model = self.view.selectionModel()
