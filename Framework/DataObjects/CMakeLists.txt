@@ -104,10 +104,9 @@ set ( INC_FILES
 	inc/MantidDataObjects/MDLeanEvent.h
 	inc/MantidDataObjects/MaskWorkspace.h
 	inc/MantidDataObjects/MortonIndex/BitInterleaving.h
-	inc/MantidDataObjects/MortonIndex/BitInterleaving.h
 	inc/MantidDataObjects/MortonIndex/CoordinateConversion.h
 	inc/MantidDataObjects/MortonIndex/Types.h
-        inc/MantidDataObjects/MementoTableWorkspace.h
+    inc/MantidDataObjects/MementoTableWorkspace.h
 	inc/MantidDataObjects/NoShape.h
 	inc/MantidDataObjects/OffsetsWorkspace.h
 	inc/MantidDataObjects/Peak.h

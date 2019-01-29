@@ -82,17 +82,18 @@ public:
   const Box &getChild(size_t parent, size_t child) const {
     if (child > 7)
       throw std::logic_error(std::string(__PRETTY_FUNCTION__) +
-                             " node has only 7 hilds.");
+                             " node has only 8 children.");
     size_t idx = 8 * parent + child + 1;
     if (idx >= nodesCount)
       throw std::logic_error(std::string(__PRETTY_FUNCTION__) +
-                             " no childs for " + std::to_string(parent) +
+                             " no children for " + std::to_string(parent) +
                              " node.");
     return store[idx];
   }
 
   const Box &getBox(size_t id) const { return store[id]; }
 
+  // leafes starts vit ind 72
   bool isLeaf(size_t ind) { return ind > 72; }
   using PtDistr =
       std::array<std::vector<std::array<Mantid::coord_t, 3>>, nodesCount>;
@@ -300,7 +301,7 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
     Points generate() const override final {
       FullTree3D3L justForBoxes(lowerLeft, upperRight);
       Points points;
-      for (size_t i = 73; i < 585; ++i) {
+      for (size_t i = 73; i < 585; ++i) { // [73; 585) leaf nodes
         const auto &bx = justForBoxes.getBox(i);
         for (size_t j = 0; j < nPerLeaf; ++j) {
           Point lower, upper;

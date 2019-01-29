@@ -345,9 +345,9 @@ public:
 protected:
   /**
    * Calculates caches if the events are known
-   * @tparam EventIterator :: iterator which points to event in som e collection
-   * @param begin :: iterarator to start
-   * @param end :: iterator before ened (not included)
+   * @tparam EventIterator :: iterator which points to event in some collection
+   * @param begin :: iterator to start
+   * @param end :: iterator before end (not included)
    */
   template <typename EventIterator>
   void calcCaches(EventIterator begin, EventIterator end);
