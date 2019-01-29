@@ -18,15 +18,11 @@ using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
-                                       QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
-  m_uiForm.setupUi(parent);
+namespace IDA {
 
-  int numDecimals = 6;
+IndirectSymmetrise::IndirectSymmetrise(QWidget *parent)
+    : IndirectDataManipulationTab(parent) {
+  m_uiForm.setupUi(parent);
 
   // Property Trees
   m_propTrees["SymmPropTree"] = new QtTreePropertyBrowser();
@@ -42,10 +38,10 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
 
   // Raw Properties
   m_properties["EMin"] = m_dblManager->addProperty("EMin");
-  m_dblManager->setDecimals(m_properties["EMin"], numDecimals);
+  m_dblManager->setDecimals(m_properties["EMin"], DECIMAL_PLACES);
   m_propTrees["SymmPropTree"]->addProperty(m_properties["EMin"]);
   m_properties["EMax"] = m_dblManager->addProperty("EMax");
-  m_dblManager->setDecimals(m_properties["EMax"], numDecimals);
+  m_dblManager->setDecimals(m_properties["EMax"], DECIMAL_PLACES);
   m_propTrees["SymmPropTree"]->addProperty(m_properties["EMax"]);
 
   QtProperty *rawPlotProps = m_grpManager->addProperty("Raw Plot");
@@ -58,15 +54,15 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   // Preview Properties
   // Mainly used for display rather than getting user input
   m_properties["NegativeYValue"] = m_dblManager->addProperty("Negative Y");
-  m_dblManager->setDecimals(m_properties["NegativeYValue"], numDecimals);
+  m_dblManager->setDecimals(m_properties["NegativeYValue"], DECIMAL_PLACES);
   m_propTrees["SymmPVPropTree"]->addProperty(m_properties["NegativeYValue"]);
 
   m_properties["PositiveYValue"] = m_dblManager->addProperty("Positive Y");
-  m_dblManager->setDecimals(m_properties["PositiveYValue"], numDecimals);
+  m_dblManager->setDecimals(m_properties["PositiveYValue"], DECIMAL_PLACES);
   m_propTrees["SymmPVPropTree"]->addProperty(m_properties["PositiveYValue"]);
 
   m_properties["DeltaY"] = m_dblManager->addProperty("Delta Y");
-  m_dblManager->setDecimals(m_properties["DeltaY"], numDecimals);
+  m_dblManager->setDecimals(m_properties["DeltaY"], DECIMAL_PLACES);
   m_propTrees["SymmPVPropTree"]->addProperty(m_properties["DeltaY"]);
 
   // Indicators for Y value at each EMin position
@@ -116,7 +112,6 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   centreMarkPV->setColour(Qt::cyan);
   centreMarkPV->setMinimum(0.0);
 
-  // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(verifyERange(QtProperty *, double)));
@@ -159,9 +154,6 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 IndirectSymmetrise::~IndirectSymmetrise() {}
 
 void IndirectSymmetrise::setup() {}
@@ -181,6 +173,8 @@ bool IndirectSymmetrise::validate() {
 }
 
 void IndirectSymmetrise::run() {
+  setRunIsRunning(true);
+
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
   QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) +
                                 "_sym" + workspaceName.right(4);
@@ -220,12 +214,11 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  if (error)
-    return;
-
-  // Enable save and plot
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
+  setRunIsRunning(false);
+  if (error) {
+    setPlotEnabled(false);
+    setSaveEnabled(false);
+  }
 }
 
 /**
@@ -554,6 +547,22 @@ void IndirectSymmetrise::saveClicked() {
     plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 
+void IndirectSymmetrise::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void IndirectSymmetrise::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setButtonsEnabled(!plotting);
+}
+
+void IndirectSymmetrise::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotEnabled(enabled);
+  setSaveEnabled(enabled);
+}
+
 void IndirectSymmetrise::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
@@ -566,30 +575,6 @@ void IndirectSymmetrise::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
-void IndirectSymmetrise::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotEnabled(enable);
-  setSaveEnabled(enable);
-}
-
-void IndirectSymmetrise::updateRunButton(bool enabled,
-                                         std::string const &enableOutputButtons,
-                                         QString const message,
-                                         QString const tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
-}
-
-void IndirectSymmetrise::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
-}
-
+} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTSYMMETRISE_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSYMMETRISE_H_
 
-#include "IndirectDataReductionTab.h"
+#include "IndirectDataManipulationTab.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -33,16 +33,13 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** IndirectSymmetrise
+namespace IDA {
 
-  @author Dan Nixon
-  @date 23/07/2014
-*/
-class DLLExport IndirectSymmetrise : public IndirectDataReductionTab {
+class DLLExport IndirectSymmetrise : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  IndirectSymmetrise(QWidget *parent = nullptr);
   ~IndirectSymmetrise() override;
 
   void setup() override;
@@ -65,19 +62,20 @@ private slots:
   void plotClicked();
   void saveClicked();
 
+private:
+  void loadSettings(const QSettings &settings) override{};
+
+  void setRunIsRunning(bool running);
+  void setPlotIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setPlotEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString const message = "Run",
-                       QString const tooltip = "");
-  void setPlotIsPlotting(bool plotting);
 
-private:
   Ui::IndirectSymmetrise m_uiForm;
 };
+
+} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -24,8 +24,8 @@ IndirectDataManipulation::IndirectDataManipulation(QWidget *parent)
     : UserSubWindow(parent) {
   m_uiForm.setupUi(this);
 
-  // m_tabs.emplace(SYMMETRISE2, new IndirectSymmetrise(
-  //                                m_uiForm.twIDMTabs->widget(SYMMETRISE2)));
+  m_tabs.emplace(SYMMETRISE, new IndirectSymmetrise(
+                                 m_uiForm.twIDMTabs->widget(SYMMETRISE)));
   // m_tabs.emplace(SQW2, new IndirectSqw(m_uiForm.twIDMTabs->widget(SQW2)));
   // m_tabs.emplace(MOMENTS2,
   //               new IndirectMoments(m_uiForm.twIDMTabs->widget(MOMENTS2)));

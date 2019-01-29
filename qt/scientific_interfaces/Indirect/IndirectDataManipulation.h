@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-enum IDMTabChoice { SYMMETRISE2, SQW2, MOMENTS2, ELWIN, IQT };
+enum IDMTabChoice { SYMMETRISE, SQW2, MOMENTS2, ELWIN, IQT };
 
 class IndirectDataManipulation : public MantidQt::API::UserSubWindow {
   Q_OBJECT

@@ -109,7 +109,7 @@ void IndirectDataReduction::initLayout() {
   addTab<ISISCalibration>("ISIS Calibration");
   addTab<ISISDiagnostics>("ISIS Diagnostics");
   addTab<IndirectTransmission>("Transmission");
-  addTab<IndirectSymmetrise>("Symmetrise");
+  //addTab<IndirectSymmetrise>("Symmetrise");
   addTab<IndirectSqw>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");

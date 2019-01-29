@@ -135,18 +135,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pbRun">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>180</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="text">
          <string>Run</string>
         </property>
@@ -226,15 +214,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DataSelector.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
