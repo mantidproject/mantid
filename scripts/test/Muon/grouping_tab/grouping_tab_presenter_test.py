@@ -31,21 +31,23 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.context = MuonDataContext()
         self.model = GroupingTabModel(data=self.context)
 
-        self.grouping_table_view = GroupingTableView()
+        self.grouping_table_view = GroupingTableView(parent=self.obj)
         self.grouping_table_widget = GroupingTablePresenter(self.grouping_table_view, self.model)
 
-        self.pairing_table_view = PairingTableView()
+        self.pairing_table_view = PairingTableView(parent=self.obj)
         self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.model)
 
         self.add_three_groups()
         self.add_two_pairs()
 
-        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view)
+        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view, parent=self.obj)
         self.presenter = GroupingTabPresenter(self.view, self.model,
                                               self.grouping_table_widget,
                                               self.pairing_table_widget)
 
         self.view.display_warning_box = mock.MagicMock()
+        self.grouping_table_view.warning_popup = mock.MagicMock()
+        self.pairing_table_view.warning_popup = mock.MagicMock()
 
     def add_three_groups(self):
         testgroup1 = MuonGroup(group_name="fwd", detector_ids=[1, 2, 3, 4, 5])
