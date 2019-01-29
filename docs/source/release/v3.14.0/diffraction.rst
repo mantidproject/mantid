@@ -94,6 +94,6 @@ Engineering Diffraction
 New
 ###
 
-- Scripts added that produce the same results as the engineering gui, this is to allow use with autoreduction.
+- Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
 
 :ref:`Release 3.14.0 <v3.14.0>`
