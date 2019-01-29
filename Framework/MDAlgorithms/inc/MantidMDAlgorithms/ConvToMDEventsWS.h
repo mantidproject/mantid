@@ -17,10 +17,6 @@
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 
-#include <tbb/parallel_sort.h>
-#include <vector>
-
-#include <chrono>
 
 namespace Mantid {
 // Forward declarations

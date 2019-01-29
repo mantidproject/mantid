@@ -350,7 +350,7 @@ protected:
    * @param end :: iterator before end (not included)
    */
   template <typename EventIterator>
-  void calcCaches(EventIterator begin, EventIterator end);
+  void calcCaches(const EventIterator &begin, const EventIterator &end);
   /** Array of MDDimensionStats giving the extents and
    * other stats on the box dimensions.
    */
@@ -402,7 +402,7 @@ public:
 
 template <typename MDE, size_t nd>
 template <typename EventIterator>
-void MDBoxBase<MDE, nd>::calcCaches(EventIterator begin, EventIterator end) {
+void MDBoxBase<MDE, nd>::calcCaches(const EventIterator &begin, const EventIterator &end) {
   m_signal = 0;
   m_errorSquared = 0;
   m_totalWeight = 0;

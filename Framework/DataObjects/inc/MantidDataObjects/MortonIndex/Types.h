@@ -19,6 +19,7 @@ using uint128_t = boost::multiprecision::uint128_t;
 using uint256_t = boost::multiprecision::uint256_t;
 } // namespace morton_index
 #else
+// Dummy types to avoid using boost::multiprecision
 namespace morton_index {
 using uint128_t = uint64_t;
 using uint256_t = uint64_t;

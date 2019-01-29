@@ -8,6 +8,7 @@
 #define MANTID_MDALGORITHMS_MDEVENTTREEBUILDER_H_
 
 #include <queue>
+#include <tbb/parallel_sort.h>
 #include <tbb/task_scheduler_init.h>
 #include <thread>
 

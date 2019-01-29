@@ -71,14 +71,14 @@ public:
    * union fields)
    */
   struct AccessFor {
-    static typename std::enable_if<std::is_same<
-        EventAccessor, typename Accessor::EventAccessType>::value>::type
+    static std::enable_if_t<std::is_same<
+        EventAccessor, typename Accessor::EventAccessType>::value>
     retrieveCoordinates(MDLeanEvent<nd> &event,
                         const morton_index::MDSpaceBounds<nd> &space) {
       event.retrieveCoordinates(space);
     }
-    static typename std::enable_if<std::is_same<
-        EventAccessor, typename Accessor::EventAccessType>::value>::type
+    static std::enable_if_t<std::is_same<
+        EventAccessor, typename Accessor::EventAccessType>::value>
     retrieveIndex(MDLeanEvent<nd> &event,
                   const morton_index::MDSpaceBounds<nd> &space) {
       event.retrieveIndex(space);
@@ -216,8 +216,6 @@ public:
 
   //---------------------------------------------------------------------------------------------
   friend void swap<nd>(MDLeanEvent &first, MDLeanEvent &second);
-  //  MDLeanEvent(const MDLeanEvent& other) : m_signal(other.m_signal),
-  //  m_errorSquared(other.m_errorSquared), m_morton(other.m_morton) {}
 
   MDLeanEvent &operator=(MDLeanEvent other) {
     swap(*this, other);
