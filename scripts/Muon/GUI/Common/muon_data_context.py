@@ -184,11 +184,10 @@ class MuonDataContext(object):
     def loaded_workspace(self):
         return self.current_data["OutputWorkspace"][0].workspace
 
-    @property
-    def loaded_workspace_as_group(self):
+    def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
             workspace_group = WorkspaceGroup()
-            for workspace_wrapper in self.current_data["OutputWorkspace"]:
+            for workspace_wrapper in self._loaded_data.get_data(run=int(run))['workspace']['OutputWorkspace']:
                 workspace_group.addWorkspace(workspace_wrapper.workspace)
             return workspace_group
         else:
@@ -265,8 +264,6 @@ class MuonDataContext(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def show_raw_data(self):
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         workspace_list = self._loaded_data.params
         for workspace in workspace_list:
             run = run_list_to_string(workspace['run'])
@@ -288,26 +285,32 @@ class MuonDataContext(object):
             self.show_group_data(group_name)
 
     def show_group_data(self, group_name, show=True):
-        name = get_group_data_workspace_name(self, group_name)
-        directory = get_base_data_directory(self, self.run) + get_group_data_directory(self)
-        workspace = calculate_group_data(self, group_name)
+        workspace_list = self._loaded_data.params
+        for workspace in workspace_list:
+            run = run_list_to_string(workspace['run'])
+            workspace = calculate_group_data(self, group_name, run)
+            directory = get_base_data_directory(self, run) + get_group_data_directory(self, run)
+            name = get_group_data_workspace_name(self, group_name, run)
 
-        self._groups[group_name].workspace = MuonWorkspaceWrapper(workspace)
-        if show:
-            self._groups[group_name].workspace.show(directory + name)
+            self._groups[group_name].workspace = MuonWorkspaceWrapper(workspace)
+            if show:
+                self._groups[group_name].workspace.show(directory + name)
 
     def show_all_pairs(self):
         for pair_name in self._pairs.keys():
             self.show_pair_data(pair_name)
 
     def show_pair_data(self, pair_name, show=True):
-        name = get_pair_data_workspace_name(self, pair_name)
-        directory = get_base_data_directory(self, self.run) + get_pair_data_directory(self)
-        workspace = calculate_pair_data(self, pair_name)
+        workspace_list = self._loaded_data.params
+        for workspace in workspace_list:
+            run = run_list_to_string(workspace['run'])
+            name = get_pair_data_workspace_name(self, pair_name, run)
+            directory = get_base_data_directory(self, run) + get_pair_data_directory(self, run)
+            workspace = calculate_pair_data(self, pair_name, run)
 
-        self._pairs[pair_name].workspace = MuonWorkspaceWrapper(workspace)
-        if show:
-            self._pairs[pair_name].workspace.show(directory + name)
+            self._pairs[pair_name].workspace = MuonWorkspaceWrapper(workspace)
+            if show:
+                self._pairs[pair_name].workspace.show(directory + name)
 
     def calculate_all_groups(self):
         for group_name in self._groups.keys():
