@@ -9,21 +9,13 @@
 
 #include "ui_IndirectDataManipulation.h"
 
-#include "IndirectDataManipulationTab.h"
-
-#include "Elwin.h"
-#include "IndirectMoments.h"
-#include "IndirectSqw.h"
-#include "IndirectSymmetrise.h"
-#include "Iqt.h"
-
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-enum IDMTabChoice { SYMMETRISE2, SQW2, MOMENTS2, ELWIN2, IQT2 };
+enum IDMTabChoice { SYMMETRISE2, SQW2, MOMENTS2, ELWIN, IQT };
 
 class IndirectDataManipulation : public MantidQt::API::UserSubWindow {
   Q_OBJECT
@@ -32,15 +24,20 @@ class IndirectDataManipulation : public MantidQt::API::UserSubWindow {
 
 public:
   explicit IndirectDataManipulation(QWidget *parent = nullptr);
-  ~IndirectDataManipulation() override{};
 
   static std::string name() { return "Data Manipulation"; }
   static QString categoryInfo() { return "Indirect"; }
 
-private:
-  void initLayout() override{};
+private slots:
+  void handleHelp();
+  void handleExportToPython();
+  void handleManageDirectories();
+  void showMessageBox(QString const &message);
 
-  std::map<unsigned int, IndirectDataManipulationTab *> m_tabs;
+private:
+  void initLayout() override;
+
+  std::map<std::size_t, IndirectDataManipulationTab *> m_tabs;
 
   Ui::IndirectDataManipulation m_uiForm;
 };

@@ -7,14 +7,14 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectDataManipulationTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_Elwin.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport Elwin : public IndirectDataAnalysisTab {
+class DLLExport Elwin : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
@@ -39,7 +39,6 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
-  void setBrowserWorkspace() override{};
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                             const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);

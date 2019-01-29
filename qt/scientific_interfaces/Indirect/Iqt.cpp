@@ -109,7 +109,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Iqt::Iqt(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
+    : IndirectDataManipulationTab(parent), m_iqtTree(nullptr),
+      m_iqtResFileType() {
   m_uiForm.setupUi(parent);
 }
 
@@ -119,14 +120,14 @@ void Iqt::setup() {
 
   // Create and configure properties
   m_properties["ELow"] = m_dblManager->addProperty("ELow");
-  m_dblManager->setDecimals(m_properties["ELow"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["ELow"], DECIMAL_PLACES);
 
   m_properties["EWidth"] = m_dblManager->addProperty("EWidth");
-  m_dblManager->setDecimals(m_properties["EWidth"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EWidth"], DECIMAL_PLACES);
   m_properties["EWidth"]->setEnabled(false);
 
   m_properties["EHigh"] = m_dblManager->addProperty("EHigh");
-  m_dblManager->setDecimals(m_properties["EHigh"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EHigh"], DECIMAL_PLACES);
 
   m_properties["SampleBinning"] = m_dblManager->addProperty("SampleBinning");
   m_dblManager->setDecimals(m_properties["SampleBinning"], 0);
@@ -231,7 +232,7 @@ void Iqt::algorithmComplete(bool error) {
   } else {
     auto const lastSpectrumIndex =
         static_cast<int>(getWsNumberOfSpectra(m_pythonExportWsName)) - 1;
-    auto const selectedSpec = selectedSpectrum();
+    auto const selectedSpec = getSelectedSpectrum();
 
     setPlotSpectrumIndexMax(lastSpectrumIndex);
     setPlotSpectrumIndex(selectedSpec);
@@ -456,7 +457,7 @@ void Iqt::plotInput(const QString &wsname) {
     return;
   }
 
-  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
+  IndirectDataManipulationTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {

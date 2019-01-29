@@ -56,7 +56,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Elwin::Elwin(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
+    : IndirectDataManipulationTab(parent), m_elwTree(nullptr) {
   m_uiForm.setupUi(parent);
 }
 
@@ -71,13 +71,13 @@ void Elwin::setup() {
 
   // Create Properties
   m_properties["IntegrationStart"] = m_dblManager->addProperty("Start");
-  m_dblManager->setDecimals(m_properties["IntegrationStart"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["IntegrationStart"], DECIMAL_PLACES);
   m_properties["IntegrationEnd"] = m_dblManager->addProperty("End");
-  m_dblManager->setDecimals(m_properties["IntegrationEnd"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["IntegrationEnd"], DECIMAL_PLACES);
   m_properties["BackgroundStart"] = m_dblManager->addProperty("Start");
-  m_dblManager->setDecimals(m_properties["BackgroundStart"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["BackgroundStart"], DECIMAL_PLACES);
   m_properties["BackgroundEnd"] = m_dblManager->addProperty("End");
-  m_dblManager->setDecimals(m_properties["BackgroundEnd"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["BackgroundEnd"], DECIMAL_PLACES);
 
   m_properties["BackgroundSubtraction"] =
       m_blnManager->addProperty("Background Subtraction");
@@ -478,13 +478,13 @@ void Elwin::newPreviewFileSelected(int index) {
  * Replots the preview plot.
  */
 void Elwin::plotInput() {
-  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
-  IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
-                                           m_uiForm.ppPlot, "IntegrationStart",
-                                           "IntegrationEnd");
-  setDefaultResolution(inputWorkspace(),
+  IndirectDataManipulationTab::plotInput(m_uiForm.ppPlot);
+  IndirectDataManipulationTab::updatePlotRange(
+      "ElwinIntegrationRange", m_uiForm.ppPlot, "IntegrationStart",
+      "IntegrationEnd");
+  setDefaultResolution(getInputWorkspace(),
                        m_uiForm.ppPlot->getCurveRange("Sample"));
-  setDefaultSampleLog(inputWorkspace());
+  setDefaultSampleLog(getInputWorkspace());
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
