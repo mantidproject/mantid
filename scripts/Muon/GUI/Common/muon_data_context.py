@@ -15,7 +15,7 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.muon_file_utils import format_run_for_file
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
@@ -187,7 +187,7 @@ class MuonDataContext(object):
     def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
             workspace_group = WorkspaceGroup()
-            for workspace_wrapper in self._loaded_data.get_data(run=int(run))['workspace']['OutputWorkspace']:
+            for workspace_wrapper in self._loaded_data.get_data(run=run_string_to_list(run))['workspace']['OutputWorkspace']:
                 workspace_group.addWorkspace(workspace_wrapper.workspace)
             return workspace_group
         else:
