@@ -180,7 +180,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
     // Add counts per detector per good frame
     out << "\nCounts/(Good frames*number detectors): ";
     out << std::setprecision(3);
-    out << countsPerFrame /static_cast<double>(runWs->getNumberHistograms())
+    out << countsPerFrame / static_cast<double>(runWs->getNumberHistograms())
         << " Events per frame per detector";
   }
   // Add average temperature.
