@@ -7,8 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def get_raw_data_workspace_name(context):
-    return context._base_run_name() + "_raw_data"
+def get_raw_data_workspace_name(context, run):
+    return context._base_run_name(run) + "_raw_data"
 
 
 def get_group_data_workspace_name(context, group_name):
@@ -26,18 +26,18 @@ def get_pair_data_workspace_name(context, pair_name):
         return context._base_run_name() + "; Pair Asym; " + pair_name + "; #1"
 
 
-def get_base_data_directory(context):
+def get_base_data_directory(context, run):
     if context.is_multi_period():
-        return context.base_directory + "/" + context._base_run_name() + "/"
+        return context.base_directory + "/" + context._base_run_name(run) + "/"
     else:
-        return context.base_directory + "/" + context._base_run_name() + "/"
+        return context.base_directory + "/" + context._base_run_name(run) + "/"
 
 
-def get_raw_data_directory(context):
+def get_raw_data_directory(context, run):
     if context.is_multi_period():
-        return context._base_run_name() + "; Raw Data/"
+        return context._base_run_name(run) + "; Raw Data/"
     else:
-        return context._base_run_name() + " Raw Data/"
+        return context._base_run_name(run) + " Raw Data/"
 
 
 def get_cached_data_directory(context):

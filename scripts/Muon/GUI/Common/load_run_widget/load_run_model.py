@@ -28,6 +28,8 @@ class LoadRunWidgetModel(object):
 
     # Used with load thread
     def execute(self):
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         failed_files = []
         for filename in self._filenames:
             try:

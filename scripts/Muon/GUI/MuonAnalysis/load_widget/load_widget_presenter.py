@@ -108,7 +108,7 @@ class LoadWidgetPresenter(object):
         self._model.clear_data()
         self.handle_run_widget_data_changed()
         self.handle_run_widget_data_changed()
-        self.load_run_widget.set_current_instrument(ConfigService.getInstrument().name())
+        self.load_run_widget.set_current_instrument(self._model._context.instrument)
         self.loadNotifier.notify_subscribers()
 
     @property

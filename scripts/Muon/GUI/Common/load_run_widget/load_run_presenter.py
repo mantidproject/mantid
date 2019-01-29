@@ -151,6 +151,8 @@ class LoadRunWidgetPresenter(object):
         self.on_loading_finished()
 
     def on_loading_finished(self):
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         # If in single file mode, remove the previous run
         if not self._load_multiple_runs and len(self._model.loaded_runs) > 1:
             self._model.remove_previous_data()

@@ -251,30 +251,37 @@ class MuonDataContext(object):
         self.clear_pairs()
         self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
-    def _base_run_name(self):
+    def _base_run_name(self, run=None):
         """ e.g. EMU0001234 """
-        if isinstance(self.run, int):
-            return str(self.instrument) + format_run_for_file(self.run)
+        if not run:
+            run = self.run
+        if isinstance(run, int):
+            return str(self.instrument) + format_run_for_file(run)
         else:
-            return str(self.instrument) + self.run
+            return str(self.instrument) + run
 
     # ------------------------------------------------------------------------------------------------------------------
     # Showing workspaces in the ADS
     # ------------------------------------------------------------------------------------------------------------------
 
     def show_raw_data(self):
-        workspace = self.current_data["OutputWorkspace"]
-        directory = get_base_data_directory(self) + get_raw_data_directory(self)
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+        workspace_list = self._loaded_data.params
+        for workspace in workspace_list:
+            run = run_list_to_string(workspace['run'])
+            workspace = workspace['workspace']['OutputWorkspace']
+            directory = get_base_data_directory(self, run) + get_raw_data_directory(self, run)
 
-        if len(workspace) > 1:
-            # Multi-period data
-            for i, single_ws in enumerate(workspace):
-                name = directory + get_raw_data_workspace_name(self) + "_period_" + str(i)
-                single_ws.show(name)
-        else:
-            # Single period data
-            name = directory + get_raw_data_workspace_name(self)
-            workspace[0].show(name)
+            if len(workspace) > 1:
+                # Multi-period data
+                for i, single_ws in enumerate(workspace):
+                    name = directory + get_raw_data_workspace_name(self, run) + "_period_" + str(i)
+                    single_ws.show(name)
+            else:
+                # Single period data
+                name = directory + get_raw_data_workspace_name(self, run)
+                workspace[0].show(name)
 
     def show_all_groups(self):
         for group_name in self._groups.keys():
@@ -282,7 +289,7 @@ class MuonDataContext(object):
 
     def show_group_data(self, group_name, show=True):
         name = get_group_data_workspace_name(self, group_name)
-        directory = get_base_data_directory(self) + get_group_data_directory(self)
+        directory = get_base_data_directory(self, self.run) + get_group_data_directory(self)
         workspace = calculate_group_data(self, group_name)
 
         self._groups[group_name].workspace = MuonWorkspaceWrapper(workspace)
@@ -295,7 +302,7 @@ class MuonDataContext(object):
 
     def show_pair_data(self, pair_name, show=True):
         name = get_pair_data_workspace_name(self, pair_name)
-        directory = get_base_data_directory(self) + get_pair_data_directory(self)
+        directory = get_base_data_directory(self, self.run) + get_pair_data_directory(self)
         workspace = calculate_pair_data(self, pair_name)
 
         self._pairs[pair_name].workspace = MuonWorkspaceWrapper(workspace)

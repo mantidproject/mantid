@@ -67,7 +67,7 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         self.context = MuonDataContext(load_data=self.loaded_data)
 
         # construct all the widgets.
-        self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
+        self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context)
         self.setup_tabs()
