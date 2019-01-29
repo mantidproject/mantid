@@ -33,6 +33,7 @@ Improved
 * Added save_can option to output unsubtracted can and sample workspaces.
 * Added transmission sample and can data to XML and H5 files when provided.
 * Added transmission sample/can to unsubtracted sample/can XML and H5 files when "Save Can" option selected.
+* Autocomplete for Sample shape column in the table.
 * Can separate items in variable q binning with commas or spaces. E.g. L/Q 0.0, 0.02 0.3 0.05, 0.8
 * Can export table as a csv, which can be re-loaded as a batch file.
 * File path to batch file will be added to your directories automatically upon loading

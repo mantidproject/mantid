@@ -461,14 +461,17 @@ void JobTreeView::appendAndEditAtChildRow() {
 
 void JobTreeView::appendAndEditAtRowBelow() {
   auto current = currentIndex();
+  setCurrentIndex(QModelIndex());
+  setCurrentIndex(current);
   if (current != m_mainModel.index(-1, -1)) {
     auto const below = findOrMakeCellBelow(fromFilteredModel(current));
     auto index = below.first;
     auto isNew = below.second;
 
-    if (isNew)
+    if (isNew) {
       m_notifyee->notifyRowInserted(
           rowLocation().atIndex(mapToMainModel(index)));
+    }
     editAt(index);
   }
 }
