@@ -6,6 +6,8 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex, valid_alpha_regex
 from Muon.GUI.Common.observer_pattern import Observable
 
+pair_columns = ['pair_name', 'group_1', 'group_2', 'alpha']
+
 
 class PairingTablePresenter(object):
 
@@ -54,24 +56,21 @@ class PairingTablePresenter(object):
         table = self._view.get_table_contents()
         changed_item = table[row][col]
         update_model = True
-        if col == 0 and not self.validate_pair_name(changed_item):
+        if pair_columns[col] == 'pair_name' and not self.validate_pair_name(changed_item):
             update_model = False
-        if col == 1:
-            if changed_item == self._view.get_table_item_text(row, 2):
-                table[row][2] = self._model.pairs[row].forward_group
-        if col == 2:
-            if changed_item == self._view.get_table_item_text(row, 1):
-                table[row][1] = self._model.pairs[row].backward_group
-        if col == 3:
+        if pair_columns[col] == 'group_1':
+            if changed_item == self._view.get_table_item_text(row, pair_columns.index('group_2')):
+                table[row][pair_columns.index('group_2')] = self._model.pairs[row].forward_group
+        if pair_columns[col] == 'group_2':
+            if changed_item == self._view.get_table_item_text(row, pair_columns.index('group_1')):
+                table[row][pair_columns.index('group_1')] = self._model.pairs[row].backward_group
+        if pair_columns[col] == 'alpha':
             if not self.validate_alpha(changed_item):
                 update_model = False
             else:
-                self._view.pairing_table.blockSignals(True)
                 rounded_item = '{:.3f}'.format(float(changed_item)) if '{:.3f}'.format(float(changed_item)) != '0.000'\
                     else '{:.3g}'.format(float(changed_item))
-
-                self._view.pairing_table.item(row, col).setText(rounded_item)
-                self._view.pairing_table.blockSignals(False)
+                table[row][col] = rounded_item
 
         if update_model:
             self.update_model_from_view(table)

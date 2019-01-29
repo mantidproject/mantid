@@ -67,10 +67,8 @@ class GroupingTabView(QtGui.QWidget):
         self.vertical_layout.setObjectName("verticalLayout")
         self.vertical_layout.addItem(self.horizontal_layout)
         self.vertical_layout.addItem(self.horizontal_layout_description)
-        if self._grouping_table:
-            self.vertical_layout.addWidget(self._grouping_table)
-        if self._pairing_table:
-            self.vertical_layout.addWidget(self._pairing_table)
+        self.vertical_layout.addWidget(self._grouping_table)
+        self.vertical_layout.addWidget(self._pairing_table)
         self.vertical_layout.addItem(self.horizontal_layout_base)
 
         self.setLayout(self.vertical_layout)
