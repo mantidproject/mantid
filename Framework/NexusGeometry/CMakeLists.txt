@@ -12,7 +12,7 @@ set ( INC_FILES
     inc/MantidNexusGeometry/NexusGeometryParser.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
     inc/MantidNexusGeometry/TubeBuilder.h
-    inc/MantidNexusGeometry/TubeHelpers.h        
+    inc/MantidNexusGeometry/TubeHelpers.h
       )
 
 set ( TEST_FILES
@@ -40,11 +40,11 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 #Include HDF5 libraries
-target_include_directories ( NexusGeometry SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
+target_include_directories ( NexusGeometry SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ../DataHandling/inc)
 # Add to the 'Framework' group in VS
 set_property ( TARGET NexusGeometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries( NexusGeometry LINK_PRIVATE ${MANTIDLIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${HDF5_CXX_LIBRARIES})
+target_link_libraries( NexusGeometry LINK_PRIVATE ${MANTIDLIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${HDF5_CXX_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

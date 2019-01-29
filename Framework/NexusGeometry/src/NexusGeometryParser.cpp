@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/NexusGeometryParser.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -147,9 +148,24 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   // Open data set
   DataSet data = group.openDataSet(dataset);
   auto dataType = data.getDataType();
-  H5std_string buffer;
-  data.read(buffer, dataType, data.getSpace());
-  return buffer;
+  // Use a different read method if the string is of variable length type
+  if (dataType.isVariableStr()) {
+    H5std_string buffer;
+    // Need to check for old versions of hdf5
+    if (DataHandling::H5Util::checkVariableLengthStringSupport()) {
+      data.read(buffer, dataType, data.getSpace());
+    } else {
+      throw std::runtime_error("NexusGeometryParser::get1DStringDataset: Only "
+                               "versions 1.8.16 + of hdf5 support the variable "
+                               "string feature");
+    }
+    return buffer;
+  } else {
+    auto nCharacters = dataType.getSize();
+    std::vector<char> value(nCharacters);
+    data.read(value.data(), dataType, data.getSpace());
+    return std::string(value.begin(), value.end());
+  }
 }
 
 /** Open subgroups of parent group
