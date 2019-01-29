@@ -120,14 +120,14 @@ void ConvertToMD::init() {
                   "demand in order to reduce memory use.");
 
 #if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
-  std::vector<std::string> converterType{"default", "indexed"};
+  std::vector<std::string> converterType{"Default", "Indexed"};
 #else
   std::vector<std::string> converterType{"default"};
 #endif
   auto loadTypeValidator =
       boost::make_shared<StringListValidator>(converterType);
   declareProperty("ConverterType", "default", loadTypeValidator,
-                  "[default, indexed], indexed is the experimental type that "
+                  "[Default, Indexed], indexed is the experimental type that "
                   "can speedup the conversion process"
                   "for the big files using the indexing.");
 }
@@ -150,7 +150,7 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     result["Filename"] = "Filename must be given if FileBackEnd is required.";
   }
 
-  if (treeBuilderType.find("indexed") != std::string::npos) {
+  if (treeBuilderType.find("Indexed") != std::string::npos) {
     if (fileBackEnd)
       result["ConverterType"] += "No file back end implemented "
                                  "for indexed version of algorithm. ";
@@ -291,7 +291,7 @@ void ConvertToMD::exec() {
   // factory, (will throw if logic is wrong and ChildAlgorithm is not found
   // among existing)
   ConvToMDSelector::ConverterType convType =
-      getPropertyValue("ConverterType") == "indexed"
+      getPropertyValue("ConverterType") == "Indexed"
           ? ConvToMDSelector::INDEXED
           : ConvToMDSelector::DEFAULT;
   ConvToMDSelector AlgoSelector(convType);
