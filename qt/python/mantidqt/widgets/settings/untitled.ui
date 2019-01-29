@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>726</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>5</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetNoConstraint</enum>
+      </property>
+      <item>
+       <widget class="QListWidget" name="sections">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QListView {
+    show-decoration-selected: 1;
+}
+
+QListView::item {
+    padding:20px;
+}
+</string>
+        </property>
+        <property name="selectionRectVisible">
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>General</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Mantid</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Not Mantid</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Definitely Not Mantid</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="container"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>726</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
