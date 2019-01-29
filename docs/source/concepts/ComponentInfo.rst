@@ -18,7 +18,7 @@ Python Interface
 
 Examples of using ``ComponentInfo`` in python
 
-Print indices of detectors in "bank1" that are masked
+**Print indices of detectors in "bank1" that are masked**
 
 .. testcode:: show_masked_detectors_in_bank 
 
@@ -34,6 +34,10 @@ Print indices of detectors in "bank1" that are masked
        if det_info.isMasked(int(det_index)):
            print('Masked detector index of bank1 is {}'.format(det_index))
 
+Output:
+
 .. testoutput:: show_masked_detectors_in_bank
 
    Masked detector index of bank1 is 2
+
+.. categories:: Concepts

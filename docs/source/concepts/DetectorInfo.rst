@@ -1,8 +1,8 @@
 .. _DetectorInfo:
 
-=============
+============
 DetectorInfo
-=============
+============
 
 .. contents::
   :local:
@@ -35,7 +35,10 @@ Example of using ``DetectorInfo`` in python
            mask_count += 1
    print('masked {} detectors'.format(mask_count))
 
+Output:
+
 .. testoutput:: mask_detectors
   
    masked 200 detectors
   
+.. categories:: Concepts
