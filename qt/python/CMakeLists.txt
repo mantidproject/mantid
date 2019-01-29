@@ -100,6 +100,10 @@ endif ()
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
 
+    mantidqt/widgets/common/test/test_workspacedisplay_ads_observer.py
+    mantidqt/widgets/common/test/test_observing_presenter.py
+    mantidqt/widgets/common/test/test_observing_view.py
+
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_table_view_model.py

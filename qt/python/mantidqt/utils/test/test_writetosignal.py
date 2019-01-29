@@ -12,11 +12,15 @@ from __future__ import (absolute_import)
 import unittest
 
 import sys
-from mock import patch
 from qtpy.QtCore import QCoreApplication, QObject
 
 from mantidqt.utils.qt.test import GuiTest
 from mantidqt.utils.writetosignal import WriteToSignal
+
+if sys.version_info.major == 2:
+    from mock import patch
+else:
+    from unittest.mock import patch
 
 
 class Receiver(QObject):
@@ -27,8 +31,8 @@ class Receiver(QObject):
 
 
 class WriteToSignalTest(GuiTest):
-    @classmethod
-    def setUpClass(cls):
+
+    def setUp(self):
         if not hasattr(sys.stdout, "fileno"):
             # if not present in the test stdout, then add it as an
             # attribute so that mock can replace it later.
@@ -56,6 +60,12 @@ class WriteToSignalTest(GuiTest):
             QCoreApplication.processEvents()
             self.assertEqual(txt, recv.captured_txt)
             mock_fileno.assert_called_once_with()
+
+    def test_with_fileno_not_defined(self):
+        with patch('sys.stdout') as mock_stdout:
+            del mock_stdout.fileno
+            writer = WriteToSignal(sys.stdout)
+            self.assertEqual(writer._original_out, None)
 
 
 if __name__ == "__main__":

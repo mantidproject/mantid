@@ -32,7 +32,7 @@ class HelpWidgetView(QtGui.QWidget):
         self.help_label.setText("Help : ")
 
         self.help_button = QtGui.QToolButton(self)
-        self.help_button.setObjectName("rebinHelpButton")
+        self.help_button.setObjectName("helpButton")
         self.help_button.setText("?")
 
         self.manage_user_dir_button = QtGui.QPushButton(self)

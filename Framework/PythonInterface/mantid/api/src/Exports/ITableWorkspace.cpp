@@ -471,12 +471,16 @@ PyObject *cell(ITableWorkspace &self, const object &value, int row_or_col) {
  * column if value is an index
  */
 void setCell(ITableWorkspace &self, const object &col_or_row,
-             const int row_or_col, const object &value) {
+             const int row_or_col, const object &value,
+             const bool &notify_replace) {
   Mantid::API::Column_sptr column;
   int row(-1);
   getCellLoc(self, col_or_row, row_or_col, column, row);
   setValue(column, row, value);
-  self.modified();
+
+  if (notify_replace) {
+    self.modified();
+  }
 }
 } // namespace
 
@@ -670,10 +674,11 @@ void export_ITableWorkspace() {
 
       .def("setCell", &setCell,
            (arg("self"), arg("row_or_column"), arg("column_or_row"),
-            arg("value")),
+            arg("value"), arg("notify_replace") = true),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
-           "is interpreted as a column name.")
+           "is interpreted as a column name. If notify replace is false, then "
+           "the replace workspace event is not triggered.")
 
       .def("toDict", &toDict, (arg("self")),
            "Gets the values of this workspace as a dictionary. The keys of the "
