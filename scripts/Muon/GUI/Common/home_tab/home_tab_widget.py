@@ -27,10 +27,10 @@ from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabPresenter
 
 class HomeTabWidget(object):
     def __init__(self, context, parent):
-        self.inst_view = InstrumentWidgetView()
-        self.grp_view = HomeGroupingWidgetView()
-        self.plot_view = HomePlotWidgetView()
-        self.run_info_view = HomeRunInfoWidgetView()
+        self.inst_view = InstrumentWidgetView(parent)
+        self.grp_view = HomeGroupingWidgetView(parent)
+        self.plot_view = HomePlotWidgetView(parent)
+        self.run_info_view = HomeRunInfoWidgetView(parent)
 
         # keep a handle to the presenters of sub-widgets
         self.instrument_widget = InstrumentWidgetPresenter(self.inst_view,

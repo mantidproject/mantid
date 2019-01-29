@@ -80,8 +80,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.group2 = QtGui.QGroupBox("Rebin")
         self.group2.setFlat(False)
-        self.vertical_layout2 = QtGui.QVBoxLayout()
-        self.vertical_layout2.addItem(self.horizontal_layout_5)
+
         self.group2.setLayout(self.horizontal_layout_5)
 
         self.widget_layout = QtGui.QVBoxLayout(self)
@@ -197,7 +196,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.timezero_unit_label = QtGui.QLabel(self)
         self.timezero_unit_label.setObjectName("timeZeroUnitLabel")
-        self.timezero_unit_label.setText(u" µs (From data file ")
+        self.timezero_unit_label.setText(u"\u03BCs (From data file ")
 
         self.timezero_checkbox = QtGui.QCheckBox(self)
         self.timezero_checkbox.setObjectName("timeZeroCheckbox")
@@ -261,7 +260,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.firstgooddata_unit_label = QtGui.QLabel(self)
         self.firstgooddata_unit_label.setObjectName("firstgooddataUnitLabel")
-        self.firstgooddata_unit_label.setText(u" U+03BCs (From data file ")
+        self.firstgooddata_unit_label.setText(u" \u03BCs (From data file ")
 
         self.firstgooddata_checkbox = QtGui.QCheckBox(self)
         self.firstgooddata_checkbox.setObjectName("firstgooddataCheckbox")

@@ -28,10 +28,9 @@ class DetachableTabWidget(QtGui.QTabWidget):
         self.detachedTabs = {}
 
         # Close all detached tabs if the application is closed explicitly
-        QtGui.qApp.aboutToQuit.connect(self.close_detached_tabs)  # @UndefinedVariable
+        # QtGui.qApp.aboutToQuit.connect(self.close_detached_tabs)  # @UndefinedVariable
 
     def closeEvent(self, event):
-        print("closeEvent in detatchable tab widget")
         self.close_detached_tabs()
 
     def setMovable(self, movable):
@@ -217,7 +216,6 @@ class DetachableTabWidget(QtGui.QTabWidget):
         """
         Close all tabs that are currently detached.
         """
-        print("close detatched tabs")
         list_of_detached_tabs = []
 
         for key in self.detachedTabs:
