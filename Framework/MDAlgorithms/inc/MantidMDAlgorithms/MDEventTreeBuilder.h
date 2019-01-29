@@ -348,12 +348,12 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
   ++tsk.level;
   for (auto &ch : children) {
     Task newTask{ch.box,
-              ch.eventRange.first,
-              ch.eventRange.second,
-              ch.mortonBounds.first,
-              ch.mortonBounds.second,
-              tsk.maxDepth,
-              tsk.level};
+                 ch.eventRange.first,
+                 ch.eventRange.second,
+                 ch.mortonBounds.first,
+                 ch.mortonBounds.second,
+                 tsk.maxDepth,
+                 tsk.level};
     if (wtp == MASTER &&
         (size_t)std::distance(newTask.begin, newTask.end) < m_eventsThreshold)
       pushTask(std::move(newTask));
