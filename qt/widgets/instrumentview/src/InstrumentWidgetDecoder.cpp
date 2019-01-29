@@ -71,7 +71,6 @@ void InstrumentWidgetDecoder::decodeTabs(const QMap<QString, QVariant> &map,
 
 void InstrumentWidgetDecoder::decodeMaskTab(const QMap<QString, QVariant> &map,
                                             InstrumentWidgetMaskTab *obj) {
-  connect(this, SIGNAL(shapeCreated()), obj, SLOT(shapeCreated()));
   const auto activeTools = map[QString("activeTools")].toMap();
   const auto activeType = map[QString("activeType")].toMap();
 
@@ -156,7 +155,6 @@ void InstrumentWidgetDecoder::decodeTreeTab(const QMap<QString, QVariant> &map,
 
 void InstrumentWidgetDecoder::decodePickTab(const QMap<QString, QVariant> &map,
                                             InstrumentWidgetPickTab *obj) {
-  connect(this, SIGNAL(shapeCreated()), obj, SLOT(shapeCreated()));
   obj->m_zoom->setChecked(map[QString("zoom")].toBool());
   obj->m_edit->setChecked(map[QString("edit")].toBool());
   obj->m_ellipse->setChecked(map[QString("ellipse")].toBool());
@@ -197,6 +195,13 @@ void InstrumentWidgetDecoder::decodeBinMasks(const QList<QVariant> &list,
 void InstrumentWidgetDecoder::decodeSurface(
     const QMap<QString, QVariant> &map,
     boost::shared_ptr<ProjectionSurface> obj) {
+
+  auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
+  // Decide Projection3D stuff
+  if (map[QString("projection3DSuccess")].toBool() && projection3D) {
+    this->decodeProjection3D(map[QString("projection3D")].toMap(), *projection3D);
+  }
+
   QMap<QString, QVariant> color = map[QString("backgroundColor")].toMap();
   QColor qColor(color[QString("red")].toInt(), color[QString("green")].toInt(),
                 color[QString("blue")].toInt(),
@@ -208,15 +213,38 @@ void InstrumentWidgetDecoder::decodeSurface(
   this->decodeAlignmentInfo(map[QString("alignmentInfo")].toList(), obj);
 }
 
+void InstrumentWidgetDecoder::decodeProjection3D(
+    const QMap<QString, QVariant> &map, Projection3D &obj) {
+      this->decodeViewPort(map[QString("viewport")].toMap(), obj.m_viewport);
+    }
+
+void InstrumentWidgetDecoder::decodeViewPort(const QMap<QString, QVariant> &map,
+                                             Viewport &obj) {
+  auto translationMap = map[QString("translation")].toMap();
+  auto rotationList = map[QString("rotation")].toList();
+
+  obj.m_xTrans = translationMap[QString("xTrans")].toDouble();
+  obj.m_yTrans = translationMap[QString("yTrans")].toDouble();
+  obj.m_zoomFactor = map[QString("zoom")].toDouble();
+
+  // Sort out the rotation
+  double w, a, b, c;
+  w = rotationList[0].toDouble();
+  a = rotationList[1].toDouble();
+  b = rotationList[2].toDouble();
+  c = rotationList[3].toDouble();
+  Mantid::Kernel::Quat quat(w, a, b, c);
+  obj.setRotation(quat);
+}
+
 void InstrumentWidgetDecoder::decodeMaskShapes(const QList<QVariant> &list,
                                                Shape2DCollection &obj) {
+  connect(this, SIGNAL(shapeCreated()), &obj, SIGNAL(shapeCreated()));
   for (const auto &shape : list) {
     auto created_shape = this->decodeShape(shape.toMap());
     obj.m_shapes.push_back(created_shape);
     emit shapeCreated();
   }
-
-  std::cout << list.size() << " " << obj.m_shapes.size() << "/n";
 }
 
 Shape2D *
@@ -237,10 +265,12 @@ InstrumentWidgetDecoder::decodeShape(const QMap<QString, QVariant> &map) {
     }
   }();
 
-  shape->setScalable(map[QString("scalable")].toBool());
-  shape->edit(map[QString("editing")].toBool());
-  shape->setSelected(map[QString("selected")].toBool());
-  shape->setVisible(map[QString("visible")].toBool());
+  // Set the properties of the overall shape object from the properties map.
+  auto properties = map[QString("properties")].toMap();
+  shape->setScalable(properties[QString("visible")].toBool());
+  shape->setVisible(properties[QString("scalable")].toBool());
+  shape->edit(properties[QString("editing")].toBool());
+  shape->setSelected(properties[QString("selected")].toBool());
 
   QMap<QString, QVariant> color1 = map[QString("color")].toMap();
   QColor qColor(

@@ -248,6 +248,14 @@ QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
   QMap<QString, QVariant> map;
 
+  auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
+  if (projection3D){
+    map.insert(QString("projection3DSuccess"), QVariant(true));
+    map.insert(QString("projection3D"), QVariant(this->encodeProjection3D(*projection3D)));
+  } else {
+    map.insert(QString("projection3DSuccess"), QVariant(false));
+  }
+
   map.insert(QString("backgroundColor"), QVariant(obj->m_backgroundColor));
   map.insert(QString("shapes"),
              QVariant(this->encodeMaskShapes(obj->m_maskShapes)));
@@ -257,28 +265,31 @@ InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
   return map;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeProjection3D(const Projection3D &obj){
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeProjection3D(const Projection3D &obj) {
   QMap<QString, QVariant> map;
-  map.insert(QString("viewport"), QVariant(this->encodeViewPort(obj.m_viewport)));
+  map.insert(QString("viewport"),
+             QVariant(this->encodeViewPort(obj.m_viewport)));
   return map;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeViewPort(const Viewport &obj){
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeViewPort(const Viewport &obj) {
   QMap<QString, QVariant> map;
   QMap<QString, QVariant> translationMap;
-  
+
   translationMap.insert(QString("xTrans"), QVariant(obj.m_xTrans));
   translationMap.insert(QString("yTrans"), QVariant(obj.m_yTrans));
   map.insert(QString("translation"), QVariant(translationMap));
 
-  map.insert(QString("Zoom"), QVariant(obj.m_zoomFactor));
+  map.insert(QString("zoom"), QVariant(obj.m_zoomFactor));
 
   QList<QVariant> rotation;
-  for(auto i = 0; i < 4; i++){
+  for (auto i = 0; i < 4; ++i) {
     rotation.append(obj.m_quaternion[i]);
   }
   map.insert(QString("rotation"), QVariant(rotation));
-  
+
   return map;
 }
 
@@ -293,7 +304,8 @@ InstrumentWidgetEncoder::encodeMaskShapes(const Shape2DCollection &obj) {
   return list;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
   QMap<QString, QVariant> map;
 
   map.insert(QString("properties"), QVariant(this->encodeShapeProperties(obj)));
@@ -316,10 +328,12 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encodeShape(const Shape2D *obj)
 
   QMap<QString, QVariant> subShapeMap;
   if (obj->type() == "ellipse") {
-    subShapeMap = this->encodeEllipse(reinterpret_cast<const Shape2DEllipse *>(obj));
+    subShapeMap =
+        this->encodeEllipse(reinterpret_cast<const Shape2DEllipse *>(obj));
     map.insert(QString("type"), QVariant(QString("ellipse")));
   } else if (obj->type() == "rectangle") {
-    subShapeMap = this->encodeRectangle(reinterpret_cast<const Shape2DRectangle *>(obj));
+    subShapeMap =
+        this->encodeRectangle(reinterpret_cast<const Shape2DRectangle *>(obj));
     map.insert(QString("type"), QVariant(QString("rectangle")));
   } else if (obj->type() == "ring") {
     subShapeMap = this->encodeRing(reinterpret_cast<const Shape2DRing *>(obj));
@@ -369,7 +383,8 @@ InstrumentWidgetEncoder::encodeRectangle(const Shape2DRectangle *obj) {
   return map;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeRing(const Shape2DRing *obj) {
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeRing(const Shape2DRing *obj) {
   const auto xWidth = obj->getDouble("xwidth");
   const auto yWidth = obj->getDouble("ywidth");
   auto baseShape = obj->getOuterShape()->clone();
@@ -382,7 +397,8 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encodeRing(const Shape2DRing *o
   return map;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeFree(const Shape2DFree *obj) {
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeFree(const Shape2DFree *obj) {
   const auto polygon = obj->m_polygon;
 
   QList<QVariant> parameters;

@@ -54,7 +54,7 @@ else:
                                                  u'freeDrawButton': False, u'ringEllipseButton': False},
                                 u'maskWorkspaceSaved': False},
                                 u'renderTab': {u'displayWireframe': False, u'displayLighting': False,
-                                               u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': True,
+                                               u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': False,
                                                u'colorBar': {u'max': u'40', u'scaleType': 0, u'power': u'2',
                                                              u'min': u'40'},
                                                u'showLabels': True, u'flipView': False, u'displayDetectorsOnly': True,
