@@ -128,6 +128,14 @@ class TableModel(object):
         row = [''] * 16
         return TableIndexModel(*row)
 
+    def get_non_empty_rows(self, rows):
+        non_empty_rows = []
+        for index in rows:
+            row = self.get_table_entry(index)
+            if not row.is_empty():
+                non_empty_rows.append(index)
+        return non_empty_rows
+
     def get_options_hint_strategy(self):
         return OptionsColumnModel.get_hint_strategy()
 
