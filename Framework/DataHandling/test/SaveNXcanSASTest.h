@@ -494,7 +494,7 @@ private:
     try {
       data.openAttribute(sasDataQUncertaintiesAttr);
     } catch (H5::AttributeIException &) {
-      missingQUncertaintyAttribute = true;
+      missingQUncertaintiesAttribute = true;
     }
     TSM_ASSERT("Should not have a Q_uncertainties attribute",
                missingQUncertaintiesAttribute);
@@ -649,7 +649,7 @@ private:
   void do_assert_2D_data(H5::Group &data) {
     auto numAttributes = data.getNumAttrs();
     TSM_ASSERT_EQUALS(
-        "Should have 6 attributes, since Q_uncertainty is not present", 6,
+        "Should have 7 attributes, since Q_uncertainty is not present", 7,
         numAttributes);
 
     // canSAS_class and NX_class attribute
