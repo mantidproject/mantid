@@ -170,12 +170,12 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Add the end time for the run
   out << "\nGood frames: ";
   if (run.hasProperty("goodfrm")) {
-    auto goodFrames = run.getProperty("goodfrm")->value();
+    const auto goodFrames = run.getProperty("goodfrm")->value();
     out << goodFrames;
     // Add counts divided by good frames to run information
     out << "\nCounts/Good frames: ";
     out << std::setprecision(3);
-    auto countsPerFrame = counts / std::stod(goodFrames);
+    const auto countsPerFrame = counts / std::stod(goodFrames);
     out << countsPerFrame << " Events per frame";
     // Add counts per detector per good frame
     out << "\nCounts/(Good frames*number detectors): ";
