@@ -25,6 +25,7 @@ Improvements
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
+- New TOPAZ instrument geometry for 2019 run cycle
 
 
 Bugfixes
@@ -34,12 +35,14 @@ Bugfixes
 Single Crystal Diffraction
 --------------------------
 
-New
-###
+New Algorithms
+##############
 
 - New algorithm :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` to predict satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace or range of wavelength and DSpacing.
 
 - New algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` to index peaks with satellites and set modulation vectors and maximum order of satellite from input values.
+
+- The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal diffraction measurements.
 
 Improvements
 ############
@@ -60,6 +63,7 @@ Improvements
 - :ref:`IntegratePeaksUsingClusters <algm-IntegratePeaksUsingClusters>` will now treat NaN's as background.
 - SCD Event Data Reduction Diffraction Interface now adds goniometer for CORELLI and used proton charge as monitor count if no monitors are in input file.
 - :ref:`SetCrystalLocation <algm-SetCrystalLocation>` is a new algorithm to set the sample location in events workspaces.
+- :ref:`OptimizeCrystalPlacementByRun <algm-OptimizeCrystalPlacementByRun>` is new algorithm to update the sample position for each run in a peaks workspace.
 
 - :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
 
@@ -74,7 +78,7 @@ Bugfixes
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` does not have duplicate peak numbers when saving PeaksWorkspaces with more than one RunNumber.
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now loads the calibration from the peaks file correctly.
 
-- :ref:`OptimizeCrystalPlacement <algm-OptimizeCrystalPlacement>` now updates the sample location used by peaks.  Previously, the sample was effectively left unmoved. Default for indexing tolerance was lowered to 0.15.
+- :ref:`OptimizeCrystalPlacement <algm-OptimizeCrystalPlacement>` now updates the sample location used by peaks.  Previously, the sample was effectively left unmoved. Default for indexing tolerance was lowered to 0.15 and can now be called more than once without error.
 
 Powder Diffraction
 ------------------
@@ -92,6 +96,7 @@ Improvements
 - Focus on Pearl now saves out xye_tof files.
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
+- :ref:`SaveReflections <algm-SaveReflections>` now supports saving indexed modulated peaks in the Jana format.
 
 
 Bugfixes

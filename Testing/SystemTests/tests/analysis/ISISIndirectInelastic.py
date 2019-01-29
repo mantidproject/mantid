@@ -87,7 +87,7 @@ from six import with_metaclass
 
 def currentOSHasGSLv2():
     """ Check whether the current OS should be running GSLv2 """
-    return platform.linux_distribution()[0] == "ubuntu" or platform.mac_ver()[0] != ''
+    return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''
 
 
 class ISISIndirectInelasticBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):

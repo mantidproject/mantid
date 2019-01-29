@@ -837,7 +837,7 @@ double ReflectometryReductionOne2::findIvsLamRangeMin(
   const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
 
   // For bLambda, use the average bin size for this spectrum
-  auto xValues = detectorWS->x(spIdx);
+  const auto &xValues = detectorWS->x(spIdx);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
                    static_cast<int>(xValues.size());
   double dummy = 0.0;
@@ -856,7 +856,7 @@ double ReflectometryReductionOne2::findIvsLamRangeMax(
   const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
 
   // For bLambda, use the average bin size for this spectrum
-  auto xValues = detectorWS->x(spIdx);
+  const auto &xValues = detectorWS->x(spIdx);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
                    static_cast<int>(xValues.size());
 

@@ -701,7 +701,7 @@ void addTransmission(H5::Group &group,
 
   //-----------------------------------------
   // Add Tdev with units
-  const auto transmissionErrors = workspace->e(0);
+  const auto &transmissionErrors = workspace->e(0);
   std::map<std::string, std::string> transmissionErrorAttributes;
   transmissionErrorAttributes.emplace(sasUnitAttr, unit);
 
@@ -711,7 +711,7 @@ void addTransmission(H5::Group &group,
 
   //-----------------------------------------
   // Add lambda with units
-  const auto lambda = workspace->x(0);
+  const auto &lambda = workspace->x(0);
   std::map<std::string, std::string> lambdaAttributes;
   auto lambdaUnit = getUnitFromMDDimension(workspace->getDimension(0));
   if (lambdaUnit.empty() || lambdaUnit == "Angstrom") {

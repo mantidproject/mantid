@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <boost/optional.hpp>
 
@@ -16,6 +17,14 @@ using namespace Mantid::API;
 
 MatrixWorkspace_sptr getWorkspace(const std::string &name) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+}
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+bool validWorkspace(std::string const &name) {
+  return !name.empty() && doesExistInADS(name);
 }
 
 boost::optional<std::size_t> maximumIndex(MatrixWorkspace_sptr workspace) {
@@ -115,8 +124,9 @@ void ConvFitAddWorkspaceDialog::setResolutionFBSuffices(
 }
 
 void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
-  if (state == Qt::Checked) {
-    m_uiForm.leWorkspaceIndices->setText(getIndexString(workspaceName()));
+  auto const name = workspaceName();
+  if (validWorkspace(name) && state == Qt::Checked) {
+    m_uiForm.leWorkspaceIndices->setText(getIndexString(name));
     m_uiForm.leWorkspaceIndices->setEnabled(false);
   } else
     m_uiForm.leWorkspaceIndices->setEnabled(true);
@@ -133,8 +143,10 @@ void ConvFitAddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
 
 void ConvFitAddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   setAllSpectraSelectionEnabled(true);
-  if (m_uiForm.ckAllSpectra->isChecked())
+  if (m_uiForm.ckAllSpectra->isChecked()) {
     m_uiForm.leWorkspaceIndices->setText(getIndexString(workspace));
+    m_uiForm.leWorkspaceIndices->setEnabled(false);
+  }
 }
 
 void ConvFitAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {

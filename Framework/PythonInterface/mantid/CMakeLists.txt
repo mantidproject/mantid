@@ -65,7 +65,6 @@ include ( ${CMAKE_CURRENT_SOURCE_DIR}/BundlePython.cmake )
 ###########################################################################
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid ${WORKBENCH_BIN_DIR}/mantid)
 # version.py that will overwrite the ones from the built target
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py DESTINATION
-          ${BIN_DIR}/mantid RENAME ${VERSION_PY}.py )
+mtd_install_files( FILES ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py INSTALL_DIRS ${BIN_DIR}/mantid ${WORKBENCH_BIN_DIR}/mantid RENAME ${VERSION_PY}.py)

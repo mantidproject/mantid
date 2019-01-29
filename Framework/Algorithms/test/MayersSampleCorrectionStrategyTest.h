@@ -121,9 +121,9 @@ public:
 
     auto outHisto = mscat.getCorrectedHisto();
 
-    auto tof = outHisto.x();
-    auto signal = outHisto.y();
-    auto error = outHisto.e();
+    const auto &tof = outHisto.x();
+    const auto &signal = outHisto.y();
+    const auto &error = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
@@ -147,9 +147,9 @@ public:
     MayersSampleCorrectionStrategy mscat(corrPars, histo);
 
     const auto outHisto = mscat.getCorrectedHisto();
-    const auto tof = outHisto.x();
-    const auto signal = outHisto.y();
-    const auto error = outHisto.e();
+    const auto &tof = outHisto.x();
+    const auto &signal = outHisto.y();
+    const auto &error = outHisto.e();
 
     // Check some values
     // Check some values
@@ -174,9 +174,9 @@ public:
     MayersSampleCorrectionStrategy mscat(corrPars, histo);
 
     const auto outHisto = mscat.getCorrectedHisto();
-    const auto tof = outHisto.x();
-    const auto signal = outHisto.y();
-    const auto error = outHisto.e();
+    const auto &tof = outHisto.x();
+    const auto &signal = outHisto.y();
+    const auto &error = outHisto.e();
 
     // Check some values
     // Check some values

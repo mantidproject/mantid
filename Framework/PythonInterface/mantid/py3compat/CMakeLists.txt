@@ -1,6 +1,3 @@
-set (_module_name Py3Compat )
-string(TOLOWER _module_name _module_name_lower)
-
 set ( PY_FILES
   __init__.py
   enum.py
@@ -29,3 +26,4 @@ add_custom_target ( PythonPy3CompatModule ALL DEPENDS ${PYTHON_INSTALL_FILES} )
 ###########################################################################
 # Pure Python files
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/py3compat )
+install ( FILES ${PY_FILES} DESTINATION ${WORKBENCH_BIN_DIR}/mantid/py3compat )

@@ -168,14 +168,14 @@ void NormaliseByPeakArea::createOutputWorkspaces(
   if (m_sumResults) {
     // Copy over xvalues & assign "high" initial error values to simplify
     // symmetrisation calculation
-    double high(1e6);
+    constexpr double high(1e6);
 
     m_yspaceWS->setSharedX(0, yspaceIn->sharedX(0));
     m_fittedWS->setSharedX(0, yspaceIn->sharedX(0));
     m_symmetrisedWS->setSharedX(0, yspaceIn->sharedX(0));
     m_yspaceWS->mutableE(0) = high;
-    m_fittedWS->mutableE(0) = high;
-    m_symmetrisedWS->mutableE(0) = high;
+    m_fittedWS->setSharedE(0, m_yspaceWS->sharedE(0));
+    m_symmetrisedWS->setSharedE(0, m_yspaceWS->sharedE(0));
   }
 
   setUnitsToMomentum(m_yspaceWS);
