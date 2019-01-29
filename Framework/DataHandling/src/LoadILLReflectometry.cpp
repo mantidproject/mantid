@@ -752,8 +752,8 @@ double LoadILLReflectometry::detectorRotation() {
   m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
   const double detectorAngle =
       m_detectorAngle - dbPeak.detectorAngle - dbOffset;
-  m_log.debug() << "Direct beam calibrated detector angle (degrees): " << detectorAngle
-                << '\n';
+  m_log.debug() << "Direct beam calibrated detector angle (degrees): "
+                << detectorAngle << '\n';
   return detectorAngle;
 }
 
@@ -799,7 +799,9 @@ void LoadILLReflectometry::placeDetector() {
   // Add two theta to the sample logs
   m_localWorkspace->mutableRun().addLogData(new PropertyWithValue<double>(
       "reduction.two_theta", detectorRotationAngle));
-  m_localWorkspace->mutableRun().getProperty("reduction.two_theta")->setUnits("degree");
+  m_localWorkspace->mutableRun()
+      .getProperty("reduction.two_theta")
+      ->setUnits("degree");
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
     if (m_instrument != Supported::FIGARO)

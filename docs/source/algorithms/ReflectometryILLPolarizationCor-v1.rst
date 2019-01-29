@@ -30,8 +30,6 @@ Usage
 
 .. testcode:: AnalyzerlessEx
 
-   from directtools import SampleLogs
-
    # Use same foreground and background settings for direct and reflected
    # beams.
    # Python dictionaries can be passed to algorithms as 'keyword arguments'.
@@ -49,18 +47,12 @@ Usage
        **settings
    )
 
-   # For reflected angle calibration:
-   directLogs = SampleLogs(direct)
-   peakX = directLogs.peak_position
-   twoTheta = directLogs.twoTheta
-
    directFgd = ReflectometryILLSumForeground(direct)
    
    # Reflected beam. Flippers set to '++'
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       BeamCentre=peakX,
-       BraggAngle=twoTheta,
+       DirectLineWorkspace=direct,
        **settings
    )
    

@@ -447,24 +447,25 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return twoTheta
 
     def _moveDetector(self, ws, twoTheta, linePosition):
-        """Perform detector position correction for reflected beams only."""
+        """Perform detector position correction for direct and reflected beams."""
         if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
             return ws
-        # Move detector
+        # Reflected beam calibration
+        detectorMovedWSName = self._names.withSuffix('detectors_moved')
         directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
         directLinePosition = directLineWS.run().getLogData('reduction.line_position').value
-        detectorMovedWSName = self._names.withSuffix('detectors_moved')
-        SpecularReflectionPositionCorrect(InputWorkspace=ws,
-                                          OutputWorkspace=detectorMovedWSName,
-                                          TwoTheta=twoTheta,
-                                          DetectorCorrectionType='RotateAroundSample',
-                                          DetectorComponentName='detector',
-                                          DetectorFacesSample=True,
-                                          PixelSize=common.pixelSize(self._instrumentName),
-                                          LinePosition=linePosition,
-                                          DirectLinePosition=directLinePosition,
-                                          DirectLineWorkspace=directLineWS,
-                                          EnableLogging=self._subalgLogging)
+        args = {'InputWorkspace': ws,
+                'OutputWorkspace': detectorMovedWSName,
+                'EnableLogging': self._subalgLogging,
+                'DetectorComponentName': 'detector',
+                'LinePosition': linePosition,
+                'DirectLinePosition': directLinePosition,
+                'DirectLineWorkspace': directLineWS}
+        if self._instrumentName is not 'D17':
+            args['DetectorCorrectionType'] = 'RotateAroundSample'
+            args['DetectorFacesSample'] = True
+            args['PixelSize'] = common.pixelSize(self._instrumentName)
+        SpecularReflectionPositionCorrect(**args)
         detectorMovedWS = mtd[detectorMovedWSName]
         self._cleanup.cleanup(ws)
         return detectorMovedWS

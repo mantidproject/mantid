@@ -5,10 +5,11 @@ digraph ReflectometryILLPreprocess {
   subgraph params {
     $param_style
     background        [label="Background options:\nLow/HighAngleBkgOffset\nLow/HighAngleBkgWidth"]
-    beamCentre        [label="BeamCentre"]
-    braggAngle        [label="BraggAngle"]
+    beamCentre        [label="LinePosition"]
+    braggAngle        [label="TwoTheta"]
     run               [label="Run"]
     inputBeamPosition [label="DirectBeamPositionWorkspace"]
+    inputDirect       [label="DirectLineWorkspace"]
     inputWorkspace    [label="InputWorkspace"]
     output            [label="OutputWorkspace"]
     waterReference    [label="WaterWorkspace"]
@@ -46,7 +47,8 @@ digraph ReflectometryILLPreprocess {
   inputWorkspace        -> extractMonitors
   beamCentre            -> determinePeakPosition
   extractMonitors       -> determinePeakPosition
-  determinePeakPosition -> addSampleLogs [label="foreground.centre_workspace_index,\nforeground.first_workspace_index,\nforeground.last_workspace_index,\npeak_position"]
+  determinePeakPosition -> addSampleLogs [label="reduction.foreground.centre_workspace_index,\nreduction.foreground.first_workspace_index,\nreduction.foreground.last_workspace_index,\reduction.line_position"]
+  inputDirect           -> moveDetectors [label="In case of reflected beam calibration"]
   determinePeakPosition -> moveDetectors
   braggAngle            -> moveDetectors [label="If user input,\nloader took already care\nof the correct detector position"]
   moveDetectors         -> addSampleLogTwoTheta [label="twoTheta"]

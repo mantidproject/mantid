@@ -42,7 +42,6 @@ Usage
        Run='ILL/D17/317369.nxs',
        **settings
    )
-   # For reflected angle calibration:
    directFgd = ReflectometryILLSumForeground(
        Inputworkspace=direct,
        WavelengthRange=[2, 15])

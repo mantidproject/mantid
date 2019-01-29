@@ -131,7 +131,7 @@ Usage
        Run='ILL/D17/317369.nxs',
        **settings
    )
-   # For reflected angle calibration:
+
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectLineWorkspace=direct,
