@@ -419,12 +419,16 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
                                                   sasDataQ);
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr,
                                                   sasDataIdev);
+  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr,
+                                                  sasDataIdev);
   Mantid::DataHandling::H5Util::writeNumAttribute(data, sasDataQIndicesAttr,
                                                   std::vector<int>{0});
 
   if (workspace->hasDx(0)) {
     Mantid::DataHandling::H5Util::writeStrAttribute(
         data, sasDataQUncertaintyAttr, sasDataQdev);
+    Mantid::DataHandling::H5Util::writeStrAttribute(
+        data, sasDataQUncertaintiesAttr, sasDataQdev);
   }
 
   //-----------------------------------------
@@ -436,6 +440,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   qAttributes.emplace(sasUnitAttr, qUnit);
   if (workspace->hasDx(0)) {
     qAttributes.emplace(sasUncertaintyAttr, sasDataQdev);
+    qAttributes.emplace(sasUncertaintiesAttr, sasDataQdev);
   }
 
   writeArray1DWithStrAttributes(data, sasDataQ, qValue.rawData(), qAttributes);
@@ -448,6 +453,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.emplace(sasUnitAttr, iUnit);
   iAttributes.emplace(sasUncertaintyAttr, sasDataIdev);
+  iAttributes.emplace(sasUncertaintiesAttr, sasDataIdev);
 
   writeArray1DWithStrAttributes(data, sasDataI, intensity.rawData(),
                                 iAttributes);
@@ -594,6 +600,8 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
                                                   sasDataIAxesAttr2D);
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr,
                                                   sasDataIdev);
+  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr,
+                                                  sasDataIdev);
   // Write the Q Indices as Int Array
   Mantid::DataHandling::H5Util::writeNumAttribute(data, sasDataQIndicesAttr,
                                                   std::vector<int>{0, 1});
@@ -622,6 +630,7 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.emplace(sasUnitAttr, iUnit);
   iAttributes.emplace(sasUncertaintyAttr, sasDataIdev);
+  iAttributes.emplace(sasUncertaintiesAttr, sasDataIdev);
 
   auto iExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, int index) {
     return ws->dataY(index).data();
@@ -669,14 +678,17 @@ void addTransmission(H5::Group &group,
       group, sasTransmissionName, nxTransmissionSpectrumClassAttr,
       sasTransmissionSpectrumClassAttr);
 
-  // Add attributes for @signal, @T_axes, @T_indices, @T_uncertainty, @name,
-  // @timestamp
+  // Add attributes for @signal, @T_axes, @T_indices, @T_uncertainty,
+  // @T_uncertainties, @name, @timestamp
   Mantid::DataHandling::H5Util::writeStrAttribute(transmission, sasSignal,
                                                   sasTransmissionSpectrumT);
   Mantid::DataHandling::H5Util::writeStrAttribute(
       transmission, sasTransmissionSpectrumTIndices, sasTransmissionSpectrumT);
   Mantid::DataHandling::H5Util::writeStrAttribute(
       transmission, sasTransmissionSpectrumTUncertainty,
+      sasTransmissionSpectrumTdev);
+  Mantid::DataHandling::H5Util::writeStrAttribute(
+      transmission, sasTransmissionSpectrumTUncertainties,
       sasTransmissionSpectrumTdev);
   Mantid::DataHandling::H5Util::writeStrAttribute(
       transmission, sasTransmissionSpectrumNameAttr, transmissionName);
@@ -695,6 +707,8 @@ void addTransmission(H5::Group &group,
   }
   transmissionAttributes.emplace(sasUnitAttr, unit);
   transmissionAttributes.emplace(sasUncertaintyAttr,
+                                 sasTransmissionSpectrumTdev);
+  transmissionAttributes.emplace(sasUncertaintiesAttr,
                                  sasTransmissionSpectrumTdev);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumT,

@@ -89,6 +89,7 @@ Improvements
   version of algorithm, `Indexed` provide the new one with better performance and some restrictions
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes)
 - :ref:`FitPeaks <algm-FitPeaks>` can output parameters' uncertainty (fitting error) in an optional workspace.
+- :ref:`SaveNXcanSAS <algm-SaveNXcanSAS>` now has "uncertainties" parameter as well as "uncertainty". They point to the same data, but move file output inline with standards whilst keeping compatibility with old output.
 - The documentation in :ref:`EventFiltering` and :ref:`FilterEvents <algm-FilterEvents>` have been extensively rewritten to aid in understanding what the code does.
 - All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``). If the sample shape is a cylinder it will use the specialized code for rasterizing it.
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now will check the workspace's sample object for geometry
