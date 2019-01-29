@@ -44,7 +44,7 @@ Improvements
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
-- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` now rotates the panels with YZY rotations and clones the workspace instead of removing rotations.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` now attempts to index all the peaks at each iteration instead of only using initially indexed peaks.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 - SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
 - :ref:`IntegratePeaksUsingClusters <algm-IntegratePeaksUsingClusters>` will now treat NaN's as background.
