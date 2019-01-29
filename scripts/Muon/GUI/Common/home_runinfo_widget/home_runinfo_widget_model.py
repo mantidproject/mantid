@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_context import MuonContext
 
-mev_conversion_factor = 1000000
+millions_counts_conversion = 1./1e6
 
 
 class HomeRunInfoWidgetModel(object):
@@ -39,15 +39,23 @@ class HomeRunInfoWidgetModel(object):
         return total
 
     def get_counts_in_MeV(self, counts):
-        return counts / mev_conversion_factor
+        return counts * millions_counts_conversion
 
     def get_counts_per_good_frame(self, counts):
         good_frames = self.get_log_value("goodfrm")
 
-        return counts/good_frames
+        if good_frames is not 'Log not found':
+            return counts/good_frames
+        else:
+            return 'Good frames not defined'
 
     def get_counts_per_good_frame_per_detector(self, counts):
-        return self.get_counts_per_good_frame(counts)/self._data.num_detectors()
+        good_frames = self.get_log_value("goodfrm")
+
+        if good_frames is not 'Log not found':
+            return counts/good_frames/self._data.num_detectors()
+        else:
+            return 'Good frames not defined'
 
     def get_average_temperature(self):
         # TODO : This implementation does not match the one in the C++ code
