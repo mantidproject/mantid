@@ -230,7 +230,7 @@ TMDE(void MDBox)::getBoxes(
  * @param cond :: condition to check
  *(leaves on the tree)
  */
-TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *>& outBoxes, std::function<bool(API::IMDNode *)> cond) {
+TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *>& outBoxes, const std::function<bool(API::IMDNode *)> &cond) {
   if(cond(this))
     outBoxes.emplace_back(this);
 }

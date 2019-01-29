@@ -126,7 +126,7 @@ public:
                 Mantid::Geometry::MDImplicitFunction *function) override;
 
   void getBoxes(std::vector<API::IMDNode *> &outBoxes,
-                std::function<bool(API::IMDNode *)> cond) final override;
+                const std::function<bool(API::IMDNode *)> &cond) final override;
 
   const API::IMDNode *getBoxAtCoord(const coord_t *coords) override;
 

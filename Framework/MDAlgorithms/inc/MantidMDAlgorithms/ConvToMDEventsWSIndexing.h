@@ -123,10 +123,10 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     const typename std::vector<EventType> &events = *events_ptr;
     std::vector<MDEventType<ND>> mdEventsForSpectrum;
     // Iterators to start/end
-    for (auto it = events.cbegin(); it != events.cend(); it++) {
-      double val = localUnitConv.convertUnits(it->tof());
-      double signal = it->weight();
-      double errorSq = it->errorSquared();
+    for (const auto &event: events) {
+      double val = localUnitConv.convertUnits(event.tof());
+      double signal = event.weight();
+      double errorSq = event.errorSquared();
 
       if (!localQConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
         continue; // skip ND outside the range

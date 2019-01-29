@@ -139,7 +139,7 @@ public:
 
   /// Fill a vector with all the boxes who are satisfying the condition
   virtual void getBoxes(std::vector<IMDNode *> &outBoxes,
-                        std::function<bool(IMDNode *)> cond) = 0;
+                        const std::function<bool(IMDNode *)> &cond) = 0;
 
   // -------------------------------- Events-Related
   // -------------------------------------------
