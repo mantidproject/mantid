@@ -365,9 +365,27 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if os.path.exists(summed_cache_file):
                 LoadNexusProcessed(Filename=summed_cache_file, OutputWorkspace=finalname)
                 loaded_summed_cache = True
-                
+
+        self.__processFiles(
+            filenames if not loaded_summed_cache else [],
+            useCaching, unfocusname, unfocusname_file, finalname)
+
+        if useCaching and not os.path.exists(summed_cache_file):
+            SaveNexusProcessed(InputWorkspace=finalname, Filename=summed_cache_file)
+            
+        # with more than one chunk or file the integrated proton charge is
+        # generically wrong
+        mtd[finalname].run().integrateProtonCharge()
+
+        # set the output workspace
+        self.setProperty('OutputWorkspace', mtd[finalname])
+        if unfocusname != '':
+            self.setProperty('UnfocussedWorkspace', mtd[unfocusname])
+
+            
+    def __processFiles(self, files, useCaching, unfocusname, unfocusname_file, finalname):
         # outer loop creates chunks to load
-        for (i, filename) in enumerate(filenames if not loaded_summed_cache else []):
+        for (i, filename) in enumerate(files):
             # default name is based off of filename
             wkspname = os.path.split(filename)[-1].split('.')[0]
 
@@ -425,19 +443,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                                    StartTime=self.kwargs['CompressStartTime'])
                     # not compressing unfocussed workspace because it is in d-spacing
                     # and is likely to be from a different part of the instrument
-
-        if useCaching and not os.path.exists(summed_cache_file):
-            SaveNexusProcessed(InputWorkspace=finalname, Filename=summed_cache_file)
-            
-        # with more than one chunk or file the integrated proton charge is
-        # generically wrong
-        mtd[finalname].run().integrateProtonCharge()
-
-        # set the output workspace
-        self.setProperty('OutputWorkspace', mtd[finalname])
-        if unfocusname != '':
-            self.setProperty('UnfocussedWorkspace', mtd[unfocusname])
-
+        return
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(AlignAndFocusPowderFromFiles)
