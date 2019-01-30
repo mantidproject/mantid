@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
-    MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
+    MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import ConfigService, Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CopyLogs, CreateCacheFilename, \
     DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
@@ -225,17 +225,17 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if name == 'PreserveEvents' or not prop.isDefault:
                 # TODO need unique identifier for absorption workspace
                 alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
-        if 'GroupingWorkspace' in self.kwargs:
-            sum = SumSpectra(InputWorkspace=self.kwargs['GroupingWorkspace'])
-            alignandfocusargs.append('%s=%s' % ("groupSum",str(sum.readY(0)[0])))
         if 'GroupFilename' in self.kwargs:
             groupfile = self.kwargs['GroupFilename']
             if groupfile.split('.')[1] is 'cal':
-                groups = LoadDiffCal(Filename=groupfile, MakeCalWorkspace=False, MakeMaskWorkspace=False)
+                __groups = LoadDiffCal(Filename=groupfile, MakeCalWorkspace=False, MakeMaskWorkspace=False)
             else:
-                groups = LoadDetectorsGroupingFile(InputFile=groupfile)
-            sum = SumSpectra(InputWorkspace=groups)
-            alignandfocusargs.append('%s=%s' % ("groupSum",str(sum.readY(0)[0])))
+                __groups = LoadDetectorsGroupingFile(InputFile=groupfile)
+            __sum = SumSpectra(InputWorkspace=__groups)
+            alignandfocusargs.append('%s=%s' % ("groupFileSum",str(__sum.readY(0)[0])))
+        elif 'GroupingWorkspace' in self.kwargs:
+            __sum = SumSpectra(InputWorkspace=self.kwargs['GroupingWorkspace'])
+            alignandfocusargs.append('%s=%s' % ("groupSum",str(__sum.readY(0)[0])))
 
         return CreateCacheFilename(Prefix=wkspname,
                                    PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
@@ -335,6 +335,14 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # end of inner loop
 
     def PyExec(self):
+        # get the instrument name
+        instr = "NOM"
+        if AnalysisDataService.doesExist(instr+'_cal'):
+            DeleteWorkspace(Workspace=instr+'_cal')
+        if AnalysisDataService.doesExist(instr+'_group'):
+            DeleteWorkspace(Workspace=instr+'_group')
+        if AnalysisDataService.doesExist(instr+'_mask'):
+            DeleteWorkspace(Workspace=instr+'_mask')
         filenames = self._getLinearizedFilenames('Filename')
         self.filterBadPulses = self.getProperty('FilterBadPulses').value
         self.chunkSize = self.getProperty('MaxChunkSize').value
