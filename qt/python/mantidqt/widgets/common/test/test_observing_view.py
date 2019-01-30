@@ -25,7 +25,6 @@ class ObservingViewTest(unittest.TestCase):
     def test_closeEvent(self):
         mock_event = MockQtEvent()
         self.view.closeEvent(mock_event)
-        self.view.presenter.clear_observer.assert_called_once_with()
         mock_event.accept.assert_called_once_with()
 
     def test_rename(self):
