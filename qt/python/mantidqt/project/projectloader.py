@@ -78,7 +78,7 @@ class ProjectLoader(object):
             except Exception as e:
                 # Catch any exception and log it for the encoder
                 if isinstance(e, KeyboardInterrupt):
-                    raise KeyboardInterrupt(e)
+                    raise
                 logger.warning("Project Loader: An interface could not be loaded error: " + str(e))
 
 
@@ -103,5 +103,5 @@ class ProjectReader(object):
                 self.interface_list = json_data["interfaces"]
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
-                raise KeyboardInterrupt(e)
+                raise
             logger.warning("JSON project file unable to be loaded/read")

@@ -60,7 +60,7 @@ class ProjectSaver(object):
             except Exception as e:
                 # Catch any exception and log it
                 if isinstance(e, KeyboardInterrupt):
-                    raise KeyboardInterrupt(e)
+                    raise
                 logger.warning("Project Saver: An interface could not be saver error: " + str(e))
 
         # Pass dicts to Project Writer
@@ -98,5 +98,5 @@ class ProjectWriter(object):
         except Exception as e:
             # Catch any exception and log it
             if isinstance(e, KeyboardInterrupt):
-                raise KeyboardInterrupt(e)
+                raise
             logger.warning("JSON project file unable to be opened/written to")
