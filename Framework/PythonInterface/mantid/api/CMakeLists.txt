@@ -118,6 +118,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
   ${HEADER_DIR}/api/SpectrumInfoPythonIterator.h
   ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
+  ${HEADER_DIR}/api/ComponentInfoPythonIterator.h
 )
 
 set ( PY_FILES
