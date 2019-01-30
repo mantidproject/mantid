@@ -693,22 +693,6 @@ readArray1DCoerce<int64_t>(DataSet &dataset);
 template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
 readArray1DCoerce<uint64_t>(DataSet &dataset);
 
-// -------------------------------------------------------------------
-// Utilities for checking library version and vlen string support
-// -------------------------------------------------------------------
-
-uint32_t makeHdf5VersionNumber(uint32_t maj, uint32_t min, uint32_t relnum) {
-  return 100000 * maj + 1000 * min + relnum;
-}
-
-bool checkVariableLengthStringSupport() {
-  uint32_t maj, min, relnum;
-  H5get_libversion(&maj, &min, &relnum);
-  const auto actual = makeHdf5VersionNumber(maj, min, relnum);
-  const auto expected = makeHdf5VersionNumber(1, 8, 16); // Minimum expected
-  return (actual > expected);
-}
-
 } // namespace H5Util
 } // namespace DataHandling
 } // namespace Mantid

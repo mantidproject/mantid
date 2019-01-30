@@ -118,14 +118,6 @@ std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name);
 template <typename NumT>
 std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset);
 
-// Create a comparable version number as a single integer
-MANTID_DATAHANDLING_DLL uint32_t makeHdf5VersionNumber(uint32_t maj,
-                                                       uint32_t min,
-                                                       uint32_t relnum);
-
-// Check if current version of hdf5 supports variable length strings
-MANTID_DATAHANDLING_DLL bool checkVariableLengthStringSupport();
-
 } // namespace H5Util
 } // namespace DataHandling
 } // namespace Mantid

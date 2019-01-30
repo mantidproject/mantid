@@ -13,7 +13,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -22,6 +21,7 @@
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
@@ -169,7 +169,7 @@ public:
 
   void test_load_event_nexus_v20_ess_integration_2018() {
     // Only perform this test if the version of hdf5 supports vlen strings
-    if (DataHandling::H5Util::checkVariableLengthStringSupport()) {
+    if (NexusGeometry::Hdf5Version::checkVariableLengthStringSupport()) {
       const std::string file = "V20_ESSIntegration_2018-12-13_0942.nxs";
       LoadEventNexus alg;
       alg.setChild(true);

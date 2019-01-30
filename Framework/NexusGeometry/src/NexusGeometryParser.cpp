@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/NexusGeometryParser.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -14,6 +13,7 @@
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
@@ -152,7 +152,7 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   if (dataType.isVariableStr()) {
     H5std_string buffer;
     // Need to check for old versions of hdf5
-    if (DataHandling::H5Util::checkVariableLengthStringSupport()) {
+    if (Hdf5Version::checkVariableLengthStringSupport()) {
       data.read(buffer, dataType, data.getSpace());
     } else {
       throw std::runtime_error("NexusGeometryParser::get1DStringDataset: Only "
