@@ -25,9 +25,10 @@ namespace API {
 
 class BatchAlgorithmRunnerSubscriber {
 public:
-  virtual void notifyAlgorithmStarted(){};
-  virtual void notifyAlgorithmComplete(){};
-  virtual void notifyAlgorithmError(std::string const &){};
+  virtual void notifyAlgorithmStarted(Mantid::API::IAlgorithm_sptr const){};
+  virtual void notifyAlgorithmComplete(Mantid::API::IAlgorithm_sptr const){};
+  virtual void notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const,
+                                    std::string const &){};
 };
 
 class ConfiguredAlgorithm {
@@ -70,27 +71,37 @@ public:
 
 class AlgorithmCompleteNotification : public Poco::Notification {
 public:
-  AlgorithmCompleteNotification(BatchAlgorithmRunnerSubscriber *notifyee)
-      : Poco::Notification(), m_notifyee(notifyee) {}
+  AlgorithmCompleteNotification(ConfiguredAlgorithm &algorithm)
+      : Poco::Notification(), m_algorithm(algorithm) {}
 
-  BatchAlgorithmRunnerSubscriber *notifyee() const { return m_notifyee; }
+  BatchAlgorithmRunnerSubscriber *notifyee() const {
+    return m_algorithm.notifyee();
+  }
+  Mantid::API::IAlgorithm_sptr algorithm() const {
+    return m_algorithm.algorithm();
+  }
 
 private:
-  BatchAlgorithmRunnerSubscriber *m_notifyee;
+  ConfiguredAlgorithm &m_algorithm;
 };
 
 class AlgorithmErrorNotification : public Poco::Notification {
 public:
-  AlgorithmErrorNotification(BatchAlgorithmRunnerSubscriber *notifyee,
+  AlgorithmErrorNotification(ConfiguredAlgorithm &algorithm,
                              std::string const &errorMessage)
-      : Poco::Notification(), m_notifyee(notifyee),
+      : Poco::Notification(), m_algorithm(algorithm),
         m_errorMessage(errorMessage) {}
 
-  BatchAlgorithmRunnerSubscriber *notifyee() const { return m_notifyee; }
+  BatchAlgorithmRunnerSubscriber *notifyee() const {
+    return m_algorithm.notifyee();
+  }
+  Mantid::API::IAlgorithm_sptr algorithm() const {
+    return m_algorithm.algorithm();
+  }
   std::string errorMessage() const { return m_errorMessage; }
 
 private:
-  BatchAlgorithmRunnerSubscriber *m_notifyee;
+  ConfiguredAlgorithm &m_algorithm;
   std::string m_errorMessage;
 };
 

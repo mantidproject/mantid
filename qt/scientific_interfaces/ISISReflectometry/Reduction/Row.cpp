@@ -63,11 +63,25 @@ Row mergedRow(Row const &rowA, Row const &rowB) {
   return rowA.withExtraRunNumbers(rowB.runNumbers());
 }
 
-void Row::notifyAlgorithmStarted() { setRunning(); }
+void Row::notifyAlgorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
+  UNUSED_ARG(algorithm);
+  setRunning();
+}
 
-void Row::notifyAlgorithmComplete() { setSuccess(); }
+void Row::notifyAlgorithmComplete(
+    Mantid::API::IAlgorithm_sptr const algorithm) {
+  m_reducedWorkspaceNames.setOutputNames(
+      algorithm->getPropertyValue("OutputWorkspaceWavelength"),
+      algorithm->getPropertyValue("OutputWorkspace"),
+      algorithm->getPropertyValue("OutputWorkspaceBinned"));
+  setSuccess();
+}
 
-void Row::notifyAlgorithmError(std::string const &msg) { setError(msg); }
+void Row::notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
+                               std::string const &msg) {
+  UNUSED_ARG(algorithm);
+  setError(msg);
+}
 
 State Row::state() const { return m_itemState.state(); }
 

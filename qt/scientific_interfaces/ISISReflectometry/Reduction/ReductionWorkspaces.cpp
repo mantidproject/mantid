@@ -58,6 +58,14 @@ std::string const &ReductionWorkspaces::iVsQBinned() const {
   return m_iVsQBinned;
 }
 
+void ReductionWorkspaces::setOutputNames(std::string iVsLambda,
+                                         std::string iVsQ,
+                                         std::string iVsQBinned) {
+  m_iVsLambda = std::move(iVsLambda);
+  m_iVsQ = std::move(iVsQ);
+  m_iVsQBinned = std::move(iVsQBinned);
+}
+
 bool operator==(ReductionWorkspaces const &lhs,
                 ReductionWorkspaces const &rhs) {
   return lhs.timeOfFlight() == rhs.timeOfFlight() &&

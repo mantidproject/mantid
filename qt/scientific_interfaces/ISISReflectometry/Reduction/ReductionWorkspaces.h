@@ -34,6 +34,9 @@ public:
   std::string const &iVsQ() const;
   std::string const &iVsQBinned() const;
 
+  void setOutputNames(std::string iVsLambda, std::string iVsQ,
+                      std::string iVsQBinned);
+
 private:
   std::vector<std::string> m_timeOfFlight;
   std::string m_joinedTofWorkspace;

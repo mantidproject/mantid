@@ -41,9 +41,12 @@ public:
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
-  void notifyAlgorithmStarted() override;
-  void notifyAlgorithmComplete() override;
-  void notifyAlgorithmError(std::string const &msg) override;
+  void
+  notifyAlgorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) override;
+  void notifyAlgorithmComplete(
+      Mantid::API::IAlgorithm_sptr const algorithm) override;
+  void notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
+                            std::string const &msg) override;
 
   State state() const;
   std::string message() const;

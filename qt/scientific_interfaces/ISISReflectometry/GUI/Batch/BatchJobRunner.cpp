@@ -49,10 +49,6 @@ void updateProperty(std::string const &property,
 void updateWorkspacesNameProperties(AlgorithmRuntimeProps &properties,
                                     ReductionWorkspaces const &workspaces) {
   updateProperty("InputRunList", workspaces.timeOfFlight(), properties);
-  updateProperty("OutputWorkspace", workspaces.iVsQ(), properties);
-  updateProperty("OutputWorkspaceBinned", workspaces.iVsQBinned(), properties);
-  updateProperty("OutputWorkspaceWavelength", workspaces.iVsLambda(),
-                 properties);
   updateProperty("FirstTransmissionRunList",
                  workspaces.transmissionRuns().first, properties);
   updateProperty("SecondTransmissionRunList",
