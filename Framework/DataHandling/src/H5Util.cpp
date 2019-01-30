@@ -692,7 +692,6 @@ template MANTID_DATAHANDLING_DLL std::vector<int64_t>
 readArray1DCoerce<int64_t>(DataSet &dataset);
 template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
 readArray1DCoerce<uint64_t>(DataSet &dataset);
-
 } // namespace H5Util
 } // namespace DataHandling
 } // namespace Mantid
