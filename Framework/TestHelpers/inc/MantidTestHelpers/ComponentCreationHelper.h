@@ -87,6 +87,12 @@ boost::shared_ptr<Mantid::Geometry::CSGObject>
 createCuboid(double x_side_length, double y_side_length = -1.0,
              double z_side_length = -1.0);
 /**
+ * Create a rotated cuboid shape
+ */
+boost::shared_ptr<Mantid::Geometry::CSGObject> createCuboid(double xHalfLength,
+                                          double yHalfLength,
+                                          double zHalfLength, double angle);
+/**
  * Create a component assembly at the origin made up of 4 cylindrical detectors
  */
 boost::shared_ptr<Mantid::Geometry::CompAssembly>

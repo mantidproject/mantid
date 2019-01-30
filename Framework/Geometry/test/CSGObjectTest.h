@@ -1552,28 +1552,68 @@ public:
   static void destroySuite(CSGObjectTestPerformance *suite) { delete suite; }
 
   CSGObjectTestPerformance()
-      : rng(200000), solid(ComponentCreationHelper::createSphere(0.1)),
-        shell(ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
+      : m_rng(200000), m_activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1),
+        m_cuboid(ComponentCreationHelper::createCuboid(0.2, 0.2, 0.1)),
+        m_cylinder(ComponentCreationHelper::createCappedCylinder(
+            0.1, 0.4, V3D{0., 0., 0.}, V3D{0., 1., 0.}, "cyl")),
+        m_rotatedCuboid(
+            ComponentCreationHelper::createCuboid(0.01, 0.12, 0.12, M_PI / 4.)),
+        m_sphere(ComponentCreationHelper::createSphere(0.1)),
+        m_sphericalShell(
+            ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
 
-  void test_generatePointInside_Solid_Primitive() {
-    const size_t maxAttempts(500);
-    for (size_t i = 0; i < npoints; ++i) {
-      solid->generatePointInObject(rng, maxAttempts);
+  void test_generatePointInside_Cuboid_With_ActiveRegion() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i{0}; i < m_npoints; ++i) {
+      m_cuboid->generatePointInObject(m_rng, m_activeRegion, maxAttempts);
     }
   }
 
-  void test_Point_Inside_Solid_Composite_With_Hole() {
-    const size_t maxAttempts(500);
-    for (size_t i = 0; i < npoints; ++i) {
-      shell->generatePointInObject(rng, maxAttempts);
+  void test_generatePointInside_Cylinder_With_ActiveRegion() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i{0}; i < m_npoints; ++i) {
+      m_cylinder->generatePointInObject(m_rng, m_activeRegion, maxAttempts);
+    }
+  }
+
+  void test_generatePointInside_Rotated_Cuboid() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i = 0; i < m_npoints; ++i) {
+      m_rotatedCuboid->generatePointInObject(m_rng, maxAttempts);
+    }
+  }
+
+  void test_generatePointInside_Rotated_Cuboid_With_ActiveRegion() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i = 0; i < m_npoints; ++i) {
+      m_rotatedCuboid->generatePointInObject(m_rng, m_activeRegion,
+                                             maxAttempts);
+    }
+  }
+
+  void test_generatePointInside_Sphere() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i = 0; i < m_npoints; ++i) {
+      m_sphere->generatePointInObject(m_rng, maxAttempts);
+    }
+  }
+
+  void test_generatePointInside_sphericalShell() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i = 0; i < m_npoints; ++i) {
+      m_sphericalShell->generatePointInObject(m_rng, maxAttempts);
     }
   }
 
 private:
-  const size_t npoints = 20000;
-  Mantid::Kernel::MersenneTwister rng;
-  IObject_sptr solid;
-  IObject_sptr shell;
+  static constexpr size_t m_npoints{1000000};
+  Mantid::Kernel::MersenneTwister m_rng;
+  BoundingBox m_activeRegion;
+  IObject_sptr m_cuboid;
+  IObject_sptr m_cylinder;
+  IObject_sptr m_rotatedCuboid;
+  IObject_sptr m_sphere;
+  IObject_sptr m_sphericalShell;
 };
 
 #endif // MANTID_TESTCSGOBJECT__
