@@ -14,11 +14,11 @@ from __future__ import absolute_import
 import weakref
 
 # 3rdparty imports
-from qtpy.QtCore import QEvent, Signal
+from qtpy.QtCore import QEvent, Qt, Signal
 from qtpy.QtWidgets import QMainWindow
 
 # local imports
-from mantidqt.plotting.figuretype import figure_type, FigureType
+from mantidqt.plotting.figuretype import FigureType, figure_type
 
 
 class FigureWindow(QMainWindow):
@@ -31,6 +31,7 @@ class FigureWindow(QMainWindow):
         QMainWindow.__init__(self, parent=parent)
         # attributes
         self._canvas = weakref.proxy(canvas)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.setAcceptDrops(True)
 
