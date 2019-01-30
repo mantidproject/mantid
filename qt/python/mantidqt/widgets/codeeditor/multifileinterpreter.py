@@ -183,3 +183,11 @@ class MultiPythonFileInterpreter(QWidget):
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()
+
+    def set_whitespace_visible_all(self):
+        for idx in range(self.editor_count):
+            self.editor_at(idx).set_whitespace_visible()
+
+    def set_whitespace_invisible_all(self):
+        for idx in range(self.editor_count):
+            self.editor_at(idx).set_whitespace_invisible()

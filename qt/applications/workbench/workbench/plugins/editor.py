@@ -74,11 +74,21 @@ class MultiFileEditor(PluginWidget):
             self, 'Spaces to Tabs',
             on_triggered=self.editors.spaces_to_tabs_current)
 
+        self.whitespace_visible_action = create_action(
+            self, 'Set Whitespace Visible',
+            on_triggered=self.editors.set_whitespace_visible_all)
+
+        self.whitespace_invisible_action = create_action(
+            self, 'Set Whitespace Invisible',
+            on_triggered=self.editors.set_whitespace_invisible_all)
+
         self.editor_actions = [self.run_action,
                                self.abort_action,
                                self.toggle_comment_action,
                                self.tabs_to_spaces_action,
-                               self.spaces_to_tabs_action]
+                               self.spaces_to_tabs_action,
+                               self.whitespace_visible_action,
+                               self.whitespace_invisible_action]
 
     def execute_current(self):
         '''This is used by MainWindow to execute a file after opening it'''

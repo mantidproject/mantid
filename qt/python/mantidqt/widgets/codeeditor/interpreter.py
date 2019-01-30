@@ -162,6 +162,12 @@ class PythonFileInterpreter(QWidget):
         new_text = self.editor.selectedText().replace('    ', '\t')
         self.editor.replaceSelectedText(new_text)
 
+    def set_whitespace_visible(self):
+        self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
+
+    def set_whitespace_invisible(self):
+        self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
+
     def toggle_comment(self):
         if self.editor.selectedText() == '':   # If nothing selected, do nothing
             return
@@ -169,7 +175,7 @@ class PythonFileInterpreter(QWidget):
         # Note selection indices to restore highlighting later
         selection_idxs = list(self.editor.getSelection())
 
-        # Select complete lines then read them
+        # Expand selection from first character on start line to end char on last line
         line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
         line_selection_idxs = [selection_idxs[0], 0,
                                selection_idxs[2], line_end_pos]

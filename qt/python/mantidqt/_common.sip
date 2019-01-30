@@ -98,6 +98,17 @@ public:
       AcsAPIs
   };
 
+  enum WhitespaceVisibility {
+     //! Whitespace is invisible.
+     WsInvisible = SCWS_INVISIBLE,
+
+     //! Whitespace is always visible.
+     WsVisible = SCWS_VISIBLEALWAYS,
+
+     //! Whitespace is visible after the whitespace used for indentation.
+     WsVisibleAfterIndent = SCWS_VISIBLEAFTERINDENT
+  };
+
 public:
   ScriptEditor(const QString & language,
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
@@ -131,6 +142,7 @@ public:
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
   void setText(const QString &text);
+  void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
 
 public slots:
