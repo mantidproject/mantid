@@ -152,7 +152,7 @@ class subPlot(QtWidgets.QWidget):
             self._selector_window = None
 
     def _create_rm_window(self, subplotName):
-        line_names = self._context.subplots[subplotName].lines.keys()
+        line_names = list(self._context.subplots[subplotName].lines.keys())
         vline_names = self._context.subplots[subplotName].vlines
         return RemovePlotWindow(lines=line_names, vlines=vline_names, subplot=subplotName, parent=self)
 

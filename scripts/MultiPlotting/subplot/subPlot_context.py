@@ -37,10 +37,10 @@ class subPlotContext(object):
                 rotation=label.rotation)
 
     def redraw_annotations(self):
-        for key in self._labels.keys():
+        for key in list(self._labels.keys()):
             self._labels[key].remove()
             del self._labels[key]
-        for label in self._labelObjects.keys():
+        for label in list(self._labelObjects.keys()):
             self.add_annotate(self._labelObjects[label])
 
     def addLine(self, ws, specNum=1):
@@ -87,11 +87,11 @@ class subPlotContext(object):
 
     def change_errors(self, state):
         self._errors = state
-        for label in self._lines.keys():
+        for label in list(self._lines.keys()):
             self.redraw(label)
 
     def change_auto(self, state):
-        for label in self._lines.keys():
+        for label in list(self._lines.keys()):
             self._subplot.autoscale(enable=state, axis="y")
             self.redraw_annotations()
 
@@ -103,10 +103,10 @@ class subPlotContext(object):
     def vlines(self):
         # only return unprotected vlines and annotations
         vlines = []
-        for name in self._labelObjects.keys():
+        for name in list(self._labelObjects.keys()):
             if not self._labelObjects[name].protected:
                 vlines.append(name)
-        for name in self._vLines.keys():
+        for name in list(self._vLines.keys()):
             if name not in self._labelObjects.keys():
                 vlines.append(name)
         return vlines
@@ -137,11 +137,11 @@ class subPlotContext(object):
                 return ws
 
     def removeLine(self, name):
-        if name in self._lines.keys():
+        if name in list(self._lines.keys()):
             self.removePlotLine(name)
-        if name in self._vLines.keys():
+        if name in list(self._vLines.keys()):
             self.removeVLine(name)
-        if name in self._labelObjects.keys():
+        if name in list(self._labelObjects.keys()):
             self.removeLabel(name)
 
     def removePlotLine(self, name):
@@ -173,12 +173,12 @@ class subPlotContext(object):
         del self._labelObjects[name]
 
     def delete(self):
-        keys = self._lines.keys()
+        keys = list(self._lines.keys())
         for label in keys:
             self.removeLine(label)
-        keys = self._vLines.keys()
+        keys = list(self._vLines.keys())
         for label in keys:
             self.removeLine(label)
-        keys = self._labelObjects.keys()
+        keys = list(self._labelObjects.keys())
         for label in keys:
             self.removeLabel(label)
