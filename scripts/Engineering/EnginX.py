@@ -42,6 +42,8 @@ def main(vanadium_run, user, focus_run, **kwargs):
     ceria_run = kwargs.get("ceria_run", "241391")
     crop_name = kwargs.get("crop_name", "cropped")
     crop_on = kwargs.get("crop_on", None)
+    params = kwargs.get("params", None)
+    time_period = kwargs.get("time_period", None)
     grouping_file = kwargs.get("grouping_file", None)
     if crop_on is None and cropped is not None:
         print("You must enter a value to crop_on if you enter a cropping method")
@@ -58,11 +60,11 @@ def main(vanadium_run, user, focus_run, **kwargs):
     focus_general = os.path.join(directory, "Focus")
 
     run(calibration_directory, calibration_general, ceria_run, crop_name, crop_on, cropped, do_cal, do_pre_process,
-        do_van, focus_directory, focus_general, focus_run, grouping_file, vanadium_run, **kwargs)
+        do_van, focus_directory, focus_general, focus_run, grouping_file, vanadium_run, params, time_period)
 
 
 def run(calibration_directory, calibration_general, ceria_run, crop_name, crop_on, cropped, do_cal, do_pre_process,
-        do_van, focus_directory, focus_general, focus_run, grouping_file, van_run, **kwargs):
+        do_van, focus_directory, focus_general, focus_run, grouping_file, van_run, params, time_period):
     """
     calls methods needed based off of inputs
 
@@ -107,8 +109,6 @@ def run(calibration_directory, calibration_general, ceria_run, crop_name, crop_o
 
     # if a focus is requested, run the focus
     if focus_run is not None:
-        params = kwargs.get("params", None)
-        time_period = kwargs.get("time_period", None)
         focus(focus_run, grouping_file, crop_on, calibration_directory, focus_directory, focus_general, cropped,
               van_run, do_pre_process, params, time_period)
 
