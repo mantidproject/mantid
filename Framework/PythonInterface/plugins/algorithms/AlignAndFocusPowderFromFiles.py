@@ -212,7 +212,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if loadFile and useCharac:
             DeleteWorkspace(Workspace=tempname)
 
-    def __getCacheName(self, wkspname):
+    def __getCacheName(self, wkspname, additional_props=None):
+        """additional_props: list. additional properties to be hashed
+        """
         cachedir = self.getProperty('CacheDir').value
         if len(cachedir) <= 0:
             return None
@@ -224,7 +226,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if name == 'PreserveEvents' or not prop.isDefault:
                 # TODO need unique identifier for absorption workspace
                 alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
-
+        alignandfocusargs += additional_props or []
         return CreateCacheFilename(Prefix=wkspname,
                                    PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
                                    Properties=propman_properties,
@@ -345,13 +347,27 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         else:
             self.log().warning('CacheDir is not specified - functionality disabled')
 
+        assert len(filenames), "No files specified"
         self.prog_per_file = 1./float(len(filenames))  # for better progress reporting
 
         # these are also passed into the child-algorithms
         self.kwargs = self.__getAlignAndFocusArgs()
 
+        # find summed cache
+        filenames_str = ','.join(filenames)
+        newprop = 'files_to_sum={}'.format(filenames_str)
+        loaded_summed_cache = False
+        if useCaching:
+            filename = filenames[0]
+            wkspname = os.path.split(filename)[-1].split('.')[0]
+            self.__determineCharacterizations(filename, wkspname)  # updates instance variable
+            summed_cache_file = self.__getCacheName(finalname, additional_props=[newprop])
+            if os.path.exists(summed_cache_file):
+                LoadNexusProcessed(Filename=summed_cache_file, OutputWorkspace=finalname)
+                loaded_summed_cache = True
+                
         # outer loop creates chunks to load
-        for (i, filename) in enumerate(filenames):
+        for (i, filename) in enumerate(filenames if not loaded_summed_cache else []):
             # default name is based off of filename
             wkspname = os.path.split(filename)[-1].split('.')[0]
 
@@ -410,6 +426,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                     # not compressing unfocussed workspace because it is in d-spacing
                     # and is likely to be from a different part of the instrument
 
+        if useCaching and not os.path.exists(summed_cache_file):
+            SaveNexusProcessed(InputWorkspace=finalname, Filename=summed_cache_file)
+            
         # with more than one chunk or file the integrated proton charge is
         # generically wrong
         mtd[finalname].run().integrateProtonCharge()
