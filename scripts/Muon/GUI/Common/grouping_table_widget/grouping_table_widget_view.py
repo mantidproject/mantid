@@ -44,6 +44,19 @@ class GroupingTableView(QtGui.QWidget):
         self.add_group_button = QtGui.QToolButton()
         self.remove_group_button = QtGui.QToolButton()
 
+        self.group_range_label = QtGui.QLabel()
+        self.group_range_label.setText('Group Asymmetry Range')
+        self.group_range_min = QtGui.QLineEdit()
+        self.group_range_max = QtGui.QLineEdit()
+        self.group_range_to_label = QtGui.QLabel()
+        self.group_range_to_label.setText(' to ')
+
+        self.group_range_layout = QtGui.QHBoxLayout()
+        self.group_range_layout.addWidget(self.group_range_label)
+        self.group_range_layout.addWidget(self.group_range_min)
+        self.group_range_layout.addWidget(self.group_range_to_label)
+        self.group_range_layout.addWidget(self.group_range_max)
+
         size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
@@ -72,6 +85,7 @@ class GroupingTableView(QtGui.QWidget):
         self.vertical_layout.setObjectName("verticalLayout")
         self.vertical_layout.addWidget(self.grouping_table)
         self.vertical_layout.addLayout(self.horizontal_layout)
+        self.vertical_layout.addLayout(self.group_range_layout)
 
         self.setLayout(self.vertical_layout)
 
@@ -302,3 +316,10 @@ class GroupingTableView(QtGui.QWidget):
                 else:
                     # number of detectors should remain un-editable
                     item.setFlags(QtCore.Qt.ItemIsSelectable)
+
+    def get_group_range(self):
+        return str(self.group_range_min.text()), str(self.group_range_max.text())
+
+    def set_group_range(self, range):
+        self.group_range_min.setText(range[0])
+        self.group_range_max.setText(range[1])
