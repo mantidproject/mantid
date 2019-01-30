@@ -29,49 +29,49 @@ class InstrumentWidgetModel(object):
         self._data.clear()
 
     def get_file_time_zero(self):
-        return self._data.loaded_data["TimeZero"]
+        return self._data.current_data["TimeZero"]
 
     def get_user_time_zero(self):
-        if "UserTimeZero" in self._data.loaded_data.keys():
-            time_zero = self._data.loaded_data["UserTimeZero"]
+        if "UserTimeZero" in self._data.current_data(self._data.current_run).keys():
+            time_zero = self._data.current_data["UserTimeZero"]
         else:
             # default to loaded value, keep a record of the data vaue
-            self._data.loaded_data["DataTimeZero"] = self._data.loaded_data["TimeZero"]
-            time_zero = self._data.loaded_data["TimeZero"]
+            self._data.current_data["DataTimeZero"] = self._data.current_data["TimeZero"]
+            time_zero = self._data.current_data["TimeZero"]
         return time_zero
 
     def get_file_first_good_data(self):
-        return self._data.loaded_data["FirstGoodData"]
+        return self._data.current_data["FirstGoodData"]
 
     def get_user_first_good_data(self):
-        if "UserFirstGoodData" in self._data.loaded_data.keys():
-            first_good_data = self._data.loaded_data["UserFirstGoodData"]
+        if "UserFirstGoodData" in self._data.current_data.keys():
+            first_good_data = self._data.current_data["UserFirstGoodData"]
         else:
             # Default to loaded value
-            self._data.loaded_data["FirstGoodData"] = self._data.loaded_data["FirstGoodData"]
-            first_good_data = self._data.loaded_data["FirstGoodData"]
+            self._data.current_data["FirstGoodData"] = self._data.current_data["FirstGoodData"]
+            first_good_data = self._data.current_data["FirstGoodData"]
         return first_good_data
 
     def set_user_time_zero(self, time_zero):
-        self._data.loaded_data["UserTimeZero"] = time_zero
+        self._data.current_data["UserTimeZero"] = time_zero
 
     def set_user_first_good_data(self, first_good_data):
-        self._data.loaded_data["UserFirstGoodData"] = first_good_data
+        self._data.current_data["UserFirstGoodData"] = first_good_data
 
     def get_dead_time_table_from_data(self):
         if self._data.is_multi_period():
-            return self._data.loaded_data["DataDeadTimeTable"][0]
+            return self._data.current_data["DataDeadTimeTable"][0]
         else:
-            return self._data.loaded_data["DataDeadTimeTable"]
+            return self._data.current_data["DataDeadTimeTable"]
 
     def get_dead_time_table(self):
         return self._data.dead_time_table
 
     def add_fixed_binning(self, fixed_bin_size):
-        self._data.loaded_data["Rebin"] = str(fixed_bin_size)
+        self._data.current_data["Rebin"] = str(fixed_bin_size)
 
     def add_variable_binning(self, rebin_params):
-        self._data.loaded_data["Rebin"] = str(rebin_params)
+        self._data.current_data["Rebin"] = str(rebin_params)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time
@@ -99,16 +99,16 @@ class InstrumentWidgetModel(object):
         return True
 
     def set_dead_time_to_none(self):
-        self._data.loaded_data["DeadTimeTable"] = None
+        self._data.current_data["DeadTimeTable"] = None
 
     def set_dead_time_from_data(self):
-        data_dead_time = self._data.loaded_data["DataDeadTimeTable"]
+        data_dead_time = self._data.current_data["DataDeadTimeTable"]
         if isinstance(data_dead_time, WorkspaceGroup):
-            self._data.loaded_data["DeadTimeTable"] = data_dead_time[0]
+            self._data.current_data["DeadTimeTable"] = data_dead_time[0]
         else:
-            self._data.loaded_data["DeadTimeTable"] = data_dead_time
+            self._data.current_data["DeadTimeTable"] = data_dead_time
 
     def set_user_dead_time_from_ADS(self, name):
         dtc = api.AnalysisDataServiceImpl.Instance().retrieve(str(name))
-        self._data.loaded_data["UserDeadTimeTable"] = dtc
-        self._data.loaded_data["DeadTimeTable"] = dtc
+        self._data.current_data["UserDeadTimeTable"] = dtc
+        self._data.current_data["DeadTimeTable"] = dtc

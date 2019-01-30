@@ -10,7 +10,7 @@ import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 def calculate_group_data(context, group_name, run):
     processed_data = _run_pre_processing(context, run)
 
-    params = _get_MuonGroupingCounts_parameters(context, group_name)
+    params = _get_MuonGroupingCounts_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
     group_data = algorithm_utils.run_MuonGroupingCounts(params)
 
@@ -20,7 +20,7 @@ def calculate_group_data(context, group_name, run):
 def calculate_pair_data(context, pair_name, run):
     processed_data = _run_pre_processing(context, run)
 
-    params = _get_MuonPairingAsymmetry_parameters(context, pair_name)
+    params = _get_MuonPairingAsymmetry_parameters(context, pair_name, run)
     params["InputWorkspace"] = processed_data
     pair_data = algorithm_utils.run_MuonPairingAsymmetry(params)
 
@@ -28,34 +28,34 @@ def calculate_pair_data(context, pair_name, run):
 
 
 def _run_pre_processing(context, run):
-    params = _get_pre_processing_params(context)
+    params = _get_pre_processing_params(context, run)
     params["InputWorkspace"] = context.loaded_workspace_as_group(run)
     processed_data = algorithm_utils.run_MuonPreProcess(params)
     return processed_data
 
 
-def _get_pre_processing_params(context):
+def _get_pre_processing_params(context, run):
     pre_process_params = {}
     try:
-        time_min = context.loaded_data["FirstGoodData"]
+        time_min = context.loaded_data(run)["FirstGoodData"]
         pre_process_params["TimeMin"] = time_min
     except KeyError:
         pass
 
     try:
-        rebin_args = context.loaded_data["Rebin"]
+        rebin_args = context.loaded_data(run)["Rebin"]
         pre_process_params["RebinArgs"] = rebin_args
     except KeyError:
         pass
 
     try:
-        time_offset = context.loaded_data["TimeZero"]
+        time_offset = context.loaded_data(run)["TimeZero"]
         pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
 
     try:
-        dead_time_table = context.dead_time_table
+        dead_time_table = context.loaded_data(run)["DeadTimeTable"]
         if dead_time_table is not None:
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:
@@ -64,16 +64,16 @@ def _get_pre_processing_params(context):
     return pre_process_params
 
 
-def _get_MuonGroupingCounts_parameters(context, group_name):
+def _get_MuonGroupingCounts_parameters(context, group_name, run):
     params = {}
     try:
-        summed_periods = context.loaded_data["SummedPeriods"]
+        summed_periods = context.loaded_data(run)["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
     except KeyError:
         params["SummedPeriods"] = "1"
 
     try:
-        subtracted_periods = context.loaded_data["SubtractedPeriods"]
+        subtracted_periods = context.loaded_data(run)["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
     except KeyError:
         params["SubtractedPeriods"] = ""
@@ -86,16 +86,16 @@ def _get_MuonGroupingCounts_parameters(context, group_name):
     return params
 
 
-def _get_MuonPairingAsymmetry_parameters(context, pair_name):
+def _get_MuonPairingAsymmetry_parameters(context, pair_name, run):
     params = {}
     try:
-        summed_periods = context.loaded_data["SummedPeriods"]
+        summed_periods = context.loaded_data(run)["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
     except KeyError:
         params["SummedPeriods"] = "1"
 
     try:
-        subtracted_periods = context.loaded_data["SubtractedPeriods"]
+        subtracted_periods = context.loaded_data(run)["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
     except KeyError:
         params["SubtractedPeriods"] = ""
