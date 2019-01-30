@@ -29,17 +29,17 @@ from collections import OrderedDict
 from mantid.kernel import ConfigServiceImpl, ConfigService
 
 
-def get_default_grouping(instrument, main_field_direction):
+def get_default_grouping(workspace, instrument, main_field_direction):
     parameter_name = "Default grouping file"
     if instrument == "MUSR":
         parameter_name += " - " + main_field_direction
     try:
-        grouping_file = ConfigService.getInstrument(instrument).getStringParameter(parameter_name)[0]
+        grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
     except IndexError:
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = instrument_directory + grouping_file
-    new_groups, new_pairs = xml_utils.load_grouping_from_XML(filename)
+    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
     return new_groups, new_pairs
 
 
@@ -154,7 +154,10 @@ class MuonDataContext(object):
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
-        self._groups[group.name] = group
+        if self.check_group_contains_valid_detectors(group):
+            self._groups[group.name] = group
+        else:
+            raise ValueError('Invalid detectors in group {}'.format(group.name))
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
@@ -289,7 +292,7 @@ class MuonDataContext(object):
             calculate_group_data(self, group_name)
 
     def set_groups_and_pairs_to_default(self):
-        groups, pairs = get_default_grouping(self.instrument, self.main_field_direction)
+        groups, pairs = get_default_grouping(self.loaded_workspace, self.instrument, self.main_field_direction)
 
         self.clear_groups()
         for group in groups:
@@ -298,3 +301,9 @@ class MuonDataContext(object):
         self.clear_pairs()
         for pair in pairs:
             self.add_pair(pair)
+
+    def check_group_contains_valid_detectors(self, group):
+        if max(group.detectors) > self.num_detectors or min(group.detectors) < 1:
+            return False
+        else:
+            return True
