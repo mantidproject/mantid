@@ -28,6 +28,20 @@ polarizationCorrectionTypeFromString(std::string const &correctionType) {
     throw std::runtime_error("Unexpected polarization correction type.");
 }
 
+inline std::string
+PolarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
+  if (correctionType == PolarizationCorrectionType::None)
+    return "None";
+  else if (correctionType == PolarizationCorrectionType::PA)
+    return "PA";
+  else if (correctionType == PolarizationCorrectionType::PNR)
+    return "PNR";
+  else if (correctionType == PolarizationCorrectionType::ParameterFile)
+    return "ParameterFile";
+  else
+    throw std::runtime_error("Unexpected polarization correction type.");
+}
+
 inline bool polarizationCorrectionRequiresInputs(
     PolarizationCorrectionType correctionType) {
   return (correctionType == PolarizationCorrectionType::PA ||

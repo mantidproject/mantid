@@ -25,6 +25,13 @@ void updateProperty(std::string const &property, std::string const &value,
 }
 
 void updateProperty(std::string const &property,
+                    boost::optional<std::string> const &value,
+                    AlgorithmRuntimeProps &properties) {
+  if (value)
+    updateProperty(property, value.get(), properties);
+}
+
+void updateProperty(std::string const &property,
                     std::vector<std::string> const &values,
                     AlgorithmRuntimeProps &properties) {
   if (values.size() < 1)
@@ -44,6 +51,14 @@ void updateProperty(std::string const &property,
                     AlgorithmRuntimeProps &properties) {
   if (value)
     updateProperty(property, value.get(), properties);
+}
+
+void updatePropertiesFromMap(
+    AlgorithmRuntimeProps &properties,
+    std::map<std::string, std::string> const &parameterMap) {
+  for (auto kvp : parameterMap) {
+    updateProperty(kvp.first, kvp.second, properties);
+  }
 }
 
 void updateWorkspacesNameProperties(AlgorithmRuntimeProps &properties,
@@ -67,19 +82,69 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   updateRangeInQProperties(properties, row.qRange());
   updateProperty("ThetaIn", row.theta(), properties);
   updateProperty("ScaleFactor", row.scaleFactor(), properties);
+  updatePropertiesFromMap(properties, row.reductionOptions());
+}
+
+void updateTransmissionRangeProperties(
+    AlgorithmRuntimeProps &properties,
+    boost::optional<RangeInLambda> const &range) {
+  if (!range)
+    return;
+
+  if (range->minSet())
+    updateProperty("StartOverlap", range->min(), properties);
+
+  if (range->maxSet())
+    updateProperty("EndOverlap", range->max(), properties);
+}
+
+void updatePolarizationCorrectionProperties(
+    AlgorithmRuntimeProps &properties,
+    PolarizationCorrections const &corrections) {
+  if (corrections.correctionType() == PolarizationCorrectionType::None)
+    return;
+
+  updateProperty(
+      "PolarisationCorrections",
+      PolarizationCorrectionTypeToString(corrections.correctionType()),
+      properties);
+
+  if (corrections.correctionType() == PolarizationCorrectionType::PA ||
+      corrections.correctionType() == PolarizationCorrectionType::PNR) {
+    updateProperty("CRho", corrections.cRho(), properties);
+    updateProperty("CAlpha", corrections.cRho(), properties);
+    updateProperty("CAp", corrections.cRho(), properties);
+    updateProperty("CPp", corrections.cRho(), properties);
+  }
+}
+
+void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties,
+                                     FloodCorrections const &corrections) {
+  updateProperty("FloodCorrection",
+                 FloodCorrectionTypeToString(corrections.correctionType()),
+                 properties);
+
+  if (corrections.correctionType() == FloodCorrectionType::Workspace)
+    updateProperty("FloodWorkspace", corrections.workspace(), properties);
 }
 
 void updateExperimentProperties(AlgorithmRuntimeProps &properties,
                                 Experiment const &experiment) {
   updateProperty("AnalysisMode",
                  analysisModeToString(experiment.analysisMode()), properties);
-  updateProperty("ReductionType",
-                 reductionTypeToString(experiment.reductionType()), properties);
+  updateProperty("Debug", boolToString(experiment.debug()), properties);
   updateProperty("SummationType",
                  summationTypeToString(experiment.summationType()), properties);
+  updateProperty("ReductionType",
+                 reductionTypeToString(experiment.reductionType()), properties);
   updateProperty("IncludePartialBins",
                  boolToString(experiment.includePartialBins()), properties);
-  updateProperty("Debug", boolToString(experiment.debug()), properties);
+  updateTransmissionRangeProperties(properties,
+                                    experiment.transmissionRunRange());
+  updatePolarizationCorrectionProperties(properties,
+                                         experiment.polarizationCorrections());
+  updateFloodCorrectionProperties(properties, experiment.floodCorrections());
+  updatePropertiesFromMap(properties, experiment.stitchParameters());
 }
 
 void addAlgorithmForRow(Row &row, Batch const &model,
