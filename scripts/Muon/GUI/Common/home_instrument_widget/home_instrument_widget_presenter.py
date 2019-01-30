@@ -72,9 +72,11 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_loaded_time_zero_checkState_change(self):
         if self._view.time_zero_state():
+            self._model.set_time_zero_from_file(True)
             time_zero = self._model.get_file_time_zero()
             self._view.set_time_zero(time_zero)
         else:
+            self._model.set_time_zero_from_file(False)
             time_zero = self._model.get_user_time_zero()
             self._view.set_time_zero(time_zero)
 
@@ -88,9 +90,11 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_loaded_first_good_data_checkState_change(self):
         if self._view.first_good_data_state():
+            self._model.set_first_good_data_source(True)
             first_good_data = self._model.get_file_first_good_data()
             self._view.set_first_good_data(first_good_data)
         else:
+            self._model.set_first_good_data_source(False)
             first_good_data = self._model.get_user_first_good_data()
             self._view.set_first_good_data(first_good_data)
 

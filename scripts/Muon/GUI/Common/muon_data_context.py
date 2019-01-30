@@ -161,6 +161,10 @@ class MuonDataContext(object):
     def pairs(self):
         return self._pairs
 
+    @property
+    def gui_variables(self):
+        return self._gui_variables
+
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
         self._groups[group.name] = group
