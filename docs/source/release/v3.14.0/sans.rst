@@ -36,6 +36,7 @@ Improved
 * Can export table as a csv, which can be re-loaded as a batch file.
 * File path to batch file will be added to your directories automatically upon loading
 * If loading of user file fails, user file field will remain empty to make it clear it has not be loaded successfully.
+* Workspaces are centred upon loading.
 
 Bug fixes
 #########
@@ -48,6 +49,8 @@ Bug fixes
 * Removed option to process in non-compatibility mode to avoid calculation issues.
 * GUI can correctly read user files with variable step sizes, in /LOG and /LIN modes.
 * Fixed occasional crash when entering data into table.
+* Removed option to process in non-compatibility mode to avoid calculation issues.
+* Default name for added runs has correct number of digits.
 
 Improvements
 ############
