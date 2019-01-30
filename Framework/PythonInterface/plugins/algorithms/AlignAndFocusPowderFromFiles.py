@@ -11,7 +11,7 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
 from mantid.kernel import ConfigService, Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CopyLogs, CreateCacheFilename, \
     DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
-    PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed
+    PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed, SumSpectra
 import os
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -224,6 +224,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if name == 'PreserveEvents' or not prop.isDefault:
                 # TODO need unique identifier for absorption workspace
                 alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
+        if 'GroupingWorkspace' in self.kwargs:
+            sum = SumSpectra(InputWorkspace=self.kwargs['GroupingWorkspace'])
+            alignandfocusargs.append('%s=%s' % ("groupSum",str(sum.readY(0)[0])))
+        if 'GroupFilename' in self.kwargs:
+            groups = LoadNexusProcessed(InputWorkspace=self.kwargs['GroupFilename'])
+            sum = SumSpectra(InputWorkspace=groups)
+            alignandfocusargs.append('%s=%s' % ("groupSum",str(sum.readY(0)[0])))
 
         return CreateCacheFilename(Prefix=wkspname,
                                    PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
