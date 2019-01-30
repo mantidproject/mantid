@@ -48,11 +48,11 @@ void updateProperty(std::string const &property,
 
 void updateWorkspacesNameProperties(AlgorithmRuntimeProps &properties,
                                     ReductionWorkspaces const &workspaces) {
-  updateProperty("InputRunList", workspaces.timeOfFlight(), properties);
+  updateProperty("InputRunList", workspaces.inputRunNumbers(), properties);
   updateProperty("FirstTransmissionRunList",
-                 workspaces.transmissionRuns().first, properties);
+                 workspaces.transmissionRuns().firstRunList(), properties);
   updateProperty("SecondTransmissionRunList",
-                 workspaces.transmissionRuns().second, properties);
+                 workspaces.transmissionRuns().secondRunList(), properties);
 }
 
 void updateRangeInQProperties(AlgorithmRuntimeProps &properties,

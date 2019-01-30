@@ -29,9 +29,9 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(std::to_string(row.theta())),
        MantidQt::MantidWidgets::Batch::Cell(
-           row.transmissionWorkspaceNames().first),
+           row.transmissionWorkspaceNames().firstRunList()),
        MantidQt::MantidWidgets::Batch::Cell(
-           row.transmissionWorkspaceNames().second),
+           row.transmissionWorkspaceNames().secondRunList()),
        MantidQt::MantidWidgets::Batch::Cell(
            optionalToString(row.qRange().min())),
        MantidQt::MantidWidgets::Batch::Cell(

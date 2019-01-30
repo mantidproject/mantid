@@ -172,14 +172,14 @@ public:
   }
 
   void testParsesFirstTransmissionRun() {
-    auto const expected = std::pair<std::string, std::string>("1000", "");
+    auto const expected = TransmissionRunPair("1000", "");
     auto const result =
         boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", ""));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesTwoTransmissionRuns() {
-    auto const expected = std::pair<std::string, std::string>("1000", "2010");
+    auto const expected = TransmissionRunPair("1000", "2010");
     auto const result =
         boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", "2010"));
     TS_ASSERT_EQUALS(expected, result);

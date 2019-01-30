@@ -570,14 +570,14 @@ private:
   // either as an input array of strings or an output model
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
   PerThetaDefaults defaultsWithFirstAngle() {
-    return PerThetaDefaults(0.5, std::make_pair("13463", ""), RangeInQ(),
+    return PerThetaDefaults(0.5, TransmissionRunPair("13463", ""), RangeInQ(),
                             boost::none, boost::none);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
   PerThetaDefaults defaultsWithSecondAngle() {
-    return PerThetaDefaults(2.3, std::make_pair("13463", "13464"), RangeInQ(),
-                            boost::none, boost::none);
+    return PerThetaDefaults(2.3, TransmissionRunPair("13463", "13464"),
+                            RangeInQ(), boost::none, boost::none);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }

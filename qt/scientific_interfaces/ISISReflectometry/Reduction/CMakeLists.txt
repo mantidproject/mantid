@@ -9,6 +9,7 @@ set ( REDUCTION_SRC_FILES
     ValidateRow.cpp
     Slicing.cpp
     ParseReflectometryStrings.cpp
+    TransmissionRunPair.cpp
 
     Batch.cpp
     DetectorCorrections.cpp
@@ -37,6 +38,7 @@ set ( REDUCTION_INC_FILES
     ValidateRow.h
     ParseReflectometryStrings.h
     ProcessingInstructions.h
+    TransmissionRunPair.h
     ValidatePerThetaDefaults.h
 
     AnalysisMode.h

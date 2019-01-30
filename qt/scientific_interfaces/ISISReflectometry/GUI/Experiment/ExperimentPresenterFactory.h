@@ -36,8 +36,8 @@ private:
     auto floodCorrections(FloodCorrectionType::Workspace);
     auto stitchParameters = std::map<std::string, std::string>();
     auto perThetaDefaults = std::vector<PerThetaDefaults>(
-        {PerThetaDefaults(boost::none, std::pair<std::string, std::string>(),
-                          RangeInQ(), boost::none, ProcessingInstructions())});
+        {PerThetaDefaults(boost::none, TransmissionRunPair(), RangeInQ(),
+                          boost::none, ProcessingInstructions())});
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
                       std::move(polarizationCorrections),

@@ -27,12 +27,12 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL Row
     : public API::BatchAlgorithmRunnerSubscriber {
 public:
   Row(std::vector<std::string> number, double theta,
-      std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
+      TransmissionRunPair tranmissionRuns, RangeInQ qRange,
       boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
       ReductionWorkspaces reducedWorkspaceNames);
 
   std::vector<std::string> const &runNumbers() const;
-  std::pair<std::string, std::string> const &transmissionWorkspaceNames() const;
+  TransmissionRunPair const &transmissionWorkspaceNames() const;
   double theta() const;
   RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
@@ -57,7 +57,7 @@ private:
   double m_theta;
   RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
-  std::pair<std::string, std::string> m_transmissionRuns;
+  TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
   ItemState m_itemState;

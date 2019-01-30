@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
+#include "TransmissionRunPair.h"
 #include <boost/optional.hpp>
 #include <string>
 #include <vector>
@@ -18,12 +19,11 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
   PerThetaDefaults(
-      boost::optional<double> theta,
-      std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
-      boost::optional<double> scaleFactor,
+      boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
+      RangeInQ qRange, boost::optional<double> scaleFactor,
       boost::optional<ProcessingInstructions> processingInstructions);
 
-  std::pair<std::string, std::string> const &transmissionWorkspaceNames() const;
+  TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
   boost::optional<double> thetaOrWildcard() const;
   RangeInQ const &qRange() const;
@@ -32,7 +32,7 @@ public:
 
 private:
   boost::optional<double> m_theta;
-  std::pair<std::string, std::string> m_transmissionRuns;
+  TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
   boost::optional<ProcessingInstructions> m_processingInstructions;

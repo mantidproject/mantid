@@ -14,8 +14,7 @@ namespace CustomInterfaces {
 
 Row::Row( // cppcheck-suppress passedByValue
     std::vector<std::string> runNumbers, double theta,
-    // cppcheck-suppress passedByValue
-    std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
+    TransmissionRunPair transmissionRuns, RangeInQ qRange,
     boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
     // cppcheck-suppress passedByValue
     ReductionWorkspaces reducedWorkspaceNames)
@@ -29,8 +28,7 @@ Row::Row( // cppcheck-suppress passedByValue
 
 std::vector<std::string> const &Row::runNumbers() const { return m_runNumbers; }
 
-std::pair<std::string, std::string> const &
-Row::transmissionWorkspaceNames() const {
+TransmissionRunPair const &Row::transmissionWorkspaceNames() const {
   return m_transmissionRuns;
 }
 
@@ -65,6 +63,7 @@ Row mergedRow(Row const &rowA, Row const &rowB) {
 
 void Row::notifyAlgorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
   UNUSED_ARG(algorithm);
+  m_reducedWorkspaceNames.resetOutputNames();
   setRunning();
 }
 
@@ -80,6 +79,7 @@ void Row::notifyAlgorithmComplete(
 void Row::notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
                                std::string const &msg) {
   UNUSED_ARG(algorithm);
+  m_reducedWorkspaceNames.resetOutputNames();
   setError(msg);
 }
 

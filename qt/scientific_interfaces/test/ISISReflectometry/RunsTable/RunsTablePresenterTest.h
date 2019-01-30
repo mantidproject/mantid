@@ -33,9 +33,9 @@ public:
   }
 
   Row basicRow() {
-    return Row(std::vector<std::string>({"101", "102"}), 1.2, {"A", "B"},
-               RangeInQ(), boost::none, {},
-               ReductionWorkspaces({}, "", {"", ""}, "", "", "", ""));
+    return Row(std::vector<std::string>({"101", "102"}), 1.2,
+               TransmissionRunPair{"A", "B"}, RangeInQ(), boost::none, {},
+               ReductionWorkspaces({}, TransmissionRunPair()));
   }
 
   ReductionJobs twoEmptyGroupsModel() {

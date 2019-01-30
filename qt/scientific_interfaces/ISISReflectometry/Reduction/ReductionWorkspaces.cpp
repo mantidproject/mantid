@@ -11,41 +11,18 @@ namespace MantidQt {
 namespace CustomInterfaces {
 ReductionWorkspaces::ReductionWorkspaces(
     // cppcheck-suppress passedByValue
-    std::vector<std::string> timeOfFlight,
-    // cppcheck-suppress passedByValue
-    std::string joinedTofWorkspace,
-    // cppcheck-suppress passedByValue
-    std::pair<std::string, std::string> transmissionRuns,
-    // cppcheck-suppress passedByValue
-    std::string combinedTransmissionRuns,
-    // cppcheck-suppress passedByValue
-    std::string iVsLambda,
-    // cppcheck-suppress passedByValue
-    std::string iVsQ,
-    // cppcheck-suppress passedByValue
-    std::string iVsQBinned)
-    : m_timeOfFlight(std::move(timeOfFlight)),
-      m_joinedTofWorkspace(std::move(joinedTofWorkspace)),
-      m_transmissionRuns(std::move(transmissionRuns)),
-      m_combinedTransmissionRuns(combinedTransmissionRuns),
-      m_iVsLambda(std::move(iVsLambda)), m_iVsQ(std::move(iVsQ)),
-      m_iVsQBinned(std::move(iVsQBinned)) {}
+    std::vector<std::string> inputRunNumbers,
+    TransmissionRunPair transmissionRuns)
+    : m_inputRunNumbers(std::move(inputRunNumbers)),
+      m_transmissionRuns(transmissionRuns), m_iVsLambda(), m_iVsQ(),
+      m_iVsQBinned() {}
 
-std::vector<std::string> const &ReductionWorkspaces::timeOfFlight() const {
-  return m_timeOfFlight;
+std::vector<std::string> const &ReductionWorkspaces::inputRunNumbers() const {
+  return m_inputRunNumbers;
 }
 
-std::string const &ReductionWorkspaces::joinedTofWorkspace() const {
-  return m_joinedTofWorkspace;
-}
-
-std::pair<std::string, std::string> const &
-ReductionWorkspaces::transmissionRuns() const {
+TransmissionRunPair const &ReductionWorkspaces::transmissionRuns() const {
   return m_transmissionRuns;
-}
-
-std::string const &ReductionWorkspaces::combinedTransmissionRuns() const {
-  return m_combinedTransmissionRuns;
 }
 
 std::string const &ReductionWorkspaces::iVsLambda() const {
@@ -66,12 +43,16 @@ void ReductionWorkspaces::setOutputNames(std::string iVsLambda,
   m_iVsQBinned = std::move(iVsQBinned);
 }
 
+void ReductionWorkspaces::resetOutputNames() {
+  m_iVsLambda = std::string();
+  m_iVsQ = std::string();
+  m_iVsQBinned = std::string();
+}
+
 bool operator==(ReductionWorkspaces const &lhs,
                 ReductionWorkspaces const &rhs) {
-  return lhs.timeOfFlight() == rhs.timeOfFlight() &&
-         lhs.transmissionRuns() == rhs.transmissionRuns() &&
-         lhs.iVsLambda() == rhs.iVsLambda() && lhs.iVsQ() == rhs.iVsQ() &&
-         lhs.iVsQBinned() == rhs.iVsQBinned();
+  return lhs.inputRunNumbers() == rhs.inputRunNumbers() &&
+         lhs.transmissionRuns() == rhs.transmissionRuns();
 }
 
 bool operator!=(ReductionWorkspaces const &lhs,
@@ -79,36 +60,10 @@ bool operator!=(ReductionWorkspaces const &lhs,
   return !(lhs == rhs);
 }
 
-std::string transmissionWorkspacesCombined(
-    std::pair<std::string, std::string> const &transmissionRuns) {
-  if (!transmissionRuns.first.empty()) {
-    auto first = transmissionRuns.first;
-    if (!transmissionRuns.second.empty()) {
-      return first + "_" + transmissionRuns.second;
-    } else {
-      return first;
-    }
-  } else {
-    return std::string();
-  }
-}
-
 ReductionWorkspaces
-workspaceNames(std::vector<std::string> const &tofRunNumbers,
-               std::pair<std::string, std::string> const &transmissionRuns) {
-
-  auto joinedRuns = boost::algorithm::join(tofRunNumbers, "+");
-  auto joinedTofWorkspace = "TOF_" + joinedRuns;
-  auto iVsLambda = "IvsLam_" + joinedRuns;
-  auto iVsQ = "IvsQ_" + joinedRuns;
-  auto iVsQBinned = "IvsQ_binned_" + joinedRuns;
-  auto combinedTransmissionWorkspace =
-      transmissionWorkspacesCombined(transmissionRuns);
-
-  return ReductionWorkspaces(
-      tofRunNumbers, std::move(joinedTofWorkspace), transmissionRuns,
-      std::move(combinedTransmissionWorkspace), std::move(iVsLambda),
-      std::move(iVsQ), std::move(iVsQBinned));
+workspaceNames(std::vector<std::string> const &inputRunNumbers,
+               TransmissionRunPair const &transmissionRuns) {
+  return ReductionWorkspaces(inputRunNumbers, transmissionRuns);
 }
 
 std::string postprocessedWorkspaceName(
