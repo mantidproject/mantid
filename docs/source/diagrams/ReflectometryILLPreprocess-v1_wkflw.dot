@@ -8,7 +8,7 @@ digraph ReflectometryILLPreprocess {
     beamCentre        [label="LinePosition"]
     braggAngle        [label="TwoTheta"]
     run               [label="Run"]
-    inputBeamPosition [label="DirectBeamPositionWorkspace"]
+    inputBeamPosition [label="Sample log reduction.line_position"]
     inputDirect       [label="DirectLineWorkspace"]
     inputWorkspace    [label="InputWorkspace"]
     output            [label="OutputWorkspace"]
@@ -40,19 +40,17 @@ digraph ReflectometryILLPreprocess {
   whichInput -> load [label="Read from disk"]
 
   run                   -> load
-  beamCentre            -> load [label="Override beam centre\nfrom loader"]
   braggAngle            -> load [label="Override angles in .nxs"]
-  inputBeamPosition     -> load
   load                  -> extractMonitors
   inputWorkspace        -> extractMonitors
   beamCentre            -> determinePeakPosition
   extractMonitors       -> determinePeakPosition
-  determinePeakPosition -> addSampleLogs [label="reduction.foreground.centre_workspace_index,\nreduction.foreground.first_workspace_index,\nreduction.foreground.last_workspace_index,\reduction.line_position"]
+  inputBeamPosition     -> determinePeakPosition [label="From InputWorkspace"]
   inputDirect           -> moveDetectors [label="In case of reflected beam calibration"]
   determinePeakPosition -> moveDetectors
   braggAngle            -> moveDetectors [label="If user input,\nloader took already care\nof the correct detector position"]
-  moveDetectors         -> addSampleLogTwoTheta [label="twoTheta"]
-  moveDetectors         -> waterNorm [label="WaterWorkspace available"]
+  moveDetectors         -> addSampleLogs
+  addSampleLogs         -> waterNorm [label="WaterWorkspace available"]
   waterReference        -> waterNorm [label="Rebin"]
   waterNorm             -> isSlitNorm
   moveDetectors         -> isSlitNorm

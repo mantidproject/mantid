@@ -125,6 +125,7 @@ class SampleLogs:
     FOREGROUND_CENTRE = 'reduction.foreground.centre_workspace_index'
     FOREGROUND_END = 'reduction.foreground.last_workspace_index'
     FOREGROUND_START = 'reduction.foreground.first_workspace_index'
+    LINE_POSITION = 'reduction.line_position'
     SUM_TYPE = 'reduction.foreground.summation_type'
     TWO_THETA = 'reduction.two_theta'
 

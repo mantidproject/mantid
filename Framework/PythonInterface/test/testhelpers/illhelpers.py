@@ -10,7 +10,7 @@ from mantid.api import mtd
 from mantid.kernel import DeltaEModeType, UnitConversion
 import numpy
 from testhelpers import create_algorithm, run_algorithm
-
+import ReflectometryILL_common as common
 
 def _gaussian(x, height, x0, sigma):
     """Return a point in the gaussian curve."""
@@ -47,6 +47,15 @@ def _fillTemplateReflectometryWorkspace(ws):
         'LogText': str(3600),
         'LogType': 'Number',
         'LogUnit': 'Sec',
+        'NumberType': 'Double',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    kwargs = {
+        'Workspace': ws,
+        'LogName': common.SampleLogs.LINE_POSITION,
+        'LogText': str(3.0),
+        'LogType': 'Number',
         'NumberType': 'Double',
         'child': True
     }

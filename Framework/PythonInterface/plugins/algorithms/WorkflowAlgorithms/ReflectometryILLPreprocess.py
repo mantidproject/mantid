@@ -8,11 +8,15 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty,
-                        MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction,
-                           IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty,
-                           IntBoundedValidator, Property, StringListValidator)
+from mantid.api import (AlgorithmFactory,
+                        DataProcessorAlgorithm,
+                        FileAction,
+                        MatrixWorkspaceProperty,
+                        MultipleFileProperty,
+                        PropertyMode,
+                        WorkspaceUnitValidator)
+from mantid.kernel import (CompositeValidator, Direction, IntArrayLengthValidator, IntArrayBoundedValidator,
+                           IntArrayProperty, IntBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (AddSampleLog, CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
                               Divide, ExtractMonitors, FindReflectometryLines, LoadAndMerge, Minus, mtd,
                               NormaliseToMonitor, RebinToWorkspace, Scale, SpecularReflectionPositionCorrect, Transpose)
@@ -21,7 +25,6 @@ import ReflectometryILL_common as common
 
 
 class Prop:
-    BEAM_POS_WS = 'DirectBeamPosition'
     START_WS_INDEX = 'FitStartWorkspaceIndex'
     END_WS_INDEX = 'FitEndWorkspaceIndex'
     XMIN = 'FitRangeLower'
@@ -34,7 +37,7 @@ class Prop:
     HIGH_BKG_OFFSET = 'HighAngleBkgOffset'
     HIGH_BKG_WIDTH = 'HighAngleBkgWidth'
     INPUT_WS = 'InputWorkspace'
-    LINE_POSITION = 'LinePosition'
+    LINE_POSITION_INPUT = 'LinePosition'
     LOW_BKG_OFFSET = 'LowAngleBkgOffset'
     LOW_BKG_WIDTH = 'LowAngleBkgWidth'
     OUTPUT_WS = 'OutputWorkspace'
@@ -151,15 +154,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      validator=WorkspaceUnitValidator('TOF'),
                                                      optional=PropertyMode.Optional),
                              doc='An input workspace (units TOF) if no Run is specified.')
-        self.declareProperty(ITableWorkspaceProperty(Prop.BEAM_POS_WS,
-                                                     defaultValue='',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='A beam position table corresponding to InputWorkspace.')
         self.declareProperty(Prop.TWO_THETA,
                              defaultValue=Property.EMPTY_DBL,
                              doc='A user-defined scattering angle 2 theta (unit degrees).')
-        self.declareProperty(name=Prop.LINE_POSITION,
+        self.declareProperty(name=Prop.LINE_POSITION_INPUT,
                              defaultValue=Property.EMPTY_DBL,
                              doc='A workspace index corresponding to the beam centre between 0.0 and 255.0')
         self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
@@ -186,7 +184,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              doc='Enable or disable slit normalisation.')
         self.declareProperty(Prop.FLUX_NORM_METHOD,
                              defaultValue=FluxNormMethod.TIME,
-                             validator=StringListValidator([FluxNormMethod.TIME, FluxNormMethod.MONITOR, FluxNormMethod.OFF]),
+                             validator=StringListValidator([FluxNormMethod.TIME,
+                                                            FluxNormMethod.MONITOR,
+                                                            FluxNormMethod.OFF]),
                              doc='Neutron flux normalisation method.')
         self.declareProperty(IntArrayProperty(Prop.FOREGROUND_HALF_WIDTH,
                                               validator=maxTwoNonnegativeInts),
@@ -198,20 +198,23 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(Prop.LOW_BKG_OFFSET,
                              defaultValue=7,
                              validator=nonnegativeInt,
-                             doc='Distance of flat background region towards smaller detector angles from the foreground centre, ' +
-                                 'in pixels.')
+                             doc='Distance of flat background region towards smaller detector angles from the ' +
+                                 'foreground centre, in pixels.')
         self.declareProperty(Prop.LOW_BKG_WIDTH,
                              defaultValue=5,
                              validator=nonnegativeInt,
-                             doc='Width of flat background region towards smaller detector angles from the foreground centre, in pixels.')
+                             doc='Width of flat background region towards smaller detector angles from the ' +
+                                 'foreground centre, in pixels.')
         self.declareProperty(Prop.HIGH_BKG_OFFSET,
                              defaultValue=7,
                              validator=nonnegativeInt,
-                             doc='Distance of flat background region towards larger detector angles from the foreground centre, in pixels.')
+                             doc='Distance of flat background region towards larger detector angles from the ' +
+                                 'foreground centre, in pixels.')
         self.declareProperty(Prop.HIGH_BKG_WIDTH,
                              defaultValue=5,
                              validator=nonnegativeInt,
-                             doc='Width of flat background region towards larger detector angles from the foreground centre, in pixels.')
+                             doc='Width of flat background region towards larger detector angles from the ' +
+                                 'foreground centre, in pixels.')
         self.declareProperty(Prop.START_WS_INDEX,
                              validator=wsIndexRange,
                              defaultValue=0,
@@ -230,7 +233,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      defaultValue='',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='A direct beam workspace for reference.')
+                             doc='A pre-processed direct beam workspace (sample log entries).')
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -239,15 +242,19 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             issues[Prop.RUN] = 'Provide at least an input file or alternatively an input workspace.'
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
-                issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
-            if not self.getProperty(Prop.INPUT_WS).isDefault and self.getProperty(Prop.BEAM_POS_WS).isDefault \
-                    and self.getProperty(Prop.LINE_POSITION).isDefault:
-                issues[Prop.BEAM_POS_WS] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
-                issues[Prop.LINE_POSITION] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
-        if not self.getProperty(Prop.LINE_POSITION).isDefault:
-            beamCentre = self.getProperty(Prop.LINE_POSITION).value
+                issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background /' \
+                                          ' widths are zero.'
+            if not self.getProperty(Prop.INPUT_WS).isDefault:
+                ws = self.getProperty(Prop.INPUT_WS).value
+                if not ws.run().hasProperty(common.SampleLogs.LINE_POSITION) and \
+                        self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
+                    issues[Prop.LINE_POSITION_INPUT] = 'Cannot subtract flat background without knowledge of /'\
+                                                       'line position.'
+                    issues[Prop.INPUT_WS] = 'Consider to give a sample log entry ' + common.SampleLogs.LINE_POSITION
+        if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
+            beamCentre = self.getProperty(Prop.LINE_POSITION_INPUT).value
             if beamCentre < 0. or beamCentre > 255.:
-                issues[Prop.LINE_POSITION] = 'Value should be between 0 and 255.'
+                issues[Prop.LINE_POSITION_INPUT] = 'Value should be between 0.0 and 255.0'
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             xmin = self.getProperty(Prop.XMIN).value
@@ -298,10 +305,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _flatBkgRanges(self, ws):
         """Return spectrum number ranges for flat background fitting."""
         sign = self._workspaceIndexDirection(ws)
-        if ws.getRun().hasProperty(common.SampleLogs.FOREGROUND_CENTRE):
-            peakPos = ws.getRun().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value
-        else:
-            raise RuntimeError('Missing log entry for sample logs foreground centre.')
+        peakPos = ws.getRun().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value
         # Convert to spectrum numbers
         peakPos = ws.getSpectrum(peakPos).getSpectrumNo()
         peakHalfWidths = self._foregroundWidths()
@@ -369,11 +373,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         mindex = int(hists / 2)
         l2 = ws.spectrumInfo().l2(mindex)
         theta = ws.spectrumInfo().twoTheta(mindex) / 2.
-        if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
-            tableWithBeamPos = self.getProperty(Prop.BEAM_POS_WS).value
-            linePosition = tableWithBeamPos.cell('PeakCentre', 0)
-        elif not self.getProperty(Prop.LINE_POSITION).isDefault:
-            linePosition = self.getProperty(Prop.LINE_POSITION).value
+        linePosition = 0.0
+        if not self.getProperty(Prop.INPUT_WS).isDefault:
+            inputWS = self.getProperty(Prop.INPUT_WS).value
+            if inputWS.run().hasProperty(common.SampleLogs.LINE_POSITION):
+                linePosition = inputWS.run().getLogData(common.SampleLogs.LINE_POSITION).value
+        if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault and linePosition == 0.0:
+            linePosition = self.getProperty(Prop.LINE_POSITION_INPUT).value
         else:
             # Fit peak position
             peakWSName = self._names.withSuffix('peak')
@@ -398,7 +404,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         # Add the fractional workspace index of the beam position to the sample logs of ws.
         AddSampleLog(Workspace=ws,
                      LogType='Number',
-                     LogName='reduction.line_position',
+                     LogName=common.SampleLogs.LINE_POSITION,
                      LogText=format(linePosition, '.13f'),
                      NumberType='Double',
                      EnableLogging=self._subalgLogging)
@@ -453,7 +459,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         # Reflected beam calibration
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
         directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
-        directLinePosition = directLineWS.run().getLogData('reduction.line_position').value
+        directLinePosition = directLineWS.run().getLogData(common.SampleLogs.LINE_POSITION).value
         args = {'InputWorkspace': ws,
                 'OutputWorkspace': detectorMovedWSName,
                 'EnableLogging': self._subalgLogging,

@@ -11,10 +11,10 @@ Description
 
 This algorithm is the first step in the ILL reflectometry reduction workflow. It:
 
-#. loads data from disk by using LoadAndMerge <algm-LoadAndMerge> for :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` and :ref:`MergeRuns <algm-MergeRuns>`
+#. loads data from disk by using :ref:`LoadAndMerge <algm-LoadAndMerge>` (:ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`, :ref:`MergeRuns <algm-MergeRuns>`)
 #. merges the numors
 #. determines the peak position by using :ref:`FindReflectometryLines <algm-FindReflectometryLines>`
-#. moves the detector (of name 'detector') by using :ref:`SpecularReflectionPositionCorrect <algm-SpecularReflectionPositionCorrect>`
+#. moves the detector (of name *detector*) by using :ref:`SpecularReflectionPositionCorrect <algm-SpecularReflectionPositionCorrect>` (optional, if *DirectLineWorkspace* is given)
 #. normalizes to a (water) reference (optional)
 #. normalizes to slit sizes (optional)
 #. normalizes to experiment time or monitor counts (optional)
@@ -30,8 +30,8 @@ The algorithm adds the following sample log entries to the *OutputWorkspace*:
 * reduction.foreground.centre_workspace_index
 * reduction.foreground.last_workspace_index
 * reduction.foreground.first_workspace_index
-* reduction.line_position : the peak position (workspace index) used to define the :math:'2\theta2 angles (detector positions)
-* reduction.two_theta : the two theta scattering angle in degrees
+* reduction.line_position : the peak position (workspace index) used to define the :math:`2\theta` angles (detector positions)
+* reduction.two_theta : the two theta :math:`2\theta` scattering angle in degrees
 
 The workflow diagram below gives an overview of the algorithm:
 
@@ -44,7 +44,7 @@ A fitting of the present peak position takes place in order to determine the det
 For preventing fitting of the present peak position, the property *LinePosition* allows to provide a peak position.
 A use case is to enter a direct peak position, which can be obtained from the direct beam workspaces sample logs, when the *Run* is a reflected beam.
 
-Alternatively, the properties *TwoTheta* and *DirectBeamPosition* affect the pixel :math:'2\theta' angles. They the latter maps directly to the corresponding properties of :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`.
+Alternatively, the properties *TwoTheta* and the sample log *reduction.line_position* affect the pixel :math:`2\theta` angles.
 
 Foreground and backgrounds
 ##########################
@@ -60,8 +60,8 @@ The foreground pixels are defined by the foreground centre and *ForegroundHalfWi
     * Otherwise, the line position will be determined by peak fitting.
     * Use the beam centre returned by the :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`, rounded to nearest integer, as the foreground centre.
 * If *InputWorkspace* is given:
-    * If *DirectBeamPosition* is given, take the beam centre from there, round it to nearest integer and use as the foreground centre.
-    * If *TwoTheta* is given, round the value to nearest integer and use as the foreground centre.
+    * If sample log entry `reduction.line_position` is given, round it to nearest integer and use as the foreground centre.
+    * If *LinePosition* is given, round the value to nearest integer and use as the foreground centre.
     * Otherwise fit the beam centre using similar method to :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` and use the rounded result as the foreground centre.
 
 *ForegroundHalfWidth* is a list of one or two values. If a single value is given, then this number of pixels on both sides of the centre pixel are included in the foreground. For example, ``ForegroundHalfWidth=[3]`` means three pixel on both sides are included, making the foreground seven pixels wide in total. ``ForegroundHalfWidth=[0]`` means that only the centre pixel is included. When two values are given, then the foreground is asymmetric around the centre. For instance, ``ForegroundHalfWidth[2,5]`` indicates that two pixel at lower :math:`\theta` and five pixels at higher :math:`\theta` are included in the foreground.
