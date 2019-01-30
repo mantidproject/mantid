@@ -19,7 +19,7 @@ from qtpy.QtWidgets import QVBoxLayout, QWidget
 # local imports
 from mantidqt.utils.qt import import_qt
 # import widget class from C++ wrappers
-from mantidqt.widgets.common.observing_view import ObservingView
+from mantidqt.widgets.commonworkspacedisplay.observing_view import ObservingView
 
 InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
                              'InstrumentWidget')

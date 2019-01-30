@@ -14,11 +14,11 @@ from functools import partial
 from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
-from mantidqt.widgets.common.observing_presenter import ObservingPresenter
-from mantidqt.widgets.common.status_bar_view import StatusBarView
-from mantidqt.widgets.common.table_copying import copy_cells
-from mantidqt.widgets.common.user_notifier import UserNotifier
-from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.commonworkspacedisplay.observing_presenter import ObservingPresenter
+from mantidqt.widgets.commonworkspacedisplay.status_bar_view import StatusBarView
+from mantidqt.widgets.commonworkspacedisplay.data_copier import WorkspaceDisplayDataCopier
+from mantidqt.widgets.commonworkspacedisplay.user_notifier import UserNotifier
+from mantidqt.widgets.commonworkspacedisplay.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
@@ -26,7 +26,7 @@ from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
-class TableWorkspaceDisplay(ObservingPresenter, UserNotifier):
+class TableWorkspaceDisplay(ObservingPresenter, UserNotifier, WorkspaceDisplayDataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
     TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
@@ -62,6 +62,7 @@ class TableWorkspaceDisplay(ObservingPresenter, UserNotifier):
         self.container = container if container else StatusBarView(parent, self.view)
 
         UserNotifier.__init__(self, self.container.status_bar)
+        WorkspaceDisplayDataCopier.__init__(self)
 
         self.parent = parent
         self.plot = plot
@@ -93,6 +94,7 @@ class TableWorkspaceDisplay(ObservingPresenter, UserNotifier):
             self.model = TableWorkspaceDisplayModel(workspace)
             self.load_data(self.view)
             self.view.emit_repaint()
+
 
     def handleItemChanged(self, item):
         """
@@ -143,16 +145,16 @@ class TableWorkspaceDisplay(ObservingPresenter, UserNotifier):
                 table.setItem(row, col, item)
 
     def action_copy_cells(self):
-        copy_cells(self.view, self)
+        self.copy_cells(self.view)
 
     def action_copy_bin_values(self):
-        copy_cells(self.view, self)
+        self.copy_cells(self.view)
 
     def action_copy_spectrum_values(self):
-        copy_cells(self.view, self)
+        self.copy_cells(self.view)
 
     def action_keypress_copy(self):
-        copy_cells(self.view, self)
+        self.copy_cells(self.view)
 
     def action_delete_row(self):
         selection_model = self.view.selectionModel()

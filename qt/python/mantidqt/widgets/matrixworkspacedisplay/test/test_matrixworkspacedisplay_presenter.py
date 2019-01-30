@@ -13,9 +13,9 @@ import unittest
 
 from mock import Mock, patch
 
-from mantidqt.widgets.common.test_mocks.mock_mantid import MockWorkspace
-from mantidqt.widgets.common.test_mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
-from mantidqt.widgets.common.test_mocks.mock_qt import MockQModelIndex, MockQTableView
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_mantid import MockWorkspace
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_qt import MockQModelIndex, MockQTableView
 from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
 

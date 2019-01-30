@@ -23,4 +23,5 @@ from mantidqt.plotting.functions import plot  # noqa: F402
 app = QApplication([])
 LOQ74044 = Load("LOQ74044.nxs")
 window = MatrixWorkspaceDisplay(LOQ74044, plot)
+window.show_view()
 app.exec_()

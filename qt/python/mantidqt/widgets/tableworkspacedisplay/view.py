@@ -19,7 +19,7 @@ from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMe
                             QStyledItemDelegate, QTableWidget)
 
 import mantidqt.icons
-from mantidqt.widgets.common.observing_view import ObservingView
+from mantidqt.widgets.commonworkspacedisplay.observing_view import ObservingView
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 
 

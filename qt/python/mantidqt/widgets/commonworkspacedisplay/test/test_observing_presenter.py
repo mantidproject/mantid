@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantidqt.widgets.common.test_mocks.mock_observing import MockObservingPresenter
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_observing import MockObservingPresenter
 
 
 def with_presenter(workspaces_are_equal=True):

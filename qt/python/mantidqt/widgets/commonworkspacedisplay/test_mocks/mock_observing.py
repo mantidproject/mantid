@@ -9,9 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 
 from mock import Mock
 
-from mantidqt.widgets.common.observing_presenter import ObservingPresenter
-from mantidqt.widgets.common.observing_view import ObservingView
-from mantidqt.widgets.common.test_mocks.mock_qt import MockQtSignal
+from mantidqt.widgets.commonworkspacedisplay.observing_presenter import ObservingPresenter
+from mantidqt.widgets.commonworkspacedisplay.observing_view import ObservingView
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_qt import MockQtSignal
 
 
 class MockObservingView(ObservingView):

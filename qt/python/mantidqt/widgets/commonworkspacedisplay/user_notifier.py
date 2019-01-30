@@ -9,6 +9,7 @@ from qtpy.QtWidgets import QToolTip
 class UserNotifier(object):
     NO_SELECTION_MESSAGE = "No selection"
     COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
+    WORKING_MESSAGE = "Operation in progress.."
     DEFAULT_TIMEOUT = 2000
 
     def __init__(self, status_bar):
@@ -44,3 +45,6 @@ class UserNotifier(object):
     def notify_successful_copy(self):
         self.show_mouse_toast(self.COPY_SUCCESSFUL_MESSAGE)
         self.show_status_message(self.COPY_SUCCESSFUL_MESSAGE)
+
+    def notify_working(self):
+        self.show_status_message(self.WORKING_MESSAGE)

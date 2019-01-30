@@ -9,8 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantidqt.widgets.common.test_mocks.mock_observing import MockObservingView
-from mantidqt.widgets.common.test_mocks.mock_qt import MockQtEvent
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_observing import MockObservingView
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_qt import MockQtEvent
 
 
 class ObservingViewTest(unittest.TestCase):

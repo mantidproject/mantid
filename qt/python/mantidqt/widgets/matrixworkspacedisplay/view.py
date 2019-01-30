@@ -17,7 +17,7 @@ from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
 
 import mantidqt.icons
-from mantidqt.widgets.common.observing_view import ObservingView
+from mantidqt.widgets.commonworkspacedisplay.observing_view import ObservingView
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 
 

@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mock import Mock
 
-from mantidqt.widgets.common.test_mocks.mock_qt import MockQTab, MockQTableView
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_qt import MockQTab, MockQTableView
 
 
 class MockMatrixWorkspaceDisplayView:
