@@ -228,7 +228,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             sum = SumSpectra(InputWorkspace=self.kwargs['GroupingWorkspace'])
             alignandfocusargs.append('%s=%s' % ("groupSum",str(sum.readY(0)[0])))
         if 'GroupFilename' in self.kwargs:
-            groups = LoadNexusProcessed(InputWorkspace=self.kwargs['GroupFilename'])
+            groups = LoadNexusProcessed(Filename=self.kwargs['GroupFilename'])
             sum = SumSpectra(InputWorkspace=groups)
             alignandfocusargs.append('%s=%s' % ("groupSum",str(sum.readY(0)[0])))
 
