@@ -863,12 +863,16 @@ void IndirectFitAnalysisTab::updateParameterValues(
     else
       m_fitPropertyBrowser->clearErrors();
   } catch (const std::out_of_range &) {
+  } catch (const std::invalid_argument &) {
   }
 }
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
-  m_fitPropertyBrowser->updateParameters();
+  if (m_fittingAlgorithm) {
+    MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+    IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
+    m_fitPropertyBrowser->updateParameters(*fun);
+  }
 }
 
 /**

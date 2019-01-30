@@ -55,7 +55,7 @@ public:
   /// Get the ignore invalid data option
   bool ignoreInvalidData() const;
 
-  void updateParameters();
+  void updateParameters(const Mantid::API::IFunction &fun);
 
   Mantid::API::IFunction_sptr background() const;
 
