@@ -48,6 +48,8 @@ Bug fixes
 * Removed option to process in non-compatibility mode to avoid calculation issues.
 * GUI can correctly read user files with variable step sizes, in /LOG and /LIN modes.
 * Fixed occasional crash when entering data into table.
+* Removed option to process in non-compatibility mode to avoid calculation issues.
+* Default name for added runs has correct number of digits.
 
 Improvements
 ############
