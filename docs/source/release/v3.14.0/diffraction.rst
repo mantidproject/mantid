@@ -95,4 +95,13 @@ New
 - :ref:`HB2AReduce <algm-HB2AReduce>` algorithm reduces HFIR POWDER (HB-2A) data
 - :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
 
+
+Engineering Diffraction
+-----------------------
+
+New
+###
+
+- Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
+
 :ref:`Release 3.14.0 <v3.14.0>`
