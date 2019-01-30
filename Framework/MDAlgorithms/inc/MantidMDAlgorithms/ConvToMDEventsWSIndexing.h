@@ -107,7 +107,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     int32_t detID = m_detID[workspaceIndex];
     uint16_t runIndexLoc = m_RunIndex;
 
-    std::vector<coord_t> locCoord(m_Coord);
+    std::vector<coord_t> locCoord(ND);
     // set up unit conversion and calculate up all coordinates, which depend on
     // spectra index only
     if (!localQConverter->calcYDepCoordinates(locCoord, workspaceIndex))
