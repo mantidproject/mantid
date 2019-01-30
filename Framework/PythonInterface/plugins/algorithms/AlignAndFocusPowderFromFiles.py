@@ -11,7 +11,8 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
 from mantid.kernel import ConfigService, Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CopyLogs, CreateCacheFilename, \
     DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
-    PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed, SumSpectra
+    PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed, SumSpectra, \
+    LoadDiffCal, LoadDetectorsGroupingFile
 import os
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -228,7 +229,11 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             sum = SumSpectra(InputWorkspace=self.kwargs['GroupingWorkspace'])
             alignandfocusargs.append('%s=%s' % ("groupSum",str(sum.readY(0)[0])))
         if 'GroupFilename' in self.kwargs:
-            groups = LoadNexusProcessed(Filename=self.kwargs['GroupFilename'])
+            groupfile = self.kwargs['GroupFilename']
+            if groupfile.split('.')[1] is 'cal':
+                groups = LoadDiffCal(Filename=groupfile, MakeCalWorkspace=False, MakeMaskWorkspace=False)
+            else:
+                groups = LoadDetectorsGroupingFile(InputFile=groupfile)
             sum = SumSpectra(InputWorkspace=groups)
             alignandfocusargs.append('%s=%s' % ("groupSum",str(sum.readY(0)[0])))
 
