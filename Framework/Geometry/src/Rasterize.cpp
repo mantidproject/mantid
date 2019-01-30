@@ -35,7 +35,7 @@ void getCylinderParameters(const CSGObject &shape, double &radius,
   height = shapeInfo.height();
 }
 
-} // anonymous
+} // namespace
 
 namespace Rasterize {
 
@@ -65,8 +65,8 @@ Raster calculateCylinder(const Kernel::V3D &beamDirection,
   double radius, height;
   getCylinderParameters(shape, radius, height);
 
-  const double sliceThickness{ height / static_cast<double>(numSlices) };
-  const double deltaR{ radius / static_cast<double>(numAnnuli) };
+  const double sliceThickness{height / static_cast<double>(numSlices)};
+  const double deltaR{radius / static_cast<double>(numAnnuli)};
 
   /* The number of volume elements is
    * numslices*(1+2+3+.....+numAnnuli)*6
@@ -124,6 +124,6 @@ Raster calculateCylinder(const Kernel::V3D &beamDirection,
 
   return result;
 }
-}
+} // namespace Rasterize
 } // namespace Geometry
 } // namespace Mantid

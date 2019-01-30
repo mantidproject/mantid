@@ -9,10 +9,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Rasterize.h"
-#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid::Geometry;
@@ -64,8 +64,8 @@ public:
   static void destroySuite(RasterizeTest *suite) { delete suite; }
 
   void test_calculateCylinder() {
-    const size_t NUM_SLICE{ 3 };
-    const size_t NUM_ANNULLI{ 3 };
+    const size_t NUM_SLICE{3};
+    const size_t NUM_ANNULLI{3};
 
     boost::shared_ptr<IObject> cylinder = createCylinder();
     TS_ASSERT(cylinder);

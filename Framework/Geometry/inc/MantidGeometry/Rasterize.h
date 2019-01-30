@@ -7,9 +7,9 @@
 #ifndef MANTID_GEOMETRY_RASTERIZE_H_
 #define MANTID_GEOMETRY_RASTERIZE_H_
 
-#include <boost/shared_ptr.hpp>
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -36,10 +36,9 @@ MANTID_GEOMETRY_DLL Raster calculateCylinder(const Kernel::V3D &beamDirection,
                                              const size_t numSlices,
                                              const size_t numAnnuli);
 
-MANTID_GEOMETRY_DLL Raster
-calculateCylinder(const Kernel::V3D &beamDirection,
-                  const boost::shared_ptr<IObject> shape,
-                  const size_t numSlices, const size_t numAnnuli);
+MANTID_GEOMETRY_DLL Raster calculateCylinder(
+    const Kernel::V3D &beamDirection, const boost::shared_ptr<IObject> shape,
+    const size_t numSlices, const size_t numAnnuli);
 
 } // namespace Rasterize
 } // namespace Geometry
