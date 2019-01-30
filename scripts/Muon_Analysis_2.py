@@ -93,7 +93,7 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         """
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTab(self.home_tab.home_tab_view, 'Home')
-        self.tabs.addTab(self.group_tab_view, 'Grouping')
+        self.tabs.addTab(self.grouping_tab_widget.group_tab_view, 'Grouping')
 
 def qapp():
     if QtGui.QApplication.instance():

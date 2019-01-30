@@ -11,8 +11,8 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
 
-from Muon.GUI.Common.muon_file_utils import allowed_instruments
-from Muon.GUI.Common.run_string_utils import valid_float_regex
+from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
+from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
 from Muon.GUI.Common.message_box import warning
 
 
@@ -198,7 +198,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.timezero_unit_label = QtGui.QLabel(self)
         self.timezero_unit_label.setObjectName("timeZeroUnitLabel")
-        self.timezero_unit_label.setText(u" µs (From data file ")
+        self.timezero_unit_label.setText(u" \u03BCs (From data file ")
 
         self.timezero_checkbox = QtGui.QCheckBox(self)
         self.timezero_checkbox.setObjectName("timeZeroCheckbox")
@@ -262,7 +262,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.firstgooddata_unit_label = QtGui.QLabel(self)
         self.firstgooddata_unit_label.setObjectName("firstgooddataUnitLabel")
-        self.firstgooddata_unit_label.setText(u" U+03BCs (From data file ")
+        self.firstgooddata_unit_label.setText(u" \u03BCs (From data file ")
 
         self.firstgooddata_checkbox = QtGui.QCheckBox(self)
         self.firstgooddata_checkbox.setObjectName("firstgooddataCheckbox")

@@ -22,7 +22,7 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
         self._view.clear()
         run = self._model.get_run_number()
         instrument = self._model.get_instrument_name()
-        counts = self.model.get_total_counts()
+        counts = self._model.get_total_counts()
         self._view.add_text_line("Instrument                : " + str(instrument))
         self._view.add_text_line("Run                       : " + run)
         self._view.add_text_line(self.create_text_line("Title                    ", "run_title"))

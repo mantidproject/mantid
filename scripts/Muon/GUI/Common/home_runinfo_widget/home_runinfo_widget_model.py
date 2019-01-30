@@ -44,16 +44,16 @@ class HomeRunInfoWidgetModel(object):
     def get_counts_per_good_frame(self, counts):
         good_frames = self.get_log_value("goodfrm")
 
-        if good_frames is not 'Log not found':
-            return counts/good_frames
+        if good_frames != 'Log not found':
+            return counts/float(good_frames)
         else:
             return 'Good frames not defined'
 
     def get_counts_per_good_frame_per_detector(self, counts):
         good_frames = self.get_log_value("goodfrm")
 
-        if good_frames is not 'Log not found':
-            return counts/good_frames/self._data.num_detectors()
+        if good_frames != 'Log not found':
+            return counts/float(good_frames)/self._data.num_detectors
         else:
             return 'Good frames not defined'
 
