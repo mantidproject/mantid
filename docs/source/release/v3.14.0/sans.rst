@@ -36,6 +36,7 @@ Improved
 * Can export table as a csv, which can be re-loaded as a batch file.
 * File path to batch file will be added to your directories automatically upon loading
 * Workspaces are centred upon loading.
+* All limit strings in the user file (L/ ) are now space-separable to allow for uniform structure in the user file. For backwards compatibility, any string which was comma separable remains comma separable as well.
 
 Bug fixes
 #########
