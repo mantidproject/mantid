@@ -1,8 +1,8 @@
 from qtpy.QtWidgets import QApplication  # noqa: F402
 
+from mantidqt.widgets.settings.presenter import SettingsPresenter
 
 app = QApplication([])
-from mantidqt.widgets.settings.view import SettingsView
-settings = SettingsView()
-settings.show()
+settings = SettingsPresenter(None)
+settings.view.show()
 app.exec_()
