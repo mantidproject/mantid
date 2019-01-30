@@ -71,25 +71,10 @@ bool operator!=(ReductionWorkspaces const &lhs,
   return !(lhs == rhs);
 }
 
-std::pair<std::string, std::string> transmissionWorkspaceNames(
-    std::pair<std::string, std::string> const &transmissionRuns) {
-  if (!transmissionRuns.first.empty()) {
-    auto first = "TRANS_" + transmissionRuns.first;
-    if (!transmissionRuns.second.empty()) {
-      auto second = "TRANS_" + transmissionRuns.second;
-      return std::make_pair(first, second);
-    } else {
-      return std::make_pair(first, std::string());
-    }
-  } else {
-    return std::pair<std::string, std::string>();
-  }
-}
-
 std::string transmissionWorkspacesCombined(
     std::pair<std::string, std::string> const &transmissionRuns) {
   if (!transmissionRuns.first.empty()) {
-    auto first = "TRANS_" + transmissionRuns.first;
+    auto first = transmissionRuns.first;
     if (!transmissionRuns.second.empty()) {
       return first + "_" + transmissionRuns.second;
     } else {
@@ -101,26 +86,19 @@ std::string transmissionWorkspacesCombined(
 }
 
 ReductionWorkspaces
-workspaceNames(std::vector<std::string> const &summedRunNumbers,
+workspaceNames(std::vector<std::string> const &tofRunNumbers,
                std::pair<std::string, std::string> const &transmissionRuns) {
 
-  auto tofWorkspaces =
-      map(summedRunNumbers, [](std::string const &runNumber) -> std::string {
-        return "TOF_" + runNumber;
-      });
-
-  auto joinedRuns = boost::algorithm::join(summedRunNumbers, "+");
+  auto joinedRuns = boost::algorithm::join(tofRunNumbers, "+");
   auto joinedTofWorkspace = "TOF_" + joinedRuns;
   auto iVsLambda = "IvsLam_" + joinedRuns;
   auto iVsQ = "IvsQ_" + joinedRuns;
   auto iVsQBinned = "IvsQ_binned_" + joinedRuns;
-  auto transmissionWorkspaces = transmissionWorkspaceNames(transmissionRuns);
   auto combinedTransmissionWorkspace =
       transmissionWorkspacesCombined(transmissionRuns);
 
   return ReductionWorkspaces(
-      std::move(tofWorkspaces), std::move(joinedTofWorkspace),
-      std::move(transmissionWorkspaces),
+      tofRunNumbers, std::move(joinedTofWorkspace), transmissionRuns,
       std::move(combinedTransmissionWorkspace), std::move(iVsLambda),
       std::move(iVsQ), std::move(iVsQBinned));
 }

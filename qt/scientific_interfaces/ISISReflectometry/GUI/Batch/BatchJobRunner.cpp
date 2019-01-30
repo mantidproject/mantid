@@ -24,6 +24,16 @@ void updateProperty(std::string const &property, std::string const &value,
     properties[property] = value;
 }
 
+void updateProperty(std::string const &property,
+                    std::vector<std::string> const &values,
+                    AlgorithmRuntimeProps &properties) {
+  if (values.size() < 1)
+    return;
+
+  auto value = boost::algorithm::join(values, ", ");
+  updateProperty(property, value, properties);
+}
+
 void updateProperty(std::string const &property, double value,
                     AlgorithmRuntimeProps &properties) {
   updateProperty(property, std::to_string(value), properties);
@@ -38,15 +48,15 @@ void updateProperty(std::string const &property,
 
 void updateWorkspacesNameProperties(AlgorithmRuntimeProps &properties,
                                     ReductionWorkspaces const &workspaces) {
-  updateProperty("InputWorkspace", workspaces.joinedTofWorkspace(), properties);
+  updateProperty("InputRunList", workspaces.timeOfFlight(), properties);
   updateProperty("OutputWorkspace", workspaces.iVsQ(), properties);
   updateProperty("OutputWorkspaceBinned", workspaces.iVsQBinned(), properties);
   updateProperty("OutputWorkspaceWavelength", workspaces.iVsLambda(),
                  properties);
-  updateProperty("FirstTransmissionRun", workspaces.transmissionRuns().first,
-                 properties);
-  updateProperty("SecondTransmissionRun", workspaces.transmissionRuns().second,
-                 properties);
+  updateProperty("FirstTransmissionRunList",
+                 workspaces.transmissionRuns().first, properties);
+  updateProperty("SecondTransmissionRunList",
+                 workspaces.transmissionRuns().second, properties);
 }
 
 void updateRangeInQProperties(AlgorithmRuntimeProps &properties,
@@ -79,7 +89,7 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
 void addAlgorithmForRow(Row &row, Batch const &model,
                         BatchAlgorithmRunner &batchAlgoRunner) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
-      "ReflectometryReductionOneAuto");
+      "ReflectometryISISLoadAndProcess");
 
   auto properties = AlgorithmRuntimeProps();
   // updateEventProperties(properties, model.experiment());

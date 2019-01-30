@@ -56,7 +56,7 @@ std::string transmissionWorkspacesCombined(
     std::pair<std::string, std::string> const &transmissionRuns);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces
-workspaceNames(std::vector<std::string> const &summedRunNumbers,
+workspaceNames(std::vector<std::string> const &tofRunNumbers,
                std::pair<std::string, std::string> const &transmissionRuns);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL std::string postprocessedWorkspaceName(
