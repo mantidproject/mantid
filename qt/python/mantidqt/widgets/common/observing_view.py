@@ -46,6 +46,7 @@ class ObservingView(object):
         # This clear prevents a leak when the window is closed from X by the user
         self.presenter.clear_observer()
         event.accept()
+        self.deleteLater()
 
     def emit_rename(self, new_name):
         self.rename_signal.emit(new_name)
