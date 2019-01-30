@@ -217,9 +217,9 @@ double V3D::angle(const V3D &v) const {
 
 int V3D::reBase(const V3D &A, const V3D &B, const V3D &C)
 /**
-   Re-express this point components of A,B,C.
-   Assuming that A,B,C are form an basis set (which
-   does not have to be othonormal.
+   Re-express this point as components of A,B,C.
+   Assuming that A,B,C form a basis set (which does not have to be
+   orthonormal).
    @param A :: Unit vector in basis
    @param B :: Unit vector in basis
    @param C :: Unit vector in basis
