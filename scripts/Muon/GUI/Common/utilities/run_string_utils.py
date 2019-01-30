@@ -97,7 +97,7 @@ def run_string_to_list(run_string):
             max_length = len(range_max)
             min_length = len(range_min)
             if(max_length < min_length):
-                range_max = range_min[:max_length - min_length + 1] + range_max
+                range_max = range_min[:min_length - max_length] + range_max
 
             range_max = int(range_max)
             range_min = int(range_min)

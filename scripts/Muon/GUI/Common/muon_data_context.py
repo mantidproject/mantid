@@ -39,7 +39,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = instrument_directory + grouping_file
-    new_groups, new_pairs = xml_utils.load_grouping_from_XML(filename)
+    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
     return new_groups, new_pairs
 
 
@@ -158,7 +158,10 @@ class MuonDataContext(object):
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
-        self._groups[group.name] = group
+        if self.check_group_contains_valid_detectors(group):
+            self._groups[group.name] = group
+        else:
+            raise ValueError('Invalid detectors in group {}'.format(group.name))
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
@@ -182,7 +185,7 @@ class MuonDataContext(object):
             # return the first workspace in the group
             return self.current_data["OutputWorkspace"][0].workspace
         else:
-            return self.current_data["OutputWorkspace"].workspace
+            return self.current_data["OutputWorkspace"][0].workspace
 
     @property
     def period_string(self):
@@ -302,3 +305,9 @@ class MuonDataContext(object):
         self.clear_pairs()
         for pair in pairs:
             self.add_pair(pair)
+
+    def check_group_contains_valid_detectors(self, group):
+        if max(group.detectors) > self.num_detectors or min(group.detectors) < 1:
+            return False
+        else:
+            return True

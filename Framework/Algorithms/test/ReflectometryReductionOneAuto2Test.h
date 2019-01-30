@@ -876,6 +876,85 @@ public:
     ADS.clear();
   }
 
+  void test_input_workspace_group_with_default_output_workspaces() {
+    ReflectometryReductionOneAuto2 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Mandatory workspaces should exist
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_1234"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234"), true);
+    // IvsLam is currently always output for group workspaces
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234"), true);
+
+    auto outQGroup = retrieveOutWS("IvsQ_1234");
+    auto outQGroupBinned = retrieveOutWS("IvsQ_binned_1234");
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outQGroupBinned.size(), 4);
+
+    ADS.clear();
+  }
+
+  void
+  test_input_workspace_group_with_default_output_workspaces_and_debug_on() {
+    ReflectometryReductionOneAuto2 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    alg.setProperty("Debug", true);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Mandatory workspaces should exist
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_1234"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234"), true);
+
+    auto outLamGroup = retrieveOutWS("IvsLam_1234");
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    ADS.clear();
+  }
+
+  void test_input_workspace_group_with_named_output_workspaces() {
+    ReflectometryReductionOneAuto2 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    alg.setPropertyValue("OutputWorkspace", "testIvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "testIvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "testIvsLam");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Mandatory workspaces should exist
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsQ"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsQ_binned"), true);
+    // IvsLam is currently always output for group workspaces
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsLam"), true);
+
+    auto outQGroup = retrieveOutWS("testIvsQ");
+    auto outQGroupBinned = retrieveOutWS("testIvsQ_binned");
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outQGroupBinned.size(), 4);
+
+    ADS.clear();
+  }
+
+  void test_input_workspace_group_with_named_output_workspaces_and_debug_on() {
+    ReflectometryReductionOneAuto2 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    alg.setPropertyValue("OutputWorkspace", "testIvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "testIvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "testIvsLam");
+    alg.setProperty("Debug", true);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Mandatory workspaces should exist
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsQ"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsQ_binned"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsLam"), true);
+
+    auto outLamGroup = retrieveOutWS("testIvsLam");
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    ADS.clear();
+  }
+
   void test_one_transmissionrun() {
     const double startX = 1000;
     const int nBins = 3;
@@ -916,6 +995,7 @@ public:
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.setPropertyValue("FirstTransmissionRun", "transWSGroup");
+    alg.setProperty("Debug", true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     auto outQGroup = retrieveOutWS("IvsQ");
@@ -1055,6 +1135,7 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.setPropertyValue("FirstTransmissionRun", "transWSGroup");
     alg.setPropertyValue("SecondTransmissionRun", "transWSGroup2");
+    alg.setProperty("Debug", true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     auto outQGroup = retrieveOutWS("IvsQ");
@@ -1180,8 +1261,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1205,8 +1286,8 @@ public:
 
     MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQbinned->x(0);
-    auto outY = outQbinned->y(0);
+    const auto &outX = outQbinned->x(0);
+    const auto &outY = outQbinned->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1229,8 +1310,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0006, 0.0001);
@@ -1255,8 +1336,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1280,8 +1361,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
@@ -1306,8 +1387,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1331,8 +1412,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
@@ -1562,6 +1643,25 @@ private:
     }
     flood->getAxis(0)->setUnit("TOF");
     return flood;
+  }
+
+  void setup_alg_on_input_workspace_group_with_run_number(
+      ReflectometryReductionOneAuto2 &alg) {
+    std::string const name = "input";
+    prepareInputGroup(name);
+    WorkspaceGroup_sptr group = ADS.retrieveWS<WorkspaceGroup>("input");
+    MatrixWorkspace_sptr ws =
+        ADS.retrieveWS<MatrixWorkspace>(group->getNames()[0]);
+    ws->mutableRun().addProperty<std::string>("run_number", "1234");
+
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 0.0000000001);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
   }
 };
 

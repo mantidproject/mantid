@@ -19,6 +19,8 @@ from save_python import getWidgetIfOpen
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
+from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 
@@ -42,7 +44,7 @@ def check_facility():
                              + "\n - ".join(SUPPORTED_FACILITIES))
 
 
-class MuonAnalysis4Gui(QtGui.QMainWindow):
+class MuonAnalysisGui(QtGui.QMainWindow):
     """
     The Muon Analaysis 2.0 interface.
     """
@@ -52,7 +54,7 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         message_box.warning(str(message))
 
     def __init__(self, parent=None):
-        super(MuonAnalysis4Gui, self).__init__(parent)
+        super(MuonAnalysisGui, self).__init__(parent)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         try:
@@ -67,11 +69,14 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context.instrument, self)
         self.home_tab = HomeTabWidget(self.context, self)
+        self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.setup_tabs()
+        self.help_widget = HelpWidget()
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget.load_widget_view)
         splitter.addWidget(self.tabs)
+        splitter.addWidget(self.help_widget.view)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
@@ -79,6 +84,7 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(self.home_tab.home_tab_widget.instrumentObserver)
         self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(self.load_widget.load_widget.instrumentObserver)
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
     def setup_tabs(self):
         """
@@ -87,7 +93,7 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
         """
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTab(self.home_tab.home_tab_view, 'Home')
-        # self.tabs.addTab(self.group_tab_view, 'Grouping')
+        self.tabs.addTab(self.group_tab_view, 'Grouping')
 
 def qapp():
     if QtGui.QApplication.instance():
@@ -106,7 +112,7 @@ def main():
     app = qapp()
     try:
         global muon
-        muon = MuonAnalysis4Gui()
+        muon = MuonAnalysisGui()
         muon.resize(700, 700)
         muon.show()
         app.exec_()
@@ -130,7 +136,7 @@ def loadFromProject(project):
     global muonGUI
     muonGUI = main()
     muonGUI.dock_widget.loadFromProject(project)
-    # muonGUI.loadFromContext(project)
+    muonGUI.loadFromContext(project)
     return muonGUI
 
 

@@ -7,7 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
-from Muon.GUI.Common.utilities.run_string_utils import valid_alpha_regex
+from Muon.GUI.Common.run_string_utils import valid_alpha_regex
+from Muon.GUI.Common.message_box import warning
 
 
 class HomeGroupingWidgetView(QtGui.QWidget):
@@ -18,10 +19,6 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
         self.alpha_hidden(True)
         self.periods_hidden(False)
-
-        self._button = QtGui.QMessageBox.Ok
-        self._message_box = QtGui.QMessageBox("Error in substitution", "ERROR !", QtGui.QMessageBox.Warning,
-                                              self._button, 0, 0)
 
     def setup_interface(self, show_checks=False):
         self.setObjectName("GroupingWidget")
@@ -134,8 +131,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.setLayout(self.widget_layout)
 
     def warning_popup(self, message):
-        self._message_box.setText(message)
-        self._message_box.open()
+        warning(message, parent=self)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Groups and Pairs

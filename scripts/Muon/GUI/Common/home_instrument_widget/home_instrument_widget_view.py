@@ -11,8 +11,9 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
 
-from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
-from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
+from Muon.GUI.Common.muon_file_utils import allowed_instruments
+from Muon.GUI.Common.run_string_utils import valid_float_regex
+from Muon.GUI.Common.message_box import warning
 
 
 class InstrumentWidgetView(QtGui.QWidget):
@@ -25,10 +26,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self._button_height = 40
         self._cached_instrument = ["None", "None"]
-
-        self._button = QtGui.QMessageBox.Ok
-        self._message_box = QtGui.QMessageBox("Error in substitution", "ERROR !", QtGui.QMessageBox.Warning,
-                                              self._button, 0, 0)  # QtGui.QMessageBox()
 
         self.setup_interface()
         self.dead_time_file_loader_hidden(True)
@@ -117,8 +114,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.firstgooddata_checkbox.setChecked(True)
 
     def warning_popup(self, message):
-        self._message_box.setText(message)
-        self._message_box.open()
+        warning(message, parent=self)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Instrument selection
@@ -214,7 +210,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_2 = QtGui.QHBoxLayout()
         self.horizontal_layout_2.setObjectName("horizontalLayout2")
-        # self.horizontal_layout_2.addWidget(self.timezero_edit)
         self.horizontal_layout_2.addSpacing(10)
         self.horizontal_layout_2.addWidget(self.timezero_unit_label)
         self.horizontal_layout_2.addWidget(self.timezero_checkbox)
@@ -267,7 +262,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.firstgooddata_unit_label = QtGui.QLabel(self)
         self.firstgooddata_unit_label.setObjectName("firstgooddataUnitLabel")
-        self.firstgooddata_unit_label.setText(u" µs (From data file ")  # "micro seconds ( ")
+        self.firstgooddata_unit_label.setText(u" U+03BCs (From data file ")
 
         self.firstgooddata_checkbox = QtGui.QCheckBox(self)
         self.firstgooddata_checkbox.setObjectName("firstgooddataCheckbox")
@@ -279,7 +274,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_3 = QtGui.QHBoxLayout()
         self.horizontal_layout_3.setObjectName("horizontalLayout3")
-        # self.horizontal_layout_3.addWidget(self.firstgooddata_edit)
         self.horizontal_layout_3.addSpacing(10)
         self.horizontal_layout_3.addWidget(self.firstgooddata_unit_label)
         self.horizontal_layout_3.addWidget(self.firstgooddata_checkbox)

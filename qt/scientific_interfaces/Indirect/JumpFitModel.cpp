@@ -340,7 +340,7 @@ JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
 
 std::string JumpFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiFofQFit_" + m_fitType + "_Result";
+    return "MultiFofQFit_" + m_fitType + "_Results";
   return constructOutputName();
 }
 
@@ -356,7 +356,7 @@ std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string JumpFitModel::constructOutputName() const {
   auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
-  auto const position = name.find("_Result");
+  auto const position = name.find("_Results");
   if (position != std::string::npos)
     return name.substr(0, position) + name.substr(position + 7, name.size());
   return name;
