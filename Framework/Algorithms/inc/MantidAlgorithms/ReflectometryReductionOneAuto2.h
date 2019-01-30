@@ -35,9 +35,18 @@ public:
   bool processGroups() override;
 
 private:
+  // Utility class to store output workspace names
+  struct WorkspaceNames {
+    std::string iVsQ;
+    std::string iVsQBinned;
+    std::string iVsLam;
+  };
+
   void init() override;
   void exec() override;
-  // Set default names for output workspaces
+  std::string
+  getRunNumberForWorkspaceGroup(WorkspaceGroup_const_sptr workspace);
+  WorkspaceNames getOutputWorkspaceNames();
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
@@ -66,12 +75,10 @@ private:
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
                               const double defaultValue);
-  void setOutputWorkspaces(std::vector<std::string> &IvsLamGroup,
-                           std::string const &outputIvsLam,
-                           std::vector<std::string> &IvsQGroup,
-                           std::string const &outputIvsQBinned,
-                           std::vector<std::string> &IvsQUnbinnedGroup,
-                           std::string const &outputIvsQ);
+  void setOutputWorkspaces(WorkspaceNames const &outputGroupNames,
+                           std::vector<std::string> &IvsLamGroup,
+                           std::vector<std::string> &IvsQBinnedGroup,
+                           std::vector<std::string> &IvsQGroup);
 };
 
 } // namespace Algorithms
