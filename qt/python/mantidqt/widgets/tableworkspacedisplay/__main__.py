@@ -24,4 +24,5 @@ import matplotlib.pyplot as plt  # noqa: F402
 app = QApplication([])
 ws = Load("SavedTableWorkspace.nxs")
 window = TableWorkspaceDisplay(ws, plt)
+window.show_view()
 app.exec_()

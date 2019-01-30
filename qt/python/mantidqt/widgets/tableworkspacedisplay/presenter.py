@@ -14,8 +14,10 @@ from functools import partial
 from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
+from mantidqt.widgets.common.user_notifier import UserNotifier
 from mantidqt.widgets.common.observing_presenter import ObservingPresenter
-from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
+from mantidqt.widgets.common.status_bar_view import StatusBarView
+from mantidqt.widgets.common.table_copying import copy_cells
 from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
@@ -24,7 +26,7 @@ from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
-class TableWorkspaceDisplay(ObservingPresenter):
+class TableWorkspaceDisplay(ObservingPresenter, UserNotifier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
     TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
@@ -58,6 +60,7 @@ class TableWorkspaceDisplay(ObservingPresenter):
         self.model = model if model else TableWorkspaceDisplayModel(ws)
         self.name = name if name else self.model.get_name()
         self.view = view if view else TableWorkspaceDisplayView(self, parent, self.name)
+        self.container = StatusBarView(parent, self.view)
         self.parent = parent
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
@@ -70,6 +73,9 @@ class TableWorkspaceDisplay(ObservingPresenter):
         # connect to cellChanged signal after the data has been loaded
         # all consecutive triggers will be from user actions
         self.view.itemChanged.connect(self.handleItemChanged)
+
+    def show_view(self):
+        self.container.show()
 
     @classmethod
     def supports(cls, ws):
@@ -135,21 +141,21 @@ class TableWorkspaceDisplay(ObservingPresenter):
                 table.setItem(row, col, item)
 
     def action_copy_cells(self):
-        copy_cells(self.view)
+        copy_cells(self.view, self)
 
     def action_copy_bin_values(self):
-        copy_cells(self.view)
+        copy_cells(self.view, self)
 
     def action_copy_spectrum_values(self):
-        copy_cells(self.view)
+        copy_cells(self.view, self)
 
     def action_keypress_copy(self):
-        copy_cells(self.view)
+        copy_cells(self.view, self)
 
     def action_delete_row(self):
         selection_model = self.view.selectionModel()
         if not selection_model.hasSelection():
-            show_no_selection_to_copy_toast()
+            self.notify_no_selection_to_copy()
             return
 
         selected_rows = selection_model.selectedRows()
@@ -161,7 +167,7 @@ class TableWorkspaceDisplay(ObservingPresenter):
     def _get_selected_columns(self, max_selected=None, message_if_over_max=None):
         selection_model = self.view.selectionModel()
         if not selection_model.hasSelection():
-            show_no_selection_to_copy_toast()
+            self.notify_no_selection_to_copy()
             raise ValueError("No selection")
 
         selected_columns = selection_model.selectedColumns()
@@ -173,7 +179,7 @@ class TableWorkspaceDisplay(ObservingPresenter):
             raise ValueError("Too many selected")
         elif num_selected_columns == 0:
             # if no columns are selected
-            show_no_selection_to_copy_toast()
+            self.notify_no_selection_to_copy()
             raise ValueError("No selection")
         else:
             col_selected = [index.column() for index in selected_columns]

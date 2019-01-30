@@ -1,12 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtGui
-from qtpy.QtCore import QPoint
-from qtpy.QtGui import QCursor, QFont, QFontMetrics
-from qtpy.QtWidgets import (QMessageBox, QToolTip)
+from qtpy.QtWidgets import QMessageBox
 
-NO_SELECTION_MESSAGE = "No selection"
-COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
+
 
 """
 This module contains the common copying functionality between
@@ -71,7 +68,7 @@ def copy_bin_values(table, ws_read, num_rows):
     show_successful_copy_toast()
 
 
-def copy_cells(table):
+def copy_cells(table, presenter):
     """
     :type table: QTableView
     :param table: The table from which the data will be copied.
@@ -79,7 +76,7 @@ def copy_cells(table):
     """
     selectionModel = table.selectionModel()
     if not selectionModel.hasSelection():
-        show_no_selection_to_copy_toast()
+        presenter.notify_no_selection_to_copy()
         return
 
     selection = selectionModel.selection()
@@ -101,7 +98,7 @@ def copy_cells(table):
 
     # strip the string to remove the trailing new line
     copy_to_clipboard("".join(data).strip())
-    show_successful_copy_toast()
+    presenter.notify_successful_copy()
 
 
 def keypress_copy(table, view, ws_read, num_rows):
@@ -116,15 +113,6 @@ def keypress_copy(table, view, ws_read, num_rows):
         copy_bin_values(table, ws_read, num_rows)
     else:
         copy_cells(table)
-
-
-def show_mouse_toast(message):
-    # Creates a text with empty space to get the height of the rendered text - this is used
-    # to provide the same offset for the tooltip, scaled relative to the current resolution and zoom.
-    font_metrics = QFontMetrics(QFont(" "))
-    # The height itself is divided by 2 just to reduce the offset so that the tooltip is
-    # reasonably position relative to the cursor
-    QToolTip.showText(QCursor.pos() + QPoint(font_metrics.height() / 2, 0), message)
 
 
 def copy_to_clipboard(data):
@@ -146,11 +134,3 @@ def ask_confirmation(self, message, title="Mantid Workbench"):
     """
     reply = QMessageBox.question(self, title, message, QMessageBox.Yes, QMessageBox.No)
     return True if reply == QMessageBox.Yes else False
-
-
-def show_no_selection_to_copy_toast():
-    show_mouse_toast(NO_SELECTION_MESSAGE)
-
-
-def show_successful_copy_toast():
-    show_mouse_toast(COPY_SUCCESSFUL_MESSAGE)

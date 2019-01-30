@@ -64,9 +64,6 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
         self.rename_signal.connect(self._run_rename)
         self.repaint_signal.connect(self._run_repaint)
 
-        self.resize(600, 400)
-        self.show()
-
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
 
