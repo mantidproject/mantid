@@ -38,9 +38,9 @@ public:
     std::array<double, 3> lowerLeft;
     std::array<double, 3> upperRight;
     std::array<double, 3> center() const {
-      return std::array<double, 3>{(lowerLeft[0] + upperRight[0]) / 2,
+      return std::array<double, 3>{{(lowerLeft[0] + upperRight[0]) / 2,
                                    (lowerLeft[1] + upperRight[1]) / 2,
-                                   (lowerLeft[2] + upperRight[2]) / 2};
+                                   (lowerLeft[2] + upperRight[2]) / 2}};
     }
 
     Box() {}
@@ -163,21 +163,21 @@ private:
     std::array<double, 3> ctrLow{nextBigger(ctrUp[0]), nextBigger(ctrUp[1]),
                                  nextBigger(ctrUp[2])};
     store[++curIdx] =
-        Box{{ll[0], ll[1], ll[2]}, {ctrUp[0], ctrUp[1], ctrUp[2]}};
+        Box{{{ll[0], ll[1], ll[2]}}, {{ctrUp[0], ctrUp[1], ctrUp[2]}}};
     store[++curIdx] =
-        Box{{ctrLow[0], ll[1], ll[2]}, {ur[0], ctrUp[1], ctrUp[2]}};
+        Box{{{ctrLow[0], ll[1], ll[2]}}, {{ur[0], ctrUp[1], ctrUp[2]}}};
     store[++curIdx] =
-        Box{{ll[0], ctrLow[1], ll[2]}, {ctrUp[0], ur[1], ctrUp[2]}};
+        Box{{{ll[0], ctrLow[1], ll[2]}}, {{ctrUp[0], ur[1], ctrUp[2]}}};
     store[++curIdx] =
-        Box{{ll[0], ll[1], ctrLow[2]}, {ctrUp[0], ctrUp[1], ur[2]}};
+        Box{{{ll[0], ll[1], ctrLow[2]}}, {{ctrUp[0], ctrUp[1], ur[2]}}};
     store[++curIdx] =
-        Box{{ctrLow[0], ctrLow[1], ll[2]}, {ur[0], ur[1], ctrUp[2]}};
+        Box{{{ctrLow[0], ctrLow[1], ll[2]}}, {{ur[0], ur[1], ctrUp[2]}}};
     store[++curIdx] =
-        Box{{ll[0], ctrLow[1], ctrLow[2]}, {ctrUp[0], ur[1], ur[2]}};
+        Box{{{ll[0], ctrLow[1], ctrLow[2]}}, {{ctrUp[0], ur[1], ur[2]}}};
     store[++curIdx] =
-        Box{{ctrLow[0], ll[1], ctrLow[2]}, {ur[0], ctrUp[1], ur[2]}};
+        Box{{{ctrLow[0], ll[1], ctrLow[2]}}, {{ur[0], ctrUp[1], ur[2]}}};
     store[++curIdx] =
-        Box{{ctrLow[0], ctrLow[1], ctrLow[2]}, {ur[0], ur[1], ur[2]}};
+        Box{{{ctrLow[0], ctrLow[1], ctrLow[2]}}, {{ur[0], ur[1], ur[2]}}};
     std::sort(store.begin() + curIdx - 7, store.begin() + 1 + curIdx,
               [](Box &a, Box &b) {
                 unsigned i = 3;
@@ -249,7 +249,7 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
     Points generate() const override final {
       Points points;
       for (size_t i = 0; i < n; ++i)
-        points.emplace_back(std::array<Mantid::coord_t, ND>{0.5, 0.5, 0.5});
+        points.emplace_back(std::array<Mantid::coord_t, ND>{{0.5, 0.5, 0.5}});
       return points;
     }
 
@@ -274,9 +274,9 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
       for (size_t i = 73; i < 585; ++i)
         for (size_t _ = 0; _ < nPerLeaf; ++_) {
           auto ctr = justForBoxes.getBox(i).center();
-          points.emplace_back(Point{static_cast<float>(ctr[0]),
+          points.emplace_back(Point{{static_cast<float>(ctr[0]),
                                     static_cast<float>(ctr[1]),
-                                    static_cast<float>(ctr[2])});
+                                    static_cast<float>(ctr[2])}});
         }
       return points;
     }
