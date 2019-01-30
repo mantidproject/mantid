@@ -142,6 +142,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     elif output_mode is OutputMode.Both:
         save_to_file(reduction_packages, save_can)
 
+    if output_mode is not OutputMode.SaveToFile and not state.adjustment.show_transmission:
+        # Remove transmission workspaces from ADS only
+        delete_reduced_workspaces(reduction_packages, include_non_transmission=False)
+
     # -----------------------------------------------------------------------
     # Clean up other workspaces if the optimizations have not been turned on.
     # -----------------------------------------------------------------------
@@ -807,35 +811,34 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     #-------------------------------------------------------------------------------------------------------------------
     # Set the output workspaces for the calculated and unfitted transmission
     #-------------------------------------------------------------------------------------------------------------------
-    if state.adjustment.show_transmission:
-        sample_calculated_transmission,\
-            sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
-                                                                               multi_reduction_type, True)
-        can_calculated_transmission,\
-            can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
-                                                                            multi_reduction_type, True)
-        sample_unfitted_transmission,\
-            sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
-                                                                             multi_reduction_type, False)
-        can_unfitted_transmission,\
-            can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
-                                                                          multi_reduction_type, False)
+    sample_calculated_transmission,\
+        sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+                                                                           multi_reduction_type, True)
+    can_calculated_transmission,\
+        can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+                                                                        multi_reduction_type, True)
+    sample_unfitted_transmission,\
+        sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+                                                                         multi_reduction_type, False)
+    can_unfitted_transmission,\
+        can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+                                                                      multi_reduction_type, False)
 
-        _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmission",
-                                     sample_calculated_transmission, sample_calculated_transmission_base
-                                     ,"calculated_transmission_name", "calculated_transmission_base_name")
+    _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmission",
+                                 sample_calculated_transmission, sample_calculated_transmission_base
+                                 ,"calculated_transmission_name", "calculated_transmission_base_name")
 
-        _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceUnfittedTransmission",
-                                     sample_unfitted_transmission, sample_unfitted_transmission_base
-                                     , "unfitted_transmission_name", "unfitted_transmission_base_name")
+    _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceUnfittedTransmission",
+                                 sample_unfitted_transmission, sample_unfitted_transmission_base
+                                 , "unfitted_transmission_name", "unfitted_transmission_base_name")
 
-        _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmissionCan",
-                                     can_calculated_transmission, can_calculated_transmission_base
-                                     , "calculated_transmission_can_name", "calculated_transmission_can_base_name")
+    _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmissionCan",
+                                 can_calculated_transmission, can_calculated_transmission_base
+                                 , "calculated_transmission_can_name", "calculated_transmission_can_base_name")
 
-        _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceUnfittedTransmissionCan",
-                                     can_unfitted_transmission, can_unfitted_transmission_base
-                                     , "unfitted_transmission_can_name", "unfitted_transmission_can_base_name")
+    _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceUnfittedTransmissionCan",
+                                 can_unfitted_transmission, can_unfitted_transmission_base
+                                 , "unfitted_transmission_can_name", "unfitted_transmission_can_base_name")
 
 
 def get_workspace_from_algorithm(alg, output_property_name):
@@ -924,12 +927,11 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can):
     add_to_group(reduction_package.reduced_lab_sample, CAN_AND_SAMPLE_WORKSPACE)
     add_to_group(reduction_package.reduced_hab_sample, CAN_AND_SAMPLE_WORKSPACE)
 
-    if reduction_package.state.adjustment.show_transmission:
-        add_to_group(reduction_package.calculated_transmission, reduction_package.calculated_transmission_base_name)
-        add_to_group(reduction_package.calculated_transmission_can,
-                     reduction_package.calculated_transmission_can_base_name)
-        add_to_group(reduction_package.unfitted_transmission, reduction_package.unfitted_transmission_base_name)
-        add_to_group(reduction_package.unfitted_transmission_can, reduction_package.unfitted_transmission_can_base_name)
+    add_to_group(reduction_package.calculated_transmission, reduction_package.calculated_transmission_base_name)
+    add_to_group(reduction_package.calculated_transmission_can,
+                 reduction_package.calculated_transmission_can_base_name)
+    add_to_group(reduction_package.unfitted_transmission, reduction_package.unfitted_transmission_base_name)
+    add_to_group(reduction_package.unfitted_transmission_can, reduction_package.unfitted_transmission_can_base_name)
 
 
 def add_to_group(workspace, name_of_group_workspace):
@@ -987,7 +989,7 @@ def save_to_file(reduction_packages, save_can):
             save_workspace_to_file(name_to_save, file_formats, name_to_save)
 
 
-def delete_reduced_workspaces(reduction_packages):
+def delete_reduced_workspaces(reduction_packages, include_non_transmission=True):
     """
     Deletes all workspaces which would have been generated from a list of reduction packages.
 
@@ -1005,24 +1007,26 @@ def delete_reduced_workspaces(reduction_packages):
     delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)
 
     for reduction_package in reduction_packages:
-        reduced_lab = reduction_package.reduced_lab
-        reduced_hab = reduction_package.reduced_hab
-        reduced_merged = reduction_package.reduced_merged
-
-        # Remove samples
-        reduced_lab_sample = reduction_package.reduced_lab_sample
-        reduced_hab_sample = reduction_package.reduced_hab_sample
-
         # Remove transmissions
         calculated_transmission = reduction_package.calculated_transmission
         unfitted_transmission = reduction_package.unfitted_transmission
         calculated_transmission_can = reduction_package.calculated_transmission_can
         unfitted_transmission_can = reduction_package.unfitted_transmission_can
 
-        workspaces_to_delete = [reduced_lab, reduced_hab, reduced_merged,
-                                reduced_lab_sample, reduced_hab_sample,
-                                calculated_transmission, unfitted_transmission,
+        workspaces_to_delete = [calculated_transmission, unfitted_transmission,
                                 calculated_transmission_can, unfitted_transmission_can]
+
+        if include_non_transmission:
+            reduced_lab = reduction_package.reduced_lab
+            reduced_hab = reduction_package.reduced_hab
+            reduced_merged = reduction_package.reduced_merged
+
+            # Remove samples
+            reduced_lab_sample = reduction_package.reduced_lab_sample
+            reduced_hab_sample = reduction_package.reduced_hab_sample
+
+            workspaces_to_delete.extend([reduced_lab, reduced_hab, reduced_merged,
+                                         reduced_lab_sample, reduced_hab_sample])
 
         _delete_workspaces(delete_alg, workspaces_to_delete)
 
