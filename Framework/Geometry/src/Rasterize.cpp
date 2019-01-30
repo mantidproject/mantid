@@ -56,9 +56,15 @@ Raster calculateCylinder(const Kernel::V3D &beamDirection,
 Raster calculateCylinder(const Kernel::V3D &beamDirection,
                          const CSGObject &shape, const size_t numSlices,
                          const size_t numAnnuli) {
+  if (numSlices == 0)
+    throw std::runtime_error("Tried to section cylinder into zero slices");
+  if (numAnnuli == 0)
+    throw std::runtime_error("Tried to section cylinder into zero annuli");
+
   // get the geometry for the volume elements
   double radius, height;
   getCylinderParameters(shape, radius, height);
+
   const double sliceThickness{ height / static_cast<double>(numSlices) };
   const double deltaR{ radius / static_cast<double>(numAnnuli) };
 
@@ -71,6 +77,7 @@ Raster calculateCylinder(const Kernel::V3D &beamDirection,
 
   Raster result;
   result.resize(numVolumeElements);
+  result.totalvolume = height * M_PI * radius * radius;
 
   // loop over the elements of the shape and create everything
   size_t counter = 0;

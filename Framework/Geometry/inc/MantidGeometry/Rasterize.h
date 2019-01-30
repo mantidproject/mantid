@@ -26,6 +26,7 @@ public:
   std::vector<double> l1;            ///< Cached L1 distances
   std::vector<double> volume;        ///< Cached element volumes
   std::vector<Kernel::V3D> position; ///< Cached element positions
+  double totalvolume;                ///< Volume of the object
 };
 
 namespace Rasterize {
