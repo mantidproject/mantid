@@ -150,6 +150,18 @@ class PythonFileInterpreter(QWidget):
     def set_status_message(self, msg):
         self.status.showMessage(msg)
 
+    def replace_tabs_with_spaces(self):
+        if self.editor.selectedText() == '':
+            self.editor.selectAll()
+        new_text = self.editor.selectedText().replace('\t', '    ')
+        self.editor.replaceSelectedText(new_text)
+
+    def replace_spaces_with_tabs(self):
+        if self.editor.selectedText() == '':
+            self.editor.selectAll()
+        new_text = self.editor.selectedText().replace('    ', '\t')
+        self.editor.replaceSelectedText(new_text)
+
     def toggle_comment(self):
         if self.editor.selectedText == '':   # If nothing selected, do nothing
             return

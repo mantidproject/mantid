@@ -119,6 +119,7 @@ public:
   void enableAutoCompletion(AutoCompletionSource source);
   void disableAutoCompletion();
   void getCursorPosition(int *line, int *index) const;
+  void selectAll(bool select = true);
   void setCaretLineBackgroundColor (const QColor & col);
   void setCaretLineVisible(bool enable);
   void setCursorPosition(int line, int index);

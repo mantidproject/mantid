@@ -66,8 +66,19 @@ class MultiFileEditor(PluginWidget):
             shortcut="Ctrl+M",
             shortcut_context=Qt.ApplicationShortcut)
 
-        self.editor_actions = [self.run_action, self.abort_action,
-                               self.toggle_comment_action]
+        self.tabs_to_spaces_action = create_action(
+            self, 'Tabs to Spaces',
+            on_triggered=self.editors.tabs_to_spaces_current)
+
+        self.spaces_to_tabs_action = create_action(
+            self, 'Spaces to Tabs',
+            on_triggered=self.editors.spaces_to_tabs_current)
+
+        self.editor_actions = [self.run_action,
+                               self.abort_action,
+                               self.toggle_comment_action,
+                               self.tabs_to_spaces_action,
+                               self.spaces_to_tabs_action]
 
     def execute_current(self):
         '''This is used by MainWindow to execute a file after opening it'''

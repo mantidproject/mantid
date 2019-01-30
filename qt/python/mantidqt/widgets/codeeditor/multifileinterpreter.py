@@ -177,3 +177,9 @@ class MultiPythonFileInterpreter(QWidget):
 
     def toggle_comment_current(self):
         self.current_editor().toggle_comment()
+
+    def tabs_to_spaces_current(self):
+        self.current_editor().replace_tabs_with_spaces()
+
+    def spaces_to_tabs_current(self):
+        self.current_editor().replace_spaces_with_tabs()
