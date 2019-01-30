@@ -39,8 +39,8 @@ public:
     std::array<double, 3> upperRight;
     std::array<double, 3> center() const {
       return std::array<double, 3>{{(lowerLeft[0] + upperRight[0]) / 2,
-                                   (lowerLeft[1] + upperRight[1]) / 2,
-                                   (lowerLeft[2] + upperRight[2]) / 2}};
+                                    (lowerLeft[1] + upperRight[1]) / 2,
+                                    (lowerLeft[2] + upperRight[2]) / 2}};
     }
 
     Box() {}
@@ -274,9 +274,9 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
       for (size_t i = 73; i < 585; ++i)
         for (size_t _ = 0; _ < nPerLeaf; ++_) {
           auto ctr = justForBoxes.getBox(i).center();
-          points.emplace_back(Point{{static_cast<float>(ctr[0]),
-                                    static_cast<float>(ctr[1]),
-                                    static_cast<float>(ctr[2])}});
+          points.emplace_back(
+              Point{{static_cast<float>(ctr[0]), static_cast<float>(ctr[1]),
+                     static_cast<float>(ctr[2])}});
         }
       return points;
     }
