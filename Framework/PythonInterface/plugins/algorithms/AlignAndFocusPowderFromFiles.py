@@ -325,7 +325,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # end of inner loop
 
     def PyExec(self):
-        filenames = self._getLinearizedFilenames('Filename')
+        self._filenames = filenames = sorted(self._getLinearizedFilenames('Filename'))
         self.filterBadPulses = self.getProperty('FilterBadPulses').value
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
@@ -372,7 +372,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         if useCaching and not os.path.exists(summed_cache_file):
             SaveNexusProcessed(InputWorkspace=finalname, Filename=summed_cache_file)
-            
+
         # with more than one chunk or file the integrated proton charge is
         # generically wrong
         mtd[finalname].run().integrateProtonCharge()
@@ -382,67 +382,77 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if unfocusname != '':
             self.setProperty('UnfocussedWorkspace', mtd[unfocusname])
 
-            
+    def __processFile2_withcache(self, filename, useCaching, unfocusname, unfocusname_file):
+        """process the given file and save the result in `wkspname`
+        the difference between this and __processFile is this function takes cached into account
+        """
+        # default name is based off of filename
+        wkspname = os.path.split(filename)[-1].split('.')[0]
+
+        self.__loaderName = 'Load'  # reset to generic load with each file
+        if useCaching:
+            self.__determineCharacterizations(filename, wkspname)  # updates instance variable
+            cachefile = self.__getCacheName(wkspname)
+        else:
+            cachefile = None
+
+        i = self._filenames.index(filename)
+        wkspname += '_f%d' % i  # add file number to be unique
+
+        # if the unfocussed data is requested, don't read it from disk
+        # because of the extra complication of the unfocussed workspace
+        if useCaching and os.path.exists(cachefile) and unfocusname == '':
+            LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
+            # TODO LoadNexusProcessed has a bug. When it finds the
+            # instrument name without xml it reads in from an IDF
+            # in the instrument directory.
+            editinstrargs = {}
+            for name in PROPS_FOR_INSTR:
+                prop = self.getProperty(name)
+                if not prop.isDefault:
+                    editinstrargs[name] = prop.value
+            if editinstrargs:
+                EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
+        else:
+            self.__processFile(filename, wkspname, unfocusname_file, self.prog_per_file * float(i), not useCaching)
+
+            # write out the cachefile for the main reduced data independent of whether
+            # the unfocussed workspace was requested
+            if useCaching:
+                SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
+        return wkspname
+
+    def __accumuate(self, wkspname, finalname, unfocusname, unfocusname_file, firstrun=False):
+        # accumulate runs
+        if firstrun:
+            if wkspname != finalname:
+                RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=finalname)
+            if unfocusname != '':
+                RenameWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
+        else:
+            Plus(LHSWorkspace=finalname, RHSWorkspace=wkspname, OutputWorkspace=finalname,
+                 ClearRHSWorkspace=self.kwargs['PreserveEvents'])
+            DeleteWorkspace(Workspace=wkspname)
+
+            if unfocusname != '':
+                Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_file, OutputWorkspace=unfocusname,
+                     ClearRHSWorkspace=self.kwargs['PreserveEvents'])
+                DeleteWorkspace(Workspace=unfocusname_file)
+
+            if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
+                CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname,
+                               WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
+                               Tolerance=self.kwargs['CompressTolerance'],
+                               StartTime=self.kwargs['CompressStartTime'])
+                # not compressing unfocussed workspace because it is in d-spacing
+                # and is likely to be from a different part of the instrument
+        return
+
     def __processFiles(self, files, useCaching, unfocusname, unfocusname_file, finalname):
         # outer loop creates chunks to load
         for (i, filename) in enumerate(files):
-            # default name is based off of filename
-            wkspname = os.path.split(filename)[-1].split('.')[0]
-
-            self.__loaderName = 'Load'  # reset to generic load with each file
-            if useCaching:
-                self.__determineCharacterizations(filename, wkspname)  # updates instance variable
-                cachefile = self.__getCacheName(wkspname)
-            else:
-                cachefile = None
-
-            wkspname += '_f%d' % i  # add file number to be unique
-
-            # if the unfocussed data is requested, don't read it from disk
-            # because of the extra complication of the unfocussed workspace
-            if useCaching and os.path.exists(cachefile) and unfocusname == '':
-                LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
-                # TODO LoadNexusProcessed has a bug. When it finds the
-                # instrument name without xml it reads in from an IDF
-                # in the instrument directory.
-                editinstrargs = {}
-                for name in PROPS_FOR_INSTR:
-                    prop = self.getProperty(name)
-                    if not prop.isDefault:
-                        editinstrargs[name] = prop.value
-                if editinstrargs:
-                    EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
-            else:
-                self.__processFile(filename, wkspname, unfocusname_file, self.prog_per_file * float(i), not useCaching)
-
-                # write out the cachefile for the main reduced data independent of whether
-                # the unfocussed workspace was requested
-                if useCaching:
-                    SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
-
-            # accumulate runs
-            if i == 0:
-                if wkspname != finalname:
-                    RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=finalname)
-                if unfocusname != '':
-                    RenameWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
-            else:
-                Plus(LHSWorkspace=finalname, RHSWorkspace=wkspname, OutputWorkspace=finalname,
-                     ClearRHSWorkspace=self.kwargs['PreserveEvents'])
-                DeleteWorkspace(Workspace=wkspname)
-
-                if unfocusname != '':
-                    Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_file, OutputWorkspace=unfocusname,
-                         ClearRHSWorkspace=self.kwargs['PreserveEvents'])
-                    DeleteWorkspace(Workspace=unfocusname_file)
-
-                if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
-                    CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname,
-                                   WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
-                                   Tolerance=self.kwargs['CompressTolerance'],
-                                   StartTime=self.kwargs['CompressStartTime'])
-                    # not compressing unfocussed workspace because it is in d-spacing
-                    # and is likely to be from a different part of the instrument
+            wkspname = self.__processFile2_withcache(filename, useCaching, unfocusname, unfocusname_file)
+            self.__accumuate(wkspname, finalname, unfocusname, unfocusname_file, firstrun=i==0)
         return
 
 # Register algorithm with Mantid.
