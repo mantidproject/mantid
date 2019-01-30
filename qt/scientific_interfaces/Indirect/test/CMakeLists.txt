@@ -15,6 +15,7 @@ set ( TEST_FILES
   IndirectFittingModelTest.h
   IndirectSpectrumSelectionPresenterTest.h
   JumpFitDataPresenterTest.h
+  JumpFitModelTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
