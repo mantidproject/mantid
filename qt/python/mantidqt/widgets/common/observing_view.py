@@ -43,6 +43,10 @@ class ObservingView(object):
         self.close_signal.emit()
 
     def closeEvent(self, event):
+        # This clear prevents a leak when the window is closed from X by the user
+        # for some reason it can't be done in the ObservingPresenter as it doesn't
+        # seem to clear the ADSObserver object properly
+        self.presenter.clear_observer()
         event.accept()
         self.deleteLater()
 

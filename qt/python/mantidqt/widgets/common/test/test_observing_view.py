@@ -25,6 +25,11 @@ class ObservingViewTest(unittest.TestCase):
     def test_closeEvent(self):
         mock_event = MockQtEvent()
         self.view.closeEvent(mock_event)
+        # This is important: if the ADSObserver is not cleared in the view then
+        # it is not cleared at all. Adding it in the ObservingPresenter did not
+        # delete the ADSObserver properly. If this behaviour is changed, make sure
+        # to check that the ADSObserver is actually being cleared properly.
+        self.view.presenter.clear_observer.assert_called_once_with()
         mock_event.accept.assert_called_once_with()
 
     def test_rename(self):
