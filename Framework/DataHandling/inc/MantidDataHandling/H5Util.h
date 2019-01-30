@@ -8,6 +8,7 @@
 #define MANTID_DATAHANDLING_H5UTIL_H_
 
 #include "MantidDataHandling/DllConfig.h"
+
 #include <map>
 #include <string>
 #include <vector>
