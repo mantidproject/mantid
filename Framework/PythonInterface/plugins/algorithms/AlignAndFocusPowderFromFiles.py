@@ -358,12 +358,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             filename = filenames[0]
             wkspname = os.path.split(filename)[-1].split('.')[0]
             self.__determineCharacterizations(filename, wkspname)
-            
+
         # find cache and partition the filename list
         # the file_or_groups will be a list of filenames (strings) or list of filenames (group),
         # the latter means a cache for the group was found and loaded.
         if useCaching:
-            cached = []; nocache = []
+            cached = []
+            nocache = []
             self.__find_caches(filenames, cached, nocache)
             file_or_groups = cached + nocache
         else:
@@ -404,7 +405,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                     found = True
                     cached.append(files1)
                     break
-            if found: break
+            if found:
+                break
             continue
         if not found:
             nocache += filenames
@@ -414,14 +416,15 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             return self.__find_caches(remained, cached, nocache)
 
     def __get_grp_ws_name(self, group):
-        _ = lambda filename: os.path.split(filename)[-1].split('.')[0]
+        def _(filename):
+            return os.path.split(filename)[-1].split('.')[0]
         return _(group[0]) + "," + _(group[-1])
 
     def __get_grp_cache_fn(self, group):
         finalname = self.getPropertyValue('OutputWorkspace')
         filenames_str = ','.join(group)
         newprop = 'files_to_sum={}'.format(filenames_str)
-        return self.__getCacheName(finalname, additional_props=[newprop])        
+        return self.__getCacheName(finalname, additional_props=[newprop])
 
     def __processFiles(self, files, useCaching, unfocusname, unfocusname_file, finalname):
         """process given files (may be mixed with groups of files)
