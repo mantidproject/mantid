@@ -329,18 +329,17 @@ InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
 
   QMap<QString, QVariant> subShapeMap;
   if (obj->type() == "ellipse") {
-    subShapeMap =
-        this->encodeEllipse(reinterpret_cast<const Shape2DEllipse *>(obj));
+    subShapeMap = this->encodeEllipse(static_cast<const Shape2DEllipse *>(obj));
     map.insert(QString("type"), QVariant(QString("ellipse")));
   } else if (obj->type() == "rectangle") {
     subShapeMap =
-        this->encodeRectangle(reinterpret_cast<const Shape2DRectangle *>(obj));
+        this->encodeRectangle(static_cast<const Shape2DRectangle *>(obj));
     map.insert(QString("type"), QVariant(QString("rectangle")));
   } else if (obj->type() == "ring") {
-    subShapeMap = this->encodeRing(reinterpret_cast<const Shape2DRing *>(obj));
+    subShapeMap = this->encodeRing(static_cast<const Shape2DRing *>(obj));
     map.insert(QString("type"), QVariant(QString("ring")));
   } else if (obj->type() == "free") {
-    subShapeMap = this->encodeFree(reinterpret_cast<const Shape2DFree *>(obj));
+    subShapeMap = this->encodeFree(static_cast<const Shape2DFree *>(obj));
     map.insert(QString("type"), QVariant(QString("free")));
   } else {
     throw std::runtime_error("InstrumentView - Could not encode shape");
