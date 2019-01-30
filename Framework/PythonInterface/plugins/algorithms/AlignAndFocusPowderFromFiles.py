@@ -353,25 +353,32 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # these are also passed into the child-algorithms
         self.kwargs = self.__getAlignAndFocusArgs()
 
-        # find summed cache
-        filenames_str = ','.join(filenames)
-        newprop = 'files_to_sum={}'.format(filenames_str)
-        loaded_summed_cache = False
+        # initialization for caching mechanism
         if useCaching:
             filename = filenames[0]
             wkspname = os.path.split(filename)[-1].split('.')[0]
-            self.__determineCharacterizations(filename, wkspname)  # updates instance variable
-            summed_cache_file = self.__getCacheName(finalname, additional_props=[newprop])
-            if os.path.exists(summed_cache_file):
-                LoadNexusProcessed(Filename=summed_cache_file, OutputWorkspace=finalname)
-                loaded_summed_cache = True
+            self.__determineCharacterizations(filename, wkspname)
+            
+        # find cache and partition the filename list
+        # the file_or_groups will be a list of filenames (strings) or list of filenames (group),
+        # the latter means a cache for the group was found and loaded.
+        if useCaching:
+            cached = []; nocache = []
+            self.__find_caches(filenames, cached, nocache)
+            file_or_groups = cached + nocache
+        else:
+            file_or_groups = filenames
 
+        # process files or groups
         self.__processFiles(
-            filenames if not loaded_summed_cache else [],
+            file_or_groups,
             useCaching, unfocusname, unfocusname_file, finalname)
 
-        if useCaching and not os.path.exists(summed_cache_file):
-            SaveNexusProcessed(InputWorkspace=finalname, Filename=summed_cache_file)
+        # create cache
+        if useCaching:
+            summed_cache_file = self.__get_grp_cache_fn(filenames)
+            if not os.path.exists(summed_cache_file):
+                SaveNexusProcessed(InputWorkspace=finalname, Filename=summed_cache_file)
 
         # with more than one chunk or file the integrated proton charge is
         # generically wrong
@@ -381,6 +388,55 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', mtd[finalname])
         if unfocusname != '':
             self.setProperty('UnfocussedWorkspace', mtd[unfocusname])
+
+    def __find_caches(self, filenames, cached, nocache):
+        "find caches and load them using a greedy algorithm"
+        N = len(filenames)
+        found = False
+        for length in range(N, 1, -1):
+            for start in range(N-length+1):
+                end = start+length-1
+                files1 = filenames[start:end+1]
+                summed_cache_file = self.__get_grp_cache_fn(files1)
+                if os.path.exists(summed_cache_file):
+                    wkspname = self.__get_grp_ws_name(files1)
+                    LoadNexusProcessed(Filename=summed_cache_file, OutputWorkspace=wkspname)
+                    found = True
+                    cached.append(files1)
+                    break
+            if found: break
+            continue
+        if not found:
+            nocache += filenames
+            return
+        remained = filenames[:start] + filenames[end:]
+        if remained:
+            return self.__find_caches(remained, cached, nocache)
+
+    def __get_grp_ws_name(self, group):
+        _ = lambda filename: os.path.split(filename)[-1].split('.')[0]
+        return _(group[0]) + "," + _(group[-1])
+
+    def __get_grp_cache_fn(self, group):
+        finalname = self.getPropertyValue('OutputWorkspace')
+        filenames_str = ','.join(group)
+        newprop = 'files_to_sum={}'.format(filenames_str)
+        return self.__getCacheName(finalname, additional_props=[newprop])        
+
+    def __processFiles(self, files, useCaching, unfocusname, unfocusname_file, finalname):
+        """process given files (may be mixed with groups of files)
+        """
+        # outer loop creates chunks to load
+        for (i, f_or_g) in enumerate(files):
+            # f_or_g: file or group
+            if isinstance(f_or_g, basestring):
+                wkspname = self.__processFile2_withcache(
+                    f_or_g, useCaching, unfocusname, unfocusname_file)
+            else:
+                # must be a group here
+                wkspname = self.__get_grp_ws_name(f_or_g)
+            self.__accumuate(wkspname, finalname, unfocusname, unfocusname_file, firstrun=i==0)
+        return
 
     def __processFile2_withcache(self, filename, useCaching, unfocusname, unfocusname_file):
         """process the given file and save the result in `wkspname`
@@ -446,13 +502,6 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                                StartTime=self.kwargs['CompressStartTime'])
                 # not compressing unfocussed workspace because it is in d-spacing
                 # and is likely to be from a different part of the instrument
-        return
-
-    def __processFiles(self, files, useCaching, unfocusname, unfocusname_file, finalname):
-        # outer loop creates chunks to load
-        for (i, filename) in enumerate(files):
-            wkspname = self.__processFile2_withcache(filename, useCaching, unfocusname, unfocusname_file)
-            self.__accumuate(wkspname, finalname, unfocusname, unfocusname_file, firstrun=i==0)
         return
 
 # Register algorithm with Mantid.
