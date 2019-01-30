@@ -32,11 +32,11 @@ class GroupingTabModel(object):
 
     @property
     def groups(self):
-        return self._data.groups.values()
+        return list(self._data.groups.values())
 
     @property
     def pairs(self):
-        return self._data.pairs.values()
+        return list(self._data.pairs.values())
 
     @property
     def group_names(self):
@@ -66,15 +66,21 @@ class GroupingTabModel(object):
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
-        self._data.groups[group.name] = group
+        self._data.add_group(group)
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
-        self._data.pairs[pair.name] = pair
+        self._data.add_pair(pair)
 
     def remove_groups_by_name(self, name_list):
         for name in name_list:
             del self._data.groups[name]
+            self.remove_pairs_with_removed_name(name)
+
+    def remove_pairs_with_removed_name(self, group_name):
+        for name, pair in self._data.pairs.items():
+            if pair.forward_group == group_name or pair.backward_group == group_name:
+                del self._data.pairs[name]
 
     def remove_pairs_by_name(self, name_list):
         for name in name_list:

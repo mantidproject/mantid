@@ -7,7 +7,6 @@
 from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui
 
-
 class HomeRunInfoWidgetView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(HomeRunInfoWidgetView, self).__init__(parent)
@@ -34,7 +33,6 @@ class HomeRunInfoWidgetView(QtGui.QWidget):
 
         self.group = QtGui.QGroupBox("Run Information")
         self.group.setFlat(False)
-
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"
                            'subcontrol-origin: margin;'
