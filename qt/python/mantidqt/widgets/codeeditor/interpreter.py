@@ -163,47 +163,47 @@ class PythonFileInterpreter(QWidget):
         self.editor.replaceSelectedText(new_text)
 
     def toggle_comment(self):
-        if self.editor.selectedText == '':   # If nothing selected, do nothing
+        if self.editor.selectedText() == '':   # If nothing selected, do nothing
             return
 
-        lines = self.editor.text().split('\n')
+        # Note selection indices to restore highlighting later
         selection_idxs = list(self.editor.getSelection())
-        selected_lines = lines[selection_idxs[0]:selection_idxs[2] + 1]
+
+        # Select complete lines then read them
+        line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
+        line_selection_idxs = [selection_idxs[0], 0,
+                               selection_idxs[2], line_end_pos]
+        self.editor.setSelection(*line_selection_idxs)
+        selected_lines = self.editor.selectedText().split('\n')
 
         if self._are_comments(selected_lines) is True:
-            selected_lines, leading_whitespaces = self._uncomment_lines(selected_lines)
-            # Track deleted whitespace on last line to keep highlighting consistent
-            selection_idxs[-1] -= 1 + leading_whitespaces % 4
+            toggled_lines = self._uncomment_lines(selected_lines)
+            # Track deleted characters to keep highlighting consistent
+            selection_idxs[1] -= 2
+            selection_idxs[-1] -= 2
         else:
-            selected_lines = self._comment_lines(selected_lines)
+            toggled_lines = self._comment_lines(selected_lines)
+            selection_idxs[1] += 2
             selection_idxs[-1] += 2
 
-        # Note caret position to restore later
-        caret_position = self.editor.getCursorPosition()
+        # Replace lines with commented/uncommented lines
+        self.editor.replaceSelectedText('\n'.join(toggled_lines))
 
-        # Replace selected lines with commented/uncommented lines
-        lines[selection_idxs[0]:selection_idxs[2] + 1] = selected_lines
-        self.editor.setText('\n'.join(lines))
-
-        # Restore caret position and highlighting
-        self.editor.setCursorPosition(*caret_position)
+        # Restore highlighting
         self.editor.setSelection(*selection_idxs)
 
     def _comment_lines(self, lines):
         for i in range(len(lines)):
-            if lines[i].startswith('#'):
-                lines[i] = '#' + lines[i]
-            else:
-                lines[i] = '# ' + lines[i]
+            lines[i] = '# ' + lines[i]
         return lines
 
     def _uncomment_lines(self, lines):
         for i in range(len(lines)):
-            lines[i] = lines[i].replace('#', '', 1)
-            # Remove whitespaces such that indents are multiples of 4
-            leading_whitespaces = len(lines[i]) - len(lines[i].lstrip('\t '))
-            lines[i] = lines[i][leading_whitespaces % 4:]
-        return lines, leading_whitespaces
+            uncommented_line = lines[i].replace('# ', '', 1)
+            if uncommented_line == lines[i]:
+                uncommented_line = lines[i].replace('#', '', 1)
+            lines[i] = uncommented_line
+        return lines
 
     def _are_comments(self, code_lines):
         for line in code_lines:
