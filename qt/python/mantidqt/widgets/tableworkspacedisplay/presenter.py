@@ -14,10 +14,10 @@ from functools import partial
 from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
-from mantidqt.widgets.common.user_notifier import UserNotifier
 from mantidqt.widgets.common.observing_presenter import ObservingPresenter
 from mantidqt.widgets.common.status_bar_view import StatusBarView
 from mantidqt.widgets.common.table_copying import copy_cells
+from mantidqt.widgets.common.user_notifier import UserNotifier
 from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
@@ -42,7 +42,7 @@ class TableWorkspaceDisplay(ObservingPresenter, UserNotifier):
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = 'Column {}'
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None, container=None):
         """
         Creates a display for the provided workspace.
 
@@ -56,11 +56,13 @@ class TableWorkspaceDisplay(ObservingPresenter, UserNotifier):
         :param ads_observer: ADS observer to be used by the presenter. If not provided the default
                              one is used. Mainly intended for testing.
         """
-
         self.model = model if model else TableWorkspaceDisplayModel(ws)
         self.name = name if name else self.model.get_name()
         self.view = view if view else TableWorkspaceDisplayView(self, parent, self.name)
-        self.container = StatusBarView(parent, self.view)
+        self.container = container if container else StatusBarView(parent, self.view)
+
+        UserNotifier.__init__(self, self.container.status_bar)
+
         self.parent = parent
         self.plot = plot
         self.view.set_context_menu_actions(self.view)

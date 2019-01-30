@@ -1,4 +1,5 @@
 import sys
+import weakref
 
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QCursor, QFont, QFontMetrics
@@ -9,6 +10,17 @@ class UserNotifier(object):
     NO_SELECTION_MESSAGE = "No selection"
     COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
     DEFAULT_TIMEOUT = 2000
+
+    def __init__(self, status_bar):
+        self._status_bar = status_bar
+
+    @property
+    def _status_bar(self):
+        return self.__status_bar()
+
+    @_status_bar.setter
+    def _status_bar(self, status_bar):
+        self.__status_bar = weakref.ref(status_bar)
 
     def show_mouse_toast(self, message):
         if not sys.platform == "win32":
@@ -23,7 +35,7 @@ class UserNotifier(object):
         QToolTip.showText(QCursor.pos() + QPoint(font_metrics.height() / 2, 0), message)
 
     def show_status_message(self, msg):
-        self.container.status_bar.showMessage(msg, self.DEFAULT_TIMEOUT)
+        self._status_bar.showMessage(msg, self.DEFAULT_TIMEOUT)
 
     def notify_no_selection_to_copy(self):
         self.show_mouse_toast(self.NO_SELECTION_MESSAGE)

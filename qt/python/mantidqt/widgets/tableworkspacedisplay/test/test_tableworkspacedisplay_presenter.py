@@ -12,7 +12,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mock import Mock, call, patch
+from qtpy.QtWidgets import QStatusBar
 
+from mantidqt.widgets.common.status_bar_view import StatusBarView
 from mantidqt.widgets.common.test_mocks.mock_mantid import MockWorkspace
 from mantidqt.widgets.common.test_mocks.mock_plotlib import MockAx, MockPlotLib
 from mantidqt.widgets.common.test_mocks.mock_qt import MockQModelIndex, MockQSelectionModel
@@ -51,6 +53,8 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
         def wrapper(self, *args):
             ws = MockWorkspace()
             view = Mock(spec=TableWorkspaceDisplayView)
+            container = Mock(spec=StatusBarView)
+            container.status_bar = Mock(spec=QStatusBar)
             if add_selection_model:
                 mock_selection_model = MockQSelectionModel(has_selection=True)
                 mock_selection_model.selectedRows = Mock(
@@ -59,7 +63,7 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
                     return_value=[MockQModelIndex(1, 1), MockQModelIndex(2, 2), MockQModelIndex(3, 3)])
                 view.mock_selection_model = mock_selection_model
                 view.selectionModel.return_value = mock_selection_model
-            twd = TableWorkspaceDisplay(ws, view=view)
+            twd = TableWorkspaceDisplay(ws, view=view, container=container)
             if add_plot:
                 twd.plot = MockPlotLib()
             return func(self, ws, view, twd, *args)
@@ -70,6 +74,8 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
 
 
 class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
+    notify_no_selection_to_copy_package = 'mantidqt.widgets.common.user_notifier.UserNotifier.notify_no_selection_to_copy'
+
     @classmethod
     def setUpClass(cls):
         # Allow the MockWorkspace to work within the model
@@ -83,10 +89,8 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         # the test will fail if the support check fails - an exception is raised
         TableWorkspaceDisplay.supports(ws)
 
-    def test_handleItemChanged(self):
-        ws = MockWorkspace()
-        view = Mock(spec=TableWorkspaceDisplayView)
-        twd = TableWorkspaceDisplay(ws, view=view)
+    @with_mock_presenter
+    def test_handleItemChanged(self, ws, view, twd):
         item = Mock(spec=WorkbenchTableWidgetItem)
         item.row.return_value = 5
         item.column.return_value = 5
@@ -182,7 +186,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.hasSelection.assert_called_once_with()
         view.mock_selection_model.selectedRows.assert_called_once_with()
 
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.show_no_selection_to_copy_toast')
+    @patch(notify_no_selection_to_copy_package)
     @with_mock_presenter(add_selection_model=True)
     def test_action_delete_row_no_selection(self, ws, view, twd, mock_no_selection_toast):
         view.mock_selection_model.hasSelection = Mock(return_value=False)
@@ -196,7 +200,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         result = twd._get_selected_columns()
         self.assertEqual([1, 2, 3], result)
 
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.show_no_selection_to_copy_toast')
+    @patch(notify_no_selection_to_copy_package)
     @with_mock_presenter(add_selection_model=True)
     def test_get_selected_columns_no_selection(self, ws, view, twd, mock_no_selection_toast):
         view.mock_selection_model.hasSelection = Mock(return_value=False)
@@ -209,7 +213,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertRaises(ValueError, twd._get_selected_columns, max_selected=1, message_if_over_max=mock_message)
         view.show_warning.assert_called_once_with(mock_message)
 
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.show_no_selection_to_copy_toast')
+    @patch(notify_no_selection_to_copy_package)
     @with_mock_presenter(add_selection_model=True)
     def test_get_selected_columns_has_selected_but_no_columns(self, ws, view, twd, mock_no_selection_toast):
         """
@@ -341,12 +345,12 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         invalid_plot_type = 48903479
         self.assertRaises(ValueError, twd._get_plot_function_from_type, None, invalid_plot_type)
 
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.show_no_selection_to_copy_toast')
+    @patch(notify_no_selection_to_copy_package)
     @with_mock_presenter(add_selection_model=True)
-    def test_action_plot_no_selected_columns(self, ws, view, twd, mock_show_no_selection_to_copy_toast):
+    def test_action_plot_no_selected_columns(self, ws, view, twd, mock_notify_no_selection_to_copy):
         view.mock_selection_model.selectedColumns.return_value = []
         twd.action_plot(PlotType.LINEAR)
-        mock_show_no_selection_to_copy_toast.assert_called_once_with()
+        mock_notify_no_selection_to_copy.assert_called_once_with()
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_plot_more_than_one_x(self, ws, view, twd):
