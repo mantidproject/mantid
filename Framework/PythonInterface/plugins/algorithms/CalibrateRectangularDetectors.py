@@ -235,9 +235,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         #Find good peak for reference
         ymax = 0
+        midBin = int(mtd[wksp].blocksize()/2)
         for s in range(0,mtd[wksp].getNumberHistograms()):
             y_s = mtd[wksp].readY(s)
-            midBin = int(mtd[wksp].blocksize()/2)
             if y_s[midBin] > ymax:
                 refpixel = s
                 ymax = y_s[midBin]
@@ -265,9 +265,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                   Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
             #Find good peak for reference
             ymax = 0
+            midBin = int(mtd[wksp].blocksize()/2)
             for s in range(0,mtd[wksp].getNumberHistograms()):
                 y_s = mtd[wksp].readY(s)
-                midBin = int(mtd[wksp].blocksize()/2)
                 if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
@@ -296,9 +296,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                   Params=str(self._peakmin3)+","+str(abs(self._binning[1]))+","+str(self._peakmax3))
             #Find good peak for reference
             ymax = 0
+            midBin = mtd[wksp].blocksize()/2
             for s in range(0,mtd[wksp].getNumberHistograms()):
                 y_s = mtd[wksp].readY(s)
-                midBin = mtd[wksp].blocksize()/2
                 if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]

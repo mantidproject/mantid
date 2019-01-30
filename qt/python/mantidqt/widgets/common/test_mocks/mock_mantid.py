@@ -5,42 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
 from __future__ import (absolute_import, division, print_function)
 
 from mock import Mock
 
-from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModel, \
-    MatrixWorkspaceTableViewModelType
-
 AXIS_INDEX_FOR_HORIZONTAL = 0
 AXIS_INDEX_FOR_VERTICAL = 1
-
-
-def setup_common_for_test_data():
-    """
-    Common configuration of variables and mocking for testing
-    MatrixWorkspaceDisplayTableViewModel's data and headerData functions
-    """
-    # Create some mock data for the mock workspace
-    row = 2
-    column = 2
-    # make a workspace with 0s
-    mock_data = [0] * 10
-    # set one of them to be not 0
-    mock_data[column] = 999
-    model_type = MatrixWorkspaceTableViewModelType.x
-    # pass onto the MockWorkspace so that it returns it when read from the TableViewModel
-    ws = MockWorkspace(read_return=mock_data)
-    ws.hasMaskedBins = Mock(return_value=True)
-    ws.maskedBinsIndices = Mock(return_value=[column])
-    model = MatrixWorkspaceTableViewModel(ws, model_type)
-    # The model retrieves the spectrumInfo object, and our MockWorkspace has already given it
-    # the MockSpectrumInfo, so all that needs to be done here is to set up the correct method Mocks
-    model.ws_spectrum_info.hasDetectors = Mock(return_value=True)
-    index = MockQModelIndex(row, column)
-    return ws, model, row, index
 
 
 class MockMantidSymbol:
@@ -69,22 +39,6 @@ class MockMantidAxis:
 
         self.mock_unit = MockMantidUnit()
         self.getUnit = Mock(return_value=self.mock_unit)
-
-
-class MockQModelIndexSibling:
-    TEST_SIBLING_DATA = "MANTID_TEST_SIBLING_DATA"
-
-    def __init__(self):
-        self.data = Mock(return_value=self.TEST_SIBLING_DATA)
-
-
-class MockQModelIndex:
-
-    def __init__(self, row, column):
-        self.row = Mock(return_value=row)
-        self.column = Mock(return_value=column)
-        self.mock_sibling = MockQModelIndexSibling()
-        self.sibling = Mock(return_value=self.mock_sibling)
 
 
 class MockSpectrumInfo:
@@ -140,7 +94,7 @@ class MockWorkspace:
 
         self.setCell = Mock()
 
-        self.name = Mock(return_value="MOCK_WORKSPACE_TEST")
+        self.name = Mock(return_value=self.TEST_NAME)
 
         self._column_names = []
         for i in range(self.COLS):
@@ -154,3 +108,5 @@ class MockWorkspace:
         self.rowCount = Mock(return_value=self.row_count)
 
         self.column = Mock(return_value=[1] * self.row_count)
+
+        self.emit_repaint = Mock()

@@ -332,11 +332,11 @@ DetectorInfo::scanIntervals() const {
 }
 
 const DetectorInfoConstIt DetectorInfo::cbegin() const {
-  return DetectorInfoConstIt(*this, 0);
+  return DetectorInfoConstIt(*this, 0, size());
 }
 
 const DetectorInfoConstIt DetectorInfo::cend() const {
-  return DetectorInfoConstIt(*this, size());
+  return DetectorInfoConstIt(*this, size(), size());
 }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
@@ -358,10 +358,14 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
 }
 
 // Begin method for iterator
-DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0); }
+DetectorInfoIt DetectorInfo::begin() {
+  return DetectorInfoIt(*this, 0, size());
+}
 
 // End method for iterator
-DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size()); }
+DetectorInfoIt DetectorInfo::end() {
+  return DetectorInfoIt(*this, size(), size());
+}
 
 } // namespace Geometry
 } // namespace Mantid

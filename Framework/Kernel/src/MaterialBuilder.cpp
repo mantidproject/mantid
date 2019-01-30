@@ -19,9 +19,7 @@ namespace Kernel {
 
 namespace {
 inline bool isEmpty(const boost::optional<double> value) {
-  if (!value)
-    return true;
-  return (value == Mantid::EMPTY_DBL());
+  return !value || value == Mantid::EMPTY_DBL();
 }
 } // namespace
 
@@ -67,7 +65,7 @@ MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
   }
   using ChemicalFormula = Material::ChemicalFormula;
   try {
-    m_formula = Mantid::Kernel::make_unique<ChemicalFormula>(
+    m_formula = ChemicalFormula(
         ChemicalFormula(Material::parseChemicalFormula(formula)));
   } catch (std::runtime_error &exc) {
     throw std::invalid_argument(
@@ -83,7 +81,7 @@ MaterialBuilder &MaterialBuilder::setFormula(const std::string &formula) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setAtomicNumber(int atomicNumber) {
-  if (m_formula) {
+  if (!m_formula.empty()) {
     throw std::runtime_error("MaterialBuilder::setAtomicNumber() - Formula "
                              "already set, cannot use atomic number aswell.");
   }
@@ -206,19 +204,19 @@ MaterialBuilder &MaterialBuilder::setAbsorptionXSection(double xsec) {
  */
 Material MaterialBuilder::build() const {
   Material::ChemicalFormula formula;
-  double density;
 
-  if (m_formula) {
-    formula = Material::ChemicalFormula(*m_formula);
+  if (!m_formula.empty()) {
+    formula = Material::ChemicalFormula(m_formula);
   } else if (m_atomicNo) {
     formula = createCompositionFromAtomicNumber();
-  } else {
-    throw std::runtime_error("MaterialBuilder::createNeutronAtom() - Please "
-                             "specify one of chemical formula or atomic "
-                             "number.");
+  } else if (!m_totalXSection || !m_cohXSection || !m_incXSection ||
+             !m_absSection || !m_numberDensity) {
+    throw std::runtime_error("Please specify one of chemical formula or atomic "
+                             "number or all cross sections and a number "
+                             "density.");
   }
 
-  density = getOrCalculateRho(formula);
+  const double density = getOrCalculateRho(formula);
   if (hasOverrideNeutronProperties()) {
     PhysicalConstants::NeutronAtom neutron = generateCustomNeutron();
     return Material(m_name, neutron, density);
@@ -251,15 +249,15 @@ MaterialBuilder::createCompositionFromAtomicNumber() const {
  */
 double MaterialBuilder::getOrCalculateRho(
     const Material::ChemicalFormula &formula) const {
-  // first calculate the total number of atoms
+  if (m_numberDensity) {
+    return m_numberDensity.get();
+  }
   double totalNumAtoms = 0.;
   for (const auto &formulaUnit : formula) {
     totalNumAtoms += formulaUnit.multiplicity;
   }
 
-  if (m_numberDensity) {
-    return m_numberDensity.get();
-  } else if (m_zParam && m_cellVol) {
+  if (m_zParam && m_cellVol) {
     return totalNumAtoms * m_zParam.get() / m_cellVol.get();
   } else if (m_massDensity) {
     // g / cc -> atoms / Angstrom^3
@@ -269,8 +267,8 @@ double MaterialBuilder::getOrCalculateRho(
     }
     return (m_massDensity.get() * totalNumAtoms / rmm) *
            PhysicalConstants::N_A * 1e-24;
-  } else if (m_formula && m_formula->size() == 1) {
-    return m_formula->at(0).atom->number_density;
+  } else if (!m_formula.empty() && m_formula.size() == 1) {
+    return m_formula.front().atom->number_density;
   } else {
     throw std::runtime_error(
         "The number density could not be determined. Please "
@@ -280,15 +278,8 @@ double MaterialBuilder::getOrCalculateRho(
 }
 
 bool MaterialBuilder::hasOverrideNeutronProperties() const {
-  if (!isEmpty(m_totalXSection))
-    return true;
-  if (!isEmpty(m_cohXSection))
-    return true;
-  if (!isEmpty(m_incXSection))
-    return true;
-  if (!isEmpty(m_absSection))
-    return true;
-  return false;
+  return !isEmpty(m_totalXSection) || !isEmpty(m_cohXSection) ||
+         !isEmpty(m_incXSection) || !isEmpty(m_absSection);
 }
 
 PhysicalConstants::NeutronAtom MaterialBuilder::generateCustomNeutron() const {
@@ -299,19 +290,26 @@ PhysicalConstants::NeutronAtom MaterialBuilder::generateCustomNeutron() const {
     auto atom = getAtom(static_cast<uint16_t>(m_atomicNo.get()),
                         static_cast<uint16_t>(m_massNo));
     neutronAtom = atom.neutron;
-  } else {
+    overrideNeutronProperties(neutronAtom);
+  } else if (!m_formula.empty()) {
     double totalNumAtoms = 0.;
-    for (const auto &formulaUnit : *m_formula) {
+    for (const auto &formulaUnit : m_formula) {
       neutronAtom =
           neutronAtom + formulaUnit.multiplicity * formulaUnit.atom->neutron;
       totalNumAtoms += formulaUnit.multiplicity;
     }
     neutronAtom = (1. / totalNumAtoms) * neutronAtom;
+    overrideNeutronProperties(neutronAtom);
+  } else {
+    neutronAtom.coh_scatt_xs = *m_cohXSection;
+    neutronAtom.inc_scatt_xs = *m_incXSection;
+    neutronAtom.tot_scatt_xs = *m_totalXSection;
+    neutronAtom.abs_scatt_xs = *m_absSection;
+    calculateScatteringLengths(neutronAtom);
   }
   neutronAtom.a_number = 0; // signifies custom neutron atom
   neutronAtom.z_number = 0; // signifies custom neutron atom
 
-  overrideNeutronProperties(neutronAtom);
   return neutronAtom;
 }
 

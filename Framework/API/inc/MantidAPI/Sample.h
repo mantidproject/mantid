@@ -13,7 +13,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/V3D.h"
-#include <vector>
 
 namespace Mantid {
 //-----------------------------------------------------------------------------

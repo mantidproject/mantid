@@ -45,6 +45,7 @@ ConvFit::ConvFit(QWidget *parent)
       m_convFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
+  setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 }
 
@@ -113,8 +114,6 @@ void ConvFit::setupFitTab() {
 
   // Post Plot and Save
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
@@ -134,24 +133,6 @@ void ConvFit::setModelResolution(const QString &resolutionName) {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
   m_convFittingModel->setResolution(resolution, 0);
   setModelFitFunction();
-}
-
-/**
- * Handles saving the workspace when save is clicked
- */
-void ConvFit::saveClicked() { IndirectFitAnalysisTab::saveResult(); }
-
-/**
- * Handles plotting the workspace when plot is clicked
- */
-void ConvFit::plotClicked() {
-  setPlotResultIsPlotting(true);
-  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
-  setPlotResultIsPlotting(false);
-}
-
-void ConvFit::updatePlotOptions() {
-  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
 void ConvFit::fitFunctionChanged() {
@@ -182,42 +163,10 @@ void ConvFit::runClicked() { runTab(); }
 
 void ConvFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
 }
 
-void ConvFit::setFitSingleSpectrumIsFitting(bool fitting) {
-  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
-      fitting ? "Fitting..." : "Fit Single Spectrum");
-  setButtonsEnabled(!fitting);
-}
-
-void ConvFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
-void ConvFit::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
-  setFitSingleSpectrumEnabled(enabled);
-}
-
-void ConvFit::setRunEnabled(bool enabled) {
-  m_uiForm->pbRun->setEnabled(enabled);
-}
-
-void ConvFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
-void ConvFit::setFitSingleSpectrumEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-}
-
-void ConvFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
+void ConvFit::setRunEnabled(bool enable) {
+  m_uiForm->pbRun->setEnabled(enable);
 }
 
 } // namespace IDA

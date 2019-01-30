@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
+from __future__ import (absolute_import, division, print_function)
+
 from mock import Mock
 
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
@@ -63,17 +63,38 @@ class MockQTableView:
         self.selectionModel = Mock(return_value=self.mock_selection_model)
 
 
-class MockMatrixWorkspaceDisplayView:
+class MockViewport:
     def __init__(self):
-        self.set_context_menu_actions = Mock()
-        self.table_x = MockQTableView()
-        self.table_y = MockQTableView()
-        self.table_e = MockQTableView()
-        self.set_model = Mock()
-        self.ask_confirmation = None
+        self.update = Mock()
 
 
-class MockMatrixWorkspaceDisplayModel:
+class MockQTab:
     def __init__(self):
-        self.get_spectrum_plot_label = Mock()
-        self.get_bin_plot_label = Mock()
+        self.mock_viewport = MockViewport()
+        self.viewport = Mock(return_value=self.mock_viewport)
+
+
+class MockQModelIndexSibling:
+    TEST_SIBLING_DATA = "MANTID_TEST_SIBLING_DATA"
+
+    def __init__(self):
+        self.data = Mock(return_value=self.TEST_SIBLING_DATA)
+
+
+class MockQModelIndex:
+
+    def __init__(self, row, column):
+        self.row = Mock(return_value=row)
+        self.column = Mock(return_value=column)
+        self.mock_sibling = MockQModelIndexSibling()
+        self.sibling = Mock(return_value=self.mock_sibling)
+
+
+class MockQtEvent:
+    def __init__(self):
+        self.accept = Mock()
+
+
+class MockQtSignal:
+    def __init__(self):
+        self.emit = Mock()
