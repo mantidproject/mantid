@@ -28,12 +28,15 @@ class UserNotifier(object):
             # There is no reason to draw tooltips for OSs that don't display anything
             return
 
+        QToolTip.showText(self._get_mouse_position(), message)
+
+    def _get_mouse_position(self):
         # Creates a text with empty space to get the height of the rendered text - this is used
         # to provide the same offset for the tooltip, scaled relative to the current resolution and zoom.
         font_metrics = QFontMetrics(QFont(" "))
         # The height itself is divided by 2 just to reduce the offset so that the tooltip is
-        # reasonably position relative to the cursor
-        QToolTip.showText(QCursor.pos() + QPoint(font_metrics.height() / 2, 0), message)
+        # reasonably positioned, relative to the cursor
+        return QCursor.pos() + QPoint(font_metrics.height() / 2, 0)
 
     def show_status_message(self, msg):
         self._status_bar.showMessage(msg, self.DEFAULT_TIMEOUT)
@@ -47,4 +50,5 @@ class UserNotifier(object):
         self.show_status_message(self.COPY_SUCCESSFUL_MESSAGE)
 
     def notify_working(self):
+        # only display this on the status bar
         self.show_status_message(self.WORKING_MESSAGE)

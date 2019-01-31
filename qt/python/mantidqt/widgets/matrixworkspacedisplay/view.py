@@ -73,9 +73,6 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
         self.close_signal.connect(self._run_close)
         self.rename_signal.connect(self._run_rename)
 
-        self.resize(600, 400)
-        self.show()
-
     @Slot()
     def _run_close(self):
         self.presenter.clear_observer()

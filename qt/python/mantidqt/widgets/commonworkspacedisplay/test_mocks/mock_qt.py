@@ -98,3 +98,8 @@ class MockQtEvent:
 class MockQtSignal:
     def __init__(self):
         self.emit = Mock()
+
+
+class MockQStatusBar(object):
+    def __init__(self):
+        self.showMessage = Mock()
