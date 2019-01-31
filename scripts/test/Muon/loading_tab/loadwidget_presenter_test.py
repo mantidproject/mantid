@@ -178,7 +178,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.presenter._model.filenames, ["\\\\EMU\\data\\EMU0083420.nxs"])
         self.assertEqual(self.presenter._model.workspaces, [[1]])
-        self.assertEqual(self.presenter._model.runs, [83420])
+        self.assertEqual(self.presenter._model.runs, [[83420]])
 
     def test_that_loading_via_load_current_run_is_displayed_correctly_in_the_interface(self):
         self.mock_loading_from_current_run([1], "\\\\EMU\\data\\EMU0083420.nxs", 83420)
@@ -210,7 +210,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.presenter._model.filenames, ["EMU00012345.nxs"])
         self.assertEqual(self.presenter._model.workspaces, [[1]])
-        self.assertEqual(self.presenter._model.runs, [12345])
+        self.assertEqual(self.presenter._model.runs, [[12345]])
 
     def test_that_user_input_run_is_displayed_correctly_in_the_interface(self):
         self.mock_user_input_single_run([1], "EMU00012345.nxs", 12345)

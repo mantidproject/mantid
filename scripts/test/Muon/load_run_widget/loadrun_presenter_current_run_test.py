@@ -80,17 +80,17 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, ["currentRun.nxs"])
-        self.assertEqual(self.presenter.runs, [1234])
+        self.assertEqual(self.presenter.runs, [[1234]])
         self.assertEqual(self.presenter.workspaces, [[1, 2, 3]])
 
-        self.assertEqual(self.model.current_run, 1234)
+        self.assertEqual(self.model.current_run, [1234])
 
     @run_test_with_and_without_threading
     def test_load_current_run_correctly_displays_run_if_load_successful(self):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1234, "1234.nxs"))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
-        self.assertEqual(self.view.get_run_edit_text(), "1234 (CURRENT RUN)")
+        self.assertEqual(self.view.get_run_edit_text(), "[1234] (CURRENT RUN)")
 
     def test_load_current_run_displays_error_message_if_fails_to_load(self):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
@@ -113,7 +113,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, ["1234.nxs"])
-        self.assertEqual(self.presenter.runs, [1234])
+        self.assertEqual(self.presenter.runs, [[1234]])
         self.assertEqual(self.presenter.workspaces, [[1]])
 
     @run_test_with_and_without_threading
@@ -128,23 +128,10 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.view.get_run_edit_text(), "9999 (CURRENT RUN)")
+        self.assertEqual(self.view.get_run_edit_text(), "[9999] (CURRENT RUN)")
         self.assertEqual(self.presenter.filenames, ["9999.nxs"])
-        self.assertEqual(self.presenter.runs, [9999])
+        self.assertEqual(self.presenter.runs, [[9999]])
         self.assertEqual(self.presenter.workspaces, [[2]])
-
-    @run_test_with_and_without_threading
-    def test_load_current_run_displays_error_if_incrementing_past_current_run(self):
-        # set up current run
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1234, "1234.nxs"))
-        self.view.set_run_edit_text("1234")
-        self.presenter.handle_load_current_run()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.presenter.handle_increment_run()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.view.warning_popup.call_count, 1)
 
 
 if __name__ == '__main__':

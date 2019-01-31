@@ -38,7 +38,7 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         self.obj = None
 
     def test_runinfo_correct(self):
-        file_path = FileFinder.findRuns('22725')[0]
+        file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
         self.context._loaded_data.remove_data(run=run)
         self.context._loaded_data.add_data(run=run, workspace=ws, filename=filename)
@@ -55,9 +55,11 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
                          'Comment                   : FC first sample\n'
                          'Start                     : 2009-03-24T04:18:58\n'
                          'End                       : 2009-03-24T04:56:26\n'
-                         'Good Frames               : 88540\n'
                          'Counts (MeV)              : 20.076704\n'
-                         'Average Temperature (K)   : 2.5338574658342083\n'
+                         'Good Frames               : 88540\n'
+                         'Counts per Good Frame     : 226.752925232\n'
+                         'Counts per Good Frame per det : 3.54301445674\n'
+                         'Average Temperature (K)   : 2.53385746583\n'
                          'Sample Temperature (K)    : 1.0\n'
                          'Sample Magnetic Field (G) : 100.0')
 
