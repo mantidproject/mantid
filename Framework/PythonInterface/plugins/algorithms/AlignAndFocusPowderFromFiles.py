@@ -335,15 +335,15 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # end of inner loop
 
     def PyExec(self):
+        filenames = self._getLinearizedFilenames('Filename')
         # get the instrument name
-        instr = "NOM"
+        instr = os.path.basename(filenames[0]).split('_')[0]
         if AnalysisDataService.doesExist(instr+'_cal'):
             DeleteWorkspace(Workspace=instr+'_cal')
         if AnalysisDataService.doesExist(instr+'_group'):
             DeleteWorkspace(Workspace=instr+'_group')
         if AnalysisDataService.doesExist(instr+'_mask'):
             DeleteWorkspace(Workspace=instr+'_mask')
-        filenames = self._getLinearizedFilenames('Filename')
         self.filterBadPulses = self.getProperty('FilterBadPulses').value
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
