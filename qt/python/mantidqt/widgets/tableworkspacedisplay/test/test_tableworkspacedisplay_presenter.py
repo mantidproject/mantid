@@ -74,7 +74,8 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
 
 
 class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
-    notify_no_selection_to_copy_package = 'mantidqt.widgets.common.user_notifier.UserNotifier.notify_no_selection_to_copy'
+    notify_no_selection_to_copy_package = 'mantidqt.widgets.commonworkspacedisplay.user_notifier.UserNotifier.notify_no_selection_to_copy'
+    copy_cells_package = 'mantidqt.widgets.commonworkspacedisplay.data_copier.DataCopier.copy_cells'
 
     @classmethod
     def setUpClass(cls):
@@ -166,7 +167,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         # set item is called on every item of the table
         self.assertEqual(ws.ROWS * ws.COLS, mock_table.setItem.call_count)
 
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.copy_cells')
+    @patch(copy_cells_package)
     @with_mock_presenter
     def test_action_copying(self, ws, view, twd, mock_copy_cells):
         twd.action_copy_cells()

@@ -12,9 +12,12 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mock import Mock, patch
+from qtpy.QtWidgets import QStatusBar
 
+from mantidqt.widgets.commonworkspacedisplay.status_bar_view import StatusBarView
 from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_mantid import MockWorkspace
-from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
+from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_matrixworkspacedisplay import \
+    MockMatrixWorkspaceDisplayView
 from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_qt import MockQModelIndex, MockQTableView
 from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
@@ -25,13 +28,18 @@ def with_mock_presenter(func):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
         mock_observer = Mock()
-        presenter = MatrixWorkspaceDisplay(ws, view=view, ads_observer=mock_observer)
+        container = Mock(spec=StatusBarView)
+        container.status_bar = Mock(spec=QStatusBar)
+        presenter = MatrixWorkspaceDisplay(ws, view=view, ads_observer=mock_observer, container=container)
         return func(self, ws, view, presenter, *args)
 
     return wrapper
 
 
 class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
+    show_mouse_toast_package = 'mantidqt.widgets.commonworkspacedisplay.user_notifier.UserNotifier.show_mouse_toast'
+    copy_to_clipboard_package = 'mantidqt.widgets.commonworkspacedisplay.data_copier.DataCopier.copy_to_clipboard'
+
     @classmethod
     def setUpClass(cls):
         # Allow the MockWorkspace to work within the model
@@ -43,12 +51,14 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
     def test_setup_table(self):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
-        MatrixWorkspaceDisplay(ws, view=view)
+        container = Mock(spec=StatusBarView)
+        container.status_bar = Mock(spec=QStatusBar)
+        MatrixWorkspaceDisplay(ws, view=view, container=container)
         self.assertEqual(3, view.set_context_menu_actions.call_count)
         self.assertEqual(1, view.set_model.call_count)
 
-    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
-    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @patch(show_mouse_toast_package)
+    @patch(copy_to_clipboard_package)
     @with_mock_presenter
     def test_action_copy_spectrum_values(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
@@ -68,8 +78,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_copy.assert_called_once_with(expected_string)
         mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
-    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @patch(show_mouse_toast_package)
+    @patch(copy_to_clipboard_package)
     @with_mock_presenter
     def test_action_copy_spectrum_values_no_selection(self, ws, view, presenter, mock_copy,
                                                       mock_show_mouse_toast):
@@ -87,8 +97,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_copy)
         mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
-    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @patch(show_mouse_toast_package)
+    @patch(copy_to_clipboard_package)
     @with_mock_presenter
     def test_action_copy_bin_values(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
@@ -110,8 +120,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_copy.assert_called_once_with(expected_string)
         mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
-    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @patch(show_mouse_toast_package)
+    @patch(copy_to_clipboard_package)
     @with_mock_presenter
     def test_action_copy_bin_values_no_selection(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
@@ -127,8 +137,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_copy)
         mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
-    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @patch(show_mouse_toast_package)
+    @patch(copy_to_clipboard_package)
     @with_mock_presenter
     def test_action_copy_cell(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
@@ -144,8 +154,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(9, mock_index.sibling.call_count)
         mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
-    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @patch(show_mouse_toast_package)
+    @patch(copy_to_clipboard_package)
     @with_mock_presenter
     def test_action_copy_cell_no_selection(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
@@ -163,7 +173,9 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_ws = MockWorkspace()
         mock_view = MockMatrixWorkspaceDisplayView()
         mock_plotter = Mock()
-        presenter = MatrixWorkspaceDisplay(mock_ws, plot=mock_plotter, view=mock_view)
+        container = Mock(spec=StatusBarView)
+        container.status_bar = Mock(spec=QStatusBar)
+        presenter = MatrixWorkspaceDisplay(mock_ws, plot=mock_plotter, view=mock_view, container=container)
 
         # monkey-patch the spectrum plot label to count the number of calls
         presenter.model.get_spectrum_plot_label = Mock()
@@ -241,7 +253,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
         self.assertNotCalled(mock_plot)
 
-    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch(show_mouse_toast_package)
     def test_action_plot_spectrum_no_selection(self, mock_show_mouse_toast):
         mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot(table_has_selection=False)
 
@@ -296,7 +308,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
         self.assertNotCalled(mock_plot)
 
-    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch(show_mouse_toast_package)
     def test_action_plot_bin_no_selection(self, mock_show_mouse_toast):
         mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot(table_has_selection=False)
         self.setup_mock_selection(mock_table, num_selected_rows=None, num_selected_cols=None)

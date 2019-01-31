@@ -16,7 +16,7 @@ from qtpy.QtCore import Qt
 from mantid.kernel import logger
 from mantidqt.widgets.commonworkspacedisplay.observing_presenter import ObservingPresenter
 from mantidqt.widgets.commonworkspacedisplay.status_bar_view import StatusBarView
-from mantidqt.widgets.commonworkspacedisplay.data_copier import WorkspaceDisplayDataCopier
+from mantidqt.widgets.commonworkspacedisplay.data_copier import DataCopier
 from mantidqt.widgets.commonworkspacedisplay.user_notifier import UserNotifier
 from mantidqt.widgets.commonworkspacedisplay.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
@@ -26,7 +26,7 @@ from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
-class TableWorkspaceDisplay(ObservingPresenter, UserNotifier, WorkspaceDisplayDataCopier):
+class TableWorkspaceDisplay(ObservingPresenter, UserNotifier, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
     TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
@@ -62,7 +62,7 @@ class TableWorkspaceDisplay(ObservingPresenter, UserNotifier, WorkspaceDisplayDa
         self.container = container if container else StatusBarView(parent, self.view)
 
         UserNotifier.__init__(self, self.container.status_bar)
-        WorkspaceDisplayDataCopier.__init__(self)
+        DataCopier.__init__(self)
 
         self.parent = parent
         self.plot = plot

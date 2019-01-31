@@ -3,18 +3,13 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtGui
 from qtpy.QtWidgets import QMessageBox
 
-from mantidqt.widgets.commonworkspacedisplay.user_notifier import UserNotifier
-
 """
 This module contains the common copying functionality between
 the MatrixWorkspaceDisplay and the TableWorkspaceDisplay.
 """
 
 
-class WorkspaceDisplayDataCopier(object):
-
-    def __init__(self):
-        assert isinstance(self, UserNotifier)
+class DataCopier(object):
 
     def copy_spectrum_values(self, table, ws_read):
         """

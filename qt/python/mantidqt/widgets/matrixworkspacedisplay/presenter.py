@@ -10,17 +10,17 @@
 from __future__ import absolute_import, division, print_function
 
 from mantid.plots.utility import MantidAxType
+from mantidqt.widgets.commonworkspacedisplay.ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.commonworkspacedisplay.data_copier import DataCopier
 from mantidqt.widgets.commonworkspacedisplay.observing_presenter import ObservingPresenter
 from mantidqt.widgets.commonworkspacedisplay.status_bar_view import StatusBarView
-from mantidqt.widgets.commonworkspacedisplay.data_copier import WorkspaceDisplayDataCopier
 from mantidqt.widgets.commonworkspacedisplay.user_notifier import UserNotifier
-from mantidqt.widgets.commonworkspacedisplay.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
 
-class MatrixWorkspaceDisplay(ObservingPresenter, UserNotifier, WorkspaceDisplayDataCopier):
+class MatrixWorkspaceDisplay(ObservingPresenter, UserNotifier, DataCopier):
     NO_SELECTION_MESSAGE = "No selection"
     COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
@@ -44,6 +44,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, UserNotifier, WorkspaceDisplayD
         self.container = container if container else StatusBarView(parent, self.view)
 
         UserNotifier.__init__(self, self.container.status_bar)
+
         self.plot = plot
 
         self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
