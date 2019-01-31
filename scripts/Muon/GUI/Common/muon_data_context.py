@@ -23,6 +23,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
                                                          get_pair_data_directory)
 
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data
+from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
 from collections import OrderedDict
 
@@ -106,7 +107,8 @@ class MuonDataContext(object):
         self._loaded_data = load_data
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
-        self._instrument = ConfigService.getInstrument().name()
+        self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
+                                                                   in allowed_instruments else 'None'
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
