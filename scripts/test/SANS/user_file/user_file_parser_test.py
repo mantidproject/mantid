@@ -284,19 +284,21 @@ class LimitParserTest(unittest.TestCase):
                           "L/QXY -12 34.6 2.7/LOG": {LimitsId.qxy: simple_range(start=-12, stop=34.6, step=2.7,
                                                                                 step_type=RangeStepType.Log)},
                           "L/qxY -12 3.6 2 /LIN": {LimitsId.qxy: simple_range(start=-12, stop=3.6, step=2,
-                                                                              step_type=RangeStepType.Lin)},
-                          "L/qxy -12  , 0.4,  23, -3.48, 36": {LimitsId.qxy: complex_range(start=-12, step1=0.4,
-                                                                mid=23, step2=3.48, stop=36,
-                                                                step_type1=RangeStepType.Lin,
-                                                                step_type2=RangeStepType.Log)},
-                          "L/qXY -12   0.4  23 3.48 36 /LIn": {LimitsId.qxy: complex_range(start=-12,
-                                                                    step1=0.4, mid=23, step2=3.48, stop=36,
-                                                                    step_type1=RangeStepType.Lin,
-                                                                    step_type2=RangeStepType.Lin)},
-                          "L/qXY -12   0.4  23  3.48 36  /Log": {LimitsId.qxy: complex_range(start=-12,
-                                                                      step1=0.4, mid=23, step2=3.48, stop=36,
-                                                                      step_type1=RangeStepType.Log,
-                                                                      step_type2=RangeStepType.Log)}}
+                                                                              step_type=RangeStepType.Lin)}}
+        """
+        These tests should be added back to valid settings when SANS GUI can accept complex QXY strings.
+        "L/qxy -12  , 0.4,  23, -3.48, 36": {LimitsId.qxy: complex_range(start=-12, step1=0.4,
+                                               mid=23, step2=3.48, stop=36,
+                                               step_type1=RangeStepType.Lin,
+                                               step_type2=RangeStepType.Log)},
+        "L/qXY -12   0.4  23 3.48 36 /LIn": {LimitsId.qxy: complex_range(start=-12,
+                                                    step1=0.4, mid=23, step2=3.48, stop=36,
+                                                    step_type1=RangeStepType.Lin,
+                                                    step_type2=RangeStepType.Lin)},
+        "L/qXY -12   0.4  23  3.48 36  /Log": {LimitsId.qxy: complex_range(start=-12,
+                                                      step1=0.4, mid=23, step2=3.48, stop=36,
+                                                      step_type1=RangeStepType.Log,
+                                                      step_type2=RangeStepType.Log)}"""
 
         invalid_settings = {"L/QXY 12 2 3 4": RuntimeError,
                             "L/QXY 12 2 3 4 23 3": RuntimeError,
