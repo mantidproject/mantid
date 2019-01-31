@@ -128,11 +128,11 @@ std::pair<double, double> cylinderTwoThetaRange(
   const auto &centerOfBottom = shapeVectors[0];
   const auto &longAxisDir = shapeVectors[1];
   Mantid::Kernel::V3D basis1{1., 0., 0.};
-  if (longAxisDir.X() != 0. && longAxisDir.Y() != 0) {
-    const auto inverseXYSumSq =
-        1. / (pow<2>(longAxisDir.X()) + pow<2>(longAxisDir.Y()));
-    basis1.setX(std::sqrt(1. - pow<2>(longAxisDir.X()) * inverseXYSumSq));
-    basis1.setY(longAxisDir.X() * std::sqrt(inverseXYSumSq));
+  if (longAxisDir.X() != 0. && longAxisDir.Z() != 0) {
+    const auto inverseXZSumSq =
+        1. / (pow<2>(longAxisDir.X()) + pow<2>(longAxisDir.Z()));
+    basis1.setX(std::sqrt(1. - pow<2>(longAxisDir.X()) * inverseXZSumSq));
+    basis1.setY(longAxisDir.X() * std::sqrt(inverseXZSumSq));
   }
   const Mantid::Kernel::V3D basis2 = longAxisDir.cross_prod(basis1);
   const std::array<double, 8> angles{{0., 0.25 * M_PI, 0.5 * M_PI, 0.75 * M_PI,
