@@ -432,11 +432,7 @@ void IndirectFitAnalysisTab::setBrowserWorkspace(std::size_t dataIndex) {
 }
 
 void IndirectFitAnalysisTab::setBrowserWorkspaceIndex(std::size_t spectrum) {
-  setBrowserWorkspaceIndex(boost::numeric_cast<int>(spectrum));
-}
-
-void IndirectFitAnalysisTab::setBrowserWorkspaceIndex(int spectrum) {
-  m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
+  //setBrowserWorkspaceIndex(boost::numeric_cast<int>(spectrum));
 }
 
 void IndirectFitAnalysisTab::tableStartXChanged(double startX,

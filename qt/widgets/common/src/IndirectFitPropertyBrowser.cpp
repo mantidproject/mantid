@@ -67,8 +67,6 @@ namespace MantidWidgets {
 IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent,
                                                        QObject *mantidui)
     : QDockWidget(parent)
-// m_functionsInComboBox(nullptr),
-// m_backgroundHandler(nullptr)
 {
   setFeatures(QDockWidget::DockWidgetFloatable |
               QDockWidget::DockWidgetMovable);
@@ -83,7 +81,7 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
 }
 
 void IndirectFitPropertyBrowser::iniFitOptionsBrowser() {
-  m_fitOptionsBrowser = new FitOptionsBrowser();
+  m_fitOptionsBrowser = new FitOptionsBrowser(nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
 }
 
@@ -101,122 +99,10 @@ void IndirectFitPropertyBrowser::init() {
   splitter->addWidget(m_fitOptionsBrowser);
   w->setLayout(layout);
   setWidget(w);
+}
 
-  // QWidget *w = new QWidget(this);
-  // setFeatures(QDockWidget::DockWidgetFloatable |
-  //            QDockWidget::DockWidgetMovable);
-  //
-  //  QSettings settings;
-  //  settings.beginGroup("Mantid/FitBrowser");
-  //
-  //  m_customFunctionGroups =
-  //      m_groupManager->addProperty("Custom Function Groups");
-  //
-  //  m_backgroundGroup = m_groupManager->addProperty("Background");
-  //
-  //  m_customSettingsGroup = m_groupManager->addProperty("Custom Settings");
-  //
-  //  /* Create background selection */
-  //  m_backgroundSelection = m_enumManager->addProperty("Background Type");
-  //  m_backgroundGroup->addSubProperty(m_backgroundSelection);
-  //
-  //  /* Create function group */
-  //  QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
-  //
-  //  /* Create fitting range group */
-  //  QtProperty *fittingRangeGroup = m_groupManager->addProperty("Fitting
-  //  Range"); m_startX = addDoubleProperty("StartX"); m_endX =
-  //  addDoubleProperty("EndX"); fittingRangeGroup->addSubProperty(m_startX);
-  //  fittingRangeGroup->addSubProperty(m_endX);
-  //
-  //  /* Create input - output properties */
-  //  QtProperty *settingsGroup = m_groupManager->addProperty("Settings");
-  //
-  //  m_minimizer = m_enumManager->addProperty("Minimizer");
-  //  m_minimizers << "Levenberg-Marquardt"
-  //               << "Levenberg-MarquardtMD"
-  //               << "Trust Region"
-  //               << "Simplex"
-  //               << "FABADA"
-  //               << "Conjugate gradient (Fletcher-Reeves imp.)"
-  //               << "Conjugate gradient (Polak-Ribiere imp.)"
-  //               << "BFGS"
-  //               << "Damped GaussNewton";
-  //
-  //  m_ignoreInvalidData = m_boolManager->addProperty("Ignore invalid data");
-  //  setIgnoreInvalidData(settings.value("Ignore invalid data",
-  //  false).toBool());
-  //
-  //  m_enumManager->setEnumNames(m_minimizer, m_minimizers);
-  //  m_costFunction = m_enumManager->addProperty("Cost function");
-  //  m_costFunctions << "Least squares"
-  //                  << "Rwp"
-  //                  << "Unweighted least squares";
-  //  m_enumManager->setEnumNames(m_costFunction, m_costFunctions);
-  //  m_maxIterations = m_intManager->addProperty("Max Iterations");
-  //  m_intManager->setValue(m_maxIterations,
-  //                         settings.value("Max Iterations", 500).toInt());
-  //
-  //  m_workspaceIndex = m_intManager->addProperty("Workspace Index");
-  //
-  //  m_peakRadius = m_intManager->addProperty("Peak Radius");
-  //  m_intManager->setValue(m_peakRadius,
-  //                         settings.value("Peak Radius", 0).toInt());
-  //
-  //  m_plotDiff = m_boolManager->addProperty("Plot Difference");
-  //  bool plotDiff = settings.value("Plot Difference",
-  //  QVariant(true)).toBool(); m_boolManager->setValue(m_plotDiff, plotDiff);
-  //
-  //  m_convolveMembers = m_boolManager->addProperty("Convolve Composite
-  //  Members");
-  //
-  //  m_showParamErrors = m_boolManager->addProperty("Show Parameter Errors");
-  //  bool showParamErrors =
-  //      settings.value(m_showParamErrors->propertyName(), false).toBool();
-  //  m_boolManager->setValue(m_showParamErrors, showParamErrors);
-  //  m_parameterManager->setErrorsEnabled(showParamErrors);
-  //
-  //  m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
-  //  m_evaluationType->setToolTip(
-  //      "Consider using Histogram fit which may produce more accurate
-  //      results.");
-  //  m_evaluationTypes << "CentrePoint"
-  //                    << "Histogram";
-  //  m_enumManager->setEnumNames(m_evaluationType, m_evaluationTypes);
-  //  int evaluationType =
-  //      settings.value(m_evaluationType->propertyName(), 0).toInt();
-  //  m_enumManager->setValue(m_evaluationType, evaluationType);
-  //
-  //  m_xColumn = m_columnManager->addProperty("XColumn");
-  //  m_yColumn = m_columnManager->addProperty("YColumn");
-  //  m_errColumn = m_columnManager->addProperty("ErrColumn");
-  //
-  //  settingsGroup->addSubProperty(m_minimizer);
-  //  settingsGroup->addSubProperty(m_ignoreInvalidData);
-  //  settingsGroup->addSubProperty(m_costFunction);
-  //  settingsGroup->addSubProperty(m_maxIterations);
-  //  settingsGroup->addSubProperty(m_peakRadius);
-  //  settingsGroup->addSubProperty(m_plotDiff);
-  //  settingsGroup->addSubProperty(m_convolveMembers);
-  //  settingsGroup->addSubProperty(m_showParamErrors);
-  //  settingsGroup->addSubProperty(m_evaluationType);
-  //
-  //  /* Create editors and assign them to the managers */
-  //  createEditors(w);
-  //
-  //  updateDecimals();
-  //
-  //  m_browser->addProperty(m_customFunctionGroups);
-  //  m_browser->addProperty(fittingRangeGroup);
-  //  m_functionsGroup = m_browser->addProperty(functionsGroup);
-  //  m_settingsGroup = m_browser->addProperty(settingsGroup);
-  //
-  //  connect(this, SIGNAL(visibilityChanged(bool)), this,
-  //          SLOT(browserVisibilityChanged(bool)));
-  //  connect(this, SIGNAL(customSettingChanged(QtProperty *)), this,
-  //          SLOT(customChanged(QtProperty *)));
-  //
-  //  initLayout(w);
+void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
+  m_functionBrowser->setFunction(funStr);
 }
 
 IFunction_sptr IndirectFitPropertyBrowser::getFittingFunction() const {
@@ -328,38 +214,6 @@ QHash<QString, QString> IndirectFitPropertyBrowser::getTies() const {
   return ties;
 }
 
-/**
- * @param handler A property handler, holding a composite function whose ties to
- *                retrieve.
- * @param ties    The map in which to store the tie expression under the tied
- *                parameter.
- */
-// void IndirectFitPropertyBrowser::getCompositeTies(
-//    PropertyHandler *handler, QHash<QString, QString> &ties) const {
-//  for (size_t i = 0u; i < handler->cfun()->nFunctions(); ++i) {
-//    auto nextHandler = handler->getHandler(i);
-//    if (nextHandler->cfun())
-//      getCompositeTies(nextHandler, ties);
-//    else
-//      getTies(nextHandler, ties);
-//  }
-//}
-
-/**
- * @param handler A property handler, holding a function whose ties to
- *                retrieve.
- * @param ties    The map in which to store the tie expression under the tied
- *                parameter.
- */
-// void IndirectFitPropertyBrowser::getTies(PropertyHandler *handler,
-//                                         QHash<QString, QString> &ties) const
-//                                         {
-//  const auto prefix = handler->functionPrefix() + ".";
-//  auto tieProperties = handler->getTies();
-//  for (const auto parameter : tieProperties.keys())
-//    ties[prefix + parameter] =
-//    m_stringManager->value(tieProperties[parameter]);
-//}
 
 /**
  * @param functionName  The name of the function.
@@ -643,28 +497,6 @@ void IndirectFitPropertyBrowser::addEnumCustomSetting(
   // addCustomSetting(settingKey, settingProperty);
 }
 
-/**
- * Adds a custom setting with the specified key to this indirect fit property
- * browser.
- *
- * @param settingKey      The key of the custom setting to add.
- * @param settingProperty The property to display in the fit property browser.
- */
-// void IndirectFitPropertyBrowser::addCustomSetting(const QString &settingKey,
-//                                                  QtProperty *settingProperty)
-//                                                  {
-//  m_customSettingsGroup->addSubProperty(settingProperty);
-//
-//  if (m_customSettings.isEmpty()) {
-//    if (m_enumManager->enumNames(m_backgroundSelection).isEmpty())
-//      m_browser->insertProperty(m_customSettingsGroup,
-//      m_customFunctionGroups);
-//    else
-//      m_browser->insertProperty(m_customSettingsGroup, m_backgroundGroup);
-//  }
-//
-//  m_customSettings[settingKey] = settingProperty;
-//}
 
 /**
  * Adds an optional double custom setting, with the specified key and display
@@ -690,35 +522,6 @@ void IndirectFitPropertyBrowser::addOptionalDoubleSetting(
   //                   enabled);
 }
 
-/**
- * Adds an optional custom setting, with the specified key and display name.
- *
- * @param settingKey      The key of the optional double setting to add.
- * @param settingProperty The property to display in the fit property browser.
- * @param optionKey       The key of the setting specifying whether to use this
- *                        this optional setting.
- * @param optionName      The display name of the setting specifying whether to
- *                        use this optional setting.
- * @param enabled         True if the setting should start enabled, false
- *                        otherwise.
- */
-// void IndirectFitPropertyBrowser::addOptionalSetting(const QString
-// &settingKey,
-//                                                    QtProperty
-//                                                    *settingProperty, const
-//                                                    QString &optionKey, const
-//                                                    QString &optionName, bool
-//                                                    enabled) {
-//  auto optionProperty = m_boolManager->addProperty(optionName);
-//  m_customSettingsGroup->addSubProperty(optionProperty);
-//  m_optionProperties.insert(optionProperty);
-//  m_optionalProperties[optionProperty] = settingProperty;
-//  m_customSettings[optionKey] = optionProperty;
-//  m_customSettings[settingKey] = settingProperty;
-//
-//  if (enabled)
-//    optionProperty->addSubProperty(settingProperty);
-//}
 
 /**
  * Sets whether a setting with a specified key affects the fitting function.
@@ -807,80 +610,6 @@ void IndirectFitPropertyBrowser::clearFitTypeComboBox() {
 }
 
 /**
- * Adds a custom function group to this fit property browser, with the specified
- * name and the associated specified functions.
- *
- * @param groupName The name of the function group.
- * @param functions The functions associated to the function group.
- */
-// void IndirectFitPropertyBrowser::addCustomFunctionGroup(
-//    const QString &groupName, const std::vector<IFunction_sptr> &functions) {
-//  m_groupToFunctionList[groupName] = functions;
-//
-//  for (const auto &function : functions) {
-//    const auto functionName = function->name();
-//    if (m_customFunctionCount.find(functionName) ==
-//    m_customFunctionCount.end())
-//      m_customFunctionCount[functionName] = 0;
-//  }
-//}
-
-/**
- * Adds a specified multiple of the custom function group with the specified
- * name. Displays the functions in the specified property.
- *
- * @param prop      The property in which to display the functions.
- * @param groupName The name of the function group.
- * @param multiples The number of times to add the functions in the function
- *                  group.
- */
-// void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
-//                                                    const QString &groupName,
-//                                                    const int &multiples) {
-//  for (int i = 0; i < multiples; ++i) {
-//    if (!m_functionHandlers.contains(prop))
-//      m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
-//    addCustomFunctions(prop, m_groupToFunctionList[groupName]);
-//  }
-//
-//  if (multiples > 0)
-//    emit functionChanged();
-//}
-
-/**
- * Adds the custom function group with the specified name. Displays the
- * functions in the specified property.
- *
- * @param prop      The property in which to display the functions.
- * @param groupName The name of the function group.
- */
-// void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
-//                                                    const QString &groupName)
-//                                                    {
-//  if (!m_functionHandlers.contains(prop))
-//    m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
-//
-//  addCustomFunctions(prop, m_groupToFunctionList[groupName]);
-//  emit functionChanged();
-//}
-
-/**
- * Adds the functions with the specified name. Displays the functions in the
- * specified property.
- *
- * @param prop      The property in which to display the functions.
- * @param functions The functions to add.
- */
-// void IndirectFitPropertyBrowser::addCustomFunctions(
-//    QtProperty *prop, const std::vector<IFunction_sptr> &functions) {
-//  MantidQt::API::SignalBlocker<QObject> blocker(this);
-//  for (const auto &function : functions) {
-//    m_functionHandlers[prop] << addFunction(function->asString());
-//    m_customFunctionCount[function->name()] += 1;
-//  }
-//}
-
-/**
  * Clears the functions in this indirect fit property browser.
  */
 void IndirectFitPropertyBrowser::clear() {
@@ -917,126 +646,6 @@ void IndirectFitPropertyBrowser::updatePlotGuess(
   //  setPeakToolOn(false);
 }
 
-/**
- * Clears all custom functions in the specified property.
- *
- * @param prop        The property to clear of custom functions.
- * @param emitSignals If True, will emit Qt signals.
- */
-// void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop,
-//                                                      bool emitSignals) {
-//  clearCustomFunctions(prop);
-//  m_functionHandlers[prop].clear();
-//
-//  if (emitSignals) {
-//    emit removePlotSignal(getHandler());
-//    emit functionRemoved();
-//    emit functionChanged();
-//  }
-//}
-
-/**
- * Clears all custom functions in the specified property.
- *
- * @param prop        The property to clear of custom functions.
- */
-// void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
-//  MantidQt::API::SignalBlocker<QObject> blocker(this);
-//  for (const auto &functionHandler : m_functionHandlers[prop]) {
-//
-//    if (functionHandler->parentHandler() != nullptr) {
-//      FitPropertyBrowser::removeFunction(functionHandler);
-//      m_customFunctionCount[functionHandler->function()->name()] -= 1;
-//    }
-//  }
-//}
-
-/**
- * Creates a custom function group property, to use for displaying an
- * option for selecting the function group.
- *
- * @param groupName       The name of the function group.
- * @param propertyManager The property manager, to be used to create
- *                        the property.
- * @param atFront         If true, moves the created function group
- *                        property to precede others in this indirect
- *                        fit property.
- */
-// QtProperty *IndirectFitPropertyBrowser::createFunctionGroupProperty(
-//    const QString &groupName, QtAbstractPropertyManager *propertyManager,
-//    bool atFront) {
-//  auto functionProperty = propertyManager->addProperty(groupName);
-//
-//  if (atFront && !m_customFunctionGroups->subProperties().isEmpty()) {
-//    auto firstProperty = m_customFunctionGroups->subProperties().first();
-//    m_customFunctionGroups->insertSubProperty(functionProperty,
-//    firstProperty); m_customFunctionGroups->removeSubProperty(firstProperty);
-//    m_customFunctionGroups->insertSubProperty(firstProperty,
-//    functionProperty);
-//  } else {
-//    m_customFunctionGroups->addSubProperty(functionProperty);
-//  }
-//  m_orderedFunctionGroups.append(functionProperty);
-//  return functionProperty;
-//}
-
-/**
- * Removes the function, associated to the specified handler, from this indirect
- * fit property browser.
- *
- * @param handler The handler containing the function to be removed.
- */
-// void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
-//
-//  for (const auto &prop : m_functionHandlers.keys()) {
-//    auto &functionHandlers = m_functionHandlers[prop];
-//    int i = functionHandlers.indexOf(handler);
-//
-//    if (i >= 0) {
-//      functionHandlers.remove(i);
-//      m_customFunctionCount[handler->function()->name()] -= 1;
-//      customFunctionRemoved(prop);
-//    }
-//  }
-//
-//  if (handler->parentHandler() != nullptr)
-//    FitPropertyBrowser::removeFunction(handler);
-//
-//  if (handler == m_backgroundHandler)
-//    m_enumManager->setValue(m_backgroundSelection, 0);
-//}
-
-/**
- * Called when a custom function has been removed from this fit property
- * browser.
- *
- * @param prop  The property of the removed custom function.
- */
-// void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
-//
-//  if (m_functionsAsSpinner.contains(prop)) {
-//    disconnect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
-//               SLOT(intChanged(QtProperty *)));
-//    m_intManager->setValue(prop, m_intManager->value(prop) - 1);
-//    connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
-//            SLOT(intChanged(QtProperty *)));
-//    FitPropertyBrowser::intChanged(prop);
-//  } else if (m_functionsAsCheckBox.contains(prop)) {
-//    disconnect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
-//               SLOT(boolChanged(QtProperty *)));
-//    m_boolManager->setValue(prop, false);
-//    connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
-//            SLOT(boolChanged(QtProperty *)));
-//    FitPropertyBrowser::boolChanged(prop);
-//  } else if (prop == m_functionsInComboBox) {
-//    disconnect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
-//               SLOT(enumChanged(QtProperty *)));
-//    m_enumManager->setValue(m_functionsInComboBox, 0);
-//    connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
-//            SLOT(enumChanged(QtProperty *)));
-//    FitPropertyBrowser::enumChanged(prop);
-//  }
-//}
 
 void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
   // FitPropertyBrowser::setWorkspaceIndex(i);
@@ -1080,106 +689,6 @@ void IndirectFitPropertyBrowser::fit() { emit fitScheduled(); }
 void IndirectFitPropertyBrowser::sequentialFit() {
   emit sequentialFitScheduled();
 }
-
-/**
- * Called when an enum value changes in this indirect fit property browser.
- *
- * @param prop  The property containing the enum value which was changed.
- */
-// void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
-//
-//  if (prop == m_functionsInComboBox) {
-//    clearCustomFunctions(prop, false);
-//    addCustomFunctions(prop, enumValue(prop));
-//  } else if (prop == m_backgroundSelection) {
-//    setBackground(enumValue(prop).toStdString());
-//  } else if (m_customSettings.values().contains(prop)) {
-//    emit customEnumChanged(prop->propertyName(), enumValue(prop));
-//    emit customSettingChanged(prop);
-//  }
-//  FitPropertyBrowser::enumChanged(prop);
-//}
-
-/**
- * Called when a boolean value changes in this indirect fit property browser.
- *
- * @param prop  The property containing the boolean value which was changed.
- */
-// void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
-//  const auto propertyName = prop->propertyName();
-//
-//  if (m_optionProperties.contains(prop)) {
-//    if (m_boolManager->value(prop))
-//      prop->addSubProperty(m_optionalProperties[prop]);
-//    else
-//      prop->removeSubProperty(m_optionalProperties[prop]);
-//  }
-//
-//  if (m_functionsAsCheckBox.contains(prop)) {
-//    if (m_boolManager->value(prop))
-//      addCustomFunctions(prop, propertyName);
-//    else
-//      clearCustomFunctions(prop, true);
-//  } else if (m_customSettings.values().contains(prop)) {
-//    emit customBoolChanged(propertyName, m_boolManager->value(prop));
-//    emit customSettingChanged(prop);
-//  }
-//  FitPropertyBrowser::boolChanged(prop);
-//}
-
-/**
- * Called when an integer value changes in this indirect fit property browser.
- *
- * @param prop  The property containing the integer value which was changed.
- */
-// void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
-//
-//  if (m_functionsAsSpinner.contains(prop)) {
-//    auto multiples = m_intManager->value(prop);
-//    clearCustomFunctions(prop, multiples == 0);
-//    addCustomFunctions(prop, prop->propertyName(), multiples);
-//  } else if (m_customSettings.values().contains(prop)) {
-//    emit customIntChanged(prop->propertyName(), m_intManager->value(prop));
-//    emit customSettingChanged(prop);
-//  }
-//  FitPropertyBrowser::intChanged(prop);
-//}
-
-/**
- * Called when a double value changes in this indirect fit property browser.
- *
- * @param prop  The property containing the double value which was changed.
- */
-// void IndirectFitPropertyBrowser::doubleChanged(QtProperty *prop) {
-//  if (m_customSettings.values().contains(prop)) {
-//    emit customDoubleChanged(prop->propertyName(),
-//                             m_doubleManager->value(prop));
-//    emit customSettingChanged(prop);
-//  }
-//  FitPropertyBrowser::doubleChanged(prop);
-//}
-
-/**
- * Called when a custom setting changes in this indirect fit property browser.
- *
- * @param prop The custom setting property which was changed.
- */
-// void IndirectFitPropertyBrowser::customChanged(QtProperty *prop) {
-//  if (m_functionChangingSettings.contains(prop))
-//    emit functionChanged();
-//}
-
-/**
- * @param prop  The property whose enum value to extract.
- * @return      The enum value of the specified property.
- */
-// QString IndirectFitPropertyBrowser::enumValue(QtProperty *prop) const {
-//  const auto values = m_enumManager->enumNames(prop);
-//  if (values.isEmpty())
-//    return "";
-//  const auto selectedIndex = m_enumManager->value(prop);
-//  return values[selectedIndex];
-//}
 
 /**
  * Called when the browser visibility has changed.

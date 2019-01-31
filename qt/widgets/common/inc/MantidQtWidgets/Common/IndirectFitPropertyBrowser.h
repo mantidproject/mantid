@@ -38,6 +38,7 @@ public:
   /// Initialise the layout.
   void init();
 
+  Q_INVOKABLE void setFunction(const QString &funStr);
   Mantid::API::IFunction_sptr getFittingFunction() const;
   Mantid::API::IFunction_sptr compositeFunction() const;
   /// Get the minimizer
@@ -69,12 +70,6 @@ public:
   QString backgroundName() const;
 
   QHash<QString, QString> getTies() const;
-
-  // void getCompositeTies(PropertyHandler *handler,
-  //                      QHash<QString, QString> &ties) const;
-
-  // void getTies(PropertyHandler *handler, QHash<QString, QString> &ties)
-  // const;
 
   size_t numberOfCustomFunctions(const std::string &functionName) const;
 
@@ -137,19 +132,11 @@ public:
                             const QString &settingName,
                             const QStringList &options);
 
-  // void addCustomSetting(const QString &settingKey, QtProperty
-  // *settingProperty);
-
   void addOptionalDoubleSetting(const QString &settingKey,
                                 const QString &settingName,
                                 const QString &optionKey,
                                 const QString &optionName, bool enabled = false,
                                 double defaultValue = 0);
-
-  // void addOptionalSetting(const QString &settingKey,
-  //                        QtProperty *settingProperty, const QString
-  //                        &optionKey, const QString &optionName, bool enabled
-  //                        = false);
 
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
@@ -181,32 +168,12 @@ public slots:
   void sequentialFit();
 
 protected slots:
-  // void enumChanged(QtProperty *prop) override;
-
-  // void boolChanged(QtProperty *prop) override;
-
-  // void intChanged(QtProperty *prop) override;
-
-  // void doubleChanged(QtProperty *prop) override;
-
-  // void customChanged(QtProperty *settingName);
-
   void clear();
   void clearAllCustomFunctions();
   void browserVisibilityChanged(bool isVisible);
 
 
 signals:
-  // void customBoolChanged(const QString &settingName, bool value);
-
-  // void customIntChanged(const QString &settingName, int value);
-
-  // void customEnumChanged(const QString &settingName, const QString &value);
-
-  // void customDoubleChanged(const QString &settingName, double value);
-
-  // void customSettingChanged(QtProperty *settingName);
-
   void functionChanged();
   void fitScheduled();
 
@@ -220,53 +187,6 @@ private:
   
   FunctionBrowser *m_functionBrowser;
   FitOptionsBrowser *m_fitOptionsBrowser;
-
-  // void addWorkspaceIndexToBrowser() override {}
-
-  // private:
-  //  void addCustomFunctionGroup(
-  //      const QString &groupName,
-  //      const std::vector<Mantid::API::IFunction_sptr> &functions);
-  //
-  //  void addCustomFunctions(QtProperty *prop, const QString &groupName);
-  //  void addCustomFunctions(QtProperty *prop, const QString &groupName,
-  //                          const int &multiples);
-  //  void
-  //  addCustomFunctions(QtProperty *prop,
-  //                     const std::vector<Mantid::API::IFunction_sptr>
-  //                     &functions);
-  //
-  //  void clearCustomFunctions(QtProperty *prop, bool emitSignals);
-  //  void clearCustomFunctions(QtProperty *prop);
-  //
-  //  void customFunctionRemoved(QtProperty *property);
-  //
-  //  QtProperty *
-  //  createFunctionGroupProperty(const QString &groupName,
-  //                              QtAbstractPropertyManager *propertyManager,
-  //                              bool atFront = false);
-  //
-  //  QString enumValue(QtProperty *prop) const;
-  //
-  //  QtProperty *m_customFunctionGroups;
-  //  QtProperty *m_backgroundGroup;
-  //  QtProperty *m_customSettingsGroup;
-  //  QtProperty *m_functionsInComboBox;
-  //  QSet<QtProperty *> m_functionsAsCheckBox;
-  //  QSet<QtProperty *> m_functionsAsSpinner;
-  //  QSet<QtProperty *> m_functionChangingSettings;
-  //  QHash<QString, QtProperty *> m_customSettings;
-  //  QtProperty *m_backgroundSelection;
-  //  PropertyHandler *m_backgroundHandler;
-  //  QHash<QtProperty *, QVector<PropertyHandler *>> m_functionHandlers;
-  //  QVector<QtProperty *> m_orderedFunctionGroups;
-  //  std::unordered_map<std::string, size_t> m_customFunctionCount;
-  //  QSet<QtProperty *> m_optionProperties;
-  //  QHash<QtProperty *, QtProperty *> m_optionalProperties;
-  //
-  //  std::string selectedBackground;
-  //  QHash<QString, std::vector<Mantid::API::IFunction_sptr>>
-  //      m_groupToFunctionList;
 };
 
 } // namespace MantidWidgets
