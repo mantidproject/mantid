@@ -223,7 +223,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
             if name == 'GroupFilename' and not prop.isDefault:
                 if prop.valueAsStr.split('.')[1] == 'cal':
-                    __groups = LoadDiffCal(InstrumentName=self.instr, Filename=prop.valueAsStr, MakeCalWorkspace=False, 
+                    __groups = LoadDiffCal(InstrumentName=self.instr, Filename=prop.valueAsStr, MakeCalWorkspace=False,
                                            WorkspaceName="__groups", MakeMaskWorkspace=False)
                 else:
                     __groups = LoadDetectorsGroupingFile(InputFile=prop.valueAsStr)
