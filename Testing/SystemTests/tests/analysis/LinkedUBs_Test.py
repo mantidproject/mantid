@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 """
-System test that loads TOPAZ single-crystal data,
-and runs Diffraction Workflow.
+System test that loads two SXD data files and 
+links the indexing of their reflections across orientations.
 """
 from __future__ import (absolute_import, division, print_function)
 import systemtesting
@@ -79,8 +79,8 @@ class LinkedUBs_Test(systemtesting.MantidSystemTest):
                 MinWavelength=0.2,
                 MaxWavelength=10,
                 MinDSpacing=0.5, 
-                MaxDSpacing=5,
-                ReflectionCondition='All-face centred',
+                MaxDSpacing=5
+,                ReflectionCondition='All-face centred',
                 Workspace=ws2, 
                 ObservedPeaks='SXD30905_find_peaks', 
                 PredictedPeaks='SXD30905_predict_peaks', 
