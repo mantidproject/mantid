@@ -12,7 +12,7 @@ from mantid.kernel import ConfigService, Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CopyLogs, CreateCacheFilename, \
     DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
     PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed, LoadDiffCal, \
-    LoadDetectorsGroupingFile
+    MaskDetectors, LoadDetectorsGroupingFile
 import os
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -167,15 +167,11 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if CAL_FILE in self.kwargs:
             del self.kwargs[GROUP_FILE]
 
-        # get the instrument name
-        instr = mtd[wkspname].getInstrument().getName()
-        instr = ConfigService.getInstrument(instr).shortName()
-
         # use the canonical names if they weren't specifed
         for key, ext in zip((CAL_WKSP, GRP_WKSP, MASK_WKSP),
                             ('_cal', '_group', '_mask')):
             if key not in self.kwargs:
-                self.kwargs[key] = instr + ext
+                self.kwargs[key] = self.instr + ext
 
     def __determineCharacterizations(self, filename, wkspname):
         useCharac = bool(self.charac is not None)
@@ -225,21 +221,23 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if name == 'PreserveEvents' or not prop.isDefault:
                 # TODO need unique identifier for absorption workspace
                 alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
-        if 'GroupFilename' in self.kwargs:
-            groupfile = self.kwargs['GroupFilename']
-            if groupfile.split('.')[1] is 'cal':
-                __groups = LoadDiffCal(Filename=groupfile, MakeCalWorkspace=False, MakeMaskWorkspace=False)
-            else:
-                __groups = LoadDetectorsGroupingFile(InputFile=groupfile)
-            alignandfocusargs.append('%s=' % ("groupFile"))
-            for i in range(0, __groups.getNumberHistograms()):
-                alignandfocusargs.append('%s' % (str(__groups.readY(i)[0])))
-            DeleteWorkspace(Workspace=__groups)
-        elif 'GroupingWorkspace' in self.kwargs:
-            __groups = mtd[self.kwargs['GroupingWorkspace']]
-            alignandfocusargs.append('%s=' % ("group"))
-            for i in range(0, __groups.getNumberHistograms()):
-                alignandfocusargs.append('%s' % (str(__groups.readY(i)[0])))
+            if name == 'GroupFilename' and not prop.isDefault:
+                if prop.valueAsStr.split('.')[1] is 'cal':
+                    __groups = LoadDiffCal(InstrumentName=self.instr, Filename=prop.valueAsStr, MakeCalWorkspace=False, MakeMaskWorkspace=False)
+                else:
+                    __groups = LoadDetectorsGroupingFile(InputFile=prop.valueAsStr)
+                alignandfocusargs.append('%s=' % ("groupFile"))
+                for i in range(0, __groups.getNumberHistograms()):
+                    alignandfocusargs.append('%s' % (str(__groups.readY(i)[0])))
+                DeleteWorkspace(Workspace=__groups)
+            if name == 'GroupingWorkspace' and not prop.isDefault:
+                __groups = mtd[prop.valueAsStr]
+                calfile = self.getPropertyValue('CalFileName')
+                __mask = LoadDiffCal(InputWorkspace=__groups, Filename=calfile, MakeCalWorkspace=False, MakeGroupingWorkspace=False)
+                MaskDetectors(Workspace=__groups, MaskedWorkspace=__mask)
+                alignandfocusargs.append('%s=' % ("group"))
+                for i in range(0, __groups.getNumberHistograms()):
+                    alignandfocusargs.append('%s' % (str(__groups.readY(i)[0])))
 
         return CreateCacheFilename(Prefix=wkspname,
                                    PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
@@ -341,13 +339,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
     def PyExec(self):
         filenames = self._getLinearizedFilenames('Filename')
         # get the instrument name
-        instr = os.path.basename(filenames[0]).split('_')[0]
-        if AnalysisDataService.doesExist(instr+'_cal'):
-            DeleteWorkspace(Workspace=instr+'_cal')
-        if AnalysisDataService.doesExist(instr+'_group'):
-            DeleteWorkspace(Workspace=instr+'_group')
-        if AnalysisDataService.doesExist(instr+'_mask'):
-            DeleteWorkspace(Workspace=instr+'_mask')
+        self.instr = os.path.basename(filenames[0]).split('_')[0]
+        if AnalysisDataService.doesExist(self.instr+'_cal'):
+            DeleteWorkspace(Workspace=self.instr+'_cal')
+        if AnalysisDataService.doesExist(self.instr+'_group'):
+            DeleteWorkspace(Workspace=self.instr+'_group')
+        if AnalysisDataService.doesExist(self.instr+'_mask'):
+            DeleteWorkspace(Workspace=self.instr+'_mask')
         self.filterBadPulses = self.getProperty('FilterBadPulses').value
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
