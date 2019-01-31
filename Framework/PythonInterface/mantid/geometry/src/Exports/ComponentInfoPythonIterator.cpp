@@ -19,10 +19,10 @@ void export_ComponentInfoPythonIterator() {
   // Export to Python
   class_<ComponentInfoPythonIterator>("ComponentInfoPythonIterator", no_init)
       .def("__iter__", objects::identity_function())
-#ifdef IS_PY3K
-      .def("__next__", &ComponentInfoPythonIterator::next)
-#else
+#ifdef IS_PY2K
       .def("next", &ComponentInfoPythonIterator::next)
+#else
+      .def("__next__", &ComponentInfoPythonIterator::next)
 #endif
       ;
 }

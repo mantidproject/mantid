@@ -134,11 +134,6 @@ class LoadWidgetPresenter(object):
             self.outer = outer  # handle to containing class
 
         def notify_subscribers(self, arg=None):
-            for workspace, run in zip(self.outer._model.workspaces, self.outer._model.runs):
-                for i, single_ws in enumerate(workspace['OutputWorkspace']):
-                    name = str(run) + "_period_" + str(i)
-                    single_ws.show(name)
-
             Observable.notify_subscribers(self, arg)
 
     class InstrumentObserver(Observer):
