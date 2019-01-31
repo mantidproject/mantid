@@ -293,4 +293,7 @@ def flatten_run_list(run_list):
 
 
 def exception_message_for_failed_files(failed_file_list):
-    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
+    message = "Could not load the following files : \n "
+    for failure in failed_file_list:
+        message += '{} ; {}'.format(os.path.split(failure[0])[-1], failure[1])
+    return message

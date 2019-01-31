@@ -145,7 +145,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.layout.addWidget(self.instrument_selector, 0, 1)
 
     def get_instrument(self):
-        return self.instrument_selector.currentText()
+        return str(self.instrument_selector.currentText())
 
     def set_instrument(self, instrument, block=False):
         index = self.instrument_selector.findText(instrument)
