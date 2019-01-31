@@ -109,6 +109,11 @@ public:
      WsVisibleAfterIndent = SCWS_VISIBLEAFTERINDENT
   };
 
+  enum
+    {
+	  SCI_CLEARCMDKEY = 2071
+	};
+
 public:
   ScriptEditor(const QString & language,
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
@@ -144,6 +149,7 @@ public:
   void setText(const QString &text);
   void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
+  void clearKeyBinding(int keyIdentifier);
 
 public slots:
   void updateProgressMarker(int lineno, bool error);

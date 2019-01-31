@@ -32,10 +32,14 @@
 
 // Qscintilla
 #include <Qsci/qsciapis.h>
+#include <Qsci/qscicommand.h>
+#include <Qsci/qscicommandset.h>
 
 // std
 #include <cmath>
 #include <stdexcept>
+
+
 
 namespace {
 
@@ -307,6 +311,14 @@ void ScriptEditor::wheelEvent(QWheelEvent *e) {
   } else {
     QsciScintilla::wheelEvent(e);
   }
+}
+/*
+*  Remove key binding to 
+*/
+void ScriptEditor::clearKeyBinding(int keyIdentifier) {
+  QsciCommandSet *cmdSet = QsciScintilla::standardCommands();
+  QsciCommand *cmd = cmdSet->boundTo(keyIdentifier);
+  cmd->setKey(0);
 }
 
 //-----------------------------------------------

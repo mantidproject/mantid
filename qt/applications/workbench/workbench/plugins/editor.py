@@ -61,9 +61,9 @@ class MultiFileEditor(PluginWidget):
             self, "Abort", on_triggered=self.editors.abort_current)
 
         self.toggle_comment_action = create_action(
-            self, r"Comment/Uncomment",
+            self.editors.current_editor(), r"Comment/Uncomment",
             on_triggered=self.editors.toggle_comment_current,
-            shortcut="Ctrl+M",
+            shortcut="Ctrl+/",
             shortcut_context=Qt.ApplicationShortcut)
 
         self.tabs_to_spaces_action = create_action(

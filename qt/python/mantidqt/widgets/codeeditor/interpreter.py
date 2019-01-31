@@ -16,7 +16,7 @@ import traceback
 
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
-from qtpy.QtGui import QColor, QFontMetrics
+from qtpy.QtGui import QColor, QFontMetrics, QKeySequence
 from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
 
 # local imports
@@ -105,6 +105,10 @@ class PythonFileInterpreter(QWidget):
 
         # layout
         self.editor = CodeEditor("AlternateCSPythonLexer", self)
+
+        # Clear QsciScintilla key bindings that may override PyQt's bindings
+        self.clear_key_binding("Ctrl+/+")
+
         self.status = QStatusBar(self)
         layout = QVBoxLayout()
         layout.addWidget(self.editor)
@@ -167,6 +171,11 @@ class PythonFileInterpreter(QWidget):
 
     def set_whitespace_invisible(self):
         self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
+
+    def clear_key_binding(self, key_str):
+        key_code = QKeySequence(key_str)[0]
+        # need to do some validity checking of the key code
+        self.editor.clearKeyBinding(key_code)
 
     def toggle_comment(self):
         if self.editor.selectedText() == '':   # If nothing selected, do nothing
