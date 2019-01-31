@@ -411,7 +411,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if not found:
             nocache += filenames
             return
-        remained = filenames[:start] + filenames[end:]
+        remained = filenames[:start] + filenames[end+1:]
         if remained:
             return self.__find_caches(remained, cached, nocache)
 
