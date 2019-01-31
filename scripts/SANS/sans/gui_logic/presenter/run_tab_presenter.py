@@ -530,6 +530,7 @@ class RunTabPresenter(object):
         Process all entries in the table, regardless of selection.
         """
         all_rows = range(self._table_model.get_number_of_rows())
+        all_rows = self._table_model.get_non_empty_rows(all_rows)
         if all_rows:
             self._process_rows(all_rows)
 
@@ -538,6 +539,7 @@ class RunTabPresenter(object):
         Process selected table entries.
         """
         selected_rows = self._view.get_selected_rows()
+        selected_rows = self._table_model.get_non_empty_rows(selected_rows)
         if selected_rows:
             self._process_rows(selected_rows)
 
@@ -561,6 +563,7 @@ class RunTabPresenter(object):
             self.sans_logger.information("Starting load of batch table.")
 
             selected_rows = self._get_selected_rows()
+            selected_rows = self._table_model.get_non_empty_rows(selected_rows)
             states, errors = self.get_states(row_index=selected_rows)
 
             for row, error in errors.items():
