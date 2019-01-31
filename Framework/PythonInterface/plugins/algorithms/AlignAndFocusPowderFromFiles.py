@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, AnalysisDataService
-from mantid.kernel import ConfigService, Direction
+from mantid.kernel import Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CopyLogs, CreateCacheFilename, \
     DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
     PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed, LoadDiffCal, \
@@ -222,8 +222,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 # TODO need unique identifier for absorption workspace
                 alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
             if name == 'GroupFilename' and not prop.isDefault:
-                if prop.valueAsStr.split('.')[1] is 'cal':
-                    __groups = LoadDiffCal(InstrumentName=self.instr, Filename=prop.valueAsStr, MakeCalWorkspace=False, MakeMaskWorkspace=False)
+                if prop.valueAsStr.split('.')[1] == 'cal':
+                    __groups = LoadDiffCal(InstrumentName=self.instr, Filename=prop.valueAsStr, MakeCalWorkspace=False, 
+                                           WorkspaceName="__groups", MakeMaskWorkspace=False)
                 else:
                     __groups = LoadDetectorsGroupingFile(InputFile=prop.valueAsStr)
                 alignandfocusargs.append('%s=' % ("groupFile"))
