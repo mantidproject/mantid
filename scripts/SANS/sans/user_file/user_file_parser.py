@@ -624,7 +624,6 @@ class LimitParser(UserFileComponentParser):
             output = self._extract_wavelength_limit(setting)
         elif self._is_qxy_limit(setting):
             output = self._extract_qxy_limit(setting)
-            print("qxy: {}".format(output))
         else:
             raise RuntimeError("LimitParser: Unknown command for L: {0}".format(line))
         return output
