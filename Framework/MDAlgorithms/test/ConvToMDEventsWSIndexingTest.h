@@ -362,6 +362,7 @@ public:
       TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
                            std::string::npos,
                        true);
+      }
 #else
     std::array<float, 3> curPt{{static_cast<float>(lowerLeft[0]),
                                 static_cast<float>(lowerLeft[1]),
