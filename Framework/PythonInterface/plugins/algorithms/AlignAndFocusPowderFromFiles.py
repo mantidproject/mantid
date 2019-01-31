@@ -231,11 +231,15 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 __groups = LoadDiffCal(Filename=groupfile, MakeCalWorkspace=False, MakeMaskWorkspace=False)
             else:
                 __groups = LoadDetectorsGroupingFile(InputFile=groupfile)
-            __sum = SumSpectra(InputWorkspace=__groups)
-            alignandfocusargs.append('%s=%s' % ("groupFileSum",str(__sum.readY(0)[0])))
+            alignandfocusargs.append('%s=' % ("groupFile"))
+            for i in range(0, __groups.getNumberHistograms()):
+                alignandfocusargs.append('%s' % (str(__groups.readY(i)[0])))
+            DeleteWorkspace(Workspace=__groups)
         elif 'GroupingWorkspace' in self.kwargs:
-            __sum = SumSpectra(InputWorkspace=self.kwargs['GroupingWorkspace'])
-            alignandfocusargs.append('%s=%s' % ("groupSum",str(__sum.readY(0)[0])))
+            __groups = mtd[self.kwargs['GroupingWorkspace']]
+            alignandfocusargs.append('%s=' % ("group"))
+            for i in range(0, __groups.getNumberHistograms()):
+                alignandfocusargs.append('%s' % (str(__groups.readY(i)[0])))
 
         return CreateCacheFilename(Prefix=wkspname,
                                    PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
