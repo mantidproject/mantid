@@ -730,7 +730,10 @@ class LimitParser(UserFileComponentParser):
         if does_pattern_match(self._qxy_simple_pattern, line):
             output = self._extract_simple_pattern(qxy_range, LimitsId.qxy)
         else:
-            output = self._extract_complex_pattern(qxy_range, LimitsId.qxy)
+            # v2 GUI cannot currently support complex QXY ranges
+            #output = self._extract_complex_pattern(qxy_range, LimitsId.qxy)
+            raise ValueError("QXY Limits: The expression {0} is currently not supported."
+                             " Use a simple pattern".format(line))
         return output
 
     def _extract_wavelength_limit(self, line):
