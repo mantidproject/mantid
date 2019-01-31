@@ -112,7 +112,6 @@ endif ()
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_workbench_table_widget_item.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_io.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
   )
@@ -120,6 +119,8 @@ endif ()
   # ctest targets for interpreters (Encoder/Decoder) tests only get tested in qt5 as only for workbench
   set ( PYTHON_WIDGET_INTERPRETER_TESTS
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
+    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_io.py
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_io.py
   )
 
   # Tests
