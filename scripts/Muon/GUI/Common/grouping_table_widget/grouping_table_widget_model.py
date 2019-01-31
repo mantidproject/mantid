@@ -17,7 +17,7 @@ class GroupingTableModel(object):
 
     @property
     def groups(self):
-        return self._data.groups
+        return self._data.groups.values()
 
     @property
     def group_names(self):

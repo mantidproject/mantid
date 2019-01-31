@@ -10,7 +10,7 @@ class PairingTableModel(object):
 
     @property
     def pairs(self):
-        return self._data.pairs.values()
+        return list(self._data.pairs.values())
 
     @property
     def pair_names(self):
