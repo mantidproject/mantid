@@ -446,6 +446,10 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 partialsum_wkspname = self.__get_grp_ws_name(grain)
                 self.__accumulate(
                     wkspname, partialsum_wkspname, unfocusname, unfocusname_file, firstrun=i==grain_start)
+                # save partial cache and clear
+                if i==grain_end-1:
+                    self.__saveSummedGroupToCache(grain)
+                    DeleteWorkspace(partialsum_wkspname)
             # cleanup
             DeleteWorkspace(Workspace=wkspname)
             if unfocusname != '':
@@ -453,11 +457,6 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # save to cache
         if useCaching:
             self.__saveSummedGroupToCache(files)
-            ngrains = (N-1)//n + 1
-            for i in range(ngrains):
-                grain = files[i*n:(i+1)*n]
-                if len(grain)>1:
-                    self.__saveSummedGroupToCache(grain)
         return
 
     def __saveSummedGroupToCache(self, group):
