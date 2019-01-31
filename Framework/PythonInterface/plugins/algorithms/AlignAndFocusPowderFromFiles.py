@@ -419,13 +419,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
     def __get_grp_ws_name(self, group):
         def _(filename):
             return os.path.split(filename)[-1].split('.')[0]
-        return _(group[0]) + "," + _(group[-1])
+        return _(group[0]) + "-" + _(group[-1])
 
     def __get_grp_cache_fn(self, group):
-        finalname = self.getPropertyValue('OutputWorkspace')
+        wsname = self.__get_grp_ws_name(group)
         filenames_str = ','.join(group)
         newprop = 'files_to_sum={}'.format(filenames_str)
-        return self.__getCacheName(finalname, additional_props=[newprop])
+        return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
 
     def __processFiles(self, files, useCaching, unfocusname, unfocusname_file, finalname):
         """process given files (may be mixed with groups of files)
