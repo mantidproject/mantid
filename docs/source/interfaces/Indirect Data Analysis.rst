@@ -21,7 +21,8 @@ Reduction interface or using :math:`S(Q, \omega)` files (*_sqw.nxs*) and
 workspaces (*_sqw*) created using either the Indirect Data Reduction interface or
 taken from a bespoke algorithm or auto reduction.
 
-Four of the available tabs are QENS fitting interfaces and share common features and layout. These common factors are documented in the :ref:`qens-fitting-features` section of this document.
+Four of the available tabs are QENS fitting interfaces and share common features and 
+layout. These common factors are documented in the :ref:`qens-fitting-features` section of this document.
 
 These interfaces do not support GroupWorkspace as input.
 
@@ -34,20 +35,13 @@ Action Buttons
 Py
   Exports a Python script which will replicate the processing done by the current tab.
 
-Run
-  Runs the processing configured on the current tab.
-
 Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-Plot Current Preview
-  Takes the data currently plotted in the preview plot and puts it in a separate external plot
-  
-
+ 
 Elwin
 -----
-
 
 Provides an interface for the :ref:`ElasticWindow <algm-ElasticWindow>`
 algorithm, with the option of selecting the range to integrate over as well as
@@ -99,14 +93,25 @@ SE log value
   specified value in the instrument parameters file, and in the absence of such
   specification, defaults to "last value")
 
+Preview File
+  The workspace currently active in the preview plot.
+
+Spectrum
+  Changes the spectrum displayed in the preview plot.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Run
+  Runs the processing configured on the current tab.
+
 Plot Spectrum
   If enabled it will plot the spectrum represented by the workspace index in the 
   neighbouring spin box. This workspace index is the index of the spectrum within the 
   workspace selected in the combobox.
 
 Save Result
-  If enabled the result will be saved as a NeXus file in the default save
-  directory.
+  Saves the result in the default save directory.
   
 MSD Fit
 -------
@@ -141,13 +146,52 @@ reduces to a Gaussian at sigma equal to zero.
 Options
 ~~~~~~~
 
-.. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
-
-.. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
-
 Sample
   A file that has been created using the Elwin tab with an :math:`x` axis of
   :math:`Q`. Alternatively, a workspace may be provided.
+
+Single Input/Multiple Input
+  Choose between loading a single workspace or multiple workspaces. 
+
+Function Browser
+  This is used to decide the details of your fit including the fit type and minimizer used. It is 
+  possible to un-dock this browser.
+
+Mini Plots
+  The top plot displays the sample data, guess and fit. The bottom plot displays the difference between 
+  the sample data and fit. It is possible to un-dock these plots.
+
+Plot Spectrum
+  Changes the spectrum displayed in the mini plots.
+
+Fit Single Spectrum
+  This will Fit a single spectrum selected by the neighboring Plot Spectrum spinbox.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Plot Guess
+  This will a plot a guess of your fit based on the information selected in the Function Browser.
+
+Fit Spectra
+  Choose a range or discontinuous list of spectra to be fitted.
+
+Mask Energies
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+  and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the selected parameter stored in the result workspace.
+
+Save Result
+  Saves the result workspace in the default save directory.
+
+.. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
+
+.. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
 
 I(Q, t)
@@ -178,24 +222,29 @@ SampleBinning
   The ratio at which to decrease the number of bins by merging of
   intensities from neighbouring bins.
 
-Plot Result
-  If enabled will plot the result as a spectra plot.
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
 
-Save Result
-  If enabled the result will be saved as a NeXus file in the default save
-  directory.
-  
+Calculate Errors
+  The calculation of errors using a Monte Carlo implementation can be skipped by unchecking
+  this option.
+
+Number Of Iterations
+  The number of iterations to perform in the Monte Carlo routine for error calculation 
+  in I(Q,t). 
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot Spectrum
+  If enabled will plot the spectrum selected by the neighbouring spinbox.
+
 Tiled Plot
   Produces a tiled plot of spectra included within the range for the output workspaces 
   generated. There is a maximum of 18 spectra allowed for a tiled plot. 
 
-Monte Carlo Error Calculation - Number Of Iterations
-  The number of iterations to perform in the Monte Carlo routine for error calculation 
-  in I(Q,t). 
-
-Monte Carlo Error Calculation - Calculate Errors
-  The calculation of errors using a Monte Carlo implementation can be skipped by ticking 
-  the Calculate Errors checkbox.
+Save Result
+  Saves the result workspace in the default save directory.
 
 A note on Binning
 ~~~~~~~~~~~~~~~~~
@@ -214,9 +263,9 @@ ResolutionBins
   Number of bins in the resolution after rebinning, typically this should be at
   least 5 and a warning will be shown if it is less.
 
+
 I(Q, t) Fit
 -----------
-
 
 I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
@@ -230,13 +279,16 @@ are also available via the fit wizard.
 Options
 ~~~~~~~
 
-.. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
-
-.. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
-
 Sample
   Either a file (*_iqt.nxs*) or workspace (*_iqt*) that has been created using
   the Iqt tab.
+
+Single Input/Multiple Input
+  Choose between loading a single workspace or multiple workspaces. 
+
+Function Browser
+  This is used to decide the details of your fit including the fit type and minimizer used. Further options 
+  are seen below. It is possible to un-dock this browser.
 
 Constrain Intensities
   Check to ensure that the sum of the background and intensities is always equal
@@ -251,8 +303,42 @@ Extract Members
   If checked, each individual member of the fit (e.g. exponential functions), will
   be extracted.
 
-Linear Background
-  Adds a linear background to the composite fit function.
+Mini Plots
+  The top plot displays the sample data, guess and fit. The bottom plot displays the difference between 
+  the sample data and fit. It is possible to un-dock these plots.
+
+Plot Spectrum
+  Changes the spectrum displayed in the mini plots.
+
+Fit Single Spectrum
+  This will Fit a single spectrum selected by the neighboring Plot Spectrum spinbox.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Plot Guess
+  This will a plot a guess of your fit based on the information selected in the Function Browser.
+
+Fit Spectra
+  Choose a range or discontinuous list of spectra to be fitted.
+
+Mask Energies
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+  and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the selected parameter stored in the result (or PDF) workspace.
+
+Save Result
+  Saves the result workspace in the default save directory.
+
+.. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
+
+.. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
+
 
 Conv Fit
 --------
@@ -290,6 +376,13 @@ Resolution
   Either a resolution file (_res.nxs) or workspace (_res) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*, *_sqw.dave*) or workspace (*_sqw*).
 
+Single Input/Multiple Input
+  Choose between loading a single workspace or multiple workspaces. 
+
+Function Browser
+  This is used to decide the details of your fit including the fit type and minimizer used. Further options 
+  are seen below. It is possible to un-dock this browser.
+
 Use Delta Function
   Found under 'Custom Function Groups'. Enables use of a delta function.
 
@@ -301,7 +394,40 @@ Use Temperature Correction
   Adds the custom user function for temperature correction to the fit function.
 
 Background Options
-  Flat Background: Adds a flat background to the composite fit function. Linear Background: Adds a linear background to the composite fit function.
+  Flat Background: Adds a flat background to the composite fit function. Linear Background: Adds a linear 
+  background to the composite fit function.
+
+Mini Plots
+  The top plot displays the sample data, guess and fit. The bottom plot displays the difference between 
+  the sample data and fit. It is possible to un-dock these plots.
+
+Plot Spectrum
+  Changes the spectrum displayed in the mini plots.
+
+Fit Single Spectrum
+  This will Fit a single spectrum selected by the neighboring Plot Spectrum spinbox.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Plot Guess
+  This will a plot a guess of your fit based on the information selected in the Function Browser.
+
+Fit Spectra
+  Choose a range or discontinuous list of spectra to be fitted.
+
+Mask Energies
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+  and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the selected parameter stored in the result (or PDF) workspace.
+
+Save Result
+  Saves the result workspace in the default save directory.
 
 Theory
 ~~~~~~
@@ -327,20 +453,58 @@ EISF. This is done by means of the
 Options
 ~~~~~~~
 
+Sample
+  A sample workspace created with either ConvFit or Quasi.
+
+Single Input/Multiple Input
+  Choose between loading a single workspace or multiple workspaces. 
+
+Fit Parameter
+  Either 'Width' or 'EISF' can be selected here. This determines whether a width or EISF parameter will be 
+  fit across.
+
+Width/EISF
+  Next to the 'Fit Parameter' menu, will be either a 'Width' or 'EISF' menu, depending on which was selected. 
+  This menu can be used to select the specific width/EISF parameter to be fit.
+
+Function Browser
+  This is used to decide the details of your fit including the fit type and minimizer used. Further options 
+  are seen below. It is possible to un-dock this browser.
+
+Mini Plots
+  The top plot displays the sample data, guess and fit. The bottom plot displays the difference between 
+  the sample data and fit. It is possible to un-dock these plots.
+
+Plot Spectrum
+  Changes the spectrum displayed in the mini plots.
+
+Fit Single Spectrum
+  This will Fit a single spectrum selected by the neighboring Plot Spectrum spinbox.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Plot Guess
+  This will a plot a guess of your fit based on the information selected in the Function Browser.
+
+Fit Spectra
+  Choose a range or discontinuous list of spectra to be fitted.
+
+Mask Energies
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+  and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the selected parameter stored in the result workspace.
+
+Save Result
+  Saves the result workspace in the default save directory.
+  
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
--Sample
--  A sample workspace created with either ConvFit or Quasi.
--
--Fit Parameter
--  Either 'Width' or 'EISF' can be selected here, determining whether a width or
--  EISF parameter will be fit across.
--
--Width/EISF
--  Next to the 'Fit Parameter' menu, will be either a 'Width' or 'EISF' menu, depending on
--  which was selected. This menu can be used to select the specific width/EISF parameter to be fit.
-
-  
  .. _qens-fitting-features:
   
 QENS Fitting Interfaces Features
@@ -478,6 +642,9 @@ Acceptance Rate
   The desired percentage acceptance of new parameters (see *JumpAcceptanceRate*
   in :ref:`FABADA` documentation)
   
+The FABADA minimizer can output a PDF group workspace when the PDF option is ticked. If this happens,
+then it is possible to plot this PDF data using the output options at the bottom of the tabs.
+
 .. _sequential-fitting-section:
 
 Sequential Fitting
