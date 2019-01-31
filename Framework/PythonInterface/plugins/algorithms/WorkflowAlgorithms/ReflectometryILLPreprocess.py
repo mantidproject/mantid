@@ -402,12 +402,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _addSampleLogInfo(self, ws, linePosition):
         """Add foreground indices and linePosition to the sample logs, names start with reduction."""
         # Add the fractional workspace index of the beam position to the sample logs of ws.
-        AddSampleLog(Workspace=ws,
-                     LogType='Number',
-                     LogName=common.SampleLogs.LINE_POSITION,
-                     LogText=format(linePosition, '.13f'),
-                     NumberType='Double',
-                     EnableLogging=self._subalgLogging)
+        run = ws.run()
+        run.addProperty(common.SampleLogs.LINE_POSITION, float(linePosition), True)
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
         beamPosIndex = int(numpy.rint(linePosition))
@@ -419,37 +415,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         endIndex = beamPosIndex + sign * hws[1]
         if startIndex > endIndex:
             endIndex, startIndex = startIndex, endIndex
-        AddSampleLog(Workspace=ws,
-                     LogType='Number',
-                     LogName=common.SampleLogs.FOREGROUND_START,
-                     LogText=str(startIndex),
-                     NumberType='Int',
-                     EnableLogging=self._subalgLogging)
-        AddSampleLog(Workspace=ws,
-                     LogType='Number',
-                     LogName=common.SampleLogs.FOREGROUND_CENTRE,
-                     LogText=str(beamPosIndex),
-                     NumberType='Int',
-                     EnableLogging=self._subalgLogging)
-        AddSampleLog(Workspace=ws,
-                     LogType='Number',
-                     LogName=common.SampleLogs.FOREGROUND_END,
-                     LogText=str(endIndex),
-                     NumberType='Int',
-                     EnableLogging=self._subalgLogging)
+        run.addProperty(common.SampleLogs.FOREGROUND_START, int(startIndex), True)
+        run.addProperty(common.SampleLogs.FOREGROUND_CENTRE, int(beamPosIndex), True)
+        run.addProperty(common.SampleLogs.FOREGROUND_END, int(endIndex), True)
         # Add two theta to the sample logs of ws.
         if not self.getProperty(Prop.TWO_THETA).isDefault:
             twoTheta = self.getProperty(Prop.TWO_THETA).value
         else:
             spectrum_info = ws.spectrumInfo()
             twoTheta = numpy.rad2deg(spectrum_info.twoTheta(int(numpy.rint(linePosition))))
-        AddSampleLog(Workspace=ws,
-                     LogType='Number',
-                     LogName=common.SampleLogs.TWO_THETA,
-                     LogText=format(twoTheta, '.13f'),
-                     NumberType='Double',
-                     LogUnit='degree',
-                     EnableLogging=self._subalgLogging)
+        run.addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
         return twoTheta
 
     def _moveDetector(self, ws, twoTheta, linePosition):

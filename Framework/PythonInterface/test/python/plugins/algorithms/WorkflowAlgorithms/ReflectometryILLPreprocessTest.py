@@ -414,6 +414,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                                                DirectLineWorkspace=direct)
         self.assertEquals(reflected.run().getLogData(common.SampleLogs.LINE_POSITION).value, 201.6745481268582)
         self.assertEquals(reflected.run().getLogData(common.SampleLogs.TWO_THETA).value, 80.0)
+        self.assertEquals(reflected.run().getProperty(common.SampleLogs.TWO_THETA).units, 'degree')
         self.assertEquals(reflected.getAxis(0).getUnit().caption(), 'Wavelength')
 
 
