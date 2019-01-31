@@ -14,6 +14,7 @@ from mantid.kernel import (Direction, StringListValidator, logger)
 
 from pystog.converter import Converter
 
+
 class PDConvertRealSpace(PythonAlgorithm):
     """
     Convert between different real space functions
@@ -86,6 +87,6 @@ class PDConvertRealSpace(PythonAlgorithm):
             new_y, new_e=transformation[from_quantity][to_quantity](x,y,e,**sample_kwargs)
             output_ws.setY(sp_num,new_y)
             output_ws.setE(sp_num,new_e)
-  
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(PDConvertRealSpace)

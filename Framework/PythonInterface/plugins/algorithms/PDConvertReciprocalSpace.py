@@ -14,8 +14,9 @@ from mantid.kernel import (Direction, StringListValidator, logger)
 
 from pystog.converter import Converter
 
+
 class PDConvertReciprocalSpace(PythonAlgorithm):
-    """ 
+    """
     Convert between different reciprocal space functions
     """
     def category(self):
@@ -83,10 +84,10 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
             e = input_ws.readE(sp_num)
             if len(x)==len(y)+1:
                 x = 0.5*(x[:-1]+x[1:])
-            
+
             new_y, new_e=transformation[from_quantity][to_quantity](x,y,e,**sample_kwargs)
             output_ws.setY(sp_num,new_y)
             output_ws.setE(sp_num,new_e)
-        
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(PDConvertReciprocalSpace)
