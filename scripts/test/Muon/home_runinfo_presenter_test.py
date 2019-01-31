@@ -48,20 +48,13 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
 
         self.presenter.update_view_from_model()
 
-        self.assertEqual(self.view.run_info_box.toPlainText(),
-                         'Instrument                : MUSR\n'
-                         'Run                       : 22725\n'
-                         'Title                     : FeTeSe T=1 F=100\n'
-                         'Comment                   : FC first sample\n'
-                         'Start                     : 2009-03-24T04:18:58\n'
-                         'End                       : 2009-03-24T04:56:26\n'
-                         'Counts (MeV)              : 20.076704\n'
-                         'Good Frames               : 88540\n'
-                         'Counts per Good Frame     : 226.752925232\n'
-                         'Counts per Good Frame per det : 3.54301445674\n'
-                         'Average Temperature (K)   : 2.53385746583\n'
-                         'Sample Temperature (K)    : 1.0\n'
-                         'Sample Magnetic Field (G) : 100.0')
+        expected_string_list = ['Instrument:MUSR', 'Run:22725', 'Title:FeTeSeT=1F=100', 'Comment:FCfirstsample',
+                                'Start:2009-03-24T04:18:58', 'End:2009-03-24T04:56:26', 'Counts(MEv):20.076704',
+                                'GoodFrames:88540', 'CountsperGoodFrame:226.752925232',
+                                'CountsperGoodFrameperdet:3.54301445674', 'AverageTemperature(K):2.5338574658342083',
+                                'SampleTemperature(K):1.0', 'SampleMagneticField(G):100.0']
+
+        self.assertEqual(str(self.view.run_info_box.toPlainText()).replace(' ', '').splitlines(), expected_string_list)
 
 
 if __name__ == '__main__':

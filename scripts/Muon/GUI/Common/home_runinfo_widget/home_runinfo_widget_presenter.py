@@ -29,7 +29,7 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
         self._view.add_text_line("Comment                   : " + str(self._model.get_workspace_comment()))
         self._view.add_text_line(self.create_text_line("Start                    ", "run_start"))
         self._view.add_text_line(self.create_text_line("End                      ", "run_end"))
-        self._view.add_text_line("Counts (MeV)              : " + str(self._model.get_counts_in_MeV(counts)))
+        self._view.add_text_line("Counts (MEv)              : " + str(self._model.get_counts_in_MeV(counts)))
         self._view.add_text_line(self.create_text_line("Good Frames              ", "goodfrm"))
         self._view.add_text_line("Counts per Good Frame     : " + str(self._model.get_counts_per_good_frame(counts)))
         self._view.add_text_line("Counts per Good Frame per det : " +
