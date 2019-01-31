@@ -87,69 +87,74 @@ To access the data from python that is stored in C++ there are two options, coll
 
 The way that is easiest would be creating a C++ class and grab all the state and information needed to recreate the interface to the same state it was in. The formation of the information should be a QMap<QString, QVariant>, this is because it will quickly and natively convert this to a python dict object when using SIP, with the only caveat being that before returning this dictionary from the encode method it is encouraged to check if any QtObjects have been transferred across, for example QtColors will transfer seamlessly across, but cannot be serialized by JSON, so this would need to be converted into a JSON serializable form and then back to QtColors before transferring to C++ or at least handled on the C++ side to create the objects back.
 
+Before the tutorial really starts some advice about QMap, if using the [] operator and it cannot find the correct value, it will return a default constructed version of the value in the key value pair, i.e. if it can't find the QVariant it will return an empty one, which in turn will also return a default value when converted back into a normal type, i.e. QVariant.toBool() will return false, in the given cases, always.
+
 To start with the encoding we would have a C++ called Interface with class Interface, we would create a class called InterfaceEncoder and have the method QMap<QString, QVariant> encode(Interface &interface), this method does not need to follow any specific format but it would be good practice to follow the encode and decode naming scheme. As an example:
 
 Header File:
+
 .. code-block:: cpp
 
-  class EXPORT_OPT_MANTIDQT_INTERFACE InterfaceEncoder {
-  public:
-  InterfaceEncoder();
-  QMap<QString, QVariant> encode (const Interface &interface);
+    class EXPORT_OPT_MANTIDQT_INTERFACE InterfaceEncoder {
+    public:
+    InterfaceEncoder();
+    QMap<QString, QVariant> encode (const Interface &interface);
 
-  private:
-  QMap<QString, QVariant> encodeInfo(const InterfaceInfo &info);
-  QMap<QString, QVariant> encodeState(const InterfaceState &state);
-  };
+    private:
+    QMap<QString, QVariant> encodeInfo(const InterfaceInfo &info);
+    QMap<QString, QVariant> encodeState(const InterfaceState &state);
+    };
 
 Source File:
+
 .. code-block:: cpp
 
-  InterfaceEncoder::InterfaceEncoder()
+    InterfaceEncoder::InterfaceEncoder()
 
-  QMap<QString, QVariant> InterfaceEncoder::encode(const Interface &interface){
-    QMap<QString, QVariant> map;
-    // It is encouraged to not add extra methods to the Interface class for getting information unless already present
-    // Instead add the encoder as a friend class and access the member variables directly
-    map.insert(QString("info"), QVariant(encodeInfo(interface.m_interfaceInfo));
-    map.insert(QString("state"), QVariant(encodeState(interface.getStateObject()));
-    return map;
-  }
+    QMap<QString, QVariant> InterfaceEncoder::encode(const Interface &interface){
+      QMap<QString, QVariant> map;
+      // It is encouraged to not add extra methods to the Interface class for getting information unless already present
+      // Instead add the encoder as a friend class and access the member variables directly
+      map.insert(QString("info"), QVariant(encodeInfo(interface.m_interfaceInfo));
+      map.insert(QString("state"), QVariant(encodeState(interface.getStateObject()));
+      return map;
+    }
 
-  QMap<QString, QVariant> InterfaceEncoder::encodeInfo(const InterfaceInfo &info){
-    QMap<QString, QVariant> map;
-    map.insert(QString("info1"), QVariant(info.m_info1));
-    map.insert(QString("info2"), QVariant(info.m_info2));
-    return map;
-  }
+    QMap<QString, QVariant> InterfaceEncoder::encodeInfo(const InterfaceInfo &info){
+      QMap<QString, QVariant> map;
+      map.insert(QString("info1"), QVariant(info.m_info1));
+      map.insert(QString("info2"), QVariant(info.m_info2));
+      return map;
+    }
 
-  QMap<QString, QVariant> InterfaceEncoder::encodeState(const InterfaceState &state){
-    QMap<QString, QVariant> map;
-    map.insert(QString("state1"), QVariant(state.m_state1));
-    map.insert(QString("state2"), QVariant(state.m_state2));
-    return map;
-  }
+    QMap<QString, QVariant> InterfaceEncoder::encodeState(const InterfaceState &state){
+      QMap<QString, QVariant> map;
+      map.insert(QString("state1"), QVariant(state.m_state1));
+      map.insert(QString("state2"), QVariant(state.m_state2));
+      return map;
+    }
 
 With the encoder classes done it needs to be exposed to python via SIP, this can be done by adding the InterfaceEncoder to a compiling sip file, now the placement of this is not necessarily mandated, but InstrumentView had it's own SIP file and it made sense to expand it to encompass it's encoder and decoders.
 
 SIP File:
+
 .. code-block:: text
 
-  class InterfaceEncoder {
-  %TypeHeaderCode
-  #include "MantidQtWidgets/Interface/InterfaceEncoder.h"
-  %End
-  public:
-    InterfaceEncoder();
-    QMap<QString, QVariant> encode(const Interface &interface) /ReleaseGIL/;
-  };
-  class InterfaceDecoder : QObject{
-  %TypeHeaderCode
-  #include "MantidQtWidgets/Interface/InterfaceDecoder.h"
-  %End
-  public:
-    InterfaceDecoder();
-    void decode(const QMap<QString, QVariant> &map) /ReleaseGIL/;
-  };
+    class InterfaceEncoder {
+    %TypeHeaderCode
+    #include "MantidQtWidgets/Interface/InterfaceEncoder.h"
+    %End
+    public:
+      InterfaceEncoder();
+      QMap<QString, QVariant> encode(const Interface &interface) /ReleaseGIL/;
+    };
+    class InterfaceDecoder : QObject{
+    %TypeHeaderCode
+    #include "MantidQtWidgets/Interface/InterfaceDecoder.h"
+    %End
+    public:
+      InterfaceDecoder();
+      void decode(const QMap<QString, QVariant> &map) /ReleaseGIL/;
+    };
 
 The last thing to discuss is that the decoder would be structured very similarly to the encoder, but instead of constructing a map you are just setting the details back from the map. This is achieved by using ``map[QString("key")].toInt()`` for a int, as the value stored is a QVariant so a conversion is needed.
