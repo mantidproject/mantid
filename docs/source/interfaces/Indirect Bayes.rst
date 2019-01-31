@@ -1,4 +1,4 @@
-Indirect Bayes
+﻿Indirect Bayes
 ==============
 
 .. contents:: Table of Contents
@@ -18,9 +18,6 @@ Action Buttons
 
 ?
   Opens this help page.
-
-Run
-  Runs the processing configured on the current tab.
 
 Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
@@ -58,8 +55,17 @@ Resolution File
 EMin & EMax
   The energy range to perform fitting within.
 
-Plot Result
-  Plots the result workspaces.
+Preview Spectrum
+  Changes the spectrum displayed in the preview plot.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the selected parameter stored in the result workspaces.
 
 Save Result
   Saves the result in the default save directory.
@@ -99,12 +105,12 @@ of spectra.
 Options
 ~~~~~~~
 
-Input
+Sample
   Either a reduced file created using the Energy Transfer tab or an
   :math:`S(Q, \omega)` file.
 
 Resolution
-  A resolution file created using the Calibrtion tab.
+  A resolution file created using the Calibration tab.
 
 Program
   The curve fitting program to use.
@@ -133,8 +139,17 @@ Sample Binning
 Resolution Binning
   Resolution binning to use.
 
-Plot Result
-  Plots the result workspaces.
+Preview Spectrum
+  Changes the spectrum displayed in the preview plot.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the selected parameter stored in the result workspaces.
 
 Save Result
   Saves the result in the default save directory.
@@ -148,7 +163,7 @@ Stretch
   :widget: Stretch
 
 This is a variation of the stretched exponential option of Quasi. For each
-spectrum a fit is performed for a grid of β and σ values. The distribution of
+spectrum, a fit is performed for a grid of β and σ values. The distribution of
 goodness of fit values is plotted.
 
 Options
@@ -159,7 +174,7 @@ Sample
   :math:`S(Q, \omega)` file.
 
 Resolution
-  A resolution file created using the Calibrtion tab.
+  A resolution file created using the Calibration tab.
 
 Background
   The background fitting program to use.
@@ -182,8 +197,20 @@ Sigma
 Beta
   Value of Beta to use.
 
-Plot Result
-  Plots the result workspaces.
+Preview Spectrum
+  Changes the spectrum displayed in the preview plot.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the selected parameter stored in the result workspaces.
+
+Plot Contour
+  Produces a contour plot of the selected workspace.
 
 Save Result
   Saves the result in the default save directory.
