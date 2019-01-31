@@ -14,15 +14,12 @@ from mantidqt.widgets.commonworkspacedisplay.ads_observer import WorkspaceDispla
 from mantidqt.widgets.commonworkspacedisplay.data_copier import DataCopier
 from mantidqt.widgets.commonworkspacedisplay.observing_presenter import ObservingPresenter
 from mantidqt.widgets.commonworkspacedisplay.status_bar_view import StatusBarView
-from mantidqt.widgets.commonworkspacedisplay.user_notifier import UserNotifier
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
 
-class MatrixWorkspaceDisplay(ObservingPresenter, UserNotifier, DataCopier):
-    NO_SELECTION_MESSAGE = "No selection"
-    COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
+class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
@@ -43,7 +40,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, UserNotifier, DataCopier):
         self.view = view if view else MatrixWorkspaceDisplayView(self, parent, self.model.get_name())
         self.container = container if container else StatusBarView(parent, self.view)
 
-        UserNotifier.__init__(self, self.container.status_bar)
+        super(MatrixWorkspaceDisplay, self).__init__(self.container.status_bar)
 
         self.plot = plot
 

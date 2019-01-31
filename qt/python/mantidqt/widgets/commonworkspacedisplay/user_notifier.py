@@ -7,6 +7,10 @@ from qtpy.QtWidgets import QToolTip
 
 
 class UserNotifier(object):
+    """
+    Provides common functionality for notifying the user using a
+    status bar, or (Windows only) mouse tooltip notifications.
+    """
     NO_SELECTION_MESSAGE = "No selection"
     COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
     WORKING_MESSAGE = "Operation in progress.."

@@ -21,6 +21,7 @@ from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_matrixworkspacedisp
 from mantidqt.widgets.commonworkspacedisplay.test_mocks.mock_qt import MockQModelIndex, MockQTableView
 from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
+from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 
 
 def with_mock_presenter(func):
@@ -78,6 +79,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_copy.assert_called_once_with(expected_string)
         mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
+        presenter._get_ws_read_from_type.assert_called_once_with(MatrixWorkspaceTableViewModelType.x)
+
     @patch(show_mouse_toast_package)
     @patch(copy_to_clipboard_package)
     @with_mock_presenter
@@ -119,6 +122,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         mock_copy.assert_called_once_with(expected_string)
         mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+        presenter._get_ws_read_from_type.assert_called_once_with(MatrixWorkspaceTableViewModelType.x)
 
     @patch(show_mouse_toast_package)
     @patch(copy_to_clipboard_package)

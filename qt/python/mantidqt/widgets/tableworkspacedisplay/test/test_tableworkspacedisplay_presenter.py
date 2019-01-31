@@ -225,7 +225,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(1, mock_no_selection_toast.call_count)
         view.mock_selection_model.selectedColumns.assert_called_once_with()
 
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.TableWorkspaceDisplay')
+    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.TableWorkspaceDisplay', spec=TableWorkspaceDisplay)
     @patch('mantidqt.widgets.tableworkspacedisplay.model.StatisticsOfTableWorkspace')
     @with_mock_presenter(add_selection_model=True)
     def test_action_statistics_on_columns(self, ws, view, twd, mock_StatisticsOfTableWorkspace,

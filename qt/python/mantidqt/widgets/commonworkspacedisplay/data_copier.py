@@ -3,13 +3,17 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtGui
 from qtpy.QtWidgets import QMessageBox
 
+from mantidqt.widgets.commonworkspacedisplay.user_notifier import UserNotifier
+
 """
 This module contains the common copying functionality between
 the MatrixWorkspaceDisplay and the TableWorkspaceDisplay.
 """
 
 
-class DataCopier(object):
+class DataCopier(UserNotifier):
+    def __init__(self, status_bar):
+        super(DataCopier, self).__init__(status_bar)
 
     def copy_spectrum_values(self, table, ws_read):
         """
@@ -101,19 +105,6 @@ class DataCopier(object):
         self.copy_to_clipboard("".join(data).strip())
         self.notify_successful_copy()
 
-    # def keypress_copy(self, table, view, ws_read, num_rows):
-    #     selectionModel = table.selectionModel()
-    #     if not selectionModel.hasSelection():
-    #         self.notify_no_selection_to_copy()
-    #         return
-    #
-    #     if len(selectionModel.selectedRows()) > 0:
-    #         self.copy_spectrum_values(table, ws_read)
-    #     elif len(selectionModel.selectedColumns()) > 0:
-    #         self.copy_bin_values(table, ws_read, num_rows)
-    #     else:
-    #         self.copy_cells(table)
-
     def copy_to_clipboard(self, data):
         """
         Uses the QGuiApplication to copy to the system clipboard.
@@ -126,9 +117,5 @@ class DataCopier(object):
         cb.setText(data, mode=cb.Clipboard)
 
     def ask_confirmation(self, message, title="Mantid Workbench"):
-        """
-        :param message:
-        :return:
-        """
         reply = QMessageBox.question(self, title, message, QMessageBox.Yes, QMessageBox.No)
         return True if reply == QMessageBox.Yes else False

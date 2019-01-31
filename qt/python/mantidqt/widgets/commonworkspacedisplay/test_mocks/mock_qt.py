@@ -103,3 +103,9 @@ class MockQtSignal:
 class MockQStatusBar(object):
     def __init__(self):
         self.showMessage = Mock()
+
+
+class MockQClipboard(object):
+    def __init__(self):
+        self.setText = Mock()
+        self.Clipboard = 3
