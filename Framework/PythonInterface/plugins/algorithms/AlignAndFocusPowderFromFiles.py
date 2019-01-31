@@ -10,7 +10,7 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import ConfigService, Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CopyLogs, CreateCacheFilename, \
-    CloneWorkspace, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
+    DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
     PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed
 import os
 
@@ -372,14 +372,14 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         #
         # process not-cached files
         if nocache:
-            self.__processFiles(nocache, useCaching, unfocusname, unfocusname_file)
-            cached.append(nocache)
+            newcache = list(self.__processFiles(nocache, useCaching, unfocusname, unfocusname_file))
+            cached += newcache
         # combine
         self.__processGroups(cached, unfocusname, unfocusname_file, finalname)
         #
         # create cache of everything summed together
         if useCaching:
-            self.__saveSummedGroupToCache(filenames)
+            self.__saveSummedGroupToCache(filenames, wkspname=finalname)
 
         # with more than one chunk or file the integrated proton charge is
         # generically wrong
@@ -427,41 +427,33 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
 
     def __processFiles(self, files, useCaching, unfocusname, unfocusname_file):
-        """process given files (may be mixed with groups of files)
+        """process given files and yield grains (group of files)
         """
         N = len(files)
         import math
-        if N>2: #9
+        if N>3: #9
             n = int(math.sqrt(N)) # grain size
-        allsum_wkspname = self.__get_grp_ws_name(files)
+        else:
+            n = N
         for (i, f) in enumerate(files):
             wkspname = self.__processFile2_withcache(f, useCaching, unfocusname, unfocusname_file)
-            # sum of all files
-            self.__accumulate(wkspname, allsum_wkspname, unfocusname, unfocusname_file, firstrun=i==0)
-            if useCaching:
-                # accumulate into partial sum
-                grain_start = i//n*n
-                grain_end = min((i//n+1)*n, N)
-                grain = files[grain_start:grain_end]
-                partialsum_wkspname = self.__get_grp_ws_name(grain)
-                self.__accumulate(
-                    wkspname, partialsum_wkspname, unfocusname, unfocusname_file, firstrun=i==grain_start)
-                # save partial cache and clear
-                if i==grain_end-1:
+            # accumulate into partial sum
+            grain_start = i//n*n
+            grain_end = min((i//n+1)*n, N)
+            grain = files[grain_start:grain_end]
+            partialsum_wkspname = self.__get_grp_ws_name(grain)
+            self.__accumulate(
+                wkspname, partialsum_wkspname, unfocusname, unfocusname_file, firstrun=i==grain_start)
+            if i==grain_end-1:
+                if useCaching and len(grain)>1:
+                    # save partial cache
                     self.__saveSummedGroupToCache(grain)
-                    DeleteWorkspace(partialsum_wkspname)
-            # cleanup
-            DeleteWorkspace(Workspace=wkspname)
-            if unfocusname != '':
-                DeleteWorkspace(Workspace=unfocusname_file)
-        # save to cache
-        if useCaching:
-            self.__saveSummedGroupToCache(files)
+                yield grain
         return
 
-    def __saveSummedGroupToCache(self, group):
+    def __saveSummedGroupToCache(self, group, wkspname=None):
         cache_file = self.__get_grp_cache_fn(group)
-        wksp = self.__get_grp_ws_name(group)
+        wksp = wkspname or self.__get_grp_ws_name(group)
         if not os.path.exists(cache_file):
             SaveNexusProcessed(InputWorkspace=wksp, Filename=cache_file)
         return
@@ -472,7 +464,6 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         for (i, g) in enumerate(groups):
             wkspname = self.__get_grp_ws_name(g)
             self.__accumulate(wkspname, finalname, unfocusname, unfocusname_file, firstrun=i==0)
-            DeleteWorkspace(Workspace=wkspname)
         return
 
     def __processFile2_withcache(self, filename, useCaching, unfocusname, unfocusname_file):
@@ -519,16 +510,18 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # accumulate runs
         if firstrun:
             if wkspname != finalname:
-                CloneWorkspace(InputWorkspace=wkspname, OutputWorkspace=finalname)
+                RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=finalname)
             if unfocusname != '':
-                CloneWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
+                RenameWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
         else:
             Plus(LHSWorkspace=finalname, RHSWorkspace=wkspname, OutputWorkspace=finalname,
                  ClearRHSWorkspace=self.kwargs['PreserveEvents'])
+            DeleteWorkspace(Workspace=wkspname)
 
             if unfocusname != '':
                 Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_file, OutputWorkspace=unfocusname,
                      ClearRHSWorkspace=self.kwargs['PreserveEvents'])
+                DeleteWorkspace(Workspace=unfocusname_file)
 
             if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
                 CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname,
