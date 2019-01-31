@@ -400,7 +400,7 @@ One can do twin axes as well:
    ax2.set_ylabel('sin', color=color)
    ax2.tick_params(axis='y', labelcolor=color)
    fig.tight_layout()
-   fig.show()
+   #fig.show()
 
 
 ====================
