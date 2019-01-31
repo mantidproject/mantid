@@ -17,7 +17,7 @@ from mantid.api import (AlgorithmFactory,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, IntArrayLengthValidator, IntArrayBoundedValidator,
                            IntArrayProperty, IntBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (AddSampleLog, CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
+from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
                               Divide, ExtractMonitors, FindReflectometryLines, LoadAndMerge, Minus, mtd,
                               NormaliseToMonitor, RebinToWorkspace, Scale, SpecularReflectionPositionCorrect, Transpose)
 import numpy
