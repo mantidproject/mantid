@@ -157,6 +157,8 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_user_selects_dead_time_from_data(self):
         """User chooses to load dead time from the currently loaded workspace."""
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         dtc = self._model.get_dead_time_table_from_data()
         if dtc is not None:
             self._model.set_dead_time_from_data()

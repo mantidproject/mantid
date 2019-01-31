@@ -65,10 +65,7 @@ class InstrumentWidgetModel(object):
         self._data.gui_variables["FirstGoodData"] = first_good_data
 
     def get_dead_time_table_from_data(self):
-        if self._data.is_multi_period():
-            return self._data.current_data["DataDeadTimeTable"][0]
-        else:
-            return self._data.current_data["DataDeadTimeTable"]
+        return self._data.current_data["DataDeadTimeTable"]
 
     def get_dead_time_table(self):
         return self._data.dead_time_table
@@ -105,16 +102,18 @@ class InstrumentWidgetModel(object):
         return True
 
     def set_dead_time_to_none(self):
-        self._data.current_data["DeadTimeTable"] = None
+        self._data.gui_variables['DeadTimeSource'] = 'None'
 
     def set_dead_time_from_data(self):
-        data_dead_time = self._data.current_data["DataDeadTimeTable"]
-        if isinstance(data_dead_time, WorkspaceGroup):
-            self._data.current_data["DeadTimeTable"] = data_dead_time[0]
-        else:
-            self._data.current_data["DeadTimeTable"] = data_dead_time
+        self._data.gui_variables['DeadTimeSource'] = 'FromFile'
+        # data_dead_time = self._data.current_data["DataDeadTimeTable"]
+        # if isinstance(data_dead_time, WorkspaceGroup):
+        #     self._data.gui_variables["DeadTimeTable"] = data_dead_time[0]
+        # else:
+        #     self._data.gui_variables["DeadTimeTable"] = data_dead_time
 
     def set_user_dead_time_from_ADS(self, name):
-        dtc = api.AnalysisDataServiceImpl.Instance().retrieve(str(name))
-        self._data.current_data["UserDeadTimeTable"] = dtc
-        self._data.current_data["DeadTimeTable"] = dtc
+        self._data.gui_variables['DeadTimeSource'] = 'FromADS'
+        dtc = api.AnalysisDataService.retrieve(str(name))
+        # self._data.current_data["UserDeadTimeTable"] = dtc
+        self._data.gui_variables["DeadTimeTable"] = dtc

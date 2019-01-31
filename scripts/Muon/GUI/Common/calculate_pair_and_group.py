@@ -61,7 +61,15 @@ def _get_pre_processing_params(context, run):
         pass
 
     try:
-        dead_time_table = context.loaded_data(run)["DeadTimeTable"]
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+        if context.gui_variables['DeadTimeSource'] == 'FromFile':
+            dead_time_table = context.loaded_data(run)["DataDeadTimeTable"]
+        elif context.gui_variables['DeadTimeSource'] == 'FromADS':
+            dead_time_table = context.gui_variables['DeadTimeTable']
+        else:
+            dead_time_table = None
+
         if dead_time_table is not None:
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:
