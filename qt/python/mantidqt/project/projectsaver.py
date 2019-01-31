@@ -11,6 +11,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from json import dump
 import os
 
+from mantid.api import AnalysisDataService as ADS
 from mantidqt.project.workspacesaver import WorkspaceSaver
 from mantidqt.project.plotssaver import PlotsSaver
 from mantid import logger
@@ -20,13 +21,15 @@ class ProjectSaver(object):
     def __init__(self, project_file_ext):
         self.project_file_ext = project_file_ext
 
-    def save_project(self, directory, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None):
+    def save_project(self, directory, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None,
+                     save_workspaces=True):
         """
         The method that will actually save the project and call relevant savers for workspaces, plots, interfaces etc.
         :param directory: String; The directory of the
         :param workspace_to_save: List; of Strings that will have workspace names in it, if None will save all
         :param plots_to_save: List; of matplotlib.figure objects to save to the project file.
         :param interfaces_to_save: List of Lists of Window and Encoder; the interfaces to save and the encoders to use
+        :param save_workspaces: whether or not you want the program to also save the workspaces with the project file
         :return: None; If the method cannot be completed.
         """
         # Check if the directory doesn't exist
@@ -40,8 +43,13 @@ class ProjectSaver(object):
             return
 
         # Save workspaces to that location
-        workspace_saver = WorkspaceSaver(directory=directory)
-        workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
+        if save_workspaces:
+            workspace_saver = WorkspaceSaver(directory=directory)
+            workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
+            saved_workspaces = workspace_saver.get_output_list()
+        else:
+            # Assume that this is project recovery so pass a list of workspace names
+            saved_workspaces = ADS.getObjectNames()
 
         # Generate plots
         plots_to_save_list = PlotsSaver().save_plots(plots_to_save)
@@ -49,6 +57,19 @@ class ProjectSaver(object):
         # Save interfaces
         if interfaces_to_save is None:
             interfaces_to_save = []
+
+        interfaces = self.save_interfaces(directory=directory, interfaces_to_save=interfaces_to_save)
+
+        # Pass dicts to Project Writer
+        writer = ProjectWriter(workspace_names=saved_workspaces,
+                               plots_to_save=plots_to_save_list,
+                               interfaces_to_save=interfaces,
+                               save_location=directory,
+                               project_file_ext=self.project_file_ext)
+        writer.write_out()
+
+    @staticmethod
+    def save_interfaces(directory, interfaces_to_save):
         interfaces = []
         for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
@@ -63,13 +84,7 @@ class ProjectSaver(object):
                     raise
                 logger.warning("Project Saver: An interface could not be saver error: " + str(e))
 
-        # Pass dicts to Project Writer
-        writer = ProjectWriter(workspace_names=workspace_saver.get_output_list(),
-                               plots_to_save=plots_to_save_list,
-                               interfaces_to_save=interfaces,
-                               save_location=directory,
-                               project_file_ext=self.project_file_ext)
-        writer.write_out()
+        return interfaces
 
 
 class ProjectWriter(object):
