@@ -160,8 +160,8 @@ private:
                  const std::array<double, 3> &ur) {
     auto curIdx = beforeStart;
     std::array<double, 3> ctrUp = Box(ll, ur).center();
-    std::array<double, 3> ctrLow{nextBigger(ctrUp[0]), nextBigger(ctrUp[1]),
-                                 nextBigger(ctrUp[2])};
+    std::array<double, 3> ctrLow{{nextBigger(ctrUp[0]), nextBigger(ctrUp[1]),
+                                 nextBigger(ctrUp[2])}};
     store[++curIdx] =
         Box{{{ll[0], ll[1], ll[2]}}, {{ctrUp[0], ctrUp[1], ctrUp[2]}}};
     store[++curIdx] =
