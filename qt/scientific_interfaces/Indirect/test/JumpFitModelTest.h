@@ -278,16 +278,14 @@ public:
   }
 
   void
-  test_that_singleFitOutputName_returns_the_correct_name_for_a_multi_fit() {
+  test_that_singleFitOutputName_returns_the_correct_name_for_a_single_data_set_fit() {
     Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
-    auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
-    m_ads->addOrReplace("Name2", workspace2);
 
-    addWorkspacesToModel(spectra, m_workspace, workspace2);
+    addWorkspacesToModel(spectra, m_workspace);
     m_model->setFitType("ChudleyElliot");
 
     TS_ASSERT_EQUALS(m_model->singleFitOutputName(0, 0),
-                     "MultiFofQFit_ChudleyElliot_Results");
+                     "Name_HWHM_FofQFit_ChudleyElliot_s0_Results");
   }
 
 private:

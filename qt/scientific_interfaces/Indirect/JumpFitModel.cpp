@@ -352,8 +352,10 @@ std::string JumpFitModel::simultaneousFitOutputName() const {
   return sequentialFitOutputName();
 }
 
-std::string JumpFitModel::singleFitOutputName(std::size_t, std::size_t) const {
-  return sequentialFitOutputName();
+std::string JumpFitModel::singleFitOutputName(std::size_t index,
+                                              std::size_t spectrum) const {
+  return createSingleFitOutputName("%1%_FofQFit_" + m_fitType + "_s%2%_Results",
+                                   index, spectrum);
 }
 
 std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
