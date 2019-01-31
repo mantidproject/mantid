@@ -74,7 +74,7 @@ public:
 private:
   morton_index::MDCoordinate<ND>
   convertToIndex(std::vector<MDEventType<ND>> &mdEvents,
-                const morton_index::MDSpaceBounds<ND> &space);
+                 const morton_index::MDSpaceBounds<ND> &space);
   void sortEvents(std::vector<MDEventType<ND>> &mdEvents);
   BoxBase *doDistributeEvents(std::vector<MDEventType<ND>> &mdEvents);
   void distributeEvents(Task &tsk, const WORKER_TYPE &wtp);

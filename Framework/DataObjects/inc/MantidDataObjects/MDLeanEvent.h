@@ -74,13 +74,13 @@ public:
     static std::enable_if_t<
         std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
     convertToCoordinates(MDLeanEvent<nd> &event,
-                        const morton_index::MDSpaceBounds<nd> &space) {
+                         const morton_index::MDSpaceBounds<nd> &space) {
       event.convertToCoordinates(space);
     }
     static std::enable_if_t<
         std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
     convertToIndex(MDLeanEvent<nd> &event,
-                  const morton_index::MDSpaceBounds<nd> &space) {
+                   const morton_index::MDSpaceBounds<nd> &space) {
       event.convertToIndex(space);
     }
     static typename std::enable_if<
