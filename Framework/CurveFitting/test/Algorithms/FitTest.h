@@ -2047,7 +2047,7 @@ public:
     auto ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
     FunctionDomain1DVector x(-10, 10, nbins);
-    ws->dataX(0) = x.toVector();
+    ws->mutableX(0) = x.toVector();
     {
       Fit fit;
       fit.initialize();
@@ -2058,7 +2058,7 @@ public:
       fit.execute();
       auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           "out_Workspace");
-      auto y = res->y(1);
+      const auto &y = res->y(1);
       TS_ASSERT_DIFFERS(y.front(), 0.0);
       TS_ASSERT_DIFFERS(y.back(), 0.0);
     }
@@ -2073,7 +2073,7 @@ public:
       fit.execute();
       auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           "out_Workspace");
-      auto y = res->y(1);
+      const auto &y = res->y(1);
       for (size_t i = 0; i < 25; ++i) {
         TS_ASSERT_EQUALS(y[i], 0.0);
         TS_ASSERT_EQUALS(y[nbins - i - 1], 0.0);

@@ -9,10 +9,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <algorithm>
-#include <cmath>
 #include <sstream>
-#include <stdexcept>
-#include <string>
 
 namespace Mantid {
 namespace PhysicalConstants {
@@ -3214,7 +3211,10 @@ bool compareAtoms(const Atom &left, const Atom &right) {
  * @return The atom corresponding to the given Z and A
  */
 Atom getAtom(const uint16_t z_number, const uint16_t a_number) {
-  Atom temp("junk", z_number, a_number, NAN, NAN, NAN);
+  Atom temp("junk", z_number, a_number,
+            std::numeric_limits<double>::quiet_NaN(),
+            std::numeric_limits<double>::quiet_NaN(),
+            std::numeric_limits<double>::quiet_NaN());
 
   Atom *result =
       std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);

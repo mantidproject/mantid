@@ -461,8 +461,9 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
                                    std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
-  if (size > ws->blocksize() || size == 0) {
-    size = ws->blocksize();
+  const auto blocksize = ws->blocksize();
+  if (size > blocksize || size == 0) {
+    size = blocksize;
   }
 
   if (m_ragged) {

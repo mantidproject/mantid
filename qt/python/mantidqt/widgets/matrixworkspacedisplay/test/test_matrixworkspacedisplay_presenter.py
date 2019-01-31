@@ -11,16 +11,32 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mock import Mock
+from mock import Mock, patch
 
+from mantidqt.widgets.common.test_mocks.mock_mantid import MockWorkspace
+from mantidqt.widgets.common.test_mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
+from mantidqt.widgets.common.test_mocks.mock_qt import MockQModelIndex, MockQTableView
+from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockQModelIndex, \
-    MockWorkspace
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedisplay import \
-    MockMatrixWorkspaceDisplayView, MockQTableView
+
+
+def with_mock_presenter(func):
+    def wrapper(self, *args):
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        mock_observer = Mock()
+        presenter = MatrixWorkspaceDisplay(ws, view=view, ads_observer=mock_observer)
+        return func(self, ws, view, presenter, *args)
+
+    return wrapper
 
 
 class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Allow the MockWorkspace to work within the model
+        MatrixWorkspaceDisplayModel.ALLOWED_WORKSPACE_TYPES.append(MockWorkspace)
+
     def assertNotCalled(self, mock):
         self.assertEqual(0, mock.call_count)
 
@@ -31,11 +47,10 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(3, view.set_context_menu_actions.call_count)
         self.assertEqual(1, view.set_model.call_count)
 
-    def test_action_copy_spectrum_values(self):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
-
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @with_mock_presenter
+    def test_action_copy_spectrum_values(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
 
         # two rows are selected in different positions
@@ -50,13 +65,14 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
-        view.copy_to_clipboard.assert_called_once_with(expected_string)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+        mock_copy.assert_called_once_with(expected_string)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    def test_action_copy_spectrum_values_no_selection(self):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @with_mock_presenter
+    def test_action_copy_spectrum_values_no_selection(self, ws, view, presenter, mock_copy,
+                                                      mock_show_mouse_toast):
 
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
@@ -68,12 +84,13 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         # the action should never look for rows if there is no selection
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        self.assertNotCalled(mock_copy)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-    def test_action_copy_bin_values(self):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @with_mock_presenter
+    def test_action_copy_bin_values(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
 
         # two columns are selected at different positions
@@ -89,15 +106,14 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         presenter.action_copy_bin_values(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
-        view.copy_to_clipboard.assert_called_once_with(expected_string)
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+        mock_copy.assert_called_once_with(expected_string)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    def test_action_copy_bin_values_no_selection(self):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
-
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @with_mock_presenter
+    def test_action_copy_bin_values_no_selection(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
         mock_table.mock_selection_model.selectedColumns = Mock()
@@ -108,12 +124,13 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         # the action should never look for rows if there is no selection
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        self.assertNotCalled(mock_copy)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-    def test_action_copy_cell(self):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @with_mock_presenter
+    def test_action_copy_cell(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
 
         # two columns are selected at different positions
@@ -123,14 +140,14 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         presenter.action_copy_cells(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
-        self.assertEqual(1, view.copy_to_clipboard.call_count)
+        self.assertEqual(1, mock_copy.call_count)
         self.assertEqual(9, mock_index.sibling.call_count)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
-    def test_action_copy_cell_no_selection(self):
-        ws = MockWorkspace()
-        view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    @patch('mantidqt.widgets.common.table_copying.copy_to_clipboard')
+    @with_mock_presenter
+    def test_action_copy_cell_no_selection(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
 
@@ -138,9 +155,9 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-        self.assertNotCalled(view.copy_to_clipboard)
+        self.assertNotCalled(mock_copy)
 
     def common_setup_action_plot(self, table_has_selection=True):
         mock_ws = MockWorkspace()
@@ -224,7 +241,8 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
         self.assertNotCalled(mock_plot)
 
-    def test_action_plot_spectrum_no_selection(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    def test_action_plot_spectrum_no_selection(self, mock_show_mouse_toast):
         mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot(table_has_selection=False)
 
         mock_table.mock_selection_model.selectedRows = Mock()
@@ -232,7 +250,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         presenter.action_plot_spectrum(mock_table)
 
-        mock_view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
 
@@ -278,19 +296,62 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
         self.assertNotCalled(mock_plot)
 
-    def test_action_plot_bin_no_selection(self):
+    @patch('mantidqt.widgets.common.table_copying.show_mouse_toast')
+    def test_action_plot_bin_no_selection(self, mock_show_mouse_toast):
         mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot(table_has_selection=False)
         self.setup_mock_selection(mock_table, num_selected_rows=None, num_selected_cols=None)
 
         presenter.action_plot_bin(mock_table)
 
-        mock_view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
+        mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
 
         self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
         self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
         self.assertNotCalled(mock_plot)
+
+    @with_mock_presenter
+    def test_close_incorrect_workspace(self, ws, view, presenter):
+        presenter.close(ws.TEST_NAME + "123")
+        self.assertNotCalled(view.emit_close)
+        self.assertIsNotNone(presenter.ads_observer)
+
+    @with_mock_presenter
+    def test_close(self, ws, view, presenter):
+        presenter.close(ws.TEST_NAME)
+        view.emit_close.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter
+    def test_force_close_even_with_incorrect_name(self, _, view, presenter):
+        # window always closes, regardless of the workspace
+        presenter.force_close()
+        view.emit_close.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter
+    def test_force_close(self, _, view, presenter):
+        presenter.force_close()
+        view.emit_close.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter
+    def test_replace_incorrect_workspace(self, ws, view, presenter):
+        presenter.replace_workspace(ws.TEST_NAME + "123", ws)
+        self.assertNotCalled(view.get_active_tab)
+        self.assertNotCalled(view.mock_tab.viewport)
+        self.assertNotCalled(view.mock_tab.mock_viewport.update)
+
+    @with_mock_presenter
+    def test_replace(self, ws, view, presenter):
+        # patch this out after the constructor of the presenter has finished,
+        # so that we reset any calls it might have made
+        presenter.replace_workspace(ws.TEST_NAME, ws)
+
+        view.get_active_tab.assert_called_once_with()
+        view.mock_tab.viewport.assert_called_once_with()
+        view.mock_tab.mock_viewport.update.assert_called_once_with()
 
 
 if __name__ == '__main__':

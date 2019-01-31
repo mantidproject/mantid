@@ -121,3 +121,7 @@ add_subdirectory( test )
 install ( DIRECTORY plugins/ DESTINATION ${PLUGINS_DIR}/python
           PATTERN "*.pyc" EXCLUDE
           PATTERN ".svn" EXCLUDE )
+
+install ( DIRECTORY plugins/ DESTINATION ${WORKBENCH_PLUGINS_DIR}/python
+          PATTERN "*.pyc" EXCLUDE
+          PATTERN ".svn" EXCLUDE )

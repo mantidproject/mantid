@@ -251,7 +251,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
   PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
   if [[ "${ON_MACOS}" == true ]]; then
-    PACKAGINGVARS="${PACKAGINGVARS} -DPACKAGE_WORKBENCH=OFF -DCPACK_PACKAGE_SUFFIX="
+    PACKAGINGVARS="${PACKAGINGVARS} -DPACKAGE_WORKBENCH=ON -DCPACK_PACKAGE_SUFFIX="
   else
     PACKAGINGVARS="${PACKAGINGVARS} -DPACKAGE_WORKBENCH=ON"
     # Use different suffix for linux builds if parameter is not defined
@@ -363,6 +363,16 @@ fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
+# Remove GUI qsettings files
+if [[ ${ON_MACOS} == true ]] ; then
+  rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
+  rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
+  rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
+else
+  rm -f ~/.config/Mantid/MantidPlot.conf
+fi
+rm -f ~/.config/mantidproject/mantidworkbench.ini
+
 mkdir -p $userconfig_dir
 # use a fixed number of openmp threads to avoid overloading the system
 userprops_file=$userconfig_dir/Mantid.user.properties

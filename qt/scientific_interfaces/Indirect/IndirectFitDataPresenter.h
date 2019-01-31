@@ -8,10 +8,11 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
 
 #include "IAddWorkspaceDialog.h"
+#include "IIndirectFitDataView.h"
 #include "IndirectDataTablePresenter.h"
-#include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QObject>
@@ -20,17 +21,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/**
-  A presenter.
-*/
-class DLLExport IndirectFitDataPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject {
   Q_OBJECT
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
-                           IndirectFitDataView *view);
+                           IIndirectFitDataView *view);
 
   IndirectFitDataPresenter(
-      IndirectFittingModel *model, IndirectFitDataView *view,
+      IndirectFittingModel *model, IIndirectFitDataView *view,
       std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
 
   void setSampleWSSuffices(const QStringList &suffices);
@@ -55,6 +53,8 @@ protected slots:
   void setModelFromMultipleData();
   void showAddWorkspaceDialog();
 
+  virtual void closeDialog();
+
 signals:
   void singleSampleLoaded();
   void singleResolutionLoaded();
@@ -69,25 +69,27 @@ signals:
   void requestedAddWorkspaceDialog();
 
 protected:
-  IndirectFitDataView const *getView() const;
+  IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void setSingleModelData(const std::string &name);
   virtual void addModelData(const std::string &name);
   void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
-  virtual void dialogExecuted(IAddWorkspaceDialog const *dialog,
-                              QDialog::DialogCode result);
+
+private slots:
+  void addData();
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(std::size_t dataIndex);
 
+  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModel *m_model;
   PrivateFittingData m_singleData;
   PrivateFittingData m_multipleData;
-  IndirectFitDataView *m_view;
+  IIndirectFitDataView *m_view;
   std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
 };
 

@@ -35,7 +35,7 @@ Improvements
 - When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle
   Fit Types are selected in the ConvFit Tab, the Q values are retrieved from the workspaces, preventing a crash
   when plotting a guess.
-- The Plot buttons in MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit are disabled after a Run when the result workspace only 
+- The Plot buttons in MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit are disabled after a Run when the result workspace only
   has one data point to plot.
 - There is now an option to choose which output parameter to plot in MSDFit.
 - An option to skip the calculation of Monte Carlo Errors on the I(Q,t) Tab has been added.
@@ -45,6 +45,15 @@ Improvements
   maximum of 18 plots.
 - The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed.
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
+- Fit and Fit Sequential in the Fit combobox above the FitPropertyBrowser are now disabled while fitting is taking place.
+- The option to choose which workspace index to Plot Spectrum for and from which output workspace is now given in Elwin.
+- ConvFit now allows the loading of Dave ASCII files which end with '_sqw.dave'.
+- The results of a fit in MSDFit, IqtFit, ConvFit and F(Q)Fit are now plotted with error bars.
+- The AddWorkspace windows (opened from the Multiple Input tab) now stay open after adding a workspace to the data table. This 
+  is found on the MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit interfaces.
+- It is now possible to load a Nexus file without it's history on the Elwin interface by unchecking the Load History checkbox.
+- It is now possible to undock the mini-plots on the MSDFit, IqtFit, ConvFit and F(Q)Fit interfaces.
+
 
 Bugfixes
 ########
@@ -61,8 +70,12 @@ Bugfixes
 - A bug where fixed parameters don't remain fixed when using the FABADA minimizer in ConvFit has been corrected.
 - The expression for the Fit type Yi in MSDFit was incorrect and has now been corrected.
 - The x-axis labels in the output plots for MSDFit are now correct.
-- An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading 
+- An unexpected error is now prevented when clicking Plot Guess from the Display combo box in ConvFit without first loading
   a reduced file.
+- The output workspace ending with _Results now contains workspaces with corrected names which detail the fit functions used.
+- Selecting multiple data using the All Spectra checkbox without first selected a sample file used to cause an unexpected error.
+  This is now prevented. Meaningful error messages are also displayed when a sample or resolution file are not selected.
+- In the Elwin interface, the errors are now propagated correctly through to the workspace with extension _elt.
 
 
 Data Corrections Interface
@@ -116,6 +129,16 @@ Bugfixes
 ########
 
 - An unwanted 'Fit' plot is no longer plotted in ResNorm when you click `Plot` in the output options.
+
+
+Simulations Interface
+---------------------
+
+Improvements
+############
+
+- The Run button is now above the output options.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
 
 
 Diffraction Interface

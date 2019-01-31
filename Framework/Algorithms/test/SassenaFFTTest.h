@@ -245,19 +245,20 @@ private:
 
     const double dt = 0.01; // time unit, in picoseconds
     MantidVec xv;
+    xv.reserve(nbins);
     for (size_t i = 0; i < nbins; i++) {
       int j = -static_cast<int>(nbins / 2) + static_cast<int>(i);
-      xv.push_back(dt * static_cast<double>(j));
+      xv.emplace_back(dt * static_cast<double>(j));
     }
 
     double sigma;
     MantidVec yv(nbins);
     // each spectra is a gaussian of same Height but different stdev
     for (size_t i = 0; i < nspectra; i++) {
-      ws->dataX(i) = xv;
+      ws->mutableX(i) = xv;
       sigma = sigma0 / (1 + static_cast<double>(i));
       this->Gaussian(xv, yv, Heigth, sigma);
-      ws->dataY(i) = yv;
+      ws->mutableY(i) = yv;
     }
 
     API::AnalysisDataService::Instance().add(wsName, ws);

@@ -534,9 +534,9 @@ public:
   bool isParallel() const { return m_isParallel; }
 
   /// Set a function handler
-  void setHandler(FunctionHandler *handler);
+  void setHandler(std::unique_ptr<FunctionHandler> handler);
   /// Return the handler
-  FunctionHandler *getHandler() const { return m_handler; }
+  FunctionHandler *getHandler() const { return m_handler.get(); }
 
   /// Describe parameter status in relation to fitting:
   /// Active: Fit varies such parameter directly.
@@ -597,7 +597,7 @@ protected:
   bool m_isParallel;
 
   /// Pointer to a function handler
-  FunctionHandler *m_handler;
+  std::unique_ptr<FunctionHandler> m_handler;
 
   /// Pointer to the progress handler
   boost::shared_ptr<Kernel::ProgressBase> m_progReporter;

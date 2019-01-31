@@ -95,6 +95,7 @@ void CentroidPeaks::integrate() {
     }
   }
 
+  const int inBlocksize = static_cast<int>(inWS->blocksize());
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
@@ -154,7 +155,7 @@ void CentroidPeaks::integrate() {
     col = int(colcentroid / intensity);
     boost::algorithm::clamp(col, 0, nCols - 1);
     chan = int(chancentroid / intensity);
-    boost::algorithm::clamp(chan, 0, static_cast<int>(inWS->blocksize()));
+    boost::algorithm::clamp(chan, 0, inBlocksize);
 
     // Set wavelength to change tof for peak object
     if (!edgePixel(inst, bankName, col, row, Edge)) {

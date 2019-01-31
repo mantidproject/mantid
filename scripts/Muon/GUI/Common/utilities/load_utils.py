@@ -14,6 +14,7 @@ from mantid.simpleapi import mtd
 from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
+import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
@@ -189,7 +190,7 @@ def load_dead_time_from_filename(filename):
         return ""
     assert isinstance(dead_times, ITableWorkspace)
 
-    instrument = loaded_data["OutputWorkspace"].workspace.getInstrument().getName()
+    instrument = loaded_data["OutputWorkspace"][0].workspace.getInstrument().getName()
     name = str(instrument) + file_utils.format_run_for_file(run) + "_deadTimes"
     api.AnalysisDataService.Instance().addOrReplace(name, dead_times)
 
@@ -212,11 +213,10 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
-
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
-        load_result["OutputWorkspace"] = MuonWorkspaceWrapper(load_result["OutputWorkspace"])
+        load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
 
     load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
@@ -252,3 +252,45 @@ def get_table_workspace_names_from_ADS():
     names = api.AnalysisDataService.Instance().getObjectNames()
     table_names = [name for name in names if isinstance(mtd[name], ITableWorkspace)]
     return table_names
+
+
+def combine_loaded_runs(model, run_list):
+    return_ws = model._loaded_data_store.get_data(run=run_list[0])["workspace"]
+    running_total = []
+
+    for index, workspace in enumerate(return_ws["OutputWorkspace"]):
+        running_total.append(workspace.workspace)
+
+        for run in run_list[1:]:
+            ws = model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"][index].workspace
+            running_total[index] = algorithm_utils.run_Plus({
+                "LHSWorkspace": running_total[index],
+                "RHSWorkspace": ws,
+                "AllowDifferentNumberSpectra": False}
+            )
+            # remove the single loaded filename
+
+    for run in run_list:
+        model._loaded_data_store.remove_data(run=run)
+
+    return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
+    model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
+                                      filename="Co-added")
+
+
+def flatten_run_list(run_list):
+    """
+    run list might be [1,2,[3,4]] where the [3,4] are co-added
+    """
+    new_list = []
+    for run_item in run_list:
+        if isinstance(run_item, int):
+            new_list += [run_item]
+        elif isinstance(run_item, list):
+            for run in run_item:
+                new_list += [run]
+    return new_list
+
+
+def exception_message_for_failed_files(failed_file_list):
+    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)

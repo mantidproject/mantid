@@ -15,8 +15,12 @@
 set ( BIN_DIR bin )
 set ( ETC_DIR etc )
 set ( LIB_DIR lib )
-# This is the root of the plugins directory
 set ( PLUGINS_DIR plugins )
+
+set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
+set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
+
 # Separate directory of plugins to be discovered by the ParaView framework
 # These cannot be mixed with our other plugins. Further sub-directories
 # based on the Qt version will also be created by the installation targets
@@ -252,7 +256,7 @@ if (ENABLE_MANTIDPLOT)
             DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
 endif ()
 if (PACKAGE_WORKBENCH) # will eventually switch to ENABLE_WORKBENCH
-  set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
+  set ( MANTIDWORKBENCH_EXEC workbench-script ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY )
   install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install

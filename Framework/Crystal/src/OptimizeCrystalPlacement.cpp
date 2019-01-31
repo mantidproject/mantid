@@ -118,10 +118,10 @@ void OptimizeCrystalPlacement::init() {
   declareProperty("MaxAngularChange", 5.0,
                   "Max offset in degrees from current settings(def=5)");
 
-  declareProperty("MaxIndexingError", .25,
+  declareProperty("MaxIndexingError", 0.15,
                   "Use only peaks whose fractional "
                   "hkl values are below this "
-                  "tolerance(def=.25)");
+                  "tolerance(def=0.15)");
 
   declareProperty("MaxHKLPeaks2Use", -1.0,
                   "If less than 0 all peaks are used, "
@@ -145,6 +145,12 @@ void OptimizeCrystalPlacement::init() {
                       make_unique<OrEnabledWhenProperties>(
                           "AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "0",
                           "OptimizeGoniometerTilt", Kernel::IS_EQUAL_TO, "0"));
+
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputNormalisedCovarianceMatrixOptX", "CovarianceInfo",
+                      Direction::Output),
+                  "The name of the TableWorkspace in which to store the final "
+                  "covariance matrix");
 }
 
 /**
@@ -304,8 +310,8 @@ void OptimizeCrystalPlacement::exec() {
     }
   }
 
-  Instrument_const_sptr instr = peaks->getPeak(0).getInstrument();
-  V3D sampPos = instr->getSample()->getPos();
+  // offset of previous sample position so should start at 0
+  V3D sampPos = V3D(0., 0., 0.);
 
   oss << ",SampleXOffset=" << sampPos.X() << ",SampleYOffset=" << sampPos.Y()
       << ",SampleZOffset=" << sampPos.Z();
@@ -371,8 +377,8 @@ void OptimizeCrystalPlacement::exec() {
   //------------------------- Get/Report  Results ------------------
 
   double chisq = fit_alg->getProperty("OutputChi2overDoF");
-  std::cout << "Fit finished. Status="
-            << (std::string)fit_alg->getProperty("OutputStatus") << '\n';
+  g_log.notice() << "Fit finished. Status="
+                 << (std::string)fit_alg->getProperty("OutputStatus") << '\n';
 
   setProperty("Chi2overDoF", chisq);
 
@@ -391,12 +397,6 @@ void OptimizeCrystalPlacement::exec() {
   g_log.notice() << "Output Status=" << OutputStatus << '\n';
 
   //------------------ Fix up Covariance output --------------------
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputNormalisedCovarianceMatrixOptX", "CovarianceInfo",
-                      Direction::Output),
-                  "The name of the TableWorkspace in which to store the final "
-                  "covariance matrix");
-
   ITableWorkspace_sptr NormCov =
       fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
   setProperty("OutputNormalisedCovarianceMatrixOptX",
@@ -449,8 +449,9 @@ void OptimizeCrystalPlacement::exec() {
   UBinv.Invert();
   UBinv /= (2 * M_PI);
   for (int i = 0; i < outPeaks->getNumberPeaks(); ++i) {
-
-    int RunNum = outPeaks->getPeak(i).getRunNumber();
+    auto &peak = outPeaks->getPeak(i);
+    peak.setSamplePos(peak.getSamplePos() + newSampPos);
+    int RunNum = peak.getRunNumber();
     std::string RunNumStr = std::to_string(RunNum);
     Matrix<double> GonMatrix;
     if (RunNum == prevRunNum ||
@@ -472,12 +473,12 @@ void OptimizeCrystalPlacement::exec() {
       GonMatrix = GonTilt * uniGonio.getR();
       MapRunNum2GonMat[RunNum] = GonMatrix;
     } else {
-      GonMatrix = GonTilt * outPeaks->getPeak(i).getGoniometerMatrix();
+      GonMatrix = GonTilt * peak.getGoniometerMatrix();
       MapRunNum2GonMat[RunNum] = GonMatrix;
     }
 
-    outPeaks->getPeak(i).setGoniometerMatrix(GonMatrix);
-    V3D hkl = UBinv * outPeaks->getPeak(i).getQSampleFrame();
+    peak.setGoniometerMatrix(GonMatrix);
+    V3D hkl = UBinv * peak.getQSampleFrame();
     if (Geometry::IndexingUtils::ValidIndex(hkl, HKLintOffsetMax))
       nIndexed++;
 
