@@ -21,6 +21,7 @@ import traceback
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService
+
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
@@ -40,6 +41,7 @@ from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.sans_batch import SANSCentreFinder
 from sans.user_file.user_file_reader import UserFileReader
+
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
@@ -280,6 +282,10 @@ class RunTabPresenter(object):
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
             self._view.set_out_default_user_file()
+
+            self._view.set_hinting_line_edit_for_column(
+                self._table_model.column_name_converter.index('sample_shape'),
+                self._table_model.get_sample_shape_hint_strategy())
 
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
@@ -524,6 +530,7 @@ class RunTabPresenter(object):
         Process all entries in the table, regardless of selection.
         """
         all_rows = range(self._table_model.get_number_of_rows())
+        all_rows = self._table_model.get_non_empty_rows(all_rows)
         if all_rows:
             self._process_rows(all_rows)
 
@@ -532,6 +539,7 @@ class RunTabPresenter(object):
         Process selected table entries.
         """
         selected_rows = self._view.get_selected_rows()
+        selected_rows = self._table_model.get_non_empty_rows(selected_rows)
         if selected_rows:
             self._process_rows(selected_rows)
 
@@ -555,6 +563,7 @@ class RunTabPresenter(object):
             self.sans_logger.information("Starting load of batch table.")
 
             selected_rows = self._get_selected_rows()
+            selected_rows = self._table_model.get_non_empty_rows(selected_rows)
             states, errors = self.get_states(row_index=selected_rows)
 
             for row, error in errors.items():

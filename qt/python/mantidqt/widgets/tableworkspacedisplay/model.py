@@ -12,6 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
 from mantid.kernel import V3D
+from mantid.simpleapi import DeleteTableRows, SortPeaksWorkspace, SortTableWorkspace, StatisticsOfTableWorkspace
 from mantidqt.widgets.tableworkspacedisplay.marked_columns import MarkedColumns
 
 
@@ -95,3 +96,19 @@ class TableWorkspaceDisplayModel:
 
     def workspace_equals(self, workspace_name):
         return self.ws.name() == workspace_name
+
+    def delete_rows(self, selected_rows):
+        DeleteTableRows(self.ws, selected_rows)
+
+    def get_statistics(self, selected_columns):
+        stats = StatisticsOfTableWorkspace(self.ws, selected_columns)
+        return stats
+
+    def sort(self, column_index, sort_ascending):
+        column_name = self.ws.getColumnNames()[column_index]
+        if self.is_peaks_workspace():
+            SortPeaksWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, ColumnNameToSortBy=column_name,
+                               SortAscending=sort_ascending)
+        else:
+            SortTableWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, Columns=column_name,
+                               Ascending=sort_ascending)
