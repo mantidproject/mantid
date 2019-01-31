@@ -369,7 +369,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             file_or_groups = cached + nocache
         else:
             file_or_groups = filenames
-
+        self.log().notice('file_or_groups: {}'.format(file_or_groups))
+        #
         # process files or groups
         self.__processFiles(
             file_or_groups,
