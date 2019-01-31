@@ -111,6 +111,7 @@ Bugfixes
 - Fixed a bug in `AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to `DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for `AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
+- Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` for when using the multiple scattering correction.
 
 Python
 ------
