@@ -279,11 +279,13 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         # normalise_to_slits, normalise_to_monitor, '_normalised_to_time_','transposed_flat_background'
         outWSName = 'outWS'
         ws = illhelpers.create_poor_mans_d17_workspace()
+        ws = illhelpers.refl_add_line_position(ws, 3.0)
         self.assertEquals(ws.run().getProperty(common.SampleLogs.LINE_POSITION).value, 3.0)
         # Add a peak to the workspace.
         for i in range(33, 100):
             ys = ws.dataY(i)
             ys += 10.0
+        # Maybe two possibilities: InputWorkspace has sample log, or DirectLineWorkspace has sample log
         args = {'InputWorkspace': ws,
                 'OutputWorkspace': outWSName,
                 'Cleanup': 'Cleanup OFF',

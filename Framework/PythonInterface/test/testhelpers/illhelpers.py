@@ -19,7 +19,7 @@ def _gaussian(x, height, x0, sigma):
     return height * numpy.exp(- x * x / sigma2)
 
 
-def _fillTemplateReflectometryWorkspace(ws):
+def _fillTemplateReflectometryWorkspace(ws, XUnit='TOF'):
     """Fill a reflectometry workspace with somewhat sane data."""
     nHistograms = ws.getNumberHistograms()
     binWidth = 57.
@@ -40,22 +40,13 @@ def _fillTemplateReflectometryWorkspace(ws):
     }
     alg = run_algorithm('CreateWorkspace', **kwargs)
     ws = alg.getProperty('OutputWorkspace').value
-    ws.getAxis(0).setUnit('TOF')
+    ws.getAxis(0).setUnit(XUnit)
     kwargs = {
         'Workspace': ws,
         'LogName': 'time',
         'LogText': str(3600),
         'LogType': 'Number',
         'LogUnit': 'Sec',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': common.SampleLogs.LINE_POSITION,
-        'LogText': str(3.0),
-        'LogType': 'Number',
         'NumberType': 'Double',
         'child': True
     }
@@ -340,25 +331,33 @@ def default_test_detectors(ws):
     return ws
 
 
-def refl_create_beam_position_ws(beamPosWSName, referenceWS, detectorAngle, beamCentre):
-    args = {
-        'OutputWorkspace': beamPosWSName
+def refl_add_line_position(ws, linePosition):
+    kwargs = {
+        'Workspace': ws,
+        'LogName': common.SampleLogs.LINE_POSITION,
+        'LogText': str(linePosition),
+        'LogType': 'Number',
+        'NumberType': 'Double',
+        'child': True
     }
-    alg = create_algorithm('CreateEmptyTableWorkspace', **args)
-    alg.execute()
-    beamPos = mtd[beamPosWSName]
-    beamPos.addColumn('double', 'DetectorAngle')
-    beamPos.addColumn('double', 'DetectorDistance')
-    beamPos.addColumn('double', 'PeakCentre')
-    L2 = referenceWS.getInstrument().getComponentByName('detector').getPos().norm()
-    beamPos.addRow((detectorAngle, L2, beamCentre))
-    return beamPos
+    run_algorithm('AddSampleLog', **kwargs)
+    return ws
 
 
-def refl_preprocess(outputWSName, ws, beamPosWS):
+def refl_preprocess(outputWSName, ws):
     args = {
         'InputWorkspace': ws,
-        'DirectBeamPosition': beamPosWS,
+        'OutputWorkspace': outputWSName,
+    }
+    alg = create_algorithm('ReflectometryILLPreprocess', **args)
+    alg.execute()
+    return mtd[outputWSName]
+
+
+def refl_preprocess_with_calibration(outputWSName, ws, directLineWS):
+    args = {
+        'InputWorkspace': ws,
+        'DirectLineWorkspace': directLineWS,
         'OutputWorkspace': outputWSName,
     }
     alg = create_algorithm('ReflectometryILLPreprocess', **args)
