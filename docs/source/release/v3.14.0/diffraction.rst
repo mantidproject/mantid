@@ -79,7 +79,7 @@ Improvements
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
 - :ref:`SaveReflections <algm-SaveReflections>` now supports saving indexed modulated peaks in the Jana format.
-
+- `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ has been added as an external project
 
 Bugfixes
 ########
