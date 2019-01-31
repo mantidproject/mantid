@@ -127,15 +127,15 @@ public:
     using EventAccess = MDLeanEvent<ND>::template AccessFor<MDLeanEventTest>;
 #if BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
     try {
-      EventAccess::retrieveIndex(event, bounds);
+      EventAccess::convertToIndex(event, bounds);
     } catch (std::runtime_error &exception) {
       TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
                            std::string::npos,
                        true);
     }
 #else
-    EventAccess::retrieveIndex(event, bounds);
-    EventAccess::retrieveCoordinates(event, bounds);
+    EventAccess::convertToIndex(event, bounds);
+    EventAccess::convertToCoordinates(event, bounds);
 
     TS_ASSERT_EQUALS(event.getCenter(0), 1.5);
     TS_ASSERT_EQUALS(event.getCenter(1), 10);

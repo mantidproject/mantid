@@ -73,7 +73,7 @@ public:
 
 private:
   morton_index::MDCoordinate<ND>
-  retrieveIndex(std::vector<MDEventType<ND>> &mdEvents,
+  convertToIndex(std::vector<MDEventType<ND>> &mdEvents,
                 const morton_index::MDSpaceBounds<ND> &space);
   void sortEvents(std::vector<MDEventType<ND>> &mdEvents);
   BoxBase *doDistributeEvents(std::vector<MDEventType<ND>> &mdEvents);
@@ -120,7 +120,7 @@ template <size_t ND, template <size_t> class MDEventType,
 typename MDEventTreeBuilder<ND, MDEventType, EventIterator>::TreeWithIndexError
 MDEventTreeBuilder<ND, MDEventType, EventIterator>::distribute(
     std::vector<MDEvent> &mdEvents) {
-  auto err = retrieveIndex(mdEvents, m_space);
+  auto err = convertToIndex(mdEvents, m_space);
   sortEvents(mdEvents);
   auto root = doDistributeEvents(mdEvents);
   return {root, err};
@@ -167,7 +167,7 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::doDistributeEvents(
 template <size_t ND, template <size_t> class MDEventType,
           typename EventIterator>
 morton_index::MDCoordinate<ND>
-MDEventTreeBuilder<ND, MDEventType, EventIterator>::retrieveIndex(
+MDEventTreeBuilder<ND, MDEventType, EventIterator>::convertToIndex(
     std::vector<MDEventType<ND>> &mdEvents,
     const morton_index::MDSpaceBounds<ND> &space) {
   std::vector<morton_index::MDCoordinate<ND>> perThread(
@@ -175,7 +175,7 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::retrieveIndex(
 #pragma omp parallel for num_threads(m_numWorkers)
   for (int64_t i = 0; i < static_cast<int64_t>(mdEvents.size()); ++i) {
     morton_index::MDCoordinate<ND> oldCoord{mdEvents[i].getCenter()};
-    IndexCoordinateSwitcher::retrieveIndex(mdEvents[i], space);
+    IndexCoordinateSwitcher::convertToIndex(mdEvents[i], space);
     morton_index::MDCoordinate<ND> newCoord =
         morton_index::indexToCoordinates<ND, IntT, MortonT>(
             IndexCoordinateSwitcher::getIndex(mdEvents[i]), space);
@@ -317,7 +317,7 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(
             static_cast<int64_t>(splitThreshold) ||
         tsk.maxDepth == 1) {
       for (auto it = boxEventStart; it < eventIt; ++it)
-        IndexCoordinateSwitcher::retrieveCoordinates(*it, m_space);
+        IndexCoordinateSwitcher::convertToCoordinates(*it, m_space);
       m_bc->incBoxesCounter(tsk.level);
       newBox = new Box(m_bc.get(), tsk.level, extents, boxEventStart, eventIt);
     } else {

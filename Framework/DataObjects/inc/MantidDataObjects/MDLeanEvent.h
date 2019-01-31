@@ -66,22 +66,22 @@ public:
 
   template <class Accessor>
   /**
-   * Internal structure to avoid the direct exposing of retrieve
+   * Internal structure to avoid the direct exposing of API
    * functions, which change the state of event (switch between
    * union fields)
    */
   struct AccessFor {
     static std::enable_if_t<
         std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
-    retrieveCoordinates(MDLeanEvent<nd> &event,
+    convertToCoordinates(MDLeanEvent<nd> &event,
                         const morton_index::MDSpaceBounds<nd> &space) {
-      event.retrieveCoordinates(space);
+      event.convertToCoordinates(space);
     }
     static std::enable_if_t<
         std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
-    retrieveIndex(MDLeanEvent<nd> &event,
+    convertToIndex(MDLeanEvent<nd> &event,
                   const morton_index::MDSpaceBounds<nd> &space) {
-      event.retrieveIndex(space);
+      event.convertToIndex(space);
     }
     static typename std::enable_if<
         std::is_same<EventAccessor, typename Accessor::EventAccessType>::value,
@@ -117,11 +117,23 @@ protected:
 #pragma pack(pop)
 
 private:
-  void retrieveIndex(const morton_index::MDSpaceBounds<nd> &space) {
+  /**
+   * Calculate Morton index for center coordinates for
+   * given space and ovveride the memory used for
+   * storing center with index
+   * @param space :: given space
+   */
+  void convertToIndex(const morton_index::MDSpaceBounds<nd> &space) {
     index = morton_index::coordinatesToIndex<nd, IntT, MortonT>(center, space);
   }
 
-  void retrieveCoordinates(const morton_index::MDSpaceBounds<nd> &space) {
+  /**
+   * Calculate coordinates of the center of event from it
+   * Morton index in known space and oveerride index with
+   * coordinates in memory
+   * @param space :: known space
+   */
+  void convertToCoordinates(const morton_index::MDSpaceBounds<nd> &space) {
     auto coords =
         morton_index::indexToCoordinates<nd, IntT, MortonT>(index, space);
     for (unsigned i = 0; i < nd; ++i)
