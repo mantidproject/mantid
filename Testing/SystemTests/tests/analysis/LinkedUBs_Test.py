@@ -95,7 +95,7 @@ class LinkedUBs_Test(systemtesting.MantidSystemTest):
 
       linkedUB = mtd['SXD30905_linked_peaks'].sample().getOrientedLattice().getUB()
 
-      diff = linkedUB - UB2 < 0.001
+      diff = linkedUB - UB2 < 0.01
       for c in range(3):
           # This compares each column, allowing old == new OR old == -new
           if not np.all(diff[:,c]):
