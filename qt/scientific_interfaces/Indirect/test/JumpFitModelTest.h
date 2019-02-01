@@ -228,8 +228,8 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(0, 0).value(), 1);
-    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(1, 0).value(), 2);
+    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(0, 0).get(), 1);
+    TS_ASSERT_EQUALS(m_model->getWidthSpectrum(1, 0).get(), 2);
   }
 
   void test_that_getEISFSpectrum_will_return_none_when_there_are_no_EISFs() {
@@ -247,8 +247,8 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(0, 0).value(), 0);
-    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(1, 0).value(), 3);
+    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(0, 0).get(), 0);
+    TS_ASSERT_EQUALS(m_model->getEISFSpectrum(1, 0).get(), 3);
   }
 
   void
