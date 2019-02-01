@@ -423,6 +423,7 @@ public:
                        true);
     }
 #else
+    std::cout << sizeof(morton_index::uint128_t) << "   sizeof\n";
     static std::vector<std::shared_ptr<InputGenerator>> generators;
     // All points in one child node
     generators.emplace_back(new SimpleInput(11));
