@@ -544,7 +544,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                                    Tolerance=self.kwargs['CompressTolerance'],
                                    StartTime=self.kwargs['CompressStartTime'])
         #
-        if unfocusname == '': return
+        if unfocusname == '':
+            return
         self._accumulate_calls[unfocusname] += 1
         firstrun = self._accumulate_calls[unfocusname] == 1
         if firstrun:
