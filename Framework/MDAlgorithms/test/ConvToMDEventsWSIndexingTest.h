@@ -365,6 +365,7 @@ public:
                        true);
     }
 #else
+    std::cout << sizeof(morton_index::uint128_t) << "   sizeof\n";
     std::cout << "Start test1." << std::endl;
     std::array<float, 3> curPt{{static_cast<float>(lowerLeft[0]),
                                 static_cast<float>(lowerLeft[1]),
