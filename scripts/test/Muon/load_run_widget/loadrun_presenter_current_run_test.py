@@ -133,6 +133,19 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.assertEqual(self.presenter.runs, [[9999]])
         self.assertEqual(self.presenter.workspaces, [[2]])
 
+    @run_test_with_and_without_threading
+    def test_load_current_run_displays_error_if_incrementing_past_current_run(self):
+        # set up current run
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1234, "1234.nxs"))
+        self.view.set_run_edit_text("1234")
+        self.presenter.handle_load_current_run()
+        self.wait_for_thread(self.presenter._load_thread)
+
+        self.presenter.handle_increment_run()
+        self.wait_for_thread(self.presenter._load_thread)
+
+        self.assertEqual(self.view.warning_popup.call_count, 1)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -192,7 +192,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.set_dead_time_label(dead_time_text)
         except ValueError as error:
             self._handle_selected_table_is_invalid()
-            self._view.warning_popup(error.args[0])
+            self._view.warning_popup(error.args[0] + ' ' + error.args[1])
 
     def _handle_selected_table_is_invalid(self):
         self._model.set_dead_time_to_none()

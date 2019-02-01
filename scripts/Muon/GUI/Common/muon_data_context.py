@@ -108,7 +108,7 @@ class MuonDataContext(object):
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
         self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
-            in allowed_instruments else 'None'
+            in allowed_instruments else 'EMU'
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
