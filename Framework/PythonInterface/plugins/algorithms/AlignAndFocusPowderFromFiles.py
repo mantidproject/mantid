@@ -472,7 +472,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 if useCaching and len(grain)>1:
                     # save partial cache
                     self.__saveSummedGroupToCache(grain)
-                # assumulate into final sum
+                # accumulate into final sum
                 self.__accumulate(partialsum_wkspname, finalname, unfocusname, unfocusname_file)
         return
 
