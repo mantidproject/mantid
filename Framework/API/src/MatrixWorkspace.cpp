@@ -59,18 +59,16 @@ MatrixWorkspace::MatrixWorkspace(const Parallel::StorageMode storageMode)
       m_isInitialized(false), m_YUnit(), m_YUnitLabel(), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
-    : IMDWorkspace(other), ExperimentInfo(other) {
+    : IMDWorkspace(other), ExperimentInfo(other),
+      m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit),
+      m_YUnitLabel(other.m_YUnitLabel),
+      m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks),
+      m_indexInfoNeedsUpdate(false) {
   m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(other.indexInfo());
-  m_indexInfoNeedsUpdate = false;
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = other.m_axes[i]->clone(this);
-
-  m_isInitialized = other.m_isInitialized;
-  m_YUnit = other.m_YUnit;
-  m_YUnitLabel = other.m_YUnitLabel;
-  m_isCommonBinsFlag = other.m_isCommonBinsFlag;
-  m_masks = other.m_masks;
+  m_isCommonBinsFlagValid.store(other.m_isCommonBinsFlagValid.load());
   // TODO: Do we need to init m_monitorWorkspace?
 }
 
