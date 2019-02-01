@@ -362,7 +362,7 @@ public:
       TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
                            std::string::npos,
                        true);
-      }
+    }
 #else
     std::array<float, 3> curPt{{static_cast<float>(lowerLeft[0]),
                                 static_cast<float>(lowerLeft[1]),
@@ -404,19 +404,18 @@ public:
     delete topNodeWithErrorMulti.root;
     TS_ASSERT_EQUALS(check, true);
 #endif // BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
-    }
+  }
 
-    void test_sructure() {
+  void test_sructure() {
 #if BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
-      try {
-        checkStructure(SimpleInput(11).generate(), lowerLeft, upperRight,
-                       splitTreshold);
-      } catch (std::runtime_error &exception) {
-        TS_ASSERT_EQUALS(
-            std::string(exception.what()).find("specialisation.") !=
-                std::string::npos,
-            true);
-      }
+    try {
+      checkStructure(SimpleInput(11).generate(), lowerLeft, upperRight,
+                     splitTreshold);
+    } catch (std::runtime_error &exception) {
+      TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
+                           std::string::npos,
+                       true);
+    }
 #else
     static std::vector<std::shared_ptr<InputGenerator>> generators;
     // All points in one child node
@@ -435,99 +434,99 @@ public:
           checkStructure(gen->generate(), lowerLeft, upperRight, splitTreshold),
           true);
 #endif // MULTIPRECISION_BOOST_VALID_VERSION
+  }
+
+private:
+  bool compareWithFullTreeRecursive(FullTree3D3L::PtDistr &distr, size_t id,
+                                    Mantid::API::IMDNode *nd) {
+    bool res = distr[id].empty();
+    if (nd->isLeaf()) {
+      res = (distr[id].size() == nd->getNPoints());
+    } else {
+      for (int i = 0; i < 8; ++i)
+        res &= compareWithFullTreeRecursive(
+            distr, FullTree3D3L::getChildIdx(id, i), nd->getChild(i));
     }
 
-  private:
-    bool compareWithFullTreeRecursive(FullTree3D3L::PtDistr & distr, size_t id,
-                                      Mantid::API::IMDNode * nd) {
-      bool res = distr[id].empty();
-      if (nd->isLeaf()) {
-        res = (distr[id].size() == nd->getNPoints());
-      } else {
-        for (int i = 0; i < 8; ++i)
-          res &= compareWithFullTreeRecursive(
-              distr, FullTree3D3L::getChildIdx(id, i), nd->getChild(i));
-      }
+    return res;
+  }
+  bool compareWithFullTree(FullTree3D3L::PtDistr &distr,
+                           Mantid::API::IMDNode *root) {
+    return compareWithFullTreeRecursive(distr, 0, root);
+  }
 
-      return res;
-    }
-    bool compareWithFullTree(FullTree3D3L::PtDistr & distr,
-                             Mantid::API::IMDNode * root) {
-      return compareWithFullTreeRecursive(distr, 0, root);
-    }
-
-    bool compareNode(Mantid::API::IMDNode * nd1, Mantid::API::IMDNode * nd2) {
-      if (nd1->getNumChildren() != nd2->getNumChildren())
+  bool compareNode(Mantid::API::IMDNode *nd1, Mantid::API::IMDNode *nd2) {
+    if (nd1->getNumChildren() != nd2->getNumChildren())
+      return false;
+    size_t nd = nd1->getNumDims();
+    if (nd != nd2->getNumDims())
+      return false;
+    std::vector<Mantid::coord_t> center1(nd);
+    std::vector<Mantid::coord_t> center2(nd);
+    nd1->getCenter(center1.data());
+    nd2->getCenter(center2.data());
+    for (size_t i = 0; i < nd; ++i) {
+      auto ext = nd1->getExtents(i);
+      if (ext.outside(center2[i]))
         return false;
-      size_t nd = nd1->getNumDims();
-      if (nd != nd2->getNumDims())
+      ext = nd2->getExtents(i);
+      if (ext.outside(center1[i]))
         return false;
-      std::vector<Mantid::coord_t> center1(nd);
-      std::vector<Mantid::coord_t> center2(nd);
-      nd1->getCenter(center1.data());
-      nd2->getCenter(center2.data());
-      for (size_t i = 0; i < nd; ++i) {
-        auto ext = nd1->getExtents(i);
-        if (ext.outside(center2[i]))
+    }
+    if (nd1->getNPoints() != nd2->getNPoints())
+      return false;
+    return true;
+  }
+
+  bool compareTrees(Mantid::API::IMDNode *nd1, Mantid::API::IMDNode *nd2) {
+    if (nd1->isLeaf() && nd2->isLeaf())
+      return compareNode(nd1, nd2);
+    else if (!nd1->isLeaf() && !nd2->isLeaf()) {
+      bool res = compareNode(nd1, nd2);
+      for (size_t i = 0; i < nd1->getNumChildren(); ++i) {
+        res &= compareTrees(nd1->getChild(i), nd2->getChild(i));
+        if (!res)
           return false;
-        ext = nd2->getExtents(i);
-        if (ext.outside(center1[i]))
-          return false;
       }
-      if (nd1->getNPoints() != nd2->getNPoints())
-        return false;
       return true;
-    }
+    } else
+      return false;
+  }
 
-    bool compareTrees(Mantid::API::IMDNode * nd1, Mantid::API::IMDNode * nd2) {
-      if (nd1->isLeaf() && nd2->isLeaf())
-        return compareNode(nd1, nd2);
-      else if (!nd1->isLeaf() && !nd2->isLeaf()) {
-        bool res = compareNode(nd1, nd2);
-        for (size_t i = 0; i < nd1->getNumChildren(); ++i) {
-          res &= compareTrees(nd1->getChild(i), nd2->getChild(i));
-          if (!res)
-            return false;
-        }
-        return true;
-      } else
-        return false;
-    }
+  bool checkStructure(
+      const Points &points,
+      const std::array<double, 3> &ll, // lower left bound of global space
+      const std::array<double, 3> &ur,
+      size_t splitTreshold) { // upper right bound of global space
+    FullTree3D3L t3d(ll, ur);
+    Mantid::API::BoxController_sptr bc =
+        boost::shared_ptr<Mantid::API::BoxController>(
+            new Mantid::API::BoxController(ND));
+    bc->setMaxDepth(3);
+    bc->setSplitInto(2);
+    bc->setSplitThreshold(splitTreshold);
+    morton_index::MDSpaceBounds<ND> bds{};
+    bds(0, 0) = static_cast<Mantid::coord_t>(ll[0]);
+    bds(0, 1) = static_cast<Mantid::coord_t>(ur[0]);
+    bds(1, 0) = static_cast<Mantid::coord_t>(ll[1]);
+    bds(1, 1) = static_cast<Mantid::coord_t>(ur[1]);
+    bds(2, 0) = static_cast<Mantid::coord_t>(ll[2]);
+    bds(2, 1) = static_cast<Mantid::coord_t>(ur[2]);
+    TreeBuilder tb(1, 0, bc, bds);
 
-    bool checkStructure(
-        const Points &points,
-        const std::array<double, 3> &ll, // lower left bound of global space
-        const std::array<double, 3> &ur,
-        size_t splitTreshold) { // upper right bound of global space
-      FullTree3D3L t3d(ll, ur);
-      Mantid::API::BoxController_sptr bc =
-          boost::shared_ptr<Mantid::API::BoxController>(
-              new Mantid::API::BoxController(ND));
-      bc->setMaxDepth(3);
-      bc->setSplitInto(2);
-      bc->setSplitThreshold(splitTreshold);
-      morton_index::MDSpaceBounds<ND> bds{};
-      bds(0, 0) = static_cast<Mantid::coord_t>(ll[0]);
-      bds(0, 1) = static_cast<Mantid::coord_t>(ur[0]);
-      bds(1, 0) = static_cast<Mantid::coord_t>(ll[1]);
-      bds(1, 1) = static_cast<Mantid::coord_t>(ur[1]);
-      bds(2, 0) = static_cast<Mantid::coord_t>(ll[2]);
-      bds(2, 1) = static_cast<Mantid::coord_t>(ur[2]);
-      TreeBuilder tb(1, 0, bc, bds);
+    auto res = t3d.distribute(points, splitTreshold);
 
-      auto res = t3d.distribute(points, splitTreshold);
+    MDEventStore mdEvents(points.size());
+    for (size_t k = 0; k < points.size(); ++k)
+      for (size_t d = 0; d < ND; ++d)
+        mdEvents[k].setCenter(d, points[k][d]);
 
-      MDEventStore mdEvents(points.size());
-      for (size_t k = 0; k < points.size(); ++k)
-        for (size_t d = 0; d < ND; ++d)
-          mdEvents[k].setCenter(d, points[k][d]);
+    auto topNodeWithError = tb.distribute(mdEvents);
 
-      auto topNodeWithError = tb.distribute(mdEvents);
-
-      auto check = compareWithFullTree(res, topNodeWithError.root);
-      delete topNodeWithError.root;
-      return check;
-    }
-  };
+    auto check = compareWithFullTree(res, topNodeWithError.root);
+    delete topNodeWithError.root;
+    return check;
+  }
+};
 
 #endif /* MANTID_MDALGORITHMS_CONVTOMDEVENTSWSINDEXINGTEST_H_ */
