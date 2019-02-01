@@ -365,6 +365,7 @@ public:
                        true);
     }
 #else
+    std::cout << "Start test1." << std::endl;
     std::array<float, 3> curPt{{static_cast<float>(lowerLeft[0]),
                                 static_cast<float>(lowerLeft[1]),
                                 static_cast<float>(lowerLeft[2])}};
@@ -380,7 +381,7 @@ public:
           curPt[d] -= bound[d];
         mdEvents[k].setCenter(d, curPt[d]);
       }
-
+    std::cout << "Prepare for tree builder." << std::endl;
     Mantid::API::BoxController_sptr bc =
         boost::shared_ptr<Mantid::API::BoxController>(
             new Mantid::API::BoxController(ND));
@@ -394,16 +395,20 @@ public:
     bds(1, 1) = static_cast<Mantid::coord_t>(upperRight[1]);
     bds(2, 0) = static_cast<Mantid::coord_t>(lowerLeft[2]);
     bds(2, 1) = static_cast<Mantid::coord_t>(upperRight[2]);
+    std::cout << "Construct tree builder." << std::endl;
     TreeBuilder tbSingle(1, 0, bc, bds);
     TreeBuilder tbMulti(4, splitTreshold * 2, bc, bds);
+    std::cout << "Distribute events." << std::endl;
     auto topNodeWithErrorSingle = tbSingle.distribute(mdEvents);
     auto topNodeWithErrorMulti = tbMulti.distribute(mdEvents);
 
+    std::cout << "Compare trees." << std::endl;
     bool check =
         compareTrees(topNodeWithErrorSingle.root, topNodeWithErrorMulti.root);
     delete topNodeWithErrorSingle.root;
     delete topNodeWithErrorMulti.root;
     TS_ASSERT_EQUALS(check, true);
+    std::cout << "End test1." << std::endl;
 #endif // BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
   }
 
