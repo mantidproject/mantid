@@ -23,6 +23,9 @@ public:
 
   boost::optional<RangeInLambda> const &wavelengthRange() const;
   bool integratedMonitors() const;
+  MonitorCorrections const &monitorCorrections() const;
+  DetectorCorrections const &detectorCorrections() const;
+
   size_t monitorIndex() const;
   boost::optional<RangeInLambda> monitorIntegralRange() const;
   boost::optional<RangeInLambda> monitorBackgroundRange() const;

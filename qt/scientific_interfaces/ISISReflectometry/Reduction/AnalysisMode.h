@@ -27,9 +27,8 @@ inline std::string analysisModeToString(AnalysisMode analysisMode) {
     return "PointDetectorAnalysis";
   case AnalysisMode::MultiDetector:
     return "MultiDetectorAnalysis";
-  default:
-    throw std::runtime_error("Unexpected analysis mode.");
   }
+  throw std::runtime_error("Unexpected analysis mode");
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

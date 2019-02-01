@@ -41,6 +41,16 @@ void updateProperty(std::string const &property,
   updateProperty(property, value, properties);
 }
 
+void updateProperty(std::string const &property, bool value,
+                    AlgorithmRuntimeProps &properties) {
+  updateProperty(property, boolToString(value), properties);
+}
+
+void updateProperty(std::string const &property, size_t value,
+                    AlgorithmRuntimeProps &properties) {
+  updateProperty(property, std::to_string(value), properties);
+}
+
 void updateProperty(std::string const &property, double value,
                     AlgorithmRuntimeProps &properties) {
   updateProperty(property, std::to_string(value), properties);
@@ -76,8 +86,8 @@ void updateTransmissionWorkspaceProperties(
                  properties);
 }
 
-void updateRangeInQProperties(AlgorithmRuntimeProps &properties,
-                              RangeInQ const &rangeInQ) {
+void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties,
+                                      RangeInQ const &rangeInQ) {
   updateProperty("MomentumTransferMin", rangeInQ.min(), properties);
   updateProperty("MomentumTransferMax", rangeInQ.max(), properties);
   updateProperty("MomentumTransferStep", rangeInQ.step(), properties);
@@ -88,7 +98,7 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
       properties, row.reducedWorkspaceNames().inputRunNumbers());
   updateTransmissionWorkspaceProperties(
       properties, row.reducedWorkspaceNames().transmissionRuns());
-  updateRangeInQProperties(properties, row.qRange());
+  updateMomentumTransferProperties(properties, row.qRange());
   updateProperty("ThetaIn", row.theta(), properties);
   updateProperty("ScaleFactor", row.scaleFactor(), properties);
   updatePropertiesFromMap(properties, row.reductionOptions());
@@ -163,10 +173,57 @@ void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
 
   updateTransmissionWorkspaceProperties(
       properties, perThetaDefaults->transmissionWorkspaceNames());
-  updateRangeInQProperties(properties, perThetaDefaults->qRange());
+  updateMomentumTransferProperties(properties, perThetaDefaults->qRange());
   updateProperty("ScaleFactor", perThetaDefaults->scaleFactor(), properties);
   updateProperty("ProcessingInstructions",
                  perThetaDefaults->processingInstructions(), properties);
+}
+
+void updateWavelengthRangeProperties(
+    AlgorithmRuntimeProps &properties,
+    boost::optional<RangeInLambda> const &rangeInLambda) {
+  if (!rangeInLambda)
+    return;
+
+  updateProperty("WavelengthMin", rangeInLambda->min(), properties);
+  updateProperty("WavelengthMax", rangeInLambda->max(), properties);
+}
+
+void updateMonitorCorrectionProperties(AlgorithmRuntimeProps &properties,
+                                       MonitorCorrections const &monitor) {
+  updateProperty("I0MonitorIndex", monitor.monitorIndex(), properties);
+  updateProperty("NormalizeByIntegratedMonitors", monitor.integrate(),
+                 properties);
+  if (monitor.integralRange() && monitor.integralRange()->minSet())
+    updateProperty("MonitorIntegrationWavelengthMin",
+                   monitor.integralRange()->min(), properties);
+  if (monitor.integralRange() && monitor.integralRange()->maxSet())
+    updateProperty("MonitorIntegrationWavelengthMax",
+                   monitor.integralRange()->max(), properties);
+  if (monitor.backgroundRange() && monitor.backgroundRange()->minSet())
+    updateProperty("MonitorBackgroundWavelengthMin",
+                   monitor.backgroundRange()->min(), properties);
+  if (monitor.backgroundRange() && monitor.backgroundRange()->maxSet())
+    updateProperty("MonitorBackgroundWavelengthMax",
+                   monitor.backgroundRange()->max(), properties);
+}
+
+void updateDetectorCorrectionProperties(AlgorithmRuntimeProps &properties,
+                                        DetectorCorrections const &detector) {
+  updateProperty("CorrectDetectors", detector.correctPositions(), properties);
+  if (detector.correctPositions())
+    updateProperty("DetectorCorrectionType",
+                   detectorCorrectionTypeToString(detector.correctionType()),
+                   properties);
+}
+
+void updateInstrumentProperties(AlgorithmRuntimeProps &properties,
+                                Instrument const &instrument) {
+  updateWavelengthRangeProperties(properties, instrument.wavelengthRange());
+  updateMonitorCorrectionProperties(properties,
+                                    instrument.monitorCorrections());
+  updateDetectorCorrectionProperties(properties,
+                                     instrument.detectorCorrections());
 }
 
 void addAlgorithmForRow(Row &row, Batch const &model,
@@ -179,7 +236,7 @@ void addAlgorithmForRow(Row &row, Batch const &model,
   updateExperimentProperties(properties, model.experiment());
   updatePerThetaDefaultProperties(properties,
                                   model.defaultsForTheta(row.theta()));
-  // updateInstrumentProperties(properties, model.experiment());
+  updateInstrumentProperties(properties, model.instrument());
   // updateSaveProperties(properties, model.experiment());
   updateRowProperties(properties, row);
 

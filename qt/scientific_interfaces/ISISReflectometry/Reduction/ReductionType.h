@@ -31,9 +31,8 @@ inline std::string reductionTypeToString(ReductionType reductionType) {
     return "NonFlatSample";
   case ReductionType::Normal:
     return "Normal";
-  default:
-    throw std::runtime_error("Unexpected reduction type.");
   }
+  throw std::runtime_error("Unexpected reduction type");
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

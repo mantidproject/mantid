@@ -30,9 +30,8 @@ inline std::string summationTypeToString(SummationType summationType) {
     return "SumInLambda";
   case SummationType::SumInQ:
     return "SumInQ";
-  default:
-    throw std::runtime_error("Unexpected summation type.");
   }
+  throw std::runtime_error("Unexpected summation type");
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

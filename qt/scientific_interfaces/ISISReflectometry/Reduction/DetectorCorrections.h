@@ -7,10 +7,24 @@
 #ifndef MANTID_CUSTOMINTERFACES_DETECTORCORRECTIONS_H_
 #define MANTID_CUSTOMINTERFACES_DETECTORCORRECTIONS_H_
 #include "Common/DllConfig.h"
+#include <stdexcept>
+#include <string>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
 enum class DetectorCorrectionType { VerticalShift, RotateAroundSample };
+
+inline std::string
+detectorCorrectionTypeToString(DetectorCorrectionType correctionType) {
+  switch (correctionType) {
+  case DetectorCorrectionType::VerticalShift:
+    return "VerticalShift";
+  case DetectorCorrectionType::RotateAroundSample:
+    return "RotateAroundSample";
+  }
+  throw std::runtime_error("Unexpected detector correction type");
+}
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL DetectorCorrections {
 public:
