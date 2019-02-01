@@ -326,6 +326,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
     def PyExec(self):
         self._filenames = filenames = sorted(self._getLinearizedFilenames('Filename'))
+        import collections
+        self._accumulate_calls = collections.defaultdict(int) # bookkeeping for __accumulate
         self.filterBadPulses = self.getProperty('FilterBadPulses').value
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
@@ -359,23 +361,16 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             wkspname = os.path.split(filename)[-1].split('.')[0]
             self.__determineCharacterizations(filename, wkspname)
 
-        # find cache and partition the filename list
-        # the file_or_groups will be a list of filenames (strings) or list of filenames (group),
-        # the latter means a cache for the group was found and loaded.
-        cached = []
-        nocache = []
         if useCaching:
-            self.__find_caches(filenames, cached, nocache)
+            # find caches and sum them. return files without cache
+            nocache = self.__find_caches(filenames, finalname, unfocusname, unfocusname_file)
         else:
             nocache = filenames
-        self.log().notice('cached: {}\nnocache: {}'.format(cached, nocache))
+        self.log().notice('Files remained to add: {}'.format(nocache,))
         #
         # process not-cached files
         if nocache:
-            newcache = list(self.__processFiles(nocache, useCaching, unfocusname, unfocusname_file))
-            cached += newcache
-        # combine
-        self.__processGroups(cached, unfocusname, unfocusname_file, finalname)
+            self.__processFiles(nocache, useCaching, unfocusname, unfocusname_file)
         #
         # create cache of everything summed together
         if useCaching:
@@ -390,8 +385,14 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if unfocusname != '':
             self.setProperty('UnfocussedWorkspace', mtd[unfocusname])
 
-    def __find_caches(self, filenames, cached, nocache):
-        "find caches and load them using a greedy algorithm"
+    def __find_caches(self, filenames, finalname, unfocusname, unfocusname_file, firstcall=True):
+        """find caches and load them using a greedy algorithm
+
+        Find cache for the longest partial sum of the given filenames.
+        If no cache found for any partial sum, return the filename list.
+        If a cache found for a partial sum, continue to work on the remained files by calling this function.
+        When a cache is found, it will be loaded and accumulated, and then deleted.
+        """
         N = len(filenames)
         found = False
         for length in range(N, 1, -1):
@@ -400,20 +401,22 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 files1 = filenames[start:end+1]
                 summed_cache_file = self.__get_grp_cache_fn(files1)
                 if os.path.exists(summed_cache_file):
+                    self.log().notice('Found cache for {}'.format(files1))
                     wkspname = self.__get_grp_ws_name(files1)
+                    self.log().notice('Loading cache from {}'.format(summed_cache_file))
                     LoadNexusProcessed(Filename=summed_cache_file, OutputWorkspace=wkspname)
+                    self.__accumulate(wkspname, finalname, unfocusname, unfocusname_file)
                     found = True
-                    cached.append(files1)
                     break
             if found:
                 break
             continue
         if not found:
-            nocache += filenames
-            return
+            return filenames
         remained = filenames[:start] + filenames[end+1:]
         if remained:
-            return self.__find_caches(remained, cached, nocache)
+            return self.__find_caches(remained, finalname, unfocusname, unfocusname_file, firstcall=False)
+        return []
 
     def __get_grp_ws_name(self, group):
         def _(filename):
@@ -427,8 +430,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
 
     def __processFiles(self, files, useCaching, unfocusname, unfocusname_file):
-        """process given files and yield grains (group of files)
+        """process given files, separate them to "grains". Sum each grain, and add the grain sum to final sum
         """
+        finalname = self.getPropertyValue('OutputWorkspace')
         N = len(files)
         import math
         if N>3: #9
@@ -443,12 +447,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             grain = files[grain_start:grain_end]
             partialsum_wkspname = self.__get_grp_ws_name(grain)
             self.__accumulate(
-                wkspname, partialsum_wkspname, unfocusname, unfocusname_file, firstrun=i==grain_start)
+                wkspname, partialsum_wkspname, unfocusname, unfocusname_file)
             if i==grain_end-1:
                 if useCaching and len(grain)>1:
                     # save partial cache
                     self.__saveSummedGroupToCache(grain)
-                yield grain
+                # assumulate into final sum
+                self.__accumulate(partialsum_wkspname, finalname, unfocusname, unfocusname_file)
         return
 
     def __saveSummedGroupToCache(self, group, wkspname=None):
@@ -456,14 +461,6 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         wksp = wkspname or self.__get_grp_ws_name(group)
         if not os.path.exists(cache_file):
             SaveNexusProcessed(InputWorkspace=wksp, Filename=cache_file)
-        return
-
-    def __processGroups(self, groups, unfocusname, unfocusname_file, finalname):
-        """process given groups with cached sum already loaded
-        """
-        for (i, g) in enumerate(groups):
-            wkspname = self.__get_grp_ws_name(g)
-            self.__accumulate(wkspname, finalname, unfocusname, unfocusname_file, firstrun=i==0)
         return
 
     def __processFile2_withcache(self, filename, useCaching, unfocusname, unfocusname_file):
@@ -506,30 +503,38 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
         return wkspname
 
-    def __accumulate(self, wkspname, finalname, unfocusname, unfocusname_file, firstrun=False):
-        # accumulate runs
+    def __accumulate(self, wkspname, sumwkspname, unfocusname, unfocusname_file):
+        """accumulate newdata `wkspname` into sum `sumwkspname` and delete `wkspname`"""
+        # the first call to accumulate to a specific target should be a simple rename
+        self._accumulate_calls[sumwkspname] += 1
+        firstrun = self._accumulate_calls[sumwkspname] == 1
         if firstrun:
-            if wkspname != finalname:
-                RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=finalname)
-            if unfocusname != '':
-                RenameWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
+            if wkspname != sumwkspname:
+                RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=sumwkspname)
         else:
-            Plus(LHSWorkspace=finalname, RHSWorkspace=wkspname, OutputWorkspace=finalname,
+            Plus(LHSWorkspace=sumwkspname, RHSWorkspace=wkspname, OutputWorkspace=sumwkspname,
                  ClearRHSWorkspace=self.kwargs['PreserveEvents'])
             DeleteWorkspace(Workspace=wkspname)
-
-            if unfocusname != '':
-                Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_file, OutputWorkspace=unfocusname,
-                     ClearRHSWorkspace=self.kwargs['PreserveEvents'])
-                DeleteWorkspace(Workspace=unfocusname_file)
-
             if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
-                CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname,
-                               WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
-                               Tolerance=self.kwargs['CompressTolerance'],
-                               StartTime=self.kwargs['CompressStartTime'])
-                # not compressing unfocussed workspace because it is in d-spacing
-                # and is likely to be from a different part of the instrument
+                finalname = self.getPropertyValue('OutputWorkspace')
+                # only compress when adding individual files
+                if sumwkspname != finalname:
+                    CompressEvents(InputWorkspace=sumwkspname, OutputWorkspace=sumwkspname,
+                                   WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
+                                   Tolerance=self.kwargs['CompressTolerance'],
+                                   StartTime=self.kwargs['CompressStartTime'])
+        #
+        if unfocusname == '': return
+        self._accumulate_calls[unfocusname] += 1
+        firstrun = self._accumulate_calls[unfocusname] == 1
+        if firstrun:
+            RenameWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
+        else:
+            Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_file, OutputWorkspace=unfocusname,
+                 ClearRHSWorkspace=self.kwargs['PreserveEvents'])
+            DeleteWorkspace(Workspace=unfocusname_file)
+            # not compressing unfocussed workspace because it is in d-spacing
+            # and is likely to be from a different part of the instrument
         return
 
 # Register algorithm with Mantid.
