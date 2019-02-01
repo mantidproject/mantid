@@ -13,7 +13,7 @@ The Yi model for Mean-squared displacement fitting is defined as:
 
 .. math::
 
-    Height \cdot \left(1 + \frac{x^4 \sigma}{72}\right) \cdot \exp\left(\frac{- x^2 MSD}{6}\right) 
+    \mbox{Height} \cdot \left(1 + \frac{x^4 \sigma}{72}\right) \cdot e^{\left(\frac{-x^2 \cdot MSD}{6}\right)}
 
 where:
   - :math:`MSD` is the mean squared displacement

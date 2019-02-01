@@ -138,8 +138,10 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The `Peters model[1] <https://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdPeters.html>`_ 
-reduces to a Gaussian at large (towards infinity) beta. The Yi[2] model reduces to a Gaussian at sigma equal to zero.
+The `Peters model <https://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdPeters.html>`_[1]
+reduces to a `Gaussian <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdGauss.html>`_ at large 
+(towards infinity) beta. The `Yi Model <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdYi.html>`_ [2] 
+reduces to a `Gaussian <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdGauss.html>`_ at sigma equal to zero.
 
 .. interface:: Data Analysis
   :width: 450
@@ -273,6 +275,8 @@ I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
 
+The fit types available for use in IqtFit are `Exponentials <https://docs.mantidproject.org/nightly/fitting/fitfunctions/ExpDecay.html>`_ 
+and `Stretched Exponential <https://docs.mantidproject.org/nightly/fitting/fitfunctions/StretchExp.html>`_.
 
 .. interface:: Data Analysis
   :width: 450
@@ -358,6 +362,14 @@ values for fitting the next. This is done by means of the
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
+
+The fit types available in ConvFit are One `Lorentzian <http://docs.mantidproject.org/nightly/fitting/fitfunctions/Lorentzian.html>`_, 
+Two Lorentzian, `TeixeiraWater (SQE) <https://docs.mantidproject.org/nightly/fitting/fitfunctions/TeixeiraWaterSQE.html>`_, 
+`InelasticDiffSphere <https://docs.mantidproject.org/nightly/fitting/fitfunctions/InelasticDiffSphere.html>`_, 
+`InelasticDiffRotDiscreteCircle <https://docs.mantidproject.org/nightly/fitting/fitfunctions/InelasticDiffRotDiscreteCircle.html>`_, 
+`ElasticDiffSphere <https://docs.mantidproject.org/nightly/fitting/fitfunctions/ElasticDiffSphere.html>`_, 
+`ElasticDiffRotDiscreteCircle <https://docs.mantidproject.org/nightly/fitting/fitfunctions/ElasticDiffRotDiscreteCircle.html>`_ and 
+`StretchedExpFT <http://docs.mantidproject.org/nightly/fitting/fitfunctions/StretchedExpFT.html>`_.
 
 .. interface:: Data Analysis
   :width: 450
@@ -446,6 +458,14 @@ then moves rapidly, that is, in a time negligible compared to :math:`\tau`.
 This interface can be used for a jump diffusion fit as well as fitting across
 EISF. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
+
+The fit types available in F(Q)Fit are `ChudleyElliot <https://docs.mantidproject.org/nightly/fitting/fitfunctions/ChudleyElliot.html>`_,
+`HallRoss <http://docs.mantidproject.org/nightly/fitting/fitfunctions/HallRoss.html>`_, 
+`FickDiffusion <https://docs.mantidproject.org/nightly/fitting/fitfunctions/FickDiffusion.html>`_, 
+`TeixeiraWater <https://docs.mantidproject.org/nightly/fitting/fitfunctions/TeixeiraWater.html>`_, 
+`EISFDiffCylinder <https://docs.mantidproject.org/nightly/fitting/fitfunctions/EISFDiffCylinder.html>`_, 
+`EISFDiffSphere <http://docs.mantidproject.org/nightly/fitting/fitfunctions/EISFDiffSphere.html>`_ and 
+`EISFDiffSphereAlkyl <https://docs.mantidproject.org/nightly/fitting/fitfunctions/EISFDiffSphereAlkyl.html>`_.
 
 .. interface:: Data Analysis
   :width: 450

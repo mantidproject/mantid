@@ -269,7 +269,7 @@ Number Wavelengths
   The number of wavelength points for which a simulation is attempted.
 
 Events
-  The number of “neutron” events to generate per simulated point.
+  The number of neutron events to generate per simulated point.
 
 Interpolation
   Method of interpolation used to compute unsimulated values.
