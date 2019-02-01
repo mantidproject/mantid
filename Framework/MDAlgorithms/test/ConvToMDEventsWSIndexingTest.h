@@ -30,9 +30,9 @@
  * index = 8*id + 1 + index
  */
 class FullTree3D3L {
+public:
   static constexpr size_t nodesCount{585};
   static constexpr uint8_t level{3};
-
 public:
   struct Box {
     std::array<double, 3> lowerLeft;
@@ -441,6 +441,8 @@ public:
 private:
   bool compareWithFullTreeRecursive(FullTree3D3L::PtDistr &distr, size_t id,
                                     Mantid::API::IMDNode *nd) {
+    if(id >= FullTree3D3L::nodesCount)
+      return false;
     bool res = distr[id].empty();
     if (nd->isLeaf()) {
       res = (distr[id].size() == nd->getNPoints());
@@ -500,6 +502,7 @@ private:
       const std::array<double, 3> &ll, // lower left bound of global space
       const std::array<double, 3> &ur,
       size_t splitTreshold) { // upper right bound of global space
+    std::cout << "Start check." << std::endl;
     FullTree3D3L t3d(ll, ur);
     Mantid::API::BoxController_sptr bc =
         boost::shared_ptr<Mantid::API::BoxController>(
@@ -514,20 +517,22 @@ private:
     bds(1, 1) = static_cast<Mantid::coord_t>(ur[1]);
     bds(2, 0) = static_cast<Mantid::coord_t>(ll[2]);
     bds(2, 1) = static_cast<Mantid::coord_t>(ur[2]);
+    std::cout << "Construct tree builder." << std::endl;
     TreeBuilder tb(1, 0, bc, bds);
-
+    std::cout << "Distribute fixed tree." << std::endl;
     auto res = t3d.distribute(points, splitTreshold);
-
+    std::cout << "Create MDEvents." << std::endl;
     MDEventStore mdEvents(points.size());
     for (size_t k = 0; k < points.size(); ++k)
       for (size_t d = 0; d < ND; ++d)
         mdEvents[k].setCenter(d, points[k][d]);
-
+    std::cout << "Distribute events." << std::endl;
     auto topNodeWithError = tb.distribute(mdEvents);
-
-    //    auto check = compareWithFullTree(res, topNodeWithError.root);
+    std::cout << "Compare trees." << std::endl;
+    auto check = compareWithFullTree(res, topNodeWithError.root);
     delete topNodeWithError.root;
-    //    return check;
+    return check;
+    std::cout << "End check." << std::endl;
     return true;
   }
 };
