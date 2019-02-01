@@ -23,8 +23,27 @@ Row::Row( // cppcheck-suppress passedByValue
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)),
-      m_reductionOptions(std::move(reductionOptions)) {
+      m_reductionOptions(std::move(reductionOptions)), m_itemState() {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
+}
+
+Row::Row(Row const &rhs)
+    : m_runNumbers(rhs.runNumbers()), m_theta(rhs.theta()),
+      m_qRange(rhs.qRange()), m_scaleFactor(rhs.scaleFactor()),
+      m_transmissionRuns(rhs.transmissionWorkspaceNames()),
+      m_reducedWorkspaceNames(rhs.reducedWorkspaceNames()),
+      m_reductionOptions(rhs.reductionOptions()), m_itemState() {}
+
+Row &Row::operator=(Row const &rhs) {
+  m_runNumbers = rhs.runNumbers();
+  m_theta = rhs.theta();
+  m_qRange = rhs.qRange();
+  m_scaleFactor = rhs.scaleFactor();
+  m_transmissionRuns = rhs.transmissionWorkspaceNames();
+  m_reducedWorkspaceNames = rhs.reducedWorkspaceNames();
+  m_reductionOptions = rhs.reductionOptions();
+  m_itemState = ItemState();
+  return *this;
 }
 
 std::vector<std::string> const &Row::runNumbers() const { return m_runNumbers; }

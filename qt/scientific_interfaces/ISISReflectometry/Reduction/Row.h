@@ -30,6 +30,9 @@ public:
       TransmissionRunPair tranmissionRuns, RangeInQ qRange,
       boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
       ReductionWorkspaces reducedWorkspaceNames);
+  Row(Row const &rhs);
+
+  Row &operator=(Row const &rhs);
 
   std::vector<std::string> const &runNumbers() const;
   TransmissionRunPair const &transmissionWorkspaceNames() const;
