@@ -32,14 +32,11 @@
 
 // Qscintilla
 #include <Qsci/qsciapis.h>
-#include <Qsci/qscicommand.h>
 #include <Qsci/qscicommandset.h>
 
 // std
 #include <cmath>
 #include <stdexcept>
-
-
 
 namespace {
 
@@ -313,12 +310,13 @@ void ScriptEditor::wheelEvent(QWheelEvent *e) {
   }
 }
 /*
-*  Remove key binding to 
+*  Remove shortcut key binding from its command. 
+*  @param keyIdentifier :: Integer referencing the key combination.
+*                          The key references come from Qt, e.g.
+                           "Ctrl+/" is Qt::CTRL | Qt::Key_Slash.
 */
 void ScriptEditor::clearKeyBinding(int keyIdentifier) {
-  QsciCommandSet *cmdSet = QsciScintilla::standardCommands();
-  QsciCommand *cmd = cmdSet->boundTo(keyIdentifier);
-  cmd->setKey(0);
+  standardCommands()->boundTo(keyIdentifier)->setKey(0);
 }
 
 //-----------------------------------------------

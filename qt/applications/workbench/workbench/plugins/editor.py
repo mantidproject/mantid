@@ -61,7 +61,7 @@ class MultiFileEditor(PluginWidget):
             self, "Abort", on_triggered=self.editors.abort_current)
 
         self.toggle_comment_action = create_action(
-            self.editors.current_editor(), r"Comment/Uncomment",
+            self.editors.current_editor(), "Comment/Uncomment",
             on_triggered=self.editors.toggle_comment_current,
             shortcut="Ctrl+/",
             shortcut_context=Qt.ApplicationShortcut)
@@ -82,11 +82,12 @@ class MultiFileEditor(PluginWidget):
             self, 'Set Whitespace Invisible',
             on_triggered=self.editors.set_whitespace_invisible_all)
 
+        # Store actions for adding to menu bar; None will add a separator
         self.editor_actions = [self.run_action,
-                               self.abort_action,
-                               self.toggle_comment_action,
+                               self.abort_action, None,
+                               self.toggle_comment_action, None,
                                self.tabs_to_spaces_action,
-                               self.spaces_to_tabs_action,
+                               self.spaces_to_tabs_action, None,
                                self.whitespace_visible_action,
                                self.whitespace_invisible_action]
 

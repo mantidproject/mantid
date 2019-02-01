@@ -109,11 +109,6 @@ public:
      WsVisibleAfterIndent = SCWS_VISIBLEAFTERINDENT
   };
 
-  enum
-    {
-	  SCI_CLEARCMDKEY = 2071
-	};
-
 public:
   ScriptEditor(const QString & language,
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
@@ -132,6 +127,7 @@ public:
   QString selectedText() const;
   QString text() const;
 
+  void clearKeyBinding(int keyIdentifier);
   void enableAutoCompletion(AutoCompletionSource source);
   void disableAutoCompletion();
   void getCursorPosition(int *line, int *index) const;
@@ -149,7 +145,6 @@ public:
   void setText(const QString &text);
   void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
-  void clearKeyBinding(int keyIdentifier);
 
 public slots:
   void updateProgressMarker(int lineno, bool error);

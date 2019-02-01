@@ -107,7 +107,7 @@ class PythonFileInterpreter(QWidget):
         self.editor = CodeEditor("AlternateCSPythonLexer", self)
 
         # Clear QsciScintilla key bindings that may override PyQt's bindings
-        self.clear_key_binding("Ctrl+/+")
+        self.clear_key_binding("Ctrl+/")
 
         self.status = QStatusBar(self)
         layout = QVBoxLayout()
