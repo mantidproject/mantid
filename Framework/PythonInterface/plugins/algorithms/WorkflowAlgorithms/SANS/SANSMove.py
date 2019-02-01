@@ -9,13 +9,14 @@
 """ SANSMove algorithm to move a workspace according to the instrument settings."""
 
 from __future__ import (absolute_import, division, print_function)
+
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from sans.algorithm_detail.move_workspaces import SANSMoveFactory
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import DetectorType
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
 class MoveType(object):

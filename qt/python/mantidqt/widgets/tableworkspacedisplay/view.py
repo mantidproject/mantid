@@ -178,10 +178,10 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
         show_all_columns.triggered.connect(self.presenter.action_show_all_columns)
 
         sort_ascending = QAction("Sort Ascending", menu_main)
-        sort_ascending.triggered.connect(partial(self.presenter.action_sort, Qt.AscendingOrder))
+        sort_ascending.triggered.connect(partial(self.presenter.action_sort, True))
 
         sort_descending = QAction("Sort Descending", menu_main)
-        sort_descending.triggered.connect(partial(self.presenter.action_sort, Qt.DescendingOrder))
+        sort_descending.triggered.connect(partial(self.presenter.action_sort, False))
 
         menu_main.addAction(copy_bin_values)
         menu_main.addAction(self.make_separator(menu_main))

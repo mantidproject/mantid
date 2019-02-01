@@ -35,6 +35,7 @@ Improved
 * Can separate items in variable q binning with commas or spaces. E.g. L/Q 0.0, 0.02 0.3 0.05, 0.8
 * Can export table as a csv, which can be re-loaded as a batch file.
 * File path to batch file will be added to your directories automatically upon loading
+* Workspaces are centred upon loading.
 
 Bug fixes
 #########
@@ -47,6 +48,9 @@ Bug fixes
 * Removed option to process in non-compatibility mode to avoid calculation issues.
 * GUI can correctly read user files with variable step sizes, in /LOG and /LIN modes.
 * Fixed occasional crash when entering data into table.
+* Fixed error message when trying to load or process table with empty rows.
+* Removed option to process in non-compatibility mode to avoid calculation issues.
+* Default name for added runs has correct number of digits.
 
 Improvements
 ############
