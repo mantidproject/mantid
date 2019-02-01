@@ -255,11 +255,11 @@ public:
   test_that_setExcludeRegion_rounds_the_numbers_in_the_input_string_to_the_appropriate_decimal_place() {
     auto data = getIndirectFitData(2);
 
-    data->setExcludeRegionString("6.29,2.93", 0);
-    data->setExcludeRegionString("2.6,2.3,1.99,3.01", 1);
+    data->setExcludeRegionString("6.29445,2.93343", 0);
+    data->setExcludeRegionString("2.6,2.3,1.9999,3.0125", 1);
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.900,6.300");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.300,2.600,2.000,3.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.933,6.294");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.300,2.600,2.000,3.013");
   }
 
   void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
