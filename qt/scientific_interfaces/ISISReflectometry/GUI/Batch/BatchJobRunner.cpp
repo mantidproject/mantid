@@ -61,8 +61,9 @@ void updatePropertiesFromMap(
   }
 }
 
-void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
-                                     std::vector<std::string> inputRunNumbers) {
+void updateInputWorkspacesProperties(
+    AlgorithmRuntimeProps &properties,
+    std::vector<std::string> const &inputRunNumbers) {
   updateProperty("InputRunList", inputRunNumbers, properties);
 }
 

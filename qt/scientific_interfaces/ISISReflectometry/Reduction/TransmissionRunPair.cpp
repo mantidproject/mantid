@@ -13,13 +13,17 @@ namespace CustomInterfaces {
 TransmissionRunPair::TransmissionRunPair()
     : m_firstTransmissionRunNumbers(), m_secondTransmissionRunNumbers() {}
 
-TransmissionRunPair::TransmissionRunPair(std::string firstTransmissionRun,
-                                         std::string secondTransmissionRun)
-    : m_firstTransmissionRunNumbers{firstTransmissionRun},
-      m_secondTransmissionRunNumbers{secondTransmissionRun} {}
+TransmissionRunPair::TransmissionRunPair( // cppcheck-suppress passedByValue
+    std::string firstTransmissionRun,
+    // cppcheck-suppress passedByValue
+    std::string secondTransmissionRun)
+    : m_firstTransmissionRunNumbers{std::move(firstTransmissionRun)},
+      m_secondTransmissionRunNumbers{std::move(secondTransmissionRun)} {}
 
 TransmissionRunPair::TransmissionRunPair(
+    // cppcheck-suppress passedByValue
     std::vector<std::string> firstTransmissionRunNumbers,
+    // cppcheck-suppress passedByValue
     std::vector<std::string> secondTransmissionRunNumbers)
     : m_firstTransmissionRunNumbers(std::move(firstTransmissionRunNumbers)),
       m_secondTransmissionRunNumbers(std::move(secondTransmissionRunNumbers)) {}

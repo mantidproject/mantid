@@ -10,8 +10,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 PerThetaDefaults::PerThetaDefaults(
-    boost::optional<double> theta, TransmissionRunPair transmissionRuns,
-    RangeInQ qRange, boost::optional<double> scaleFactor,
+    boost::optional<double> theta,
+    // cppcheck-suppress passedByValue
+    TransmissionRunPair transmissionRuns, RangeInQ qRange,
+    boost::optional<double> scaleFactor,
     boost::optional<ProcessingInstructions> processingInstructions)
     : m_theta(std::move(theta)),
       m_transmissionRuns(std::move(transmissionRuns)),

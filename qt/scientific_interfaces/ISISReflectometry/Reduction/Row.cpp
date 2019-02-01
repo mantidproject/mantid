@@ -14,6 +14,7 @@ namespace CustomInterfaces {
 
 Row::Row( // cppcheck-suppress passedByValue
     std::vector<std::string> runNumbers, double theta,
+    // cppcheck-suppress passedByValue
     TransmissionRunPair transmissionRuns, RangeInQ qRange,
     boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
     // cppcheck-suppress passedByValue

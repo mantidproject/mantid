@@ -12,6 +12,7 @@ namespace CustomInterfaces {
 ReductionWorkspaces::ReductionWorkspaces(
     // cppcheck-suppress passedByValue
     std::vector<std::string> inputRunNumbers,
+    // cppcheck-suppress passedByValue
     TransmissionRunPair transmissionRuns)
     : m_inputRunNumbers(std::move(inputRunNumbers)),
       m_transmissionRuns(transmissionRuns), m_iVsLambda(), m_iVsQ(),
