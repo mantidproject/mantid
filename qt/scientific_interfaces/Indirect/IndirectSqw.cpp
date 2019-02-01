@@ -198,9 +198,11 @@ void IndirectSqw::plotRqwContour() {
 
     convertToSpectrumAxis(sampleName, outputName);
 
-    auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
-    if (rqwWorkspace)
-      m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+    if (AnalysisDataService::Instance().doesExist(outputName)) {
+      auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
+      if (rqwWorkspace)
+        m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+    }
   } else {
     emit showMessageBox("Invalid filename.");
   }
