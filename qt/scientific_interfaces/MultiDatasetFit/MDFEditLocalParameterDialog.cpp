@@ -7,7 +7,6 @@
 #include "MDFEditLocalParameterDialog.h"
 #include "MDFLocalParameterItemDelegate.h"
 #include "MantidKernel/make_unique.h"
-#include "MultiDatasetFit.h"
 
 #include <QClipboard>
 #include <QMenu>
@@ -25,34 +24,7 @@ namespace CustomInterfaces {
 namespace MDF {
 
 /**
- * Constructor when used as part of MultiDatasetFit interface
- * @param multifit :: [input] Pointer to parent MultiDatasetFit interface
- * @param parName :: [input] Name of parameter to edit in this dialog
- */
-EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
-                                                   const QString &parName)
-    : QDialog(multifit), m_parName(parName) {
-  m_uiForm.setupUi(this);
-  const int n = multifit->getNumberOfSpectra();
-  QStringList wsNames;
-  std::vector<size_t> wsIndices;
-
-  for (int i = 0; i < n; ++i) {
-    double value = multifit->getLocalParameterValue(parName, i);
-    m_values.push_back(value);
-    bool fixed = multifit->isLocalParameterFixed(parName, i);
-    m_fixes.push_back(fixed);
-    auto tie = multifit->getLocalParameterTie(parName, i);
-    m_ties.push_back(tie);
-    wsNames.append(multifit->getWorkspaceName(i));
-    wsIndices.push_back(multifit->getWorkspaceIndex(i));
-  }
-
-  doSetup(parName, wsNames, wsIndices);
-}
-
-/**
- * Constructor when used outside of MultiDatasetFit interface
+ * Constructor used inside and outside of MultiDatasetFit interface
  * @param parent :: [input] Parent widget of this dialog
  * @param funcBrowser :: [input] Function browser this is working with
  * @param parName :: [input] Name of parameter to edit in this dialog
@@ -361,9 +333,6 @@ void EditLocalParameterDialog::setValueToLog(int i) {
   } catch (const std::invalid_argument &err) {
     const auto &message =
         QString("Failed to get log value:\n\n %1").arg(err.what());
-    if (const auto *multifit = static_cast<MultiDatasetFit *>(this->parent())) {
-      multifit->logWarning(message.toStdString());
-    }
     QMessageBox::critical(this, "MantidPlot - Error", message);
   }
   m_values[i] = value;

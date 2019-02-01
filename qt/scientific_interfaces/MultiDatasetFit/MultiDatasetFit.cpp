@@ -458,7 +458,15 @@ int MultiDatasetFit::getNumberOfSpectra() const {
 /// @param parName :: Fully qualified name for a local parameter (Global
 /// unchecked).
 void MultiDatasetFit::editLocalParameterValues(const QString &parName) {
-  MDF::EditLocalParameterDialog dialog(this, parName);
+  QStringList wsNames;
+  std::vector<size_t> wsIndices;
+  const int n = getNumberOfSpectra();
+  for (int i = 0; i < n; ++i) {
+    wsNames.append(getWorkspaceName(i));
+    wsIndices.push_back(getWorkspaceIndex(i));
+  }
+
+  MDF::EditLocalParameterDialog dialog(this, m_functionBrowser, parName, wsNames, wsIndices);
   if (dialog.exec() == QDialog::Accepted) {
     auto values = dialog.getValues();
     auto fixes = dialog.getFixes();

@@ -7,28 +7,7 @@
 #include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-//#include "MantidQtWidgets/Common/PropertyHandler.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-
-// Suppress a warning coming out of code that isn't ours
-//#if defined(__INTEL_COMPILER)
-//#pragma warning disable 1125
-//#elif defined(__GNUC__)
-//#if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
-//#pragma GCC diagnostic push
-//#endif
-//#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-//#endif
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
-//#if defined(__INTEL_COMPILER)
-//#pragma warning enable 1125
-//#elif defined(__GNUC__)
-//#if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
-//#pragma GCC diagnostic pop
-//#endif
-//#endif
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"

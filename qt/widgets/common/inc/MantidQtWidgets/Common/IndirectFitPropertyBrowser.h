@@ -7,8 +7,6 @@
 #ifndef INDIRECTFITPROPERTYBROWSER_H_
 #define INDIRECTFITPROPERTYBROWSER_H_
 
-//#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
