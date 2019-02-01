@@ -525,9 +525,9 @@ private:
 
     auto topNodeWithError = tb.distribute(mdEvents);
 
-//    auto check = compareWithFullTree(res, topNodeWithError.root);
+    //    auto check = compareWithFullTree(res, topNodeWithError.root);
     delete topNodeWithError.root;
-//    return check;
+    //    return check;
     return true;
   }
 };
