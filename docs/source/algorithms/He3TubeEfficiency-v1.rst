@@ -28,7 +28,7 @@ following manner. If no input value is given, the detector parameter is
 pulled from the detector itself. If a single value is used as input,
 that value is applied to all detectors. If an array of values is used,
 that array *must* be the same size as the number of spectra in the
-workspace. If it is not, the spectra indicies that do not have values
+workspace. If it is not, the spectra indices that do not have values
 will be zeroed in the output workspace.
 
 Restrictions on Input Workspace

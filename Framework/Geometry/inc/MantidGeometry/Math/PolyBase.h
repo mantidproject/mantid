@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef mathLevel_PolyBase_h
 #define mathLevel_PolyBase_h
 
@@ -56,7 +62,7 @@ public:
   // arithmetic operations
   PolyBase operator+(const PolyBase &) const;
   PolyBase operator-(const PolyBase &) const;
-  PolyBase operator*(const PolyBase &) const;
+  PolyBase operator*(const PolyBase &)const;
   //  PolyBase operator/(const PolyBase&) const;
 
   // input is degree 0 poly
@@ -94,7 +100,7 @@ public:
 PolyBase operator*(double const, const PolyBase &);
 std::ostream &operator<<(std::ostream &, const PolyBase &);
 
-} // NAMESPACE mathlevel
+} // namespace mathLevel
 
 } // NAMESPACE Mantid
 #endif

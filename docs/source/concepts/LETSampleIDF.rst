@@ -11,7 +11,7 @@ This page annotates the direct inelastic instrument LET, with the purpose of (ho
 Instrument view of LET
 ----------------------
 
-LET consists of doors (in the speach of LET scientists) where each door is made up of a number of tupes along the y-axis (green line in picture below), where each tube is made up of a sequence pixels (detectors). 
+LET consists of doors (in the speech of LET scientists) where each door is made up of a number of tupes along the y-axis (green line in picture below), where each tube is made up of a sequence pixels (detectors). 
 
 The view of the instrument below is in the 'Full 3D' mode.
 

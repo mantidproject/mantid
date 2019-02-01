@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 # File: ReduceOneSCD_Run.py
 #
@@ -21,12 +27,12 @@
 
 #
 # _v1: December 3rd 2013. Mads Joergensen
-# This version now includes the posibility to use the 1D cylindrical integration method
-# and the posibility to load a UB matrix which will be used for integration of the individual
+# This version now includes the possibility to use the 1D cylindrical integration method
+# and the possibility to load a UB matrix which will be used for integration of the individual
 # runs and to index the combined file (Code from Xiapoing).
 #
 # _v2: December 3rd 2013. Mads Joergensen
-# Adds the posibility to optimize the loaded UB for each run for a better peak prediction
+# Adds the possibility to optimize the loaded UB for each run for a better peak prediction
 # It is also possible to find the common UB by using lattice parameters of the first
 # run or the loaded matirix instead of the default FFT method
 #
@@ -342,7 +348,7 @@ else:
     SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
                   Filename=run_niggli_integrate_file )
 
-# Print warning if user is trying to integrate using the cylindrical method and transorm the cell
+# Print warning if user is trying to integrate using the cylindrical method and transform the cell
 if use_cylindrical_integration:
     if (cell_type is not None) or (centering is not None):
         print("WARNING: Cylindrical profiles are NOT transformed!!!")

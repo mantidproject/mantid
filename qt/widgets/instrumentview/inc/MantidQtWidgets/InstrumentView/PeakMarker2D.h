@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDPLOT_PEAKMARKER2D_H_
 #define MANTIDPLOT_PEAKMARKER2D_H_
 
-#include "Shape2D.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "Shape2D.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -10,10 +16,10 @@ namespace MantidWidgets {
 class PeakOverlay;
 
 /**
-* Shape representing a peak marker on un unwrapped surface.
-* A marker consists of a symbol marking location of a peak
-* and a text label.
-*/
+ * Shape representing a peak marker on un unwrapped surface.
+ * A marker consists of a symbol marking location of a peak
+ * and a text label.
+ */
 class PeakMarker2D : public Shape2D {
 public:
   enum Symbol { Circle = 0, Diamond, Square };
@@ -78,7 +84,7 @@ private:
   int m_row;                  ///< peaks row number in PeaksWorkspace
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MANTIDPLOT_PEAKMARKER2D_H_*/

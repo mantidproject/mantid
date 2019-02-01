@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/IDFObject.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include <Poco/String.h>
@@ -14,7 +20,7 @@ const std::string AbstractIDFObject::expectedExtension() { return ".xml"; }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 IDFObject::IDFObject(const std::string &fileName)
     : m_defFile(fileName), m_hasFileName(!fileName.empty()),
       m_cachePath(m_defFile.path()),

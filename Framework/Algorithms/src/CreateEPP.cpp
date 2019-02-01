@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateEPP.h"
 
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitConversion.h"
@@ -13,8 +19,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 namespace {
 /** A private namespace holding the property names.
@@ -37,7 +43,7 @@ const static std::string HEIGHT("Height");
 const static std::string HEIGHT_ERR("HeightError");
 const static std::string CHI_SQUARED("chiSq");
 const static std::string STATUS("FitStatus");
-}
+} // namespace ColumnNames
 
 /** Add standard EPP table columns to the input workspace.
  *
@@ -104,7 +110,7 @@ void CreateEPP::exec() {
       getProperty(PropertyNames::INPUT_WORKSPACE);
   const auto &spectrumInfo = inputWS->spectrumInfo();
   API::ITableWorkspace_sptr outputWS =
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      boost::make_shared<DataObjects::TableWorkspace>();
   addEPPColumns(outputWS);
   const double sigma = getProperty(PropertyNames::SIGMA);
   const size_t spectraCount = spectrumInfo.size();

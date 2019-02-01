@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertToConstantL2.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Strings.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include <cmath>
 #include <boost/format.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -21,6 +27,7 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ConvertToConstantL2)
@@ -57,7 +64,7 @@ void ConvertToConstantL2::initWorkspaces() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
 
   m_wavelength = getRunProperty("wavelength");
@@ -135,11 +142,15 @@ void ConvertToConstantL2::exec() {
  *
  */
 double ConvertToConstantL2::getRunProperty(std::string s) {
-  Mantid::Kernel::Property *prop = m_inputWS->run().getProperty(s);
+  const auto &run = m_inputWS->run();
+  if (!run.hasProperty(s)) {
+    throw Exception::NotFoundError("Sample log property not found", s);
+  }
+  Mantid::Kernel::Property *prop = run.getProperty(s);
   double val;
-  if (!prop || !Strings::convert(prop->value(), val)) {
-    std::string mesg = "Run property " + s + "doesn't exist!";
-    g_log.error(mesg);
+  if (!Strings::convert(prop->value(), val)) {
+    const std::string mesg =
+        "Cannot convert sample log '" + s + "' to a number.";
     throw std::runtime_error(mesg);
   }
   return val;
@@ -152,8 +163,7 @@ double ConvertToConstantL2::getRunProperty(std::string s) {
 double ConvertToConstantL2::getInstrumentProperty(std::string s) {
   std::vector<std::string> prop = m_instrument->getStringParameter(s);
   if (prop.empty()) {
-    std::string mesg = "Property <" + s + "> doesn't exist!";
-    g_log.error(mesg);
+    const std::string mesg = "Property <" + s + "> doesn't exist!";
     throw std::runtime_error(mesg);
   }
   g_log.debug() << "prop[0] = " << prop[0] << '\n';
@@ -171,5 +181,5 @@ double ConvertToConstantL2::calculateTOF(double distance) {
   return distance / velocity;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

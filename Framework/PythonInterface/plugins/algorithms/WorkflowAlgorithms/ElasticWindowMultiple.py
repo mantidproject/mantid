@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import AppendSpectra, CloneWorkspace, ElasticWindow, LoadLog, Logarithm, SortXAxis, Transpose
@@ -15,15 +21,28 @@ def _normalize_by_index(workspace, index):
     @param workspace    The workspace to normalize.
     @param index        The index of the y-value to normalize by.
     """
+    number_of_histograms = workspace.getNumberHistograms()
 
-    num_hist = workspace.getNumberHistograms()
+    for idx in range(0, number_of_histograms):
+        y_values = workspace.readY(idx)
+        y_errors = workspace.readE(idx)
 
-    # Normalize each spectrum in the workspace
-    for idx in range(0, num_hist):
-        y_vals = workspace.readY(idx)
-        scale = 1.0 / y_vals[index]
-        y_vals_scaled = scale * y_vals
-        workspace.setY(idx, y_vals_scaled)
+        # Avoid divide by zero
+        if y_values[index] == 0.0:
+            scale = np.reciprocal(1.0e-8)
+        else:
+            scale = np.reciprocal(y_values[index])
+
+        # Normalise y values
+        y_values_normalised = scale * y_values
+
+        # Propagate y errors: C = A / B ; dC = sqrt( (dA/B)^2 + (A*dB/B^2)^2 )
+        a = (y_errors*scale)
+        b = (y_values*y_errors[index]*(scale ** 2))
+        y_errors_propagated = np.sqrt(a ** 2 + b ** 2)
+
+        workspace.setY(idx, y_values_normalised)
+        workspace.setE(idx, y_errors_propagated)
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
@@ -210,7 +229,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 elt_workspace = CloneWorkspace(InputWorkspace=elf_workspace, OutputWorkspace="__cloned",
                                                StoreInADS=False, EnableLogging=False)
 
-            _normalize_by_index(elt_workspace, np.argmin(sample_param))
+            _normalize_by_index(elt_workspace, 0)
 
             self.setProperty('OutputELT', elt_workspace)
 
@@ -229,8 +248,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         instr, run_number = getInstrRun(workspace.getName())
 
-        instrument = config.getFacility().instrument(instr)
-        pad_num = instrument.zeroPadding(int(run_number))
+        pad_num = config.getInstrument(instr).zeroPadding(int(run_number))
         zero_padding = '0' * (pad_num - len(run_number))
 
         run_name = instr + zero_padding + run_number

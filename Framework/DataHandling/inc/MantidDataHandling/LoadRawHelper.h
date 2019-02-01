@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADRAWHELPER_H_
 #define MANTID_DATAHANDLING_LOADRAWHELPER_H_
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include <boost/scoped_ptr.hpp>
+#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <climits>
+#include <memory>
 
 class ISISRAW;
 class ISISRAW2;
@@ -25,33 +31,15 @@ Helper class for LoadRaw algorithms.
 
 @author Sofia Antony, ISIS,RAL
 @date 14/04/2010
-
-Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadRawHelper
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Default constructor
   LoadRawHelper();
+  // Define destructor in .cpp as we have unique_ptr to forward declared
+  // ISISRAW2
+  ~LoadRawHelper();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadRawHelper"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -116,10 +104,10 @@ public:
                                    API::Algorithm *const pAlg);
 
   /// Extract the start time from a raw file
-  static Types::Core::DateAndTime extractStartTime(ISISRAW *isisRaw);
+  static Types::Core::DateAndTime extractStartTime(ISISRAW &isisRaw);
 
   /// Extract the end time from a raw file
-  static Types::Core::DateAndTime extractEndTime(ISISRAW *isisRaw);
+  static Types::Core::DateAndTime extractEndTime(ISISRAW &isisRaw);
 
 protected:
   /// Overwrites Algorithm method.
@@ -170,14 +158,10 @@ protected:
   /// This method sets the raw file data to workspace vectors
   void setWorkspaceData(
       DataObjects::Workspace2D_sptr newWorkspace,
-      const std::vector<boost::shared_ptr<HistogramData::HistogramX>> &
-          timeChannelsVec,
+      const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
+          &timeChannelsVec,
       int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
       int64_t lengthIn, int64_t binStart);
-
-  /// ISISRAW class instance which does raw file reading. Shared pointer to
-  /// prevent memory leak when an exception is thrown.
-  boost::shared_ptr<ISISRAW2> isisRaw;
 
   /// get proton charge from raw file
   float getProtonCharge() const;
@@ -188,6 +172,8 @@ protected:
 
   /// number of time regimes
   int getNumberofTimeRegimes();
+  /// return an reference to the ISISRAW2 reader
+  ISISRAW2 &isisRaw() const;
   /// resets the isisraw shared pointer
   void reset();
 
@@ -226,6 +212,8 @@ private:
   /// convert month label to int string
   static std::string convertMonthLabelToIntStr(std::string month);
 
+  /// ISISRAW class instance which does raw file reading.
+  mutable std::unique_ptr<ISISRAW2> m_isis_raw;
   /// Allowed values for the cache property
   std::vector<std::string> m_cache_options;
   /// A map for storing the time regime for each spectrum
@@ -246,7 +234,7 @@ private:
   specnum_t m_total_specs;
 
   /// A ptr to the log creator
-  boost::scoped_ptr<ISISRunLogs> m_logCreator;
+  std::unique_ptr<ISISRunLogs> m_logCreator;
 
   /// Search for the log files in the workspace, and output their names as a
   /// set.

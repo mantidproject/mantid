@@ -65,7 +65,7 @@ public:
          QObject *context = nullptr);
   /// Destructor
   ~Script() override;
-  /// Returns the envirnoment this script is tied to
+  /// Returns the environment this script is tied to
   inline ScriptingEnv *environment() { return m_env; }
   /// Returns the identifier for the script.
   inline const std::string &identifier() const { return m_name; }

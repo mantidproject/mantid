@@ -1,11 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
+#include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include "MantidQtWidgets/Common/Batch/CellDelegate.h"
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
-#include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
+#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <algorithm>
@@ -25,10 +32,12 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setItemDelegate(new CellDelegate(this, *this, m_filteredModel, m_mainModel));
+  setContextMenuPolicy(Qt::ActionsContextMenu);
   enableFiltering();
 }
 
 void JobTreeView::commitData(QWidget *editor) {
+  auto current_filtered_index = fromFilteredModel(currentIndex());
   auto cellTextBefore =
       m_adaptedMainModel.cellFromCellIndex(m_lastEdited).contentText();
   QTreeView::commitData(editor);
@@ -40,6 +49,7 @@ void JobTreeView::commitData(QWidget *editor) {
     m_notifyee->notifyCellTextChanged(rowLocation().atIndex(m_lastEdited),
                                       m_lastEdited.column(), cellTextBefore,
                                       cellText);
+    editAt(current_filtered_index);
   }
 }
 
@@ -78,8 +88,9 @@ boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
 
   std::transform(selected.cbegin(), selected.cend(),
                  std::back_inserter(selectedRows),
-                 [&](RowLocation const &location)
-                     -> Row { return Row(location, cellsAt(location)); });
+                 [&](RowLocation const &location) -> Row {
+                   return Row(location, cellsAt(location));
+                 });
 
   auto extractSubtrees = ExtractSubtrees();
   return extractSubtrees(selectedRows);
@@ -110,6 +121,17 @@ void JobTreeView::appendAllUnselectedDescendants(
       descendantsList.append(childIndex);
     appendAllUnselectedDescendants(descendantsList, childIndex);
   }
+}
+
+void JobTreeView::setHintsForColumn(
+    int column, std::unique_ptr<HintStrategy> hintStrategy) {
+  setItemDelegateForColumn(
+      column,
+      new HintingLineEditFactory(itemDelegate(), std::move(hintStrategy)));
+}
+
+void JobTreeView::setHintsForColumn(int column, HintStrategy *hintStrategy) {
+  setHintsForColumn(column, std::unique_ptr<HintStrategy>(hintStrategy));
 }
 
 QModelIndexList
@@ -147,6 +169,10 @@ void JobTreeView::removeSelectedRequested() {
 
 void JobTreeView::copySelectedRequested() {
   m_notifyee->notifyCopyRowsRequested();
+}
+
+void JobTreeView::cutSelectedRequested() {
+  m_notifyee->notifyCutRowsRequested();
 }
 
 void JobTreeView::pasteSelectedRequested() {
@@ -198,8 +224,9 @@ void JobTreeView::closeAnyOpenEditorsOnUneditableCells(
     std::vector<Cell> const &cells) {
   m_adaptedMainModel.enumerateCellsInRow(
       firstCellOnRow, m_mainModel.columnCount(),
-      [&](QModelIndexForMainModel const &cellIndex, int column)
-          -> void { closeEditorIfCellIsUneditable(cellIndex, cells[column]); });
+      [&](QModelIndexForMainModel const &cellIndex, int column) -> void {
+        closeEditorIfCellIsUneditable(cellIndex, cells[column]);
+      });
 }
 
 void JobTreeView::setCellsAt(RowLocation const &location,
@@ -244,7 +271,7 @@ void JobTreeView::replaceRows(std::vector<RowLocation> replacementPoints,
   auto replacement = replacements.cbegin();
 
   for (; replacementPoint != replacementPoints.cend() &&
-             replacement != replacements.cend();
+         replacement != replacements.cend();
        ++replacementPoint, ++replacement) {
     replaceSubtreeAt(*replacementPoint, *replacement);
   }
@@ -326,43 +353,61 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
   m_adaptedMainModel.removeRowFrom(indexToRemove);
 }
 
-void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow) {
-  m_adaptedMainModel.insertEmptyChildRow(rowLocation().indexAt(parent),
-                                         beforeRow);
+void JobTreeView::removeAllRows() {
+  appendChildRowOf({});
+  auto firstChild = std::vector<int>{0};
+  while (!isOnlyChildOfRoot(firstChild)) {
+    removeRowAt(firstChild);
+  }
+  clearSelection();
 }
 
-void JobTreeView::insertChildRowOf(RowLocation const &parent, int beforeRow,
-                                   std::vector<Cell> const &cells) {
+RowLocation JobTreeView::insertChildRowOf(RowLocation const &parent,
+                                          int beforeRow) {
+  return rowLocation().atIndex(m_adaptedMainModel.insertEmptyChildRow(
+      rowLocation().indexAt(parent), beforeRow));
+}
+
+RowLocation JobTreeView::insertChildRowOf(RowLocation const &parent,
+                                          int beforeRow,
+                                          std::vector<Cell> const &cells) {
   assertOrThrow(static_cast<int>(cells.size()) <= m_mainModel.columnCount(),
                 "Attempted to add row with more cells than columns. Increase "
                 "the number of columns by increasing the number of headings.");
-  m_adaptedMainModel.insertChildRow(
+  return rowLocation().atIndex(m_adaptedMainModel.insertChildRow(
       rowLocation().indexAt(parent), beforeRow,
-      paddedCellsToWidth(cells, g_deadCell, m_mainModel.columnCount()));
+      paddedCellsToWidth(cells, g_deadCell, m_mainModel.columnCount())));
 }
 
 Cell const JobTreeView::g_deadCell =
     Cell("", "white", 0, "transparent", 0, false);
 
-void JobTreeView::appendChildRowOf(RowLocation const &parent) {
-  m_adaptedMainModel.appendEmptyChildRow(rowLocation().indexAt(parent));
+RowLocation JobTreeView::appendChildRowOf(RowLocation const &parent) {
+  return rowLocation().atIndex(
+      m_adaptedMainModel.appendEmptyChildRow(rowLocation().indexAt(parent)));
 }
 
-void JobTreeView::appendChildRowOf(RowLocation const &parent,
-                                   std::vector<Cell> const &cells) {
+RowLocation JobTreeView::appendChildRowOf(RowLocation const &parent,
+                                          std::vector<Cell> const &cells) {
   auto parentIndex = rowLocation().indexAt(parent);
-  m_adaptedMainModel.appendChildRow(
+  return rowLocation().atIndex(m_adaptedMainModel.appendChildRow(
       parentIndex,
-      paddedCellsToWidth(cells, g_deadCell, m_mainModel.columnCount()));
+      paddedCellsToWidth(cells, g_deadCell, m_mainModel.columnCount())));
 }
 
 void JobTreeView::editAt(QModelIndexForFilteredModel const &index) {
   if (isEditable(index.untyped())) {
-    clearSelection();
+    QTreeView::clearSelection();
     setCurrentIndex(index.untyped());
     edit(index.untyped());
   }
 }
+
+void JobTreeView::clearSelection() { QTreeView::clearSelection(); }
+
+void JobTreeView::expandAll() { QTreeView::expandAll(); }
+
+void JobTreeView::collapseAll() { QTreeView::collapseAll(); }
 
 QModelIndexForFilteredModel
 JobTreeView::expanded(QModelIndexForFilteredModel const &index) {
@@ -410,19 +455,25 @@ void JobTreeView::appendAndEditAtChildRow() {
   resetFilter();
   auto const parent = mapToMainModel(fromFilteredModel(currentIndex()));
   auto const child = m_adaptedMainModel.appendEmptyChildRow(parent);
-  editAt(expanded(mapToFilteredModel(child)));
   m_notifyee->notifyRowInserted(rowLocation().atIndex(child));
+  editAt(expanded(mapToFilteredModel(child)));
 }
 
 void JobTreeView::appendAndEditAtRowBelow() {
   auto current = currentIndex();
-  auto const below = findOrMakeCellBelow(fromFilteredModel(current));
-  auto index = below.first;
-  auto isNew = below.second;
+  setCurrentIndex(QModelIndex());
+  setCurrentIndex(current);
+  if (current != m_mainModel.index(-1, -1)) {
+    auto const below = findOrMakeCellBelow(fromFilteredModel(current));
+    auto index = below.first;
+    auto isNew = below.second;
 
-  editAt(index);
-  if (isNew)
-    m_notifyee->notifyRowInserted(rowLocation().atIndex(mapToMainModel(index)));
+    if (isNew) {
+      m_notifyee->notifyRowInserted(
+          rowLocation().atIndex(mapToMainModel(index)));
+    }
+    editAt(index);
+  }
 }
 
 void JobTreeView::editAtRowAbove() {
@@ -437,7 +488,9 @@ void JobTreeView::enableFiltering() {
 }
 
 void JobTreeView::keyPressEvent(QKeyEvent *event) {
-  if (event->key() == Qt::Key_Return) {
+  switch (event->key()) {
+  case Qt::Key_Return:
+  case Qt::Key_Enter: {
     if (event->modifiers() & Qt::ControlModifier) {
       appendAndEditAtChildRow();
     } else if (event->modifiers() & Qt::ShiftModifier) {
@@ -445,17 +498,30 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
     } else {
       appendAndEditAtRowBelow();
     }
-  } else if (event->key() == Qt::Key_Delete) {
+    break;
+  }
+  case Qt::Key_Delete:
     removeSelectedRequested();
-  } else if (event->key() == Qt::Key_C) {
+    break;
+  case Qt::Key_C: {
     if (event->modifiers() & Qt::ControlModifier) {
       copySelectedRequested();
     }
-  } else if (event->key() == Qt::Key_V) {
+    break;
+  }
+  case Qt::Key_V: {
     if (event->modifiers() & Qt::ControlModifier) {
       pasteSelectedRequested();
     }
-  } else {
+    break;
+  }
+  case Qt::Key_X: {
+    if (event->modifiers() & Qt::ControlModifier) {
+      cutSelectedRequested();
+    }
+    break;
+  }
+  default:
     QTreeView::keyPressEvent(event);
   }
 }

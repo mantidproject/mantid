@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRYTEST_H_
 #define MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRYTEST_H_
 
@@ -13,7 +19,7 @@ using namespace Mantid::API;
 class EditInstrumentGeometryTest : public CxxTest::TestSuite {
 public:
   /** Test algorithm initialization
-    */
+   */
   void test_Initialize() {
 
     EditInstrumentGeometry editdetector;
@@ -22,7 +28,7 @@ public:
   }
 
   /** Test for a workspace containing a single spectrum
-    */
+   */
   void test_SingleSpectrum() {
     // 1. Init
     EditInstrumentGeometry editdetector;
@@ -64,7 +70,7 @@ public:
   }
 
   /** Unit test to edit instrument parameters of all spectrums (>1)
-    */
+   */
   void test_MultipleWholeSpectrumEdit() {
     // 1. Init
     EditInstrumentGeometry editdetector;
@@ -108,7 +114,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Unit test to edit instrument parameters of all spectrums (>1) and using
    * new detector IDs
-    */
+   */
   void test_MultiplePartialSpectrumEdit() {
     // Init
     EditInstrumentGeometry editdetector;
@@ -152,7 +158,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
-    */
+   */
   void checkDetectorParameters(API::MatrixWorkspace_sptr workspace,
                                size_t wsindex, double realr, double realtth,
                                double realphi) {
@@ -169,7 +175,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
-    */
+   */
   void checkDetectorID(API::MatrixWorkspace_sptr workspace, size_t wsindex,
                        detid_t detid) {
 

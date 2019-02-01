@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADNEXUSLOGSTEST_H_
 #define LOADNEXUSLOGSTEST_H_
 
-#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -18,8 +24,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
+#include <cxxtest/TestSuite.h>
 
 class LoadNexusLogsTest : public CxxTest::TestSuite {
 public:
@@ -253,6 +259,39 @@ public:
     TS_ASSERT(pclog);
     TS_ASSERT_EQUALS(pclog->size(), 24150);
     TS_ASSERT(pclog->getStatistics().duration < 3e9);
+  }
+
+  void test_no_crash_on_2D_array_of_values_on_load() {
+    auto testWS = createTestWorkspace();
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "larmor_array_time_series_mock.nxs");
+    TS_ASSERT_THROWS_NOTHING(loader.execute())
+  }
+
+  void test_last_time_series_log_entry_equals_end_time() {
+    LoadNexusLogs ld;
+    std::string outws_name = "REF_L_instrument";
+    ld.initialize();
+    ld.setPropertyValue("Filename", "REF_L_32035.nxs");
+    MatrixWorkspace_sptr ws = createTestWorkspace();
+    // Put it in the object.
+    ld.setProperty("Workspace", ws);
+    ld.execute();
+    TS_ASSERT(ld.isExecuted());
+
+    auto run = ws->run();
+    auto pclog = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("PhaseRequest1"));
+
+    TS_ASSERT(pclog);
+
+    const auto lastTime = pclog->lastTime();
+    const auto endTime = run.endTime();
+
+    TS_ASSERT_EQUALS(endTime.totalNanoseconds(), lastTime.totalNanoseconds());
   }
 
 private:

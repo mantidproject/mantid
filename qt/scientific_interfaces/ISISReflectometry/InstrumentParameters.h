@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_INSTRUMENTPARAMETERS_H
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTPARAMETERS_H
-#include <vector>
-#include <boost/optional.hpp>
-#include "GetInstrumentParameter.h"
 #include "First.h"
+#include "GetInstrumentParameter.h"
 #include "ValueOr.h"
+#include <boost/optional.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -127,6 +133,6 @@ private:
   std::vector<InstrumentParameterTypeMissmatch> m_typeErrors;
   std::vector<MissingInstrumentParameterValue> m_missingValueErrors;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTPARAMETERS_H

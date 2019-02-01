@@ -11,7 +11,7 @@ ISIS SANS
 
 A new reduction backend was added. It improves considerably on performance, robustness and maintainability. Currently the new reduction backend can be used via a Python API. See `here <https://www.mantidproject.org/Scripting_SANS_Reductions_With_The_New_Reduction_Backend>`_  for more details on how to use the new reduction backend via this API.
 
-One of the most noteable improvements of this new reduction backend is an enhanced performance which is most prominent when running batch reductions.
+One of the most notable improvements of this new reduction backend is an enhanced performance which is most prominent when running batch reductions.
 
 .. figure::  ../../images/SANSNewReductionBackendPerformance.png
    :align: center

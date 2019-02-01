@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
 from qtpy.QtCore import Qt
@@ -13,6 +19,7 @@ class CancelButton(QPushButton):
     """
     Button that cancels an algorithm
     """
+
     def __init__(self, presenter, algorithm_id):
         """
         Init an instance
@@ -32,6 +39,7 @@ class AlgorithmMonitorDialog(QDialog):
     """
     Displays progress of all running algorithms.
     """
+
     def __init__(self, parent, model):
         super(AlgorithmMonitorDialog, self).__init__(parent)
         self.tree = QTreeWidget(self)
@@ -60,6 +68,17 @@ class AlgorithmMonitorDialog(QDialog):
 
         self.presenter = AlgorithmProgressDialogPresenter(self, model)
         self.presenter.update_gui()
+
+    def closeEvent(self, event):
+        """
+        Funnel the closeEvent, triggered when the user presses X,
+        through the same routine as the `Close` button
+        :param args:
+        :return:
+        """
+        self.presenter.close()
+        self.deleteLater()
+        event.accept()
 
     def update(self, data):
         """

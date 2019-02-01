@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
-#include <MantidKernel/System.h>
 #include "MantidKernel/V3D.h"
+#include <MantidKernel/System.h>
 #include <vector>
 
 #ifndef INTERFACES_MANTID_EV_WORKER_H
@@ -15,26 +21,6 @@
 
     @author Dennis Mikkelson
     @date   2013-02-19
-
-    Copyright © 2013 ORNL, STFC Rutherford Appleton Laboratories
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    Code Documentation is available at
-                 <http://doxygen.mantidproject.org>
 */
 
 namespace MantidQt {
@@ -59,20 +45,21 @@ public:
   bool isEventWorkspace(const std::string &event_ws_name);
 
   /// Load and event file and convert to MD workspace
-  bool loadAndConvertToMD(const std::string &file_name,
-                          const std::string &ev_ws_name,
-                          const std::string &md_ws_name, const double modQ,
-                          const double minQ, const double maxQ,
-                          const bool do_lorentz_corr, const bool load_data,
-                          const bool load_det_cal,
-                          const std::string &det_cal_file,
-                          const std::string &det_cal_file2);
+  bool loadAndConvertToMD(
+      const std::string &file_name, const std::string &ev_ws_name,
+      const std::string &md_ws_name, const double modQ, const double minQ,
+      const double maxQ, const bool do_lorentz_corr, const bool load_data,
+      const bool load_det_cal, const std::string &det_cal_file,
+      const std::string &det_cal_file2, const std::string &axisCORELLI);
+  bool convertToHKL(const std::string &ev_ws_name,
+                    const std::string &md_ws_name, const double minQ,
+                    const double maxQ);
 
   /// Find peaks in MD workspace and set peaks into peaks workspace
   bool findPeaks(const std::string &ev_ws_name, const std::string &md_ws_name,
                  const std::string &peaks_ws_name, double max_abc,
                  size_t num_to_find, double min_intensity, double minQPeaks,
-                 double maxQPeaks);
+                 double maxQPeaks, const std::string &file_name);
 
   /// Predict peaks and overwrite the peaks workspace
   bool predictPeaks(const std::string &peaks_ws_name, double min_pred_wl,

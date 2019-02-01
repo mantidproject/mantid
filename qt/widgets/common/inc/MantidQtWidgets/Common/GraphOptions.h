@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDGRAPHOPTIONS_H_
 #define MANTIDGRAPHOPTIONS_H_
 
@@ -18,8 +24,8 @@ enum ScaleType { Linear = 0, Log10, Power };
 enum Axis { Left, Right, Bottom, Top };
 
 /**
-* Graph curve type
-*/
+ * Graph curve type
+ */
 enum CurveType {
   Unspecified = -1,
   Line,
@@ -46,6 +52,6 @@ enum CurveType {
   ImagePlot,
   User
 };
-}
+} // namespace GraphOptions
 
 #endif // MANTIDSCALETYPE_H_

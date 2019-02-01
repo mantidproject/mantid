@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
 
 #include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
-#include <boost/algorithm/clamp.hpp>
 #include <QHeaderView>
 #include <QString>
 #include <QVector>
+#include <boost/algorithm/clamp.hpp>
 #include <qwt_scale_engine.h>
 
 namespace MantidQt {

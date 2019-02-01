@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef COMMUTATIVEBINARYOPERATIONTEST_H_
 #define COMMUTATIVEBINARYOPERATIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidKernel/System.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -33,6 +39,8 @@ public:
                                      const MatrixWorkspace_const_sptr ws2) {
     m_lhs = ws1;
     m_rhs = ws2;
+    m_lhsBlocksize = ws1->blocksize();
+    m_rhsBlocksize = ws2->blocksize();
     BinaryOperation::checkRequirements();
     return CommutativeBinaryOperation::checkSizeCompatibility(ws1, ws2);
   }
@@ -41,25 +49,20 @@ private:
   // Unhide base class method to avoid Intel compiler warning
   using BinaryOperation::checkSizeCompatibility;
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const MantidVec &rhsY,
-                              const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override {
-    UNUSED_ARG(lhsX);
-    UNUSED_ARG(lhsY);
-    UNUSED_ARG(lhsE);
-    UNUSED_ARG(rhsY);
-    UNUSED_ARG(rhsE);
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const HistogramData::Histogram &rhs,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override {
+    UNUSED_ARG(lhs);
+    UNUSED_ARG(rhs);
     UNUSED_ARG(YOut);
     UNUSED_ARG(EOut);
   }
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const double rhsY,
-                              const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override {
-    UNUSED_ARG(lhsX);
-    UNUSED_ARG(lhsY);
-    UNUSED_ARG(lhsE);
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const double rhsY, const double rhsE,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override {
+    UNUSED_ARG(lhs);
     UNUSED_ARG(rhsY);
     UNUSED_ARG(rhsE);
     UNUSED_ARG(YOut);

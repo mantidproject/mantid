@@ -14,7 +14,6 @@ set ( EXPORT_FILES
   src/Exports/AlgorithmHistory.cpp
   src/Exports/CatalogManager.cpp
   src/Exports/CatalogSession.cpp
-  src/Exports/DetectorInfo.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
@@ -55,6 +54,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceValidators.cpp
   src/Exports/ADSValidator.cpp
   src/Exports/InstrumentValidator.cpp
+  src/Exports/OrientedLatticeValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp
@@ -77,6 +77,11 @@ set ( EXPORT_FILES
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
   src/Exports/MultiDomainFunction.cpp
+  src/Exports/SpectrumDefinition.cpp
+  src/Exports/SpectrumInfoItem.cpp
+  src/Exports/SpectrumInfoIterator.cpp
+  src/Exports/SpectrumInfoPythonIterator.cpp
+  src/Exports/AnalysisDataServiceObserver.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
@@ -95,6 +100,7 @@ set ( SRC_FILES
   src/PythonAlgorithm/DataProcessorAdapter.cpp
   src/CloneMatrixWorkspace.cpp
   src/ExtractWorkspace.cpp
+  src/Exports/AnalysisDataServiceObserverAdapter.cpp
 )
 
 set ( INC_FILES
@@ -105,10 +111,14 @@ set ( INC_FILES
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
+  ${HEADER_DIR}/api/AnalysisDataServiceObserverAdapter.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/ExtractWorkspace.h
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
+  ${HEADER_DIR}/api/SpectrumInfoPythonIterator.h
+  ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
+  ${HEADER_DIR}/api/ComponentInfoPythonIterator.h
 )
 
 set ( PY_FILES
@@ -143,7 +153,8 @@ set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+target_link_libraries ( PythonAPIModule PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            PythonInterfaceCore
             PythonGeometryModule
             PythonKernelModule
             API
@@ -165,7 +176,7 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonAPIModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/api )
+mtd_install_targets( TARGETS PythonAPIModule INSTALL_DIRS ${BIN_DIR}/mantid/api ${WORKBENCH_BIN_DIR}/mantid/api )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/api )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/api ${WORKBENCH_BIN_DIR}/mantid/api)

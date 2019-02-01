@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Base class for instrument-specific user interface
 """
 from __future__ import (absolute_import, division, print_function)
 import six
-from PyQt4 import QtGui
+from qtpy.QtWidgets import (QMessageBox)  # noqa
 import sys
 import os
 import traceback
@@ -75,7 +81,7 @@ class InstrumentInterface(object):
             #TODO: change this to signals and slots mechanism
         """
         if len(self.widgets)>0:
-            QtGui.QMessageBox.warning(self.widgets[0], title, message)
+            QMessageBox.warning(self.widgets[0], title, message)
 
     def load_last_reduction(self):
         try:
@@ -268,12 +274,6 @@ class InstrumentInterface(object):
     def has_advanced_version(self):
         """
             Returns true if the instrument has simple and advanced views
-        """
-        return False
-
-    def is_cluster_enabled(self):
-        """
-            Returns true if the instrument is compatible with remote submission
         """
         return False
 

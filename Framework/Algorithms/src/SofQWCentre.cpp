@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SofQWCentre.h"
-#include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"

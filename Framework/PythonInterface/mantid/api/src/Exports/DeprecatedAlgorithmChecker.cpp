@@ -1,5 +1,11 @@
-#include "MantidAPI/DeprecatedAlgorithm.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include <boost/python/class.hpp>
 
 using Mantid::API::AlgorithmManager;
@@ -10,17 +16,17 @@ using namespace boost::python;
 
 namespace {
 /**
-* It is not going to be possible to directly test if an algorithm is deprecated
-*from Python. This
-* is because we only export up to API and the deprecation happens at the
-*concrete layer meaning
-* Python cannot work out that the concrete class inherits from
-*DeprecatedAlgorithm.
-*
-* To work around this we create a small DeprecatedAlgorithmTester class to
-*handle to querying the C++
-* inheritance structure
-*/
+ * It is not going to be possible to directly test if an algorithm is deprecated
+ *from Python. This
+ * is because we only export up to API and the deprecation happens at the
+ *concrete layer meaning
+ * Python cannot work out that the concrete class inherits from
+ *DeprecatedAlgorithm.
+ *
+ * To work around this we create a small DeprecatedAlgorithmTester class to
+ *handle to querying the C++
+ * inheritance structure
+ */
 class DeprecatedAlgorithmChecker {
 public:
   /**
@@ -50,7 +56,7 @@ private:
   /// Pointer to unmanaged algorithm
   IAlgorithm_sptr m_alg;
 };
-}
+} // namespace
 
 void export_DeprecatedAlgorithmChecker() {
   class_<DeprecatedAlgorithmChecker>("DeprecatedAlgorithmChecker", no_init)

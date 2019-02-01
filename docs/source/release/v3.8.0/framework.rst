@@ -89,7 +89,7 @@ Improved
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
 
-- :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
+- :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some instrument geometries.
 
 - :ref:`LoadILL <algm-LoadILLTOF>` was renamed to :ref:`LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
 
@@ -155,7 +155,7 @@ Performance
 CurveFitting
 ------------
 
-- Added a new minimizer belonging to the trust region family of algorithms developped for Mantid by the SCD
+- Added a new minimizer belonging to the trust region family of algorithms developed for Mantid by the SCD
   Numerical Analysis Group at RAL. It has better performance characteristics compared to the existing
   minimizers especially when applied to the most difficult fitting problems.
 - Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset

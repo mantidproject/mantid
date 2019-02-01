@@ -12,6 +12,7 @@ if [ -f $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot ]; then
     if [ ! -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot ]; then
         ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot
     fi
+    # create link to old name so upgrading from old packages doesn't delete the executable
     if [ ! -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
         ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
     fi
@@ -24,11 +25,20 @@ if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
     ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
     ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.pth @PYTHON_SITE@/mantid.pth
 else
-    # Create symbolic links in world's path
-    if [ ! -L /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@ ]; then
-        ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@
+    # symbolic links in world's path of mantidplot
+    if [ -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
+      if [ ! -L /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@ ]; then
+          ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@
+      fi
     fi
+    # symbolic link for mantidpython
     if [ ! -L /usr/bin/mantidpython@CPACK_PACKAGE_SUFFIX@ ]; then
         ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidpython /usr/bin/mantidpython@CPACK_PACKAGE_SUFFIX@
+    fi
+    # link the workbench if it exists
+    if [ -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidworkbench ]; then
+        if [ ! -L /usr/bin/mantidworkbench@CPACK_PACKAGE_SUFFIX@ ]; then
+            ln -s $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidworkbench /usr/bin/mantidworkbench@CPACK_PACKAGE_SUFFIX@
+        fi
     fi
 fi

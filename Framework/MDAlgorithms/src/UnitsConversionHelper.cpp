@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
 #include <cmath>
 
 namespace Mantid {
@@ -360,5 +366,5 @@ UnitsConversionHelper::UnitsConversionHelper()
       m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(nullptr),
       m_pL2s(nullptr), m_pEfixedArray(nullptr) {}
 
-} // endNamespace DataObjects
-} // endNamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // SaveNexusProcessed
 // @author Ronald Fowler, based on SaveNexus
 #include "MantidDataHandling/SaveNexusProcessed.h"
@@ -8,6 +14,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
@@ -15,7 +22,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <Poco/File.h>
-#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -63,8 +69,9 @@ void SaveNexusProcessed::init() {
                   "List of spectrum numbers to read, only for single period\n"
                   "data.");
 
-  declareProperty("Append", false, "Determines whether .nxs file needs to be\n"
-                                   "over written or appended");
+  declareProperty("Append", false,
+                  "Determines whether .nxs file needs to be\n"
+                  "over written or appended");
 
   declareProperty(
       "PreserveEvents", true,
@@ -160,6 +167,8 @@ void SaveNexusProcessed::doExec(
       boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
   OffsetsWorkspace_const_sptr offsetsWorkspace =
       boost::dynamic_pointer_cast<const OffsetsWorkspace>(inputWorkspace);
+  MaskWorkspace_const_sptr maskWorkspace =
+      boost::dynamic_pointer_cast<const MaskWorkspace>(inputWorkspace);
   if (peaksWorkspace)
     g_log.debug("We have a peaks workspace");
   // check if inputWorkspace is something we know how to save
@@ -186,10 +195,11 @@ void SaveNexusProcessed::doExec(
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
       (workspaceID.find("RebinnedOutput") == std::string::npos) &&
-      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace)
+      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace &&
+      !maskWorkspace)
     throw Exception::NotImplementedError(
         "SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, "
-        "EventWorkspace, ITableWorkspace, or OffsetsWorkspace.");
+        "EventWorkspace, ITableWorkspace, OffsetsWorkspace or MaskWorkspace.");
 
   // Create progress object for initial part - depends on whether events are
   // processed
@@ -219,7 +229,7 @@ void SaveNexusProcessed::doExec(
   nexusFile->openNexusWrite(m_filename, entryNumber);
 
   // Equivalent C++ API handle
-  auto cppFile = new ::NeXus::File(nexusFile->fileID);
+  ::NeXus::File cppFile(nexusFile->fileID);
 
   prog_init.reportIncrement(1, "Opening file");
   if (nexusFile->writeNexusProcessedHeader(m_title, wsName) != 0)
@@ -230,7 +240,7 @@ void SaveNexusProcessed::doExec(
   // write instrument data, if present and writer enabled
   if (matrixWorkspace) {
     // Save the instrument names, ParameterMap, sample, run
-    matrixWorkspace->saveExperimentInfoNexus(cppFile);
+    matrixWorkspace->saveExperimentInfoNexus(&cppFile);
     prog_init.reportIncrement(1, "Writing sample and instrument");
 
     // check if all X() are in fact the same array
@@ -245,33 +255,35 @@ void SaveNexusProcessed::doExec(
     // Write out the data (2D or event)
     if (m_eventWorkspace && PreserveEvents) {
       this->execEvent(nexusFile.get(), uniformSpectra, spec);
-    } else if (offsetsWorkspace) {
-      g_log.warning() << "Writing SpecialWorkspace2D ID=" << workspaceID
-                      << "\n";
-      nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra,
-                                           spec, "offsets_workspace", true);
     } else {
+      std::string workspaceTypeGroupName;
+      if (offsetsWorkspace)
+        workspaceTypeGroupName = "offsets_workspace";
+      else if (maskWorkspace)
+        workspaceTypeGroupName = "mask_workspace";
+      else
+        workspaceTypeGroupName = "workspace";
+
       nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra,
-                                           spec, "workspace", true);
+                                           spec, workspaceTypeGroupName.c_str(),
+                                           true);
     }
 
-    cppFile->openGroup("instrument", "NXinstrument");
-    saveSpectraMapNexus(*matrixWorkspace, cppFile, spec, ::NeXus::LZW);
-    cppFile->closeGroup();
+    cppFile.openGroup("instrument", "NXinstrument");
+    saveSpectraMapNexus(*matrixWorkspace, &cppFile, spec, ::NeXus::LZW);
+    cppFile.closeGroup();
 
   } // finish matrix workspace specifics
 
   if (peaksWorkspace) {
     // Save the instrument names, ParameterMap, sample, run
-    peaksWorkspace->saveExperimentInfoNexus(cppFile);
+    peaksWorkspace->saveExperimentInfoNexus(&cppFile);
     prog_init.reportIncrement(1, "Writing sample and instrument");
   }
 
   // peaks workspace specifics
   if (peaksWorkspace) {
-    //  g_log.information("Peaks Workspace saving to Nexus would be done");
-    //  int pNum = peaksWorkspace->getNumberPeaks();
-    peaksWorkspace->saveNexus(cppFile);
+    peaksWorkspace->saveNexus(&cppFile);
 
   }                        // finish peaks workspace specifics
   else if (tableWorkspace) // Table workspace specifics
@@ -293,7 +305,7 @@ void SaveNexusProcessed::doExec(
     }
   }
 
-  inputWorkspace->history().saveNexus(cppFile);
+  inputWorkspace->history().saveNexus(&cppFile);
   nexusFile->closeGroup();
 }
 
@@ -508,16 +520,16 @@ bool SaveNexusProcessed::processGroups() {
     }
   }
 
-  // Only the input workspace property can take group workspaces. Therefore
-  // index = 0.
-  std::vector<Workspace_sptr> &thisGroup = m_groups[0];
-  if (!thisGroup.empty()) {
-    for (size_t entry = 0; entry < m_groupSize; entry++) {
-      Workspace_sptr ws = thisGroup[entry];
+  // If we have arrived here then a WorkspaceGroup was passed to the
+  // InputWorkspace property. Pull out the unrolled workspaces and append an
+  // entry for each one. We only have a single input workspace property declared
+  // so there will only be a single list of unrolled workspaces
+  const auto &workspaces = m_unrolledInputWorkspaces[0];
+  if (!workspaces.empty()) {
+    for (size_t entry = 0; entry < workspaces.size(); entry++) {
+      const Workspace_sptr ws = workspaces[entry];
       this->doExec(ws, nexusFile, true /*keepFile*/, entry);
-      std::stringstream buffer;
-      buffer << "Saving group index " << entry;
-      m_log.information(buffer.str());
+      g_log.information() << "Saving group index " << entry << "\n";
     }
   }
 
@@ -527,11 +539,11 @@ bool SaveNexusProcessed::processGroups() {
 }
 
 /** Save the spectra detector map to an open NeXus file.
-* @param ws :: Workspace containing spectrum data
-* @param file :: open NeXus file
-* @param spec :: list of the Workspace Indices to save.
-* @param compression :: NXcompression int to indicate how to compress
-*/
+ * @param ws :: Workspace containing spectrum data
+ * @param file :: open NeXus file
+ * @param spec :: list of the Workspace Indices to save.
+ * @param compression :: NXcompression int to indicate how to compress
+ */
 void SaveNexusProcessed::saveSpectraMapNexus(
     const MatrixWorkspace &ws, ::NeXus::File *file,
     const std::vector<int> &spec,

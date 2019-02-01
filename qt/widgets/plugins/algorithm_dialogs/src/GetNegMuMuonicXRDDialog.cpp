@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/GetNegMuMuonicXRDDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h"
 #include <QCheckBox>
-#include <QMessageBox>
-#include <QLineEdit>
-#include <QValidator>
 #include <QFormLayout>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QValidator>
 
 namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(GetNegMuMuonicXRDDialog)
 
 /**
-* Default constructor.
-* @param parent :: Parent dialog.
-*/
+ * Default constructor.
+ * @param parent :: Parent dialog.
+ */
 
 GetNegMuMuonicXRDDialog::GetNegMuMuonicXRDDialog(QWidget *parent)
     : API::AlgorithmDialog(parent), m_periodicTable(nullptr),
@@ -45,9 +51,9 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   m_periodicTable->disableAllElementButtons();
 
   /*Elements Enabled Correspond to those for which we
-  * have data for in the dictionary found in
-  * GetNegMuMuonicXRD.py file
-  */
+   * have data for in the dictionary found in
+   * GetNegMuMuonicXRD.py file
+   */
   enableElementsForGetNegMuMuonicXRD();
 
   // label for the QLineEdit for m_yPosition property
@@ -74,24 +80,24 @@ void GetNegMuMuonicXRDDialog::initLayout() {
 }
 
 /**
-*
-*/
+ *
+ */
 void GetNegMuMuonicXRDDialog::showLegend() {
   bool checked = m_showLegendCheck->isChecked();
   m_periodicTable->showGroupLegend(checked);
 }
 
 /**
-* Enables the buttons for which we have data for in the GetNegMuMuonicXRD.py
-* dictionary of elements, by Periodic Table symbol.
-* i.e Au corresponds to Gold.
-*/
+ * Enables the buttons for which we have data for in the GetNegMuMuonicXRD.py
+ * dictionary of elements, by Periodic Table symbol.
+ * i.e Au corresponds to Gold.
+ */
 void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD() {
   /* The GetNegMuMuonic algorithm only has data for these elements
-  * The dictionary of elements and data can edited in the python file
-  * for the algorithm, and the button for that element can be enabled
-  * the same as the elements are below.
-  */
+   * The dictionary of elements and data can edited in the python file
+   * for the algorithm, and the button for that element can be enabled
+   * the same as the elements are below.
+   */
   m_periodicTable->enableButtonByName("Au");
   m_periodicTable->enableButtonByName("Ag");
   m_periodicTable->enableButtonByName("Cu");
@@ -102,9 +108,9 @@ void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD() {
 }
 
 /**
-* The Slot to gather input from the dialog, store it in the propertyValue
-* and then emit the signal for valid input. Preparing for accept() to be run.
-*/
+ * The Slot to gather input from the dialog, store it in the propertyValue
+ * and then emit the signal for valid input. Preparing for accept() to be run.
+ */
 void GetNegMuMuonicXRDDialog::parseInput() {
   // getting a list of strings of elements selected from periodicTableWidget
   QString elementsSelectedStr = m_periodicTable->getAllCheckedElementsStr();
@@ -129,5 +135,5 @@ void GetNegMuMuonicXRDDialog::parseInput() {
     emit validInput();
   }
 }
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt

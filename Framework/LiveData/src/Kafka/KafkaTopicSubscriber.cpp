@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include "MantidKernel/Logger.h"
 
@@ -28,9 +34,9 @@ std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
   conf->set("metadata.broker.list", brokerAddr, errorMsg);
   conf->set("session.timeout.ms", "10000", errorMsg);
   conf->set("group.id", "mantid", errorMsg);
-  conf->set("message.max.bytes", "10000000", errorMsg);
-  conf->set("fetch.message.max.bytes", "10000000", errorMsg);
-  conf->set("replica.fetch.max.bytes", "10000000", errorMsg);
+  conf->set("message.max.bytes", "25000000", errorMsg);
+  conf->set("fetch.message.max.bytes", "25000000", errorMsg);
+  conf->set("replica.fetch.max.bytes", "25000000", errorMsg);
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
   conf->set("offset.store.method", "none", errorMsg);
@@ -51,7 +57,7 @@ std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
   globalConf->set("default_topic_conf", conf.get(), errorMsg);
   return conf;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace LiveData {
@@ -61,6 +67,7 @@ namespace LiveData {
 // -----------------------------------------------------------------------------
 
 const std::string KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX = "_events";
+const std::string KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX = "_eventSum";
 const std::string KafkaTopicSubscriber::RUN_TOPIC_SUFFIX = "_runInfo";
 const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 const std::string KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX = "_sampleEnv";
@@ -157,6 +164,11 @@ KafkaTopicSubscriber::getCurrentOffsets() {
     throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
                              "current partition assignment.");
   }
+  error = m_consumer->position(partitions);
+  if (error != RdKafka::ERR_NO_ERROR) {
+    throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
+                             "current partition positions.");
+  }
   for (auto topicPartition : partitions) {
     std::vector<int64_t> offsetList = {topicPartition->offset()};
     auto result = currentOffsets.emplace(
@@ -217,7 +229,8 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
                        << ", looked up offset as: " << partition->offset()
                        << ", current high watermark is: "
                        << getCurrentOffset(partition->topic(),
-                                           partition->partition()) << std::endl;
+                                           partition->partition())
+                       << std::endl;
     }
   }
 
@@ -503,5 +516,5 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
 
   return partitionOffsetMap;
 }
-}
-}
+} // namespace LiveData
+} // namespace Mantid

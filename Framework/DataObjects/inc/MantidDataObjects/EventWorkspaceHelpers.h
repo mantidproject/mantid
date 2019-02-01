@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef EVENTWORKSPACEHELPERS_H_
 #define EVENTWORKSPACEHELPERS_H_
 
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -18,7 +24,7 @@ struct DLLExport EventWorkspaceHelpers {
   convertEventTo2D(API::MatrixWorkspace_sptr inputMatrixW);
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* EVENTWORKSPACEHELPERS_H_ */

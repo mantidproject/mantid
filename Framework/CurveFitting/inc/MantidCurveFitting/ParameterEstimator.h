@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_PARAMETERESTIMATOR_H_
 #define MANTID_CURVEFITTING_PARAMETERESTIMATOR_H_
 
@@ -11,7 +17,7 @@ namespace API {
 class IFunction;
 class FunctionDomain1D;
 class FunctionValues;
-}
+} // namespace API
 
 namespace CurveFitting {
 namespace ParameterEstimator {

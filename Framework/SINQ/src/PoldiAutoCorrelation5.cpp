@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidSINQ/PoldiAutoCorrelation5.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
@@ -129,10 +135,10 @@ void PoldiAutoCorrelation5::logConfigurationInformation(
 
     if (g_log.is(Poco::Message::PRIO_DEBUG)) {
       for (size_t i = 0; i < chopper->slitPositions().size(); ++i) {
-        g_log.information() << "_Poldi -     Slits: " << i
-                            << ": Position = " << chopper->slitPositions()[i]
-                            << "\t Time = " << chopper->slitTimes()[i]
-                            << " µs\n";
+        g_log.information()
+            << "_Poldi -     Slits: " << i
+            << ": Position = " << chopper->slitPositions()[i]
+            << "\t Time = " << chopper->slitTimes()[i] << " µs\n";
       }
     }
 

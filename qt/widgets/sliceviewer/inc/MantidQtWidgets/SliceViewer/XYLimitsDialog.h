@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef XYLIMITSDIALOG_H
 #define XYLIMITSDIALOG_H
 
-#include <QDialog>
-#include "ui_XYLimitsDialog.h"
 #include "DllOption.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "ui_XYLimitsDialog.h"
+#include <QDialog>
 
 /** Dialog that prompts the user
  * to enter the X and Y limits to the axes

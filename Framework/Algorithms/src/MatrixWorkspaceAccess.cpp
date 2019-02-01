@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MatrixWorkspaceAccess.h"
 
 namespace Mantid {
@@ -12,5 +18,5 @@ decltype(std::mem_fn(
         (std::vector<double> & (API::MatrixWorkspace::*)(const std::size_t)) &
         API::MatrixWorkspace::dataX);
 ///@endcond
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

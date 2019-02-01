@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 #include "MantidKernel/Statistics.h"
 
 #include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 
 #include <algorithm>
@@ -229,8 +235,8 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
 
 /// Getting statistics of a string array should just give a bunch of NaNs
 template <>
-DLLExport Statistics
-getStatistics<string>(const vector<string> &data, const unsigned int flags) {
+DLLExport Statistics getStatistics<string>(const vector<string> &data,
+                                           const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return getNanStatistics();
@@ -238,20 +244,20 @@ getStatistics<string>(const vector<string> &data, const unsigned int flags) {
 
 /// Getting statistics of a boolean array should just give a bunch of NaNs
 template <>
-DLLExport Statistics
-getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
+DLLExport Statistics getStatistics<bool>(const vector<bool> &data,
+                                         const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return getNanStatistics();
 }
 
 /** Return the Rwp of a diffraction pattern data
-  * @param obsI :: array of observed intensity values
-  * @param calI :: array of calculated intensity values;
-  * @param obsE :: array of error of the observed data;
-  * @return :: RFactor including Rp and Rwp
-  *
-  */
+ * @param obsI :: array of observed intensity values
+ * @param calI :: array of calculated intensity values;
+ * @param obsE :: array of error of the observed data;
+ * @return :: RFactor including Rp and Rwp
+ *
+ */
 Rfactor getRFactor(const std::vector<double> &obsI,
                    const std::vector<double> &calI,
                    const std::vector<double> &obsE) {
@@ -438,8 +444,8 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
 #define INSTANTIATE(TYPE)                                                      \
-  template MANTID_KERNEL_DLL Statistics                                        \
-  getStatistics<TYPE>(const vector<TYPE> &, const unsigned int);               \
+  template MANTID_KERNEL_DLL Statistics getStatistics<TYPE>(                   \
+      const vector<TYPE> &, const unsigned int);                               \
   template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(              \
       const vector<TYPE> &);                                                   \
   template MANTID_KERNEL_DLL std::vector<double> getWeightedZscore<TYPE>(      \

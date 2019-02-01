@@ -1,15 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
-#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
-#include "MantidAPI/MDGeometry.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
-#include <vector>
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
+#include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -35,9 +42,10 @@ public:
       Mantid::Geometry::PeakTransformFactory_sptr transformFactory);
   void reInitialize(Mantid::API::IPeaksWorkspace_sptr peaksWS) override;
   ~ConcretePeaksPresenter() override;
+  void setNonOrthogonal(bool nonOrthogonalEnabled) override;
+  bool changeShownDim(size_t dimX, size_t dimY) override;
   void update() override;
   void updateWithSlicePoint(const PeakBoundingBox &slicePoint) override;
-  bool changeShownDim() override;
   bool isLabelOfFreeAxis(const std::string &label) const override;
   SetPeaksWorkspaces presentedWorkspaces() const override;
   void setForegroundColor(const PeakViewColor) override;
@@ -81,6 +89,10 @@ private:
   bool m_isHidden;
   /// Flag to indicate the current edit mode.
   EditMode m_editMode;
+  /// Flag to indicate slice viewer in in non-orthogonal mode
+  bool m_nonOrthogonalMode;
+  /// Non orthogonal axis information
+  NonOrthogonalAxis m_axisData;
   /// Configure peak transformations
   bool configureMappingTransform();
   /// Hide all views
@@ -108,7 +120,7 @@ private:
   /// Set the visible peak list.
   void setVisiblePeaks(const std::vector<size_t> &indexes);
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_ */

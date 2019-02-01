@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADER_H_
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADER_H_
 
 #include "DllConfig.h"
-#include "MuonAnalysisHelper.h"
+#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MuonAnalysisHelper.h"
 #include <QMap>
 #include <QRegExp>
 #include <QStringList>
@@ -40,33 +46,13 @@ struct AnalysisOptions {
   std::string groupPairName; /// Name of group or pair to use
   const Mantid::API::Grouping grouping; /// Grouping to use
   PlotType plotType = {};               /// Type of analysis to perform
+  std::string wsName = "";              /// Name of the ws
   explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g) {}
 };
 } // namespace Muon
 
 /** MuonAnalysisDataLoader : Loads and processes muon data for MuonAnalysis
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL MuonAnalysisDataLoader {
 public:
   /// constructor

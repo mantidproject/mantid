@@ -1,7 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef OPTIMIZECRYSTALPLACEMENTTEST_H_
 #define OPTIMIZECRYSTALPLACEMENTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
@@ -9,13 +14,14 @@
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
-using Mantid::Crystal::PeakHKLErrors;
 using Mantid::Crystal::OptimizeCrystalPlacement;
+using Mantid::Crystal::PeakHKLErrors;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 using Mantid::Geometry::Goniometer;
@@ -59,7 +65,7 @@ runOptimizePlacement(const PeaksWorkspace_sptr &peaksWS,
   ads.remove(fitTableName);
   return std::make_pair(modifiedPeaksWS, fitInfoWS);
 }
-}
+} // namespace
 
 class OptimizeCrystalPlacementTest : public CxxTest::TestSuite {
 
@@ -181,9 +187,10 @@ public:
 
   void test_SamplePosition() {
     auto modPeaksNoFix = calculateBasicPlacement();
-    const auto &peak = modPeaksNoFix->getPeak(0);
+    auto peak = modPeaksNoFix->getPeak(0);
     auto inst = peak.getInstrument();
     const V3D sampPos(.0003, -.00025, .00015);
+    peak.setSamplePos(sampPos);
 
     auto pmap = inst->getParameterMap();
     auto sample = inst->getSample();
@@ -202,9 +209,9 @@ public:
         modPeaksNoFix, {{"KeepGoniometerFixedfor", "5637, 5638"},
                         {"AdjustSampleOffsets", "1"}});
     const auto table = resultsSamplePos.second;
-    TS_ASSERT_DELTA(table->Double(0, 1), 0, .0004);
-    TS_ASSERT_DELTA(table->Double(1, 1), 0, .00024);
-    TS_ASSERT_DELTA(table->Double(2, 1), 0, .0003);
+    TS_ASSERT_DELTA(table->Double(0, 1), -0.0003377231, 1.e-4);
+    TS_ASSERT_DELTA(table->Double(1, 1), 0.0000897573, 1.e-4);
+    TS_ASSERT_DELTA(table->Double(2, 1), -0.0002679569, 1.e-4);
   }
 
 private:

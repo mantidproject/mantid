@@ -61,7 +61,7 @@ least for RAW files.
 If a file with an alternate data stream is copied to an FAT file system
 the alternate data stream is lost. It has been reported that if a file
 with an ADS is copied using SAMBA to a unix file system the streams are
-extracted into seperate files with automatically generates suffixes.
+extracted into separate files with automatically generates suffixes.
 
 More information about Alternate Data Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

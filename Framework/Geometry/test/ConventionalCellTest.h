@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_CONVENTIONAL_CELL_TEST_H_
 #define MANTID_GEOMETRY_CONVENTIONAL_CELL_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/System.h>
-#include <MantidKernel/V3D.h>
 #include <MantidKernel/Matrix.h>
+#include <MantidKernel/System.h>
+#include <MantidKernel/Timer.h>
+#include <MantidKernel/V3D.h>
+#include <cxxtest/TestSuite.h>
 
 #include <MantidGeometry/Crystal/ConventionalCell.h>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class ConventionalCellTest : public CxxTest::TestSuite {
 public:

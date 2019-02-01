@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 '''
 1. all the functions are defined and built consistently.
 
@@ -548,7 +554,7 @@ def showx3(x):
     '''
     %showx displays all parameters for refinement in reasonably intelligible
     %form
-    Input : parameter vector and the sets of hkl indices for the diamons
+    Input : parameter vector and the sets of hkl indices for the diamonds
     '''
     global hkl1, hkl2
     global UB1, pkcalcint1
@@ -773,7 +779,7 @@ def SimTrans3(x):
     % multiplied. I've implemented the change...will see what difference it
     % makes.
     %
-    % M. Guthrie 9 April 2014, introduced possiblity to refine L2 and also a
+    % M. Guthrie 9 April 2014, introduced possibility to refine L2 and also a
     % scale factor for calculated dip wavelengths (to account for diamond
     % compressibility).
     '''

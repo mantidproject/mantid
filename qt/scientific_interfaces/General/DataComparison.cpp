@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "DataComparison.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -14,7 +20,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(DataComparison)
 }
-}
+} // namespace MantidQt
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
@@ -243,8 +249,9 @@ int DataComparison::getInitialColourIndex() {
   }
 
   // Find the smallest unused colour
-  int numColours = dynamic_cast<QComboBox *>(
-                       m_uiForm.twCurrentData->cellWidget(0, COLOUR))->count();
+  int numColours =
+      dynamic_cast<QComboBox *>(m_uiForm.twCurrentData->cellWidget(0, COLOUR))
+          ->count();
   for (int i = 0; i < numColours; i++) {
     if (!usedColours.contains(i))
       return i;

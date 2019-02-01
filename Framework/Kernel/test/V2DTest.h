@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_V2DTEST_H_
 #define MANTID_KERNEL_V2DTEST_H_
 
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Exception.h"
-#include <cxxtest/TestSuite.h>
 #include <cfloat>
+#include <cxxtest/TestSuite.h>
 #include <limits>
 
 using Mantid::Kernel::V2D;

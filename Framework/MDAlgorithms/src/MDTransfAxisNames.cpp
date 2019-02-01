@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDTransfAxisNames.h"
 #include <boost/format.hpp>
 
@@ -97,5 +103,5 @@ std::string DLLExport sprintfd(const double data, const double eps) {
   return boost::str(boost::format("%d") % dist);
 }
 
-} // endnamespace MDAlgorithms
-} // endnamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid

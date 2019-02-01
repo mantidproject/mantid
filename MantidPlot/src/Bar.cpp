@@ -5,7 +5,7 @@
     Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
  Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
-    Description          : 3D bars (modifed enrichment from QwtPlot3D)
+    Description          : 3D bars (modified enrichment from QwtPlot3D)
 
  ***************************************************************************/
 
@@ -31,9 +31,9 @@
 
 #include <qbitmap.h>
 
+#include "Bar.h"
 #include <qwt3d_color.h>
 #include <qwt3d_plot.h>
-#include "Bar.h"
 
 using namespace Qwt3D;
 

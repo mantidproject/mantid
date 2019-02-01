@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef EVENTLISTTEST_H_
 #define EVENTLISTTEST_H_ 1
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
@@ -1300,6 +1306,41 @@ public:
       double min = MAX_TOF * 0.25;
       double max = MAX_TOF * 0.5;
       el.maskTof(min, max);
+      for (std::size_t i = 0; i < el.getNumberEvents(); i++) {
+        // No tofs in that range
+        TS_ASSERT((el.getEvent(i).tof() < min) || (el.getEvent(i).tof() > max));
+      }
+      TS_ASSERT_EQUALS(el.getNumberEvents(), 0.75 * 2 * MAX_TOF / BIN_DELTA);
+    }
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void test_maskCondition_allTypes() {
+    // Go through each possible EventType as the input
+    for (int this_type = 0; this_type < 3; this_type++) {
+      this->fake_uniform_data();
+      el.switchTo(static_cast<EventType>(this_type));
+
+      // tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
+      // How many events did we make?
+      TS_ASSERT_EQUALS(el.getNumberEvents(), 2 * MAX_TOF / BIN_DELTA);
+
+      // Mask out 5-10 milliseconds
+      auto nlen = el.getNumberEvents();
+      std::vector<bool> mask(nlen, true);
+
+      // first check no removal
+      el.maskCondition(mask);
+      TS_ASSERT_EQUALS(el.getNumberEvents(), 2 * MAX_TOF / BIN_DELTA);
+
+      double min = MAX_TOF * 0.25;
+      double max = MAX_TOF * 0.5;
+      for (size_t i = 0; i < nlen; i++) {
+        if ((el.getEvent(i).tof() >= min) && (el.getEvent(i).tof() <= max)) {
+          mask[i] = false;
+        }
+      }
+      el.maskCondition(mask);
       for (std::size_t i = 0; i < el.getNumberEvents(); i++) {
         // No tofs in that range
         TS_ASSERT((el.getEvent(i).tof() < min) || (el.getEvent(i).tof() > max));

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SPHERICALABSORPTIONTEST_H_
 #define SPHERICALABSORPTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SphericalAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/SphericalAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

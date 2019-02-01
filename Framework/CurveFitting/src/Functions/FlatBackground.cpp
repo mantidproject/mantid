@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/FlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/System.h"
@@ -91,6 +97,6 @@ void FlatBackground::histogramDerivative1D(Jacobian *jacobian, double left,
   }
 }
 
-} // namespace Mantid
 } // namespace Functions
 } // namespace CurveFitting
+} // namespace Mantid

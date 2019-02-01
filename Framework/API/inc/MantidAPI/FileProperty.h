@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_FILEPROPERTY_H_
 #define MANTID_API_FILEPROPERTY_H_
 
@@ -53,10 +59,11 @@ public:
   };
 
   /// Constructor taking a list of extensions as a vector
-  FileProperty(const std::string &name, const std::string &defaultValue,
-               unsigned int action, const std::vector<std::string> &exts =
-                                        std::vector<std::string>(),
-               unsigned int direction = Kernel::Direction::Input);
+  FileProperty(
+      const std::string &name, const std::string &defaultValue,
+      unsigned int action,
+      const std::vector<std::string> &exts = std::vector<std::string>(),
+      unsigned int direction = Kernel::Direction::Input);
   /// Constructor taking a single extension as a string
   FileProperty(const std::string &name, const std::string &default_value,
                unsigned int action, const std::string &ext,
@@ -120,6 +127,6 @@ private:
     pop) // Re-enable the warning about multiple assignment operators
 #endif
 }
-}
+} // namespace Mantid
 
 #endif // MANTID_API_FILEPROPERTY_H_

@@ -5,7 +5,7 @@
    :align: right
    :width: 455
 
-This dialog allows you to adjust your settings (stored in the :ref:`Properties File`) for the data search directories which Mantid will search for data in, the option to also search the data archive, and the default save directory. It is accessable from the File menu, on the toolbar through it's icon |filefolder_icon| , through the "Help"->"First Time Setup" menu window, or from buttons on several custom user interfaces.
+This dialog allows you to adjust your settings (stored in the :ref:`Properties File`) for the data search directories which Mantid will search for data in, the option to also search the data archive, and the default save directory. It is accessible from the File menu, on the toolbar through it's icon |filefolder_icon| , through the "Help"->"First Time Setup" menu window, or from buttons on several custom user interfaces.
 
 .. |filefolder_icon| image:: /images/MantidQtManageDirectoriesIcon.jpg
 

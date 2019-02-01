@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef _vtkEventNexusReader_h
 #define _vtkEventNexusReader_h
-#include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
 
 class vtkImplicitFunction;
 // cppcheck-suppress class_X_Y

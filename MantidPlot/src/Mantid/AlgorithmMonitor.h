@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGMONITOR_H
 #define ALGMONITOR_H
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <Poco/NObserver.h>
 #include <QDialog>
 #include <QMutex>
@@ -9,7 +16,6 @@
 #include <QPushButton>
 #include <QThread>
 #include <QVector>
-#include "MantidAPI/AlgorithmManager.h"
 
 class QLabel;
 class QTreeWidget;

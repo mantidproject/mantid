@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDBOXITERATOR_H_
 #define MANTID_DATAOBJECTS_MDBOXITERATOR_H_
 
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/SkippingPolicy.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -119,7 +125,7 @@ private:
   SkippingPolicy_scptr m_skippingPolicy;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_MDBOXITERATOR_H_ */

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFFunctionPlotData.h"
-#include "MultiDatasetFit.h"
 #include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
+#include "MultiDatasetFit.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
@@ -22,7 +28,7 @@ size_t MDFFunctionPlotData::g_defaultDomainSize = 100;
 namespace {
 /// Default curve color
 auto FUNCTION_CURVE_COLOR = Qt::magenta;
-}
+} // namespace
 
 /// Constructor.
 /// @param fun :: A function to plot.
@@ -114,6 +120,6 @@ void MDFFunctionPlotData::updateFunction(const Mantid::API::IFunction &fun) {
   }
 }
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

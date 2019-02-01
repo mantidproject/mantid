@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MODQ_TRANSF_H
 #define MANTID_MDALGORITHMS_MODQ_TRANSF_H
 //
-#include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
 //
 namespace Mantid {
 namespace MDAlgorithms {
@@ -20,28 +26,6 @@ namespace MDAlgorithms {
   transformation to the ModQ case
   *
   * @date 16-05-2012
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-        This file is part of Mantid.
-
-        Mantid is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 3 of the License, or
-        (at your option) any later version.
-
-        Mantid is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-        File change history is stored at:
-  <https://github.com/mantidproject/mantid>
-        Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport MDTransfModQ : public MDTransfInterface {
@@ -50,7 +34,7 @@ public:
   /// list)
   const std::string transfID() const override; // {return "ModQ"; }
   /** energy conversion modes supported by this class;
-    * The class supports three standard energy conversion modes */
+   * The class supports three standard energy conversion modes */
   std::vector<std::string> getEmodes() const override;
 
   bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
@@ -144,7 +128,7 @@ private:
                                        std::vector<coord_t> &Coord) const;
 };
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

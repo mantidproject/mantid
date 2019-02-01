@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
 #define MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
 
 #include <MantidAPI/ExperimentInfo.h>
 #include <MantidAPI/IAlgorithm_fwd.h>
@@ -14,9 +21,10 @@
 
 #include <MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h>
 #include <QDockWidget>
+#include <QHash>
 #include <QMap>
 #include <QMetaType>
-#include <QHash>
+#include <QMutex>
 #include <boost/shared_ptr.hpp>
 #include <map>
 
@@ -49,35 +57,14 @@ class MantidTreeWidget;
 \author Lamar Moore
 \date   24-08-2016
 \version 1.1
-
-
-Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
     : public QWidget,
       public IWorkspaceDockView {
   Q_OBJECT
 public:
-  explicit WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
-                               QWidget *parent = nullptr);
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
+                      bool viewOnly = false, QWidget *parent = nullptr);
   ~WorkspaceTreeWidget();
   void dropEvent(QDropEvent *de) override;
 
@@ -178,6 +165,10 @@ private:
   void setupWidgetLayout();
   void setupLoadButtonMenu();
   void setupConnections();
+  void hideButtonToolbar();
+
+  MantidQt::MantidWidgets::MantidItemSortScheme
+  whichCriteria(SortCriteria criteria);
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem *, int);
@@ -190,6 +181,7 @@ public slots:
   void sortDescending();
   void chooseByName();
   void chooseByLastModified();
+  void chooseByMemorySize();
   void keyPressEvent(QKeyEvent *) override;
 
 protected slots:
@@ -251,6 +243,7 @@ private:
   QLineEdit *m_workspaceFilter;
   QActionGroup *m_sortChoiceGroup;
   QFileDialog *m_saveFolderDialog;
+  bool m_viewOnly;
 
   QMenu *m_sortMenu, *m_saveMenu;
   // Context-menu actions
@@ -273,6 +266,8 @@ private:
   QStringList m_selectedNames;
   /// Keep a map of renamed workspaces between updates
   QHash<QString, QString> m_renameMap;
+  /// A mutex to lock m_renameMap and m_selectedNames for reading/writing
+  mutable QMutex m_mutex;
 
 private slots:
   void handleUpdateTree(const TopLevelItems &);
@@ -281,6 +276,6 @@ signals:
   void signalClearView();
   void signalUpdateTree(const TopLevelItems &);
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H

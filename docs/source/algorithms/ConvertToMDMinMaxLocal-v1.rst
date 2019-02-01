@@ -10,9 +10,9 @@ Description
 -----------
 
 Calculate min-max input values for selected workspace and MD transformation, 
-choosen from `MD Transformation factory <http://www.mantidproject.org/MD_Transformation_factory>`_.
+chosen from `MD Transformation factory <http://www.mantidproject.org/MD_Transformation_factory>`_.
 
-Used as helper algorithm for :ref:`algm-ConvertToMD` but can aslo be deployed separately 
+Used as helper algorithm for :ref:`algm-ConvertToMD` but can also be deployed separately 
 to evaluate the MD transformation limits for the current workspace.
 
 Initiates the same as :ref:`algm-ConvertToMD` algorithm transformation from the

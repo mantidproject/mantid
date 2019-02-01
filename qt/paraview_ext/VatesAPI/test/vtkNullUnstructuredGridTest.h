@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VTKNULLUNSTRUCTUREDGRID_TEST_H_
 #define VTKNULLUNSTRUCTUREDGRID_TEST_H_
 
@@ -7,8 +13,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <vtkUnstructuredGrid.h>
 #include <vtkPoints.h>
+#include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::VATES;
 

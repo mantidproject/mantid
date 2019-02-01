@@ -30,7 +30,7 @@ with a cubic spline, which then can be invoked to obtain
 :math:`S(Q,E,T)` at any T value.
 
 Errors in the structure factor are incorporated when constructing the spline, so that the spline
-need not neccessarily pass trough the :math:`(T_i, S_i)` points.
+need not necessarily pass trough the :math:`(T_i, S_i)` points.
 This has the desirable effect of producing smooth spline curves when the variation of the
 structure factors versus :math:`T` contains significant noise.
 For more details on the construction of the spline, see `UnivariateSpline <http://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.UnivariateSpline.html>`_

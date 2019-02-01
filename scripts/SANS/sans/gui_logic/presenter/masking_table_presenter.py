@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """  The presenter associated with the masking table view. """
 
 from __future__ import (absolute_import, division, print_function)
@@ -79,6 +85,15 @@ def perform_load(serialized_state):
 def perform_move(state, workspace):
     serialized_state = state.property_manager
     move_name = "SANSMove"
+
+    zero_options = {"SANSState": serialized_state,
+                    "Workspace": workspace,
+                    "MoveType": "SetToZero",
+                    "Component": ""}
+    zero_alg = create_unmanaged_algorithm(move_name, **zero_options)
+    zero_alg.execute()
+    workspace = zero_alg.getProperty("Workspace").value
+
     move_options = {"SANSState": serialized_state,
                     "Workspace": workspace,
                     "MoveType": "InitialMove"}
@@ -150,27 +165,31 @@ class MaskingTablePresenter(object):
 
     def on_row_changed(self):
         row_index = self._view.get_current_row()
-        state = self.get_state(row_index)
+        state = self.get_state(row_index, file_lookup=False)
         if state:
             self.display_masking_information(state)
 
     def on_display(self):
         # Get the state information for the selected row.
-        row_index = self._view.get_current_row()
-        state = self.get_state(row_index)
-
-        if not state:
-            self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
-                                     "valid sample scatter entry has been provided in the selected row.")
-            return
-
         # Disable the button
         self._view.set_display_mask_button_to_processing()
 
-        # Run the task
-        listener = MaskingTablePresenter.DisplayMaskListener(self)
-        state_copy = copy.copy(state)
-        self._work_handler.process(listener, load_and_mask_workspace, state_copy, self.DISPLAY_WORKSPACE_NAME)
+        try:
+            row_index = self._view.get_current_row()
+            state = self.get_state(row_index)
+        except Exception as e:
+            self.on_processing_error_masking_display(e)
+            raise Exception(str(e))  # propagate errors for run_tab_presenter to deal with
+        else:
+            if not state:
+                self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
+                                         "valid sample scatter entry has been provided in the selected row.")
+                return
+
+            # Run the task
+            listener = MaskingTablePresenter.DisplayMaskListener(self)
+            state_copy = copy.copy(state)
+            self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
 
     def on_processing_finished_masking_display(self, result):
         # Enable button
@@ -181,6 +200,8 @@ class MaskingTablePresenter(object):
 
     def on_processing_error_masking_display(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
+        # Enable button
+        self._view.set_display_mask_button_to_normal()
 
     def on_processing_error(self, error):
         pass
@@ -222,8 +243,8 @@ class MaskingTablePresenter(object):
         self._view.update_rows([])
         self.display_masking_information(state=None)
 
-    def get_state(self, index):
-        return self._parent_presenter.get_state_for_row(index)
+    def get_state(self, index, file_lookup=True):
+        return self._parent_presenter.get_state_for_row(index, file_lookup=file_lookup)
 
     @staticmethod
     def _append_single_spectrum_mask(spectrum_mask, container, detector_name, prefix):

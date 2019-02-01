@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingFFT.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -108,5 +114,5 @@ void FindUBUsingFFT::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

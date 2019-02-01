@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Data stitching for SANS and reflectometry
@@ -271,7 +277,7 @@ class DataSet(object):
     def load(self, update_range=False, restricted_range=False):
         """
             Load a data set from file
-            @param upate_range: if True, the Q range of the data set will be udpated
+            @param upate_range: if True, the Q range of the data set will be updated
             @param restricted_range: if True, zeros at the beginning and end will be stripped
         """
         if os.path.isfile(self._file_path):

@@ -168,7 +168,7 @@ Accessing the Data
    print(ws.signalAt(index))
    print(ws.errorSquaredAt(index))
 
-   # To extract the whole signal aray
+   # To extract the whole signal array
    signalArray =  ws.getSignalArray()
    # or the whole error squared array
    errorSquaredArray =  ws.getErrorSquaredArray()
@@ -222,6 +222,8 @@ The basic arithmetic operators are available from python. For example:
    #Compound arithmetic expressions can be made, e.g:
    E = (A - B) / (C * C)
 
+.. _MDHistoWorkspace boolean operations:
+
 Boolean Operations
 ##################
 
@@ -269,7 +271,7 @@ Using Boolean Masks
       
 The :ref:`SetMDUsingMask <algm-SetMDUsingMask>` algorithm allows you to modify
 the values in a MDHistoWorkspace using a mask created using the boolean
-operations above. See the `algorithm wiki page <algm-SetMDUsingMask>`__ for
+operations above. See the :ref:`algorithm wiki page <algm-SetMDUsingMask>` for
 more details.
 
 

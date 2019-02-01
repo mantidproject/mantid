@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadDiffCal.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -12,24 +18,26 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Diffraction.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 
-#include <cmath>
 #include <H5Cpp.h>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
 
 using Mantid::API::FileProperty;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::Progress;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Progress;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::Exception::FileError;
 using Mantid::Kernel::PropertyWithValue;
 
 using namespace H5;
@@ -391,8 +399,13 @@ void LoadDiffCal::exec() {
   }
 
   // read in everything from the file
-  H5File file(m_filename, H5F_ACC_RDONLY);
   H5::Exception::dontPrint();
+  H5File file;
+  try {
+    file = H5File(m_filename, H5F_ACC_RDONLY);
+  } catch (FileIException &) {
+    throw FileError("Failed to open file using HDF5", m_filename);
+  }
   getInstrument(file);
 
   Progress progress(this, 0.1, 0.4, 8);
@@ -406,7 +419,8 @@ void LoadDiffCal::exec() {
 #else
     e.printError(stderr);
 #endif
-    throw std::runtime_error("Did not find group \"/calibration\"");
+    file.close();
+    throw FileError("Did not find group \"/calibration\"", m_filename);
   }
 
   progress.report("Reading detid");

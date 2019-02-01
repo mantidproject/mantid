@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDIBASICCHOPPERTEST_H_
 #define MANTID_SINQ_POLDIBASICCHOPPERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/TableRow.h"
 #include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -19,10 +25,9 @@ class TestablePoldiBasicChopper : public PoldiBasicChopper {
 
     double rawSlitPositions[] = {0.000000, 0.162156, 0.250867, 0.3704,
                                  0.439811, 0.588455, 0.761389, 0.895667};
-    std::vector<double> slitPositions(rawSlitPositions,
-                                      rawSlitPositions +
-                                          sizeof(rawSlitPositions) /
-                                              sizeof(rawSlitPositions[0]));
+    std::vector<double> slitPositions(
+        rawSlitPositions, rawSlitPositions + sizeof(rawSlitPositions) /
+                                                 sizeof(rawSlitPositions[0]));
 
     initializeFixedParameters(slitPositions, 11800.0, 0.0005, -0.60);
     initializeVariableParameters(10000.0);

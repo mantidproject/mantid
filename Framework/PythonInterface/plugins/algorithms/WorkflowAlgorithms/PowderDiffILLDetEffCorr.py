@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import math
@@ -158,6 +164,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
 
         self.declareProperty(FloatArrayProperty(name='MaskCriterion', values=[], validator=maskCriterionValidator),
                              doc='Efficiency constants outside this range will be set to zero.')
+
+        self.declareProperty(name='UseCalibratedData',
+                             defaultValue=False,
+                             doc='Whether or not to use the calibrated data in the NeXus files (D2B only).')
 
     def validateInputs(self):
         issues = dict()
@@ -365,8 +375,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         inst = mtd[raw_ws].getInstrument()
         self._n_tubes = inst.getComponentByName('detectors').nelements()
         self._n_pixels_per_tube = inst.getComponentByName('detectors/tube_1').nelements()
-        self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
+        #self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
+        self._n_scans_per_file = 25 # TODO: In v2 this should be freely variable
         self._scan_points = self._n_scans_per_file * self._n_scan_files
+        self.log().information('Number of scan steps is: ' + str(self._scan_points))
         if self._excluded_ranges.any():
             n_excluded_ranges = int(len(self._excluded_ranges) / 2)
             self._excluded_ranges = np.split(self._excluded_ranges, n_excluded_ranges)
@@ -460,21 +472,6 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 mtd[constants_ws].dataY(pixel)[0] = 1.
                 mtd[constants_ws].dataE(pixel)[0] = 0.
 
-    def _mask_outside_range(self, constants_ws):
-        """
-            Sets the efficiencies to zero, if they are outside the given range
-        """
-        y = mtd[constants_ws].extractY()
-        x = mtd[constants_ws].extractX()
-        e = mtd[constants_ws].extractE()
-        lower = self._mask_criterion[0]
-        upper = self._mask_criterion[1]
-        y[y<lower]=0.
-        y[y>upper]=0.
-        self.log().information('Masking pixels with constant outisde ({0},{1})'.format(lower, upper))
-        CreateWorkspace(DataY=y, DataX=x, DataE=e, NSpec=mtd[constants_ws].getNumberHistograms(),
-                        OutputWorkspace=constants_ws, ParentWorkspace=constants_ws)
-
     def _derive_calibration_sequential(self, ws_2d, constants_ws, response_ws):
         """
             Computes the relative calibration factors sequentailly for all the pixels.
@@ -541,17 +538,19 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             if self._out_response:
                 # take care of combined response
                 end = self._bin_offset
+                response = mtd[response_ws]
+                responseBlockSize = response.blocksize()
                 if det == self._pixel_range[1] - 1:
                     end = self._scan_points - self._bin_offset
                     for scan_point in range(0, self._bin_offset):
-                        index = mtd[response_ws].blocksize() - self._bin_offset + scan_point
-                        mtd[response_ws].dataY(0)[index] = mtd[ws].readY(0)[end + scan_point]
-                        mtd[response_ws].dataE(0)[index] = mtd[ws].readE(0)[end + scan_point]
+                        index = responseBlockSize - self._bin_offset + scan_point
+                        response.dataY(0)[index] = mtd[ws].readY(0)[end + scan_point]
+                        response.dataE(0)[index] = mtd[ws].readE(0)[end + scan_point]
 
                 for scan_point in range(0, end):
                     index = det * self._bin_offset + scan_point
-                    mtd[response_ws].dataY(0)[index] = mtd[ref_ws].readY(0)[scan_point]
-                    mtd[response_ws].dataE(0)[index] = mtd[ref_ws].readE(0)[scan_point]
+                    response.dataY(0)[index] = mtd[ref_ws].readY(0)[scan_point]
+                    response.dataE(0)[index] = mtd[ref_ws].readE(0)[scan_point]
 
             DeleteWorkspace(ws)
         # end of loop over pixels
@@ -603,6 +602,16 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         mtd[constants_ws].getAxis(1).setUnit('Label').setLabel('Cell #', '')
         mtd[constants_ws].setYUnitLabel('Calibration constant')
 
+    def _crop_last_time_index(self, ws, n_scan_points):
+        ws_index_list = ""
+        for pixel in range(self._n_tubes * self._n_pixels_per_tube):
+            start = n_scan_points * pixel
+            end = n_scan_points * (pixel + 1) - 2
+            index_range = str(start)+"-"+str(end)+","
+            ws_index_list += index_range
+        ws_index_list = ws_index_list[:-1]
+        ExtractSpectra(InputWorkspace=ws, OutputWorkspace=ws, WorkspaceIndexList=ws_index_list)
+
     def _process_global(self):
         """
             Performs the global derivation for D2B following the logic:
@@ -610,6 +619,9 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             2. Loop over tubes, make ratios wrt reference, obtain constants
             3. Apply the constants, and iterate over if requested
         """
+        data_type = 'Raw'
+        if self.getProperty('UseCalibratedData').value:
+            data_type = 'Calibrated'
         constants_ws = self._hide('constants')
         response_ws = self._hide('resp')
         calib_ws = self._hide('calib')
@@ -618,10 +630,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self._progress = Progress(self, start=0.0, end=1.0, nreports=self._n_scan_files)
 
         for index, numor in enumerate(self._input_files.split(',')):
-            self._progress.report('Pre-processing detector scan '+numor[-9:-3])
+            self._progress.report('Pre-processing detector scan '+numor[-10:-4])
             ws_name = '__raw_'+str(index)
             numors.append(ws_name)
-            LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name, DataType="Raw")
+            LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name, DataType=data_type)
             self._validate_scan(ws_name)
             if index == 0:
                 if mtd[ws_name].getInstrument().getName() != 'D2B':
@@ -633,6 +645,12 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             ConvertSpectrumAxis(InputWorkspace=ws_name, OrderAxis=False, Target="SignedTheta", OutputWorkspace=ws_name)
             if self._calib_file:
                 ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_ws, OutputWorkspace=ws_name)
+
+            n_scan_steps = mtd[ws_name].getRun().getLogData("ScanSteps").value
+            if n_scan_steps != self._n_scans_per_file:
+                self.log().warning("Run {0} has {1} scan points instead of {2}.".
+                                   format(numor[-10:-4], n_scan_steps, self._n_scans_per_file))
+                self._crop_last_time_index(ws_name, n_scan_steps)
 
         if self._calib_file:
             DeleteWorkspace(calib_ws)
@@ -671,7 +689,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 ws_name = '__raw_'+str(index)
                 ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_current, OutputWorkspace=ws_name)
             SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=response_ws, MirrorScatteringAngles=False,
-                                CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes", ScatteringAngleTolerance=1000)
+                                CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes")
 
         DeleteWorkspace(ref_ws)
         DeleteWorkspaces(numors)
@@ -715,7 +733,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
 
         self._progress.report('Constructing the global reference')
         SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=ref_ws, MirrorScatteringAngles=False,
-                            CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes", ScatteringAngleTolerance=1000)
+                            CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes")
 
         to_group = []
         self._progress.report('Preparing the tube responses')
@@ -780,7 +798,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             self._process_global()
 
         if self._mask_criterion.any():
-            self._mask_outside_range(constants_ws)
+            MaskBinsIf(InputWorkspace=constants_ws, OutputWorkspace=constants_ws,
+                       Criterion='y<'+str(self._mask_criterion[0])+'||y>'+str(self._mask_criterion[1]))
 
         # set output workspace[s]
         RenameWorkspace(InputWorkspace=constants_ws, OutputWorkspace=self._out_name)

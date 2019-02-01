@@ -2,7 +2,7 @@
  HistogramValidator
 ====================
 
-This a python binding to the C++ class Mantid::API::HistogramValidator.
+This is a Python binding to the C++ class Mantid::API::HistogramValidator.
 
 *bases:* :py:obj:`mantid.api.MatrixWorkspaceValidator`
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWMOCKOBJECT_H
 #define MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWMOCKOBJECT_H
 
@@ -10,11 +16,11 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 
 class MockProgressableView : public ProgressableView {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setProgress, void(int));
   MOCK_METHOD2(setProgressRange, void(int, int));
   MOCK_METHOD0(clearProgress, void());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 #endif /* MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWMOCKOBJECT_H */

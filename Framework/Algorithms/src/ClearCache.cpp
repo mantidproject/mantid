@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ClearCache.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidKernel/UsageService.h"
-#include <Poco/Path.h>
 #include <Poco/File.h>
 #include <Poco/Glob.h>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace Algorithms {

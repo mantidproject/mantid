@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_QSCIENCESPINBOX_H_
 #define MANTIDQT_API_QSCIENCESPINBOX_H_
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
+#include <QDebug>
 #include <QDoubleSpinBox>
 #include <QDoubleValidator>
 #include <QLineEdit>
-#include <QVariant>
-#include <QDebug>
 #include <QString>
+#include <QVariant>
 
 namespace MantidQt {
 namespace API {

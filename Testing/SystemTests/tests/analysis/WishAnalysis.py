@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class WishAnalysis(stresstesting.MantidStressTest):
+class WishAnalysis(systemtesting.MantidSystemTest):
     """
     Runs the WISH analysis chain on one bank of data
     """
@@ -51,7 +57,7 @@ class WishAnalysis(stresstesting.MantidStressTest):
         RebinToWorkspace(WorkspaceToRebin="vana",WorkspaceToMatch="w16748-1foc",OutputWorkspace="vana")
         Divide(LHSWorkspace="w16748-1foc",RHSWorkspace="vana",OutputWorkspace="w16748-1foc")
         DeleteWorkspace(Workspace="vana")
-        #convert back to TOF for ouput to GSAS/Fullprof
+        #convert back to TOF for output to GSAS/Fullprof
         ConvertUnits(InputWorkspace="w16748-1foc",OutputWorkspace="w16748-1foc",Target="TOF")
 
     def validate(self):

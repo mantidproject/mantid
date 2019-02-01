@@ -1,15 +1,38 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"
-#include "MantidQtWidgets/Common/DataSelector.h"
 
 #include <QFileInfo>
 
+#include <QDebug>
 #include <QDropEvent>
 #include <QMimeData>
-#include <QDebug>
 #include <QUrl>
+
+namespace {
+
+std::string extractLastOf(const std::string &str,
+                          const std::string &delimiter) {
+  const auto cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(cutIndex, str.size() - cutIndex);
+  return str;
+}
+
+std::string loadAlgName(const std::string &filePath) {
+  const auto suffix = extractLastOf(filePath, ".");
+  return suffix == ".dave" ? "LoadDaveGrp" : "Load";
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -39,15 +62,15 @@ DataSelector::DataSelector(QWidget *parent)
 DataSelector::~DataSelector() {}
 
 /**
-* Return whether empty input is allowed
-* @return :: Flag if is optional
-*/
+ * Return whether empty input is allowed
+ * @return :: Flag if is optional
+ */
 bool DataSelector::isOptional() const { return m_isOptional; }
 
 /**
-* Sets if the text field is optional
-* @param optional :: Set the optional status of the text field
-*/
+ * Sets if the text field is optional
+ * @param optional :: Set the optional status of the text field
+ */
 void DataSelector::isOptional(bool optional) {
   m_isOptional = optional;
   m_uiForm.rfFileInput->isOptional(optional);
@@ -119,8 +142,8 @@ bool DataSelector::isValid() {
         // don't use algorithm runner because we need to know instantly.
         const QString filepath =
             m_uiForm.rfFileInput->getUserInput().toString();
-        const Algorithm_sptr loadAlg =
-            AlgorithmManager::Instance().createUnmanaged("Load");
+        const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(
+            loadAlgName(filepath.toStdString()));
         loadAlg->initialize();
         loadAlg->setProperty("Filename", filepath.toStdString());
         loadAlg->setProperty("OutputWorkspace", wsName.toStdString());
@@ -144,9 +167,9 @@ bool DataSelector::isValid() {
 }
 
 /**
-* Return the error.
-* @returns A string explaining the error.
-*/
+ * Return the error.
+ * @returns A string explaining the error.
+ */
 QString DataSelector::getProblem() const {
   using namespace Mantid::API;
 
@@ -173,14 +196,14 @@ QString DataSelector::getProblem() const {
  */
 void DataSelector::autoLoadFile(const QString &filepath) {
   using namespace Mantid::API;
-  QString baseName = getWsNameFromFiles();
+  const auto baseName = getWsNameFromFiles().toStdString();
 
   // create instance of load algorithm
-  const Algorithm_sptr loadAlg =
-      AlgorithmManager::Instance().createUnmanaged("Load");
+  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(
+      loadAlgName(filepath.toStdString()));
   loadAlg->initialize();
   loadAlg->setProperty("Filename", filepath.toStdString());
-  loadAlg->setProperty("OutputWorkspace", baseName.toStdString());
+  loadAlg->setProperty("OutputWorkspace", baseName);
 
   m_algRunner.startAlgorithm(loadAlg);
 }
@@ -337,17 +360,17 @@ void DataSelector::setLoadBtnText(const QString &text) {
 }
 
 /**
-* Read settings from the given group
-* @param group :: The name of the group key to retrieve data from
-*/
+ * Read settings from the given group
+ * @param group :: The name of the group key to retrieve data from
+ */
 void DataSelector::readSettings(const QString &group) {
   m_uiForm.rfFileInput->readSettings(group);
 }
 
 /**
-* Save settings to the given group
-* @param group :: The name of the group key to save to
-*/
+ * Save settings to the given group
+ * @param group :: The name of the group key to save to
+ */
 void DataSelector::saveSettings(const QString &group) {
   m_uiForm.rfFileInput->saveSettings(group);
 }

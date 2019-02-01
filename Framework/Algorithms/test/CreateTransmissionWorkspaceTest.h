@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * CreateTransmissionWorkspaceTest.h
  *
@@ -8,15 +14,15 @@
 #ifndef ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_
 #define ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <algorithm>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <algorithm>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

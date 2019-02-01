@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/UnitLabel.h"
 
@@ -34,5 +40,5 @@ const UnitLabel Symbol::InverseCM("cm^-1", L"cm\u207b\u00b9", "cm^{-1}");
 const UnitLabel Symbol::RLU("r.l.u");
 
 } // namespace Units
-}
-} // namespace Mantid::Kernel
+} // namespace Kernel
+} // namespace Mantid

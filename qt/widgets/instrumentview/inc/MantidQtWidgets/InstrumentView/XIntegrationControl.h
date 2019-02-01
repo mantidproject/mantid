@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef XINTEGRATIONCONTROL_H_
 #define XINTEGRATIONCONTROL_H_
 
@@ -49,8 +55,8 @@ private:
 };
 
 /**
-* Implements a control for setting the x integration range
-*/
+ * Implements a control for setting the x integration range
+ */
 class XIntegrationControl : public QFrame {
   Q_OBJECT
 public:
@@ -84,7 +90,7 @@ private:
   double m_minimum;
   double m_maximum;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*XINTEGRATIONCONTROL_H_*/

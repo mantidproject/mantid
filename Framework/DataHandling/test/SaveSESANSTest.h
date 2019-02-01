@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVESESANSTEST_H_
 #define MANTID_DATAHANDLING_SAVESESANSTEST_H_
 
@@ -90,9 +96,9 @@ public:
 
     // Check (a small sample of) the values we wrote are correct
     TS_ASSERT_EQUALS(static_cast<int>(data->getNumberHistograms()), 1);
-    auto xValues = data->x(0);
-    auto yValues = data->y(0);
-    auto eValues = data->e(0);
+    const auto &xValues = data->x(0);
+    const auto &yValues = data->y(0);
+    const auto &eValues = data->e(0);
 
     TS_ASSERT_EQUALS(static_cast<int>(xValues.size()), 10);
     TS_ASSERT_EQUALS(static_cast<int>(yValues.size()), 10);

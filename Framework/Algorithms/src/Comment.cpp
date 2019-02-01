@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Comment.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
 
+using Mantid::API::Workspace;
+using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::MandatoryValidator;
-using Mantid::API::WorkspaceProperty;
-using Mantid::API::Workspace;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Comment)

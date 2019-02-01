@@ -13,7 +13,7 @@ This algorithm transposes a workspace, so that an N1 x N2 workspace
 becomes N2 x N1. 
 
 The X-vector values for the new workspace are taken from the axis values
-of the old workspace, which is generaly the spectra number but can be
+of the old workspace, which is generally the spectra number but can be
 other values, if say the workspace has gone through
 :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.
 

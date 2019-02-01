@@ -30,7 +30,7 @@ The algorithm uses one of the two strategies (set via `Type` property): "Monte C
 Monte Carlo
 ###########
 
-In this strategy a number (defined by `NSamples` property) of paramter sets are generated and the one that
+In this strategy a number (defined by `NSamples` property) of parameter sets are generated and the one that
 gives the smallest cost function is considered the winner. These best parameters are set to `Function`
 property (it has the `InOut` direction).
 

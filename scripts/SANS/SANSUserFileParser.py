@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
@@ -53,7 +59,7 @@ class BackCommandParser(object):
 
     def _evaluate_mean(self, argument):
         '''
-        Evalutes if the argument is either MEAN, TOF or something else.
+        Evaluates if the argument is either MEAN, TOF or something else.
         @param argument: string to investigate
         @raise RuntimeError: If the argument cannot be parsed correctly
         '''
@@ -68,7 +74,7 @@ class BackCommandParser(object):
 
     def _evaluate_uniform(self, argument):
         '''
-        Evalutes if the argument is either TIME, UAMP or something else.
+        Evaluates if the argument is either TIME, UAMP or something else.
         @param argument: string to investigate
         @raise RuntimeError: If the argument cannot be parsed correctly
         '''
@@ -83,7 +89,7 @@ class BackCommandParser(object):
 
     def _evaluate_run(self, argument):
         '''
-        Evalutes if the argument is RUN=
+        Evaluates if the argument is RUN=
         @param argument: string to investigate
         @raise RuntimeError: If the argument cannot be parsed correctly
         '''
@@ -98,7 +104,7 @@ class BackCommandParser(object):
 
     def _evaluate_mon(self, argument):
         '''
-        Evaluates which detector to use. At this point the validty of this has already been checkd, so
+        Evaluates which detector to use. At this point the validty of this has already been checked, so
         we can just take it as is.
         @param argument: string to investigate
         @raise RuntimeError: If the argument cannot be parsed correctly

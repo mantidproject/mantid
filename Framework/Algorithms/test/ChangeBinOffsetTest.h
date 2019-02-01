@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CHANGEBINOFFSETTEST_H_
 #define CHANGEBINOFFSETTEST_H_
 
@@ -8,11 +14,11 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/ChangeBinOffset.h"
+#include "MantidDataHandling/LoadEventPreNexus2.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

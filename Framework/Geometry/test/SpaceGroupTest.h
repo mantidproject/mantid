@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_SPACEGROUPTEST_H_
 #define MANTID_GEOMETRY_SPACEGROUPTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/SpaceGroup.h"
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidGeometry/Crystal/CenteringGroup.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
-#include "MantidGeometry/Crystal/CenteringGroup.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 #include "MantidKernel/V3D.h"
 

@@ -9,7 +9,7 @@
 %Include string.sip
 
 %ModuleHeaderCode
-#include "MantidQtWidgets/Common/PythonSystemHeader.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 %End
 
@@ -207,6 +207,7 @@ bool isValid();
 void setUserInput(const QVariant &);
 void setText(const QString&);
 signals:
+void fileEditingFinished();
 void fileFindingFinished();
 void liveButtonPressed(bool);
 };
@@ -1497,6 +1498,77 @@ public:
 	QStringList getParameterNames() const;
 };
 
+class Hint {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Hint.h"
+%End
+public:
+  Hint(std::string word, std::string description);
+  const std::string& word() const;
+  const std::string& description() const;
+};
+class HintStrategy
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/HintStrategy.h"
+%End
+public:
+  HintStrategy();
+  virtual std::vector<MantidQt::MantidWidgets::Hint> createHints() = 0;
+  virtual ~HintStrategy();
+};
+class AlgorithmHintStrategy : public MantidQt::MantidWidgets::HintStrategy
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+%End
+public:
+  AlgorithmHintStrategy(const std::string& algorithmName,
+                        std::vector<std::string> blacklist);
+  virtual std::vector<MantidQt::MantidWidgets::Hint> createHints();
+};
+
+// ---------------------------------
+// WorkspaceWidget and dependencies
+// ---------------------------------
+
+class MantidDisplayBase /Abstract/ {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
+%End
+private:
+  MantidDisplayBase();
+};
+
+class MantidTreeModel : MantidQt::MantidWidgets::MantidDisplayBase {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MantidTreeModel.h"
+%End
+public:
+  MantidTreeModel();
+private:
+  MantidTreeModel(const MantidQt::MantidWidgets::MantidTreeModel &);
+};
+
+class WorkspaceTreeWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
+%End
+public:
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb /Transfer/, bool viewOnly=false,
+                      QWidget *parent /TransferThis/ = nullptr);
+  void refreshWorkspaces();
+  std::vector<std::string> getSelectedWorkspaceNames() const;
+};
+
+// Implementation to override context menu
+class WorkspaceTreeWidgetSimple : MantidQt::MantidWidgets::WorkspaceTreeWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
+%End
+public:
+  WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
+};
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 
@@ -1557,6 +1629,7 @@ public:
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
+  virtual void notifyCutRowsRequested() = 0;
   virtual void notifyPasteRowsRequested() = 0;
   virtual void notifyFilterReset() = 0;
 };
@@ -1568,18 +1641,23 @@ class JobTreeView : public QTreeView
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 %End
 public:
-    JobTreeView(const QStringList &columnHeadings, const MantidQt::MantidWidgets::Batch::Cell& defaultCellStyle, QWidget *parent = nullptr);
+    JobTreeView(const QStringList &columnHeadings, const MantidQt::MantidWidgets::Batch::Cell& defaultCellStyle,
+     QWidget *parent = nullptr);
 
     void subscribe(MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber& subscriber);
-    void insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow,
+    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
+     &parent, int beforeRow,
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
-    void insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow);
-    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent);
-    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parentLocation,
+    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
+    &parent, int beforeRow);
+    MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
+    &parent);
+    MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
+    &parentLocation,
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
-
+    void removeAllRows();
     void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementPoints,
                      std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>> replacementLocations);
     void appendSubtreesAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent,
@@ -1594,6 +1672,8 @@ public:
     void filterRowsBy(MantidQt::MantidWidgets::Batch::RowPredicate* predicate /Transfer/);
     void resetFilter();
     bool hasFilter() const;
+
+    void setHintsForColumn(int column, MantidQt::MantidWidgets::HintStrategy* hintStrategy /Transfer/);
 
     bool isOnlyChildOfRoot(const MantidQt::MantidWidgets::Batch::RowLocation& location) const;
     std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsAt(const MantidQt::MantidWidgets::Batch::RowLocation &location) const;
@@ -1620,6 +1700,10 @@ public:
 
   const std::string &contentText() const;
   void setContentText(const std::string& contentText);
+
+  const std::string &toolTip() const;
+  void setToolTip(const std::string &toolTip);
+
 
   const std::string & borderColor() const;
   void setBorderColor(const std::string& borderColor);
@@ -1667,6 +1751,7 @@ public:
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested();
+  virtual void notifyCutRowsRequested();
   virtual void notifyPasteRowsRequested();
   virtual void notifyFilterReset();
 signals:
@@ -1679,6 +1764,7 @@ signals:
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
+  void cutRowsRequested();
 
 };
 
@@ -1785,13 +1871,13 @@ class DataProcessorMainPresenter
 public:
 DataProcessorMainPresenter();
 
-virtual QVariantMap getPreprocessingOptions() const;
-virtual QVariantMap getProcessingOptions() const;
-virtual QString getPostprocessingOptionsAsString() const;
+virtual QVariantMap getPreprocessingOptions(int) const;
+virtual QVariantMap getProcessingOptions(int) const;
+virtual QString getPostprocessingOptionsAsString(int) const;
 virtual void confirmReductionPaused(int);
 virtual void confirmReductionResumed(int);
 
-virtual void notifyADSChanged(const QSet<QString> &);
+virtual void notifyADSChanged(const QSet<QString> &, int);
 };
 
 class AppendRowCommand
@@ -2257,6 +2343,43 @@ namespace MantidQt
 namespace API
 {
 
+class TSVSerialiser
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+%End
+private:
+TSVSerialiser(const MantidQt::API::TSVSerialiser &);
+
+public:
+TSVSerialiser();
+TSVSerialiser(const std::string &lines);
+
+void clear();
+std::string outputLines() const;
+std::vector<std::string> sections(const std::string &name) const;
+
+MantidQt::API::TSVSerialiser &writeLine(const std::string &name);
+void writeSection(const std::string &name, const std::string &body);
+
+
+bool selectLine(const std::string &name);
+bool selectSection(const std::string &name);
+
+void storeDouble(const double value);
+void storeInt(const int value);
+void storeString(const std::string value);
+void storeBool(const bool value);
+
+double readDouble();
+int readInt();
+std::string readString();
+bool readBool();
+
+std::string lineAsString(const std::string &name) const;
+std::vector<std::string> values(const std::string &name) const;
+};
+
 class WidgetScrollbarDecorator
 {
 %TypeHeaderCode
@@ -2446,6 +2569,9 @@ public:
   void setColorMapRange(double, double);
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
+  %MethodCode
+    sipCpp->setScaleType(MantidQt::MantidWidgets::ColorMap::ScaleType(a0));
+  %End
   void setViewType(const QString &);
 
 private:
@@ -2464,6 +2590,9 @@ public:
 %Docstring
     Returns the current scale type. 0=Linear, 1=Log10
 %End
+%MethodCode
+  sipRes = static_cast<GraphOptions::ScaleType>(sipCpp->getScaleType());
+%End
 
   void setScaleType(GraphOptions::ScaleType type);
 %Docstring
@@ -2471,6 +2600,9 @@ public:
 
     Args:
         type The new type Options are: GraphOptions.Linear, GraphOptions.Log10
+%End
+%MethodCode
+  sipCpp->setScaleType(MantidQt::MantidWidgets::ColorMap::ScaleType(a0));
 %End
 
   void setAxis(const QString& axisName);

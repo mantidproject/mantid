@@ -1,11 +1,17 @@
-#include "MantidKernel/System.h"
-#include "MantidKernel/ListValidator.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidMDAlgorithms/CentroidPeaksMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-#include "MantidMDAlgorithms/CentroidPeaksMD.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -169,5 +175,5 @@ void CentroidPeaksMD::exec() {
   CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

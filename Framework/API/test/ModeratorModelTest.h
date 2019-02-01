@@ -1,25 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_MODERATORMODELTEST_H_
 #define MANTID_API_MODERATORMODELTEST_H_
 
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include <boost/make_shared.hpp>
 
 class MockModerator : public Mantid::API::ModeratorModel {
 public:
   boost::shared_ptr<ModeratorModel> clone() const override {
     return boost::shared_ptr<MockModerator>();
   }
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD0(emissionTimeMean, double());
   MOCK_CONST_METHOD0(emissionTimeVariance, double());
   MOCK_CONST_METHOD1(sampleTimeDistribution, double(const double));
   MOCK_METHOD2(setParameterValue,
                void(const std::string &, const std::string &));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class ModeratorModelTest : public CxxTest::TestSuite {

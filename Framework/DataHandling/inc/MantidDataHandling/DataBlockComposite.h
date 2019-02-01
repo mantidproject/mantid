@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_DATABLOCK_COMPOSITE_H_
 #define MANTID_DATAHANDLING_DATABLOCK_COMPOSITE_H_
 
@@ -10,28 +16,6 @@ namespace DataHandling {
 /** DataBlockComposite: The DataBlockComposite handles a collection
     of DataBlocks. It represents a set of contiguous spectrum numbers
     which are to be consumed elsewhere.
-
-Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at:
-<https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport DataBlockComposite : public DataBlock {
 public:
@@ -63,25 +47,23 @@ private:
 };
 
 /**
-* Populates a DataBlockComposite with DataBlocks which are extracted from a
-* indexable collection (array-type). Note that std::is_array does not
-* work on boost::shared_array which is one of the use cases. Hence this
-* function could get abused. Monitor spectra get their own data block
-* @param dataBlockComposite: the detector block composite which will get
-* populated
-* @param indexContainer: the container of indices
-* @param nArray: the number of array elements
-* @param numberOfPeriods: the number of periods
-* @param numberOfChannels: the number of channels
-* @param monitorSpectra: a collection of monitor spectrum numbers
-*/
+ * Populates a DataBlockComposite with DataBlocks which are extracted from a
+ * indexable collection (array-type). Note that std::is_array does not
+ * work on boost::shared_array which is one of the use cases. Hence this
+ * function could get abused. Monitor spectra get their own data block
+ * @param dataBlockComposite: the detector block composite which will get
+ * populated
+ * @param indexContainer: the container of indices
+ * @param nArray: the number of array elements
+ * @param numberOfPeriods: the number of periods
+ * @param numberOfChannels: the number of channels
+ * @param monitorSpectra: a collection of monitor spectrum numbers
+ */
 template <typename T>
-void DLLExport
-populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite,
-                                        T &indexContainer, int64_t nArray,
-                                        int numberOfPeriods,
-                                        size_t numberOfChannels,
-                                        std::vector<int64_t> monitorSpectra) {
+void DLLExport populateDataBlockCompositeWithContainer(
+    DataBlockComposite &dataBlockComposite, T &indexContainer, int64_t nArray,
+    int numberOfPeriods, size_t numberOfChannels,
+    std::vector<int64_t> monitorSpectra) {
   auto isMonitor = [&monitorSpectra](int64_t index) {
     return std::find(std::begin(monitorSpectra), std::end(monitorSpectra),
                      index) != std::end(monitorSpectra);
@@ -166,6 +148,6 @@ populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite,
                                numberOfChannels, previousValue, startValue);
   }
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif

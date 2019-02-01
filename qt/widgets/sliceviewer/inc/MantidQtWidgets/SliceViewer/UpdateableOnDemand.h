@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef UPDATEABLEONDEMAND_H_
 #define UPDATEABLEONDEMAND_H_
 
@@ -8,7 +14,7 @@ namespace Mantid {
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -27,7 +33,7 @@ public:
   // Destructor
   virtual ~UpdateableOnDemand() {}
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* UPDATEABLEONDEMAND_H_ */

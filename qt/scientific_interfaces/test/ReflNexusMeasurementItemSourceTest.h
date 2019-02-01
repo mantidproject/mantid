@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_REFLNEXUSMEASUREMENTITEMSOURCETEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_REFLNEXUSMEASUREMENTITEMSOURCETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "../ISISReflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidAPI/FileFinder.h"
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
 

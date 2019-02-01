@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/XIntegrationControl.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include "MantidKernel/ConfigService.h"
 
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QMenu>
 #include <QAction>
-#include <QLabel>
 #include <QApplication>
 #include <QEvent>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenu>
 #include <QMouseEvent>
+#include <QPushButton>
 
-#include <numeric>
 #include <cfloat>
+#include <numeric>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,10 +52,10 @@ void XIntegrationScrollBar::mouseMoveEvent(QMouseEvent *e) {
 }
 
 /**
-* Process events comming to the slider
-* @param object :: pointer to the slider
-* @param e :: event
-*/
+ * Process events comming to the slider
+ * @param object :: pointer to the slider
+ * @param e :: event
+ */
 bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
   QPushButton *slider = dynamic_cast<QPushButton *>(object);
   if (!slider)
@@ -125,23 +131,23 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
 }
 
 /**
-* Return the minimum value (between 0 and 1)
-*/
+ * Return the minimum value (between 0 and 1)
+ */
 double XIntegrationScrollBar::getMinimum() const { return m_minimum; }
 
 /**
-* Return the maximum value (between 0 and 1)
-*/
+ * Return the maximum value (between 0 and 1)
+ */
 double XIntegrationScrollBar::getMaximum() const { return m_maximum; }
 
 /**
-* Return the width == maximum - minimum (value is between 0 and 1)
-*/
+ * Return the width == maximum - minimum (value is between 0 and 1)
+ */
 double XIntegrationScrollBar::getWidth() const { return m_maximum - m_minimum; }
 
 /**
-* Set new minimum and maximum values
-*/
+ * Set new minimum and maximum values
+ */
 void XIntegrationScrollBar::set(double minimum, double maximum) {
   if (minimum < 0 || minimum > 1. || maximum < 0 || maximum > 1.) {
     throw std::invalid_argument(
@@ -289,5 +295,5 @@ void XIntegrationControl::setMaximum() {
 void XIntegrationControl::setUnits(const QString &units) {
   m_units->setText(units);
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from sans.common.general_functions import parse_diagnostic_settings
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from sans.common.general_functions import (create_child_algorithm)
@@ -157,9 +163,9 @@ def get_detector_size_from_sans_file(state, detector):
 
 
 def create_state(state_model_with_view_update, file, period, facility):
-    table_row = TableIndexModel(0, file, period, '', '', '', '', '', '', '', '', '', '')
+    table_row = TableIndexModel(file, period, '', '', '', '', '', '', '', '', '', '')
     table = TableModel()
-    table.add_table_entry(0, table_row)
+    table.add_table_entry_no_thread_or_signal(0, table_row)
 
     gui_state_director = GuiStateDirector(table, state_model_with_view_update, facility)
 

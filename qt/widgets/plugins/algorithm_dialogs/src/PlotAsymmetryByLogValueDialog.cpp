@@ -1,33 +1,38 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/PlotAsymmetryByLogValueDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
-#include "MantidKernel/Property.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Property.h"
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDir>
+#include <QFileInfo>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QComboBox>
-#include <QFileInfo>
-#include <QDir>
-#include <QCheckBox>
 #include <QSignalMapper>
+#include <QVBoxLayout>
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(PlotAsymmetryByLogValueDialog)
 }
-}
+} // namespace MantidQt
 
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
@@ -44,8 +49,8 @@ PlotAsymmetryByLogValueDialog::PlotAsymmetryByLogValueDialog(QWidget *parent)
 }
 
 /**
-  *Destructor
-  */
+ *Destructor
+ */
 PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog() {
   delete browseButtonMapper;
 }

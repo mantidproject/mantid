@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS - Execute this
@@ -13,7 +19,7 @@ import mantid.simpleapi as mantid
 # == Set parameters for calibration ==
 
 filename = 'MAP14919.raw'  # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
-# Set what we want to calibrate (e.g whole intrument or one door )
+# Set what we want to calibrate (e.g whole instrument or one door )
 CalibratedComponent = 'D2_window'  # Calibrate D2 window
 
 # Get calibration raw file and integrate it

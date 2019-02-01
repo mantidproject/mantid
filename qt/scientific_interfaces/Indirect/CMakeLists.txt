@@ -3,14 +3,19 @@ set ( SRC_FILES
 	ApplyAbsorptionCorrections.cpp
 	CalculatePaalmanPings.cpp
 	ContainerSubtraction.cpp
-	ConvFit.cpp
 	CorrectionsTab.cpp
+	ConvFit.cpp
+	ConvFitAddWorkspaceDialog.cpp
+	ConvFitDataPresenter.cpp
+	ConvFitDataTablePresenter.cpp
+	ConvFitModel.cpp
 	DensityOfStates.cpp
-        Elwin.cpp
+	Elwin.cpp
 	ILLEnergyTransfer.cpp
 	ISISCalibration.cpp
 	ISISDiagnostics.cpp
 	ISISEnergyTransfer.cpp
+	IndirectAddWorkspaceDialog.cpp
 	IndirectBayes.cpp
 	IndirectBayesTab.cpp
 	IndirectCorrections.cpp
@@ -18,14 +23,28 @@ set ( SRC_FILES
 	IndirectDataAnalysisTab.cpp
 	IndirectDataReduction.cpp
 	IndirectDataReductionTab.cpp
+	IndirectDataTablePresenter.cpp
 	IndirectDiffractionReduction.cpp
 	IndirectFitAnalysisTab.cpp
+	IndirectFitData.cpp
+	IndirectFitDataPresenter.cpp
+	IndirectFitDataView.cpp
+	IndirectFitOutput.cpp
+	IndirectFitOutputOptionsModel.cpp
+	IndirectFitOutputOptionsPresenter.cpp
+	IndirectFitOutputOptionsView.cpp
+	IndirectFitPlotModel.cpp
+	IndirectFitPlotPresenter.cpp
+	IndirectFitPlotView.cpp
+	IndirectFittingModel.cpp
 	IndirectLoadILL.cpp
 	IndirectMolDyn.cpp
 	IndirectMoments.cpp
 	IndirectSassena.cpp
 	IndirectSimulation.cpp
 	IndirectSimulationTab.cpp
+	IndirectSpectrumSelectionPresenter.cpp
+	IndirectSpectrumSelectionView.cpp
 	IndirectSqw.cpp
 	IndirectSymmetrise.cpp
 	IndirectTab.cpp
@@ -35,8 +54,14 @@ set ( SRC_FILES
 	IndirectTransmissionCalc.cpp
 	Iqt.cpp
 	IqtFit.cpp
+	IqtFitModel.cpp
 	JumpFit.cpp
+	JumpFitAddWorkspaceDialog.cpp
+	JumpFitDataPresenter.cpp
+	JumpFitDataTablePresenter.cpp
+	JumpFitModel.cpp
 	MSDFit.cpp
+	MSDFitModel.cpp
 	Quasi.cpp
 	ResNorm.cpp
 	Stretch.cpp
@@ -45,19 +70,29 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
-    DllConfig.h
+	DllConfig.h
 	AbsorptionCorrections.h
 	ApplyAbsorptionCorrections.h
 	CalculatePaalmanPings.h
 	ContainerSubtraction.h
 	ConvFit.h
+	ConvFitAddWorkspaceDialog.h
+	ConvFitDataPresenter.h
+	ConvFitDataTablePresenter.h
+	ConvFitModel.h
 	CorrectionsTab.h
 	DensityOfStates.h
-        Elwin.h
+	Elwin.h
+	IAddWorkspaceDialog.h
+	IIndirectFitDataView.h
+	IIndirectFitOutputOptionsModel.h
+	IIndirectFitOutputOptionsView.h
+	IIndirectFitPlotView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
 	ISISEnergyTransfer.h
+	IndirectAddWorkspaceDialog.h
 	IndirectBayes.h
 	IndirectBayesTab.h
 	IndirectCorrections.h
@@ -65,14 +100,28 @@ set ( INC_FILES
 	IndirectDataAnalysisTab.h
 	IndirectDataReduction.h
 	IndirectDataReductionTab.h
+	IndirectDataTablePresenter.h
 	IndirectDiffractionReduction.h
 	IndirectFitAnalysisTab.h
+	IndirectFitData.h
+	IndirectFitDataPresenter.h
+	IndirectFitDataView.h
+	IndirectFitOutput.h
+	IndirectFitOutputOptionsModel.h
+	IndirectFitOutputOptionsPresenter.h
+	IndirectFitOutputOptionsView.h
+	IndirectFitPlotModel.h
+	IndirectFitPlotPresenter.h
+	IndirectFitPlotView.h
+	IndirectFittingModel.h
 	IndirectLoadILL.h
 	IndirectMolDyn.h
 	IndirectMoments.h
 	IndirectSassena.h
 	IndirectSimulation.h
 	IndirectSimulationTab.h
+	IndirectSpectrumSelectionPresenter.h
+	IndirectSpectrumSelectionView.h
 	IndirectSqw.h
 	IndirectSymmetrise.h
 	IndirectTab.h
@@ -82,8 +131,15 @@ set ( INC_FILES
 	IndirectTransmissionCalc.h
 	Iqt.h
 	IqtFit.h
+	IqtFitModel.h
 	JumpFit.h
+	JumpFitAddWorkspaceDialog.h
+	JumpFitDataPresenter.h
+	JumpFitDataTablePresenter.h
+	LazyAsyncRunner.h
+	JumpFitModel.h
 	MSDFit.h
+	MSDFitModel.h
 	Quasi.h
 	ResNorm.h
 	Stretch.h
@@ -95,10 +151,19 @@ set ( MOC_FILES
     CalculatePaalmanPings.h
     ContainerSubtraction.h
     ConvFit.h
+    ConvFitAddWorkspaceDialog.h
+    ConvFitDataPresenter.h
+    ConvFitDataTablePresenter.h
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
+    IAddWorkspaceDialog.h
+    IIndirectFitDataView.h
+    IIndirectFitOutputOptionsModel.h
+    IIndirectFitOutputOptionsView.h
+    IIndirectFitPlotView.h
     ILLEnergyTransfer.h
+    IndirectAddWorkspaceDialog.h
     IndirectBayes.h
     IndirectBayesTab.h
     IndirectCorrections.h
@@ -106,14 +171,23 @@ set ( MOC_FILES
     IndirectDataAnalysisTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
+    IndirectDataTablePresenter.h
     IndirectDiffractionReduction.h
-	IndirectFitAnalysisTab.h
+    IndirectFitAnalysisTab.h
+    IndirectFitDataPresenter.h
+    IndirectFitDataView.h
+    IndirectFitOutputOptionsPresenter.h
+    IndirectFitOutputOptionsView.h
+    IndirectFitPlotPresenter.h
+    IndirectFitPlotView.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
     IndirectSassena.h
     IndirectSimulation.h
     IndirectSimulationTab.h
+    IndirectSpectrumSelectionPresenter.h
+    IndirectSpectrumSelectionView.h
     IndirectSqw.h
     IndirectSymmetrise.h
     IndirectTransmission.h
@@ -124,6 +198,10 @@ set ( MOC_FILES
     Iqt.h
     IqtFit.h
     JumpFit.h
+    JumpFitAddWorkspaceDialog.h
+    JumpFitDataPresenter.h
+    JumpFitDataTablePresenter.h
+    LazyAsyncRunner.h
     MSDFit.h
     Quasi.h
     ResNorm.h
@@ -139,19 +217,25 @@ set ( UI_FILES
    CalculatePaalmanPings.ui
    ContainerSubtraction.ui
    ConvFit.ui
+   ConvFitAddWorkspaceDialog.ui
    DensityOfStates.ui
    Elwin.ui
    ILLEnergyTransfer.ui
+   IndirectAddWorkspaceDialog.ui
    IndirectBayes.ui
    IndirectCorrections.ui
    IndirectDataAnalysis.ui
    IndirectDataReduction.ui
    IndirectDiffractionReduction.ui
+   IndirectFitDataView.ui
+   IndirectFitOutputOptions.ui
+   IndirectFitPreviewPlot.ui
    IndirectLoadILL.ui
    IndirectMolDyn.ui
    IndirectMoments.ui
    IndirectSassena.ui
    IndirectSimulation.ui
+   IndirectSpectrumSelector.ui
    IndirectSqw.ui
    IndirectSymmetrise.ui
    IndirectTools.ui
@@ -160,6 +244,7 @@ set ( UI_FILES
    Iqt.ui
    IqtFit.ui
    JumpFit.ui
+   JumpFitAddWorkspaceDialog.ui
    MSDFit.ui
    Quasi.ui
    ResNorm.ui
@@ -200,3 +285,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/"
 
 )
+
+# Testing target
+add_subdirectory ( test )

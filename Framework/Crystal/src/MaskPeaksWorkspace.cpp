@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/MaskPeaksWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -54,12 +60,14 @@ void MaskPeaksWorkspace::init() {
   declareProperty(
       "YMax", 2,
       "Maximum of Y (row) Range to mask peak relative to peak's center");
-  declareProperty("TOFMin", EMPTY_DBL(), "Optional(all TOF if not specified): "
-                                         "Minimum TOF relative to peak's "
-                                         "center TOF.");
-  declareProperty("TOFMax", EMPTY_DBL(), "Optional(all TOF if not specified): "
-                                         "Maximum TOF relative to peak's "
-                                         "center TOF.");
+  declareProperty("TOFMin", EMPTY_DBL(),
+                  "Optional(all TOF if not specified): "
+                  "Minimum TOF relative to peak's "
+                  "center TOF.");
+  declareProperty("TOFMax", EMPTY_DBL(),
+                  "Optional(all TOF if not specified): "
+                  "Maximum TOF relative to peak's "
+                  "center TOF.");
 }
 
 /** Executes the algorithm

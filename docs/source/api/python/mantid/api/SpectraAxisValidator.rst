@@ -2,7 +2,7 @@
  SpectraAxisValidator
 ======================
 
-This a python binding to the C++ class Mantid::API::SpectraAxisValidator.
+This is a Python binding to the C++ class Mantid::API::SpectraAxisValidator.
 
 *bases:* :py:obj:`mantid.api.MatrixWorkspaceValidator`
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
 #define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
 
@@ -11,27 +17,6 @@ MantidWebServiceAPIJobManager implements a remote job manager that
 knows how to talk to the Mantid web service / job submission API
 (http://www.mantidproject.org/Remote_Job_Submission_API). This is
 being used for example for the Fermi cluster at SNS.
-
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MantidWebServiceAPIJobManager
     : public Mantid::API::IRemoteJobManager {
@@ -81,8 +66,8 @@ protected:
   virtual std::istream &
   httpPost(const std::string &path,
            const MantidWebServiceAPIHelper::PostDataMap &postData,
-           const MantidWebServiceAPIHelper::PostDataMap &
-               fileData = MantidWebServiceAPIHelper::PostDataMap(),
+           const MantidWebServiceAPIHelper::PostDataMap &fileData =
+               MantidWebServiceAPIHelper::PostDataMap(),
            const std::string &username = "",
            const std::string &password = "") const {
     return m_helper.httpPost(path, postData, fileData, username, password);

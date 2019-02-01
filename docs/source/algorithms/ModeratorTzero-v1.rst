@@ -58,7 +58,7 @@ Here's the result of applying ModeratorTzero to both the event list and
 the histogrammed data of a run in the VISION beamline. The
 transformation of either events or histograms shifts the curve to
 smaller TOF's. The transformed curves are not supposed to be identical,
-but similar and differenciated from the original curve.
+but similar and differentiated from the original curve.
 
 .. figure:: /images/ModeratorTzero_Fig.1.jpeg
    :width:  400px

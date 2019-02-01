@@ -2,7 +2,7 @@
  std_vector_dbl
 ================
 
-This a python binding to the C++ class Mantid::Kernel::std_vector_dbl.
+This is a Python binding to the C++ class Mantid::Kernel::std_vector_dbl.
 
 
 .. module:`mantid.kernel`

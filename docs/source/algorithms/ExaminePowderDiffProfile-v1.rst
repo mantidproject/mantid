@@ -18,7 +18,7 @@ processing background and calculating peaks by Le Bail algorithm.
 Usage
 -----
 
-**Example - Calcualte peaks from input table workspaces**
+**Example - Calculate peaks from input table workspaces**
 
 .. testcode:: ExExaminePG3Profile
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
 #define MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
 
@@ -10,7 +16,6 @@
 using namespace Mantid::Geometry;
 using namespace Mantid;
 using namespace testing;
-using boost::regex;
 
 class PeakTransformSelectorTest : public CxxTest::TestSuite {
 private:
@@ -23,12 +28,12 @@ private:
     enum { value = I };
 
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(createDefaultTransform, PeakTransform_sptr());
     MOCK_CONST_METHOD2(createTransform,
                        PeakTransform_sptr(const std::string &,
                                           const std::string &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   using MockPeakTransformFactory = MockPeakTransformFactoryType<0>;

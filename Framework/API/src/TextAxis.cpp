@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/TextAxis.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace API {
@@ -93,10 +99,10 @@ std::string TextAxis::label(const std::size_t &index) const {
 }
 
 /**
-  * Set the label for value at index
-  * @param index :: Index
-  * @param lbl :: The text label
-  */
+ * Set the label for value at index
+ * @param index :: Index
+ * @param lbl :: The text label
+ */
 void TextAxis::setLabel(const std::size_t &index, const std::string &lbl) {
   if (index >= length()) {
     throw Kernel::Exception::IndexError(index, length() - 1,

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
 from .model import AlgorithmProgressModel
@@ -23,7 +29,11 @@ class AlgorithmProgressPresenter(AlgorithmProgressPresenterBase):
         :param message: A message that may come from the algorithm.
         """
         if algorithm is self.algorithm:
-            self.need_update_progress_bar.emit(self.view.progress_bar, progress, message)
+            if message is None:
+                message = ''
+            else:
+                message = str(message)
+            self.need_update_progress_bar.emit(self.view.progress_bar, float(progress), message)
 
     def update_gui(self):
         """

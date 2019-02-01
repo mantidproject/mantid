@@ -1,16 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "UserInputValidator.h"
-
-#include <QValidator>
-#include <QLineEdit>
 #include <QLabel>
+#include <QLineEdit>
 #include <QString>
-
+#include <QValidator>
 #include <cmath>
 
 using namespace MantidQt::MantidWidgets;
 
 namespace // anonymous
-    {
+{
 template <typename T> void sortPair(std::pair<T, T> &pair) {
   if (pair.first > pair.second) {
     T temp = pair.first;
@@ -38,7 +42,7 @@ UserInputValidator::UserInputValidator() : m_errorMessages() {}
 bool UserInputValidator::checkFieldIsNotEmpty(const QString &name,
                                               QLineEdit *field,
                                               QLabel *errorLabel) {
-  if (field->text() == "") {
+  if (field->text().trimmed().isEmpty()) {
     setErrorLabel(errorLabel, false);
     m_errorMessages.append(name + " has been left blank.");
     return false;
@@ -324,5 +328,5 @@ void UserInputValidator::setErrorLabel(QLabel *errorLabel, bool valid) {
   // Only show the label if input is invalid
   errorLabel->setVisible(!valid);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_GETINSTRUMENTPARAMETER_H
 #define MANTID_ISISREFLECTOMETRY_GETINSTRUMENTPARAMETER_H
+#include "MantidGeometry/Instrument.h"
+#include <boost/variant.hpp>
 #include <string>
 #include <vector>
-#include <boost/variant.hpp>
-#include "MantidGeometry/Instrument.h"
 namespace MantidQt {
 namespace CustomInterfaces {
 template <typename T> class InstrumentParameter;
@@ -125,6 +131,6 @@ auto getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
         std::declval<std::string const &>())) {
   return InstrumentParameter<T>::get(instrument, parameterName);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_GETINSTRUMENTPARAMETER_H

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_FREQUENCYSTANDARDDEVIATIONSTEST_H_
 #define MANTID_HISTOGRAMDATA_FREQUENCYSTANDARDDEVIATIONSTEST_H_
 
@@ -25,9 +31,9 @@ public:
 
   void test_has_correct_mixins() {
     FrequencyStandardDeviations data;
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG((dynamic_cast<detail::StandardDeviationVectorOf<
-            FrequencyStandardDeviations, HistogramE, FrequencyVariances> &>(
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
+        (dynamic_cast<detail::StandardDeviationVectorOf<
+             FrequencyStandardDeviations, HistogramE, FrequencyVariances> &>(
             data))));
   }
 

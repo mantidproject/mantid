@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
@@ -131,7 +137,7 @@ void Unit::initialize(const double &_l1, const double &_l2,
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
-*/
+ */
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                  const double &_l1, const double &_l2, const double &_twoTheta,
                  const int &_emode, const double &_efixed,
@@ -162,7 +168,7 @@ double Unit::convertSingleToTOF(const double xvalue, const double &l1,
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
-*/
+ */
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                    const double &_l1, const double &_l2,
                    const double &_twoTheta, const int &_emode,
@@ -256,8 +262,8 @@ Label::Label(const std::string &caption, const std::string &label)
 }
 
 /**
-  * Set a caption and a label
-  */
+ * Set a caption and a label
+ */
 void Label::setLabel(const std::string &cpt, const UnitLabel &lbl) {
   m_caption = cpt;
   m_label = lbl;
@@ -1182,7 +1188,7 @@ double Time::singleToTOF(const double x) const {
 
 double Time::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error("Time is not allwed to be converted from TOF. ");
+  throw std::runtime_error("Time is not allowed to be converted from TOF. ");
 }
 
 double Time::conversionTOFMax() const {
@@ -1211,12 +1217,12 @@ void Degrees::init() {}
 
 double Degrees::singleToTOF(const double x) const {
   UNUSED_ARG(x);
-  throw std::runtime_error("Degrees is not allowed to be convert to TOF. ");
+  throw std::runtime_error("Degrees is not allowed to be converted to TOF. ");
 }
 
 double Degrees::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error("Degrees is not allwed to be converted from TOF. ");
+  throw std::runtime_error("Degrees is not allowed to be converted from TOF. ");
 }
 
 double Degrees::conversionTOFMax() const {
@@ -1228,6 +1234,43 @@ double Degrees::conversionTOFMin() const {
 }
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
+
+// ================================================================================
+/* Temperature in kelvin
+ * ================================================================================
+ *
+ * TemperatureKelvin prints Temperature in units of Kelvin as a label
+ */
+
+DECLARE_UNIT(Temperature)
+
+Temperature::Temperature() : Empty(), m_label("K") {}
+
+const UnitLabel Temperature::label() const { return m_label; }
+
+void Temperature::init() {}
+
+double Temperature::singleToTOF(const double x) const {
+  UNUSED_ARG(x);
+  throw std::runtime_error(
+      "Temperature is not allowed to be converted to TOF. ");
+}
+
+double Temperature::singleFromTOF(const double tof) const {
+  UNUSED_ARG(tof);
+  throw std::runtime_error(
+      "Temperature is not allowed to be converted from TOF. ");
+}
+
+double Temperature::conversionTOFMin() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double Temperature::conversionTOFMax() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+Unit *Temperature::clone() const { return new Temperature(*this); }
 
 } // namespace Units
 

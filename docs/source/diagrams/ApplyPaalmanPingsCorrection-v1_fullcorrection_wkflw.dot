@@ -2,7 +2,7 @@ digraph ApplyPaalmanPingsCorrection_FullCorrection {
   label="ApplyPaalmanPingsCorrection Full Corrections Flowchart"
   $global_style
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     IsAccInWavelength   [label="Is in Wavelength?"]
     IsAcscInWavelength  [label="Is in Wavelength?"]

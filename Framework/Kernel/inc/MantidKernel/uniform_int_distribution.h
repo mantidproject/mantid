@@ -1,27 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_UNIFORM_INT_DISRIBUTION_H_
 #define MANTID_KERNEL_UNIFORM_INT_DISRIBUTION_H_
-/**
-  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
 
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 #include <limits>
 #include <random>
 #include <type_traits>
@@ -200,13 +185,13 @@ __independent_bits_engine<_Engine, _UIntType>::__independent_bits_engine(
 
 template <class _Engine, class _UIntType>
 inline _UIntType
-    __independent_bits_engine<_Engine, _UIntType>::__eval(std::false_type) {
+__independent_bits_engine<_Engine, _UIntType>::__eval(std::false_type) {
   return static_cast<result_type>(__e_() & __mask0_);
 }
 
 template <class _Engine, class _UIntType>
 _UIntType
-    __independent_bits_engine<_Engine, _UIntType>::__eval(std::true_type) {
+__independent_bits_engine<_Engine, _UIntType>::__eval(std::true_type) {
   const size_t _WRt = std::numeric_limits<result_type>::digits;
   result_type _Sp = 0;
   for (size_t __k = 0; __k < __n0_; ++__k) {
@@ -308,8 +293,8 @@ public:
 template <class _IntType>
 template <class _URNG>
 typename uniform_int_distribution<_IntType>::result_type
-    uniform_int_distribution<_IntType>::
-    operator()(_URNG &__g, const param_type &__p) {
+uniform_int_distribution<_IntType>::operator()(_URNG &__g,
+                                               const param_type &__p) {
   typedef typename std::conditional<sizeof(result_type) <= sizeof(uint32_t),
                                     uint32_t, uint64_t>::type _UIntType;
   const _UIntType _Rp = __p.b() - __p.a() + _UIntType(1);

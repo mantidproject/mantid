@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TSVSERIALISER_H_
 #define MANTID_TSVSERIALISER_H_
 
@@ -10,34 +16,18 @@
 #include <vector>
 
 #include "qstring.h"
-#include <QPoint>
 #include <QColor>
+#include <QPoint>
 #include <QRect>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#error "TSVSerialiser os only available in Qt 4 builds"
+#endif
 
 /** Parses the formatting used in MantidPlot project files
 
   @author Harry Jeffery, ISIS, RAL
   @date 23/07/2014
-
-  Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 namespace MantidQt {
@@ -123,6 +113,16 @@ public:
   bool selectLine(const std::string &name, const size_t i = 0);
   bool selectSection(const std::string &name, const size_t i = 0);
 
+  void storeDouble(const double val);
+  void storeInt(const int val);
+  void storeString(const std::string val);
+  void storeBool(const bool val);
+
+  double readDouble();
+  int readInt();
+  std::string readString();
+  bool readBool();
+
   int asInt(const size_t i) const;
   size_t asSize_t(const size_t i) const;
   double asDouble(const size_t i) const;
@@ -175,7 +175,7 @@ private:
   std::stringstream m_output;
   bool m_midLine;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif

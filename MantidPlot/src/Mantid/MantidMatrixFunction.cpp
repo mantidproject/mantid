@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrixFunction.h"
 
 #include "MantidAPI/Axis.h"
@@ -185,12 +191,12 @@ size_t MantidMatrixFunction::indexX(size_t row, double xValue) const {
   const auto &X = m_workspace->x(row);
   const auto n = X.size();
 
-  auto provideIndexForPointData =
-      [&X](size_t start, size_t stop, double xValue, double midValue) {
-        if (fabs(X[stop] - xValue) < fabs(midValue - xValue))
-          return stop;
-        return start;
-      };
+  auto provideIndexForPointData = [&X](size_t start, size_t stop, double xValue,
+                                       double midValue) {
+    if (fabs(X[stop] - xValue) < fabs(midValue - xValue))
+      return stop;
+    return start;
+  };
 
   if (n == 0 || xValue < X[0] || xValue > X[n - 1]) {
     return std::numeric_limits<size_t>::max();

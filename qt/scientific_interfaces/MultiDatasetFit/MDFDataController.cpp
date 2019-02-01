@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFDataController.h"
 #include "MDFAddWorkspaceDialog.h"
 #include "MultiDatasetFit.h"
@@ -17,7 +23,7 @@ const int startXColumn = 2;
 const int endXColumn = 3;
 
 QString makeNumber(double d) { return QString::number(d, 'g', 16); }
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -235,6 +241,6 @@ MultiDatasetFit *DataController::owner() const {
   return static_cast<MultiDatasetFit *>(parent());
 }
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

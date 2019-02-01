@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
+from mantid.api import FrameworkManager
 
 from sans.common.general_functions import (create_unmanaged_algorithm)
 from sans.common.constants import EMPTY_NAME
@@ -12,6 +18,11 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class SANSConvertToQTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
+
     @staticmethod
     def _get_workspace(x_unit="Wavelength", is_adjustment=False):
         bank_pixel_width = 1 if is_adjustment else 2

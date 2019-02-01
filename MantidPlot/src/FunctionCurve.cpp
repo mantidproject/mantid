@@ -50,7 +50,7 @@ FunctionCurve::FunctionCurve(const FunctionType &t, const QString &name)
 }
 
 /**
- * This constractor creates a function curve from a Mantid IFunction and uses a
+ * This constructor creates a function curve from a Mantid IFunction and uses a
  * workspace for x values
  * @param fun :: A pointer to a Mantid function
  * @param wsName :: A name of a workspace to provide x values and to be passed

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef COMPRESSEVENTSTEST_H_
 #define COMPRESSEVENTSTEST_H_
 
@@ -6,6 +12,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/CompressEvents.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MantidVecPtr;
@@ -107,8 +114,8 @@ public:
     TS_ASSERT_DELTA(output->readY(0)[1], 2.0, 1e-5);
     TS_ASSERT_DELTA(output->readE(0)[1], M_SQRT2, 1e-5);
     TS_ASSERT_EQUALS(output->YUnit(), input->YUnit());
-    TS_ASSERT_EQUALS(output->getAxis(0)->unit(), input->getAxis(0)->unit());
-    TS_ASSERT_EQUALS(output->getAxis(1)->unit(), input->getAxis(1)->unit());
+    TS_ASSERT(*output->getAxis(0)->unit() == *input->getAxis(0)->unit());
+    TS_ASSERT(*output->getAxis(1)->unit() == *input->getAxis(1)->unit());
   }
 
   // WEIGHTED_NOTIME tests

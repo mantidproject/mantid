@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid import config
@@ -399,7 +405,7 @@ def parse_run_file_name(run_string):
 
 
 def process_prop_list(workspace,logName="CombinedSpectraIDList"):
-    """Method process log, which discribes list of spectra, attached to
+    """Method process log, which describes list of spectra, attached to
        the workspace
     """
     if workspace.run().hasProperty(logName):

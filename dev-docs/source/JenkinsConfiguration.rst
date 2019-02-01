@@ -43,8 +43,9 @@ Set up a local ``builder`` account that will be used by the slave.
 Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS.
 
 .. note::
-   For Windows the `Command line Visual C++ build tools <http://landinghub.visualstudio.com/visual-cpp-build-tools>`__
-   may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`).
+   For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__
+   may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`). The same
+   options should be used as for the full install.
 
 Windows
 -------
@@ -101,14 +102,9 @@ Service" has completed you should
 Linux
 -----
 
-Install an ssh server.
+Install an ssh server, ``ccache``, ``curl`` and ``xvfb``.
 
-Install ``ccache``. After installing run ``ccache --max-size=20G`` from the ``builder`` account.
-
-Install a vnc server and from the ``builder`` account run ``vncpasswd`` to set a password on the VNC server. It
-can be any password.
-
-Ensure ``curl`` is installed
+From the ``builder`` account run ``ccache --max-size=20G``.
 
 Any machines acting as performance test servers will require ``mysqldb`` to be installed.
 
@@ -357,7 +353,7 @@ Update Branches For Jobs
     import hudson.plugins.git.BranchSpec
     import static com.google.common.collect.Lists.newArrayList;
 
-    def NEW_BRANCH = "*/release-v3.8"
+    def NEW_BRANCH = "*/release-next"
 
     // Access to the Hudson Singleton
     def jenkins = jenkins.model.Jenkins.instance;
@@ -414,8 +410,8 @@ Print All Loggers
       println "${it}";
     }
 
-Run a Process
--------------
+Run a Process On a Single Node
+------------------------------
 
 .. code-block:: groovy
 
@@ -425,6 +421,22 @@ Run a Process
     // kill process on windows slave
     Process p = "cmd /c Taskkill /F /IM MantidPlot.exe".execute()
     println "${p.text}"
+
+Run a Process Across All Nodes
+------------------------------
+
+.. code-block:: groovy
+
+    import hudson.util.RemotingDiagnostics;
+
+    for (slave in hudson.model.Hudson.instance.slaves) {
+       println slave.name;
+       // is it connected?
+       if(slave.getChannel()) {
+        println RemotingDiagnostics.executeGroovy("println \"ls\".execute().text", slave.getChannel());
+      }
+    }
+
 
 Update default values for job parameters
 ----------------------------------------

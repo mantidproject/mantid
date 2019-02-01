@@ -1,15 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """ SANSMove algorithm to move a workspace according to the instrument settings."""
 
 from __future__ import (absolute_import, division, print_function)
+
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from sans.algorithm_detail.move_workspaces import SANSMoveFactory
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import DetectorType
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
 class MoveType(object):

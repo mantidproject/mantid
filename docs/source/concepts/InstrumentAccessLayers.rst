@@ -37,11 +37,19 @@ There is also a near-complete implementation of the "real" ``DetectorInfo`` clas
 
 ``ExperimentInfo`` now also provides a method ``mutableDetectorInfo()`` so that non-const access to the DetectorInfo is possible for purposes of writing detector related information such as positions or rotations. 
 
+The python interface to ``DetectorInfo`` has matured, and includes widespread immutable access via iterators. The iterators can also be used to set masking flags.
+
+See :ref:`DetectorInfo <DetectorInfo>` for more information.
+
 ComponentInfo
 ______________
 ``ComponentInfo`` can be obtatined from a call to ``ExperimentInfo::componentInfo()`` (usually this method would be called on ``MatrixWorkspace``). Much like ``DetectorInfo``, the ``ComponentInfo`` yielded from this method call is a wrapper, which contains shape and index information, that cannot yet be moved in to the real ``Beamline::ComponentInfo``. However, replacing existing usage of ``IComponent`` and ``IObjComponent`` wherever possible with ``ComponentInfo`` across the framework will represent a major step forwards.
 
 For writing to the component tree. You can extract a non-const ``ComponentInfo`` via ``ExperimentInfo::mutableComponentInfo``.
+
+The python interface to ``ComponentInfo`` has matured, and now provides equal, if not better support than the ``Instrument`` API for navigating the high-level instrument. Iterator support has also been provided for ``ComponentInfo``.
+
+See :ref:`ComponentInfo <ComponentInfo>` for more information.
 
 Changes for Rollout
 -------------------
@@ -85,7 +93,7 @@ The following methods are useful helpers on ``ComponentInfo`` that allow the ext
 
 The ``ComponentInfo`` object is accessed by an index going from 0 to the number of components (including the instrument iteself). **The component index for a detector is EQUAL to the detector index**, this is an important point to understand. In other words, a detector with a Detector Index of 5, for the purposes of working with a ``DetectorInfo`` and  will have a Component Index of 5, when working with a ``ComponentInfo``. Explained in yet another way: The first 0 - n components referenced in the ``ComponentInfo`` are detectors, where n is the total number of detectors. This guarantee can be leveraged to provide speedups, as some of the examples will show.  
 
-A ``ComponentID`` for compatiblity with older code, and be extracted from ``ComponentInfo::componentID(componentIndex)``, but such calls should be avoided where possible.
+A ``ComponentID`` for compatibility with older code, and be extracted from ``ComponentInfo::componentID(componentIndex)``, but such calls should be avoided where possible.
 
 It is also possible to use the method ``componentInfo.indexOf(componentID)`` to get the index for a particular component ID. However, this is a call to a lookup in an unordered map, so is an expensive calculation which should be avoided where possible.
 

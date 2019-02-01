@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // LoadNexus
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, e_Science  - updated to be wrapper to either
@@ -7,16 +13,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadNexus.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NexusFileIO.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/NexusFileIO.h"
 
-#include <cmath>
 #include <boost/shared_ptr.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
@@ -257,10 +263,10 @@ void LoadNexus::runLoadTOFRawNexus() {
 }
 
 /**
-* Set the output workspace(s) if the load's return workspace has type
-* API::Workspace
-* @param loader :: Shared pointer to load algorithm
-*/
+ * Set the output workspace(s) if the load's return workspace has type
+ * API::Workspace
+ * @param loader :: Shared pointer to load algorithm
+ */
 void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
   // Go through each OutputWorkspace property and check whether we need to make
   // a counterpart here

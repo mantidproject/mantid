@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
 #define MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "ExperimentInfoTest.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include <cxxtest/TestSuite.h>
 
 #include <nexus/NeXusFile.hpp>
 

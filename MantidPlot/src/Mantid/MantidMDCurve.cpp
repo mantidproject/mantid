@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDCurve.h"
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
@@ -15,7 +21,7 @@ using namespace MantidQt::API;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidMDCurve");
-}
+} // namespace
 
 /**
  *  @param wsName :: The workspace name.
@@ -194,7 +200,7 @@ void MantidMDCurve::dataReset(const QString &wsName) {
 
 /* This method saves the curve details to a string.
  * Useful for loading/saving mantid project.
-*/
+ */
 QString MantidMDCurve::saveToString() {
   QString s;
   s = "MantidMDCurve\t" + m_wsName + "\t" + QString::number(m_drawErrorBars) +

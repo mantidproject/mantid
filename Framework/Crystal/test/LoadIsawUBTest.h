@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_LOADISAWUBTEST_H_
 #define MANTID_CRYSTAL_LOADISAWUBTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Sample.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
@@ -90,8 +96,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
 
     FrameworkManager::Instance().exec(
         "LoadInstrument", 6, "Workspace", "TOPAZ_3007", "Filename",
-        "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml", "RewriteSpectraMap",
-        "True");
+        "unit_testing/MINITOPAZ_Definition.xml", "RewriteSpectraMap", "True");
 
     // Match the goniometer angles
     WorkspaceCreationHelper::setGoniometer(ws, 86.92, 135.00, -105.66);

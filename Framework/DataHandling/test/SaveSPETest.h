@@ -1,28 +1,34 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVESPETEST_H_
 #define SAVESPETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
+#include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <numeric>
 
 using namespace Mantid;
 using namespace API;
 using namespace DataHandling;
-using Mantid::Kernel::UnitFactory;
 using Mantid::Geometry::Instrument;
+using Mantid::Kernel::UnitFactory;
 
 static const double MASK_FLAG =
     -1e30; // values here need to match what is in the SaveSPE.h file

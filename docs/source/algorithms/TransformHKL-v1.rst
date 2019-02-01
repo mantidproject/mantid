@@ -10,11 +10,11 @@ Description
 -----------
 
 Given a PeaksWorkspace with a :ref:`UB matrix <Lattice>` stored with
-the sample, this algoritm will accept a 3x3 transformation matrix M,
+the sample, this algorithm will accept a 3x3 transformation matrix M,
 change UB to UB\*M-inverse and map each (HKL) vector to M\*(HKL). For
 example, the transformation with elements 0,1,0,1,0,0,0,0,-1 will
 interchange the H and K values and negate L. This algorithm should allow
-the usr to perform any required transformation of the Miller indicies,
+the usr to perform any required transformation of the Miller indices,
 provided that transformation has a positive determinant. If a transformation
 with a negative or zero determinant is entered, the algorithm with throw an
 exception. The 9 elements of the transformation must be specified as a

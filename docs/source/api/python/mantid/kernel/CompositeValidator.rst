@@ -2,7 +2,7 @@
  CompositeValidator
 ====================
 
-This a python binding to the C++ class Mantid::Kernel::CompositeValidator.
+This is a Python binding to the C++ class Mantid::Kernel::CompositeValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 

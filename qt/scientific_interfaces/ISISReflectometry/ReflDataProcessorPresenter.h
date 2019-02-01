@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 
 #include "DllConfig.h"
 
@@ -65,27 +71,6 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 
 ReflDataProcessorPresenter is a presenter class that inherits from
 GenericDataProcessorPresenter and re-implements some methods
-
-Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflDataProcessorPresenter
     : public GenericDataProcessorPresenter {
@@ -104,6 +89,8 @@ public:
   // The following methods are public for testing purposes only
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
+  // end reduction
+  void endReduction(const bool success) override;
 
   void
   completedRowReductionSuccessfully(GroupData const &groupData,
@@ -111,11 +98,14 @@ public:
   void completedGroupReductionSuccessfully(
       GroupData const &groupData, std::string const &workspaceName) override;
 
+protected slots:
+  void threadFinished(const int exitCode) override;
+
 private:
   // Get the processing options for this row
   OptionsMap getProcessingOptions(RowData_sptr data) override;
-  // Process selected rows
-  void process() override;
+  // Process given items
+  void process(TreeData itemsToProcess) override;
   // Plotting
   void plotRow() override;
   void plotGroup() override;
@@ -135,7 +125,7 @@ private:
   bool processGroupAsNonEventWS(int groupID, GroupData &group);
 
   // Parse uniform / uniform even time slicing from input string
-  void parseUniform(TimeSlicingInfo &slicing, const QString &wsName);
+  bool parseUniform(TimeSlicingInfo &slicing, const QString &wsName);
   bool workspaceExists(QString const &workspaceName) const;
 
   // Load a run as event workspace
@@ -147,6 +137,10 @@ private:
   QString takeSlice(const QString &runNo, TimeSlicingInfo &slicing,
                     size_t sliceIndex);
 
+  void setReductionResumed();
+  void setReductionPaused() override;
+  void setReductionCompleted();
+
   Mantid::API::IEventWorkspace_sptr
   retrieveWorkspaceOrCritical(QString const &name) const;
 
@@ -157,9 +151,15 @@ private:
   bool proceedIfWSTypeInADS(
       const MantidQt::MantidWidgets::DataProcessor::TreeData &data,
       const bool findEventWS);
+  void handleError(RowData_sptr rowData, const std::string &error);
+  void handleError(const int groupIndex, const std::string &error);
+  bool
+  workspaceIsOutputOfGroup(const GroupData &groupData,
+                           const std::string &workspaceName) const override;
 
   std::map<int, size_t> m_numGroupSlicesMap;
+  bool m_processingAsEventData;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /*MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H*/

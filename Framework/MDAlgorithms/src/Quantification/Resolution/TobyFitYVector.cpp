@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 
@@ -19,7 +25,7 @@ const char *SAMPLE_VOLUME = "SampleVolume";
 const char *DETECTOR_DEPTH = "DetectorDepth";
 const char *DETECTOR_AREA = "DetectorArea";
 const char *DETECTION_TIME = "DetectionTime";
-}
+} // namespace
 
 /// Returns the number length of the Y vector
 unsigned int TobyFitYVector::length() { return 11; }
@@ -281,5 +287,5 @@ const double &TobyFitYVector::nextRandomNumber() {
   return m_curRandNums->at(
       m_randIndex++); // Post-fix increments then returns previous value
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

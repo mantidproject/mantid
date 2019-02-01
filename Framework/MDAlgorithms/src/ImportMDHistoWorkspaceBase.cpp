@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h"
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include <algorithm>
 
 using namespace Mantid::API;
@@ -198,5 +204,5 @@ bool ImportMDHistoWorkspaceBase::checkIfFrameValid(
   return false;
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

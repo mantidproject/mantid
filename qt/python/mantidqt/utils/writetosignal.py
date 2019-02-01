@@ -1,24 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import)
 
-# std imports
-
-# 3rdparty imports
 from qtpy.QtCore import QObject, Signal
 
 
@@ -30,6 +20,14 @@ class WriteToSignal(QObject):
 
     sig_write_received = Signal(str)
 
+    def __init__(self, original_out):
+        QObject.__init__(self)
+        # If the file descriptor of the stream is < 0 then we are running in a no-external-console mode
+        if not hasattr(original_out, 'fileno') or original_out.fileno() < 0:
+            self._original_out = None
+        else:
+            self._original_out = original_out
+
     def closed(self):
         return False
 
@@ -40,4 +38,13 @@ class WriteToSignal(QObject):
         return False
 
     def write(self, txt):
+        if self._original_out:
+            try:
+                self._original_out.write(txt)
+            except IOError as e:
+                self.sig_write_received.emit("Error: Unable to write to the console of the process.\n"
+                                             "This error is not related to your script's execution.\n"
+                                             "Original error: {}\n\n".format(str(e)))
+
+        # always write to the message log
         self.sig_write_received.emit(txt)

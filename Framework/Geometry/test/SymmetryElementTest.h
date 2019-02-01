@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_SYMMETRYELEMENTTEST_H_
 #define MANTID_GEOMETRY_SYMMETRYELEMENTTEST_H_
 
@@ -159,7 +165,7 @@ public:
 private:
   class MockSymmetryElement : public SymmetryElement {
     friend class SymmetryElementTest;
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
   public:
     MockSymmetryElement(const std::string &hmSymbol)
         : SymmetryElement(hmSymbol) {}
@@ -175,7 +181,7 @@ private:
         : SymmetryElementWithAxis(symbol, axis, translation) {}
     MOCK_CONST_METHOD0(clone, SymmetryElement_sptr());
   };
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 #endif /* MANTID_GEOMETRY_SYMMETRYELEMENTTEST_H_ */

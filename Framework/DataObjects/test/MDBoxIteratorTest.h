@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
 #define MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
 
@@ -19,10 +25,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using Mantid::Geometry::MDBoxImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
-using Mantid::Geometry::MDBoxImplicitFunction;
 
 class MDBoxIteratorTest : public CxxTest::TestSuite {
 public:
@@ -492,9 +498,9 @@ public:
             pBC(MDBox<MDLeanEvent<2>, 2>::getBoxController())
 
       {}
-      GCC_DIAG_OFF_SUGGEST_OVERRIDE
+      GNU_DIAG_OFF_SUGGEST_OVERRIDE
       MOCK_CONST_METHOD0(getIsMasked, bool());
-      GCC_DIAG_ON_SUGGEST_OVERRIDE
+      GNU_DIAG_ON_SUGGEST_OVERRIDE
       ~MockMDBox() override { delete pBC; }
     };
 
@@ -570,10 +576,10 @@ public:
     /// Mock Skipping Policy Type to inject.
     class MockSkippingPolicy : public SkippingPolicy {
     public:
-      GCC_DIAG_OFF_SUGGEST_OVERRIDE
+      GNU_DIAG_OFF_SUGGEST_OVERRIDE
       MOCK_CONST_METHOD0(keepGoing, bool());
       MOCK_METHOD0(Die, void());
-      GCC_DIAG_ON_SUGGEST_OVERRIDE
+      GNU_DIAG_ON_SUGGEST_OVERRIDE
       ~MockSkippingPolicy() override { Die(); }
     };
 

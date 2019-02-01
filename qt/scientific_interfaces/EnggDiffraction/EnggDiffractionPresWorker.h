@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESWORKER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESWORKER_H_
 
@@ -12,27 +18,6 @@ namespace CustomInterfaces {
 Worker to run long tasks for the presenter of the EnggDiffraction
 GUI. It has a finished() signal, and it is expected to emit it when
 the hard/long-work methods finish.
-
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
-Oak Ridge National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EnggDiffWorker : public QObject {
   Q_OBJECT
@@ -47,13 +32,13 @@ public:
         m_banks(), m_bin(.0), m_nperiods(0) {}
 
   /// for focusing
-  EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
+  EnggDiffWorker(EnggDiffractionPresenter *pres,
                  const std::vector<std::string> &runNo,
                  const std::vector<bool> &banks, const std::string &SpectrumNos,
                  const std::string &dgFile)
-      : m_pres(pres), m_outCalibFilename(), m_multiRunNo(runNo),
-        m_outDir(outDir), m_banks(banks), m_SpectrumNos(SpectrumNos),
-        m_dgFile(dgFile), m_bin(.0), m_nperiods(0) {}
+      : m_pres(pres), m_outCalibFilename(), m_multiRunNo(runNo), m_banks(banks),
+        m_SpectrumNos(SpectrumNos), m_dgFile(dgFile), m_bin(.0), m_nperiods(0) {
+  }
 
   // for rebinning (ToF)
   EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &runNo,
@@ -88,7 +73,7 @@ private slots:
     for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
 
       auto runNo = m_multiRunNo[i];
-      m_pres->doFocusRun(m_outDir, runNo, m_banks, m_SpectrumNos, m_dgFile);
+      m_pres->doFocusRun(runNo, m_banks, m_SpectrumNos, m_dgFile);
     }
     emit finished();
   }
@@ -119,8 +104,6 @@ private:
   // sample multi-run to process
   const std::vector<std::string> m_multiRunNo;
 
-  /// Output directory
-  const std::string m_outDir;
   /// instrument banks: do focus/don't
   const std::vector<bool> m_banks;
   // parameters for specific types of focusing: "cropped"

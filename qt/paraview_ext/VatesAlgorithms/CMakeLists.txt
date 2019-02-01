@@ -50,7 +50,7 @@ ${POCO_LIBRARIES}
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(VatesAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS;@loader_path/../Libraries")
 elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-  set_target_properties(VatesAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(VatesAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}")
 endif ()
 
 # Create test file projects

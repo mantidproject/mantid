@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDWIDGETS_FITOPTIONSBROWSER_H_
 #define MANTIDWIDGETS_FITOPTIONSBROWSER_H_
 
 #include "DllOption.h"
 
-#include <QWidget>
 #include <QMap>
+#include <QWidget>
 
 /* Forward declarations */
 class QtProperty;
@@ -24,7 +30,7 @@ class Property;
 namespace API {
 class IAlgorithm;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -179,8 +185,8 @@ private:
   QList<QtProperty *> m_simultaneousProperties;
 };
 
-} // MantidWidgets
+} // namespace MantidWidgets
 
-} // MantidQt
+} // namespace MantidQt
 
 #endif /*MANTIDWIDGETS_FITOPTIONSBROWSER_H_*/

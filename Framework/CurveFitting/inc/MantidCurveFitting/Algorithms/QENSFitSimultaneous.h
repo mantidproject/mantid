@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_QENSFITSIMULTANEOUS_H_
 #define MANTID_ALGORITHMS_QENSFITSIMULTANEOUS_H_
 
@@ -13,22 +19,6 @@ namespace Algorithms {
 
 /**
   QENSFitSimultaneous - Algorithm for performing a simultaneous QENS fit
-
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-  This file is part of Mantid.
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport QENSFitSimultaneous : public IFittingAlgorithm {
 public:
@@ -43,7 +33,7 @@ protected:
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &name) const;
   std::set<std::string> getUniqueParameterNames() const;
-  std::vector<std::string> getFitParameterNames() const;
+  virtual std::vector<std::string> getFitParameterNames() const;
   virtual std::map<std::string, std::string> getAdditionalLogStrings() const;
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;
   virtual API::ITableWorkspace_sptr
@@ -57,16 +47,18 @@ private:
   std::pair<API::ITableWorkspace_sptr, API::Workspace_sptr>
   performFit(const std::vector<API::MatrixWorkspace_sptr> &workspaces,
              const std::string &output);
-  API::MatrixWorkspace_sptr
-  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace);
-  void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
+  API::WorkspaceGroup_sptr
+  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace,
+                               const std::vector<std::size_t> &grouping);
+  void copyLogs(API::WorkspaceGroup_sptr resultWorkspace,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
                 API::WorkspaceGroup_sptr resultGroup);
   void extractMembers(API::WorkspaceGroup_sptr resultGroupWs,
                       const std::vector<API::MatrixWorkspace_sptr> &workspaces,
                       const std::string &outputWsName);
-  void addAdditionalLogs(API::MatrixWorkspace_sptr result);
+  void addAdditionalLogs(API::WorkspaceGroup_sptr group);
+  void addAdditionalLogs(API::Workspace_sptr result);
 
   API::IAlgorithm_sptr
   extractMembersAlgorithm(API::WorkspaceGroup_sptr resultGroupWs,

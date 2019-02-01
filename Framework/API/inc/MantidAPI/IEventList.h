@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IEVENTLIST_H_
 #define MANTID_API_IEVENTLIST_H_
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/DateAndTime.h"
 #include <functional>
 
 namespace Mantid {
@@ -71,6 +77,8 @@ public:
   virtual void addPulsetime(const double seconds) = 0;
   /// Mask a given TOF range
   virtual void maskTof(const double tofMin, const double tofMax) = 0;
+  /// Mask the events by the condition vector
+  virtual void maskCondition(const std::vector<bool> &mask) = 0;
   /// Return the list of TOF values
   virtual std::vector<double> getTofs() const = 0;
   /// Return the list of TOF values
@@ -116,7 +124,7 @@ public:
                       const MantidVec &E) = 0;
 };
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_IEVENTLIST_H_ */

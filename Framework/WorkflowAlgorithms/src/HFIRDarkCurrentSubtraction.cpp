@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/Run.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

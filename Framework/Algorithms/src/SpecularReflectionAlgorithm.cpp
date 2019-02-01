@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <boost/make_shared.hpp>
 
@@ -52,7 +58,7 @@ void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers,
     }
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {

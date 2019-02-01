@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IFUNCTION1DTEST_H_
 #define IFUNCTION1DTEST_H_
 
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 
 #include <cxxtest/TestSuite.h>
 

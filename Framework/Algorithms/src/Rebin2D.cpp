@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -30,11 +36,11 @@ using namespace Mantid::HistogramData;
  * Initialize the algorithm's properties.
  */
 void Rebin2D::init() {
+  using API::WorkspaceProperty;
   using Kernel::ArrayProperty;
   using Kernel::Direction;
   using Kernel::PropertyWithValue;
   using Kernel::RebinParamsValidator;
-  using API::WorkspaceProperty;
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                            Direction::Input),
                   "An input workspace.");
@@ -71,7 +77,8 @@ void Rebin2D::init() {
 void Rebin2D::exec() {
   // Information to form input grid
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
+  const NumericAxis *oldAxis2 =
+      dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
   if (!oldAxis2) {
     throw std::invalid_argument(
         "Vertical axis is not a numeric axis, cannot rebin. "
@@ -81,16 +88,9 @@ void Rebin2D::exec() {
   const auto &oldXEdges = inputWS->x(0);
   const size_t numXBins = inputWS->blocksize();
   const size_t numYBins = inputWS->getNumberHistograms();
-  std::vector<double> oldYEdges;
-  if (numYBins == oldAxis2->length()) {
-    // Pt data on axis 2, create bins
-    oldYEdges = oldAxis2->createBinBoundaries();
-  } else {
-    oldYEdges.resize(oldAxis2->length());
-    for (size_t i = 0; i < oldAxis2->length(); ++i) {
-      oldYEdges[i] = (*oldAxis2)(i);
-    }
-  }
+  // This will convert plain NumericAxis to bin edges while
+  // BinEdgeAxis will just return its edges.
+  const std::vector<double> oldYEdges = oldAxis2->createBinBoundaries();
 
   // Output grid and workspace. Fills in the new X and Y bin vectors
   // MantidVecPtr newXBins;
@@ -106,10 +106,11 @@ void Rebin2D::exec() {
   auto inputHasFA = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   // For MatrixWorkspace, only UseFractionalArea=False makes sense.
   if (useFractionalArea && !inputHasFA) {
-    g_log.warning("Fractional area tracking requires the input workspace to "
-                  "contain calculated bin fractions from a parallelpiped rebin "
-                  "like SofQW. Continuing without fractional area tracking");
-    useFractionalArea = false;
+    g_log.warning(
+        "Fractional area tracking was requested but input workspace does "
+        "not have calculated bin fractions. Assuming bins are exact "
+        "(fractions are unity). The results may not be accurate if this "
+        "workspace was previously rebinned.");
   }
   // For RebinnedOutput, should always use useFractionalArea to get the
   // correct signal and errors (so that weights of input ws is accounted for).

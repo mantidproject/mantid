@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONCORRECTTHETA2TEST_H_
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONCORRECTTHETA2TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "SpecularReflectionAlgorithmTest.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "SpecularReflectionAlgorithmTest.h"
 
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta2.h"
 
@@ -14,8 +20,8 @@ using namespace Mantid::API;
 // clang-format off
 class SpecularReflectionCalculateTheta2Test: public CxxTest::TestSuite,
     public SpecularReflectionAlgorithmTest
-      // clang-format on
-      {
+// clang-format on
+{
 
 private:
   Mantid::API::IAlgorithm_sptr makeAlgorithm() const {

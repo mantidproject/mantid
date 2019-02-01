@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * PeakHKLErrors.cpp
  *
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
+#include "MantidCrystal/PeakHKLErrors.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidAPI/ParamFunction.h"
-#include "MantidCrystal/PeakHKLErrors.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::DataObjects;
@@ -20,8 +26,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
 using Mantid::Geometry::CompAssembly;
-using Mantid::Geometry::IObjComponent_const_sptr;
 using Mantid::Geometry::IComponent_const_sptr;
+using Mantid::Geometry::IObjComponent_const_sptr;
 using Mantid::Geometry::IPeak;
 
 namespace Mantid {
@@ -30,7 +36,7 @@ namespace Crystal {
 namespace {
 /// static logger
 Kernel::Logger g_log("PeakHKLErrors");
-}
+} // namespace
 
 DECLARE_FUNCTION(PeakHKLErrors)
 
@@ -184,26 +190,31 @@ boost::shared_ptr<Geometry::Instrument>
 PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
   Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
   auto pmap = boost::make_shared<Geometry::ParameterMap>();
-  boost::shared_ptr<const Geometry::ParameterMap> pmapSv =
-      instSave->getParameterMap();
 
   if (!instSave) {
     g_log.error(" Peaks workspace does not have an instrument");
     throw std::invalid_argument(" Not all peaks have an instrument");
   }
-  auto instChange = boost::shared_ptr<Geometry::Instrument>();
 
-  if (!instSave->isParametrized()) {
+  if (!hasParameterMap) {
+    pmapSv = instSave->getParameterMap();
+    hasParameterMap = true;
+    if (!instSave->isParametrized()) {
 
-    boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-    auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
+      boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
+      auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
 
-    instChange = Pinsta;
-  } else // catch(... )
-  {
-    auto P1 = boost::make_shared<Geometry::Instrument>(
-        instSave->baseInstrument(), pmap);
-    instChange = P1;
+      instChange = Pinsta;
+      IComponent_const_sptr sample = instChange->getSample();
+      sampPos = sample->getRelativePos();
+    } else // catch(... )
+    {
+      auto P1 = boost::make_shared<Geometry::Instrument>(
+          instSave->baseInstrument(), instSave->makeLegacyParameterMap());
+      instChange = P1;
+      IComponent_const_sptr sample = instChange->getSample();
+      sampPos = sample->getRelativePos();
+    }
   }
 
   if (!instChange) {
@@ -213,11 +224,10 @@ PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
   //------------------"clone" orig instruments pmap -------------------
 
   cLone(pmap, instSave, pmapSv);
-  IComponent_const_sptr sample = instChange->getSample();
-  V3D sampPos = sample->getRelativePos();
   V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"),
                   getParameter("SampleZOffset"));
 
+  IComponent_const_sptr sample = instChange->getSample();
   pmap->addPositionCoordinate(sample.get(), std::string("x"),
                               sampPos.X() + sampOffsets.X());
   pmap->addPositionCoordinate(sample.get(), std::string("y"),
@@ -300,16 +310,16 @@ Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
 }
 
 /**
-  *  Returns the derivative of the matrix corresponding to a rotation of
-  *theta(degrees) around axis
-  *  with respect to the angle or rotation in degrees.
-  *
-  *  @param theta   the angle of rotation in degrees
-  *  @param  axis   either x,y,z, or X,Y, or Z.
-  *
-  *  @return The derivative of the matrix that corresponds to this action with
-  *respect to degree rotation.
-  */
+ *  Returns the derivative of the matrix corresponding to a rotation of
+ *theta(degrees) around axis
+ *  with respect to the angle or rotation in degrees.
+ *
+ *  @param theta   the angle of rotation in degrees
+ *  @param  axis   either x,y,z, or X,Y, or Z.
+ *
+ *  @return The derivative of the matrix that corresponds to this action with
+ *respect to degree rotation.
+ */
 Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta,
                                                               char axis) {
   int cint = toupper(axis);
@@ -388,6 +398,10 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
     } else {
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
+    V3D sampOffsets(getParameter("SampleXOffset"),
+                    getParameter("SampleYOffset"),
+                    getParameter("SampleZOffset"));
+    peak.setSamplePos(peak.getSamplePos() + sampOffsets);
 
     V3D hkl = UBinv * peak.getQSampleFrame();
 
@@ -507,6 +521,10 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       chiParamNum = phiParamNum = omegaParamNum = nParams() + 10;
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
+    V3D sampOffsets(getParameter("SampleXOffset"),
+                    getParameter("SampleYOffset"),
+                    getParameter("SampleZOffset"));
+    peak.setSamplePos(peak.getSamplePos() + sampOffsets);
     // NOTE:Use getQLabFrame except for below.
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs
     // wrt GonRot*, wrt chi*,phi*,etc.
@@ -656,5 +674,5 @@ Peak PeakHKLErrors::createNewPeak(const Geometry::IPeak &peak_old,
   //!!!peak.setDetectorID(ID);
   return peak;
 }
-}
-}
+} // namespace Crystal
+} // namespace Mantid

@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef COMPTONPROFILETESTHELPERS_H_
 #define COMPTONPROFILETESTHELPERS_H_
 
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -55,7 +61,7 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
       auto &dataYi = ws2d->mutableY(i);
       for (auto xit = std::begin(dataXi), yit = std::begin(dataYi);
            xit != std::end(dataXi); ++xit, ++yit) {
-        *yit = peakHeight *exp(-0.5 * pow(*xit - peakCentre, 2.) / sigmaSq);
+        *yit = peakHeight * exp(-0.5 * pow(*xit - peakCentre, 2.) / sigmaSq);
       }
     }
     if (noise == NoiseType::Full) {
@@ -200,6 +206,6 @@ static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
   pmap.addDouble(compID, "hwhm_lorentz", 144);
   pmap.addDouble(compID, "sigma_gauss", 20);
 }
-}
+} // namespace ComptonProfileTestHelpers
 
 #endif /* COMPTONPROFILETESTHELPERS_H_ */

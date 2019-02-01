@@ -1,38 +1,43 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTCSGOBJECT__
 #define MANTID_TESTCSGOBJECT__
 
 #include "MantidGeometry/Objects/CSGObject.h"
 
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Math/Algebra.h"
-#include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
-#include "MantidGeometry/Rendering/ShapeInfo.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <vector>
-#include <algorithm>
-#include <ctime>
 
-#include "boost/shared_ptr.hpp"
 #include "boost/make_shared.hpp"
+#include "boost/shared_ptr.hpp"
 
-#include <gmock/gmock.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
@@ -45,7 +50,7 @@ namespace {
 // -----------------------------------------------------------------------------
 class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(nextValue, double());
   MOCK_METHOD2(nextValue, double(double, double));
   MOCK_METHOD2(nextInt, int(int, int));
@@ -56,9 +61,9 @@ public:
   MOCK_METHOD2(setRange, void(const double, const double));
   MOCK_CONST_METHOD0(min, double());
   MOCK_CONST_METHOD0(max, double());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
-}
+} // namespace
 
 class CSGObjectTest : public CxxTest::TestSuite {
 
@@ -146,8 +151,9 @@ public:
     auto testMaterial =
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
     auto geom_obj = createUnitCube();
-    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
-    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    std::unique_ptr<IObject> cloned_obj;
+    TS_ASSERT_THROWS_NOTHING(
+        cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      cloned_obj->material().numberDensity(), 1e-12);
   }
@@ -666,7 +672,8 @@ public:
     // for defining non-AA objects. However, BoundingBox is poor for non-AA and
     // needs improvement if these are
     // common
-    planes = {"p 1 0 0 -0.5", "p 1 0 0 0.5",
+    planes = {"p 1 0 0 -0.5",
+              "p 1 0 0 0.5",
               "p 0 .70710678118 .70710678118 -1.1",
               "p 0 .70710678118 .70710678118 -0.1",
               "p 0 -.70710678118 .70710678118 -0.5",
@@ -681,7 +688,8 @@ public:
     // case. Framework has now been updated to support this automatically.
     // Object is unit cube located at +-0.5 in x but centred on z=y=-1.606.. and
     // rotated 45deg to these two axes
-    planes = {"p 1 0 0 -0.5", "p 1 0 0 0.5",
+    planes = {"p 1 0 0 -0.5",
+              "p 1 0 0 0.5",
               "p 0  .70710678118 .70710678118 -2",
               "p 0  .70710678118 .70710678118 -1",
               "p 0 -.70710678118 .70710678118 -0.5",

@@ -12,7 +12,7 @@ Description
 This algorithm is responsible for processing the detector vanadium in
 the form required for the sample data normalisation in the convert to
 energy transfer process. Parameters in italics are controlled by the
-`instrument parameter file (IPF) <http://www.mantidproject.org/InstrumentParameterFile>`_
+:ref:`instrument parameter file (IPF) <InstrumentParameterFile>`
 unless provided to the algorithm via a property manager. The mappings are given
 below.
 
@@ -44,7 +44,7 @@ Usage
 
 .. warning::
 
-    This algorithm is not really intented for use at the command line, but is used
+    This algorithm is not really intended for use at the command line, but is used
     within :ref:`DgsReduction <algm-DgsReduction>`.
 
 .. categories::

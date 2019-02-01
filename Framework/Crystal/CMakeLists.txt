@@ -38,7 +38,6 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/OptimizeCrystalPlacement.cpp
-	src/OptimizeExtinctionParameters.cpp
 	src/OptimizeLatticeForCellType.cpp
 	src/PeakBackground.cpp
 	src/PeakClusterProjection.cpp
@@ -59,6 +58,7 @@ set ( SRC_FILES
 	src/SaveLauenorm.cpp
 	src/SelectCellOfType.cpp
 	src/SelectCellWithForm.cpp
+	src/SetCrystalLocation.cpp
 	src/SetGoniometer.cpp
 	src/SetSpecialCoordinates.cpp
 	src/SetUB.cpp
@@ -67,7 +67,6 @@ set ( SRC_FILES
 	src/SortHKL.cpp
 	src/SortPeaksWorkspace.cpp
 	src/StatisticsOfPeaksWorkspace.cpp
-	src/TOFExtinction.cpp
 	src/TransformHKL.cpp
 )
 
@@ -114,7 +113,6 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
-	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/OptimizeLatticeForCellType.h
 	inc/MantidCrystal/PeakBackground.h
 	inc/MantidCrystal/PeakClusterProjection.h
@@ -135,6 +133,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SaveLauenorm.h
 	inc/MantidCrystal/SelectCellOfType.h
 	inc/MantidCrystal/SelectCellWithForm.h
+	inc/MantidCrystal/SetCrystalLocation.h
 	inc/MantidCrystal/SetGoniometer.h
 	inc/MantidCrystal/SetSpecialCoordinates.h
 	inc/MantidCrystal/SetUB.h
@@ -143,7 +142,6 @@ set ( INC_FILES
 	inc/MantidCrystal/SortHKL.h
 	inc/MantidCrystal/SortPeaksWorkspace.h
 	inc/MantidCrystal/StatisticsOfPeaksWorkspace.h
-	inc/MantidCrystal/TOFExtinction.h
 	inc/MantidCrystal/TransformHKL.h
 )
 
@@ -203,6 +201,7 @@ set ( TEST_FILES
 	SaveLauenormTest.h
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h
+    SetCrystalLocationTest.h
 	SetGoniometerTest.h
 	SetSpecialCoordinatesTest.h
 	SetUBTest.h
@@ -249,4 +248,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Crystal ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS Crystal INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

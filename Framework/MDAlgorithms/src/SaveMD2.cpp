@@ -1,22 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidMDAlgorithms/SaveMD2.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/SaveMD2.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidAPI/Progress.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include <Poco/File.h>
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include <Poco/File.h>
 
 using file_holder_type = std::unique_ptr<::NeXus::File>;
 
@@ -220,5 +226,5 @@ void SaveMD2::exec() {
                              "type.");
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MUONFITPROPERTYBROWSER_H_
 #define MUONFITPROPERTYBROWSER_H_
 
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/IMuonFitDataModel.h"
 #include "MantidQtWidgets/Common/IMuonFitFunctionModel.h"
-
+#include "MantidQtWidgets/Common/MuonFunctionBrowser.h"
 #include <QMap>
 /* Forward declarations */
 class QDockWidget;
@@ -32,8 +38,8 @@ namespace API {
 class IFitFunction;
 class IPeakFunction;
 class CompositeFunction;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -55,8 +61,13 @@ public:
   void setWorkspaceName(const QString &wsName) override;
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+  void finishHandleTF(const Mantid::API::IAlgorithm *alg);
+  void finishHandleNormal(const Mantid::API::IAlgorithm *alg);
   /// Add an extra widget into the browser
   void addExtraWidget(QWidget *widget);
+  void addFitBrowserWidget(
+      QWidget *widget,
+      MantidQt::MantidWidgets::FunctionBrowser *functionBrowser);
   /// Set function externally
   void setFunction(const Mantid::API::IFunction_sptr func) override;
   /// Run a non-sequential fit
@@ -154,10 +165,10 @@ signals:
   void reselctGroupClicked(bool enabled);
   /// Emitted when fit is about to be run
   void preFitChecksRequested(bool sequential) override;
+  void TFPlot(QString wsName);
 
 protected:
   void showEvent(QShowEvent *e) override;
-  double normalization() const;
   void setNormalization();
 
 private slots:
@@ -166,18 +177,6 @@ private slots:
   void enumChanged(QtProperty *prop) override;
 
 private:
-  /// new menu option
-  QAction *m_fitActionTFAsymm;
-  /// override populating fit menu
-  void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
-  void rescaleWS(const std::map<std::string, double> norm,
-                 const std::string wsName, const double shift);
-  void rescaleWS(const double norm, const std::string wsName,
-                 const double shift);
-  Mantid::API::IFunction_sptr
-  getTFAsymmFitFunction(Mantid::API::IFunction_sptr original,
-                        const std::vector<double> norms);
-  void updateMultipleNormalization(std::map<std::string, double> norms);
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
@@ -186,7 +185,11 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
-
+  void finishAfterTFSimultaneousFit(const Mantid::API::IAlgorithm *alg,
+                                    const std::string baseName) const;
+  void setFitWorkspaces(const std::string input);
+  std::string getUnnormName(const std::string wsName);
+  void ConvertFitFunctionForMuonTFAsymmetry(bool enabled);
   void setTFAsymmMode(bool state);
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);
@@ -200,7 +203,8 @@ private:
   void addPeriodCheckbox(const QString &name);
   void updatePeriods(const int j);
   bool isPeriodValid(const QString &name);
-
+  std::string TFExtension() const;
+  void updateTFPlot();
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit
@@ -235,7 +239,7 @@ private:
   QDialog *m_groupWindow;
   QDialog *m_periodWindow;
   QDialog *m_comboWindow;
-
+  MantidQt::MantidWidgets::FunctionBrowser *m_functionBrowser;
   std::vector<std::string> m_groupsList;
 
   // stores if this is in multi fitting mode
@@ -245,8 +249,7 @@ private:
 };
 
 std::map<std::string, double> readMultipleNormalization();
-std::vector<double> readNormalization();
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MUONFITPROPERTYBROWSER_H_*/

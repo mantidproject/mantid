@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CONVERTTOPONTDATATEST_H_
 #define CONVERTTOPONTDATATEST_H_
 
 #include "MantidAlgorithms/ConvertToPointData.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-using Mantid::Algorithms::ConvertToPointData;
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Algorithms::ConvertToPointData;
 using Mantid::DataObjects::Workspace2D_sptr;
 
 class ConvertToPointDataTest : public CxxTest::TestSuite {

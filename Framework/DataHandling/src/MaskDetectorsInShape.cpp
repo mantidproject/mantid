@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -21,9 +27,10 @@ void MaskDetectorsInShape::init() {
   declareProperty("ShapeXML", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the user defined shape.");
-  declareProperty("IncludeMonitors", false, "Whether to include monitors if "
-                                            "they are contained in the shape "
-                                            "(default false)");
+  declareProperty("IncludeMonitors", false,
+                  "Whether to include monitors if "
+                  "they are contained in the shape "
+                  "(default false)");
 }
 
 void MaskDetectorsInShape::exec() {

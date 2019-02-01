@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_INTEGRATEEPPTEST_H_
 #define MANTID_ALGORITHMS_INTEGRATEEPPTEST_H_
 
@@ -52,8 +58,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nHist)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      const auto ys = outputWS->y(i);
-      const auto xs = outputWS->x(i);
+      const auto &ys = outputWS->y(i);
+      const auto &xs = outputWS->x(i);
       TS_ASSERT_EQUALS(ys[0], 2.0 * static_cast<double>(i))
       TS_ASSERT_EQUALS(xs[0], 2.5)
       TS_ASSERT_EQUALS(xs[1], 4.5)

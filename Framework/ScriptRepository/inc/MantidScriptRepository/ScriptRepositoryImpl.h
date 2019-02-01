@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef _MANTIDSCRIPTREPOSITORY_SCRIPTREPOSITORYIMPL_H_
 #define _MANTIDSCRIPTREPOSITORY_SCRIPTREPOSITORYIMPL_H_
 
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidScriptRepository/DllConfig.h"
-#include <map>
 #include <json/value.h>
+#include <map>
 
 namespace Mantid {
 namespace API {

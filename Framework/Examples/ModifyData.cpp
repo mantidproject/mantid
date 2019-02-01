@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ModifyData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -14,7 +20,7 @@ using namespace API;
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
-*/
+ */
 void ModifyData::init() {
 
   // Declare a 2D input workspace property.
@@ -91,5 +97,5 @@ void ModifyData::exec() {
     }
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

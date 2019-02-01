@@ -46,7 +46,7 @@ fully within the sample.
 Usage
 -----
 
-**Example: A simple spherical sample with a cuboid guage volume**
+**Example: A simple spherical sample with a cuboid gauge volume**
 
 .. testcode:: ExCuboidGuageSimpleSpere
     

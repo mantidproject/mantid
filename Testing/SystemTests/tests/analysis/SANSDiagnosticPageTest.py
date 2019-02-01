@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
-import stresstesting
+import systemtesting
 
 import mantid
 
@@ -64,7 +70,8 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         compare_alg.setChild(False)
         compare_alg.execute()
         result = compare_alg.getProperty("Result").value
-        self.assertTrue(result)
+        message = compare_alg.getProperty("Messages").value
+        self.assertTrue(result, message)
 
         # Remove file
         if os.path.exists(f_name):
@@ -99,9 +106,9 @@ class SANSDiagnosticPageTest(unittest.TestCase):
 
         # Act
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
-
+        self.assertEqual(len(output_workspaces), 1)
         # Evaluate it up to a defined point
-        reference_file_name = "SANS2D_ws_diagnostic_reference.nxs"
+        reference_file_name = "SANS2D_ws_centred_diagnostic_reference.nxs"
         self._compare_workspace(output_workspaces[0], reference_file_name)
 
     def test_that_produces_correct_workspace_multiperiod_LARMOR(self):
@@ -129,9 +136,9 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         self._compare_workspace(output_workspaces[0], reference_file_name)
 
 
-class SANSDiagnosticPageRunnerTest(stresstesting.MantidStressTest):
+class SANSDiagnosticPageRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

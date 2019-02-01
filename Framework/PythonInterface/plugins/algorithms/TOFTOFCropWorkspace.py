@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty    # , WorkspaceUnitValidator
@@ -64,14 +70,13 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         """ Main execution body
         """
         inputws = self.getProperty("InputWorkspace").value
-        outputws = self.getProperty("OutputWorkspace").value
 
         run = inputws.getRun()
         channel_width = float(run.getLogData('channel_width').value)
         full_channels = float(run.getLogData('full_channels').value)
         tof1 = float(run.getLogData('TOF1').value)
 
-        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width + tof1, OutputWorkspace=outputws)
+        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width + tof1, StoreInADS=False)
         self.setProperty("OutputWorkspace", outputws)
 
 

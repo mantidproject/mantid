@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADFITSTEST_H_
 #define MANTID_DATAHANDLING_LOADFITSTEST_H_
 
@@ -30,7 +36,7 @@ const std::string g_hdrBITPIX = "16";
 const std::string g_hdrNAXIS = "2";
 const std::string g_hdrNAXIS1 = "512";
 const std::string g_hdrNAXIS2 = "512";
-}
+} // namespace
 
 class LoadFITSTest : public CxxTest::TestSuite {
 public:

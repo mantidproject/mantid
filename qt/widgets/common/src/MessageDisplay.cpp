@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
 //-------------------------------------------
@@ -9,6 +15,7 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QMenu>
 #include <QPlainTextEdit>
 #include <QPoint>
@@ -23,7 +30,12 @@
 namespace {
 // Track number of attachments to generate a unique channel name
 int ATTACH_COUNT = 0;
-}
+
+int DEFAULT_LINE_COUNT_MAX = 8192;
+const char *PRIORITY_KEY_NAME = "MessageDisplayPriority";
+const char *LINE_COUNT_MAX_KEY_NAME = "MessageDisplayLineCountMax";
+
+} // namespace
 
 using Mantid::Kernel::ConfigService;
 
@@ -41,11 +53,12 @@ namespace MantidWidgets {
  * at the group containing the values
  */
 void MessageDisplay::readSettings(const QSettings &storage) {
-  const int logLevel = storage.value("MessageDisplayPriority", 0).toInt();
+  const int logLevel = storage.value(PRIORITY_KEY_NAME, 0).toInt();
   if (logLevel > 0) {
-    ConfigService::Instance().setFilterChannelLogLevel(m_filterChannelName,
-                                                       logLevel, true);
+    ConfigService::Instance().setLogLevel(logLevel, true);
   }
+  setMaximumLineCount(
+      storage.value(LINE_COUNT_MAX_KEY_NAME, DEFAULT_LINE_COUNT_MAX).toInt());
 }
 
 /**
@@ -54,10 +67,9 @@ void MessageDisplay::readSettings(const QSettings &storage) {
  * @param storage A pointer to an existing QSettings instance opened
  * at the group where the values should be stored.
  */
-void MessageDisplay::writeSettings(QSettings *storage) {
-  Q_ASSERT(storage);
-  storage->setValue("MessageDisplayPriority",
-                    static_cast<int>(m_filterChannel->getPriority()));
+void MessageDisplay::writeSettings(QSettings &storage) const {
+  storage.setValue(PRIORITY_KEY_NAME, Poco::Logger::root().getLevel());
+  storage.setValue(LINE_COUNT_MAX_KEY_NAME, maximumLineCount());
 }
 
 /**
@@ -65,7 +77,6 @@ void MessageDisplay::writeSettings(QSettings *storage) {
  */
 MessageDisplay::MessageDisplay(QWidget *parent)
     : QWidget(parent), m_logChannel(new QtSignalChannel),
-      m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
       m_loglevels(new QActionGroup(this)),
       m_logLevelMapping(new QSignalMapper(this)),
@@ -73,7 +84,7 @@ MessageDisplay::MessageDisplay(QWidget *parent)
       m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)),
       m_information(new QAction(tr("&Information"), this)),
-      m_debug(new QAction(tr("&Debug"), this)), m_filterChannelName() {
+      m_debug(new QAction(tr("&Debug"), this)) {
   initActions();
   initFormats();
   setupTextArea();
@@ -84,7 +95,6 @@ MessageDisplay::MessageDisplay(QWidget *parent)
 MessageDisplay::~MessageDisplay() {
   // The Channel class is ref counted and will
   // delete itself when required
-  m_filterChannel->release();
   m_logChannel->release();
   delete m_textDisplay;
 }
@@ -102,17 +112,14 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
   auto *rootChannel = Poco::Logger::root().getChannel();
   // The root channel might be a SplitterChannel
   if (auto *splitChannel = dynamic_cast<Poco::SplitterChannel *>(rootChannel)) {
-    splitChannel->addChannel(m_filterChannel);
+    splitChannel->addChannel(m_logChannel);
   } else {
-    Poco::Logger::setChannel(rootLogger.name(), m_filterChannel);
+    Poco::Logger::setChannel(rootLogger.name(), m_logChannel);
   }
-  m_filterChannel->addChannel(m_logChannel);
-  m_filterChannelName = "MessageDisplayChannel" + std::to_string(ATTACH_COUNT);
-  configSvc.registerLoggingFilterChannel(m_filterChannelName, m_filterChannel);
   connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this,
           SLOT(append(const Message &)));
   if (logLevel > 0) {
-    configSvc.setFilterChannelLogLevel(m_filterChannelName, logLevel, true);
+    configSvc.setLogLevel(logLevel, true);
   }
   ++ATTACH_COUNT;
 }
@@ -244,20 +251,20 @@ void MessageDisplay::scrollToBottom() {
       m_textDisplay->verticalScrollBar()->maximum());
 }
 
-//------------------------------------------------------------------------------
-// Protected members
-//------------------------------------------------------------------------------
-
 //-----------------------------------------------------------------------------
 // Private slot member functions
 //-----------------------------------------------------------------------------
 
 void MessageDisplay::showContextMenu(const QPoint &mousePos) {
   QMenu *menu = m_textDisplay->createStandardContextMenu();
-  if (!m_textDisplay->document()->isEmpty())
-    menu->addAction("Clear", m_textDisplay, SLOT(clear()));
-
   menu->addSeparator();
+  if (!m_textDisplay->document()->isEmpty()) {
+    menu->addAction("Clear", m_textDisplay, SLOT(clear()));
+    menu->addSeparator();
+  }
+  menu->addAction("&Scrollback limit", this, SLOT(setScrollbackLimit()));
+  menu->addSeparator();
+
   QMenu *logLevelMenu = menu->addMenu("&Log Level");
   logLevelMenu->addAction(m_error);
   logLevelMenu->addAction(m_warning);
@@ -266,12 +273,7 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
   logLevelMenu->addAction(m_debug);
 
   // check the right level
-  int level = m_filterChannel->getPriority();
-  // get the root logger logging level
-  int rootLevel = Poco::Logger::root().getLevel();
-  if (rootLevel < level) {
-    level = rootLevel;
-  }
+  int level = Poco::Logger::root().getLevel();
   if (level == Poco::Message::PRIO_ERROR)
     m_error->setChecked(true);
   if (level == Poco::Message::PRIO_WARNING)
@@ -292,8 +294,39 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
  * enumeration
  */
 void MessageDisplay::setLogLevel(int priority) {
-  ConfigService::Instance().setFilterChannelLogLevel(m_filterChannelName,
-                                                     priority);
+  ConfigService::Instance().setLogLevel(priority);
+}
+
+/**
+ * Set the maximum number of blocks kept by the text edit
+ */
+void MessageDisplay::setScrollbackLimit() {
+  constexpr int minLineCountAllowed(-1);
+  setMaximumLineCount(
+      QInputDialog::getInt(this, "", "No. of lines\n(-1 keeps all content)",
+                           maximumLineCount(), minLineCountAllowed));
+}
+
+// The text edit works in blocks but it is not entirely clear what a block
+// is defined as. Experiments showed setting a max block count=1 suppressed
+// all output and a min(block count)==2 was required to see a single line.
+// We have asked the user for lines so add 1 to get the behaviour they
+// would expect. Equally we subtract 1 for the value we show them to
+// keep it consistent
+
+/**
+ * @return The maximum number of lines displayed in the text edit
+ */
+int MessageDisplay::maximumLineCount() const {
+  return m_textDisplay->maximumBlockCount() - 1;
+}
+
+/**
+ * The maximum number of lines that are to be displayed in the text edit
+ * @param count The new maximum number of lines to retain.
+ */
+void MessageDisplay::setMaximumLineCount(int count) {
+  m_textDisplay->setMaximumBlockCount(count + 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -354,6 +387,7 @@ void MessageDisplay::initFormats() {
 void MessageDisplay::setupTextArea() {
   m_textDisplay->setReadOnly(true);
   m_textDisplay->ensureCursorVisible();
+  setMaximumLineCount(DEFAULT_LINE_COUNT_MAX);
   m_textDisplay->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
   m_textDisplay->setMouseTracking(true);
   m_textDisplay->setUndoRedoEnabled(false);
@@ -375,5 +409,5 @@ void MessageDisplay::setupTextArea() {
 QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 
 namespace MantidQt {
@@ -5,13 +11,13 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 /** Constructor
-* @param name : The name of this algorithm
-* @param prefix : The list of prefixes that will be used for the output
-* workspaces' names
-* @param postprocessedOutputPrefixIndex The zero based index of the prefix for
-* the workspace which should be postprocessed
-* @param blacklist : The list of properties we do not want to show
-*/
+ * @param name : The name of this algorithm
+ * @param prefix : The list of prefixes that will be used for the output
+ * workspaces' names
+ * @param postprocessedOutputPrefixIndex The zero based index of the prefix for
+ * the workspace which should be postprocessed
+ * @param blacklist : The list of properties we do not want to show
+ */
 ProcessingAlgorithm::ProcessingAlgorithm(
     QString name, std::vector<QString> prefix,
     std::size_t postprocessedOutputPrefixIndex, std::set<QString> blacklist)
@@ -44,13 +50,13 @@ ProcessingAlgorithm::ProcessingAlgorithm(
 }
 
 /** Delegating constructor
-* @param name : The name of this algorithm
-* @param prefix : The list of prefixes that will be used for the output
-* workspaces' names, as a string
-* @param postprocessedOutputPrefixIndex The zero based index of the prefix for
-* the workspace which should be postprocessed
-* @param blacklist : The list of properties we do not want to show, as a string
-*/
+ * @param name : The name of this algorithm
+ * @param prefix : The list of prefixes that will be used for the output
+ * workspaces' names, as a string
+ * @param postprocessedOutputPrefixIndex The zero based index of the prefix for
+ * the workspace which should be postprocessed
+ * @param blacklist : The list of properties we do not want to show, as a string
+ */
 ProcessingAlgorithm::ProcessingAlgorithm(
     QString name, QString const &prefix,
     std::size_t postprocessedOutputPrefixIndex, QString const &blacklist)
@@ -60,7 +66,7 @@ ProcessingAlgorithm::ProcessingAlgorithm(
 
 /**
  * Constructor
-*/
+ */
 ProcessingAlgorithm::ProcessingAlgorithm()
     : m_prefix(), m_inputProperties(), m_outputProperties() {}
 
@@ -150,6 +156,6 @@ std::vector<QString> ProcessingAlgorithm::outputProperties() const {
 /** Returns the list of prefixes associated with the output properties
  */
 std::vector<QString> ProcessingAlgorithm::prefixes() const { return m_prefix; }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
 #ifndef VTKDATASETFACTORYTEST_H_
 #define VTKDATASETFACTORYTEST_H_
@@ -27,14 +33,14 @@ private:
   /// Mocked helper type
   class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(
         create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
     MOCK_METHOD1(initialize,
                  void(const boost::shared_ptr<Mantid::API::Workspace> &));
     MOCK_CONST_METHOD0(validate, void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
     void setSuccessorConcrete(std::unique_ptr<vtkDataSetFactory> pSuccessor) {
       vtkDataSetFactory::setSuccessor(pSuccessor);
     }

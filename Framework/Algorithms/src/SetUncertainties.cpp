@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SetUncertainties.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <algorithm>
@@ -63,7 +69,7 @@ struct SqrtError {
 
   double zeroSqrtValue;
 };
-}
+} // namespace
 
 /// Algorithm's name
 const std::string SetUncertainties::name() const { return "SetUncertainties"; }

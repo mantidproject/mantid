@@ -1,7 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -26,7 +31,7 @@ DECLARE_ALGORITHM(FindPeakBackground)
 
 //----------------------------------------------------------------------------------------------
 /** Define properties
-  */
+ */
 void FindPeakBackground::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "Anonymous", Direction::Input),
@@ -83,7 +88,7 @@ void FindPeakBackground::findWindowIndex(
 
 //----------------------------------------------------------------------------------------------
 /** Execute body
-  */
+ */
 void FindPeakBackground::exec() {
   // Get input and validate
   processInputProperties();
@@ -252,16 +257,16 @@ int FindPeakBackground::findBackground(
 
 //----------------------------------------------------------------------------------------------
 /** Estimate background
-* @param histogram :: data to find peak background in
-* @param i_min :: index of minimum in X to estimate background
-* @param i_max :: index of maximum in X to estimate background
-* @param p_min :: index of peak min in X to estimate background
-* @param p_max :: index of peak max in X to estimate background
-* @param hasPeak :: ban data in the peak range
-* @param out_bg0 :: interception
-* @param out_bg1 :: slope
-* @param out_bg2 :: a2 = 0
-*/
+ * @param histogram :: data to find peak background in
+ * @param i_min :: index of minimum in X to estimate background
+ * @param i_max :: index of maximum in X to estimate background
+ * @param p_min :: index of peak min in X to estimate background
+ * @param p_max :: index of peak max in X to estimate background
+ * @param hasPeak :: ban data in the peak range
+ * @param out_bg0 :: interception
+ * @param out_bg1 :: slope
+ * @param out_bg2 :: a2 = 0
+ */
 void FindPeakBackground::estimateBackground(
     const HistogramData::Histogram &histogram, const size_t i_min,
     const size_t i_max, const size_t p_min, const size_t p_max,
@@ -282,10 +287,10 @@ void FindPeakBackground::estimateBackground(
 }
 //----------------------------------------------------------------------------------------------
 /** Calculate 4th moment
-* @param X :: vec for X
-* @param n :: length of vector
-* @param mean :: mean of X
-*/
+ * @param X :: vec for X
+ * @param n :: length of vector
+ * @param mean :: mean of X
+ */
 double FindPeakBackground::moment4(MantidVec &X, size_t n, double mean) {
   double sum = 0.0;
   for (size_t i = 0; i < n; ++i) {
@@ -369,7 +374,7 @@ void FindPeakBackground::setFitWindow(const std::vector<double> &fitwindow) {
  */
 void FindPeakBackground::createOutputWorkspaces() {
   // Set up output table workspace
-  m_outPeakTableWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_outPeakTableWS = boost::make_shared<TableWorkspace>();
   m_outPeakTableWS->addColumn("int", "wksp_index");
   m_outPeakTableWS->addColumn("int", "peak_min_index");
   m_outPeakTableWS->addColumn("int", "peak_max_index");

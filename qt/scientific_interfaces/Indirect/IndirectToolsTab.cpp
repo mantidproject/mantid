@@ -1,5 +1,11 @@
-#include "MantidQtWidgets/Common/UserSubWindow.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectToolsTab.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,5 +29,5 @@ IndirectToolsTab::~IndirectToolsTab() {}
 void IndirectToolsTab::runPythonScript(const QString &pyInput) {
   emit executePythonScript(pyInput, false);
 }
-}
+} // namespace CustomInterfaces
 } // namespace MantidQt

@@ -208,7 +208,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="MplFigureCanvas" name="graphicsView"/>
+         <widget class="QFrame" name="graphicsView"/>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
@@ -1326,13 +1326,6 @@
    </property>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MplFigureCanvas</class>
-   <extends>QGraphicsView</extends>
-   <header>MplFigureCanvas.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>pushButton_browse</tabstop>
   <tabstop>pushButton_load</tabstop>

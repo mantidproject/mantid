@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDIFITPEAKS1D2TEST_H_
 #define MANTID_SINQ_POLDIFITPEAKS1D2TEST_H_
 
@@ -5,16 +11,16 @@
 
 #include "MantidSINQ/PoldiFitPeaks1D2.h"
 
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 
 #include "MantidCurveFitting/Functions/FlatBackground.h"
 
-#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Poldi::PoldiFitPeaks1D2;
 using namespace Mantid::Poldi;

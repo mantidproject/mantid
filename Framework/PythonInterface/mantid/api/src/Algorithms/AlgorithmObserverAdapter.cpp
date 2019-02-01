@@ -1,10 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/Algorithms/AlgorithmObserverAdapter.h"
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
+#include "MantidPythonInterface/core/CallMethod.h"
 
 namespace Mantid {
 namespace PythonInterface {
-using Environment::callMethod;
-using Environment::UndefinedAttributeError;
 
 AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self)
     : API::AlgorithmObserver(), m_self(self) {}

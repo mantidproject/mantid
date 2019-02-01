@@ -1,25 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/CPUTimer.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
-#include "vtkQuad.h"
 #include "vtkNew.h"
+#include "vtkQuad.h"
 #include <vector>
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
 
-using Mantid::Kernel::CPUTimer;
 using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::DataObjects::MDHistoWorkspaceIterator;
+using Mantid::Kernel::CPUTimer;
 
 namespace {
 Mantid::Kernel::Logger g_log("vtkMDHistoQuadFactory");
@@ -246,5 +252,5 @@ void vtkMDHistoQuadFactory::validate() const {
 
 /// Destructor
 vtkMDHistoQuadFactory::~vtkMDHistoQuadFactory() {}
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from six import iteritems
@@ -126,9 +132,12 @@ class InstrumentSettings(object):
             param_val = _check_value_is_in_enum(param_val, param_map.enum_class)
 
         # Does the attribute exist - has it changed and are we suppressing warnings
+
         if not suppress_warnings:
+
             previous_value = getattr(self, attribute_name) if hasattr(self, attribute_name) else None
-            if previous_value and previous_value != param_val:
+            if previous_value is not None and previous_value != param_val:
+
                 # Print warning of what we value we are replacing for which parameter
                 warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '" +
                               str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")

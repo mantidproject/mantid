@@ -1,8 +1,14 @@
-#include <QDialogButtonBox>
-#include <QUrl>
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "ui_PeaksViewerOverlayDialog.h"
+#include <QDialogButtonBox>
+#include <QUrl>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -162,5 +168,5 @@ void PeaksViewerOverlayDialog::onHelp() {
   MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

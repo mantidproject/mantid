@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -7,8 +13,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, FloatBoundedValidator, Property,
                            PropertyCriterion, StringListValidator)
-from mantid.simpleapi import (ComputeCalibrationCoefVan, Integration)
-import numpy
+from mantid.simpleapi import (ComputeCalibrationCoefVan, MaskDetectorsIf)
 
 
 class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
@@ -39,7 +44,7 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
-        progress = Progress(self, 0.0, 1.0, 3)
+        progress = Progress(self, 0.0, 1.0, 4)
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
@@ -49,6 +54,9 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
 
         progress.report('Integrating')
         mainWS = self._integrate(mainWS, wsCleanup, subalgLogging)
+
+        progress.report('Masking zeros')
+        mainWS = self._maskZeros(mainWS, subalgLogging)
 
         self._finalize(mainWS, wsCleanup)
         progress.report('Done')
@@ -122,45 +130,27 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
     def _integrate(self, mainWS, wsCleanup, subalgLogging):
         """Integrate mainWS applying Debye-Waller correction, if requested."""
         eppWS = self.getProperty(common.PROP_EPP_WS).value
-        calibrationWS = self.getPropertyValue(common.PROP_OUTPUT_WS)
-        if self.getProperty(common.PROP_DWF_CORRECTION).value == common.DWF_ON:
-            if not self.getProperty(common.PROP_TEMPERATURE).isDefault:
-                temperature = self.getProperty(common.PROP_TEMPERATURE).value
-            else:
-                temperature = 293.0
-                ILL_TEMPERATURE_ENTRY = 'sample.temperature'
-                if mainWS.run().hasProperty(ILL_TEMPERATURE_ENTRY):
-                    temperatureProperty = mainWS.run().getProperty(ILL_TEMPERATURE_ENTRY)
-                    if hasattr(temperatureProperty, 'getStatistics'):
-                        temperature = temperatureProperty.getStatistics().mean
-                    else:
-                        temperature = temperatureProperty.value
-            calibrationWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
-                                                      EPPTable=eppWS,
-                                                      OutputWorkspace=calibrationWS,
-                                                      Temperature=temperature,
-                                                      EnableLogging=subalgLogging)
-            wsCleanup.cleanup(mainWS)
-            return calibrationWS
-        # No DWF correction - integrate manually.
-        # TODO revise when ComputeCalibrationCoefVan supports this option.
-        size = eppWS.rowCount()
-        starts = numpy.zeros(size)
-        ends = numpy.zeros(size)
-        for i in range(size):
-            row = eppWS.row(i)
-            if row['FitStatus'] == 'success':
-                fwhm = 2.0 * numpy.sqrt(2.0 * numpy.log(2.0)) * row['Sigma']
-                centre = row['PeakCentre']
-                starts[i] = centre - 3.0 * fwhm
-                ends[i] = centre + 3.0 * fwhm
-        calibrationWS = Integration(InputWorkspace=mainWS,
-                                    OutputWorkspace=calibrationWS,
-                                    RangeLowerList=starts,
-                                    RangeUpperList=ends,
-                                    EnableLogging=subalgLogging)
+        calibrationWS = self.getProperty(common.PROP_OUTPUT_WS).value
+        dwfEnabled = self.getProperty(common.PROP_DWF_CORRECTION).value == common.DWF_ON
+        temperature = self.getProperty(common.PROP_TEMPERATURE).value
+        calibrationWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
+                                                  EPPTable=eppWS,
+                                                  OutputWorkspace=calibrationWS,
+                                                  Temperature=temperature,
+                                                  EnableDWF=dwfEnabled,
+                                                  EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return calibrationWS
+
+    def _maskZeros(self, mainWS, subalgLogging):
+        """Mask zero integrals in mainWS."""
+        mainWS = MaskDetectorsIf(InputWorkspace=mainWS,
+                                 OutputWorkspace=mainWS,
+                                 Mode='SelectIf',
+                                 Operator='Equal',
+                                 Value=0.,
+                                 EnableLogging=subalgLogging)
+        return mainWS
 
 
 AlgorithmFactory.subscribe(DirectILLIntegrateVanadium)

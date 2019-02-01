@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
 #define MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
 
@@ -199,9 +205,9 @@ public:
     // Create some input data. Signal values as two offset sine waves.
     using VecDouble = std::vector<double>;
     VecDouble s1, s2, e1, e2, x;
-    double theta_shift = 0.4;
+    const double theta_shift = 0.4;
     for (size_t i = 0; i < 40; ++i) {
-      double theta = 0.02 * double(i) * M_PI;
+      const double theta = 0.02 * double(i) * M_PI;
       s1.push_back(std::sin(theta));
       e1.push_back(std::sin(theta));
       s2.push_back(std::sin(theta + theta_shift));

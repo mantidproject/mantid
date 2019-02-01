@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffGSASFittingViewQtWidget.h"
 #include "EnggDiffGSASFittingModel.h"
 #include "EnggDiffGSASFittingPresenter.h"
@@ -16,7 +22,8 @@ namespace CustomInterfaces {
 
 EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
+    boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
+    boost::shared_ptr<IEnggDiffractionParam> mainSettings)
     : m_userMessageProvider(userMessageProvider) {
 
   auto multiRunWidgetModel =
@@ -37,7 +44,7 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
   auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
   auto *model_ptr = model.get();
   m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
-      std::move(model), this, multiRunWidgetPresenter);
+      std::move(model), this, multiRunWidgetPresenter, mainSettings);
   model_ptr->setObserver(m_presenter);
   m_presenter->notify(IEnggDiffGSASFittingPresenter::Start);
 }
@@ -378,5 +385,5 @@ const char EnggDiffGSASFittingViewQtWidget::GSAS_HOME_SETTING_NAME[] =
 const char EnggDiffGSASFittingViewQtWidget::SETTINGS_NAME[] =
     "EnggGUIGSASTabSettings";
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

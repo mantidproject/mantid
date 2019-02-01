@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File
+see http://www.mantidproject.org/IDF -->
+<!-- IDF configurations can be gound here https://github.com/mantidproject/documents/blob/master/IDF-Configurations/V20_idf_configurations_v05.pptx -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+name="IMAT" valid-from ="1900-01-31 23:59:59"
+valid-to ="2099-12-31 23:59:59"
+last-modified="2018-02-09 09:00:00">
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z"/>
+  </defaults>
+  
+  <component type="source-chopper">
+    <location x="0.0" y="0.0" z="-25.3"/>
+  </component>
+  <type name="source-chopper"/>
+
+  <component type="wfm-chopper">
+    <location x="0.0" y="0.0" z="-18.45"/>
+  </component>
+  <type name="wfm-chopper" is="Source" />
+
+  <component type="some-sample-holder">
+    <location x="0.0" y="0.0" z="0"/>
+  </component>
+  <type name="some-sample-holder" is="SamplePos" />
+  
+  <component name="transmission-beam-monitor" type="monitor" idlist="monitor-id-list">
+    <location x="0.0" y="0.0" z="0.030" />
+  </component>  
+  
+    <type name="monitor" is="monitor"> 
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.02" y="-0.0525" z="0.0"  />
+      <left-front-top-point  x="0.02" y="-0.0525" z="0.040"  />
+      <left-back-bottom-point  x="-0.02" y="-0.0525" z="0.0"  />
+      <right-front-bottom-point  x="0.02" y="0.0525" z="0.0"  />
+    </cuboid>
+  </type>
+
+  <idlist idname="monitor-id-list">
+    <id val="3" />
+  </idlist>
+
+</instrument>

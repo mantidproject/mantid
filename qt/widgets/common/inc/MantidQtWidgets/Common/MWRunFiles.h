@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 #define MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 
@@ -16,7 +22,7 @@ namespace Mantid {
 namespace API {
 class IAlgorithm;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace API {
@@ -28,27 +34,6 @@ to be specified.
 
 @author Martyn Gigg, Tessella Support Services plc
 @date 24/02/2009
-
-Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class EXPORT_OPT_MANTIDQT_COMMON MWRunFiles : public API::MantidWidget {
@@ -57,19 +42,19 @@ class EXPORT_OPT_MANTIDQT_COMMON MWRunFiles : public API::MantidWidget {
   Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
   Q_PROPERTY(bool findDirectory READ isForDirectory WRITE isForDirectory)
   Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
-  Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE
-                 allowMultipleFiles)
+  Q_PROPERTY(
+      bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
   Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
   Q_PROPERTY(bool multiEntry READ doMultiEntry WRITE doMultiEntry)
   Q_PROPERTY(ButtonOpts buttonOpt READ doButtonOpt WRITE doButtonOpt)
   Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE
                  setAlgorithmProperty)
-  Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE
-                 setFileExtensions)
-  Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE
-                 extsAsSingleOption)
-  Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE
-                 liveButtonState)
+  Q_PROPERTY(
+      QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
+  Q_PROPERTY(
+      bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
+  Q_PROPERTY(
+      LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
   Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE
                  setInstrumentOverride)
   Q_ENUMS(ButtonOpts)
@@ -294,7 +279,7 @@ private:
   /// Handle to any results found
   FindFilesSearchResults m_cachedResults;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_

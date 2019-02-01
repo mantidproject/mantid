@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ A Test director """
 from __future__ import (absolute_import, division, print_function)
 from sans.state.state import get_state_builder
@@ -113,7 +119,7 @@ class TestDirector(object):
         # Build the SANSStateScale
         if self.scale_state is None:
             scale_builder = get_scale_builder(self.data_state, file_information)
-            scale_builder.set_shape(SampleShape.Cuboid)
+            scale_builder.set_shape(SampleShape.FlatPlate)
             scale_builder.set_width(1.0)
             scale_builder.set_height(2.0)
             scale_builder.set_thickness(3.0)

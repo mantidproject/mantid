@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DATAHANDING_SAVEOPENGENIEASCII_H_
 #define DATAHANDING_SAVEOPENGENIEASCII_H_
 
@@ -95,6 +101,6 @@ private:
   /// Output type - Integer
   const std::string m_intType = "Integer";
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_SAVEOPENGENIEASCII_H_

@@ -11,7 +11,7 @@ digraph LoadEventAndCompress {
     FilterBadPulses
   }
 
-  subgraph algoritms {
+  subgraph algorithms {
     $algorithm_style
     loadEventNexus    [label="LoadEventNexus v1"]
     compressEvents    [label="CompressEvents v1"]

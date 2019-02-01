@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/DivideMD.h"
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/MDBoxBase.h"
-#include "MantidDataObjects/MDBox.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -124,5 +130,5 @@ void DivideMD::execHistoScalar(
   out->divide(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

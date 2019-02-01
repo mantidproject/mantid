@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <json/json.h>
 #include <MantidKernel/VMD.h>
+#include <json/json.h>
 
 namespace Mantid {
 namespace DataObjects {

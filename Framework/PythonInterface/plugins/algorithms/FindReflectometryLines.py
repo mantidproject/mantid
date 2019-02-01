@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
@@ -64,6 +70,8 @@ class FindReflectometryLines(PythonAlgorithm):
 
     def PyExec(self):
         import mantid.simpleapi as ms
+
+        self.log().warning('FindReflectometryLines algorithm version 1 has been deprecated and will be removed in a future release.')
 
         in_ws = self.getPropertyValue("InputWorkspace")
         min_wavelength = self.getPropertyValue("StartWavelength")

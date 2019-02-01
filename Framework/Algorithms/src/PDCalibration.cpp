@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PDCalibration.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -10,9 +16,12 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -22,7 +31,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include <algorithm>
 #include <cassert>
@@ -34,21 +42,23 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::API::FileProperty;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::MaskWorkspace_sptr;
-using Mantid::Kernel::ArrayProperty;
+using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Kernel::ArrayBoundedValidator;
+using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::RebinParamsValidator;
 using Mantid::Kernel::StringListValidator;
-using Mantid::Geometry::Instrument_const_sptr;
 using std::vector;
 
 // Register the algorithm into the AlgorithmFactory
@@ -87,7 +97,7 @@ public:
       }
     }
 
-    // determin tof max supported by the workspace
+    // determine tof max supported by the workspace
     size_t maxIndex = Y.size() - 1;
     for (; maxIndex > minIndex; --maxIndex) {
       if (isNonZero(Y[maxIndex])) {
@@ -100,36 +110,17 @@ public:
   void setPositions(const std::vector<double> &peaksInD,
                     const std::vector<double> &peaksInDWindows,
                     std::function<double(double)> toTof) {
+    // clear out old values
+    inDPos.clear();
+    inTofPos.clear();
+    inTofWindows.clear();
 
-    const std::size_t numOrig = peaksInD.size();
-    for (std::size_t i = 0; i < numOrig; ++i) {
-      const double centre = toTof(peaksInD[i]);
-      if (centre < tofMax && centre > tofMin) {
-        inDPos.push_back(peaksInD[i]);
-        inTofPos.push_back(peaksInD[i]);
-        inTofWindows.push_back(peaksInDWindows[2 * i]);
-        inTofWindows.push_back(peaksInDWindows[2 * i + 1]);
-      }
-    }
-    std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
-    std::transform(inTofWindows.begin(), inTofWindows.end(),
-                   inTofWindows.begin(), toTof);
-  }
+    // assign things
+    inDPos.assign(peaksInD.begin(), peaksInD.end());
+    inTofPos.assign(peaksInD.begin(), peaksInD.end());
+    inTofWindows.assign(peaksInDWindows.begin(), peaksInDWindows.end());
 
-  // (NEW) Pete: I don't need to get rid of peaks out of TOF range because
-  // FitPeaks checks whether a given peak is in range or not.  I'd rather
-  // to have some peaks out of range than a ragged workspace
-  void calculatePositionWindowInTOF(const std::vector<double> &peaksInD,
-                                    const std::vector<double> &peaksInDWindows,
-                                    std::function<double(double)> toTof) {
-    const std::size_t numOrig = peaksInD.size();
-    for (std::size_t i = 0; i < numOrig; ++i) {
-      // const double centre = toTof(peaksInD[i]);
-      inDPos.push_back(peaksInD[i]);
-      inTofPos.push_back(peaksInD[i]);
-      inTofWindows.push_back(peaksInDWindows[2 * i]);
-      inTofWindows.push_back(peaksInDWindows[2 * i + 1]);
-    }
+    // convert the bits that matter to TOF
     std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
     std::transform(inTofWindows.begin(), inTofWindows.end(),
                    inTofWindows.begin(), toTof);
@@ -178,8 +169,7 @@ const std::string PDCalibration::summary() const {
 void PDCalibration::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::InOut),
-                  "Input signal workspace.\nIf the workspace does not exist it "
-                  "will read it from the SignalFile into this workspace.");
+                  "Input signal workspace");
 
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(
                       "TofBinning", boost::make_shared<RebinParamsValidator>()),
@@ -230,12 +220,8 @@ void PDCalibration::init() {
   declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
                   "The estimated peak width as a "
                   "percentage of the d-spacing "
-                  "of the center of the peak.");
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PositionTolerance"),
-      "List of tolerance on fitted peak positions against given peak positions."
-      "If there is only one value given, then ");
+                  "of the center of the peak. This is the same as the width in "
+                  "time-of-flight.");
 
   declareProperty("MinimumPeakHeight", 2.,
                   "Minimum peak height such that all the fitted peaks with "
@@ -246,7 +232,7 @@ void PDCalibration::init() {
       "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
   declareProperty(
-      "ConstrainPeakPositions", true,
+      "ConstrainPeakPositions", false,
       "If true peak position will be constrained by estimated positions "
       "(highest Y value position) and "
       "the peak width either estimted by observation or calculate.");
@@ -285,7 +271,6 @@ void PDCalibration::init() {
   setPropertyGroup("PeakPositions", fitPeaksGroup);
   setPropertyGroup("PeakWindow", fitPeaksGroup);
   setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
-  setPropertyGroup("PositionTolerance", fitPeaksGroup);
   setPropertyGroup("MinimumPeakHeight", fitPeaksGroup);
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
@@ -473,11 +458,16 @@ void PDCalibration::exec() {
   // some fitting strategy
   algFitPeaks->setProperty("FitFromRight", true);
   algFitPeaks->setProperty("HighBackground", false);
-  algFitPeaks->setProperty("ConstrainPeakPositions",
-                           false); // TODO Pete: need to test this option
+  bool constrainPeakPosition = getProperty("ConstrainPeakPositions");
+  algFitPeaks->setProperty(
+      "ConstrainPeakPositions",
+      constrainPeakPosition); // TODO Pete: need to test this option
   //  optimization setup // TODO : need to test LM or LM-MD
   algFitPeaks->setProperty("Minimizer", "Levenberg-Marquardt");
   algFitPeaks->setProperty("CostFunction", "Least squares");
+
+  // FitPeaks will abstract the peak parameters if you ask
+  algFitPeaks->setProperty("RawPeakParameters", false);
 
   // Analysis output
   algFitPeaks->setPropertyValue("OutputPeakParametersWorkspace",
@@ -487,7 +477,7 @@ void PDCalibration::exec() {
 
   // run and get the result
   algFitPeaks->executeAsChildAlg();
-  g_log.information("finished `FitPeaks");
+  g_log.information("finished FitPeaks");
 
   // get the fit result
   API::ITableWorkspace_sptr fittedTable =
@@ -504,7 +494,7 @@ void PDCalibration::exec() {
         "The number of rows in OutputPeakParametersWorkspace is not correct!");
 
   // END-OF (FitPeaks)
-  std::string backgroundType = getProperty("BackgroundType");
+  const std::string backgroundType = getPropertyValue("BackgroundType");
 
   API::Progress prog(this, 0.7, 1.0, NUMHIST);
 
@@ -547,14 +537,13 @@ void PDCalibration::exec() {
         throw std::runtime_error(
             "peak index mismatch but workspace index matched");
 
-      // TODO FIXME Pete: the following only works Gaussian because in FitPeaks,
-      // the exact parameter name is used
+      // get the effective peak parameters
       const double centre =
-          fittedTable->getRef<double>("PeakCentre", rowIndexInFitTable);
+          fittedTable->getRef<double>("centre", rowIndexInFitTable);
       const double width =
-          fittedTable->getRef<double>("Sigma", rowIndexInFitTable);
+          fittedTable->getRef<double>("width", rowIndexInFitTable);
       const double height =
-          fittedTable->getRef<double>("Height", rowIndexInFitTable);
+          fittedTable->getRef<double>("height", rowIndexInFitTable);
       const double chi2 =
           fittedTable->getRef<double>("chi2", rowIndexInFitTable);
 
@@ -1213,11 +1202,10 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
   // create workspaces
   size_t numspec = dataws->getNumberHistograms();
   size_t numpeaks = m_peaksInDspacing.size();
-  MatrixWorkspace_sptr peak_pos_ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", numspec, numpeaks, numpeaks);
+  MatrixWorkspace_sptr peak_pos_ws =
+      create<Workspace2D>(numspec, Points(numpeaks));
   MatrixWorkspace_sptr peak_window_ws =
-      API::WorkspaceFactory::Instance().create("Workspace2D", numspec,
-                                               numpeaks * 2, numpeaks * 2);
+      create<Workspace2D>(numspec, Points(numpeaks * 2));
 
   const int64_t NUM_HIST = static_cast<int64_t>(dataws->getNumberHistograms());
   API::Progress prog(this, 0., .2, NUM_HIST);
@@ -1228,8 +1216,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
     // calculatePositionWindowInTOF
     PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
     auto toTof = getDSpacingToTof(peaks.detid);
-    peaks.calculatePositionWindowInTOF(m_peaksInDspacing, windowsInDSpacing,
-                                       toTof);
+    peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
     peak_pos_ws->setPoints(iws, peaks.inTofPos);
     peak_window_ws->setPoints(iws, peaks.inTofWindows);
     prog.report();

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_GENERATEPEAKS_H_
 #define MANTID_ALGORITHMS_GENERATEPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,27 +23,6 @@ namespace Algorithms {
   parameters
 
   @date 2012-04-10
-
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport GeneratePeaks : public API::Algorithm {
 public:
@@ -73,8 +58,8 @@ private:
   void processTableColumnNames();
 
   void importPeaksFromTable(
-      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
-          functionmap);
+      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
+          &functionmap);
 
   /// Import peak and background function parameters from vector
   void importPeakFromVector(
@@ -83,8 +68,8 @@ private:
   /// Generate peaks in output data workspaces
   void generatePeaks(
       const std::map<specnum_t,
-                     std::vector<std::pair<double, API::IFunction_sptr>>> &
-          functionmap,
+                     std::vector<std::pair<double, API::IFunction_sptr>>>
+          &functionmap,
       API::MatrixWorkspace_sptr dataWS);
 
   /// Check whether function has a certain parameter

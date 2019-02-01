@@ -11,7 +11,7 @@ Description
 
 This utility algorithm is used to control consecutive executions of another algorithm. After defining a table of desired input and output properties, ``WorkflowAlgorithmRunner`` connects the outputs to input properties, declares the order of execution, and runs the algorithm. It is mainly meant for managing the execution of workflow algorithms for data reduction purposes although it can run all types of algorithms.
 
-The runs are specified in a `TableWorkspace` and given as the *SetupTable* input property to the algorihtm. The first column has to contain unique string identifiers for each row. The rest of the columns have to be named same as the input/output properties of the managed algorithm.
+The runs are specified in a `TableWorkspace` and given as the *SetupTable* input property to the algorithm. The first column has to contain unique string identifiers for each row. The rest of the columns have to be named same as the input/output properties of the managed algorithm.
 
 Each row in the *SetupTable* corresponds to a single run of the managed algorithm. Its properties are set without modifications from the corresponding columns of the row except for special input/output columns declare in the *InputOutputMap*. For example, two independent runs of the :ref:`algm-Scale` would be specified as
 

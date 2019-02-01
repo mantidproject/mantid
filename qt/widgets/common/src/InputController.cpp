@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/InputController.h"
 
+#include <QApplication>
+#include <QCursor>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
-#include <QCursor>
-#include <QApplication>
 
 #include <cmath>
 
@@ -19,16 +25,16 @@ InputController::InputController(QObject *parent, bool contextAllowed)
 //--------------------------------------------------------------------------------
 
 /**
-  * Constructor.
-  * @param parent :: The parent object.
-  */
+ * Constructor.
+ * @param parent :: The parent object.
+ */
 InputController3DMove::InputController3DMove(QObject *parent)
     : InputController(parent, false), m_isButtonPressed(false) {}
 
 /**
-  * Process the mouse press event.
-  * Send out movement initialization signals.
-  */
+ * Process the mouse press event.
+ * Send out movement initialization signals.
+ */
 void InputController3DMove::mousePressEvent(QMouseEvent *event) {
   if (event->buttons() & Qt::MidButton) {
     emit initZoom(event->x(), event->y());
@@ -43,9 +49,9 @@ void InputController3DMove::mousePressEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse move event.
-  * Send out surface movement signals.
-  */
+ * Process the mouse move event.
+ * Send out surface movement signals.
+ */
 void InputController3DMove::mouseMoveEvent(QMouseEvent *event) {
   if (event->buttons() & Qt::LeftButton) {
     emit rotate(event->x(), event->y());
@@ -57,18 +63,18 @@ void InputController3DMove::mouseMoveEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse release event.
-  * Finalize the interaction.
-  */
+ * Process the mouse release event.
+ * Finalize the interaction.
+ */
 void InputController3DMove::mouseReleaseEvent(QMouseEvent *) {
   m_isButtonPressed = false;
   emit finish();
 }
 
 /**
-  * Process the mouse wheel event.
-  * Send the wheel zoom signal.
-  */
+ * Process the mouse wheel event.
+ * Send the wheel zoom signal.
+ */
 void InputController3DMove::wheelEvent(QWheelEvent *event) {
   emit wheelZoom(event->x(), event->y(), event->delta());
 }
@@ -76,15 +82,15 @@ void InputController3DMove::wheelEvent(QWheelEvent *event) {
 //--------------------------------------------------------------------------------
 
 /**
-  * Constructor.
-  * @param parent :: The parent object.
-  */
+ * Constructor.
+ * @param parent :: The parent object.
+ */
 InputControllerPick::InputControllerPick(QObject *parent)
     : InputController(parent), m_isButtonPressed(false) {}
 
 /**
-  * Process the mouse press event.
-  */
+ * Process the mouse press event.
+ */
 void InputControllerPick::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     m_isButtonPressed = true;
@@ -94,8 +100,8 @@ void InputControllerPick::mousePressEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse move event.
-  */
+ * Process the mouse move event.
+ */
 void InputControllerPick::mouseMoveEvent(QMouseEvent *event) {
   if (m_isButtonPressed) {
     m_rect.setBottomRight(QPoint(event->x(), event->y()));
@@ -106,8 +112,8 @@ void InputControllerPick::mouseMoveEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse release event.
-  */
+ * Process the mouse release event.
+ */
 void InputControllerPick::mouseReleaseEvent(QMouseEvent *) {
   m_isButtonPressed = false;
   emit finishSelection();
@@ -116,15 +122,15 @@ void InputControllerPick::mouseReleaseEvent(QMouseEvent *) {
 //--------------------------------------------------------------------------------
 
 /**
-  * Constructor.
-  */
+ * Constructor.
+ */
 InputControllerDrawShape::InputControllerDrawShape(QObject *parent)
     : InputController(parent), m_creating(false), m_x(0), m_y(0), m_shapeType(),
       m_isButtonPressed(false) {}
 
 /**
-  * Process the mouse press event. Sends addShape or selectAt signal.
-  */
+ * Process the mouse press event. Sends addShape or selectAt signal.
+ */
 void InputControllerDrawShape::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     m_isButtonPressed = true;
@@ -143,9 +149,9 @@ void InputControllerDrawShape::mousePressEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse move event. If the left mouse button is down sends editing
+ * Process the mouse move event. If the left mouse button is down sends editing
  * signals.
-  */
+ */
 void InputControllerDrawShape::mouseMoveEvent(QMouseEvent *event) {
   if (m_isButtonPressed) {
     if (m_creating) {
@@ -163,8 +169,8 @@ void InputControllerDrawShape::mouseMoveEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse button release event.
-  */
+ * Process the mouse button release event.
+ */
 void InputControllerDrawShape::mouseReleaseEvent(QMouseEvent *) {
   m_isButtonPressed = false;
   m_creating = false;
@@ -173,8 +179,8 @@ void InputControllerDrawShape::mouseReleaseEvent(QMouseEvent *) {
 }
 
 /**
-  * Process the keyboard key press event.
-  */
+ * Process the keyboard key press event.
+ */
 void InputControllerDrawShape::keyPressEvent(QKeyEvent *event) {
   switch (event->key()) {
   case Qt::Key_Delete:
@@ -185,15 +191,15 @@ void InputControllerDrawShape::keyPressEvent(QKeyEvent *event) {
 }
 
 /**
-  * Process event of the mouse leaving the widget.
-  */
+ * Process event of the mouse leaving the widget.
+ */
 void InputControllerDrawShape::leaveEvent(QEvent *) {
   emit restoreOverrideCursor();
 }
 
 /**
-  * Slot for defining the shape to draw and initializing drawing.
-  */
+ * Slot for defining the shape to draw and initializing drawing.
+ */
 void InputControllerDrawShape::startCreatingShape2D(const QString &type,
                                                     const QColor &borderColor,
                                                     const QColor &fillColor) {
@@ -213,14 +219,14 @@ void InputControllerDrawShape::onDisabled() {
 //--------------------------------------------------------------------------------
 
 /**
-  * Constructor.
-  */
+ * Constructor.
+ */
 InputControllerMoveUnwrapped::InputControllerMoveUnwrapped(QObject *parent)
     : InputController(parent, false), m_isButtonPressed(false) {}
 
 /**
-  * Process the mouse press event.
-  */
+ * Process the mouse press event.
+ */
 void InputControllerMoveUnwrapped::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton || event->button() == Qt::RightButton) {
     m_isButtonPressed = true;
@@ -229,8 +235,8 @@ void InputControllerMoveUnwrapped::mousePressEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse move event.
-  */
+ * Process the mouse move event.
+ */
 void InputControllerMoveUnwrapped::mouseMoveEvent(QMouseEvent *event) {
   if (m_isButtonPressed) {
     m_rect.setBottomRight(QPoint(event->x(), event->y()));
@@ -239,8 +245,8 @@ void InputControllerMoveUnwrapped::mouseMoveEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse button release event.
-  */
+ * Process the mouse button release event.
+ */
 void InputControllerMoveUnwrapped::mouseReleaseEvent(QMouseEvent *event) {
   if (m_isButtonPressed && event->button() == Qt::LeftButton) {
     emit zoom();
@@ -258,8 +264,8 @@ void InputControllerMoveUnwrapped::mouseReleaseEvent(QMouseEvent *event) {
 //--------------------------------------------------------------------------------
 
 /**
-  * Constructor.
-  */
+ * Constructor.
+ */
 InputControllerDraw::InputControllerDraw(QObject *parent)
     : InputController(parent), m_max_size(32), m_size(30),
       m_isLeftButtonPressed(false), m_isRightButtonPressed(false),
@@ -268,8 +274,8 @@ InputControllerDraw::InputControllerDraw(QObject *parent)
 InputControllerDraw::~InputControllerDraw() { delete m_cursor; }
 
 /**
-  * Process the mouse press event.
-  */
+ * Process the mouse press event.
+ */
 void InputControllerDraw::mousePressEvent(QMouseEvent *event) {
   m_isActive = true;
   setPosition(QPoint(event->x(), event->y()));
@@ -283,8 +289,8 @@ void InputControllerDraw::mousePressEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse move event.
-  */
+ * Process the mouse move event.
+ */
 void InputControllerDraw::mouseMoveEvent(QMouseEvent *event) {
   m_isActive = true;
   setPosition(QPoint(event->x(), event->y()));
@@ -296,8 +302,8 @@ void InputControllerDraw::mouseMoveEvent(QMouseEvent *event) {
 }
 
 /**
-  * Process the mouse button release event.
-  */
+ * Process the mouse button release event.
+ */
 void InputControllerDraw::mouseReleaseEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     m_isLeftButtonPressed = false;
@@ -450,5 +456,5 @@ void InputControllerDrawAndErase::startCreatingShape2D(
   m_fillColor = fillColor;
   m_creating = true;
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

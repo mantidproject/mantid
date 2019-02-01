@@ -84,7 +84,7 @@ using ANNkd_splitter = void (*)(ANNpointArray, ANNidxArray, const ANNorthRect &,
 //----------------------------------------------------------------------
 
 class ANNkd_leaf : public ANNkd_node // leaf node for kd-tree
-                   {
+{
   int n_pts;       // no. points in bucket
   ANNidxArray bkt; // bucket of points
 public:
@@ -134,7 +134,7 @@ extern ANNkd_leaf *KD_TRIVIAL; // trivial (empty) leaf node
 //----------------------------------------------------------------------
 
 class ANNkd_split : public ANNkd_node // splitting node of a kd-tree
-                    {
+{
   int cut_dim;         // dim orthogonal to cutting plane
   ANNcoord cut_val;    // location of cutting plane
   ANNcoord cd_bnds[2]; // lower and upper bounds of

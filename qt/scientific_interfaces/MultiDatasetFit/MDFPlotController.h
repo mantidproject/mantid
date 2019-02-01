@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDFPLOTCONTROLLER_H_
 #define MDFPLOTCONTROLLER_H_
 
-#include <QObject>
 #include <QMap>
-#include <boost/shared_ptr.hpp>
+#include <QObject>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 // Forward declarations
 class QwtPlot;
@@ -20,7 +26,7 @@ namespace Mantid {
 namespace API {
 class IFunction;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -37,13 +43,13 @@ class DatasetPlotData;
 class MDFFunctionPlotData;
 
 /**
-  * A class for controlling the plot widget and the displayed data.
-  *
-  * The instance keeps pointers to the plot and other control widgets but
-  * not their positions within the parent window.
-  *
-  * Manages the plot tools.
-  */
+ * A class for controlling the plot widget and the displayed data.
+ *
+ * The instance keeps pointers to the plot and other control widgets but
+ * not their positions within the parent window.
+ *
+ * Manages the plot tools.
+ */
 class PlotController : public QObject {
   Q_OBJECT
 public:
@@ -119,8 +125,8 @@ private:
   bool m_showGuessFunction;
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFPLOTCONTROLLER_H_*/

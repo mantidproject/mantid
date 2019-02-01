@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MultiplyMD.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDBoxBase.h"
@@ -122,5 +128,5 @@ void MultiplyMD::execHistoScalar(
   out->multiply(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

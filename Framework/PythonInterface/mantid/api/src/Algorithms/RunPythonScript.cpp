@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
-#include "MantidPythonInterface/api/ExtractWorkspace.h"
-#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidPythonInterface/api/ExtractWorkspace.h"
+#include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/kernel/IsNone.h"
 
 #include <boost/python/call_method.hpp>
 #include <boost/python/exec.hpp>
@@ -136,8 +142,8 @@ std::string RunPythonScript::scriptCode() const {
   const char *indent = "    ";
   os << "import mantid\n"
      << "from mantid.simpleapi import *\n"
-     << "class _DUMMY_ALG(mantid.api.PythonAlgorithm):\n" << indent
-     << "def PyExec(self, input=None,output=None):\n";
+     << "class _DUMMY_ALG(mantid.api.PythonAlgorithm):\n"
+     << indent << "def PyExec(self, input=None,output=None):\n";
   std::string line;
   while (getline(is, line)) {
     os << indent << indent << line << "\n";
@@ -169,7 +175,7 @@ RunPythonScript::executeScript(const std::string &script) const {
   using namespace boost::python;
 
   // Execution
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   auto locals = doExecuteScript(script);
   return extractOutputWorkspace(locals);
 }
@@ -192,7 +198,7 @@ RunPythonScript::doExecuteScript(const std::string &script) const {
   try {
     boost::python::exec(script.c_str(), globals, locals);
   } catch (boost::python::error_already_set &) {
-    throw Environment::PythonException();
+    throw PythonException();
   }
   return locals;
 }

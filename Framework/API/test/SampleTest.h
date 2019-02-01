@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TESTSAMPLE_H_
 #define TESTSAMPLE_H_
 
@@ -6,8 +12,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -56,15 +62,14 @@ public:
   test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
     Sample sample;
     const std::string envName("TestKit");
-    SampleEnvironment *kit =
-        new SampleEnvironment(envName, boost::make_shared<const Container>(""));
+    auto kit = std::make_unique<SampleEnvironment>(
+        envName, boost::make_shared<const Container>(""));
     kit->add(boost::make_shared<const CSGObject>());
 
-    TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
+    TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(std::move(kit)));
 
     const SampleEnvironment &sampleKit = sample.getEnvironment();
     // Test that this references the correct object
-    TS_ASSERT_EQUALS(&sampleKit, kit);
     TS_ASSERT_EQUALS(sampleKit.name(), envName);
     TS_ASSERT_EQUALS(sampleKit.nelements(), 2);
   }

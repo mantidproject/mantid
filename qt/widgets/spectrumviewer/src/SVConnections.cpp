@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <qwt_plot_canvas.h>
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
@@ -537,10 +543,10 @@ void SVConnections::spectrumColorScale() {
 void SVConnections::loadColorMap(const QString &file_name) {
   m_colorMapFileName = file_name;
   if (m_colorMapFileName.isEmpty())
-    m_colorMapFileName = MantidColorMap::loadMapDialog("", m_svMainWindow);
+    m_colorMapFileName = MantidColorMap::chooseColorMap("", m_svMainWindow);
 
   MantidColorMap *mantid_color_map =
-      new MantidColorMap(file_name, GraphOptions::Linear);
+      new MantidColorMap(file_name, MantidColorMap::ScaleType::Linear);
 
   QwtDoubleInterval interval(0.0, 255.0);
   QVector<QRgb> mantid_color_table;

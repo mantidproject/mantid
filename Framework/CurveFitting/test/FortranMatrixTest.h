@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_FORTRANMATRIXTEST_H_
 #define MANTID_CURVEFITTING_FORTRANMATRIXTEST_H_
 
@@ -7,10 +13,10 @@
 #include "MantidCurveFitting/FortranMatrix.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
-using Mantid::CurveFitting::FortranMatrix;
-using Mantid::CurveFitting::GSLMatrix;
 using Mantid::CurveFitting::ComplexMatrix;
 using Mantid::CurveFitting::ComplexType;
+using Mantid::CurveFitting::FortranMatrix;
+using Mantid::CurveFitting::GSLMatrix;
 
 using DoubleFortranMatrix = FortranMatrix<GSLMatrix>;
 using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;

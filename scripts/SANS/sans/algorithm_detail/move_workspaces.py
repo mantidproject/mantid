@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods, invalid-name
 
 from __future__ import (absolute_import, division, print_function)
@@ -517,9 +523,8 @@ class SANSMoveLOQ(SANSMove):
         super(SANSMoveLOQ, self).__init__()
 
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
-        # For LOQ we only have to coordinates
+        # For LOQ we only have two coordinates
         assert len(coordinates) == 2
-
         if not is_transmission_workspace:
             # First move the sample holder
             move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)

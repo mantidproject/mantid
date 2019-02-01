@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_ALGORITHMDIALOG_H_
 #define MANTIDQT_API_ALGORITHMDIALOG_H_
 
 /* Used to register classes into the factory. creates a global object in an
-* anonymous namespace. The object itself does nothing, but the comma operator
-* is used in the call to its constructor to effect a call to the factory's
-* subscribe method.
-*/
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
 
 #define DECLARE_DIALOG(classname)                                              \
   namespace {                                                                  \
@@ -23,13 +29,13 @@
 
 // Could have forward declared this but it makes it easier to use from
 // inheriting classes if it is included here
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/IAlgorithm.h"
 
 #include <QDialog>
+#include <QHash>
 #include <QString>
 #include <QTimer>
-#include <QHash>
 #include <QVBoxLayout>
 
 //----------------------------------
@@ -51,7 +57,7 @@ namespace Mantid {
 namespace Kernel {
 class Property;
 }
-}
+} // namespace Mantid
 
 // Top-level namespace for this library
 namespace MantidQt {
@@ -68,27 +74,6 @@ class InterfaceManager;
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 24/02/2009
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialog
     : public QDialog,
@@ -252,7 +237,7 @@ protected:
   /// argument
   /// @param propName :: Name of the property
   /// @return Previous value. If there is no value, empty string is returned
-  QString getPreviousValue(const QString &propName);
+  QString getPreviousValue(const QString &propName) const;
   /// Set a value based on any old input that we have
   void setPreviousValue(QWidget *widget, const QString &property);
   /// Handle completion of algorithm started while staying open
@@ -352,6 +337,6 @@ protected:
   bool m_statusTracked;
   //@}
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 #endif // MANTIDQT_API_ALGORITHMDIALOG_H_

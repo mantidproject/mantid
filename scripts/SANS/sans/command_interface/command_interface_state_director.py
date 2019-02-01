@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from sans.common.enums import (serializable_enum, DataType)
 from sans.user_file.state_director import StateDirectorISIS
@@ -190,7 +196,7 @@ class CommandInterfaceStateDirector(object):
             return
 
         # If there is more than one element, then we are only interested in the last element. The user could
-        # have overriden his wishes, e.g.
+        # have overridden his wishes, e.g.
         # ...
         # AssignSample('SANS2D1234')
         # ...
@@ -434,7 +440,7 @@ class CommandInterfaceStateDirector(object):
         # Set the scale and the shift
         new_state_entries = {DetectorId.rescale: scale, DetectorId.shift: shift}
 
-        # Set the fit fot the scale
+        # Set the fit for the scale
         new_state_entries.update({DetectorId.rescale_fit: det_fit_range(start=q_min, stop=q_max, use_fit=fit_scale)})
 
         # Set the fit for shift

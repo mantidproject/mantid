@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidHistogramData/Histogram.h"
 
@@ -250,7 +256,8 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
  */
 void interpolateLinearInplace(const Histogram &input, Histogram &output) {
   sanityCheck(input, output, minSizeForLinearInterpolation());
-  const auto &points = input.points().rawData();
+  const auto inputPoints = input.points();
+  const auto &points = inputPoints.rawData();
   const auto &y = input.y().rawData();
   const auto &interpPoints = output.points();
   auto &newY = output.mutableY();

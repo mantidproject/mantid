@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "WorkspaceAlgorithm.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -14,7 +20,7 @@ using namespace API;
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
-*/
+ */
 void WorkspaceAlgorithm::init() {
 
   // Declare a 1D workspace property.
@@ -51,5 +57,5 @@ void WorkspaceAlgorithm::exec() {
     }
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

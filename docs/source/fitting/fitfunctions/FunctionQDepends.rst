@@ -16,7 +16,7 @@ This fitting function is the base class for all fitting functions that have:
 
 Fitting functions for QENS data depending on :math:`Q` should derive from this class.
 
-There are two ways to update attribute :math:`Q` in the fit funtion:
+There are two ways to update attribute :math:`Q` in the fit function:
 
 - The user inputs a particular value.
 - The spectrum contains :math:`Q` in addition to the range of energy transfers.
@@ -27,4 +27,4 @@ in the spectrum. Here are some user cases:
 - User cannot override the value of attribute :math:`Q` if the spectrum contains a :math:`Q`-value.
 - User can set or update the value of of attribute :math:`Q` is the spectrum does not contain a :math:`Q`-value.
 - The value of attribute :math:`Q` will be updated everytime we pass a new spectrum containing a :math:`Q`-value.
-- The value of attribute :math:`Q` will be erased if we pass a new spectrum not containing a :math:`Q`-value. In this case it is the responsability of the user to set the appropriate value.
+- The value of attribute :math:`Q` will be erased if we pass a new spectrum not containing a :math:`Q`-value. In this case it is the responsibility of the user to set the appropriate value.

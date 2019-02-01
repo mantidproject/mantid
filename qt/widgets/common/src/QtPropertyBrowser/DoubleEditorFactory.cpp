@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
 
 #include <QDoubleValidator>
 
 #include <cfloat>
-#include <sstream>
 #include <cmath>
+#include <sstream>
 #include <stdexcept>
 
 DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent)

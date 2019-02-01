@@ -1,21 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LoadRawSpectrum0Test_H_
 #define LoadRawSpectrum0Test_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadRawSpectrum0.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadRawSpectrum0.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/Instrument.h"
 
-#include <boost/lexical_cast.hpp>
 #include <Poco/Path.h>
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

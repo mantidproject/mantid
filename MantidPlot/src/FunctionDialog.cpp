@@ -28,21 +28,21 @@
  *                                                                         *
  ***************************************************************************/
 #include "FunctionDialog.h"
-#include "MyParser.h"
 #include "ApplicationWindow.h"
 #include "FunctionCurve.h"
+#include "MyParser.h"
 
-#include <QTextEdit>
-#include <QLineEdit>
-#include <QLayout>
-#include <QSpinBox>
 #include <QCheckBox>
-#include <QPushButton>
-#include <QLabel>
 #include <QComboBox>
-#include <QStackedWidget>
-#include <QWidget>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QStackedWidget>
+#include <QTextEdit>
+#include <QWidget>
 
 FunctionDialog::FunctionDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl)
     : QDialog(g, fl), d_app(app), graph(g) {

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/PropertyHistory.h"
 
@@ -83,5 +89,5 @@ template <typename TYPE> void MaskedProperty<TYPE>::doMasking() const {
 template class MANTID_KERNEL_DLL Mantid::Kernel::MaskedProperty<std::string>;
 ///@endcond TEMPLATE
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid

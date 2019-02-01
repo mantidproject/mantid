@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ALGORITHMPROXY_H_
 #define MANTID_API_ALGORITHMPROXY_H_
 
@@ -21,7 +27,7 @@ namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;
 template <class O> class ActiveStarter;
 class Void;
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace API {
@@ -41,27 +47,6 @@ http://proj-gaudi.web.cern.ch/proj-gaudi/)
 @date 12/09/2007
 @author Roman Tolchenov, Tessella plc
 @date 03/03/2009
-
-Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL AlgorithmProxy : public IAlgorithm,
                                       public Kernel::PropertyManagerOwner {
@@ -189,7 +174,7 @@ private:
   const std::vector<std::string> m_seeAlso; ///< seeAlso of the real algorithm
   const std::string m_alias;                ///< alias to the algorithm
   const std::string m_helpURL;              ///< Optional documentation URL
-  const std::string m_summary; ///<Message to display in GUI and help.
+  const std::string m_summary; ///< Message to display in GUI and help.
   const int m_version;         ///< version of the real algorithm
 
   mutable boost::shared_ptr<Algorithm>

@@ -1,20 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOKTEST_H_
 #define MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <boost/regex.hpp>
 
-#include "MantidAlgorithms/GenerateIPythonNotebook.h"
-#include "MantidAlgorithms/CreateWorkspace.h"
-#include "MantidAlgorithms/CropWorkspace.h"
-#include "MantidAlgorithms/Power.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/CreateWorkspace.h"
+#include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAlgorithms/GenerateIPythonNotebook.h"
+#include "MantidAlgorithms/Power.h"
 #include "MantidKernel/make_unique.h"
 #include <Poco/File.h>
 
@@ -64,10 +69,14 @@ public:
     std::string workspaceName = "testGenerateIPythonNotebook";
     create_test_workspace(workspaceName);
 
-    std::string result[] = {
-        "{", "   \"metadata\" : {", R"(      "name" : "Mantid Notebook")",
-        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [", "      {"};
+    std::string result[] = {"{",
+                            "   \"metadata\" : {",
+                            R"(      "name" : "Mantid Notebook")",
+                            "   },",
+                            "   \"nbformat\" : 3,",
+                            "   \"nbformat_minor\" : 0,",
+                            "   \"worksheets\" : [",
+                            "      {"};
 
     // Set up and execute the algorithm.
     GenerateIPythonNotebook alg;
@@ -148,7 +157,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(powerer.execute());
     TS_ASSERT_EQUALS(powerer.isExecuted(), true);
 
-    // set up history for the algorithn which is presumably removed from Mantid
+    // set up history for the algorithm which is presumably removed from Mantid
     auto ws = API::FrameworkManager::Instance().getWorkspace(wsName);
     API::WorkspaceHistory &history = ws->history();
     auto pAlg = Mantid::Kernel::make_unique<NonExistingAlgorithm>();

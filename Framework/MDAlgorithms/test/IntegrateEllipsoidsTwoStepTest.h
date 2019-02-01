@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -14,14 +20,14 @@
 #include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
-#include <tuple>
 #include <random>
+#include <tuple>
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::DataObjects;
-using Mantid::Kernel::V3D;
 using Mantid::Geometry::OrientedLattice;
+using Mantid::Kernel::V3D;
 using namespace Mantid::SingleCrystalDiffractionTestHelper;
 
 class IntegrateEllipsoidsTwoStepTest : public CxxTest::TestSuite {

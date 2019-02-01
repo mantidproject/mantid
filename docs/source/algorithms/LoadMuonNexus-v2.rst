@@ -114,7 +114,7 @@ LoadMuonNexus does not run LoadNexusLogs to load run logs. Information is loaded
 +---------------------------+----------------------------------+
 
 
-(data) indicates that the number is got from the histogram data in an appropiate manner.
+(data) indicates that the number is got from the histogram data in an appropriate manner.
 
 Spectra-detector mapping
 ''''''''''''''''''''''''

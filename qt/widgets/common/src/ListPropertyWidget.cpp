@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ListPropertyWidget.h"
-#include "MantidKernel/System.h"
-#include <QLabel>
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
+#include <QLabel>
 
 #include <sstream>
 
@@ -83,5 +89,5 @@ void ListPropertyWidget::setValueImpl(const QString &value) {
     m_list->scrollToItem(item);
   }
 }
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

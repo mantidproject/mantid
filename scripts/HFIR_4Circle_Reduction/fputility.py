@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=R0914,R0912,R0913
 # Utility methods for Fullprof
 from __future__ import (absolute_import, division, print_function)
@@ -74,7 +80,7 @@ def load_scd_fullprof_intensity_file(file_name):
             # line 2 format line, skip
             continue
         elif line.endswith('0  0'):
-            # line 3 as wave lengh line
+            # line 3 as wave length line
             wave_length = float(line.split()[0])
         elif k_index < num_k_vector:
             # k-vector line: (num_k_vector) line right after k-indication line

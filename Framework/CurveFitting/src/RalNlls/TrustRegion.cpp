@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // This code was originally translated from Fortran code on
 // https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls June 2016
 //----------------------------------------------------------------------
@@ -393,6 +399,6 @@ void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
 //  }
 //}
 
-} // NLLS
-} // CurveFitting
-} // Mantid
+} // namespace NLLS
+} // namespace CurveFitting
+} // namespace Mantid

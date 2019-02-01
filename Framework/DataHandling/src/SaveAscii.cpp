@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -54,12 +60,9 @@ void SaveAscii::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];

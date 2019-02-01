@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FAKEALGORITHMS_H_
 #define FAKEALGORITHMS_H_
 
@@ -62,12 +68,10 @@ public:
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
     declareProperty("prop3", 10.5);
-    std::vector<double> binning;
-    binning.push_back(1.0);
-    binning.push_back(0.1);
-    binning.push_back(2.0);
+    std::vector<double> binning{1.0, 0.1, 2.0};
     declareProperty(Mantid::Kernel::make_unique<ArrayProperty<double>>(
-        "Binning", binning, boost::make_shared<RebinParamsValidator>()));
+        "Binning", std::move(binning),
+        boost::make_shared<RebinParamsValidator>()));
   }
   void exec() override {}
 };

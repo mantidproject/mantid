@@ -2,7 +2,7 @@
 #define __CXXTEST__GUI_H
 
 //
-// GuiListener is a simple base class for the differes GUIs
+// GuiListener is a simple base class for the different GUIs
 // GuiTuiRunner<GuiT, TuiT> combines a GUI with a text-mode error formatter
 //
 
@@ -20,15 +20,15 @@ namespace CxxTest
         {
             enterGui( argc, argv );
             TestRunner::runAllTests( listener );
-            leaveGui();            
+            leaveGui();
         }
 
         virtual void enterGui( int & /*argc*/, char ** /*argv*/ ) {}
         virtual void leaveGui() {}
-        
+
         //
         // The easy way is to implement these functions:
-        //      
+        //
         virtual void guiEnterWorld( unsigned /*numTotalTests*/ ) {}
         virtual void guiEnterSuite( const char * /*suiteName*/ ) {}
         virtual void guiEnterTest( const char * /*suiteName*/, const char * /*testName*/ ) {}
@@ -44,22 +44,22 @@ namespace CxxTest
         void leaveTest( const TestDescription & ) {}
         void leaveSuite( const SuiteDescription & ) {}
         void leaveWorld( const WorldDescription & ) {}
-        
+
         void warning( const char * /*file*/, unsigned /*line*/, const char * /*expression*/ )
         {
             yellowBarSafe();
         }
-        
+
         void failedTest( const char * /*file*/, unsigned /*line*/, const char * /*expression*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssert( const char * /*file*/, unsigned /*line*/, const char * /*expression*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssertEquals( const char * /*file*/, unsigned /*line*/,
                                  const char * /*xStr*/, const char * /*yStr*/,
                                  const char * /*x*/, const char * /*y*/ )
@@ -74,55 +74,55 @@ namespace CxxTest
         {
             redBarSafe();
         }
-        
+
         void failedAssertDelta( const char * /*file*/, unsigned /*line*/,
                                 const char * /*xStr*/, const char * /*yStr*/, const char * /*dStr*/,
                                 const char * /*x*/, const char * /*y*/, const char * /*d*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssertDiffers( const char * /*file*/, unsigned /*line*/,
                                   const char * /*xStr*/, const char * /*yStr*/,
                                   const char * /*value*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssertLessThan( const char * /*file*/, unsigned /*line*/,
                                    const char * /*xStr*/, const char * /*yStr*/,
                                    const char * /*x*/, const char * /*y*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssertLessThanEquals( const char * /*file*/, unsigned /*line*/,
                                          const char * /*xStr*/, const char * /*yStr*/,
                                          const char * /*x*/, const char * /*y*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssertPredicate( const char * /*file*/, unsigned /*line*/,
                                     const char * /*predicate*/, const char * /*xStr*/, const char * /*x*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssertRelation( const char * /*file*/, unsigned /*line*/,
                                    const char * /*relation*/, const char * /*xStr*/, const char * /*yStr*/,
                                    const char * /*x*/, const char * /*y*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssertThrows( const char * /*file*/, unsigned /*line*/,
                                  const char * /*expression*/, const char * /*type*/,
                                  bool /*otherThrown*/ )
         {
             redBarSafe();
         }
-        
+
         void failedAssertThrowsNot( const char * /*file*/, unsigned /*line*/,
                                     const char * /*expression*/ )
         {
@@ -145,7 +145,7 @@ namespace CxxTest
                 _state = RED_BAR;
             }
         }
-        
+
     private:
         enum { GREEN_BAR, YELLOW_BAR, RED_BAR } _state;
     };
@@ -157,12 +157,12 @@ namespace CxxTest
         char **_argv;
         GuiT _gui;
         TuiT _tui;
-        
+
     public:
         GuiTuiRunner() : _argc(0), _argv(0) {}
 
         void process_commandline( int& argc, char** argv )
-        {  
+        {
             _argc=&argc;
             _argv=argv;
             setFirst( _gui );
@@ -182,4 +182,3 @@ namespace CxxTest
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
 // retains certain rights in this software.
-

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_EVENTLIST_H_
 #define MANTID_DATAOBJECTS_EVENTLIST_H_ 1
 
@@ -47,26 +53,6 @@ enum EventSortType {
 
     @author Janik Zikovsky, SNS ORNL
     @date 4/02/2010
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 class DLLExport EventList : public Mantid::API::IEventList {
@@ -258,6 +244,7 @@ public:
   void addPulsetime(const double seconds) override;
 
   void maskTof(const double tofMin, const double tofMax) override;
+  void maskCondition(const std::vector<bool> &mask) override;
 
   void getTofs(std::vector<double> &tofs) const override;
   double getTofMin() const override;
@@ -403,10 +390,6 @@ private:
 
   template <class T>
   static typename std::vector<T>::const_iterator
-  findFirstEvent(const std::vector<T> &events, const double seek_tof);
-
-  template <class T>
-  static typename std::vector<T>::const_iterator
   findFirstPulseEvent(const std::vector<T> &events,
                       const double seek_pulsetime);
 
@@ -415,10 +398,6 @@ private:
   findFirstTimeAtSampleEvent(const std::vector<T> &events,
                              const double seek_time, const double &tofFactor,
                              const double &tofOffset) const;
-
-  template <class T>
-  static typename std::vector<T>::iterator
-  findFirstEvent(std::vector<T> &events, const double seek_tof);
 
   void generateCountsHistogram(const MantidVec &X, MantidVec &Y) const;
 
@@ -477,6 +456,10 @@ private:
   template <class T>
   static std::size_t maskTofHelper(std::vector<T> &events, const double tofMin,
                                    const double tofMax);
+  template <class T>
+  static std::size_t maskConditionHelper(std::vector<T> &events,
+                                         const std::vector<bool> &mask);
+
   template <class T>
   static void getTofsHelper(const std::vector<T> &events,
                             std::vector<double> &tofs);

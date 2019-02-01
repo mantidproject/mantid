@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <sstream>
 
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
-#include <boost/functional/hash.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+#include <boost/functional/hash.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -67,8 +73,8 @@ MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML(
 
 template <typename CheckDimensionPolicy>
 MDGeometryBuilderXML<CheckDimensionPolicy> &
-    MDGeometryBuilderXML<CheckDimensionPolicy>::
-    operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
+MDGeometryBuilderXML<CheckDimensionPolicy>::
+operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
   if (this != &other) {
     m_vecDimensions = other.m_vecDimensions;
     m_spXDimension = other.m_spXDimension;
@@ -299,5 +305,5 @@ MDGeometryBuilderXML<CheckDimensionPolicy>::~MDGeometryBuilderXML() {}
 template class MDGeometryBuilderXML<StrictDimensionPolicy>;
 // Create a builder that applies no blocking/checking.
 template class MDGeometryBuilderXML<NoDimensionPolicy>;
-}
-}
+} // namespace Geometry
+} // namespace Mantid

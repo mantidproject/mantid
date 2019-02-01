@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GETALLEI_TEST_H_
 #define GETALLEI_TEST_H_
 
-#include <memory>
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/GetAllEi.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <MantidHistogramData/LinearGenerator.h>
+#include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -104,7 +110,7 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
 
   return ws;
 }
-}
+} // namespace
 
 class GetAllEiTester : public GetAllEi {
 public:

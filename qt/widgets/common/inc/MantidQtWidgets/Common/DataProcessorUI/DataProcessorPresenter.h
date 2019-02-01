@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H
 
@@ -23,30 +29,17 @@ class DataProcessorView;
 
 DataProcessorPresenter is an interface which defines the functions any data
 processor interface presenter needs to support.
-
-Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DataProcessorPresenter {
 public:
+  class DeleteAllRowsCancelledException : public std::exception {
+  public:
+    const char *what() const noexcept override { return m_msg.c_str(); }
+
+  private:
+    std::string m_msg{"User cancelled operation to delete all existing rows"};
+  };
+
   virtual ~DataProcessorPresenter(){};
 
   enum Flag {
@@ -56,7 +49,9 @@ public:
     AppendGroupFlag,
     DeleteRowFlag,
     DeleteGroupFlag,
+    DeleteAllFlag,
     ProcessFlag,
+    ProcessAllFlag,
     GroupRowsFlag,
     OpenTableFlag,
     NewTableFlag,
@@ -107,8 +102,10 @@ public:
   virtual void clearTable() = 0;
 
   virtual void skipProcessing() = 0;
+  virtual void setPromptUser(bool allowPrompt) = 0;
+  virtual void confirmReductionPaused() {}
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H*/

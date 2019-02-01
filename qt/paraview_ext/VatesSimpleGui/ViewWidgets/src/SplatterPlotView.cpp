@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/SelectionNotificationService.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/ViewFrustum.h"
+#include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidQtWidgets/Common/SelectionNotificationService.h"
-#include "MantidQtWidgets/Common/MdConstants.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidVatesAPI/vtkPeakMarkerFactory.h"
-#include "MantidVatesAPI/ViewFrustum.h"
-#include "MantidKernel/Logger.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -20,28 +26,28 @@
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
+#include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
-#include <pqPipelineFilter.h>
 #include <pqRenderView.h>
 #include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
-#include <vtkProperty.h>
 #include <vtkPVRenderView.h>
+#include <vtkProperty.h>
 #include <vtkSMDoubleVectorProperty.h>
-#include <vtkSMPropertyHelper.h>
 #include <vtkSMPVRepresentationProxy.h>
+#include <vtkSMPropertyHelper.h>
 #include <vtkSMSourceProxy.h>
 
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
 #endif
 
+#include <QAction>
 #include <QKeyEvent>
+#include <QMenu>
 #include <QMessageBox>
 #include <QToolButton>
-#include <QMenu>
-#include <QAction>
 
 using namespace MantidQt::API;
 using namespace Mantid::VATES;
@@ -55,7 +61,7 @@ Mantid::Kernel::Logger g_log("SplatterPlotView");
 const char *g_defaultRepresentation = "Point Gaussian";
 const double g_defaultOpacity = 0.5;
 const double g_defaultRadius = 0.005;
-}
+} // namespace
 
 SplatterPlotView::SplatterPlotView(
     QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager,
@@ -76,6 +82,8 @@ SplatterPlotView::SplatterPlotView(
                    SIGNAL(setRotationToPoint(double, double, double)), this,
                    SLOT(onResetCenterToPoint(double, double, double)));
 
+  this->m_ui.thresholdButton->setToolTip(
+      "Create a threshold filter on the data");
   // Set the threshold button to create a threshold filter on data
   QObject::connect(this->m_ui.thresholdButton, SIGNAL(clicked()), this,
                    SLOT(onThresholdButtonClicked()));
@@ -171,7 +179,6 @@ void SplatterPlotView::render() {
     this->m_splatSource = builder->createFilter(
         "filters", MantidQt::API::MdConstants::MantidParaViewSplatterPlot,
         this->origSrc);
-    src = this->m_splatSource;
   } else {
     // We don't want to load the same peak workspace twice into the splatterplot
     // mode
@@ -270,7 +277,8 @@ void SplatterPlotView::checkPeaksCoordinates() {
             this->origSrc->getProxy(),
             MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates
                 .toLatin1()
-                .constData()).GetAsInt();
+                .constData())
+            .GetAsInt();
     // Make commensurate with vtkPeakMarkerFactory
     peakViewCoords--;
 
@@ -285,12 +293,19 @@ void SplatterPlotView::checkPeaksCoordinates() {
 }
 
 void SplatterPlotView::onThresholdButtonClicked() {
+  if (!this->m_threshSource) {
+    // prevent trying to create a filter for empty data (nullptr)
+    // which causes VSI to crash
+    return;
+  }
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->m_threshSource = builder->createFilter(
       "filters", MantidQt::API::MdConstants::Threshold, this->m_splatSource);
   auto filterProxy =
-      builder->createDataRepresentation(this->m_threshSource->getOutputPort(0),
-                                        this->m_view)->getProxy();
+      builder
+          ->createDataRepresentation(this->m_threshSource->getOutputPort(0),
+                                     this->m_view)
+          ->getProxy();
   vtkSMPropertyHelper(filterProxy, "Representation")
       .Set(g_defaultRepresentation);
   vtkSMPropertyHelper(filterProxy, "Opacity").Set(g_defaultOpacity);
@@ -312,12 +327,16 @@ void SplatterPlotView::checkView(ModeControlWidget::Views initialView) {
  */
 void SplatterPlotView::onPickModeToggled(bool state) {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+
   if (state) {
     pqPipelineSource *src = nullptr;
     if (this->m_threshSource) {
       src = this->m_threshSource;
-    } else {
+    } else if (this->m_splatSource) {
       src = this->m_splatSource;
+    } else {
+      // no sources are present in the view -> don't do anything
+      return;
     }
     this->m_probeSource = builder->createFilter(
         "filters", MantidQt::API::MdConstants::ProbePoint, src);
@@ -368,7 +387,8 @@ void SplatterPlotView::readAndSendCoordinates() {
             this->origSrc->getProxy(),
             MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates
                 .toLatin1()
-                .constData()).GetAsInt();
+                .constData())
+            .GetAsInt();
     // Make commensurate with vtkPeakMarkerFactory
     peakViewCoords--;
 
@@ -557,7 +577,8 @@ void SplatterPlotView::setPeakSourceFrame(pqPipelineSource *source) {
           this->origSrc->getProxy(),
           MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates
               .toLatin1()
-              .constData()).GetAsInt();
+              .constData())
+          .GetAsInt();
   peakViewCoords--;
   vtkSMPropertyHelper(
       source->getProxy(),
@@ -721,6 +742,6 @@ SplatterPlotView::findFilter(const QList<pqPipelineFilter *> &filters,
   }
 }
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

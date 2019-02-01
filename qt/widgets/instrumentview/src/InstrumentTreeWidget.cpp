@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "MantidKernel/Exception.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Sample.h"
-#include <queue>
+#include "MantidKernel/Exception.h"
 #include <QMessageBox>
 #include <QString>
 #include <cfloat>
+#include <queue>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -90,5 +96,5 @@ InstrumentTreeWidget::findExpandedComponents(const QModelIndex &parent) const {
   return retval;
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

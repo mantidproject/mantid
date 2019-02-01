@@ -27,7 +27,7 @@ Add Data
   :align: right
 
 This allows new data to be added to the comparison, this can be added by either
-selecting a :ref:`MatrixWorkspace <MatrixWorkspace>` alrady loaded into Mantid
+selecting a :ref:`MatrixWorkspace <MatrixWorkspace>` already loaded into Mantid
 or by selecting a file to load.
 
 Alternatively you can select a :ref:`WorkspaceGroup <WorkspaceGroup>` to load
@@ -54,7 +54,7 @@ the spectra that you want to compare do not have the same workspace index in eac
 workspace.
 
 The value of the offset for a workspace defines the workspace index that the
-first spectum will line up to relative to the spectrum selection spin box. At
+first spectrum will line up to relative to the spectrum selection spin box. At
 least one offset value must be zero (this is set check for automatically after
 an offset value has been changed).
 
@@ -96,7 +96,7 @@ result spectra as a green curve on the plot.
 
 If either of the diff workspaces are removed then the diff will be cleared. If
 one of the workspaces can no longer be displayed as it is offset from the other
-workspace then a messsage will be displayed in the diff tool and no plot will be
+workspace then a message will be displayed in the diff tool and no plot will be
 shown, however the diff will continue to function once both workspaces can be
 displayed again.
 
@@ -108,6 +108,6 @@ the difference.
 
 Note that if the two diffed workspaces have different binning, then the second
 one selected will be rebinned to match the first before the diff is created.
-This will not modify the data in the otiginal workspace.
+This will not modify the data in the original workspace.
 
 .. categories:: Interfaces General

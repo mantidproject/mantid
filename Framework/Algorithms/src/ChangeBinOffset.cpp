@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/EventWorkspaceAccess.h"
+#include "MantidAlgorithms/MatrixWorkspaceAccess.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAlgorithms/MatrixWorkspaceAccess.h"
-#include "MantidAlgorithms/EventWorkspaceAccess.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -54,5 +60,5 @@ void ChangeBinOffset::exec() {
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

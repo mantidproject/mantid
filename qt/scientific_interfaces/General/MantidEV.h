@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 #define MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 
-#include <QWidget>
+#include <Poco/NObserver.h>
 #include <QActionGroup>
 #include <QRunnable>
-#include <Poco/NObserver.h>
+#include <QWidget>
 
 #include <MantidKernel/System.h>
 
-#include "ui_MantidEV.h"
 #include "MantidEVWorker.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/SelectionNotificationService.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_MantidEV.h"
 
 class QSettings;
 class QThreadPool;
@@ -38,7 +44,8 @@ public:
       const std::string &ev_ws_name, const std::string &md_ws_name,
       const double modQ, const double minQ, const double maxQ,
       const bool do_lorentz_corr, const bool load_data, const bool load_det_cal,
-      const std::string &det_cal_file, const std::string &det_cal_file2);
+      const std::string &det_cal_file, const std::string &det_cal_file2,
+      const std::string &axisCORELLI);
 
   /// Calls worker->loadAndConvertToMD from a separate thread
   void run() override;
@@ -56,6 +63,7 @@ private:
   bool load_det_cal;
   std::string det_cal_file;
   std::string det_cal_file2;
+  std::string axisCORELLI;
 };
 
 /// Local class to run FindPeaks in a Non-Qt thread.
@@ -65,7 +73,8 @@ public:
   RunFindPeaks(MantidEVWorker *worker, const std::string &ev_ws_name,
                const std::string &md_ws_name, const std::string &peaks_ws_name,
                double max_abc, size_t num_to_find, double min_intensity,
-               double minQPeaks, double maxQPeaks);
+               double minQPeaks, double maxQPeaks,
+               const std::string &file_name);
 
   /// Calls worker->findPeaks from a separate thread
   void run() override;
@@ -80,6 +89,7 @@ private:
   double min_intensity;
   double minQPeaks;
   double maxQPeaks;
+  std::string file_name;
 };
 
 /// Local class to run PredictPeaks in a Non-Qt thread.

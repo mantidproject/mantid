@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
 Tube Calibration Demonstration for MAPS instrument.
@@ -78,9 +84,9 @@ def minimalInput(filename):
 
 
     The minimal input for the calibration is the integrated workspace
-    and the knwon positions.
+    and the known positions.
 
-    Eventhough it is easy to call, the calibration performs well, but there are ways to improve
+    Even though it is easy to call, the calibration performs well, but there are ways to improve
     the results, as it is explored after.
 
     .. image:: /images/outputOfMinimalInput.png
@@ -88,7 +94,7 @@ def minimalInput(filename):
     """
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
@@ -104,13 +110,13 @@ def provideTheExpectedValue(filename):
     Giving the expected value for the position of the peaks in pixel.
 
     The :func:`~Examples.minimalInput` let to the calibrate to guess the position of the pixels
-    among the tubes. Altough it works nicelly, providing these expected values may improve the results.
+    among the tubes. Although it works nicelly, providing these expected values may improve the results.
     This is done through the **fitPar** parameter.
     """
     from tube_calib_fit_params import TubeCalibFitParams
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
@@ -129,7 +135,7 @@ def provideTheExpectedValue(filename):
 
 def changeMarginAndExpectedValue(filename):
     """
-    To fit correcly, it is important to have a good window around the peak. This windown is defined
+    To fit correctly, it is important to have a good window around the peak. This windown is defined
     by the **margin** parameter.
 
     This examples shows how the results worsen if we change the margin from its default value **15**
@@ -152,7 +158,7 @@ def changeMarginAndExpectedValue(filename):
     from tube_calib_fit_params import TubeCalibFitParams
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
@@ -183,7 +189,7 @@ def improvingCalibrationSingleTube(filename):
     From the outputs of provideTheExpectedValue, looking inside the instrument tree,
     it is possible to list all the tubes that are not so good.
 
-    Unfortunatelly, they do not have a single name identifier.
+    Unfortunately, they do not have a single name identifier.
     So, locating them it is a little bit trickier.
     The :func:`~Examples.findThoseTubesThatNeedSpecialCareForCalibration` shows one way of finding those
     tubes.     The index is the position inside the PeakTable.
@@ -201,7 +207,7 @@ def improvingCalibrationSingleTube(filename):
     from tube_calib_fit_params import TubeCalibFitParams
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
@@ -228,7 +234,7 @@ def improvingCalibrationSingleTube(filename):
     overridePeaks = {19: [8.14, 80.9771, 123.221, 164.993, 245.717]}
 
     # == Get the calibration and put results into calibration table ==
-    # we will not plot anymore, because it will not plot the overrided peaks
+    # we will not plot anymore, because it will not plot the overridden peaks
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
                                                  fitPar=fitPar, outputPeak=True, rangeList=[18, 19, 20],
                                                  overridePeaks=overridePeaks)
@@ -256,7 +262,7 @@ def improvingCalibrationOfListOfTubes(filename):
 
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
@@ -313,7 +319,7 @@ def calibrateB2Window(filename):
 
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, 0.16, 0.50], [2, 1, 1, 2]
@@ -344,7 +350,7 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     them, it will process the **peakTable** output of the calibrate method when enabling the
     parameter **outputPeak**.
 
-    It them creates the Peaks workspace, that is the diffence of the peaks position from the
+    It them creates the Peaks workspace, that is the difference of the peaks position from the
     expected values of the peaks positions for all the tubes. This allows to spot what are the
     tubes whose fitting are outliers in relation to the others.
 
@@ -356,7 +362,7 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     from tube_calib_fit_params import TubeCalibFitParams
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
     # define the known positions and function factor (edge, peak, peak, peak, edge)
     knownPos, funcFactor = [-0.50, -0.16, -0.00, 0.16, 0.50], [2, 1, 1, 1, 2]
@@ -397,7 +403,7 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     # at most 12 pixels from the expected values.
 
     # so let's investigate those that differ more than 12
-    # return an array with the indexes for the first axis which is the tube indentification
+    # return an array with the indexes for the first axis which is the tube identification
     check = numpy.where(distance_from_expected > 12)[0]
 
     # remove repeated values
@@ -411,7 +417,7 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     CalibInstWS = loadingStep(filename)
     tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
                    fitPar=fitPar, rangeList=problematic_tubes, plotTube=problematic_tubes)
-    # plot the FittedTube agains TubePlot for each detector and you will see that there were problems on those tubes.
+    # plot the FittedTube against TubePlot for each detector and you will see that there were problems on those tubes.
 
 
 def completeCalibration(filename):
@@ -421,7 +427,7 @@ def completeCalibration(filename):
     and improved in :func:`calibrateB2Window`, and :func:`improvingCalibrationOfListOfTubes`.
 
     It also improves the result of the calibration because it deals with the E door. The
-    aquired data cannot be used to calibrate the E door, and trying to do so, produces a bad
+    acquired data cannot be used to calibrate the E door, and trying to do so, produces a bad
     result. In this example, the tubes inside the E door are excluded to the calibration.
     Using the '''rangeList''' option.
     """
@@ -431,7 +437,7 @@ def completeCalibration(filename):
     CalibInstWS = loadingStep(filename)
 
     # == Set parameters for calibration ==
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
 
     # define the known positions and function factor (edge, peak, peak, peak, edge)
@@ -443,7 +449,7 @@ def completeCalibration(filename):
     fitPar.setAutomatic(True)
 
     # execute the improvingCalibrationOfListOfTubes excluding the range of b2 window
-    # correct the definition of the peaks for the folowing indexes
+    # correct the definition of the peaks for the following indexes
     # define_peaks = {19:[10, 80.9771, 123.221, 164.993, 245.717], # the first one was bad
     #	37: [6.36, 80.9347, 122.941, 165.104, 248.32], # the first one was bad
     #	71: [8.62752, 85.074, 124.919, 164.116, 246.82 ], # the last one was bad - check if we can inprove

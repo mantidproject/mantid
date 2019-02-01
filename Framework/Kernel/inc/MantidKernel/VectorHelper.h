@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_VECTORHELPER_H_
 #define MANTID_KERNEL_VECTORHELPER_H_
 
@@ -17,27 +23,6 @@ namespace Kernel {
 
     @author Laurent C Chapon, Rutherford Appleton Laboratory
     @date 16/12/2008
-
-    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 namespace VectorHelper {
 int MANTID_KERNEL_DLL createAxisFromRebinParams(
@@ -45,32 +30,33 @@ int MANTID_KERNEL_DLL createAxisFromRebinParams(
     const bool resize_xnew = true, const bool full_bins_only = false,
     const double xMinHint = std::nan(""), const double xMaxHint = std::nan(""));
 
-void MANTID_KERNEL_DLL
-rebin(const std::vector<double> &xold, const std::vector<double> &yold,
-      const std::vector<double> &eold, const std::vector<double> &xnew,
-      std::vector<double> &ynew, std::vector<double> &enew, bool distribution,
-      bool addition = false);
+void MANTID_KERNEL_DLL rebin(const std::vector<double> &xold,
+                             const std::vector<double> &yold,
+                             const std::vector<double> &eold,
+                             const std::vector<double> &xnew,
+                             std::vector<double> &ynew,
+                             std::vector<double> &enew, bool distribution,
+                             bool addition = false);
 
 // New method to rebin Histogram data, should be faster than previous one
-void MANTID_KERNEL_DLL
-rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold,
-               const std::vector<double> &eold, const std::vector<double> &xnew,
-               std::vector<double> &ynew, std::vector<double> &enew,
-               bool addition);
+void MANTID_KERNEL_DLL rebinHistogram(const std::vector<double> &xold,
+                                      const std::vector<double> &yold,
+                                      const std::vector<double> &eold,
+                                      const std::vector<double> &xnew,
+                                      std::vector<double> &ynew,
+                                      std::vector<double> &enew, bool addition);
 
 /// Convert an array of bin boundaries to bin center values.
 void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges,
                                           std::vector<double> &bin_centres);
 
 /// Convert an array of bin centers to bin boundary values.
-void MANTID_KERNEL_DLL
-convertToBinBoundary(const std::vector<double> &bin_centers,
-                     std::vector<double> &bin_edges);
+void MANTID_KERNEL_DLL convertToBinBoundary(
+    const std::vector<double> &bin_centers, std::vector<double> &bin_edges);
 
 /// Gets the bin of a value from a vector of bin centers
-size_t MANTID_KERNEL_DLL
-indexOfValueFromCenters(const std::vector<double> &bin_centers,
-                        const double value);
+size_t MANTID_KERNEL_DLL indexOfValueFromCenters(
+    const std::vector<double> &bin_centers, const double value);
 
 /// Gets the bin of a value from a vector of bin edges
 size_t MANTID_KERNEL_DLL

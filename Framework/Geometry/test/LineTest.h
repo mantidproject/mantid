@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LINETEST__
 #define MANTID_LINETEST__
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <vector>
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Line.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Surfaces/Line.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Plane.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <vector>
 
 using namespace Mantid;
 using namespace Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class LineTest : public CxxTest::TestSuite {
 public:

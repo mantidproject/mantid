@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionFocussing.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Unit.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/Unit.h"
 
 #include <fstream>
 #include <limits>
@@ -23,10 +30,12 @@ DiffractionFocussing::DiffractionFocussing()
 }
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
+using namespace HistogramData;
+
 using API::FileProperty;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -128,8 +137,8 @@ void DiffractionFocussing::exec() {
   // Create a new workspace that's the right size for the meaningful spectra and
   // copy them in
   int64_t newSize = tmpW->blocksize();
-  API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(
-      tmpW, resultIndeces.size(), newSize + 1, newSize);
+  API::MatrixWorkspace_sptr outputW = DataObjects::create<API::MatrixWorkspace>(
+      *tmpW, resultIndeces.size(), BinEdges(newSize + 1));
 
   std::vector<Indexing::SpectrumNumber> specNums;
   const auto &tmpIndices = tmpW->indexInfo();
@@ -259,5 +268,5 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   return detectorGroups;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

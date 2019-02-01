@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FINDDETECTORSOUTSIDELIMITSTEST_H_
 #define FINDDETECTORSOUTSIDELIMITSTEST_H_
 
@@ -17,8 +23,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
@@ -164,8 +170,8 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
     // Add ten more at #10 so that it fails
     for (int i = 0; i < 10; i++)
-      work_in->getSpectrum(10)
-          .addEventQuickly(TofEvent((i + 0.5), run_start + double(i)));
+      work_in->getSpectrum(10).addEventQuickly(
+          TofEvent((i + 0.5), run_start + double(i)));
 
     AnalysisDataService::Instance().add("testdead_in", work_in);
 

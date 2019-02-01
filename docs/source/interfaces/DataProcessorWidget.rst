@@ -190,7 +190,7 @@ Processing Algorithm
 ^^^^^^^^^^^^^^^^^^^^
 
 The processing algorithm refers to the main reduction algorithm that is used to reduce the runs. Processing
-algorithms must satify the following conditions:
+algorithms must satisfy the following conditions:
 
 - Only algorithms with at least one input workspace property are allowed.
 - Only algorithms with at least one output workspace property are allowed.
@@ -292,7 +292,7 @@ Post-processing Algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A post-processing algorithm defines the way in which a group of runs should be post-processed. As
-an example, in Reflectometry at ISIS, a run typically constists in two or three runs measured
+an example, in Reflectometry at ISIS, a run typically consists in two or three runs measured
 under the same conditions of temperature, magnetic field, etc, but at different incident
 angles. These runs belong to the same group and need to be stitched together. The post-processing
 algorithm is in this case :ref:`algm-Stitch1DMany`, and can be defined as:
@@ -354,7 +354,7 @@ in Reflectometry at ISIS we use :ref:`algm-LoadISISNexus`). However, at the mome
 this is only possible if both pre-processing and post-processing algorithms are specified. The only
 reason for this is that it was requested by Reflectometry scientists at ISIS, who work with pre-processing
 and post-processing. However, if you need to implement this, all you need to do is add an optional
-string argument to the relevant :literal:`GenericDataProcessorPresenter` constuctor. For instance,
+string argument to the relevant :literal:`GenericDataProcessorPresenter` constructor. For instance,
 assuming that you don't need to pre-process and post-process groups of runs, the constructor:
 
 .. code-block:: c

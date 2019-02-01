@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDEXING_INDEXSETTEST_H_
 #define MANTID_INDEXING_INDEXSETTEST_H_
 
@@ -130,6 +136,17 @@ public:
     TS_ASSERT_EQUALS(*it2, 1);
     TS_ASSERT_THROWS_NOTHING(--it2);
     TS_ASSERT_EQUALS(*it2, 0);
+  }
+
+  void test_isContiguous() {
+    const IndexSetTester empty{};
+    TS_ASSERT(empty.isContiguous())
+    const IndexSetTester range(3);
+    TS_ASSERT(range.isContiguous())
+    const IndexSetTester manualRange({3, 4, 5}, 6);
+    TS_ASSERT(manualRange.isContiguous())
+    IndexSetTester nonContiguous({2, 1, 3}, 4);
+    TS_ASSERT(!nonContiguous.isContiguous())
   }
 };
 

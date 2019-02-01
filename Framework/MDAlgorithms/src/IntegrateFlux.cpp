@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateFlux.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -11,8 +17,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 using namespace Mantid::HistogramData;
 using Mantid::Types::Event::TofEvent;
 
@@ -27,7 +33,7 @@ public:
   /// deleting operator. Does nothing
   void operator()(const API::MatrixWorkspace *) {}
 };
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 

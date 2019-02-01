@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/lexical_cast.hpp>

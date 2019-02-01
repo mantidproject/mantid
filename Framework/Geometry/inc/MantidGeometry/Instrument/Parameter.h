@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_PARAMETER_H_
 #define MANTID_GEOMETRY_PARAMETER_H_
 
@@ -5,11 +11,12 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
+#include <iomanip>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <typeinfo>
 #include <vector>
-#include <stdexcept>
 
 namespace Mantid {
 
@@ -29,27 +36,6 @@ class ParameterMap;
 
   @author Roman Tolchenov, Tessella Support Services plc
   @date 2/12/2008
-
-  Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>.
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL Parameter {
 public:
@@ -179,16 +165,6 @@ template <class T> void Parameter::set(const T &t) {
 // Template definitions - ParameterType class
 //--------------------------------------------------------------------------
 
-/** Return the value of the parameter as a string
- * @tparam T The type of the parameter
- * @returns A string representation of the parameter
- */
-template <class Type> std::string ParameterType<Type>::asString() const {
-  std::ostringstream str;
-  str << m_value;
-  return str.str();
-}
-
 /**
  * Set the value of the parameter from a string
  * @tparam T The type of the parameter
@@ -198,6 +174,14 @@ template <class Type>
 void ParameterType<Type>::fromString(const std::string &value) {
   std::istringstream istr(value);
   istr >> m_value;
+}
+
+/**
+ * Specialization for a string.
+ */
+template <>
+inline void ParameterType<std::string>::fromString(const std::string &value) {
+  m_value = value;
 }
 
 /** Set the value of the parameter via the assignment operator

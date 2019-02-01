@@ -1,25 +1,23 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, division, print_function)
 
-import numpy
 import datetime
-from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
-import mantid.kernel, mantid.api
+
+import numpy
+
+import mantid.api
+import mantid.kernel
+from mantid.api import MultipleExperimentInfos
+from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
+from mantid.plots.utility import MantidAxType
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
@@ -28,10 +26,13 @@ import mantid.kernel, mantid.api
 # ====================================================
 # Validation
 # ====================================================
-def validate_args(*args):
+
+
+def validate_args(*args, **kwargs):
     return len(args) > 0 and (isinstance(args[0], EventWorkspace) or
                               isinstance(args[0], Workspace2D) or
-                              isinstance(args[0], MDHistoWorkspace))
+                              isinstance(args[0], MDHistoWorkspace) or
+                              isinstance(args[0], MultipleExperimentInfos) and "LogName" in kwargs)
 
 
 # ====================================================
@@ -42,6 +43,7 @@ def get_distribution(workspace, **kwargs):
     """
     Determine whether or not the data is a distribution. The value in
     the kwargs wins. Applies to Matrix workspaces only
+
     :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
     """
     distribution = kwargs.pop('distribution', workspace.isDistribution())
@@ -53,6 +55,7 @@ def get_normalization(md_workspace, **kwargs):
     Gets the normalization flag of an MDHistoWorkspace. For workspaces
     derived similar to MSlice/Horace, one needs to average data, the so-called
     "number of events" normalization.
+
     :param md_workspace: :class:`mantid.api.IMDHistoWorkspace` to extract the data from
     """
     normalization = kwargs.pop('normalization', md_workspace.displayNormalizationHisto())
@@ -62,65 +65,91 @@ def get_normalization(md_workspace, **kwargs):
 def points_from_boundaries(input_array):
     """
     The function returns bin centers from bin boundaries
+
     :param input_array: a :class:`numpy.ndarray` of bin boundaries
     """
     assert isinstance(input_array, numpy.ndarray), 'Not a numpy array'
     if len(input_array) < 2:
         raise ValueError('could not get centers from less than two boundaries')
-    return .5*(input_array[0:-1]+input_array[1:])
+    return .5 * (input_array[0:-1] + input_array[1:])
 
 
 def _dim2array(d):
     """
     Create a numpy array containing bin centers along the dimension d
+
     :param d: an :class:`mantid.geometry.IMDDimension` object
 
     returns: bin boundaries for dimension d
     """
     dmin = d.getMinimum()
     dmax = d.getMaximum()
-    return numpy.linspace(dmin, dmax, d.getNBins()+1)
+    return numpy.linspace(dmin, dmax, d.getNBins() + 1)
 
 
-def get_wksp_index_dist_and_label(workspace, **kwargs):
+def get_wksp_index_dist_and_label(workspace, axis=MantidAxType.SPECTRUM, **kwargs):
     """
     Get workspace index, whether the workspace is a distribution,
     and label for the spectrum
 
     :param workspace: a Workspace2D or an EventWorkspace
+    :param axis: The axis on which we're operating
+    :param kwargs: Keyword arguments passed to the plot function, passed by reference as it is mutated
     """
     # get the special arguments out of kwargs
-    specNum = kwargs.pop('specNum', None)
-    wkspIndex = kwargs.pop('wkspIndex', None)
-
-    # don't worry if there is only one spectrum
-    if workspace.getNumberHistograms() == 1:
-        specNum = None
-        wkspIndex = 0
-
-    # error check input parameters
-    if (specNum is not None) and (wkspIndex is not None):
-        raise RuntimeError('Must specify only specNum or wkspIndex')
-    if (specNum is None) and (wkspIndex is None):
-        raise RuntimeError('Must specify either specNum or wkspIndex')
-
-    # convert the spectrum number to a workspace index and vice versa
-    if specNum is not None:
-        wkspIndex = workspace.getIndexFromSpectrumNumber(int(specNum))
-    else:
-        specNum = workspace.getSpectrum(wkspIndex).getSpectrumNo()
+    workspace_index, spectrum_number, kwargs = _get_wksp_index_and_spec_num(workspace, axis, **kwargs)
 
     # create a label if it isn't already specified
     if 'label' not in kwargs:
-        wsName = workspace.name()
-        if wsName:
-            kwargs['label'] = '{0}: spec {1}'.format(wsName, specNum)
-        else:
-            kwargs['label'] = 'spec {0}'.format(specNum)
+        ws_name = workspace.name()
+        if axis == MantidAxType.SPECTRUM:
+            if ws_name:
+                kwargs['label'] = '{0}: spec {1}'.format(ws_name, spectrum_number)
+            else:
+                kwargs['label'] = 'spec {0}'.format(spectrum_number)
+        elif axis == MantidAxType.BIN:
+            if ws_name:
+                kwargs['label'] = '{0}: bin {1}'.format(ws_name, workspace_index)
+            else:
+                kwargs['label'] = 'bin {0}'.format(workspace_index)
 
     (distribution, kwargs) = get_distribution(workspace, **kwargs)
 
-    return wkspIndex, distribution, kwargs
+    return workspace_index, distribution, kwargs
+
+
+def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
+    """
+    Get the workspace index and the spectrum number from the kwargs provided
+    :param workspace: a Workspace2D or an EventWorkspace
+    :param axis: The axis on which the workspace is being traversed,
+                 can be either MantidAxType.BIN or MantidAxType.SPECTRUM,
+                 default is MantidAxType.SPECTRUM
+    :param kwargs: Dict of keyword arguments that should contain either spectrum number
+                   or workspace index
+    :return The workspace index and the spectrum number
+    """
+    spectrum_number = kwargs.pop('specNum', None)
+    workspace_index = kwargs.pop('wkspIndex', None)
+
+    # don't worry if there is only one spectrum
+    if workspace.getNumberHistograms() == 1:
+        spectrum_number = None
+        workspace_index = 0
+
+    # error check input parameters
+    if (spectrum_number is not None) and (workspace_index is not None):
+        raise RuntimeError('Must specify only specNum or wkspIndex')
+    if (spectrum_number is None) and (workspace_index is None):
+        raise RuntimeError('Must specify either specNum or wkspIndex')
+
+    # convert the spectrum number to a workspace index and vice versa
+    if spectrum_number is not None:
+        workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
+    elif axis == MantidAxType.SPECTRUM:  # Only get a spectrum number if we're traversing the spectra
+        spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
+
+    return workspace_index, spectrum_number, kwargs
 
 
 def get_md_data1d(workspace, normalization):
@@ -138,23 +167,25 @@ def get_md_data1d(workspace, normalization):
 def get_md_data(workspace, normalization, withError=False):
     """
     Generic function to extract data from an MDHisto workspace
+
     :param workspace: :class:`mantid.api.IMDHistoWorkspace` containing data
     :param normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
         it will divide intensity by the number of corresponding MDEvents
+    :param withError: flag for if the error is calculated. If False, err is returned as None
+
     returns a tuple containing bin boundaries for each dimension, the (maybe normalized)
     signal and error arrays
-    :param withError: flag for if the error is calculated. If False, err is returned as None
     """
     dims = workspace.getNonIntegratedDimensions()
     dim_arrays = [_dim2array(d) for d in dims]
     # get data
-    data = workspace.getSignalArray()*1.
+    data = workspace.getSignalArray() * 1.
     if normalization == mantid.api.MDNormalization.NumEventsNormalization:
         nev = workspace.getNumEventsArray()
         data /= nev
     err = None
     if withError:
-        err2 = workspace.getErrorSquaredArray()*1.
+        err2 = workspace.getErrorSquaredArray() * 1.
         if normalization == mantid.api.MDNormalization.NumEventsNormalization:
             err2 /= (nev * nev)
         err = numpy.sqrt(err2)
@@ -169,6 +200,7 @@ def get_md_data(workspace, normalization, withError=False):
 def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False):
     """
     Extract a single spectrum and process the data into a frequency
+
     :param workspace: a Workspace2D or an EventWorkspace
     :param wkspIndex: workspace index
     :param distribution: flag to divide the data by bin width. It happens only
@@ -176,9 +208,11 @@ def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
         the mantid configuration is set up to divide such workspaces by bin
         width. The same effect can be obtained by running the
         :ref:`algm-ConvertToDistribution` algorithm
+
     :param withDy: if True, it will return the error in the "counts", otherwise None
     :param with Dx: if True, and workspace has them, it will return errors
         in the x coordinate, otherwise None
+
     Note that for workspaces containing bin boundaries, this function will return
     the bin centers for x.
     To be used in 1D plots (plot, scatter, errorbar)
@@ -205,12 +239,35 @@ def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
     return x, y, dy, dx
 
 
+def get_bins(workspace, wkspIndex, withDy=False):
+    """
+    Extract all the bins for a spectrum
+
+    :param workspace: a Workspace2D or an EventWorkspace
+    :param wkspIndex: workspace index
+    :param withDy: if True, it will return the error in the "counts", otherwise None
+
+    """
+    num_hist = workspace.getNumberHistograms()
+    x = range(0, num_hist)
+    y = []
+    dy = [] if withDy else None
+    for i in x:
+        y.append(workspace.readY(i)[wkspIndex])
+        if withDy:
+            dy.append(workspace.readE(i)[wkspIndex])
+
+    dx = None
+    return x, y, dy, dx
+
+
 def get_md_data2d_bin_bounds(workspace, normalization):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin boundaries in each
     dimension, and data. To be used in 2D plots (pcolor, pcolorfast, pcolormesh)
-    Note return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
+
+    Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
     coordinate, data, _ = get_md_data(workspace, normalization, withError=False)
     assert len(coordinate) == 2, 'The workspace is not 2D'
@@ -223,7 +280,8 @@ def get_md_data2d_bin_centers(workspace, normalization):
     two non-integrated dimension into arrays of bin centers in each
     dimension, and data. To be used in 2D plots (contour, contourf,
     tricontour, tricontourf, tripcolor)
-    Note return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
+
+    Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
     x, y, data = get_md_data2d_bin_bounds(workspace, normalization)
     x = points_from_boundaries(x)
@@ -234,16 +292,17 @@ def get_md_data2d_bin_centers(workspace, normalization):
 def boundaries_from_points(input_array):
     """"
     The function tries to guess bin boundaries from bin centers
+
     :param input_array: a :class:`numpy.ndarray` of bin centers
     """
     assert isinstance(input_array, numpy.ndarray), 'Not a numpy array'
     if len(input_array) == 0:
         raise ValueError('could not extend array with no elements')
     if len(input_array) == 1:
-        return numpy.array([input_array[0]-0.5, input_array[0]+0.5])
-    return numpy.concatenate(([(3*input_array[0]-input_array[1])*0.5],
-                             (input_array[1:]+input_array[:-1])*0.5,
-                             [(3*input_array[-1]-input_array[-2])*0.5]))
+        return numpy.array([input_array[0] - 0.5, input_array[0] + 0.5])
+    return numpy.concatenate(([(3 * input_array[0] - input_array[1]) * 0.5],
+                              (input_array[1:] + input_array[:-1]) * 0.5,
+                              [(3 * input_array[-1] - input_array[-2]) * 0.5]))
 
 
 def common_x(arr):
@@ -257,12 +316,15 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False):
     '''
     Get all data from a Matrix workspace that has the same number of bins
     in every spectrum. It is used for 2D plots
+
     :param workspace: Matrix workspace to extract the data from
     :param distribution: if False, and the workspace contains histogram data,
         the intensity will be divided by the x bin width
+
     :param histogram2D: flag that specifies if the coordinates in the output are
         -bin centers (such as for contour) for False, or
         -bin edges (such as for pcolor) for True.
+
     Returns x,y,z 2D arrays
     '''
     try:
@@ -275,26 +337,26 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False):
 
     if workspace.isHistogramData():
         if not distribution:
-            z = z / (x[:, 1:] - x[:, 0:-1])
+            z /= x[:, 1:] - x[:, 0:-1]
         if histogram2D:
             if len(y) == z.shape[0]:
                 y = boundaries_from_points(y)
             x = numpy.vstack((x, x[-1]))
         else:
-            x = .5*(x[:, 0:-1]+x[:, 1:])
-            if len(y) == z.shape[0]+1:
+            x = .5 * (x[:, 0:-1] + x[:, 1:])
+            if len(y) == z.shape[0] + 1:
                 y = points_from_boundaries(y)
     else:
         if histogram2D:
             if common_x(x):
-                x = numpy.tile(boundaries_from_points(x[0]), z.shape[0]+1).reshape(z.shape[0]+1, -1)
+                x = numpy.tile(boundaries_from_points(x[0]), z.shape[0] + 1).reshape(z.shape[0] + 1, -1)
             else:
                 x = numpy.vstack((x, x[-1]))
                 x = numpy.array([boundaries_from_points(xi) for xi in x])
             if len(y) == z.shape[0]:
                 y = boundaries_from_points(y)
         else:
-            if len(y) == z.shape[0]+1:
+            if len(y) == z.shape[0] + 1:
                 y = points_from_boundaries(y)
     y = numpy.tile(y, x.shape[1]).reshape(x.shape[1], x.shape[0]).transpose()
     z = numpy.ma.masked_invalid(z)
@@ -305,9 +367,11 @@ def get_uneven_data(workspace, distribution):
     '''
     Function to get data for uneven workspace2Ds, such as
     that pcolor, pcolorfast, and pcolormesh will plot axis aligned rectangles
+
     :param workspace: a workspace2d
     :param distribution: if False, and the workspace contains histogram data,
         the intensity will be divided by the x bin width
+
     Returns three lists. Each element in the x list is an array of boundaries
     for a spectra. Each element in the y list is a 2 element array with the extents
     of a particular spectra. The z list contains arrays of intensities at bin centers
@@ -330,7 +394,7 @@ def get_uneven_data(workspace, distribution):
         zvals = numpy.ma.masked_invalid(zvals)
         z.append(zvals)
         x.append(xvals)
-        y.append([yvals[index], yvals[index+1]])
+        y.append([yvals[index], yvals[index + 1]])
     return x, y, z
 
 
@@ -340,7 +404,9 @@ def get_data_uneven_flag(workspace, **kwargs):
     :meth:`matplotlib.axes.Axes.pcolorfast`, and :meth:`matplotlib.axes.Axes.pcolormesh`
     to plot rectangles parallel to the axes even if the data is not
     on a regular grid.
+
     :param workspace: a workspace2d
+
     if axisaligned keyword is available and True or if the workspace does
     not have a constant number of bins, it will return true, otherwise false
     '''
@@ -351,14 +417,15 @@ def get_data_uneven_flag(workspace, **kwargs):
         aligned = True
     return aligned, kwargs
 
+
 # ====================================================
 # extract logs
 # ====================================================
 
 def get_sample_log(workspace, **kwargs):
     LogName = kwargs.pop('LogName')
-    ExperimentInfo = kwargs.pop('ExperimentInfo',0)
-    if isinstance(workspace, MDHistoWorkspace):
+    ExperimentInfo = kwargs.pop('ExperimentInfo', 0)
+    if isinstance(workspace, MultipleExperimentInfos):
         run = workspace.getExperimentInfo(ExperimentInfo).run()
     else:
         run = workspace.run()
@@ -366,8 +433,10 @@ def get_sample_log(workspace, **kwargs):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
     units = tsp.units
-    if not isinstance(tsp, mantid.kernel.FloatTimeSeriesProperty):
-        raise RuntimeError('This function can only plot FloatTimeSeriesProperty objects')
+    if not isinstance(tsp, (mantid.kernel.FloatTimeSeriesProperty,
+                            mantid.kernel.Int32TimeSeriesProperty,
+                            mantid.kernel.Int64TimeSeriesProperty)):
+        raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
     times = tsp.times.astype('datetime64[us]')
     y = tsp.value
     FullTime = kwargs.pop('FullTime', False)
@@ -380,7 +449,7 @@ def get_sample_log(workspace, **kwargs):
             try:
                 t0 = run['proton_charge'].times.astype('datetime64[us]')[0]
             except:
-                pass #TODO: Maybe raise a warning?
+                pass  # TODO: Maybe raise a warning?
         x = (times - t0).astype(float) * 1e-6
     return x, y, FullTime, LogName, units, kwargs
 
@@ -396,9 +465,10 @@ def get_axes_labels(workspace):
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
     All other elements in the tuple are labels for axes.
     Some of them are latex formatted already.
+
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
     """
-    if isinstance(workspace, MDHistoWorkspace):
+    if isinstance(workspace, MultipleExperimentInfos):
         axes = ['Intensity']
         dims = workspace.getNonIntegratedDimensions()
         for d in dims:

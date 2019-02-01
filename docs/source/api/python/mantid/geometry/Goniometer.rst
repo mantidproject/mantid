@@ -2,7 +2,7 @@
  Goniometer
 ============
 
-This a python binding to the C++ class Mantid::Geometry::Goniometer.
+This is a Python binding to the C++ class Mantid::Geometry::Goniometer.
 
 
 .. module:`mantid.geometry`

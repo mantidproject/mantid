@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_POINTGROUP_H_
 #define MANTID_GEOMETRY_POINTGROUP_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
-#include <vector>
-#include <string>
-#include <set>
 #include <map>
+#include <set>
+#include <string>
+#include <vector>
 
-#include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/Crystal/SymmetryOperation.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -113,7 +119,7 @@ using PointGroupCrystalSystemMap =
 
 MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_POINTGROUP_H_ */

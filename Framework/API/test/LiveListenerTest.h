@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LIVELISTENER_TEST_H_
 #define LIVELISTENER_TEST_H_
 
@@ -14,7 +20,7 @@ public:
     // Set this flag to true for testing
     m_dataReset = true;
   }
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD0(name, std::string());
   MOCK_CONST_METHOD0(supportsHistory, bool());
   MOCK_CONST_METHOD0(buffersEvents, bool());
@@ -25,7 +31,7 @@ public:
   MOCK_METHOD0(runStatus, RunStatus());
   MOCK_CONST_METHOD0(runNumber, int());
   MOCK_METHOD1(setAlgorithm, void(const Mantid::API::IAlgorithm &));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class LiveListenerTest : public CxxTest::TestSuite {

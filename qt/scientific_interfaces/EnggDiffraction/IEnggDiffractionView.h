@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 
@@ -17,27 +23,6 @@ Engineering diffraction custom interface / GUI. This is the base class
 the sense of the Model-View-Presenter, MVP pattern). This class is
 Qt-free. Qt specific functionality/dependencies are added in a class
 derived from this.
-
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD
-Oak Ridge National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IEnggDiffractionView : public IEnggDiffractionUserMsg,
                              public IEnggDiffractionSettings,
@@ -105,42 +90,42 @@ public:
   virtual std::string currentInstrument() const = 0;
 
   /**
-  * selected spec will be passed as a bank for the calibrartion
-  * process to be carried out
-  *
-  * @return Bank selection index: spectrum-numbers / north / south
-  */
+   * selected spec will be passed as a bank for the calibrartion
+   * process to be carried out
+   *
+   * @return Bank selection index: spectrum-numbers / north / south
+   */
   virtual int currentCropCalibBankName() const = 0;
 
   /**
-  * customised spec will be passed via specNo text field for the
-  * cropped calibrartion process to be carried out
-  *
-  * @return which format should to applied for plotting data
-  */
+   * customised spec will be passed via specNo text field for the
+   * cropped calibrartion process to be carried out
+   *
+   * @return which format should to applied for plotting data
+   */
   virtual std::string currentCalibSpecNos() const = 0;
 
   /**
-  * customised bank name will be passed with SpectrumNos to
-  * save workspace and file with particular bank name
-  *
-  * @return string which will be used to generate bank name
-  */
+   * customised bank name will be passed with SpectrumNos to
+   * save workspace and file with particular bank name
+   *
+   * @return string which will be used to generate bank name
+   */
   virtual std::string currentCalibCustomisedBankName() const = 0;
 
   /**
-  * Selected plot data representation will be applied, which will
-  * ran through python script
-  *
-  * @return which format should to applied for plotting data
-  */
+   * Selected plot data representation will be applied, which will
+   * ran through python script
+   *
+   * @return which format should to applied for plotting data
+   */
   virtual int currentPlotType() const = 0;
 
   /**
-  * Selected multi-run focus mode
-  *
-  * @return return integer to the presenter
-  */
+   * Selected multi-run focus mode
+   *
+   * @return return integer to the presenter
+   */
   virtual int currentMultiRunMode() const = 0;
 
   /**
@@ -254,11 +239,11 @@ public:
   virtual bool focusedOutWorkspace() const = 0;
 
   /**
-  * Check box to consider when calibrating
-  * whether to plot focused workspace
-  *
-  * @return bool
-  */
+   * Check box to consider when calibrating
+   * whether to plot focused workspace
+   *
+   * @return bool
+   */
   virtual bool plotCalibWorkspace() const = 0;
 
   /**
@@ -308,11 +293,11 @@ public:
   virtual void saveSettings() const = 0;
 
   /**
-  * Saves the ouput files which are generated, this can be done
-  * via Output Files checkbox on the focus tab
-  *
-  * @return bool
-  */
+   * Saves the ouput files which are generated, this can be done
+   * via Output Files checkbox on the focus tab
+   *
+   * @return bool
+   */
   virtual bool saveFocusedOutputFiles() const = 0;
 
   /**
@@ -323,43 +308,43 @@ public:
   virtual void showInvalidRBNumber(const bool rbNumberIsValid) = 0;
 
   /**
-  * Produces vanadium curves graph with three spectrum and
-  * ceria peaks graph with two spectrum for calib output.
-  *
-  * @param pyCode string which is passed to Mantid via pyScript
-  */
+   * Produces vanadium curves graph with three spectrum and
+   * ceria peaks graph with two spectrum for calib output.
+   *
+   * @param pyCode string which is passed to Mantid via pyScript
+   */
   virtual void plotCalibOutput(const std::string &pyCode) = 0;
 
   /**
-  * Produces a single spectrum graph for focused output.
-  *
-  * @param wsName name of the workspace to plot (must be in the ADS)
-  */
+   * Produces a single spectrum graph for focused output.
+   *
+   * @param wsName name of the workspace to plot (must be in the ADS)
+   */
   virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
 
   /**
- * Produces a waterfall spectrum graph for focused output.
- *
- * @param wsName name of the workspace to plot (must be in the ADS)
- */
+   * Produces a waterfall spectrum graph for focused output.
+   *
+   * @param wsName name of the workspace to plot (must be in the ADS)
+   */
   virtual void plotWaterfallSpectrum(const std::string &wsName) = 0;
 
   /**
-  * Produces a replaceable spectrum graph for focused output.
-  *
-  * @param wsName name of the workspace to plot (must be in the ADS)
-  * @param spectrum number of the workspace to plot
-  * @param type of the workspace plot
-  */
+   * Produces a replaceable spectrum graph for focused output.
+   *
+   * @param wsName name of the workspace to plot (must be in the ADS)
+   * @param spectrum number of the workspace to plot
+   * @param type of the workspace plot
+   */
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
 
   /**
-  * Updates the instrument in all child tabs
-  *
-  * @param newInstrument name of the new instrument that will be set
-  */
+   * Updates the instrument in all child tabs
+   *
+   * @param newInstrument name of the new instrument that will be set
+   */
   virtual void updateTabsInstrument(const std::string &newInstrument) = 0;
 };
 

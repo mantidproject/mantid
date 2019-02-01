@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SLICEVIEWER_PEAKPALETTE_H
 #define MANTID_SLICEVIEWER_PEAKPALETTE_H
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
+#include <QColor>
 #include <algorithm>
+#include <map>
 #include <sstream>
 #include <stdexcept>
-#include <map>
-#include <QColor>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -133,6 +139,6 @@ bool PeakPalette<C>::operator==(const PeakPalette &other) const {
 template <> DLLExport PeakPalette<QColor>::PeakPalette();
 template <> DLLExport PeakPalette<PeakViewColor>::PeakPalette();
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif // MANTID_SLICEVIEWER_PEAKSPALETTE_H

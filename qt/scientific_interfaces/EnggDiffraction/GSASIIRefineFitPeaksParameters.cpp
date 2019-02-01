@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "GSASIIRefineFitPeaksParameters.h"
 
 namespace MantidQt {
@@ -37,5 +43,5 @@ bool operator!=(const GSASIIRefineFitPeaksParameters &lhs,
   return !(lhs == rhs);
 }
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETOWNER_H_
 #define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETOWNER_H_
 
@@ -15,7 +21,7 @@ public:
   virtual void addWidget(IEnggDiffMultiRunFittingWidgetView *widget) = 0;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETOWNER_H_

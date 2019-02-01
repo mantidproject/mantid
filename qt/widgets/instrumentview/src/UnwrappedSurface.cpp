@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -7,19 +13,22 @@
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 
+#include <QApplication>
 #include <QMenu>
 #include <QMouseEvent>
-#include <QApplication>
 #include <QTransform>
 
 #include <cfloat>
-#include <limits>
 #include <cmath>
+#include <limits>
 
 using namespace Mantid::Geometry;
 
@@ -38,10 +47,10 @@ QRectF getArea(const UnwrappedDetector &udet, double maxWidth,
   return QRectF(udet.u - w, udet.v - h, w * 2, h * 2);
 }
 } // namespace
-  /**
-   * Constructor.
-   * @param rootActor :: The instrument actor.
-   */
+/**
+ * Constructor.
+ * @param rootActor :: The instrument actor.
+ */
 UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX),
       m_v_min(DBL_MAX), m_v_max(-DBL_MAX), m_height_max(0), m_width_max(0),
@@ -58,8 +67,8 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
 }
 
 /**
-* Get information about the dimensions of the surface.
-*/
+ * Get information about the dimensions of the surface.
+ */
 QString UnwrappedSurface::getDimInfo() const {
   return QString("U: [%1, %2] V: [%3, %4]")
       .arg(m_viewRect.x0())
@@ -70,10 +79,10 @@ QString UnwrappedSurface::getDimInfo() const {
 
 //------------------------------------------------------------------------------
 /**
-* Draw the unwrapped instrument onto the screen
-* @param widget :: The widget to draw it on.
-* @param picking :: True if detector is being drawn in the picking mode.
-*/
+ * Draw the unwrapped instrument onto the screen
+ * @param widget :: The widget to draw it on.
+ * @param picking :: True if detector is being drawn in the picking mode.
+ */
 void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
   // dimensions of the screen to draw on
   int widget_width = widget->width();
@@ -199,11 +208,11 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 }
 
 /**
-* Set detector color in OpenGL context.
-* @param index :: Detector's index in m_unwrappedDetectors
-* @param picking :: True if detector is being drawn in the picking mode.
-*   In this case index is transformed into color
-*/
+ * Set detector color in OpenGL context.
+ * @param index :: Detector's index in m_unwrappedDetectors
+ * @param picking :: True if detector is being drawn in the picking mode.
+ *   In this case index is transformed into color
+ */
 void UnwrappedSurface::setColor(size_t index, bool picking) const {
   if (picking) {
     auto c = InstrumentRenderer::makePickColor(index);
@@ -230,11 +239,11 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
 
 //------------------------------------------------------------------------------
 /** This method is called when a component is selected in the
-*InstrumentTreeWidget
-* and zooms into that spot on the view.
-*
-* @param id :: ComponentID to zoom to.
-*/
+ *InstrumentTreeWidget
+ * and zooms into that spot on the view.
+ *
+ * @param id :: ComponentID to zoom to.
+ */
 void UnwrappedSurface::componentSelected(size_t componentIndex) {
   const auto &componentInfo = m_instrActor->componentInfo();
   if (componentInfo.isDetector(componentIndex)) {
@@ -352,9 +361,9 @@ QString UnwrappedSurface::getInfoText() const {
 RectF UnwrappedSurface::getSurfaceBounds() const { return m_viewRect; }
 
 /**
-* Set a peaks workspace to be drawn ontop of the workspace.
-* @param pws :: A shared pointer to the workspace.
-*/
+ * Set a peaks workspace to be drawn ontop of the workspace.
+ * @param pws :: A shared pointer to the workspace.
+ */
 void UnwrappedSurface::setPeaksWorkspace(
     boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws) {
   if (!pws) {
@@ -374,10 +383,10 @@ void UnwrappedSurface::setPeaksWorkspace(
 
 //-----------------------------------------------------------------------------
 /** Create the peak labels from the peaks set by setPeaksWorkspace.
-* The method is called from the draw(...) method
-*
-* @param window :: The screen window rectangle in pixels.
-*/
+ * The method is called from the draw(...) method
+ *
+ * @param window :: The screen window rectangle in pixels.
+ */
 void UnwrappedSurface::createPeakShapes(const QRect &window) const {
   if (!m_peakShapes.isEmpty()) {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -393,8 +402,8 @@ void UnwrappedSurface::createPeakShapes(const QRect &window) const {
 }
 
 /**
-* Toggle between flipped and straight view.
-*/
+ * Toggle between flipped and straight view.
+ */
 void UnwrappedSurface::setFlippedView(bool on) {
   if (m_flippedView != on) {
     m_flippedView = on;
@@ -406,10 +415,10 @@ void UnwrappedSurface::setFlippedView(bool on) {
 }
 
 /**
-* Draw the surface onto an image without OpenGL
-* @param image :: Image to draw on.
-* @param picking :: If true draw a picking image.
-*/
+ * Draw the surface onto an image without OpenGL
+ * @param image :: Image to draw on.
+ * @param picking :: If true draw a picking image.
+ */
 void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
   if (!image)
     return;
@@ -483,8 +492,8 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
 }
 
 /**
-* Zooms to the specified area. The previous zoom stack is cleared.
-*/
+ * Zooms to the specified area. The previous zoom stack is cleared.
+ */
 void UnwrappedSurface::zoom(const QRectF &area) {
   if (!m_zoomStack.isEmpty()) {
     m_viewRect = m_zoomStack.first();
@@ -567,12 +576,12 @@ void UnwrappedSurface::zoom() {
 
 //------------------------------------------------------------------------------
 /** Calculate the UV and size of the given detector
-* Calls the pure virtual project() and calcSize() methods that
-* depend on the type of projection
-*
-* @param udet :: detector to unwrap.
-* @param pos :: detector position relative to the sample origin
-*/
+ * Calls the pure virtual project() and calcSize() methods that
+ * depend on the type of projection
+ *
+ * @param udet :: detector to unwrap.
+ * @param pos :: detector position relative to the sample origin
+ */
 void UnwrappedSurface::calcUV(UnwrappedDetector &udet,
                               Mantid::Kernel::V3D &pos) {
   this->project(pos, udet.u, udet.v, udet.uscale, udet.vscale);
@@ -581,11 +590,11 @@ void UnwrappedSurface::calcUV(UnwrappedDetector &udet,
 
 //------------------------------------------------------------------------------
 /** Calculate the size of the detector in U/V
-*
-* @param udet :: UwrappedDetector struct to calculate the size for. udet's size
-*fields
-* are updated by this method.
-*/
+ *
+ * @param udet :: UwrappedDetector struct to calculate the size for. udet's size
+ *fields
+ * are updated by this method.
+ */
 void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   // U is the horizontal axis on the screen
   const Mantid::Kernel::V3D U(-1, 0, 0);
@@ -649,6 +658,7 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
  * @param lines :: lines from the project file to load state from
  */
 void UnwrappedSurface::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   ProjectionSurface::loadFromProject(lines);
   API::TSVSerialiser tsv(lines);
 
@@ -673,6 +683,11 @@ void UnwrappedSurface::loadFromProject(const std::string &lines) {
         setPeaksWorkspace(ws);
     }
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "UnwrappedSurface::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /**
@@ -700,6 +715,7 @@ UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
  * @return a string representing the state of the surface
  */
 std::string UnwrappedSurface::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   tsv.writeRaw(ProjectionSurface::saveToProject());
 
@@ -713,7 +729,11 @@ std::string UnwrappedSurface::saveToProject() const {
   }
 
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "UnwrappedSurface::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegratePeaksCWSD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -598,5 +604,5 @@ void IntegratePeaksCWSD::normalizePeaksIntensities() {
   return;
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

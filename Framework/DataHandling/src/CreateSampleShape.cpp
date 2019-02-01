@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //--------------------------------
 // Includes
 //--------------------------------
 #include "MantidDataHandling/CreateSampleShape.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/Material.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Material.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -61,5 +67,5 @@ void CreateSampleShape::exec() {
   // Done!
   progress(1);
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

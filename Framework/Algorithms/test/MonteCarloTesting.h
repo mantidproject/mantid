@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MONTECARLOTESTING_H
 #define MANTID_ALGORITHMS_MONTECARLOTESTING_H
 
@@ -8,9 +14,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-
 #include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
 
@@ -25,7 +29,7 @@ namespace MonteCarloTesting {
 // -----------------------------------------------------------------------------
 class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(nextValue, double());
   MOCK_METHOD2(nextValue, double(double, double));
   MOCK_METHOD2(nextInt, int(int, int));
@@ -36,7 +40,7 @@ public:
   MOCK_METHOD2(setRange, void(const double, const double));
   MOCK_CONST_METHOD0(min, double());
   MOCK_CONST_METHOD0(max, double());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 // -----------------------------------------------------------------------------
@@ -99,7 +103,7 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   }
   auto can = boost::make_shared<Container>(canShape);
   auto environment =
-      Mantid::Kernel::make_unique<SampleEnvironment>("Annulus Container", can);
+      std::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume
   auto sampleCell = ComponentCreationHelper::createCappedCylinder(
       innerRadius, height, centre, upAxis, "sample");
@@ -112,15 +116,15 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   // Sample object
   Sample testSample;
   testSample.setShape(sampleCell);
-  testSample.setEnvironment(environment.release());
+  testSample.setEnvironment(std::move(environment));
   return testSample;
 }
 
 inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   using Mantid::API::Sample;
+  using Mantid::Geometry::IObject_sptr;
   using Mantid::Kernel::Material;
   using Mantid::Kernel::V3D;
-  using Mantid::Geometry::IObject_sptr;
   using Mantid::PhysicalConstants::getNeutronAtom;
 
   using namespace Mantid::Geometry;
@@ -148,6 +152,6 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   }
   return testSample;
 }
-}
+} // namespace MonteCarloTesting
 
 #endif // MANTID_ALGORITHMS_MONTECARLOTESTING_H

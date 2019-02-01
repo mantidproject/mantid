@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_VATES_PEAKS_PRESENTER_VSI_H
 #define MANTID_VATES_PEAKS_PRESENTER_VSI_H
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include "MantidVatesAPI/ViewFrustum.h"
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace VATES {
@@ -31,6 +37,6 @@ public:
 
 using PeaksPresenterVsi_sptr = boost::shared_ptr<PeaksPresenterVsi>;
 using PeaksPresenterVsi_const_sptr = boost::shared_ptr<const PeaksPresenterVsi>;
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

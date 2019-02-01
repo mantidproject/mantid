@@ -1,20 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_COPYSAMPLETEST_H_
 #define MANTID_ALGORITHMS_COPYSAMPLETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CopySample.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/NeutronAtom.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/CopySample.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/NeutronAtom.h"
 
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -42,10 +47,10 @@ public:
     const std::string envName("TestKit");
     auto canShape = ComponentCreationHelper::cappedCylinderXML(
         0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-    SampleEnvironment *kit = new SampleEnvironment(
+    auto kit = std::make_unique<SampleEnvironment>(
         envName,
         boost::make_shared<Container>(ShapeFactory().createShape(canShape)));
-    sample.setEnvironment(kit);
+    sample.setEnvironment(std::move(kit));
     OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
     sample.setOrientedLattice(latt);
     delete latt;

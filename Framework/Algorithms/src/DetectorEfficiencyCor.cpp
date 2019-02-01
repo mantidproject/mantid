@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -28,6 +34,7 @@ DECLARE_ALGORITHM(DetectorEfficiencyCor)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 namespace {
 
@@ -69,7 +76,7 @@ const double DIST_TO_UNIVERSE_EDGE = 1e3;
 const std::string PRESSURE_PARAM = "TubePressure";
 // Name of wall thickness parameter
 const std::string THICKNESS_PARAM = "TubeThickness";
-}
+} // namespace
 
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
@@ -106,11 +113,11 @@ void DetectorEfficiencyCor::init() {
 }
 
 /** Executes the algorithm
-*  @throw NullPointerException if a getDetector() returns NULL or pressure or
-* wall thickness is not set
-*  @throw invalid_argument if the shape of a detector is isn't a cylinder
-* aligned on axis or there is no baseInstrument
-*/
+ *  @throw NullPointerException if a getDetector() returns NULL or pressure or
+ * wall thickness is not set
+ *  @throw invalid_argument if the shape of a detector is isn't a cylinder
+ * aligned on axis or there is no baseInstrument
+ */
 void DetectorEfficiencyCor::exec() {
   // gets and checks the values passed to the algorithm
   retrieveProperties();
@@ -155,10 +162,10 @@ void DetectorEfficiencyCor::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 }
 /** Loads and checks the values passed to the algorithm
-*
-*  @throw invalid_argument if there is an incompatible property value so the
-*algorithm can't continue
-*/
+ *
+ *  @throw invalid_argument if there is an incompatible property value so the
+ *algorithm can't continue
+ */
 void DetectorEfficiencyCor::retrieveProperties() {
   // these first three properties are fully checked by validators
   m_inputWS = getProperty("InputWorkspace");
@@ -181,7 +188,7 @@ void DetectorEfficiencyCor::retrieveProperties() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != m_inputWS) {
-    m_outputWS = WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
 }
 
@@ -208,8 +215,8 @@ void DetectorEfficiencyCor::correctForEfficiency(
   auto &yout = m_outputWS->mutableY(spectraIn);
   auto &eout = m_outputWS->mutableE(spectraIn);
   // Need the original values so this is not a reference
-  auto yValues = m_inputWS->y(spectraIn);
-  auto eValues = m_inputWS->e(spectraIn);
+  const auto yValues = m_inputWS->y(spectraIn);
+  const auto eValues = m_inputWS->e(spectraIn);
 
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
@@ -296,10 +303,10 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
 }
 
 /** Update the shape cache if necessary
-* @param det :: a pointer to the detector to query
-* @param detRadius :: An output parameter that contains the detector radius
-* @param detAxis :: An output parameter that contains the detector axis vector
-*/
+ * @param det :: a pointer to the detector to query
+ * @param detRadius :: An output parameter that contains the detector radius
+ * @param detAxis :: An output parameter that contains the detector axis vector
+ */
 void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
                                                 double &detRadius,
                                                 V3D &detAxis) {
@@ -411,16 +418,16 @@ double DetectorEfficiencyCor::detectorEfficiency(const double alpha) const {
 }
 
 /** Calculates an expansion similar to that in CHEBEV of "Numerical Recipes"
-*  copied from the fortran code in effic_3he_cylinder.for
-* @param a :: a fit parameter, only the difference between a and b enters this
-* equation
-* @param b :: a fit parameter, only the difference between a and b enters this
-* equation
-* @param exspansionCoefs :: one of the 25 element constant arrays declared in
-* this file
-* @param x :: a fit parameter
-* @return a numerical approximation provided by the expansion
-*/
+ *  copied from the fortran code in effic_3he_cylinder.for
+ * @param a :: a fit parameter, only the difference between a and b enters this
+ * equation
+ * @param b :: a fit parameter, only the difference between a and b enters this
+ * equation
+ * @param exspansionCoefs :: one of the 25 element constant arrays declared in
+ * this file
+ * @param x :: a fit parameter
+ * @return a numerical approximation provided by the expansion
+ */
 double DetectorEfficiencyCor::chebevApprox(double a, double b,
                                            const double exspansionCoefs[],
                                            double x) const {
@@ -440,7 +447,7 @@ double DetectorEfficiencyCor::chebevApprox(double a, double b,
  * Logs if there were any problems locating spectra.
  * @param totalNDetectors -- number of all detectors in the workspace
  *
-*/
+ */
 void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
   if (!m_spectraSkipped.empty()) {
@@ -457,5 +464,5 @@ void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

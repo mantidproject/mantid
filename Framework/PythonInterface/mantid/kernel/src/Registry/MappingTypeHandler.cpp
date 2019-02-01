@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
@@ -51,6 +57,6 @@ MappingTypeHandler::create(const std::string &name, const object &defaultValue,
           name, createPropertyManager(dict(defaultValue)), direction);
   return valueProp;
 }
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

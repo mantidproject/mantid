@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CALCULATESLITSTEST_H_
 #define CALCULATESLITSTEST_H_
 
@@ -9,7 +15,7 @@ using namespace Mantid::Algorithms;
 
 namespace {
 double roundFour(double i) { return floor(i * 10000 + 0.5) / 10000; }
-}
+} // namespace
 
 class CalculateSlitsTest : public CxxTest::TestSuite {
 public:

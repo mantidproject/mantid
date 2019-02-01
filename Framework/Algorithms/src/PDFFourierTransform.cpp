@@ -1,16 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PDFFourierTransform.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidHistogramData/LinearGenerator.h"
 
 #include <cmath>
 #include <sstream>
@@ -26,6 +34,7 @@ DECLARE_ALGORITHM(PDFFourierTransform)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace DataObjects;
 
 namespace { // anonymous namespace
 /// Crystalline PDF
@@ -43,7 +52,7 @@ const string S_OF_Q_MINUS_ONE("S(Q)-1");
 const string Q_S_OF_Q_MINUS_ONE("Q[S(Q)-1]");
 
 constexpr double TWO_OVER_PI(2. / M_PI);
-}
+} // namespace
 
 const std::string PDFFourierTransform::name() const {
   return "PDFFourierTransform";
@@ -56,7 +65,7 @@ const std::string PDFFourierTransform::category() const {
 }
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void PDFFourierTransform::init() {
   auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
@@ -227,7 +236,7 @@ double PDFFourierTransform::determineRho0() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void PDFFourierTransform::exec() {
   // get input data
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -323,8 +332,7 @@ void PDFFourierTransform::exec() {
   bool filter = getProperty("Filter");
 
   // create the output workspace
-  API::MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);
+  API::MatrixWorkspace_sptr outputWS = create<Workspace2D>(1, Points(sizer));
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr unit = outputWS->getAxis(0)->unit();
   boost::shared_ptr<Units::Label> label =
@@ -411,5 +419,5 @@ void PDFFourierTransform::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

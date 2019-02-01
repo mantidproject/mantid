@@ -1,11 +1,17 @@
-#include "MantidDataObjects/PeaksWorkspace.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CentroidPeaks.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Crystal/EdgePixel.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include <boost/algorithm/clamp.hpp>
 
 using Mantid::DataObjects::PeaksWorkspace;
@@ -89,6 +95,7 @@ void CentroidPeaks::integrate() {
     }
   }
 
+  const int inBlocksize = static_cast<int>(inWS->blocksize());
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
@@ -148,7 +155,7 @@ void CentroidPeaks::integrate() {
     col = int(colcentroid / intensity);
     boost::algorithm::clamp(col, 0, nCols - 1);
     chan = int(chancentroid / intensity);
-    boost::algorithm::clamp(chan, 0, static_cast<int>(inWS->blocksize()));
+    boost::algorithm::clamp(chan, 0, inBlocksize);
 
     // Set wavelength to change tof for peak object
     if (!edgePixel(inst, bankName, col, row, Edge)) {
@@ -388,5 +395,5 @@ void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols,
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

@@ -235,7 +235,7 @@ Overview
     void setSharedE(const Kernel::cow_ptr<HistogramE> &e) &;
   };
 
-Note that there is also Dx-data, but it is not widely used and thus omited from this documentation.
+Note that there is also Dx-data, but it is not widely used and thus omitted from this documentation.
 The interface for Dx is mostly equivalent to that for E.
 
 ``HistogramX``, ``HistogramY``, and ``HistogramE``
@@ -516,7 +516,7 @@ Working with the new ``MatrixWorkspace`` interface
 Legacy interface
 ################
 
-For compatibility reasons an interface to the internal data, equivalent to the old interace, is still available. Using it is discouraged, since it cannot enforce size checks!
+For compatibility reasons an interface to the internal data, equivalent to the old interface, is still available. Using it is discouraged, since it cannot enforce size checks!
 
 .. code-block:: c++
   :linenos:

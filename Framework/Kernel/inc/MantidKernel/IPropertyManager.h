@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_IPROPERTYMANAGER_H_
 #define MANTID_KERNEL_IPROPERTYMANAGER_H_
 
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/make_unique.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
@@ -49,27 +55,6 @@ template <typename T> class Matrix;
  @date 20/11/2007
  @author Roman Tolchenov, Tessella plc
  @date 02/03/2009
-
- Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>.
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_KERNEL_DLL IPropertyManager {
 public:
@@ -92,8 +77,8 @@ public:
   */
   virtual void setPropertiesWithString(
       const std::string &propertiesString,
-      const std::unordered_set<std::string> &
-          ignoreProperties = std::unordered_set<std::string>()) = 0;
+      const std::unordered_set<std::string> &ignoreProperties =
+          std::unordered_set<std::string>()) = 0;
 
   /** Sets all the declared properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted
@@ -103,8 +88,8 @@ public:
    */
   virtual void
   setProperties(const std::string &propertiesJson,
-                const std::unordered_set<std::string> &
-                    ignoreProperties = std::unordered_set<std::string>()) = 0;
+                const std::unordered_set<std::string> &ignoreProperties =
+                    std::unordered_set<std::string>()) = 0;
 
   /** Sets all the declared properties from a json object
      @param jsonValue :: A json name value pair collection
@@ -113,8 +98,8 @@ public:
   */
   virtual void
   setProperties(const ::Json::Value &jsonValue,
-                const std::unordered_set<std::string> &
-                    ignoreProperties = std::unordered_set<std::string>()) = 0;
+                const std::unordered_set<std::string> &ignoreProperties =
+                    std::unordered_set<std::string>()) = 0;
 
   /** Sets property value from a string
       @param name :: Property name
@@ -172,24 +157,24 @@ public:
   }
 
   /** Specialised version of setProperty template method to handle const char *
-  *  @param name :: The name of the property (case insensitive)
-  *  @param value :: The value to assign to the property
-  *  @throw Exception::NotFoundError If the named property is unknown
-  *  @throw std::invalid_argument If an attempt is made to assign to a property
-  * of different type
-  */
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
   IPropertyManager *setProperty(const std::string &name, const char *value) {
     this->setPropertyValue(name, std::string(value));
     return this;
   }
 
   /** Specialised version of setProperty template method to handle std::string
-  *  @param name :: The name of the property (case insensitive)
-  *  @param value :: The value to assign to the property
-  *  @throw Exception::NotFoundError If the named property is unknown
-  *  @throw std::invalid_argument If an attempt is made to assign to a property
-  * of different type
-  */
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
   IPropertyManager *setProperty(const std::string &name,
                                 const std::string &value) {
     this->setPropertyValue(name, value);
@@ -229,16 +214,16 @@ public:
 
 protected:
   /** Add a property of the template type to the list of managed properties
-  *  @param name :: The name to assign to the property
-  *  @param value :: The initial value to assign to the property
-  *  @param validator :: Pointer to the (optional) validator.
-  *  @param doc :: The (optional) documentation string
-  *  @param direction :: The (optional) direction of the property, in, out or
-  * inout
-  *  @throw Exception::ExistsError if a property with the given name already
-  * exists
-  *  @throw std::invalid_argument  if the name argument is empty
-  */
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param validator :: Pointer to the (optional) validator.
+   *  @param doc :: The (optional) documentation string
+   *  @param direction :: The (optional) direction of the property, in, out or
+   * inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
   template <typename T>
   void declareProperty(
       const std::string &name, T value,
@@ -252,15 +237,15 @@ protected:
   }
 
   /** Add a property to the list of managed properties with no validator
-  *  @param name :: The name to assign to the property
-  *  @param value :: The initial value to assign to the property
-  *  @param doc :: The documentation string
-  *  @param direction :: The (optional) direction of the property, in (default),
-  * out or inout
-  *  @throw Exception::ExistsError if a property with the given name already
-  * exists
-  *  @throw std::invalid_argument  if the name argument is empty
-  */
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param doc :: The documentation string
+   *  @param direction :: The (optional) direction of the property, in
+   * (default), out or inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
   template <typename T>
   void declareProperty(const std::string &name, T value, const std::string &doc,
                        const unsigned int direction = Direction::Input) {
@@ -271,13 +256,13 @@ protected:
   }
 
   /** Add a property of the template type to the list of managed properties
-  *  @param name :: The name to assign to the property
-  *  @param value :: The initial value to assign to the property
-  *  @param direction :: The direction of the property, in, out or inout
-  *  @throw Exception::ExistsError if a property with the given name already
-  * exists
-  *  @throw std::invalid_argument  if the name argument is empty
-  */
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param direction :: The direction of the property, in, out or inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
   template <typename T>
   void declareProperty(const std::string &name, T value,
                        const unsigned int direction) {
@@ -288,22 +273,22 @@ protected:
   }
 
   /** Specialised version of declareProperty template method to prevent the
-  * creation of a
-  *  PropertyWithValue of type const char* if an argument in quotes is passed
-  * (it will be
-  *  converted to a string). The validator, if provided, needs to be a string
-  * validator.
-  *  @param name :: The name to assign to the property
-  *  @param value :: The initial value to assign to the property
-  *  @param validator :: Pointer to the (optional) validator. Ownership will be
-  * taken over.
-  *  @param doc :: The (optional) documentation string
-  *  @param direction :: The (optional) direction of the property, in, out or
-  * inout
-  *  @throw Exception::ExistsError if a property with the given name already
-  * exists
-  *  @throw std::invalid_argument  if the name argument is empty
-  */
+   * creation of a
+   *  PropertyWithValue of type const char* if an argument in quotes is passed
+   * (it will be
+   *  converted to a string). The validator, if provided, needs to be a string
+   * validator.
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param validator :: Pointer to the (optional) validator. Ownership will be
+   * taken over.
+   *  @param doc :: The (optional) documentation string
+   *  @param direction :: The (optional) direction of the property, in, out or
+   * inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
   void declareProperty(
       const std::string &name, const char *value,
       IValidator_sptr validator = boost::make_shared<NullValidator>(),
@@ -315,22 +300,22 @@ protected:
   }
 
   /** Specialised version of declareProperty template method to prevent the
-  * creation of a
-  *  PropertyWithValue of type const char* if an argument in quotes is passed
-  * (it will be
-  *  converted to a string). The validator, if provided, needs to be a string
-  * validator.
-  *  @param name :: The name to assign to the property
-  *  @param value :: The initial value to assign to the property
-  *  @param doc :: The (optional) documentation string
-  *  @param validator :: Pointer to the (optional) validator. Ownership will be
-  * taken over.
-  *  @param direction :: The (optional) direction of the property, in, out or
-  * inout
-  *  @throw Exception::ExistsError if a property with the given name already
-  * exists
-  *  @throw std::invalid_argument  if the name argument is empty
-  */
+   * creation of a
+   *  PropertyWithValue of type const char* if an argument in quotes is passed
+   * (it will be
+   *  converted to a string). The validator, if provided, needs to be a string
+   * validator.
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param doc :: The (optional) documentation string
+   *  @param validator :: Pointer to the (optional) validator. Ownership will be
+   * taken over.
+   *  @param direction :: The (optional) direction of the property, in, out or
+   * inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
   void declareProperty(
       const std::string &name, const char *value, const std::string &doc,
       IValidator_sptr validator = boost::make_shared<NullValidator>(),
@@ -341,13 +326,13 @@ protected:
   }
 
   /** Add a property of string type to the list of managed properties
-  *  @param name :: The name to assign to the property
-  *  @param value :: The initial value to assign to the property
-  *  @param direction :: The direction of the property, in, out or inout
-  *  @throw Exception::ExistsError if a property with the given name already
-  * exists
-  *  @throw std::invalid_argument  if the name argument is empty
-  */
+   *  @param name :: The name to assign to the property
+   *  @param value :: The initial value to assign to the property
+   *  @param direction :: The direction of the property, in, out or inout
+   *  @throw Exception::ExistsError if a property with the given name already
+   * exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
   void declareProperty(const std::string &name, const char *value,
                        const unsigned int direction) {
     declareProperty(name, std::string(value),

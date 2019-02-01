@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_ALGORITHMINPUTHISTORY_H_
 #define MANTIDQT_API_ALGORITHMINPUTHISTORY_H_
 
@@ -6,6 +12,7 @@
 //----------------------------------
 #include "DllOption.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidQtWidgets/Common/Configurable.h"
 #include <QHash>
 #include <QString>
 
@@ -14,26 +21,9 @@ namespace API {
 
 /** This abstract class deals with the loading and saving of previous algorithm
     property values to/from MantidPlot's QSettings.
-
-    Copyright &copy; 2009-2012 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class EXPORT_OPT_MANTIDQT_COMMON AbstractAlgorithmInputHistory {
+class EXPORT_OPT_MANTIDQT_COMMON AbstractAlgorithmInputHistory
+    : public MantidWidgets::Configurable {
 public:
   AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory &) = delete;
   AbstractAlgorithmInputHistory &
@@ -62,6 +52,12 @@ public:
 
   /// Save the values stored here to persistent storage
   void save() const;
+
+  /// @copydoc MantidWidgets::Configurable::readSettings
+  void readSettings(const QSettings &storage) override;
+
+  /// @copydoc MantidWidgets::Configurable::writeSettings
+  void writeSettings(QSettings &storage) const override;
 
 protected:
   /// Constructor
@@ -98,14 +94,14 @@ private:
 
 using AlgorithmInputHistory =
     Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
     Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmInputHistoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif // ALGORITHMINPUTHISTORY_H_

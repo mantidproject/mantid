@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from sans.common.enums import (SANSInstrument, FindDirectionEnum, DetectorType)
 from mantid.kernel import (Logger)
 from sans.common.file_information import get_instrument_paths_for_sans_file
@@ -13,22 +19,22 @@ class BeamCentreModel(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def reset_to_defaults_for_instrument(self, state_data = None):
+    def reset_to_defaults_for_instrument(self, file_information = None):
         r_range = {}
         instrument = None
 
-        if state_data:
-            instrument_file_path = get_instrument_paths_for_sans_file(state_data.sample_scatter)
+        if file_information:
+            instrument_file_path = get_instrument_paths_for_sans_file(file_information=file_information)
             r_range = get_named_elements_from_ipf_file(instrument_file_path[1],
                                                        ["beam_centre_radius_min", "beam_centre_radius_max"], float)
-            instrument = state_data.instrument
+            instrument = file_information.get_instrument()
 
         self._max_iterations = 10
         self._r_min = r_range["beam_centre_radius_min"] if "beam_centre_radius_min" in r_range else 60
         self._r_max = r_range["beam_centre_radius_max"] if "beam_centre_radius_max" in r_range else 280
         self._left_right = True
         self._up_down = True
-        self._tolerance = 0.000125
+        self._tolerance = 0.0001251
         self._lab_pos_1 = ''
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''
@@ -72,11 +78,6 @@ class BeamCentreModel(object):
             logger = Logger("CentreFinder")
             logger.notice("Have chosen no find direction exiting early")
             return {"pos1": self.lab_pos_1, "pos2": self.lab_pos_2}
-
-        if self.q_min:
-            state.convert_to_q.q_min = self.q_min
-        if self.q_max:
-            state.convert_to_q.q_max = self.q_max
 
         if self.COM:
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,

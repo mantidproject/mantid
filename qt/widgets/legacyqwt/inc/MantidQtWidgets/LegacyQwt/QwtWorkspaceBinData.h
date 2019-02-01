@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTAPI_QWTWORKSPACEBINDATA_H
 #define MANTIDQTAPI_QWTWORKSPACEBINDATA_H
 
+#include "DllOption.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
-#include "DllOption.h"
 
 #include <boost/shared_ptr.hpp>
 

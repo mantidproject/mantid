@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
@@ -5,8 +11,10 @@ import numpy
 import sys
 from HFIR_4Circle_Reduction import fourcircle_utility
 from HFIR_4Circle_Reduction import guiutility
-
+from qtpy import QtCore   # noqa
+import math
 import HFIR_4Circle_Reduction.NTableWidget as tableBase
+import os
 
 
 class KShiftTableWidget(tableBase.NTableWidget):
@@ -103,6 +111,8 @@ class MatrixTable(tableBase.NTableWidget):
         # check inputs
         assert isinstance(num_rows, int) and num_rows > 0, 'Number of rows larger than 0.'
         assert isinstance(num_cols, int) and num_cols > 0, 'Number of columns larger than 0.'
+
+        self.init_size(4, 4)
 
         # think of reset
         if self.rowCount() != num_rows or self.columnCount() != num_cols:
@@ -560,337 +570,13 @@ class UBMatrixTable(tableBase.NTableWidget):
         Init setup
         :return:
         """
-        # self.init_size(3, 3)
+        self.init_size(3, 3)
 
         for i in range(3):
             for j in range(3):
                 self.set_value_cell(i, j)
 
         self._set_to_table()
-
-        return
-
-
-# UB peak information table
-UB_Peak_Table_Setup = [('Scan', 'int'),
-                       ('Pt', 'int'),
-                       ('Spice HKL', 'str'),
-                       ('Calculated HKL', 'str'),
-                       ('Q-Sample', 'str'),
-                       ('Selected', 'checkbox'),
-                       ('m1', 'float'),
-                       ('Wavelength', 'float'),  # wave length
-                       ('Error', 'float')]
-
-
-class UBMatrixPeakTable(tableBase.NTableWidget):
-    """
-    Extended table for peaks used to calculate UB matrix
-    """
-
-    def __init__(self, parent):
-        """
-        Initialization
-        :param parent:
-        :return:
-        """
-        tableBase.NTableWidget.__init__(self, parent)
-
-        # define class variables
-        self._cachedSpiceHKL = dict()
-
-        # class variables for column indexes
-        self._colIndexScan = None
-        self._colIndexSpiceHKL = None
-        self._colIndexCalculatedHKL = None
-        self._colIndexQSample = None
-        self._colIndexWavelength = None
-        self._colIndexError = None
-
-        return
-
-    def add_peak(self, scan_number, spice_hkl, q_sample, m1, wave_length):
-        """
-
-        :param scan_number:
-        :param spice_hkl:
-        :param q_sample:
-        :param m1:
-        :param wave_length:
-        :return:
-        """
-        # check inputs
-        assert isinstance(scan_number, int), 'Scan number integer'
-        assert len(spice_hkl) == 3, 'Spice HKL'
-        assert len(q_sample) == 3, 'Q-sample'
-        assert isinstance(m1, float) or m1 is None, 'm1'
-        assert isinstance(wave_length, float) or wave_length is None, 'wave length'
-
-        # spice_hkl_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(spice_hkl[0], spice_hkl[1], spice_hkl[2])
-        # q_sample_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(q_sample[0], q_sample[1], q_sample[2])
-        spice_hkl_str = self.format_array(spice_hkl)
-        q_sample_str = self.format_array(q_sample)
-        self.append_row([scan_number, -1, spice_hkl_str, '', q_sample_str, False, m1, wave_length, ''])
-
-        return True, ''
-
-    @staticmethod
-    def format_array(array):
-        """
-        output a formatted array with limited precision of float
-        :param array:
-        :return:
-        """
-        format_str = ''
-        for index, number in enumerate(array):
-            if index > 0:
-                format_str += ', '
-            if isinstance(number, float):
-                format_str += '{0:.4f}'.format(number)
-            else:
-                format_str += '{0}'.format(number)
-        # END-FOR
-
-        return format_str
-
-    def get_exp_info(self, row_index):
-        """
-        Get experiment information from a row
-        :param row_index:
-        :return: scan number, pt number
-        """
-        assert isinstance(row_index, int)
-
-        scan_number = self.get_cell_value(row_index, 0)
-        assert isinstance(scan_number, int)
-        pt_number = self.get_cell_value(row_index, 1)
-        assert isinstance(pt_number, int)
-
-        return scan_number, pt_number
-
-    def get_hkl(self, row_index, is_spice_hkl):
-        """
-        Get reflection's miller index
-        :param row_index:
-        :param is_spice_hkl:
-        :return: 3-tuple as H, K, L
-        """
-        # check input
-        assert isinstance(row_index, int), 'Row index {0} must be an integer but not a {1}.' \
-                                           ''.format(row_index, type(row_index))
-
-        # get the HKL either parsed from SPICE file or from calculation
-        if is_spice_hkl:
-            hkl_str = self.get_cell_value(row_index, self._colIndexSpiceHKL)
-        else:
-            hkl_str = self.get_cell_value(row_index, self._colIndexCalculatedHKL)
-
-        # convert the recorded string to HKL
-        status, ret_obj = guiutility.parse_float_array(hkl_str)
-        if not status:
-            raise RuntimeError(ret_obj)
-        elif len(ret_obj) != 3:
-            raise RuntimeError('Unable to parse array "{0}" to 3 floating points.'.format(hkl_str))
-        else:
-            m_h, m_k, m_l = ret_obj
-
-        return m_h, m_k, m_l
-
-    def get_scan_pt(self, row_number):
-        """
-        Get Scan and Pt from a row
-        :param row_number:
-        :return:
-        """
-        scan_number = self.get_cell_value(row_number, 0)
-        pt_number = self.get_cell_value(row_number, 1)
-
-        return scan_number, pt_number
-
-    def get_selected_scans(self):
-        """
-        get the scan numbers that are selected
-        :return:
-        """
-        selected_rows = self.get_selected_rows(True)
-
-        scan_list = list()
-        for i_row in selected_rows:
-            scan_number = self.get_cell_value(i_row, self._colIndexScan)
-            scan_list.append(scan_number)
-
-        return scan_list
-
-    def is_selected(self, row_index):
-        """ Check whether a row is selected.
-        :param row_index:
-        :return:
-        """
-        if row_index < 0 or row_index >= self.rowCount():
-            raise IndexError('Input row number %d is out of range [0, %d)' % (row_index, self.rowCount()))
-
-        col_index = UB_Peak_Table_Setup.index(('Selected', 'checkbox'))
-
-        return self.get_cell_value(row_index, col_index)
-
-    def setup(self):
-        """
-        Init setup
-        :return:
-        """
-        self.init_setup(UB_Peak_Table_Setup)
-        self.set_status_column_name('Selected')
-
-        # define all the _colIndex
-        self._colIndexScan = self._myColumnNameList.index('Scan')
-        self._colIndexSpiceHKL = self._myColumnNameList.index('Spice HKL')
-        self._colIndexCalculatedHKL = self._myColumnNameList.index('Calculated HKL')
-        self._colIndexQSample = self._myColumnNameList.index('Q-Sample')
-        self._colIndexWavelength = self._myColumnNameList.index('Wavelength')
-        self._colIndexError = self._myColumnNameList.index('Error')
-
-        # set up the width of some columns
-        self.setColumnWidth(self._colIndexSpiceHKL, 240)
-        self.setColumnWidth(self._colIndexCalculatedHKL, 240)
-        self.setColumnWidth(4, 240)
-
-        return
-
-    def select_nuclear_peak_rows(self, tolerance):
-        """
-        select all nuclear peaks, i.e., set the flag on on 'select' for all rows if their HKL indicates that
-        they are nuclear peaks
-        :param tolerance:
-        :return: string as error message
-        """
-        num_rows = self.rowCount()
-        error_message = ''
-
-        for row_index in range(num_rows):
-            # get the reading of HKL
-            try:
-                hkl_tuple = self.get_hkl(row_index, is_spice_hkl=True)
-                if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2], tolerance):
-                    self.select_row(row_index, status=True)
-            except RuntimeError as error:
-                error_message += 'Unable to parse HKL of line %d due to %s.' % (row_index, str(error))
-        # END-FOR
-
-        return error_message
-
-    def select_scans(self, select_all=False, nuclear_peaks=False, hkl_tolerance=None,
-                     wave_length=None, wave_length_tolerance=None):
-        """
-        select scans in the UB matrix table
-        :param select_all:
-        :param nuclear_peaks:
-        :param hkl_tolerance:
-        :param wave_length:
-        :param wave_length_tolerance:
-        :return:
-        """
-        if select_all:
-            # select all
-            self.select_all_rows(True)
-
-        elif nuclear_peaks or wave_length_tolerance is not None:
-            # using filters
-            if nuclear_peaks:
-                self.select_nuclear_peak_rows(hkl_tolerance)
-            if wave_length_tolerance is not None:
-                self.select_rows_by_column_value(self._colIndexWavelength, wave_length, wave_length_tolerance,
-                                                 keep_current_selection=True)
-        else:
-            raise RuntimeError('Must pick up one option to do filter.')
-
-        return
-
-    def set_hkl(self, i_row, hkl, is_spice_hkl, error=None):
-        """
-        Set HKL to a row in the table. Show H/K/L with 4 decimal pionts
-        :param i_row:
-        :param hkl: HKL is a list of tuple
-        :param is_spice_hkl: If true, then set input to cell for SPICE-imported HKL. Otherwise to calculated HKL.
-        :param error: error of HKL
-        """
-        # Check
-        assert isinstance(i_row, int), 'Row number (index) must be integer but not %s.'.format(type(i_row))
-
-        if isinstance(hkl, list) or isinstance(hkl, tuple):
-            assert len(hkl) == 3, 'In case HKL is list of tuple, its size must be equal to 3 but not %d.' \
-                                  '' % len(hkl)
-        elif isinstance(hkl, numpy.ndarray):
-            assert hkl.shape == (3,), 'In case HKL is numpy array, its shape must be (3,) but not %s.' \
-                                      '' % str(hkl.shape)
-        else:
-            raise AssertionError('HKL of type %s is not supported. Supported types include list, tuple '
-                                 'and numpy array.' % type(hkl))
-        assert isinstance(is_spice_hkl, bool), 'Flag {0} for SPICE-HKL must be a boolean but not a {1}.' \
-                                               ''.format(is_spice_hkl, type(is_spice_hkl))
-
-        # convert to a string with 4 decimal points
-        hkl_str = '%.4f, %.4f, %.4f' % (hkl[0], hkl[1], hkl[2])
-
-        if is_spice_hkl:
-            self.update_cell_value(i_row, self._colIndexSpiceHKL, hkl_str)
-        else:
-            self.update_cell_value(i_row, self._colIndexCalculatedHKL, hkl_str)
-
-        # set error
-        if error is not None:
-            i_col_error = UB_Peak_Table_Setup.index(('Error', 'float'))
-            self.update_cell_value(i_row, i_col_error, error)
-
-        return
-
-    def restore_cached_indexing(self, is_spice=True):
-        """
-        Restore the previously saved value to HKL
-        :return:
-        """
-        # check first such that all the stored value are to be
-        stored_line_index = sorted(self._cachedSpiceHKL.keys())
-        assert len(stored_line_index) == self.rowCount(), 'The current rows and cached row counts do not match.'
-
-        # restore
-        for row_index in stored_line_index:
-            hkl = self._cachedSpiceHKL[row_index]
-            self.set_hkl(row_index, hkl, is_spice_hkl=is_spice)
-        # END-FOR
-
-        # clear
-        self._cachedSpiceHKL.clear()
-
-        return
-
-    def store_current_indexing(self):
-        """
-        Store the current indexing for reverting
-        :return:
-        """
-        # clear the previous value
-        self._cachedSpiceHKL.clear()
-
-        # store
-        num_rows = self.rowCount()
-        for row_index in range(num_rows):
-            peak_indexing = self.get_hkl(row_index, is_spice_hkl=True)
-            self._cachedSpiceHKL[row_index] = peak_indexing
-        # END-FOR
-
-        return
-
-    def update_hkl(self, i_row, h, k, l):
-        """ Update HKL value
-        :param i_row: index of the row to have HKL updated
-        :param h:
-        :param k:
-        :param l:
-        """
-        assert isinstance(i_row, int), 'row number {0} must be an integer but not a {1}.' \
-                                       ''.format(i_row, type(i_row))
-
-        self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, l]))
 
         return
 
@@ -912,11 +598,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Wavelength', 'float'),
                   ('K-Index', 'int'),
                   ('Select', 'checkbox')]
-
-    """
-    in scans processing tab, the column name of corrected will be changed to 'F2;'Error' will be modified to 'F2 Error'
-In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
-    """
 
     def __init__(self, parent):
         """
@@ -941,7 +622,6 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         self._colIndexMotorStep = None
         self._colIndexWaveLength = None
         self._colIndexKIndex = None
-        self._colIndexWorkspace = None
 
         # cache dictionaries
         self._workspaceCacheDict = dict()
@@ -997,6 +677,29 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
 
         return
 
+    def add_single_measure_scan(self, scan_number, intensity, roi_name):
+        """
+        add a single measurement peak scan
+        :param scan_number:
+        :param intensity:
+        :param roi_name:
+        :return:
+        """
+        # construct a new row
+        new_row = self._generate_empty_row(scan_number, ws_name='single-pt')
+        self.append_row(new_row)
+
+        # set peak intensity
+        row_number = self.rowCount()-1
+        self.set_peak_intensity(row_number=row_number, peak_intensity=intensity,
+                                corrected_intensity=intensity, standard_error=math.sqrt(abs(intensity)),
+                                integrate_method='single-pt')
+
+        # ROI: use the unused workspace column for this information
+        self.update_cell_value(row_number, self._colIndexMask, roi_name)
+
+        return
+
     def append_scans(self, scans, allow_duplicate_scans):
         """ Append rows for merge in future
         :param scans:
@@ -1030,7 +733,7 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
 
         return
 
-    def get_integration_type(self):
+    def get_integration_type(self, row_index):
         """
         get the peak integration type
         :return:
@@ -1038,7 +741,7 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         if self.rowCount() == 0:
             raise RuntimeError('Empty table!')
 
-        integrate_type = self.get_cell_value(0, self._colIndexIntType)
+        integrate_type = self.get_cell_value(row_index, self._colIndexIntType)
 
         return integrate_type
 
@@ -1115,6 +818,14 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
 
         return peak_index_h, peak_index_k, peak_index_l
 
+    def get_mask(self, row_index):
+        """
+        get the mask/ROI name that this integration is based on
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._colIndexMask)
+
     def get_merged_status(self, row_number):
         """ Get the status whether it is merged
         :param row_number:
@@ -1141,6 +852,21 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         """
         #  return self.get_cell_value(i_row, self._colIndexWorkspace)
         return self._workspaceCacheDict[i_row]
+
+    def get_roi_name(self, row_index):
+        """
+        get ROI name if it is a single-pt scan
+        :except RuntimeError: if it is not!
+        :param row_index:
+        :return:
+        """
+        integral_type = self.get_integration_type(row_index)
+        if integral_type != 'single-pt':
+            raise RuntimeError('Non-single-pt is not applied to get roi name')
+
+        roi_name = self.get_cell_value(row_index, self._colIndexMask)
+
+        return roi_name
 
     def get_scan_list(self, output_row_number=True):
         """
@@ -1299,7 +1025,7 @@ In survey, 'Max Counts' shall be normalized by counting time of that 'Pt'.
         assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
         assert isinstance(integrate_method, str), 'Integrated method {0} must be a string but not {1}.' \
                                                   ''.format(integrate_method, type(integrate_method))
-        if integrate_method not in ['', 'simple', 'mixed', 'gaussian']:
+        if integrate_method not in ['', 'simple', 'mixed', 'gaussian', 'single-pt']:
             raise RuntimeError('Peak integration {0} not in list. Method must be in ["" (Not defined), "simple"'
                                ', "gaussian"]'.format(integrate_method))
 
@@ -1394,6 +1120,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
                    ('L', 'float'),
                    ('Q-range', 'float'),
                    ('Sample Temp', 'float'),
+                   ('2theta', 'float'),
                    ('Selected', 'checkbox')]
 
     def __init__(self, parent):
@@ -1412,6 +1139,8 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self._colIndexH = None
         self._colIndexK = None
         self._colIndexL = None
+
+        self._colIndex2Theta = None
 
         return
 
@@ -1525,6 +1254,22 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         return scan_list
 
+    def get_selected_scan_pt(self):
+        """
+        get selected row's scan number and pt number
+        :return:
+        """
+        selected_row_list = self.get_selected_rows()
+
+        selected_scan_pt_list = list()
+        for row_number in selected_row_list:
+            scan_number = self.get_cell_value(row_number, 0)
+            pt_number = self.get_cell_value(row_number, 1)
+            selected_scan_pt_list.append((scan_number, pt_number))
+        # END-FOR
+
+        return selected_scan_pt_list
+
     def get_selected_run_surveyed(self, required_size=1):
         """
         Purpose: Get selected pt number and run number that is set as selected
@@ -1615,6 +1360,8 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self._colIndexK = ScanSurveyTable.Table_Setup.index(('K', 'float'))
         self._colIndexL = ScanSurveyTable.Table_Setup.index(('L', 'float'))
 
+        self._colIndex2Theta = ScanSurveyTable.Table_Setup.index(('2theta', 'float'))
+
         return
 
     def reset(self):
@@ -1622,3 +1369,621 @@ class ScanSurveyTable(tableBase.NTableWidget):
         :return:
         """
         self._myScanSummaryList = list()
+
+
+class SinglePtIntegrationTable(tableBase.NTableWidget):
+    """
+    Extended QTable for integration on single Pt with previously calculated FWHM
+    """
+    Table_Setup = [('Scan', 'int'),
+                   ('Pt', 'int'),
+                   ('HKL', 'str'),
+                   ('PeakHeight', 'float'),
+                   ('2theta', 'float'),
+                   ('FWHM', 'float'),
+                   ('Intensity', 'float'),
+                   ('Pt-Sigma', 'float'),
+                   ('Pt-I', 'float'),
+                   ('Pt-B', 'float'),
+                   ('ROI', 'str'),  # name of ROI used to integrate counts on detector (single measurement)
+                   ('Reference Scans', 'str'),
+                   ('Selected', 'checkbox')]
+
+    def __init__(self, parent):
+        """
+        initialization
+        :param parent:
+        """
+        super(SinglePtIntegrationTable, self).__init__(parent)
+
+        # class variables
+        self._scan_index = None
+        self._pt_index = None
+        self._hkl_index = None
+        self._height_index = None
+        self._2theta_index = None
+        self._fwhm_index = None
+        self._intensity_index = None
+        self._2thta_scans_index = None
+        self._ref_scans_index = None
+        self._roi_index = None
+
+        self._pt_row_dict = dict()
+
+        return
+
+    def add_scan_pt(self, scan_number, pt_number, hkl_str, two_theta):
+        """ add a new scan/pt to the table
+        :param scan_number:
+        :param pt_number:
+        :param hkl_str:
+        :param two_theta:
+        :return:
+        """
+        # check
+        if (scan_number, pt_number) in self._pt_row_dict:
+            raise RuntimeError('Pt number {0} exists in the table already.'.format(pt_number))
+
+        # check inputs
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(pt_number, int), 'Pt number {0} must be an integer'.format(pt_number)
+        assert isinstance(hkl_str, str), 'HKL {0} must be given as a string.'.format(hkl_str)
+        assert isinstance(two_theta, float), '2theta {0} must be a float'
+
+        # add a new row to the table
+        status, error_msg = self.append_row([scan_number, pt_number, hkl_str, 0., two_theta, 0., 0., 0., 0., 0., '', '',
+                                             False])
+        if not status:
+            raise RuntimeError(error_msg)
+
+        # register
+        self._pt_row_dict[scan_number, pt_number] = self.rowCount() - 1
+
+        # set scan editable
+        item_i = self.item(self.rowCount()-1, self._ref_scans_index)
+        item_i.setFlags(item_i.flags() | QtCore.Qt.ItemIsEditable)
+
+        return
+
+    def get_fwhm(self, row_index):
+        """ get reference scan's FWHM
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._fwhm_index)
+
+    def get_peak_intensities(self):
+        """ get the summary on all peaks' intensities
+        :return: dictionary as scan number and peak intensity
+        """
+        peak_intensity_dict = dict()
+
+        for row_index in range(self.rowCount()):
+            scan_number = self.get_cell_value(row_index, self._scan_index)
+            intensity_i = self.get_cell_value(row_index, self._intensity_index)
+            roi_i = self.get_cell_value(row_index, self._roi_index)
+            peak_intensity_dict[scan_number] = intensity_i, roi_i
+        # END-FOR
+
+        return peak_intensity_dict
+
+    def get_pt_number(self, row_index):
+        """
+        get PT number
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._pt_index)
+
+    def get_reference_scans(self, row_index):
+        """
+        get the reference scans (i.e., the scans having same/close 2theta to the single Pt scan
+        :param row_index:
+        :return:
+        """
+        # get value
+        scans_str = self.get_cell_value(row_index, self._ref_scans_index)
+
+        # no matched scan can be found!
+        if scans_str is None:
+            return None
+        elif scans_str == 'No match':
+            return None
+        elif scans_str == '':
+            return None
+
+        # split and parse to integers
+        terms = scans_str.split(',')
+        ref_scan_list = [int(term) for term in terms]
+
+        return ref_scan_list
+
+    def get_region_of_interest_name(self, row_index):
+        """
+        get ROI name
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._roi_index)
+
+    def get_scan_number(self, row_index):
+        """
+        get scan number of the specified row
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._scan_index)
+
+    def get_scan_pt_list(self):
+        """
+        get a list of current scan and pt pair in the table
+        :return:
+        """
+        return self._pt_row_dict.keys()
+
+    def get_two_theta(self, row_index):
+        """
+        get two-theta value
+        :param row_index:
+        :return:
+        """
+        return self.get_cell_value(row_index, self._2theta_index)
+
+    def save_intensities_to_file(self, out_file_name):
+        """
+        save integrated peaks intensities to file
+        :param out_file_name:
+        :return:
+        """
+        # check inputs ..
+        assert isinstance(out_file_name, str), 'Output file name {0} must be a string but not a {1}' \
+                                               ''.format(out_file_name, type(out_file_name))
+        if not os.access(out_file_name, os.W_OK):
+            raise RuntimeError('Use specified output file {0} is not writable.'.format(out_file_name))
+
+        out_buffer = ''
+        for i_row in range(self.rowCount()):
+            scan_number = self.get_cell_value(i_row, self._scan_index)
+            intensity = self.get_cell_value(i_row, self._intensity_index)
+            out_buffer += '{0} \t{1}\n'.format(scan_number, intensity)
+
+        out_file = open(out_file_name, 'w')
+        out_file.write(out_buffer)
+        out_file.close()
+
+        return
+
+    def set_gaussian_sigma(self, row_index, sigma):
+        """
+        set the (Gaussian) sigma value to a row
+        :param row_index:
+        :param sigma: sigma value of Gaussian
+        :return: None
+        """
+        self.update_cell_value(row_index, self._fwhm_index, sigma)
+
+        return
+
+    def set_reference_scan_numbers(self, row_index, ref_numbers):
+        """ set reference scan numbers or warning as 'No match'
+        :param row_index:
+        :param ref_numbers:
+        :return:
+        """
+        # process the reference number
+        if isinstance(ref_numbers, str):
+            scans_str = ref_numbers
+        elif isinstance(ref_numbers, list):
+            scans_str = ''
+            for index, ref_number in enumerate(ref_numbers):
+                if index > 0:
+                    scans_str += ','
+                scans_str += '{0}'.format(ref_number)
+
+        else:
+            raise AssertionError('Reference scan numbers {0} of type {1} is not supported.'
+                                 ''.format(ref_numbers, type(ref_numbers)))
+
+        # add to table
+        self.update_cell_value(row_index, self._ref_scans_index, scans_str)
+
+    def set_two_theta(self, row_index, two_theta):
+        """
+        set 2theta value of the scan
+        :param row_index:
+        :param two_theta:
+        :return:
+        """
+        assert isinstance(two_theta, float), '2theta {0} must be a float.'.format(two_theta)
+        self.update_cell_value(row_index, self._2theta_index, two_theta)
+
+        return
+
+    def setup(self):
+        """
+        set up the table with default columns
+        :return:
+        """
+        # set up columns
+        self.init_setup(SinglePtIntegrationTable.Table_Setup)
+
+        # set up column index
+        self._scan_index = SinglePtIntegrationTable.Table_Setup.index(('Scan', 'int'))
+        self._pt_index = SinglePtIntegrationTable.Table_Setup.index(('Pt', 'int'))
+        self._hkl_index = SinglePtIntegrationTable.Table_Setup.index(('HKL', 'str'))
+        self._height_index = SinglePtIntegrationTable.Table_Setup.index(('PeakHeight', 'float'))
+        self._2theta_index = SinglePtIntegrationTable.Table_Setup.index(('2theta', 'float'))
+        self._fwhm_index = SinglePtIntegrationTable.Table_Setup.index(('FWHM', 'float'))
+        self._intensity_index = SinglePtIntegrationTable.Table_Setup.index(('Intensity', 'float'))
+        self._ref_scans_index = SinglePtIntegrationTable.Table_Setup.index(('Reference Scans', 'str'))
+        self._roi_index = SinglePtIntegrationTable.Table_Setup.index(('ROI', 'str'))
+
+        return
+
+    def set_fwhm(self, scan_number, pt_number, fwhm):
+        """
+
+        :param pt_number:
+        :param fwhm:
+        :return:
+        """
+        row_number = self._pt_row_dict[scan_number, pt_number]
+
+        self.update_cell_value(row_number, self._fwhm_index, fwhm)
+
+        return
+
+    def set_intensity(self, scan_number, pt_number, intensity):
+        """
+
+        :param scan_number:
+        :param pt_number:
+        :param intensity:
+        :return:
+        """
+        row_number = self._pt_row_dict[scan_number, pt_number]
+
+        self.update_cell_value(row_number, self._intensity_index, intensity)
+
+        return
+
+    def set_peak_height(self, scan_number, pt_number, peak_height, roi_name):
+        """ set the intensity of single measurement from the counts on the detector.
+        In the view as 3D peak, it is the cut on the center plane as the peak shape can be modeled by 3D Gaussian.
+        Thus the integrated value is used as the Gaussian's height.
+        :param scan_number:
+        :param pt_number:
+        :param peak_height:
+        :param roi_name: ROI is closed related to how a peak/single measurement's intensity is calculated
+        :return:
+        """
+        row_number = self._pt_row_dict[scan_number, pt_number]
+
+        self.update_cell_value(row_number, self._height_index, peak_height)
+        self.update_cell_value(row_number, self._roi_index, roi_name)
+
+        return
+
+
+class UBMatrixPeakTable(tableBase.NTableWidget):
+    """
+    Extended table for peaks used to calculate UB matrix
+    """
+    # UB peak information table
+    UB_Peak_Table_Setup = [('Scan', 'int'),
+                           ('Pt', 'int'),
+                           ('Spice HKL', 'str'),
+                           ('Calculated HKL', 'str'),
+                           ('Q-Sample', 'str'),
+                           ('Selected', 'checkbox'),
+                           ('m1', 'float'),
+                           ('Wavelength', 'float'),  # wave length
+                           ('Error', 'float')]
+
+    def __init__(self, parent):
+        """
+        Initialization
+        :param parent:
+        :return:
+        """
+        tableBase.NTableWidget.__init__(self, parent)
+
+        # define class variables
+        self._cachedSpiceHKL = dict()
+
+        # class variables for column indexes
+        self._colIndexScan = None
+        self._colIndexSpiceHKL = None
+        self._colIndexCalculatedHKL = None
+        self._colIndexQSample = None
+        self._colIndexWavelength = None
+        self._colIndexError = None
+
+        return
+
+    def add_peak(self, scan_number, spice_hkl, q_sample, m1, wave_length):
+        """
+
+        :param scan_number:
+        :param spice_hkl:
+        :param q_sample:
+        :param m1:
+        :param wave_length:
+        :return:
+        """
+        # check inputs
+        assert isinstance(scan_number, int), 'Scan number integer'
+        assert len(spice_hkl) == 3, 'Spice HKL'
+        assert len(q_sample) == 3, 'Q-sample'
+        assert isinstance(m1, float) or m1 is None, 'm1'
+        assert isinstance(wave_length, float) or wave_length is None, 'wave length'
+
+        # spice_hkl_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(spice_hkl[0], spice_hkl[1], spice_hkl[2])
+        # q_sample_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(q_sample[0], q_sample[1], q_sample[2])
+        spice_hkl_str = self.format_array(spice_hkl)
+        q_sample_str = self.format_array(q_sample)
+        self.append_row([scan_number, -1, spice_hkl_str, '', q_sample_str, False, m1, wave_length, ''])
+
+        return True, ''
+
+    @staticmethod
+    def format_array(array):
+        """
+        output a formatted array with limited precision of float
+        :param array:
+        :return:
+        """
+        format_str = ''
+        for index, number in enumerate(array):
+            if index > 0:
+                format_str += ', '
+            if isinstance(number, float):
+                format_str += '{0:.4f}'.format(number)
+            else:
+                format_str += '{0}'.format(number)
+        # END-FOR
+
+        return format_str
+
+    def get_exp_info(self, row_index):
+        """
+        Get experiment information from a row
+        :param row_index:
+        :return: scan number, pt number
+        """
+        assert isinstance(row_index, int)
+
+        scan_number = self.get_cell_value(row_index, 0)
+        assert isinstance(scan_number, int)
+        pt_number = self.get_cell_value(row_index, 1)
+        assert isinstance(pt_number, int)
+
+        return scan_number, pt_number
+
+    def get_hkl(self, row_index, is_spice_hkl):
+        """
+        Get reflection's miller index
+        :except RuntimeError:
+        :param row_index:
+        :param is_spice_hkl:
+        :return: 3-tuple as H, K, L
+        """
+        # check input
+        assert isinstance(row_index, int), 'Row index {0} must be an integer but not a {1}.' \
+                                           ''.format(row_index, type(row_index))
+
+        # get the HKL either parsed from SPICE file or from calculation
+        if is_spice_hkl:
+            hkl_str = self.get_cell_value(row_index, self._colIndexSpiceHKL)
+        else:
+            hkl_str = self.get_cell_value(row_index, self._colIndexCalculatedHKL)
+
+        # convert the recorded string to HKL
+        status, ret_obj = guiutility.parse_float_array(hkl_str)
+        if not status:
+            raise RuntimeError('Unable to parse hkl (str) due to {0}'.format(ret_obj))
+        elif len(ret_obj) != 3:
+            raise RuntimeError('Unable to convert array "{0}" to 3 floating points.'.format(hkl_str))
+        else:
+            m_h, m_k, m_l = ret_obj
+
+        return m_h, m_k, m_l
+
+    def get_scan_pt(self, row_number):
+        """
+        Get Scan and Pt from a row
+        :param row_number:
+        :return:
+        """
+        scan_number = self.get_cell_value(row_number, 0)
+        pt_number = self.get_cell_value(row_number, 1)
+
+        return scan_number, pt_number
+
+    def get_selected_scans(self):
+        """
+        get the scan numbers that are selected
+        :return:
+        """
+        selected_rows = self.get_selected_rows(True)
+
+        scan_list = list()
+        for i_row in selected_rows:
+            scan_number = self.get_cell_value(i_row, self._colIndexScan)
+            scan_list.append(scan_number)
+
+        return scan_list
+
+    def is_selected(self, row_index):
+        """ Check whether a row is selected.
+        :param row_index:
+        :return:
+        """
+        if row_index < 0 or row_index >= self.rowCount():
+            raise IndexError('Input row number %d is out of range [0, %d)' % (row_index, self.rowCount()))
+
+        col_index = UBMatrixPeakTable.UB_Peak_Table_Setup.index(('Selected', 'checkbox'))
+
+        return self.get_cell_value(row_index, col_index)
+
+    def setup(self):
+        """
+        Init setup
+        :return:
+        """
+        self.init_setup(UBMatrixPeakTable.UB_Peak_Table_Setup)
+        self.set_status_column_name('Selected')
+
+        # define all the _colIndex
+        self._colIndexScan = self._myColumnNameList.index('Scan')
+        self._colIndexSpiceHKL = self._myColumnNameList.index('Spice HKL')
+        self._colIndexCalculatedHKL = self._myColumnNameList.index('Calculated HKL')
+        self._colIndexQSample = self._myColumnNameList.index('Q-Sample')
+        self._colIndexWavelength = self._myColumnNameList.index('Wavelength')
+        self._colIndexError = self._myColumnNameList.index('Error')
+
+        # set up the width of some columns
+        self.setColumnWidth(self._colIndexSpiceHKL, 240)
+        self.setColumnWidth(self._colIndexCalculatedHKL, 240)
+        self.setColumnWidth(4, 240)
+
+        return
+
+    def select_nuclear_peak_rows(self, tolerance):
+        """
+        select all nuclear peaks, i.e., set the flag on on 'select' for all rows if their HKL indicates that
+        they are nuclear peaks
+        :param tolerance:
+        :return: string as error message
+        """
+        num_rows = self.rowCount()
+        error_message = ''
+
+        for row_index in range(num_rows):
+            # get the reading of HKL
+            try:
+                hkl_tuple = self.get_hkl(row_index, is_spice_hkl=True)
+                if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2], tolerance):
+                    self.select_row(row_index, status=True)
+            except RuntimeError as error:
+                error_message += 'Unable to parse HKL of line %d due to %s.' % (row_index, str(error))
+        # END-FOR
+
+        return error_message
+
+    def select_scans(self, select_all=False, nuclear_peaks=False, hkl_tolerance=None,
+                     wave_length=None, wave_length_tolerance=None):
+        """
+        select scans in the UB matrix table
+        :param select_all:
+        :param nuclear_peaks:
+        :param hkl_tolerance:
+        :param wave_length:
+        :param wave_length_tolerance:
+        :return:
+        """
+        if select_all:
+            # select all
+            self.select_all_rows(True)
+
+        elif nuclear_peaks or wave_length_tolerance is not None:
+            # using filters
+            if nuclear_peaks:
+                self.select_nuclear_peak_rows(hkl_tolerance)
+            if wave_length_tolerance is not None:
+                self.select_rows_by_column_value(self._colIndexWavelength, wave_length, wave_length_tolerance,
+                                                 keep_current_selection=True)
+        else:
+            raise RuntimeError('Must pick up one option to do filter.')
+
+        return
+
+    def set_hkl(self, i_row, hkl, is_spice_hkl, error=None):
+        """
+        Set HKL to a row in the table. Show H/K/L with 4 decimal pionts
+        :param i_row:
+        :param hkl: HKL is a list of tuple
+        :param is_spice_hkl: If true, then set input to cell for SPICE-imported HKL. Otherwise to calculated HKL.
+        :param error: error of HKL
+        """
+        # Check
+        assert isinstance(i_row, int), 'Row number (index) must be integer but not %s.'.format(type(i_row))
+
+        if isinstance(hkl, list) or isinstance(hkl, tuple):
+            assert len(hkl) == 3, 'In case HKL is list of tuple, its size must be equal to 3 but not %d.' \
+                                  '' % len(hkl)
+        elif isinstance(hkl, numpy.ndarray):
+            assert hkl.shape == (3,), 'In case HKL is numpy array, its shape must be (3,) but not %s.' \
+                                      '' % str(hkl.shape)
+        else:
+            raise AssertionError('HKL of type %s is not supported. Supported types include list, tuple '
+                                 'and numpy array.' % type(hkl))
+        assert isinstance(is_spice_hkl, bool), 'Flag {0} for SPICE-HKL must be a boolean but not a {1}.' \
+                                               ''.format(is_spice_hkl, type(is_spice_hkl))
+
+        # convert to a string with 4 decimal points
+        hkl_str = '%.4f, %.4f, %.4f' % (hkl[0], hkl[1], hkl[2])
+
+        if is_spice_hkl:
+            self.update_cell_value(i_row, self._colIndexSpiceHKL, hkl_str)
+        else:
+            self.update_cell_value(i_row, self._colIndexCalculatedHKL, hkl_str)
+
+        # set error
+        if error is not None:
+            i_col_error = UBMatrixPeakTable.UB_Peak_Table_Setup.index(('Error', 'float'))
+            self.update_cell_value(i_row, i_col_error, error)
+
+        return
+
+    def restore_cached_indexing(self, is_spice=True):
+        """
+        Restore the previously saved value to HKL
+        :return:
+        """
+        # check first such that all the stored value are to be
+        stored_line_index = sorted(self._cachedSpiceHKL.keys())
+        assert len(stored_line_index) == self.rowCount(), 'The current rows and cached row counts do not match.'
+
+        # restore
+        for row_index in stored_line_index:
+            hkl = self._cachedSpiceHKL[row_index]
+            self.set_hkl(row_index, hkl, is_spice_hkl=is_spice)
+        # END-FOR
+
+        # clear
+        self._cachedSpiceHKL.clear()
+
+        return
+
+    def store_current_indexing(self):
+        """
+        Store the current indexing for reverting
+        :return:
+        """
+        # clear the previous value
+        self._cachedSpiceHKL.clear()
+
+        # store
+        num_rows = self.rowCount()
+        for row_index in range(num_rows):
+            peak_indexing = self.get_hkl(row_index, is_spice_hkl=True)
+            self._cachedSpiceHKL[row_index] = peak_indexing
+        # END-FOR
+
+        return
+
+    def update_hkl(self, i_row, h, k, l):
+        """ Update HKL value
+        :param i_row: index of the row to have HKL updated
+        :param h:
+        :param k:
+        :param l:
+        """
+        assert isinstance(i_row, int), 'row number {0} must be an integer but not a {1}.' \
+                                       ''.format(i_row, type(i_row))
+
+        self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, l]))
+
+        return

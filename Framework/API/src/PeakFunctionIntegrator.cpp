@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/PeakFunctionIntegrator.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
@@ -164,5 +170,5 @@ double gsl_peak_wrapper(double x, void *parameters) {
 
   return y;
 }
-}
-}
+} // namespace API
+} // namespace Mantid

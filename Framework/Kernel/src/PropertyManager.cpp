@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <json/json.h>
 
@@ -16,7 +22,7 @@ using std::string;
 namespace {
 // static logger reference
 Logger g_log("PropertyManager");
-}
+} // namespace
 
 //-----------------------------------------------------------------------------------------------
 /// Default constructor

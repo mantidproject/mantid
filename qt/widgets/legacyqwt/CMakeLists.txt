@@ -1,4 +1,6 @@
  set ( SRC_FILES
+  src/ContourPreviewPlot.cpp
+  src/DraggableColorBarWidget.cpp
   src/MantidColorMap.cpp
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidQwtWorkspaceData.cpp
@@ -21,6 +23,8 @@
 )
 
 set ( MOC_FILES
+  inc/MantidQtWidgets/LegacyQwt/ContourPreviewPlot.h
+  inc/MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h
   inc/MantidQtWidgets/LegacyQwt/ColorBarWidget.h
   inc/MantidQtWidgets/LegacyQwt/MWView.h
   inc/MantidQtWidgets/LegacyQwt/RangeSelector.h
@@ -32,6 +36,7 @@ set ( MOC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
+  inc/MantidQtWidgets/LegacyQwt/ContourPreviewPlot.h
   inc/MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h
   inc/MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h
   inc/MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h
@@ -50,6 +55,7 @@ set ( INC_FILES
 
 set ( UI_FILES
   inc/MantidQtWidgets/LegacyQwt/ColorBarWidget.ui
+  inc/MantidQtWidgets/LegacyQwt/ContourPreviewPlot.ui
   inc/MantidQtWidgets/LegacyQwt/DisplayCurveFit.ui
   inc/MantidQtWidgets/LegacyQwt/MWView.ui
   inc/MantidQtWidgets/LegacyQwt/PreviewPlot.ui
@@ -77,16 +83,19 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsLegacyQwt
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+  INSTALL_DIR
+    ${LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/../../${LIB_DIR}"
+    "\$ORIGIN/../${LIB_DIR}"
 )
 
 ###########################################################################
 # Testing
 ###########################################################################
 set( TEST_FILES
+  test/ContourPreviewPlotTest.h
   test/MantidColorMapTest.h
   test/QwtWorkspaceBinDataTest.h
   test/QwtWorkspaceSpectrumDataTest.h

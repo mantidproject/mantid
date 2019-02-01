@@ -19,7 +19,7 @@ digraph AlignAndFocusPowder {
     params2 [label="Params"]
   }
 
-  subgraph algoritms {
+  subgraph algorithms {
     $algorithm_style
     removePromptPulse [label="RemovePromptPulse v1"]
     compressEvents    [label="CompressEvents v1"]

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
 #define MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/GaussianComptonProfile.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FunctionDomain1D.h"
 #include "ComptonProfileTestHelpers.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
-using Mantid::CurveFitting::Functions::GaussianComptonProfile;
 using Mantid::CurveFitting::Functions::ComptonProfile;
+using Mantid::CurveFitting::Functions::GaussianComptonProfile;
 
 class GaussianComptonProfileTest : public CxxTest::TestSuite {
 public:

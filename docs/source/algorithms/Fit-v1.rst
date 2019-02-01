@@ -45,8 +45,8 @@ no additional properties will be declared. The Function property must be
 set before any other.
 
 The function and the initial values for its parameters are set with the
-Function property. A function can be simple or composite. A `simple
-function <../fitfunctions/categories/FitFunctions.html>`__ has a name registered with Mantid
+Function property. A function can be simple or composite. A :ref:`simple
+function <Fit Functions List>` has a name registered with Mantid
 framework. The Fit algorithm creates an instance of a function by this
 name. A composite function is an arithmetic sum of two or more functions
 (simple or composite). Each function has a number of named parameters,
@@ -61,7 +61,7 @@ to perform the minimization. By default if the function's derivatives
 can be evaluated then Fit uses the GSL Levenberg-Marquardt minimizer.
 
 In Mantidplot this algorithm can be run from the `Fit Property
-Browser <MantidPlot:_Data Analysis and Curve Fitting#Simple_Peak_Fitting_with_the_Fit_Wizard>`__
+Browser <http://www.mantidproject.org/MantidPlot:_Data_Analysis_and_Curve_Fitting>`__
 which allows all the settings to be specified via its graphical user
 interface.
 
@@ -71,8 +71,8 @@ Setting a simple function
 To use a simple function for a fit set its name and initial parameter
 values using the Function property. This property is a comma separated
 list of name=value pairs. The name of the first name=value pairs must be
-"name" and it must be set equal to the name of one of a `simple
-function <../fitfunctions/categories/FitFunctions.html>`__. This name=value pair is followed
+"name" and it must be set equal to the name of one of a :ref:`simple
+function <Fit Functions List>`. This name=value pair is followed
 by name=value pairs specifying values for the parameters of this
 function. If a parameter is not set in Function it will be given its
 default value defined by the function. All names are case sensitive. For
@@ -94,7 +94,7 @@ are created when the Formula attribute is set. It is important that
 Formula is defined before initializing the parameters.
 
 A list of the available simple functions can be found
-`here <../fitfunctions/categories/FitFunctions.html>`__.
+:ref:`here <Fit Functions List>`.
 
 Setting a composite function
 ############################
@@ -255,8 +255,8 @@ replace the name of the workspace with a different name if you give a
 value to the property 'Output' which redefines the base name of the
 output workspaces.
 
-OutputParameters is is a `TableWorkspace
-<http://www.mantidproject.org/TableWorkspace>`_ with the fitted
+OutputParameters is a :ref:`TableWorkspace
+<Table Workspaces>` with the fitted
 parameter values. OutputWorkspace is a :ref:`Workspace2D
 <Workspace2D>` which compares the fit with the original data. The
 names given to these workspaces are built by appending the suffixes
@@ -274,7 +274,7 @@ spectra:
 3. The third spectrum is the difference between the first two.
 
 Also, if the function's derivatives can be evaluated an additional
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ is
+:ref:`TableWorkspace <Table Workspaces>` is
 produced. If for example the property Output is set to "MyResults"
 then this TableWorkspace will have the name
 "MyResults\_NormalisedCovarianceMatrix" and it contains a calculated

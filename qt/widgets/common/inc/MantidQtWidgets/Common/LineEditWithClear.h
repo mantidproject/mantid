@@ -10,9 +10,9 @@
 #ifndef LINEEDITWITHCLEAR_H
 #define LINEEDITWITHCLEAR_H
 
-#include <QLineEdit>
-#include "MantidKernel/System.h"
 #include "DllOption.h"
+#include "MantidKernel/System.h"
+#include <QLineEdit>
 
 class QToolButton;
 
@@ -34,7 +34,7 @@ private slots:
 private:
   QToolButton *clearButton;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // LINEEDITWITHCLEAR_H

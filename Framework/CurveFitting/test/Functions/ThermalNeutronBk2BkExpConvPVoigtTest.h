@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_
 #define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_
 
@@ -24,7 +30,7 @@ public:
   }
 
   /** Test overriden set parameter value functions
-    */
+   */
   void test_setParameter() {
     ThermalNeutronBk2BkExpConvPVoigt peak;
     peak.initialize();
@@ -125,7 +131,7 @@ public:
   }
 
   /** Test behavior of E1()
-    */
+   */
   void test_E1() {
     // 0. Mock data
     auto vecX = generateData();
@@ -199,7 +205,7 @@ public:
   }
 
   /** Test on calcualte peak parameters including Gamma (i.e., E1())
-    * Parameter and data is from PG3_11485, Bank 1, (200) @ TOF = 46963
+   * Parameter and data is from PG3_11485, Bank 1, (200) @ TOF = 46963
    */
   void test_CalculatePeakParameters2() {
     // 1. Mock data
@@ -331,10 +337,10 @@ public:
   }
 
   /** Generate data from PG3_11485 Jason refined .prf file
-    * @param vecX:   x-values
-    * @param dataY:  experimental y-values
-    * @param modelY: calculated y-values
-    */
+   * @param vecX:   x-values
+   * @param dataY:  experimental y-values
+   * @param modelY: calculated y-values
+   */
   void generateData2(std::vector<double> &vecX, std::vector<double> &modelY) {
     vecX.clear();
     modelY.clear();

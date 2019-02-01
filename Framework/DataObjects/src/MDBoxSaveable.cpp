@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBoxSaveable.h"
 #include "MantidDataObjects/MDBox.h"
 
@@ -29,7 +35,7 @@ void MDBoxSaveable::save() const {
 }
 
 /** Loads the data from HDD if these data has not been loaded before.
-  * private function called from the DiskBuffer
+ * private function called from the DiskBuffer
  */
 void MDBoxSaveable::load() {
   // Is the data in memory right now (cached copy)?
@@ -40,5 +46,5 @@ void MDBoxSaveable::load() {
     this->setLoaded(true);
   }
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

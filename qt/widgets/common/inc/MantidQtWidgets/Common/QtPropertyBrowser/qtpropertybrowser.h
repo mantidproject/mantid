@@ -89,9 +89,9 @@
 #define QTPROPERTYBROWSER_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <QWidget>
 #include <QMap>
 #include <QSet>
+#include <QWidget>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

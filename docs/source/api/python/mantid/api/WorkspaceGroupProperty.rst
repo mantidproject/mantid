@@ -2,7 +2,7 @@
  WorkspaceGroupProperty
 ========================
 
-This a python binding to the C++ class Mantid::API::WorkspaceGroupProperty.
+This is a Python binding to the C++ class Mantid::API::WorkspaceGroupProperty.
 
 *bases:* :py:obj:`mantid.api.WorkspaceGroupPropertyPropertyWithValue`, :py:obj:`mantid.api.IWorkspaceProperty`
 

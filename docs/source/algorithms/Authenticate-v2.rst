@@ -11,9 +11,9 @@ Description
 
 Authenticate to the remote compute resource. This must be executed
 before calling any other remote algorithms. The authentication method
-and outcome of ths algorithm is dependent on the particular
+and outcome of this algorithm is dependent on the particular
 implementation (job manager underlying the algorithm). But typically,
-if the authentication is successfull, a cookie is received that is
+if the authentication is successful, a cookie is received that is
 stored internally and re-used for all subsequent interactions with the
 compute resource.
 

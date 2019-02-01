@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """  The GuiStateDirector generates the state object from the models.
 
 The GuiStateDirector gets the information from the table and state model and generates state objects. It delegates
@@ -10,7 +16,8 @@ import copy
 
 from sans.state.data import get_data_builder
 from sans.user_file.state_director import StateDirectorISIS
-from sans.common.file_information import SANSFileInformationFactory
+from sans.common.enums import (SANSInstrument)
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class GuiStateDirector(object):
@@ -20,12 +27,17 @@ class GuiStateDirector(object):
         self._state_gui_model = state_gui_model
         self._facility = facility
 
-    def create_state(self, row):
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def create_state(self, row, file_lookup=True, instrument=SANSInstrument.SANS2D):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         table_index_model = self._table_model.get_table_entry(row)
-        file_name = table_index_model.sample_scatter
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information(file_name)
+        if file_lookup:
+            file_information = table_index_model.file_information
+        else:
+            file_information = SANSFileInformationMock(instrument=instrument, facility=self._facility)
+
         data_builder = get_data_builder(self._facility, file_information)
 
         self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
@@ -55,6 +67,12 @@ class GuiStateDirector(object):
 
         if table_index_model.sample_thickness:
             state_gui_model.sample_thickness = float(table_index_model.sample_thickness)
+        if table_index_model.sample_height:
+            state_gui_model.sample_height = float(table_index_model.sample_height)
+        if table_index_model.sample_width:
+            state_gui_model.sample_width = float(table_index_model.sample_width)
+        if table_index_model.sample_shape:
+            state_gui_model.sample_shape = table_index_model.sample_shape
 
         # 4. Create the rest of the state based on the builder.
         user_file_state_director = StateDirectorISIS(data, file_information)
@@ -100,3 +118,9 @@ class GuiStateDirector(object):
 
         if "EventSlices" in options.keys():
             state_gui_model.event_slices = options["EventSlices"]
+
+        if "MergeScale" in options.keys():
+            state_gui_model.merge_scale = options["MergeScale"]
+
+        if "MergeShift" in options.keys():
+            state_gui_model.merge_shift = options["MergeShift"]

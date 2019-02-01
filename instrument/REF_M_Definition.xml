@@ -74,6 +74,26 @@
   </cuboid>
   <algebra val="pixel-shape"/>
 </type>
-  
- 
+	
+<!--MONITORS-->
+<component idlist="monitors" type="monitors">
+  <location/>
+</component>
+<type name="monitors">
+  <component type="monitor">
+    <location name="monitor1" z="-0.23368"/>
+  </component>
+</type>
+<type is="monitor" name="monitor">
+  <cylinder id="cyl-approx">
+    <centre-of-bottom-base x="0.0" y="0.0" z="0.0"/>
+    <axis x="0.0" y="0.0" z="1.0"/>
+    <radius val="0.01"/>
+    <height val="0.03"/>
+  </cylinder>
+  <algebra val="cyl-approx"/>
+</type>
+<idlist idname="monitors">
+  <id val="-1"/>
+</idlist>
 </instrument>

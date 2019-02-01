@@ -1,18 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BOUNDARYCONSTRAINTTEST_H_
 #define BOUNDARYCONSTRAINTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Expression.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

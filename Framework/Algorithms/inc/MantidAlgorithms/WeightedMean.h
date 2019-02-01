@@ -1,10 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_WEIGHTEDMEAN_H_
 #define MANTID_ALGORITHMS_WEIGHTEDMEAN_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAlgorithms/BinaryOperation.h"
+#include "MantidAlgorithms/CommutativeBinaryOperation.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,29 +24,8 @@ namespace Algorithms {
 
     @author Robert Dalgliesh, ISIS, RAL
     @date 12/1/2010
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport WeightedMean : public BinaryOperation {
+class DLLExport WeightedMean : public CommutativeBinaryOperation {
 public:
   const std::string name() const override { return "WeightedMean"; }
   /// Summary of algorithms purpose
@@ -57,14 +40,14 @@ public:
 
 private:
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const MantidVec &rhsY,
-                              const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override;
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const double rhsY,
-                              const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const HistogramData::Histogram &rhs,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const double rhsY, const double rhsE,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override;
   bool
   checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
                      const API::MatrixWorkspace_const_sptr rhs) const override;

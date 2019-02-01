@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes,
 # pylint: disable = too-many-branches,too-many-locals, too-many-nested-blocks
 from __future__ import (absolute_import, division, print_function)
@@ -276,7 +282,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
 
     def _reset_table(self):
         """
-        Reset the plot buttons and stitch checkboxes back to thier defualt state
+        Reset the plot buttons and stitch checkboxes back to their default state
         """
         # switches from current to true, to false to make sure stateChanged fires
         self.checkTickAll.setCheckState(2)

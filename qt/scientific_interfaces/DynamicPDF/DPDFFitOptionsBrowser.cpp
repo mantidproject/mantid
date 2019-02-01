@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 #include "DPDFFitOptionsBrowser.h"
 // Mantid headers from other projects
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 // 3rd party library headers
 #include "MantidKernel/Logger.h"
 // System headers
@@ -55,6 +61,6 @@ void DPDFFitOptionsBrowser::customizeBrowser() {
   this->setProperty("CreateOutput", "true");
 }
 
-} // DynamicPDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

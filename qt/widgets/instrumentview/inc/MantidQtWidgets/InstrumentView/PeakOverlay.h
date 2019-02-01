@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDPLOT_PEAKOVERLAY_H_
 #define MANTIDPLOT_PEAKOVERLAY_H_
 
-#include "Shape2DCollection.h"
 #include "PeakMarker2D.h"
+#include "Shape2DCollection.h"
 
 #include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -17,8 +23,8 @@ namespace Mantid {
 namespace API {
 class IPeak;
 class IPeaksWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -26,11 +32,11 @@ namespace MantidWidgets {
 class UnwrappedSurface;
 
 /**
-* Class for managing overlapping peak labels and drawing them on screen.
-* If labels of two or more peaks overlap they are combined into a single label.
-* A label shows three numbers h,k, and l. A combined label replaces non-equal
-* numbers of included markers with its letter.
-*/
+ * Class for managing overlapping peak labels and drawing them on screen.
+ * If labels of two or more peaks overlap they are combined into a single label.
+ * A label shows three numbers h,k, and l. A combined label replaces non-equal
+ * numbers of included markers with its letter.
+ */
 class PeakHKL {
 public:
   PeakHKL(PeakMarker2D *m, const QRectF &trect, bool sr);
@@ -110,8 +116,8 @@ private:
 };
 
 /**
-* Class for managing peak markers on an unwrapped instrument surface.
-*/
+ * Class for managing peak markers on an unwrapped instrument surface.
+ */
 class PeakOverlay : public Shape2DCollection,
                     public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
@@ -159,8 +165,8 @@ private:
   mutable QList<PeakHKL> m_labels;
   boost::shared_ptr<Mantid::API::IPeaksWorkspace>
       m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
-  UnwrappedSurface *
-      m_surface; ///< pointer to the surface this overlay is applied to
+  UnwrappedSurface
+      *m_surface; ///< pointer to the surface this overlay is applied to
   mutable int m_precision;
   mutable bool m_showRows;   ///< flag to show peak row index
   mutable bool m_showLabels; ///< flag to show peak hkl labels
@@ -170,7 +176,7 @@ private:
   static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MANTIDPLOT_PEAKOVERLAY_H_*/

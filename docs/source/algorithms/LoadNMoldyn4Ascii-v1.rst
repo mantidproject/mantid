@@ -12,7 +12,7 @@ Description
 Loads data from version 4 of nMOLDYN saved in the ASCII format after being
 extracted from the ``.tar`` archive.
 
-Functions can be provided with ot without the comma between multiple dependant
+Functions can be provided with or without the comma between multiple dependent
 variables, for example a function names ``f(q,t_H)`` in nMOLDYN can be loaded
 using either ``f(q,t)_H`` or ``f(qt)_H`` as a function name in this algorithm.
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAMITERATORTEST_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAMITERATORTEST_H_
 
@@ -96,6 +102,16 @@ public:
     std::advance(begin, std::distance(begin, end) / 2);
     TS_ASSERT_DIFFERS(begin, end);
     TS_ASSERT_EQUALS(std::distance(begin, end), 2);
+  }
+
+  void test_iterate_over_histogram_x_errors() {
+    Histogram hist(Points{1.1, 1.2, 1.3}, Counts{5, 4, 6});
+    hist.setPointStandardDeviations(PointStandardDeviations{0.1, 0.3, 0.5});
+    const auto dX = hist.dataDx();
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), dX.begin(),
+                         [](const HistogramItem &item, const double &dx) {
+                           return item.centerError() == dx;
+                         }));
   }
 
   void test_iterate_over_histogram_counts() {
@@ -301,9 +317,10 @@ public:
 
   void test_convert_counts_to_frequency_for_each_item_sparse() {
     double total = 0;
+    double floor = static_cast<double>(histSize) - 5.0;
     for (size_t i = 0; i < nHists; i++) {
       for (auto &item : m_hist) {
-        if (item.counts() > histSize - 5)
+        if (item.counts() > floor)
           total += item.frequency();
       }
     }
@@ -311,11 +328,12 @@ public:
 
   void test_convert_counts_to_frequency_once_per_histogram_sparse() {
     double total = 0;
+    double floor = static_cast<double>(histSize) - 5.0;
     for (size_t i = 0; i < nHists; i++) {
       const auto &counts = m_hist.counts();
       const auto &frequencies = m_hist.frequencies();
       for (size_t j = 0; j < histSize; ++j)
-        if (counts[j] > histSize - 5)
+        if (counts[j] > floor)
           total += frequencies[j];
     }
   }

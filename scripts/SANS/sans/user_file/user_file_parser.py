@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, too-many-instance-attributes, too-many-branches, too-few-public-methods
 
 from __future__ import (absolute_import, division, print_function)
@@ -6,7 +12,7 @@ import re
 from math import copysign
 
 
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType)
+from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
@@ -54,7 +60,8 @@ def extract_int_range(to_extract):
 def extract_list(to_extract, separator, converter):
     to_extract = to_extract.strip()
     to_extract = ' '.join(to_extract.split())
-    string_list = [element.replace(" ", "") for element in to_extract.split(separator)]
+    string_list = [element.replace(" ", "") for element in re.split(separator, to_extract)]
+    string_list = [element for element in string_list if element != ""]
     return [converter(element) for element in string_list]
 
 
@@ -69,7 +76,8 @@ def extract_string_list(to_extract, separator=","):
 def extract_float_range_midpoint_and_steps(to_extract, separator):
     to_extract = ' '.join(to_extract.split())
 
-    entries_string = to_extract.split(separator)
+    entries_string = re.split(separator, to_extract)
+    entries_string = [element for element in entries_string if element != ""]
     number_of_entries = len(entries_string)
     if number_of_entries != 5:
         raise RuntimeError("Expected a range defined by 5 numbers,"
@@ -107,6 +115,7 @@ start_string = "^\\s*"
 end_string = "\\s*$"
 space_string = "\\s+"
 rebin_string = "(\\s*[-+]?\\d+(\\.\\d+)?)(\\s*,\\s*[-+]?\\d+(\\.\\d+)?)*"
+comma_or_space_separator_string = ",? *"  # Will split the input string if commas OR spaces separate values
 
 
 # ----------------------------------------------------------------
@@ -143,7 +152,7 @@ class UserFileComponentParser(object):
 class BackParser(UserFileComponentParser):
     """
     The BackParser handles the following structure
-        Command | Qualifer    | Parameter
+        Command | Qualifier    | Parameter
         BACK    / MON/TIMES     t1 t2
         BACK    / M m/TIMES      t1 t2
         BACK    / M m            t1 t2
@@ -243,6 +252,44 @@ class BackParser(UserFileComponentParser):
     @abc.abstractmethod
     def get_type_pattern():
         return "\\s*" + BackParser.get_type() + "\\s*/\\s*"
+
+
+class InstrParser(object):
+    """
+    InstrParser looks to find the instrument.
+    Compared to other parsers, this is a naive implementation
+    which expects a line in the user file to explicitly state the instrument,
+    with no other data.
+    Because of this, we are trying to match exact strings, and so do not use regex.
+    """
+    Type = "INSTR"
+    _INSTRUMENTS = ["LOQ", "LARMOR", "SANS2D", "ZOOM", "NOINSTRUMENT"]
+
+    INSTRUMENTS_DICT = {"LOQ": SANSInstrument.LOQ,
+                        "LARMOR": SANSInstrument.LARMOR,
+                        "SANS2D": SANSInstrument.SANS2D,
+                        "ZOOM": SANSInstrument.ZOOM}
+
+    @staticmethod
+    def parse_line(line):
+        try:
+            ret_val = InstrParser.INSTRUMENTS_DICT[line]
+        except KeyError:
+            raise RuntimeError("InstrParser: Unknown command for INSTR: {0}".format(line))
+        else:
+            # If no exception raised
+            return {DetectorId.instrument: ret_val}
+
+    @staticmethod
+    def get_type():
+        return InstrParser.Type
+
+    @staticmethod
+    def get_type_pattern(line):
+        if line in InstrParser._INSTRUMENTS:
+            return True
+        else:
+            return False
 
 
 class DetParser(UserFileComponentParser):
@@ -464,7 +511,7 @@ class LimitParser(UserFileComponentParser):
         L/PHI[/NOMIRROR] d1 d2
 
         L/Q/ q1 q2 [dq[/LIN]]  or  L/Q q1 q2 [dq[/LOG]]
-        L/Q q1,dq1,q3,dq2,q2 [/LIN]]  or  L/Q q1,dq1,q3,dq2,q2 [/LOG]]
+        L/Q q1,dq1,q2,dq2,q3 [/LIN]]  or  L/Q q1,dq1,q2,dq2,q3 [/LOG]]
         but apparently also L/Q q1, dq1, q2, dq2, q3, dq3, ... [/LOG | /LIN] is allowed
 
         L/Q/RCut c
@@ -521,8 +568,12 @@ class LimitParser(UserFileComponentParser):
         self._q = "\\s*Q\\s*"
         self._q_simple_pattern = re.compile(start_string + self._q + space_string +
                                             self._simple_range + end_string)
-        self._q_complex_pattern = re.compile(start_string + self._q + space_string + self._complex_range + end_string)
-        self._q_complex_pattern_2 = re.compile(start_string + self._q + space_string + self._complex_range_2 +
+
+        q_complex_range = ",?".join(self._complex_range.split(","))  # allow comma and space separation for q ranges
+        q_complex_range_2 = ",?".join(self._complex_range_2.split(","))
+
+        self._q_complex_pattern = re.compile(start_string + self._q + space_string + q_complex_range + end_string)
+        self._q_complex_pattern_2 = re.compile(start_string + self._q + space_string + q_complex_range_2 +
                                                end_string)
 
         # Qxy limits
@@ -607,7 +658,7 @@ class LimitParser(UserFileComponentParser):
             # We have to make sure that there is an odd number of elements
             range_with_steps_string = re.sub(self._q, "", line)
             range_with_steps_string = re.sub(self._lin_or_log, "", range_with_steps_string)
-            range_with_steps = extract_float_list(range_with_steps_string, ",")
+            range_with_steps = extract_float_list(range_with_steps_string, comma_or_space_separator_string)
             pattern_matches = len(range_with_steps) > 5 and (len(range_with_steps) % 2 == 1)
         return pattern_matches
 
@@ -723,7 +774,8 @@ class LimitParser(UserFileComponentParser):
 
         # Remove the step type
         range_with_steps_string = re.sub(self._lin_or_log, "", complex_range_input)
-        range_with_steps = extract_float_range_midpoint_and_steps(range_with_steps_string, ",")
+        range_with_steps = extract_float_range_midpoint_and_steps(range_with_steps_string,
+                                                                  comma_or_space_separator_string)
 
         # Check if there is a sign on the individual steps, this shows if something had been marked as linear or log.
         # If there is an explicit LOG/LIN command, then this overwrites the sign
@@ -747,7 +799,7 @@ class LimitParser(UserFileComponentParser):
 
         # Remove the step type
         range_with_steps_string = re.sub(self._lin_or_log, "", complex_range_input)
-        range_with_steps = extract_float_list(range_with_steps_string, ",")
+        range_with_steps = extract_float_list(range_with_steps_string, comma_or_space_separator_string)
 
         if step_type is not None:
             prefix = -1.0 if step_type is RangeStepType.Log else 1.0
@@ -784,7 +836,7 @@ class MaskParser(UserFileComponentParser):
 
         MASK Ssp1[>Ssp2]
 
-        MASK[/REAR/FRONT/HAB]/TIME t1 t2 or  MASK[/REAR/FRONT/HAB]/T t1 t2 - if no detector is specfied, then mask
+        MASK[/REAR/FRONT/HAB]/TIME t1 t2 or  MASK[/REAR/FRONT/HAB]/T t1 t2 - if no detector is specified, then mask
                                                                              is applied to both detectors.
 
         MASK/LINE width angle [x y]
@@ -1125,7 +1177,7 @@ class SetParser(UserFileComponentParser):
 
         An undocumented feature is:
         SET CENTRE[/MAIN|/HAB] x y [d1 d2]
-        where d1 and d2 are pixel sizes. This is not used in the old parser, but user files have it nontheless.
+        where d1 and d2 are pixel sizes. This is not used in the old parser, but user files have it nonetheless.
 
         SET SCALES s a b c d
     """
@@ -1145,10 +1197,14 @@ class SetParser(UserFileComponentParser):
         self._hab = "\\s*(HAB|FRONT)\\s*"
         self._lab = "\\s*(LAB|REAR|MAIN)\\s*"
         self._hab_or_lab = "\\s*(/" + self._hab + "|/" + self._lab + ")\\s*"
-        self._centre_pattern = re.compile(start_string + self._centre + "\\s*(" + self._hab_or_lab + space_string +
+        self._centre_pattern = re.compile(start_string + self._centre + "\\s*(/" + self._lab + space_string +
                                           ")?\\s*" + float_number + space_string + float_number +
                                           "\\s*(" + space_string + float_number + space_string + float_number +
                                           ")?\\s*" + end_string)
+        self._centre_pattern_HAB = re.compile(start_string + self._centre + "\\s*(/" + self._hab + space_string +
+                                              ")?\\s*" + float_number + space_string + float_number +
+                                              "\\s*(" + space_string + float_number + space_string + float_number +
+                                              ")?\\s*" + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -1159,6 +1215,8 @@ class SetParser(UserFileComponentParser):
             output = self._extract_scales(setting)
         elif self._is_centre(setting):
             output = self._extract_centre(setting)
+        elif self._is_centre_HAB(setting):
+            output = self._extract_centre_HAB(setting)
         else:
             raise RuntimeError("SetParser: Unknown command for SET: {0}".format(line))
         return output
@@ -1168,6 +1226,9 @@ class SetParser(UserFileComponentParser):
 
     def _is_centre(self, line):
         return does_pattern_match(self._centre_pattern, line)
+
+    def _is_centre_HAB(self, line):
+        return does_pattern_match(self._centre_pattern_HAB, line)
 
     def _extract_scales(self, line):
         scales_string = re.sub(self._scales, "", line)
@@ -1179,10 +1240,18 @@ class SetParser(UserFileComponentParser):
     def _extract_centre(self, line):
         detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
         centre_string = re.sub(self._centre, "", line)
-        centre_string = re.sub(self._hab_or_lab, "", centre_string)
+        centre_string = re.sub("/" + self._lab, "", centre_string)
         centre_string = ' '.join(centre_string.split())
         centre = extract_float_list(centre_string, separator=" ")
         return {SetId.centre: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
+
+    def _extract_centre_HAB(self, line):
+        detector_type = DetectorType.HAB if re.search(self._hab, line) is not None else DetectorType.LAB
+        centre_string = re.sub(self._centre, "", line)
+        centre_string = re.sub("/" + self._hab, "", centre_string)
+        centre_string = ' '.join(centre_string.split())
+        centre = extract_float_list(centre_string, separator=" ")
+        return {SetId.centre_HAB: position_entry(pos1=centre[0], pos2=centre[1], detector_type=detector_type)}
 
     @staticmethod
     def get_type():
@@ -1674,7 +1743,7 @@ class FitParser(UserFileComponentParser):
         fit_string = re.sub(self._lin_or_log_or_poly_to_remove, "", fit_string)
 
         # We should now have something like [poly_order] [w1 w2]
-        # There are four posibilties
+        # There are four possibilities
         # 1. There is no number
         # 2. There is one number -> it has to be the poly_order
         # 3. There are two numbers -> it has to be the w1 and w2
@@ -2283,6 +2352,10 @@ class UserFileParser(object):
     def _get_correct_parser(self, line):
         line = line.strip()
         line = line.upper()
+
+        if InstrParser.get_type_pattern(line):
+            return InstrParser()
+
         for key in self._parsers:
             parser = self._parsers[key]
             if re.match(parser.get_type_pattern(), line, re.IGNORECASE) is not None:

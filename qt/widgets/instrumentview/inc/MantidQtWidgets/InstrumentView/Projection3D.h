@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROJECTION3D_H_
 #define PROJECTION3D_H_
 
@@ -10,7 +16,6 @@
 #include <QString>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -76,7 +81,7 @@ protected:
   Viewport m_viewport;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* PROJECTION3D_H_ */

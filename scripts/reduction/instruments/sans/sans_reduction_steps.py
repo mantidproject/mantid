@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, arguments-differ, unused-variable
 """
     Implementation of reduction steps for SANS
@@ -95,7 +101,7 @@ class BaseTransmission(ReductionStep):
 
     def set_dark_current(self, dark_current=None):
         """
-            Set the dark current data file to be subtracted from each tranmission data file
+            Set the dark current data file to be subtracted from each transmission data file
             @param dark_current: path to dark current data file
         """
         self._dark_current_data = dark_current
@@ -173,7 +179,7 @@ class Mask(ReductionStep):
 
     def __init__(self):
         """
-            Initalize masking
+            Initialize masking
         """
         super(Mask, self).__init__()
         self._nx_low = 0
@@ -217,7 +223,7 @@ class Mask(ReductionStep):
 
     def _infinite_plane(self, id, plane_pt, normal_pt, complement=False):
         """
-            Generates xml code for an infinte plane
+            Generates xml code for an infinite plane
             @param id: a string to refer to the shape by
             @param plane_pt: a point in the plane
             @param normal_pt: the direction of a normal to the plane
@@ -232,7 +238,7 @@ class Mask(ReductionStep):
     def _infinite_cylinder(self, centre, radius, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
-            @param centre: a tupple for a point on the axis
+            @param centre: a tuple for a point on the axis
             @param radius: cylinder radius
             @param axis: cylinder orientation
             @param id: a string to refer to the shape by
@@ -246,7 +252,7 @@ class Mask(ReductionStep):
     def _finite_cylinder(self, centre, radius, height, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
-            @param centre: a tupple for a point on the axis
+            @param centre: a tuple for a point on the axis
             @param radius: cylinder radius
             @param height: cylinder height
             @param axis: cylinder orientation
@@ -389,7 +395,7 @@ class CalculateNorm(object):
         distribution/non-distribution flag set correctly as they maybe converted
 
         ISIS only
-        ORNL doesnt't use that approach
+        ORNL doesn't use that approach
 
     """
     TMP_WORKSPACE_NAME = '__CalculateNorm_loaded_temp'

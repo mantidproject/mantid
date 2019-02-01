@@ -2,7 +2,7 @@
  Stats
 =======
 
-This a python binding to the C++ class Mantid::Kernel::Stats.
+This is a Python binding to the C++ class Mantid::Kernel::Stats.
 
 
 .. module:`mantid.kernel`

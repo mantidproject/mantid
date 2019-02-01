@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSurfaceContourPlotGenerator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidPlotUtilities.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidPlotUtilities.h"
 #include <MantidQtWidgets/Common/MantidDisplayBase.h>
 
 using namespace MantidQt::MantidWidgets;
-using Mantid::API::WorkspaceGroup_const_sptr;
-using Mantid::API::WorkspaceGroup_sptr;
+using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::MatrixWorkspace;
+using Mantid::API::WorkspaceGroup_const_sptr;
+using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::HistogramData::Histogram;
 
 /**
@@ -160,10 +166,11 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
   // If it's a contour plot, make a histo workspace.
   const auto xMode = graphType == Type::Contour ? Histogram::XMode::BinEdges
                                                 : Histogram::XMode::Points;
-  const auto xSize = graphType == Type::Contour ? firstWS->blocksize() + 1
-                                                : firstWS->blocksize();
+  const auto firstBlocksize = firstWS->blocksize();
+  const auto xSize =
+      graphType == Type::Contour ? firstBlocksize + 1 : firstBlocksize;
   matrixWS = Mantid::API::WorkspaceFactory::Instance().create(
-      firstWS, nWorkspaces, xSize, firstWS->blocksize());
+      firstWS, nWorkspaces, xSize, firstBlocksize);
   matrixWS->setYUnitLabel(firstWS->YUnitLabel());
 
   // For each workspace in group, add data and log values

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_VOIGTTEST_H_
 #define MANTID_CURVEFITTING_VOIGTTEST_H_
 
@@ -9,12 +15,12 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Jacobian.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/scoped_ptr.hpp>
 
-using Mantid::CurveFitting::Functions::Voigt;
 using Mantid::API::IFunction;
 using Mantid::API::IPeakFunction;
+using Mantid::CurveFitting::Functions::Voigt;
 
 class VoigtTest : public CxxTest::TestSuite {
 public:

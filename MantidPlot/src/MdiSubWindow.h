@@ -136,7 +136,7 @@ public:
   //! Possible window captions.
   enum CaptionPolicy {
     Name = 0,  //!< caption determined by the window name
-    Label = 1, //!< caption detemined by the window label
+    Label = 1, //!< caption determined by the window label
     Both = 2   //!< caption = "name - label"
   };
   enum Status { Hidden = -1, Normal = 0, Minimized = 1, Maximized = 2 };
@@ -198,7 +198,7 @@ public slots:
   //! Size of the widget as a string
   virtual QString sizeToString();
 
-  //!Notifies that a window was hidden by a direct user action
+  //! Notifies that a window was hidden by a direct user action
   virtual void setHidden();
 
   // event handlers
@@ -234,7 +234,7 @@ public slots:
    * lines to be ignored.
    * It creates a temporary file with '\n' terminated lines which can be
    * correctly read by QTextStream
-   * and returnes a path to this file.
+   * and returns a path to this file.
    */
   static QString parseAsciiFile(const QString &fname,
                                 const QString &commentString, int endLine,
@@ -307,7 +307,7 @@ signals:
   void dockToMDIArea(MdiSubWindow *);
   //! Emitted when the window wants to undock
   void undockFromMDIArea(MdiSubWindow *);
-  /// Emited to detach this window from any parent - docked or floating
+  /// Emitted to detach this window from any parent - docked or floating
   void detachFromParent(MdiSubWindow *);
 
   void dragMousePress(QPoint);

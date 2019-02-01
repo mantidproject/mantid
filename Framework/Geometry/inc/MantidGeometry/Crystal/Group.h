@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_GROUP_H_
 #define MANTID_GEOMETRY_GROUP_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Tolerance.h"
 
-#include <vector>
 #include <set>
+#include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -128,26 +134,6 @@ private:
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 03/10/2014
-
-    Copyright © 2014 PSI-MSS
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 class MANTID_GEOMETRY_DLL Group {
 public:
@@ -213,10 +199,10 @@ Group_const_sptr
 create(const std::vector<SymmetryOperation> &symmetryOperations) {
   return boost::make_shared<const T>(symmetryOperations);
 }
-}
+} // namespace GroupFactory
 
-MANTID_GEOMETRY_DLL Group_const_sptr
-operator*(const Group_const_sptr &lhs, const Group_const_sptr &rhs);
+MANTID_GEOMETRY_DLL Group_const_sptr operator*(const Group_const_sptr &lhs,
+                                               const Group_const_sptr &rhs);
 MANTID_GEOMETRY_DLL std::vector<Kernel::V3D>
 operator*(const Group_const_sptr &lhs, const Kernel::V3D &rhs);
 MANTID_GEOMETRY_DLL bool operator==(const Group_const_sptr &lhs,

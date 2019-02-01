@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDWIDGETS_ERRORCURVE_H
 #define MANTIDWIDGETS_ERRORCURVE_H
 
 #include "DllOption.h"
-#include <qwt_plot_item.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_item.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,7 +36,7 @@ private:
   QPen m_pen;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTIDWIDGETS_ERRORCURVE_H */

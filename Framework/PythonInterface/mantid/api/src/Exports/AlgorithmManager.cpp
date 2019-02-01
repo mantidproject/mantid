@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/AlgorithmIDProxy.h"
@@ -12,6 +18,26 @@ using Mantid::PythonInterface::AlgorithmIDProxy;
 using namespace boost::python;
 
 namespace {
+
+std::once_flag INIT_FLAG;
+
+/**
+ * Returns a reference to the AlgorithmManager object, creating it
+ * if necessary. In addition to creating the object the first call also:
+ *   - register AlgorithmManager.shutdown as an atexit function
+ * @return A reference to the AlgorithmManager instance
+ */
+AlgorithmManagerImpl &instance() {
+  // start the framework (if necessary)
+  auto &mgr = AlgorithmManager::Instance();
+  std::call_once(INIT_FLAG, []() {
+    PyRun_SimpleString("import atexit\n"
+                       "from mantid.api import AlgorithmManager\n"
+                       "atexit.register(lambda: AlgorithmManager.clear())");
+  });
+  return mgr;
+}
+
 /**
  * Return the algorithm identified by the given ID. A wrapper version that takes
  * a
@@ -56,26 +82,20 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
 
 ///@cond
 //------------------------------------------------------------------------------------------------------
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 /// Define overload generators
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,
                                        AlgorithmManagerImpl::create, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
                                        AlgorithmManagerImpl::createUnmanaged, 1,
                                        2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
-}
+} // namespace
 
 void export_AlgorithmManager() {
 
@@ -107,7 +127,7 @@ void export_AlgorithmManager() {
            "Clears the current list of managed algorithms")
       .def("cancelAll", &AlgorithmManagerImpl::cancelAll, arg("self"),
            "Requests that all currently running algorithms be cancelled")
-      .def("Instance", &AlgorithmManager::Instance,
+      .def("Instance", instance,
            return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
       .staticmethod("Instance");

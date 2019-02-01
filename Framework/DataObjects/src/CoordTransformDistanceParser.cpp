@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/CoordTransformDistanceParser.h"
-#include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidAPI/VectorParameterParser.h"
 #include "MantidAPI/SingleValueParameterParser.h"
+#include "MantidAPI/VectorParameterParser.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -80,5 +86,5 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
 
   return transform;
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

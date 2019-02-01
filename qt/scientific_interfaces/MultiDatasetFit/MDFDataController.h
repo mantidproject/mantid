@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDFDATACONTROLLER_H_
 #define MDFDATACONTROLLER_H_
 
@@ -12,7 +18,7 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 
@@ -24,18 +30,18 @@ class MultiDatasetFit;
 namespace MDF {
 
 /**
-  * A class for controlling a table widget containing a list of
-  * data sources for the fit.
-  *
-  * Each data source is described by:
-  *  - workspace name;
-  *  - workspace index;
-  *  - start of the fitting range;
-  *  - end of the fitting range;
-  *
-  * This controller has a pointer to the table widget and controls
-  * its behaviour but not its position on the parent widget.
-  */
+ * A class for controlling a table widget containing a list of
+ * data sources for the fit.
+ *
+ * Each data source is described by:
+ *  - workspace name;
+ *  - workspace index;
+ *  - start of the fitting range;
+ *  - end of the fitting range;
+ *
+ * This controller has a pointer to the table widget and controls
+ * its behaviour but not its position on the parent widget.
+ */
 class DataController : public QObject {
   Q_OBJECT
 public:
@@ -75,8 +81,8 @@ private:
   bool m_isFittingRangeGlobal;
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFDATACONTROLLER_H_*/

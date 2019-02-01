@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGVIEWMOCK_H
 
-#include "MantidKernel/WarningSuppressions.h"
 #include "../EnggDiffraction/IEnggDiffFittingView.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <gmock/gmock.h>
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffFittingView
@@ -32,9 +38,6 @@ public:
   // virtual EnggDiffCalibSettings currentCalibSettings() const;
   MOCK_CONST_METHOD0(currentCalibSettings,
                      MantidQt::CustomInterfaces::EnggDiffCalibSettings());
-
-  // virtual std::string focusingDir() const;
-  MOCK_CONST_METHOD0(focusingDir, std::string());
 
   // virtual std::string enggRunPythonCode(const std::string &pyCode)
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
@@ -165,6 +168,6 @@ public:
                void(const std::vector<std::string> &rows));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGVIEWMOCK_H

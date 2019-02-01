@@ -30,10 +30,10 @@
 #ifndef MVALUESDIALOG_H
 #define MVALUESDIALOG_H
 
-#include <QDialog>
-#include "ScriptingEnv.h"
-#include "Script.h"
 #include "Matrix.h"
+#include "Script.h"
+#include "ScriptingEnv.h"
+#include <QDialog>
 
 #ifdef SCRIPTING_PYTHON
 class QCheckBox;

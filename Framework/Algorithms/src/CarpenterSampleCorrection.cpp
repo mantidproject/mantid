@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CarpenterSampleCorrection.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -16,7 +22,6 @@ using namespace Kernel;
 using namespace API;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
-using std::vector;
 using namespace Geometry;
 
 const std::string CarpenterSampleCorrection::name() const {
@@ -153,5 +158,5 @@ CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr lhsWS,
   return outWS;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

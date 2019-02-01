@@ -30,9 +30,9 @@
 
 #include <QMessageBox>
 
+#include <gsl/gsl_interp.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_spline.h>
-#include <gsl/gsl_interp.h>
 
 Interpolation::Interpolation(ApplicationWindow *parent, Graph *g,
                              const QString &curveTitle, int m)

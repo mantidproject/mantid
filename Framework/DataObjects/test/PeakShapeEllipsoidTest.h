@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDTEST_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
-#include <vector>
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/cow_ptr.h"
 #include <json/json.h>
+#include <vector>
 
 using Mantid::DataObjects::PeakShapeEllipsoid;
 using Mantid::Kernel::SpecialCoordinateSystem;

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import logger
 
@@ -1282,6 +1288,8 @@ class StateDirectorISIS(object):
             check_if_contains_only_one_element(show_transmission, OtherId.show_transmission)
             show_transmission = show_transmission[-1]
             self._adjustment_builder.set_show_transmission(show_transmission)
+        else:
+            self._adjustment_builder.set_show_transmission(True)
 
     def _set_up_save(self, user_file_items):
         if OtherId.save_types in user_file_items:

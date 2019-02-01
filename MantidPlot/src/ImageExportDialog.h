@@ -33,10 +33,10 @@
 
 #include "ExtensibleFileDialog.h"
 
-#include <QSpinBox>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QPrinter>
+#include <QSpinBox>
 
 class QStackedWidget;
 class QGroupBox;
@@ -79,7 +79,7 @@ public:
   //! For vector formats: returns the output resolution the user selected,
   // defaulting to the screen resolution.
   int resolution() const { return d_resolution->value(); }
-  //! For vector formats: returns whether colors should be enabled for ouput
+  //! For vector formats: returns whether colors should be enabled for output
   //(default: true).
   bool color() const { return d_color->isChecked(); }
   //! For vector formats: returns whether the output should preserve aspect

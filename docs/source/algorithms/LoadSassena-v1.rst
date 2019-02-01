@@ -15,7 +15,7 @@ This algorithm reads Sassena output and stores all data in workspaces of
 type :ref:`Workspace2D <Workspace2D>`, grouped under a single
 :ref:`WorkspaceGroup <WorkspaceGroup>`.
 
-Sassena ouput files are in HDF5 format
+Sassena output files are in HDF5 format
 `2 <http://www.hdfgroup.org/HDF5>`__, and can be made up of the
 following datasets: *qvectors*, *fq*, *fq0*, *fq2*, and *fqt*
 

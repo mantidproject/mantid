@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidMDAlgorithms/SaveZODS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/SaveZODS.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -152,5 +158,5 @@ void SaveZODS::exec() {
   file->close();
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

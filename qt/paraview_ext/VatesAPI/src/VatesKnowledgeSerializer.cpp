@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
@@ -88,5 +94,5 @@ bool VatesKnowledgeSerializer::hasFunctionInfo() const {
 bool VatesKnowledgeSerializer::hasGeometryInfo() const {
   return !m_geomXML.empty() && !m_wsName.empty();
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/ConstColumnIterator.h"
 namespace MantidQt {
 namespace MantidWidgets {
@@ -6,10 +12,11 @@ ConstColumnIterator::ConstColumnIterator(QStringIterator names,
                                          QStringIterator descriptions,
                                          QStringIterator algorithmProperties,
                                          BoolIterator isShown,
-                                         QStringIterator prefixes)
+                                         QStringIterator prefixes,
+                                         BoolIterator isKey)
     : m_names(names), m_descriptions(descriptions),
       m_algorithmProperties(algorithmProperties), m_isShown(isShown),
-      m_prefixes(prefixes) {}
+      m_prefixes(prefixes), m_isKey(isKey) {}
 
 ConstColumnIterator &ConstColumnIterator::operator++() {
   ++m_names;
@@ -17,6 +24,7 @@ ConstColumnIterator &ConstColumnIterator::operator++() {
   ++m_algorithmProperties;
   ++m_isShown;
   ++m_prefixes;
+  ++m_isKey;
   return (*this);
 }
 
@@ -36,7 +44,7 @@ bool ConstColumnIterator::operator!=(const ConstColumnIterator &other) const {
 
 auto ConstColumnIterator::operator*() const -> reference {
   return reference(*m_names, *m_algorithmProperties, *m_isShown, *m_prefixes,
-                   *m_descriptions);
+                   *m_descriptions, *m_isKey);
 }
 
 ConstColumnIterator &ConstColumnIterator::operator+=(difference_type n) {
@@ -45,6 +53,7 @@ ConstColumnIterator &ConstColumnIterator::operator+=(difference_type n) {
   m_isShown += n;
   m_prefixes += n;
   m_descriptions += n;
+  m_isKey += n;
   return (*this);
 }
 
@@ -54,8 +63,9 @@ ConstColumnIterator &ConstColumnIterator::operator-=(difference_type n) {
   m_isShown -= n;
   m_prefixes -= n;
   m_descriptions -= n;
+  m_isKey -= n;
   return (*this);
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

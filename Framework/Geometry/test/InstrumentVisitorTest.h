@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_INSTRUMENTVISITORVISITORTEST_H_
 #define MANTID_GEOMETRY_INSTRUMENTVISITORVISITORTEST_H_
 
@@ -196,9 +202,10 @@ public:
         "Should contain the sample id", 1,
         componentIds.count(visitee->getComponentByName("some-surface-holder")
                                ->getComponentID()));
-    TSM_ASSERT_EQUALS("Should contain the source id", 1,
-                      componentIds.count(visitee->getComponentByName("source")
-                                             ->getComponentID()));
+    TSM_ASSERT_EQUALS(
+        "Should contain the source id", 1,
+        componentIds.count(
+            visitee->getComponentByName("source")->getComponentID()));
 
     auto detectorComponentId =
         visitee->getComponentByName("point-detector")->getComponentID();

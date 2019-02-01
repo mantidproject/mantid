@@ -25,7 +25,6 @@ set ( SRC_FILES
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
 	src/DllOpen.cpp
-	src/EmptyValues.cpp
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
 	src/EqualBinsChecker.cpp
@@ -34,7 +33,6 @@ set ( SRC_FILES
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
 	src/FileValidator.cpp
-	src/FilterChannel.cpp
 	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
@@ -133,7 +131,6 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
 	src/NeutronAtom.cpp
 	src/FacilityInfo.cpp
-	src/FilterChannel.cpp
 	src/FileValidator.cpp
 	src/DirectoryValidator.cpp
 	src/PropertyManager.cpp
@@ -166,7 +163,7 @@ set ( INC_FILES
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ConfigObserver.h
 	inc/MantidKernel/ConfigPropertyObserver.h
-  inc/MantidKernel/DateAndTime.h
+        inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTimeHelpers.h
@@ -191,7 +188,6 @@ set ( INC_FILES
 	inc/MantidKernel/Fast_Exponential.h
 	inc/MantidKernel/FileDescriptor.h
 	inc/MantidKernel/FileValidator.h
-	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/FilteredTimeSeriesProperty.h
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
@@ -219,7 +215,6 @@ set ( INC_FILES
 	inc/MantidKernel/Logger.h
 	inc/MantidKernel/MDAxisValidator.h
 	inc/MantidKernel/MDUnit.h
-	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
@@ -247,7 +242,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-  inc/MantidKernel/normal_distribution.h
+        inc/MantidKernel/normal_distribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -361,7 +356,6 @@ set ( TEST_FILES
 	FacilitiesTest.h
 	FileDescriptorTest.h
 	FileValidatorTest.h
-	FilterChannelTest.h
 	FilteredTimeSeriesPropertyTest.h
 	FloatingPointComparisonTest.h
 	FreeBlockTest.h
@@ -594,37 +588,6 @@ set ( COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/ )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository?debug=1" )
 set ( HTML_ROOT ${DOCS_BUILDDIR}/html )
 
-# Construct script paths.
-set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
-# First the required scripts variable...
-# Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
-set ( REQUIREDSCRIPT_SUBDIRS Engineering Inelastic Reflectometry SANS)
-
-# If other external interfaces are added then we need a better approach here..
-set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts;${CMAKE_BINARY_DIR}/scripts/ExternalInterfaces/mslice/src/mslice )
-foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
-  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
-endforeach()
-
-# Second the standard scripts variable. The variable in the file is NOT recursive so add the top level directories from here
-set ( EXCLUDED_DIRS test )
-set ( PYTHONSCRIPT_DIRS "" )
-file ( GLOB SCRIPT_SUBDIRS RELATIVE ${MANTID_SCRIPTS} ${MANTID_SCRIPTS}/* )
-foreach ( SUBDIR ${SCRIPT_SUBDIRS} )
-  set ( DIR ${MANTID_SCRIPTS}/${SUBDIR} )
-  if ( IS_DIRECTORY ${DIR} AND NOT EXISTS ${DIR}/__init__.py )
-    list ( FIND REQUIREDSCRIPT_SUBDIRS ${SUBDIR} HAVE_DIR )
-    list ( FIND EXCLUDED_DIRS ${SUBDIR} EXCLUDE_DIR )
-    if ( HAVE_DIR EQUAL -1 AND EXCLUDE_DIR EQUAL -1 ) # If it is not in REQUIRED and not EXCLUDED
-      if ( PYTHONSCRIPT_DIRS )
-        set ( PYTHONSCRIPT_DIRS "${PYTHONSCRIPT_DIRS};${DIR}" )
-      else()
-        set ( PYTHONSCRIPT_DIRS "${DIR}" ) # Avoid first ;
-      endif()
-    endif()
-  endif()
-endforeach()
-
 # For an mpi-enabled build, do not log to file, format console output (which winds up in a file) differently
 # These settings carry down to the installation configuration below
 if ( MPI_BUILD )
@@ -632,12 +595,6 @@ if ( MPI_BUILD )
   set ( PV_PLUGINS_DIR "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
-  if ( ENABLE_FILE_LOGGING )
-    set ( FILELOGGER_CHANNEL fileFilterChannel )
-  else ()
-    set ( FILELOGGER_CHANNEL "" )
-  endif ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
@@ -650,7 +607,7 @@ configure_file ( ../Properties/Mantid.properties.template
 if(MSVC)
   file(GENERATE
      OUTPUT
-     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
      INPUT
      ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
   )
@@ -667,7 +624,7 @@ endif()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
@@ -679,10 +636,8 @@ endif ()
 
 # Log to file for installed packages but not mpi
 if ( MPI_BUILD OR MPI_EXPERIMENTAL )
-  set ( FILELOGGER_CHANNEL "" )
   set ( ENABLE_NETWORK_ACCESS 0 )
 else ()
-  set ( FILELOGGER_CHANNEL fileFilterChannel )
   set ( ENABLE_NETWORK_ACCESS 1 )
 endif ()
 set ( FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins )
@@ -707,25 +662,6 @@ set ( DATADIRS "" )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository" )
 set ( HTML_ROOT ../share/doc/html )
 
-# script paths
-set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
-set ( REQUIREDSCRIPT_DIRS ${MANTID_SCRIPTS};${MANTID_SCRIPTS}/ExternalInterfaces )
-foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
-  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
-endforeach()
-
-# PYTHONSCRIPT_DIRS
-set ( WITH_SEMICOLONS "" )
-foreach ( DIR ${PYTHONSCRIPT_DIRS} )
-  string ( REGEX REPLACE "${MANTID_ROOT_BUILD}" "${MANTID_ROOT}" DIR ${DIR} )
-  if ( WITH_SEMICOLONS )
-    set ( WITH_SEMICOLONS "${WITH_SEMICOLONS};${DIR}" )
-  else()
-    set ( WITH_SEMICOLONS "${DIR}" ) # Avoid first ;
-  endif()
-endforeach()
-set ( PYTHONSCRIPT_DIRS "${WITH_SEMICOLONS}" )
-
 # For a framework-only (e.g. MPI) build some of these are not relevant and should
 # be left empty to avoid warnings on starting Mantid
 if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
@@ -735,7 +671,7 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
   set ( QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V" )
-  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt%V" )
+  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/plugins/${PVPLUGINS_SUBDIR}/qt%V" )
   set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
 endif ()
 
@@ -744,5 +680,7 @@ configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-          DESTINATION ${BIN_DIR} RENAME Mantid.properties
-)
+          DESTINATION ${BIN_DIR} RENAME Mantid.properties )
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+          DESTINATION ${WORKBENCH_BIN_DIR} RENAME Mantid.properties )

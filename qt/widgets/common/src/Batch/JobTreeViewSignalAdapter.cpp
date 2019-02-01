@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h"
 
 namespace MantidQt {
@@ -32,11 +38,15 @@ void JobTreeViewSignalAdapter::notifyCopyRowsRequested() {
   emit copyRowsRequested();
 }
 
+void JobTreeViewSignalAdapter::notifyCutRowsRequested() {
+  emit cutRowsRequested();
+}
+
 void JobTreeViewSignalAdapter::notifyPasteRowsRequested() {
   emit pasteRowsRequested();
 }
 
 void JobTreeViewSignalAdapter::notifyFilterReset() { emit filterReset(); }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

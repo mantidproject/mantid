@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include <boost/make_shared.hpp>
 
@@ -38,5 +44,5 @@ Mantid::Kernel::SpecialCoordinateSystem
 PeakTransformQLab::getCoordinateSystem() const {
   return Mantid::Kernel::QLab;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

@@ -2,7 +2,7 @@
  Object
 ========
 
-This a python binding to the C++ class Mantid::Geometry::Object.
+This is a Python binding to the C++ class Mantid::Geometry::Object.
 
 
 .. module:`mantid.geometry`

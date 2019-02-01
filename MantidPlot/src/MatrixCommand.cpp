@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : MatrixCommand.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2008 by Ion Vasilief,
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : Matrix undo/redo commands
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -31,9 +20,8 @@
 #include <QApplication>
 #include <gsl/gsl_math.h>
 
-/*************************************************************************/
 /*           Class MatrixEditCellCommand                                 */
-/*************************************************************************/
+
 MatrixEditCellCommand::MatrixEditCellCommand(MatrixModel *model,
                                              const QModelIndex &index,
                                              double valBefore, double valAfter,
@@ -67,9 +55,8 @@ void MatrixEditCellCommand::undo() {
   }
 }
 
-/*************************************************************************/
 /*           Class MatrixSetFormulaCommand                               */
-/*************************************************************************/
+
 MatrixSetFormulaCommand::MatrixSetFormulaCommand(Matrix *m,
                                                  const QString &oldFormula,
                                                  const QString &newFormula,
@@ -93,9 +80,8 @@ void MatrixSetFormulaCommand::undo() {
   d_matrix->setFormula(d_old_formula);
 }
 
-/*************************************************************************/
 /*           Class MatrixSetViewCommand                                  */
-/*************************************************************************/
+
 MatrixSetViewCommand::MatrixSetViewCommand(Matrix *m, Matrix::ViewType oldView,
                                            Matrix::ViewType newView,
                                            const QString &text)
@@ -118,9 +104,8 @@ void MatrixSetViewCommand::undo() {
   d_matrix->setViewType(d_old_view);
 }
 
-/*************************************************************************/
 /*           Class MatrixSetHeaderViewCommand                            */
-/*************************************************************************/
+
 MatrixSetHeaderViewCommand::MatrixSetHeaderViewCommand(
     Matrix *m, Matrix::HeaderViewType oldView, Matrix::HeaderViewType newView,
     const QString &text)
@@ -143,9 +128,8 @@ void MatrixSetHeaderViewCommand::undo() {
   d_matrix->setHeaderViewType(d_old_view);
 }
 
-/*************************************************************************/
 /*           Class MatrixSetColWidthCommand                              */
-/*************************************************************************/
+
 MatrixSetColWidthCommand::MatrixSetColWidthCommand(Matrix *m, int oldWidth,
                                                    int newWidth,
                                                    const QString &text)
@@ -168,9 +152,8 @@ void MatrixSetColWidthCommand::undo() {
   d_matrix->setColumnsWidth(d_old_width);
 }
 
-/*************************************************************************/
 /*           Class MatrixSetPrecisionCommand                             */
-/*************************************************************************/
+
 MatrixSetPrecisionCommand::MatrixSetPrecisionCommand(Matrix *m,
                                                      const QChar &oldFormat,
                                                      const QChar &newFormat,
@@ -195,9 +178,8 @@ void MatrixSetPrecisionCommand::undo() {
   d_matrix->setNumericFormat(d_old_format, d_old_prec);
 }
 
-/*************************************************************************/
 /*           Class MatrixSetCoordinatesCommand                           */
-/*************************************************************************/
+
 MatrixSetCoordinatesCommand::MatrixSetCoordinatesCommand(
     Matrix *m, double oxs, double oxe, double oys, double oye, double nxs,
     double nxe, double nys, double nye, const QString &text)
@@ -221,9 +203,8 @@ void MatrixSetCoordinatesCommand::undo() {
   d_matrix->setCoordinates(d_old_xs, d_old_xe, d_old_ys, d_old_ye);
 }
 
-/*************************************************************************/
 /*           Class MatrixSetColorMapCommand                              */
-/*************************************************************************/
+
 MatrixSetColorMapCommand::MatrixSetColorMapCommand(
     Matrix *m, Matrix::ColorMapType type_before,
     const QwtLinearColorMap &map_before, Matrix::ColorMapType type_after,
@@ -274,9 +255,8 @@ void MatrixSetColorMapCommand::undo() {
   }
 }
 
-/*************************************************************************/
 /*           Class MatrixDeleteRowsCommand                               */
-/*************************************************************************/
+
 MatrixDeleteRowsCommand::MatrixDeleteRowsCommand(MatrixModel *model,
                                                  int startRow, int count,
                                                  double *data,
@@ -312,9 +292,8 @@ void MatrixDeleteRowsCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-/*************************************************************************/
 /*           Class MatrixInsertRowCommand                                */
-/*************************************************************************/
+
 MatrixInsertRowCommand::MatrixInsertRowCommand(MatrixModel *model, int startRow,
                                                const QString &text)
     : QUndoCommand(text), d_model(model), d_start_row(startRow) {
@@ -339,9 +318,8 @@ void MatrixInsertRowCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-/*************************************************************************/
 /*           Class MatrixDeleteColsCommand                               */
-/*************************************************************************/
+
 MatrixDeleteColsCommand::MatrixDeleteColsCommand(MatrixModel *model,
                                                  int startCol, int count,
                                                  double *data,
@@ -379,9 +357,8 @@ void MatrixDeleteColsCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-/*************************************************************************/
 /*           Class MatrixInsertColCommand                                */
-/*************************************************************************/
+
 MatrixInsertColCommand::MatrixInsertColCommand(MatrixModel *model, int startCol,
                                                const QString &text)
     : QUndoCommand(text), d_model(model), d_start_col(startCol) {
@@ -406,9 +383,8 @@ void MatrixInsertColCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-/*************************************************************************/
 /*           Class MatrixSetSizeCommand                                */
-/*************************************************************************/
+
 MatrixSetSizeCommand::MatrixSetSizeCommand(MatrixModel *model,
                                            const QSize &oldSize,
                                            const QSize &newSize, double *data,
@@ -450,9 +426,8 @@ void MatrixSetSizeCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-/*************************************************************************/
 /*           Class MatrixUndoCommand                           */
-/*************************************************************************/
+
 MatrixUndoCommand::MatrixUndoCommand(MatrixModel *model, Matrix::Operation op,
                                      int startRow, int endRow, int startCol,
                                      int endCol, double *data,
@@ -504,9 +479,8 @@ void MatrixUndoCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-/*************************************************************************/
 /*           Class MatrixFftCommand                                      */
-/*************************************************************************/
+
 MatrixFftCommand::MatrixFftCommand(bool inverse, MatrixModel *model,
                                    int startRow, int endRow, int startCol,
                                    int endCol, double *data,
@@ -522,9 +496,8 @@ void MatrixFftCommand::redo() {
   d_model->fft(d_inverse);
 }
 
-/*************************************************************************/
 /*           Class MatrixSetImageCommand                           */
-/*************************************************************************/
+
 MatrixSetImageCommand::MatrixSetImageCommand(MatrixModel *model,
                                              const QImage &image,
                                              Matrix::ViewType oldView,
@@ -555,9 +528,8 @@ void MatrixSetImageCommand::redo() {
   m->displayImage(d_image);
 }
 
-/*************************************************************************/
 /*           Class MatrixImportAsciiCommand                              */
-/*************************************************************************/
+
 MatrixImportAsciiCommand::MatrixImportAsciiCommand(
     const QString &fname, const QString &sep, int ignoredLines,
     bool stripSpaces, bool simplifySpaces, const QString &commentString,
@@ -580,9 +552,8 @@ void MatrixImportAsciiCommand::redo() {
                        d_end_line, d_max_rows);
 }
 
-/*************************************************************************/
 /*           Class MatrixSymmetryOperation                                */
-/*************************************************************************/
+
 MatrixSymmetryOperation::MatrixSymmetryOperation(MatrixModel *model,
                                                  Matrix::Operation op,
                                                  const QString &text)
@@ -648,9 +619,8 @@ void MatrixSymmetryOperation::undo() {
   d_model->matrix()->resetView();
 }
 
-/*************************************************************************/
 /*           Class MatrixPasteCommand                               	 */
-/*************************************************************************/
+
 MatrixPasteCommand::MatrixPasteCommand(MatrixModel *model, int startRow,
                                        int endRow, int startCol, int endCol,
                                        double *clipboardData, int rows,

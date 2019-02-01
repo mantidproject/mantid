@@ -11,9 +11,9 @@ Description
 
 This algorithm Corrects the time of flight (TOF) of an indirect geometry
 instrument by substracting a time offset :math:`t_0` linearly dependent
-on the wavelenght of the neutron when emitted through the moderator.
+on the wavelength of the neutron when emitted through the moderator.
 This algorithm is suitable to data reduction of indirect instruments
-featuring a neutron flux with a narrow distribution of wavelenghts. A
+featuring a neutron flux with a narrow distribution of wavelengths. A
 empirical formula for the correction, stored in the instrument
 definition file, is taken as linear on the initial neutron wavelength
 :math:`\lambda_i`: :math:`t_0 = a * \lambda_i + b`,

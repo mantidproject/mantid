@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
@@ -662,7 +668,7 @@ def AdvancedProperties(adv_prop_definition):
 
 def iliad(reduce):
     """ This decorator wraps around main procedure and switch input from
-        web variables to properties or vise versa depending on web variables
+        web variables to properties or vice versa depending on web variables
         presence
     """
     def iliad_wrapper(*args):

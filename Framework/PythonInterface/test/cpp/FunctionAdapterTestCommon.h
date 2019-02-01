@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FUNCTIONADAPTERTESTCOMMON_H
 #define FUNCTIONADAPTERTESTCOMMON_H
 
@@ -103,7 +109,7 @@ private:
   size_t m_np;
   std::vector<double> m_data;
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // FUNCTIONADAPTERTESTCOMMON_H

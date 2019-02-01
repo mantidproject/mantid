@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/WorkflowAlgorithmRunner.h"
 
 #include "MantidAPI/ITableWorkspace.h"
@@ -16,7 +22,7 @@ namespace PropertyNames {
 const static std::string ALGORITHM("Algorithm");
 const static std::string IO_MAP("InputOutputMap");
 const static std::string SETUP_TABLE("SetupTable");
-}
+} // namespace PropertyNames
 
 /** Checks if a string is a hard coded workspace name.
  * @param s string to be checked

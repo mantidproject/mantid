@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef REPLACESPECIALVALUESTEST_H_
 #define REPLACESPECIALVALUESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <limits>
+#include "MantidAlgorithms/ReplaceSpecialValues.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
 #define MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Unit.h"
 #include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/QLab.h"

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef EXTRACTFFTSPECTRUM_H_
 #define EXTRACTFFTSPECTRUM_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ExtractFFTSpectrum.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadNexus.h"
+#include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -81,7 +87,7 @@ public:
     TS_ASSERT_EQUALS(inputWS->blocksize(), outputWS->blocksize());
 
     // Units ( Axis 1 should be the same, Axis 0 should be "Time/ns"
-    TS_ASSERT_EQUALS(inputWS->getAxis(1)->unit(), outputWS->getAxis(1)->unit());
+    TS_ASSERT(*inputWS->getAxis(1)->unit() == *outputWS->getAxis(1)->unit());
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Time");
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "ns");
   }

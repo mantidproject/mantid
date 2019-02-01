@@ -6,7 +6,7 @@
 # Find the installed version of PyQt5. FindPyQt5 should only be called after
 # Python has been found.
 #
-# This file defines the following variables, which can also be overriden by
+# This file defines the following variables, which can also be overridden by
 # users:
 #
 # PYQT5_VERSION - The version of PyQt5 found expressed as a 6 digit hex number

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------
 // Includes
 //------------------------------------------
@@ -60,6 +66,6 @@ template <> DLLExport bool checkIsEmpty(const int64_t &value) {
 template <> DLLExport bool checkIsEmpty(const OptionalBool &value) {
   return (value.getValue() == OptionalBool::Unset);
 }
-}
-}
-}
+} // namespace Detail
+} // namespace Kernel
+} // namespace Mantid

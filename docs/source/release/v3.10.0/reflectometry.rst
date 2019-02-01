@@ -5,7 +5,7 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-- Geometry for ``INTER`` has a small correction for the value of one of the attributes that was being intepreted as zero.
+- Geometry for ``INTER`` has a small correction for the value of one of the attributes that was being interpreted as zero.
 
 Algorithms
 ----------

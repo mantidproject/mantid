@@ -10,7 +10,7 @@ Event Workspace
 What is it for?
 ______________________
 
-Event Workspaces are specialised for time-of-flight neutron scattering. Event Workspaces are designed for sparse data storage of neutron events. Individual detector observations, including information about when that observation was made are stored as discrete items inside the workspace. The ability to keep more detailed information gives a number of advantages over coverting directly to a compressed form, such as allowing  more powerful filtering operations to be used.  
+Event Workspaces are specialised for time-of-flight neutron scattering. Event Workspaces are designed for sparse data storage of neutron events. Individual detector observations, including information about when that observation was made are stored as discrete items inside the workspace. The ability to keep more detailed information gives a number of advantages over converting directly to a compressed form, such as allowing  more powerful filtering operations to be used.  
 
 Summary for Users
 -----------------------
@@ -39,7 +39,7 @@ maintained. For you as a user, this means that:
 Working with Event Workspaces in Python
 ----------------------------------------
 
-The python options for an Event Workspace are limitied - it is designed to be able to be read (but not written to)
+The python options for an Event Workspace are limited - it is designed to be able to be read (but not written to)
 like a :ref:`MatrixWorkspace <MatrixWorkspace>`.  You can look at the :ref:`Event Workspace API reference <mantid.api.IEventWorkspace>` for a full list of properties and operations, but here are some of the key ones.
 
 Accessing Workspaces

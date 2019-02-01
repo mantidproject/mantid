@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_
 #define MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_
 
-#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
+#include <QGridLayout>
 #include <QHash>
 #include <QSignalMapper>
-#include <QGridLayout>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -31,7 +37,7 @@ private:
   /// the layout that widgets are added to
   QGridLayout *m_Grid;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_

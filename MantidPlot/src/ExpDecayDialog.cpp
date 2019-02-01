@@ -28,20 +28,20 @@
  *                                                                         *
  ***************************************************************************/
 #include "ExpDecayDialog.h"
-#include "Graph.h"
-#include "ColorBox.h"
 #include "ApplicationWindow.h"
-#include "Fit.h"
+#include "ColorBox.h"
 #include "ExponentialFit.h"
+#include "Fit.h"
+#include "Graph.h"
 
-#include <QMessageBox>
-#include <QLayout>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
 #include <QCloseEvent>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
 
 ExpDecayDialog::ExpDecayDialog(int type, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), fitter(nullptr), graph(nullptr), buttonFit(nullptr),
@@ -207,9 +207,13 @@ void ExpDecayDialog::fit() {
   int precision = app->fit_output_precision;
 
   if (slopes == 3) {
-    double x_init[7] = {
-        1.0, boxFirst->text().toDouble(), 1.0, boxSecond->text().toDouble(),
-        1.0, boxThird->text().toDouble(), boxYOffset->text().toDouble()};
+    double x_init[7] = {1.0,
+                        boxFirst->text().toDouble(),
+                        1.0,
+                        boxSecond->text().toDouble(),
+                        1.0,
+                        boxThird->text().toDouble(),
+                        boxYOffset->text().toDouble()};
     delete fitter;
     fitter = new ThreeExpFit(app, graph);
     fitter->setInitialGuesses(x_init);

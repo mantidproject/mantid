@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
@@ -6,8 +12,8 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
-#include <tuple>
 #include <numeric>
+#include <tuple>
 
 extern "C" {
 #include <cstdio>
@@ -314,9 +320,8 @@ bool Integrate3DEvents::correctForDetectorEdges(
   auto h3 = 1.0 - detectorQ(E1Vecs, peak_q, bkgOuterRadii);
   // scaled from area of circle minus segment when r normalized to 1
   auto m3 = std::sqrt(
-      1.0 -
-      (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
-          M_PI);
+      1.0 - (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
+                M_PI);
   auto h1 = 1.0 - detectorQ(E1Vecs, peak_q, axesRadii);
   // Do not use peak if edge of detector is inside integration radius
   if (h1 > 0.0)
@@ -326,10 +331,9 @@ bool Integrate3DEvents::correctForDetectorEdges(
   if (r2 != r1) {
     auto h2 = 1.0 - detectorQ(E1Vecs, peak_q, bkgInnerRadii);
     // scaled from area of circle minus segment when r normalized to 1
-    auto m2 = std::sqrt(
-        1.0 -
-        (std::acos(1.0 - h2) - (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
-            M_PI);
+    auto m2 = std::sqrt(1.0 - (std::acos(1.0 - h2) -
+                               (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
+                                  M_PI);
     r2 *= m2;
   }
 
@@ -802,10 +806,9 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
   if (!E1Vec.empty()) {
     double h3 = 1.0 - detectorQ(E1Vec, peak_q, abcBackgroundOuterRadii);
     // scaled from area of circle minus segment when r normalized to 1
-    double m3 = std::sqrt(
-        1.0 -
-        (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
-            M_PI);
+    double m3 = std::sqrt(1.0 - (std::acos(1.0 - h3) -
+                                 (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
+                                    M_PI);
     double h1 = 1.0 - detectorQ(E1Vec, peak_q, axes_radii);
     // Do not use peak if edge of detector is inside integration radius
     if (h1 > 0.0)
@@ -816,10 +819,9 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     if (r2 != r1) {
       double h2 = 1.0 - detectorQ(E1Vec, peak_q, abcBackgroundInnerRadii);
       // scaled from area of circle minus segment when r normalized to 1
-      double m2 = std::sqrt(
-          1.0 -
-          (std::acos(1.0 - h2) - (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
-              M_PI);
+      double m2 = std::sqrt(1.0 - (std::acos(1.0 - h2) -
+                                   (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
+                                      M_PI);
       r2 *= m2;
     }
   }
@@ -856,9 +858,9 @@ double Integrate3DEvents::detectorQ(std::vector<Kernel::V3D> E1Vec,
                                     const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {
-    V3D distv = QLabFrame -
-                E1 * (QLabFrame.scalar_prod(
-                         E1)); // distance to the trajectory as a vector
+    V3D distv =
+        QLabFrame - E1 * (QLabFrame.scalar_prod(
+                             E1)); // distance to the trajectory as a vector
     double quot0 = distv.norm() / *(std::min_element(r.begin(), r.end()));
     if (quot0 < quot) {
       quot = quot0;

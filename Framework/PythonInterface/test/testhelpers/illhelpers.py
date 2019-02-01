@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
@@ -17,7 +23,6 @@ def _fillTemplateReflectometryWorkspace(ws):
     """Fill a reflectometry workspace with somewhat sane data."""
     nHistograms = ws.getNumberHistograms()
     binWidth = 57.
-    monitorCounts = 5e8
     templateXs = numpy.array(numpy.arange(-300., 55000., binWidth))
     nBins = len(templateXs) - 1
     xs = numpy.tile(templateXs, nHistograms)
@@ -89,14 +94,13 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     xs = numpy.empty(nHistograms*(nBins+1))
     ys = numpy.empty(nHistograms*nBins)
     es = numpy.empty(nHistograms*nBins)
+    spectrumInfo = templateWS.spectrumInfo()
     instrument = templateWS.getInstrument()
-    sample = instrument.getSample()
-    l1 = sample.getDistance(instrument.getSource())
+    l1 = spectrumInfo.l1()
     l2 = float(instrument.getStringParameter('l2')[0])
     tofElastic = UnitConversion.run('Energy', 'TOF', E_i, l1, l2, 0.0, DeltaEModeType.Direct, 0.0)
     tofBegin = tofElastic - elasticIndex * binWidth
-    monitor = instrument.getDetector(0)
-    monitorSampleDistance = sample.getDistance(monitor)
+    monitorSampleDistance = 0.5
     tofElasticMonitor = tofBegin + monitorElasticIndex * binWidth
     tofMonitorDetector = UnitConversion.run('Energy', 'TOF', E_i, monitorSampleDistance, l2, 0.0,
                                             DeltaEModeType.Direct, 0.0)
@@ -116,11 +120,11 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
             ys[yIndexOffset+binIndex] = y
             es[yIndexOffset+binIndex] = numpy.sqrt(y)
 
-    fillBins(0, tofElasticMonitor, 1623 * elasticPeakHeight, bkgMonitor)
-    for histogramIndex in range(1, nHistograms):
-        trueL2 = sample.getDistance(templateWS.getDetector(histogramIndex))
+    for histogramIndex in range(0, nHistograms - 1):
+        trueL2 = spectrumInfo.l2(histogramIndex)
         trueTOF = UnitConversion.run('Energy', 'TOF', E_i, l1, trueL2, 0.0, DeltaEModeType.Direct, 0.0)
         fillBins(histogramIndex, trueTOF, elasticPeakHeight, bkgLevel)
+    fillBins(nHistograms - 1, tofElasticMonitor, 1623 * elasticPeakHeight, bkgMonitor)
     kwargs = {
         'DataX': xs,
         'DataY': ys,
@@ -173,9 +177,18 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     run_algorithm('AddSampleLog', **kwargs)
     kwargs = {
         'Workspace': ws,
+        'LogName': 'monitor.monsum',
+        'LogText': str(1000),
+        'LogType': 'Number',
+        'NumberType': 'Int',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    kwargs = {
+        'Workspace': ws,
         'ParameterName': 'default-incident-monitor-spectrum',
         'ParameterType': 'Number',
-        'Value': '1',
+        'Value': str(98305),
         'child': True
     }
     run_algorithm('SetInstrumentParameter', **kwargs)
@@ -203,7 +216,7 @@ def add_chopper_configuration_D17(ws):
         'NumberType': 'Double',
         'child': True
     }
-    run_algorithm('AddSampleLog', **kwargs)    
+    run_algorithm('AddSampleLog', **kwargs)
     kwargs = {
         'Workspace': ws,
         'LogName': 'VirtualChopper.chopper1_speed_average',
@@ -213,7 +226,7 @@ def add_chopper_configuration_D17(ws):
         'NumberType': 'Double',
         'child': True
     }
-    run_algorithm('AddSampleLog', **kwargs)    
+    run_algorithm('AddSampleLog', **kwargs)
     kwargs = {
         'Workspace': ws,
         'LogName': 'VirtualChopper.chopper2_phase_average',
@@ -222,7 +235,7 @@ def add_chopper_configuration_D17(ws):
         'NumberType': 'Double',
         'child': True
     }
-    run_algorithm('AddSampleLog', **kwargs)    
+    run_algorithm('AddSampleLog', **kwargs)
     kwargs = {
         'Workspace': ws,
         'LogName': 'VirtualChopper.open_offset',
@@ -231,7 +244,7 @@ def add_chopper_configuration_D17(ws):
         'NumberType': 'Double',
         'child': True
     }
-    run_algorithm('AddSampleLog', **kwargs)    
+    run_algorithm('AddSampleLog', **kwargs)
 
 
 def add_flipper_configuration_D17(ws, flipper1, flipper2):
@@ -320,6 +333,7 @@ def default_test_detectors(ws):
     kwargs = {
         'Workspace': ws,
         'StartWorkspaceIndex': 512,
+        'EndWorkspaceIndex': ws.getNumberHistograms() - 2,
         'child': True
     }
     run_algorithm('MaskDetectors', **kwargs)
@@ -377,11 +391,15 @@ def refl_rotate_detector(ws, angle):
     }
     run_algorithm('RotateInstrumentComponent', **args)
 
-def refl_sum_in_lambda(outputWSName, ws):
+
+def refl_sum_foreground(outputWSName, sumType, ws, dirFgdWS=None, dirWS=None):
     args = {
         'InputWorkspace': ws,
         'OutputWorkspace': outputWSName,
-        'SummationType': 'SumInLambda'
+        'SummationType': sumType,
+        'DirectForegroundWorkspace': dirFgdWS,
+        'DirectBeamWorkspace': dirWS,
+        'WavelengthRange': [0.1]
     }
     alg = create_algorithm('ReflectometryILLSumForeground', **args)
     alg.execute()

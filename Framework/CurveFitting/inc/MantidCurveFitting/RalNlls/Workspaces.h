@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CURVEFITTING_RAL_NLLS_WORKSPACES_H_
 #define CURVEFITTING_RAL_NLLS_WORKSPACES_H_
 
@@ -23,7 +29,7 @@ const double ONE = 1.0;
 const double TWO = 2.0;
 const double HALF = 0.5;
 const double SIXTEENTH = 0.0625;
-}
+} // namespace
 
 struct nlls_options {
 
@@ -270,8 +276,8 @@ struct NLLS_workspace {
   void initialize(int n, int m, const nlls_options &options);
 };
 
-} // NLLS
-} // CurveFitting
-} // Mantid
+} // namespace NLLS
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // CURVEFITTING_RAL_NLLS_WORKSPACES_H_

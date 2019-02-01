@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PARALLEL_THREADINGBACKEND_H_
 #define MANTID_PARALLEL_THREADINGBACKEND_H_
 
+#include "MantidKernel/make_unique.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
 #include "MantidParallel/Status.h"
-#include "MantidKernel/make_unique.h"
 
-#include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 
 #include <chrono>
 #include <functional>
@@ -29,27 +35,6 @@ namespace detail {
 
   @author Simon Heybrock
   @date 2017
-
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_PARALLEL_DLL ThreadingBackend {
 public:
@@ -77,7 +62,8 @@ public:
 private:
   int m_size{1};
   std::map<std::tuple<int, int, int>,
-           std::vector<std::unique_ptr<std::stringbuf>>> m_buffer;
+           std::vector<std::unique_ptr<std::stringbuf>>>
+      m_buffer;
   std::mutex m_mutex;
 };
 
@@ -121,7 +107,7 @@ size_t loadFromStream(boost::archive::binary_iarchive &ia, T *data,
   }
   return count * sizeof(T);
 }
-}
+} // namespace detail
 
 template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {

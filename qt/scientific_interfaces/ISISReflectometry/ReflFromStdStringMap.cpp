@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflFromStdStringMap.h"
 #include <algorithm>
 #include <iterator>
@@ -9,10 +15,9 @@ fromStdStringMap(std::map<std::string, std::string> const &inMap) {
   std::transform(inMap.begin(), inMap.end(), std::inserter(out, out.begin()),
                  [](std::pair<std::string, std::string> const &kvp)
                      -> std::pair<QString, QString> {
-                       return std::make_pair(
-                           QString::fromStdString(kvp.first),
-                           QString::fromStdString(kvp.second));
-                     });
+                   return std::make_pair(QString::fromStdString(kvp.first),
+                                         QString::fromStdString(kvp.second));
+                 });
   return out;
 }
 

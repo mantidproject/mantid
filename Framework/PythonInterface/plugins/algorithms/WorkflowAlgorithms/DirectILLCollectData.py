@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -8,10 +14,12 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, In
                         WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
-from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
-                              CreateWorkspace, CropWorkspace, DeleteWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Minus,
-                              NormaliseToMonitor, Scale, LoadAndMerge)
+from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP,
+                              CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, Divide, ExtractMonitors,
+                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale)
 import numpy
+
+_MONSUM_LIMIT = 100
 
 
 def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
@@ -42,7 +50,7 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
                  LogText=str(wavelength),
                  LogType='Number',
                  NumberType='Double',
-                 LogUnit='Ångström',
+                 LogUnit='Angstrom',
                  EnableLogging=algorithmLogging)
     report.notice("Applied Ei calibration to '" + str(ws) + "'.")
     report.notice('Original Ei: {} new Ei: {}.'.format(originalEnergy, energy))
@@ -137,6 +145,16 @@ def _fitEPP(ws, wsType, wsNames, algorithmLogging):
                     OutputWorkspace=eppWSName,
                     EnableLogging=algorithmLogging)
     return eppWS
+
+
+def _monitorCounts(ws):
+    """Return the total monitor counts from the sample logs"""
+    logs = ws.run()
+    instrument = ws.getInstrument()
+    if instrument.getName() == 'IN6':
+        return logs.getProperty('monitor1.monsum').value
+    else:
+        return logs.getProperty('monitor.monsum').value
 
 
 def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd,
@@ -248,7 +266,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ "DirectILLReduction" ]
+        return ['DirectILLReduction']
 
     def name(self):
         """Return the algorithm's name."""
@@ -263,7 +281,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         return 1
 
     def PyExec(self):
-        """Executes the data reduction workflow."""
+        """Execute the data collection workflow."""
         progress = Progress(self, 0.0, 1.0, 9)
         report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
@@ -293,12 +311,11 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         progress.report('Normalising to monitor/time')
         monWS = self._flatBkgMon(monWS, wsNames, wsCleanup, subalgLogging)
         monEPPWS = self._createEPPWSMon(monWS, wsNames, wsCleanup, subalgLogging)
-        mainWS = self._normalize(mainWS, monWS, monEPPWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._normalize(mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Time-independent background.
         progress.report('Calculating backgrounds')
-        mainWS, bkgWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
-        wsCleanup.cleanupLater(bkgWS)
+        mainWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Calibrate incident energy, if requested.
         progress.report('Calibrating incident energy')
@@ -435,8 +452,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue=30,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
-                             doc='Running average window width (in bins) ' +
-                                 'for flat background.')
+                             doc='Running average window width (in bins) for flat background.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, PROPGROUP_FLAT_BKG)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_FLAT_BKG_WS,
@@ -491,7 +507,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
-            doc='Output workspace for calibrated inciden energy.')
+            doc='Output workspace for calibrated incident energy.')
         self.setPropertyGroup(common.PROP_OUTPUT_INCIDENT_ENERGY_WS,
                               common.PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
@@ -522,6 +538,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _calibrateEi(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply incident energy calibration."""
+        eiCalibrationWS = None
         if self._eiCalibrationEnabled(mainWS, report):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
@@ -541,10 +558,15 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                                                     subalgLogging)
                 wsCleanup.cleanup(monWS)
                 monWS = eiCalibratedMonWS
-            if not self.getProperty(
-                    common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
-                self.setProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS, eiCalibrationWS)
-            wsCleanup.cleanup(eiCalibrationWS)
+        if not self.getProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
+            if eiCalibrationWS is None:
+                eiCalibrationWSName = wsNames.withSuffix('incident_energy_from_logs')
+                Ei = mainWS.run().getProperty('Ei').value
+                eiCalibrationWS = CreateSingleValuedWorkspace(OutputWorkspace=eiCalibrationWSName,
+                                                              DataValue=Ei,
+                                                              EnableLogging=subalgLogging)
+            self.setProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS, eiCalibrationWS)
+        wsCleanup.cleanup(eiCalibrationWS)
         return mainWS, monWS
 
     def _chooseElasticChannelMode(self, mainWS, report):
@@ -636,6 +658,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             if sigma == Property.EMPTY_DBL:
                 sigma = 10.0 * (mainWS.readX(0)[1] - mainWS.readX(0)[0])
             detEPPWS = _calculateEPP(mainWS, sigma, wsNames, subalgLogging)
+        wsCleanup.cleanupLater(detEPPWS)
         return detEPPWS
 
     def _createEPPWSMon(self, monWS, wsNames, wsCleanup, subalgLogging):
@@ -652,35 +675,46 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _eiCalibrationEnabled(self, mainWS, report):
         """Return true if incident energy calibration should be perfomed, false if not."""
-        eppMethod = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
-        if eppMethod == common.INCIDENT_ENERGY_CALIBRATION_AUTO:
+        calibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
+        state = None
+        ENABLED_AUTOMATICALLY = 1
+        if calibration == common.INCIDENT_ENERGY_CALIBRATION_OFF:
+            return False
+        elif calibration == common.INCIDENT_ENERGY_CALIBRATION_AUTO:
             instrument = mainWS.getInstrument()
             if instrument.hasParameter('enable_incident_energy_calibration'):
                 enabled = instrument.getBoolParameter('enable_incident_energy_calibration')[0]
                 if not enabled:
-                    report.notice('Inciden energy calibration disabled by the IPF.')
+                    report.notice('Incident energy calibration disabled by the IPF.')
                     return False
+                else:
+                    state = ENABLED_AUTOMATICALLY
+        monitorCounts = _monitorCounts(mainWS)
+        if monitorCounts < _MONSUM_LIMIT:
+            report.warning("'monsum' less than {}. Disabling incident energy calibration.".format(_MONSUM_LIMIT))
+            return False
+        if state == ENABLED_AUTOMATICALLY:
             report.notice('Incident energy calibration enabled.')
-            return True
-        return eppMethod == common.INCIDENT_ENERGY_CALIBRATION_ON
+        return True
 
     def _flatBkgDet(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Subtract flat background from a detector workspace."""
         if not self._flatBgkEnabled(mainWS, report):
-            return mainWS, None
-        windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
-        if self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
-            bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, wsNames, subalgLogging)
-        else:
+            return mainWS
+        if not self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
             bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
             wsCleanup.protect(bkgWS)
+        else:
+            windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
+            bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, wsNames, subalgLogging)
         if not self.getProperty(common.PROP_OUTPUT_FLAT_BKG_WS).isDefault:
             self.setProperty(common.PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
         bkgScaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
         bkgSubtractedWS = _subtractFlatBkg(mainWS, common.WS_CONTENT_DETS, bkgWS, bkgScaling, wsNames,
                                            wsCleanup, subalgLogging)
         wsCleanup.cleanup(mainWS)
-        return bkgSubtractedWS, bkgWS
+        wsCleanup.cleanup(bkgWS)
+        return bkgSubtractedWS
 
     def _flatBgkEnabled(self, mainWS, report):
         """Returns true if flat background subtraction is enabled, false otherwise."""
@@ -694,7 +728,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                     return False
             report.notice('Flat background subtraction enabled.')
             return True
-        return flatBkgOption == common.BKG_ON
+        return flatBkgOption != common.BKG_OFF
 
     def _flatBkgMon(self, monWS, wsNames, wsCleanup, subalgLogging):
         """Subtract flat background from a monitor workspace."""
@@ -733,11 +767,17 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             monIndex = common.convertToWorkspaceIndex(monIndex, monWS)
         return monIndex
 
-    def _normalize(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, subalgLogging):
+    def _normalize(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
         """Normalize to monitor or measurement time."""
         normalisationMethod = self.getProperty(common.PROP_NORMALISATION).value
-        if normalisationMethod != common.NORM_METHOD_OFF:
-            if normalisationMethod == common.NORM_METHOD_MON:
+        if normalisationMethod == common.NORM_METHOD_OFF:
+            return mainWS
+        if normalisationMethod == common.NORM_METHOD_MON:
+            monitorCounts = _monitorCounts(monWS)
+            if monitorCounts < _MONSUM_LIMIT:
+                report.warning("'monsum' less than {}. Disabling normalization to monitor.".format(_MONSUM_LIMIT))
+                normalisationMethod = common.NORM_METHOD_TIME
+            else:
                 sigmaMultiplier = \
                     self.getProperty(common.PROP_MON_PEAK_SIGMA_MULTIPLIER).value
                 monIndex = self._monitorIndex(monWS)
@@ -756,13 +796,10 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                                    subalgLogging)
                 normalizedWS = _scaleAfterMonitorNormalization(normalizedWS, wsNames, wsCleanup,
                                                                subalgLogging)
-            elif normalisationMethod == common.NORM_METHOD_TIME:
-                normalizedWS = _normalizeToTime(mainWS, wsNames, wsCleanup, subalgLogging)
-            else:
-                raise RuntimeError('Unknonwn normalisation method ' + normalisationMethod)
-            wsCleanup.cleanup(mainWS)
-            return normalizedWS
-        return mainWS
+        if normalisationMethod == common.NORM_METHOD_TIME:
+            normalizedWS = _normalizeToTime(mainWS, wsNames, wsCleanup, subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return normalizedWS
 
     def _outputDetEPPWS(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Set the output epp workspace property, if needed."""

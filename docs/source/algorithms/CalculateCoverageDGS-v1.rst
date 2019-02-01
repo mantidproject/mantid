@@ -25,7 +25,7 @@ If no minimum/maximum are set for DeltaE, these are chosen to be +/-Ei.
 If not specified, minimum/maximum for the Q dimensions are calculated based on the instrument geometry, incident energy,
 minimum/maximum for DeltaE, and lattice parameters.
 
-The algorithm calculates detector trajectories in the reciprocal space and sets to 1 the coresponding points in the output workspace.
+The algorithm calculates detector trajectories in the reciprocal space and sets to 1 the corresponding points in the output workspace.
 All other points are 0.
 
 Usage

@@ -21,7 +21,7 @@ You are expected to create the output workspace yourself.
 
 Because of boilerplate code added to the python script being run,
 stack-traces for errors will be five (5) lines greater than where the
-error occured in the supplied python code.
+error occurred in the supplied python code.
 
 Usage
 -----

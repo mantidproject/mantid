@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 """Finds a package, installs it and runs the tests against it.
 """
@@ -14,6 +20,8 @@ SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', dest='package_dir', metavar='directory', default=os.getcwd(),
                     help='Directory to look for packages. Defaults to current working directory')
+parser.add_argument('-j', '--parallel', dest='ncores', type=int, default=1,
+                    help='The number of instances to run in parallel, like the -j option in ctest.')
 parser.add_argument('-n', dest='doInstall', action='store_false',
                     help='Run tests without installing Mantid (it must be already installed)')
 parser.add_argument('-o', dest='out2stdout', action='store_true',
@@ -25,7 +33,7 @@ parser.add_argument('--archivesearch', dest='archivesearch', action='store_true'
 parser.add_argument('--exclude-in-pull-requests', dest="exclude_in_pr_builds",action="store_true",
                     help="Skip tests that are not run in pull request builds")
 log_levels = ['error', 'warning', 'notice', 'information', 'debug']
-parser.add_argument('-l', dest='log_level', metavar='level', default='notice',
+parser.add_argument('-l', dest='log_level', metavar='level', default='information',
                     choices=log_levels, help='Log level '+str(log_levels))
 options = parser.parse_args()
 
@@ -46,38 +54,42 @@ if options.doInstall:
     log("Installing package '%s'" % installer.mantidInstaller)
     try:
         installer.install()
-        log("Application path " + installer.mantidPlotPath)
+        log("Application path: %r" % installer.mantidPlotPath)
         installer.no_uninstall = False
     except Exception as err:
         scriptfailure("Installing failed. "+str(err))
 else:
     installer.no_uninstall = True
 
-try:
-    # Keep hold of the version that was run
-    version = run(installer.mantidPlotPath + ' -v')
-    version_tested = open(os.path.join(output_dir,'version_tested.log'),'w')
-    if version and len(version) > 0:
-        version_tested.write(version)
-    version_tested.close()
-except Exception as err:
-    scriptfailure('Version test failed: '+str(err), installer)
+# conda mantid-framework does not have mantid plot. skip these
+if not os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
+    try:
+        # Keep hold of the version that was run
+        version = run(installer.mantidPlotPath + ' -v')
+        version_tested = open(os.path.join(output_dir,'version_tested.log'),'w')
+        if version and len(version) > 0:
+            version_tested.write(version)
+        version_tested.close()
+    except Exception as err:
+        scriptfailure('Version test failed: '+str(err), installer)
 
-try:
-    # Now get the revision number/git commit ID (remove the leading 'g' that isn't part of it)
-    revision = run(installer.mantidPlotPath + ' -r').lstrip('g')
-    revision_tested = open(os.path.join(output_dir, 'revision_tested.log'), 'w')
-    if revision and len(version) > 0:
-        revision_tested.write(revision)
-    revision_tested.close()
-except Exception as err:
-    scriptfailure('Revision test failed: '+str(err), installer)
+    try:
+        # Now get the revision number/git commit ID (remove the leading 'g' that isn't part of it)
+        revision = run(installer.mantidPlotPath + ' -r').lstrip('g')
+        revision_tested = open(os.path.join(output_dir, 'revision_tested.log'), 'w')
+        if revision and len(version) > 0:
+            revision_tested.write(revision)
+        revision_tested.close()
+    except Exception as err:
+        scriptfailure('Revision test failed: '+str(err), installer)
+
 
 log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath,testRunErrPath))
 try:
     run_test_cmd = '%s %s %s/runSystemTests.py --loglevel=%s --executable="%s" --exec-args="%s"' % \
-                (installer.python_cmd,  installer.python_args,
-                 THIS_MODULE_DIR, options.log_level, installer.python_cmd, installer.python_args)
+                (installer.python_cmd, installer.python_args, THIS_MODULE_DIR,
+                options.log_level, installer.python_cmd, installer.python_args)
+    run_test_cmd += " -j%i --quiet --output-on-failure" % options.ncores
     if options.test_regex is not None:
         run_test_cmd += " -R " + options.test_regex
     if options.archivesearch:

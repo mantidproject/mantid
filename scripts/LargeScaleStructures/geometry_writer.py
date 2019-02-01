@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from xml.dom.minidom import getDOMImplementation
@@ -390,7 +396,7 @@ class MantidGeom(object):
         step2, ...]. If no step is required, use None.
         """
         if len(idlist) % 3 != 0:
-            raise IndexError("Please specifiy list as [start1, end1, step1, "
+            raise IndexError("Please specify list as [start1, end1, step1, "
                              + "start2, end2, step2, ...]. If no step is"
                              + "required, use None.")
         num_ids = len(idlist) / 3

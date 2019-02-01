@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <vector>
 
 namespace Mantid {
@@ -242,8 +248,8 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
   }
 
   g_log.debug() << "normalizeDetectors: Masked pixels outside the acceptable "
-                   "efficiency range [" << min_eff << "," << max_eff
-                << "] = " << dets_to_mask.size()
+                   "efficiency range ["
+                << min_eff << "," << max_eff << "] = " << dets_to_mask.size()
                 << " from a total of non masked = " << nPixels
                 << " (from a total number of spectra in the ws = "
                 << numberOfSpectra << ")\n";

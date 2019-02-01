@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SofQWPolygon.h"
-#include "MantidAlgorithms/SofQW.h"
-#include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ReplaceSpecialValues.h"
+#include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -43,8 +49,9 @@ void SofQWPolygon::exec() {
   }
 
   // Progress reports & cancellation
-  const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms() *
-                                            inputWS->blocksize()));
+  const auto blocksize = inputWS->blocksize();
+  const size_t nreports(
+      static_cast<size_t>(inputWS->getNumberHistograms() * blocksize));
   m_progress = boost::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, nreports));
   // Compute input caches
@@ -55,7 +62,7 @@ void SofQWPolygon::exec() {
           *inputWS, getProperty("QAxisBinning"), m_Qout,
           getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWS);
-  const size_t nenergyBins = inputWS->blocksize();
+  const size_t nenergyBins = blocksize;
 
   const size_t nTheta = m_thetaPts.size();
   const auto &X = inputWS->x(0);
@@ -194,5 +201,5 @@ void SofQWPolygon::initThetaCache(const API::MatrixWorkspace &workspace) {
                       << (m_thetaWidth * 180.0 / M_PI) << " degrees.\n";
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

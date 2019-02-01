@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 
-#include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include <iostream>
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -19,10 +25,10 @@
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -31,9 +37,9 @@
 #endif
 #endif
 
-#include <QVBoxLayout>
 #include <QMessageBox>
 #include <QSettings>
+#include <QVBoxLayout>
 #include <limits>
 
 namespace MantidQt {
@@ -839,5 +845,5 @@ void FitOptionsBrowser::displaySequentialFitProperties() {
   emit changedToSequentialFitting();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -32,6 +32,9 @@
 #    The variable TESTHELPER_SRCS can be used to pass in extra (non-test) source files
 #    that should be included in the test executable.
 #
+#    The variable CXXTEST_EXTRA_HEADER_INCLUDE can be used to pass an additional header
+#    to the --include optional of the cxxtestgen command.
+#
 #    The variable CXXTEST_OUTPUT_DIR can be used to specify the directory for the
 #    generated files. The default is CMAKE_CURRENT_BINARY_DIR.
 #           
@@ -103,7 +106,7 @@ include ( PrecompiledHeaderCommands )
 # CXXTEST_ADD_TEST (public macro to add unit tests)
 #=============================================================
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
-    # output directory
+  # output directory
     set (_cxxtest_output_dir ${CMAKE_CURRENT_BINARY_DIR})
     if (CXXTEST_OUTPUT_DIR)
       set (_cxxtest_output_dir ${CXXTEST_OUTPUT_DIR})
@@ -113,11 +116,16 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     endif()
     # determine the cpp filename
     set(_cxxtest_real_outfname ${_cxxtest_output_dir}/${_cxxtest_testname}_runner.cpp)
+    # add additional include if requested
+    if(CXXTEST_EXTRA_HEADER_INCLUDE)
+      set(_cxxtest_include  --include ${CXXTEST_EXTRA_HEADER_INCLUDE})
+    endif()
+
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${PATH_FILES}
         COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --root
-        --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname}
+        --xunit-printer --world ${_cxxtest_testname} ${_cxxtest_include} -o ${_cxxtest_real_outfname}
     )
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
 

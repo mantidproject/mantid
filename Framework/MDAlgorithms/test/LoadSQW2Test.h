@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_LOADSQW2TEST_H_
 #define MANTID_MDALGORITHMS_LOADSQW2TEST_H_
 
@@ -8,8 +14,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidMDAlgorithms/LoadSQW2.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidMDAlgorithms/LoadSQW2.h"
 
 #include <Poco/TemporaryFile.h>
 
@@ -23,8 +30,8 @@ using Mantid::API::IMDEventWorkspace_sptr;
 using Mantid::API::IMDIterator;
 using Mantid::API::Run;
 using Mantid::API::Sample;
-using Mantid::MDAlgorithms::LoadSQW2;
 using Mantid::Kernel::V3D;
+using Mantid::MDAlgorithms::LoadSQW2;
 
 class LoadSQW2Test : public CxxTest::TestSuite {
 public:
@@ -189,12 +196,7 @@ private:
     }
   }
 
-#ifdef __clang__
-// The missing braces warning is a false positive -
-// https://llvm.org/bugs/show_bug.cgi?id=21629
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces"
-#endif
+  GNU_DIAG_OFF("missing-braces")
   DimensionProperties getExpectedDimProperties(std::string outputFrame,
                                                DataType dtype) {
     DimensionProperties expected;
@@ -235,9 +237,7 @@ private:
     return expected;
   }
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+  GNU_DIAG_ON("missing-braces")
 
   void checkExperimentInfoAsExpected(const IMDEventWorkspace &outputWS) {
     TS_ASSERT_EQUALS(2, outputWS.getNumExperimentInfo());

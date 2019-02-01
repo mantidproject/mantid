@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/CPUTimer.h"
 #include <ctime>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -84,5 +90,5 @@ std::ostream &operator<<(std::ostream &out, CPUTimer &obj) {
   return out;
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

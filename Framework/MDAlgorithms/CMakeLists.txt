@@ -71,6 +71,7 @@ set ( SRC_FILES
 	src/LoadSQW2.cpp
 	src/LogarithmMD.cpp
 	src/MDEventWSWrapper.cpp
+	src/MDNorm.cpp
 	src/MDNormDirectSC.cpp
 	src/MDNormSCD.cpp
 	src/MDTransfAxisNames.cpp
@@ -107,6 +108,7 @@ set ( SRC_FILES
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
 	src/QueryMDWorkspace.cpp
+	src/RecalculateTrajectoriesExtents.cpp
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
@@ -201,6 +203,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadSQW2.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MDEventWSWrapper.h
+	inc/MantidMDAlgorithms/MDNorm.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MDTransfAxisNames.h
@@ -238,6 +241,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/QueryMDWorkspace.h
+	inc/MantidMDAlgorithms/RecalculateTrajectoriesExtents.h
 	inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
 	inc/MantidMDAlgorithms/ReflectometryTransformP.h
 	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
@@ -354,6 +358,7 @@ set ( TEST_FILES
 	PowerMDTest.h
 	PreprocessDetectorsToMDTest.h
 	QueryMDWorkspaceTest.h
+	RecalculateTrajectoriesExtentsTest.h
 	ReflectometryTransformKiKfTest.h
 	ReflectometryTransformPTest.h
 	ReflectometryTransformQxQzTest.h
@@ -426,4 +431,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MDAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS MDAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
@@ -15,10 +21,14 @@ class DirectILLCollectDataTest(unittest.TestCase):
         unittest.TestCase.__init__(self, methodName)
 
     def setUp(self):
-        if not DirectILLCollectDataTest._TEST_WS:
-            DirectILLCollectDataTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
-                                                                                          illhelpers.default_test_detectors)
-        mtd.addOrReplace(self._TEST_WS_NAME, DirectILLCollectDataTest._TEST_WS)
+        if self._TEST_WS is None:
+            self._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
+                                                                      illhelpers.default_test_detectors)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS,
+            'OutputWorkspace': self._TEST_WS_NAME,
+        }
+        run_algorithm('CloneWorkspace', **algProperties)
 
     def tearDown(self):
         mtd.clear()
@@ -41,7 +51,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
         self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
         ys = outWS.extractY()
         originalYs = inWS.extractY()
-        numpy.testing.assert_almost_equal(ys, originalYs[1:, :] - self._BKG_LEVEL)
+        numpy.testing.assert_almost_equal(ys, originalYs[:-1, :] - self._BKG_LEVEL)
 
     def testBackgroundOutput(self):
         outWSName = 'outWS'
@@ -80,10 +90,36 @@ class DirectILLCollectDataTest(unittest.TestCase):
         inWS = mtd[self._TEST_WS_NAME]
         ys = outWS.extractY()
         originalYs = inWS.extractY()
-        numpy.testing.assert_almost_equal(ys, originalYs[1:, :] / duration)
+        numpy.testing.assert_almost_equal(ys, originalYs[:-1, :] / duration)
         es = outWS.extractE()
         originalEs = inWS.extractE()
-        numpy.testing.assert_almost_equal(es, originalEs[1:, :] / duration)
+        numpy.testing.assert_almost_equal(es, originalEs[:-1, :] / duration)
+
+    def testNormalisationToTimeWhenMonitorCountsAreTooLow(self):
+        outWSName = 'outWS'
+        duration = 3612.3
+        logs = mtd[self._TEST_WS_NAME].mutableRun()
+        logs.addProperty('duration', duration, True)
+        monsum = 10
+        logs.addProperty('monitor.monsum', monsum, True)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'FlatBkg': 'Flat Bkg OFF',
+            'IncidentEnergyCalibration': 'Energy Calibration OFF',
+            'Normalisation': 'Normalisation Monitor',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLCollectData', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        outWS = mtd[outWSName]
+        inWS = mtd[self._TEST_WS_NAME]
+        ys = outWS.extractY()
+        originalYs = inWS.extractY()
+        numpy.testing.assert_almost_equal(ys, originalYs[:-1, :] / duration)
+        es = outWS.extractE()
+        originalEs = inWS.extractE()
+        numpy.testing.assert_almost_equal(es, originalEs[:-1, :] / duration)
 
     def testRawWorkspaceOutput(self):
         outWSName = 'outWS'
@@ -102,10 +138,10 @@ class DirectILLCollectDataTest(unittest.TestCase):
         rawWS = mtd[rawWSName]
         ys = rawWS.extractY()
         originalYS = inWS.extractY()
-        numpy.testing.assert_almost_equal(ys, originalYS[1:, :])
+        numpy.testing.assert_almost_equal(ys, originalYS[:-1, :])
         es = rawWS.extractE()
         originalES = inWS.extractE()
-        numpy.testing.assert_almost_equal(es, originalES[1:, :])
+        numpy.testing.assert_almost_equal(es, originalES[:-1, :])
         xs = rawWS.extractX()
         outXS = outWS.extractX()
         numpy.testing.assert_almost_equal(xs, outXS)
@@ -134,13 +170,30 @@ class DirectILLCollectDataTest(unittest.TestCase):
         self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
         xs = outWS.extractX()
         originalXs = inWS.extractX()
-        numpy.testing.assert_almost_equal(xs, originalXs[1:, :])
+        numpy.testing.assert_almost_equal(xs, originalXs[:-1, :])
         ys = outWS.extractY()
         originalYs = inWS.extractY()
-        numpy.testing.assert_almost_equal(ys, originalYs[1:, :])
+        numpy.testing.assert_almost_equal(ys, originalYs[:-1, :])
         es = outWS.extractE()
         originalEs = inWS.extractE()
-        numpy.testing.assert_almost_equal(es, originalEs[1:, :])
+        numpy.testing.assert_almost_equal(es, originalEs[:-1, :])
+
+    def testOutputIncidentEnergyWorkspaceWhenEnergyCalibrationIsOff(self):
+        outWSName = 'outWS'
+        eiWSName = 'Ei'
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'IncidentEnergyCalibration': 'Energy Calibration OFF',
+            'OutputIncidentEnergyWorkspace': eiWSName,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLCollectData', **algProperties)
+        self.assertTrue(mtd.doesExist(eiWSName))
+        eiWS = mtd[eiWSName]
+        inWS = mtd[self._TEST_WS_NAME]
+        E_i = inWS.run().getProperty('Ei').value
+        self.assertEquals(eiWS.readY(0)[0], E_i)
 
 
 if __name__ == '__main__':

@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/SAX/InputSource.h>
-#include <Poco/Exception.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/Exception.h>
+#include <Poco/SAX/InputSource.h>
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 
 using Poco::XML::DOMParser;
 using Poco::XML::Element;
@@ -21,7 +27,7 @@ namespace Geometry {
 namespace {
 /// static logger
 Kernel::Logger g_log("vtkGeometryCacheReader");
-}
+} // namespace
 
 /**
  * Constructor
@@ -161,5 +167,5 @@ void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle,
   }
   // Read from binary otherwise
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

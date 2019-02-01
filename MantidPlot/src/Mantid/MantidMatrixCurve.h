@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MATRIX_CURVE_H
 #define MANTID_MATRIX_CURVE_H
 
@@ -16,28 +22,6 @@ class MantidUI;
 
     @author Roman Tolchenov, Tessella plc
     @date 09/09/2009
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class MantidMatrixCurve : public MantidCurve {
@@ -112,7 +96,7 @@ public:
   void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             const QRect &) const override;
 
-  /// Overriden virtual method
+  /// Overridden virtual method
   void itemChanged() override;
 
   /// saves the MantidMatrixCurve details to project file.
@@ -147,7 +131,7 @@ private:
       const std::string &wsName,
       const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-  /// Handle an ADS clear notificiation
+  /// Handle an ADS clear notification
   void clearADSHandle() override { emit removeMe(this); }
 
 signals:

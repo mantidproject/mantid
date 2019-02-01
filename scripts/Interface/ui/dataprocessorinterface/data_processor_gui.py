@@ -1,15 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-try:
-    from mantidplot import *
-except ImportError:
-    canMantidPlot = False
-
 from PyQt4 import QtGui
 from mantidqtpython import MantidQt
 from ui.dataprocessorinterface.ui_data_processor_window import Ui_DataProcessorWindow
-
-
-canMantidPlot = True
+from reduction_gui.reduction.scripter import execute_script
 
 
 class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter):
@@ -31,28 +30,28 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
         super(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter, self).__init__()
         self.gui = gui
 
-    def getPreprocessingOptions(self):
+    def getPreprocessingOptions(self, group = 0):
         """
         Return global pre-processing options as a dict of key:value pairs
         """
         result = {"AnalysisMode":"PointDetectorAnalysis"}
         return result
 
-    def getProcessingOptions(self):
+    def getProcessingOptions(self, group = 0):
         """
         Return global processing options as a dict of key:value pairs.
         """
         result = {"AnalysisMode":"PointDetectorAnalysis", "WavelengthMin":"1.5"}
         return result
 
-    def getPostprocessingOptionsAsString(self):
+    def getPostprocessingOptionsAsString(self, group = 0):
         """
         Return global post-processing options as a string.
         The string must be a sequence of key=value separated by ','.
         """
         return "Params='0.03, -0.04, 0.6'"
 
-    def notifyADSChanged(self, workspace_list):
+    def notifyADSChanged(self, workspace_list, group = 0):
         """
         The widget will call this method when something changes in the ADS.
         The argument is the list of table workspaces that can be loaded into
@@ -221,4 +220,4 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
         """
         Re-emits 'runPytonScript' signal
         """
-        mantidplot.runPythonScript(text, True)
+        execute_script(text)

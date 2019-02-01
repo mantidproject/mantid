@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_
 #define MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_
 
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -21,8 +27,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-using ScopedFileHelper::ScopedFile;
 using Mantid::DataObjects::GroupingWorkspace;
+using ScopedFileHelper::ScopedFile;
 
 class LoadDetectorsGroupingFileTest : public CxxTest::TestSuite {
 public:
@@ -366,8 +372,8 @@ public:
     TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
     TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
-    std::string errorMsg =
-        "Bad number of spectra list in " + file.getFileName() + " on line 4";
+    std::string errorMsg = "Bad number of spectra list in \"" +
+                           file.getFileName() + "\" on line 4";
 
     TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError &e,
                             e.what(), errorMsg);
@@ -392,8 +398,9 @@ public:
     TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
     TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
-    std::string errorMsg = "Premature end of file, expecting spectra list in " +
-                           file.getFileName() + " on line 4";
+    std::string errorMsg =
+        "Premature end of file, expecting spectra list in \"" +
+        file.getFileName() + "\" on line 4";
 
     TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError &e,
                             e.what(), errorMsg);
@@ -420,8 +427,8 @@ public:
     TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
     std::string errorMsg =
-        "Expected a single int for the number of group spectra in " +
-        file.getFileName() + " on line 3";
+        "Expected a single int for the number of group spectra in \"" +
+        file.getFileName() + "\" on line 3";
 
     TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError &e,
                             e.what(), errorMsg);

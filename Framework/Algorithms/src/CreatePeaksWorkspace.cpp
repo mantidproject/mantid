@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -73,5 +79,5 @@ void CreatePeaksWorkspace::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

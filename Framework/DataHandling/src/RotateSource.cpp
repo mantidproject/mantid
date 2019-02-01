@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/RotateSource.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -8,9 +14,9 @@
 namespace Mantid {
 namespace DataHandling {
 
+using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::Quat;
-using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RotateSource)
@@ -30,8 +36,9 @@ void RotateSource::init() {
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");
-  declareProperty("Angle", 0.0, "The angle of rotation in degrees (according "
-                                "to the handedness of the coordinate system.");
+  declareProperty("Angle", 0.0,
+                  "The angle of rotation in degrees (according "
+                  "to the handedness of the coordinate system.");
 }
 
 //----------------------------------------------------------------------------------------------

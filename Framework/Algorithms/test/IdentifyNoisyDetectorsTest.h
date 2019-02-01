@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IDENTIFYNOISYDETECTORSTEST_H_
 #define IDENTIFYNOISYDETECTORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/IdentifyNoisyDetectors.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

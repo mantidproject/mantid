@@ -1,9 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import stresstesting
+import systemtesting
 from mantid import config
-from mantid.simpleapi import (BASISDiffraction, Load, GroupWorkspaces,
-                              ElasticWindowMultiple, MSDFit)
+from mantid.simpleapi import (BASISCrystalDiffraction, Load, GroupWorkspaces,
+                              ElasticWindowMultiple, MSDFit,
+                              BASISPowderDiffraction)
 
 
 class PreppingMixin(object):
@@ -22,7 +29,7 @@ class PreppingMixin(object):
             config[key] = value  # config object does not have update method like python dict
 
 
-class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
+class ElwinTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""ELWIN tab of the Indirect Inelastic Interface
     """
 
@@ -70,7 +77,7 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
         return 'outQ2', 'BASIS_elwin_eq2.nxs'
 
 
-class GaussianMSDTest(stresstesting.MantidStressTest, PreppingMixin):
+class GaussianMSDTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""MSD tab of the Indirect Inelastic Interface
     """
 
@@ -106,14 +113,14 @@ class GaussianMSDTest(stresstesting.MantidStressTest, PreppingMixin):
         return 'outMSD', 'BASIS_63652_63720_Gaussian_msd.nxs'
 
 
-class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
+class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Reduction for a scan of runs probing different orientations of a crystal.
     """
 
     def __init__(self):
         super(CrystalDiffractionTest, self).__init__()
         self.config = None
-        self.prepset('BASISDiffraction')
+        self.prepset('BASISCrystalDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
@@ -128,22 +135,21 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
         Override parent method, does the work of running the test
         """
         try:
-            BASISDiffraction(SingleCrystalDiffraction=True,
-                             RunNumbers='74799-74800',
-                             MaskFile='BASIS_Mask_default_diff.xml',
-                             VanadiumRuns='64642',
-                             BackgroundRuns='75527',
-                             PsiAngleLog='SE50Rot',
-                             PsiOffset=-27.0,
-                             LatticeSizes=[10.71, 10.71, 10.71],
-                             LatticeAngles=[90.0, 90.0, 90.0],
-                             VectorU=[1, 1, 0],
-                             VectorV=[0, 0, 1],
-                             Uproj=[1, 1, 0],
-                             Vproj=[0, 0, 1],
-                             Wproj=[1, -1, 0],
-                             Nbins=300,
-                             OutputWorkspace='peaky')
+            BASISCrystalDiffraction(RunNumbers='74799-74800',
+                                    MaskFile='BASIS_Mask_default_diff.xml',
+                                    VanadiumRuns='64642',
+                                    BackgroundRuns='75527',
+                                    PsiAngleLog='SE50Rot',
+                                    PsiOffset=-27.0,
+                                    LatticeSizes=[10.71, 10.71, 10.71],
+                                    LatticeAngles=[90.0, 90.0, 90.0],
+                                    VectorU=[1, 1, 0],
+                                    VectorV=[0, 0, 1],
+                                    Uproj=[1, 1, 0],
+                                    Vproj=[0, 0, 1],
+                                    Wproj=[1, -1, 0],
+                                    Nbins=300,
+                                    OutputWorkspace='peaky')
         finally:
             self.preptear()
 
@@ -154,4 +160,41 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
         :return: strings for workspace and file name
         """
         self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'peaky', 'BASISOrientedSample.nxs'
+
+
+class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Run a elastic reduction for powder sample"""
+
+    def __init__(self):
+        super(PowderSampleTest, self).__init__()
+        self.config = None
+        self.prepset('BASISPowderDiffraction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_diff.xml',
+                'BSS_74799_event.nxs', 'BSS_75527_event.nxs',
+                'BSS_64642_event.nxs', 'BASISPowderSample.nxs']
+
+    def runTest(self):
+        r"""
+        Override parent method, does the work of running the test
+        """
+        try:
+            BASISPowderDiffraction(RunNumbers='74799',
+                                   OutputWorkspace='powder',
+                                   BackgroundRuns='75527',
+                                   VanadiumRuns='64642')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        r"""
+        Inform of workspace output after runTest(), and associated file to
+        compare to.
+        :return: strings for workspace and file name
+        """
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'powder', 'BASISPowderSample.nxs'

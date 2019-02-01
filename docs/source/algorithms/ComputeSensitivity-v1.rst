@@ -21,7 +21,7 @@ in this patched pixel's tube.
 
 Usage
 -----
-This is a part of the EQSANS workflow algorithm and is not intended to be executed seperately.
+This is a part of the EQSANS workflow algorithm and is not intended to be executed separately.
 
 .. categories::
 

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os.path
@@ -77,6 +83,7 @@ class LoadAndMerge(PythonAlgorithm):
         # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input)
         alg = self.createChildAlgorithm(self._loader, self._version)
         alg.setAlwaysStoreInADS(True)
+        alg.setLogging(self.isLogging())
         alg.initialize()
         for key in self._loader_options.keys():
             alg.setPropertyValue(key, self._loader_options.getPropertyValue(key))

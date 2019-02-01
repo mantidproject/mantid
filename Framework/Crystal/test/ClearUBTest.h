@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_CLEARUBTEST_H_
 #define MANTID_CRYSTAL_CLEARUBTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidCrystal/ClearUB.h"
 #include "MantidAPI/Sample.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidCrystal/ClearUB.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::ClearUB;
 using namespace Mantid::API;

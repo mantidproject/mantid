@@ -12,7 +12,7 @@ Description
 The algorithms will attach an OrientedLattice object to a sample in the
 workspace. For MD workspaces, you can select to which sample to attach
 it. If nothing entered, it will attach to all. If bad number is
-enetered, it will attach to first sample.
+entered, it will attach to first sample.
 
 If :ref:`UB matrix <Lattice>` elements are entered, lattice parameters and orientation
 vectors are ignored. The algorithm will throw an exception if the

@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_
 #define MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/CreateSimulationWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/CreateSimulationWorkspace.h"
 #include "MantidKernel/Unit.h"
 
 using Mantid::DataHandling::CreateSimulationWorkspace;

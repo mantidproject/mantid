@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from docutils import statemachine
 from docutils.parsers.rst import Directive #pylint: disable=unused-import
 import re
@@ -43,7 +49,7 @@ def algorithm_name_and_version(docname):
         return (str(match.groups()[0]), None)
 
     # fail now
-    raise RuntimeError("Faild to fine ame from document filename ")
+    raise RuntimeError("Failed to find name from document filename ")
 
 #----------------------------------------------------------------------------------------
 class BaseDirective(Directive):
@@ -95,16 +101,16 @@ class BaseDirective(Directive):
           str: ReST formatted header with algorithm_name as content.
         """
         level_dict = {1:"=", 2:"-", 3:"#", 4:"^"}
-        
+
         if pagetitle:
             level = 1
         if level not in level_dict:
             env = self.state.document.settings.env
             env.app.warn('base.make_header - Did not understand level ' +str(level))
             level = 2
-            
+
         line = "\n" + level_dict[level] * (len(name)) + "\n"
-        
+
         if level == 1:
             return line + name + line
         else:
@@ -149,7 +155,7 @@ class AlgorithmBaseDirective(BaseDirective):
         The default is to skip (and warn) if the algorithm is not known.
 
         Returns:
-          str: Return error mesage string if the directive should be skipped
+          str: Return error message string if the directive should be skipped
         """
         from mantid.api import AlgorithmFactory, FunctionFactory
 
@@ -190,7 +196,7 @@ class AlgorithmBaseDirective(BaseDirective):
 
     def create_mantid_algorithm_by_name(self, algorithm_name):
         """
-        Create and initializes a Mantid algorithm using tha latest version.
+        Create and initializes a Mantid algorithm using the latest version.
 
         Args:
           algorithm_name (str): The name of the algorithm to use for the title.
@@ -202,7 +208,7 @@ class AlgorithmBaseDirective(BaseDirective):
         alg = AlgorithmManager.createUnmanaged(algorithm_name)
         alg.initialize()
         return alg
-        
+
     def create_mantid_algorithm(self, algorithm_name, version):
         """
         Create and initializes a Mantid algorithm.
@@ -218,7 +224,7 @@ class AlgorithmBaseDirective(BaseDirective):
         alg = AlgorithmManager.createUnmanaged(algorithm_name, version)
         alg.initialize()
         return alg
-        
+
     def create_mantid_ifunction(self, function_name):
         """
         Create and initiializes a Mantid IFunction.

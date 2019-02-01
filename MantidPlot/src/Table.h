@@ -37,8 +37,8 @@
 
 #include "Graph.h"
 #include "MdiSubWindow.h"
-#include "ScriptingEnv.h"
 #include "Scripted.h"
+#include "ScriptingEnv.h"
 
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
@@ -85,7 +85,7 @@ private:
  *
  * \section future Future Plans
  * Port to the Model/View approach used in Qt4 and get rid of the Qt3Support
- * dependancy.
+ * dependency.
  * [ assigned to thzs ]
  */
 class Table : public MdiSubWindow, public Scripted {
@@ -173,6 +173,7 @@ public slots:
   void moveCurrentCell();
   bool isEmptyRow(int row);
   bool isEmptyColumn(int col);
+  void onColumnHeaderDoubleClick();
 
   void print() override;
   void print(const QString &fileName);

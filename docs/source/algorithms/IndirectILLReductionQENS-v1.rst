@@ -92,7 +92,7 @@ Usage
 
     ws = IndirectILLReductionQENS(Run='ILL/IN16B/136553:136555.nxs')
     print("Result is a WorkspaceGroup, that contains {:d} workspaces".format(ws.getNumberOfEntries()))
-    print("the name of the first one is {} corresponding to run 136553".format(ws.getItem(0).getName()))
+    print("the name of the first one is {} corresponding to run 136553".format(ws.getItem(0).name()))
     print("it has {:d} spectra and {:d} bins".format(ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize()))
 
 Output:
@@ -105,7 +105,7 @@ Output:
 
 .. testcleanup:: ExIndirectILLReductionQENS
 
-   DeleteWorkspace('ws_red')
+   DeleteWorkspace(ws)
 
 .. categories::
 

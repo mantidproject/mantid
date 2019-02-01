@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PANELSSURFACE_H
 #define PANELSSURFACE_H
 
@@ -29,18 +35,18 @@ private:
 };
 
 /**
-* @class PanelsSurface
-* @brief Finds all flat banks of detectors and places them side by side.
-*
-* Who qualifies as a flat bank:
-*
-*  - Rectangular detector
-*  - CompAssembly containing an array of ObjCompAssemblies
-*     + all ObjCompAssemblies must be cylinders
-*     + two first ObjCompAssemblies (returned by CompAssembly::getChild(i))
-*       cannot lie on the same line (being parallel is alright)
-*  - CompAssembly with detectors lying in the same plane
-*/
+ * @class PanelsSurface
+ * @brief Finds all flat banks of detectors and places them side by side.
+ *
+ * Who qualifies as a flat bank:
+ *
+ *  - Rectangular detector
+ *  - CompAssembly containing an array of ObjCompAssemblies
+ *     + all ObjCompAssemblies must be cylinders
+ *     + two first ObjCompAssemblies (returned by CompAssembly::getChild(i))
+ *       cannot lie on the same line (being parallel is alright)
+ *  - CompAssembly with detectors lying in the same plane
+ */
 class PanelsSurface : public UnwrappedSurface {
 public:
   PanelsSurface(const InstrumentActor *rootActor,
@@ -53,16 +59,16 @@ public:
 
 protected:
   boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>>
-  findFlatPanels(size_t rootIndex, const std::vector<size_t> &children,
-                 std::vector<bool> &visited);
+  findFlatPanels(size_t rootIndex, std::vector<bool> &visited);
 
-  void processStructured(const std::vector<size_t> &children, size_t rootIndex);
+  void processStructured(size_t rootIndex);
 
-  void processTubes(size_t rootIndex, std::vector<bool> &visited);
+  boost::optional<size_t> processTubes(size_t rootIndex);
+
+  void processGrid(size_t rootIndex);
 
   std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
-  processUnstructured(const std::vector<size_t> &children, size_t rootIndex,
-                      std::vector<bool> &visited);
+  processUnstructured(size_t rootIndex, std::vector<bool> &visited);
 
   void rotate(const UnwrappedDetector &udet,
               Mantid::Kernel::Quat &R) const override;
@@ -76,7 +82,7 @@ protected:
                                         Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
   void addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos,
-                   int index, Mantid::Kernel::Quat &rotation);
+                   int index, const Mantid::Kernel::Quat &rotation);
   // Spread the banks over the projection plane
   void spreadBanks();
   // Find index of the largest bank
@@ -97,13 +103,13 @@ protected:
 
   /// Keep info of the flat banks
   QList<FlatBankInfo *> m_flatBanks;
-  /// Maps detector ids to indices of FlatBankInfos in m_flatBanks
-  QMap<size_t, int> m_detector2bankMap;
+  /// Maps detector indices to indices of FlatBankInfos in m_flatBanks
+  std::vector<int> m_detector2bankMap;
 
   friend struct FlatBankInfo;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // PANELSSURFACE_H

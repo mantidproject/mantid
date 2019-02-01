@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """Provides a runner to execute unit tests with a given runner
 
 It is intended to be used as a launcher script for a given unit test file.
@@ -9,6 +15,21 @@ import imp
 import os
 import sys
 import unittest
+
+# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
+# Remove this when everything is switched to qtpy
+import sip
+try:
+    sip.setapi('QString', 2)
+    sip.setapi('QVariant', 2)
+    sip.setapi('QDate', 2)
+    sip.setapi('QDateTime', 2)
+    sip.setapi('QTextStream', 2)
+    sip.setapi('QTime', 2)
+    sip.setapi('QUrl', 2)
+except AttributeError:
+    # PyQt < v4.6
+    pass
 
 from xmlrunner import XMLTestRunner
 from xmlrunner.result import _TestInfo, _XMLTestResult, safe_unicode
@@ -80,7 +101,12 @@ def main(argv):
         raise ValueError("Test path '{}' is not a file".format(pathname))
 
     # Add the directory of the test to the Python path
-    sys.path.insert(0, os.path.dirname(pathname))
+    dirname = os.path.dirname(pathname)
+    # if the directory ends with 'tests' add the parent directory as well
+    # this is used in the external project PyStoG
+    sys.path.insert(0, dirname)
+    if os.path.split(dirname)[-1] == 'tests':
+        sys.path.insert(1, os.path.split(dirname)[0])
 
     # Load the test and copy over any module variables so that we have
     # the same environment defined here
@@ -128,8 +154,4 @@ def result_class(pathname):
 
 
 if __name__ == "__main__":
-    # Import mantid so that it sets up the additional paths to scripts etc
-    # It would be good to try & remove this to soften the impact on tests
-    # that don't require importing mantid at all
-    import mantid  # noqa
     main(sys.argv)

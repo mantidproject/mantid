@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -30,6 +36,7 @@ const double TOL = 1.0e-8;
 namespace Mantid {
 namespace Algorithms {
 
+using namespace DataObjects;
 using namespace HistogramData;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(He3TubeEfficiency)
@@ -41,16 +48,9 @@ He3TubeEfficiency::He3TubeEfficiency()
   m_shapeCache.clear();
 }
 
-/// Destructor
-He3TubeEfficiency::~He3TubeEfficiency() {
-  if (m_progress) {
-    delete m_progress;
-  }
-}
-
 /**
-* Declare algorithm properties
-*/
+ * Declare algorithm properties
+ */
 void He3TubeEfficiency::init() {
   using namespace Mantid::Kernel;
 
@@ -93,15 +93,15 @@ void He3TubeEfficiency::init() {
 }
 
 /**
-* Executes the algorithm
-*/
+ * Executes the algorithm
+ */
 void He3TubeEfficiency::exec() {
   // Get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
   m_outputWS = this->getProperty("OutputWorkspace");
 
   if (m_outputWS != m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<API::MatrixWorkspace>(*m_inputWS);
   }
 
   // Get the detector parameters
@@ -119,7 +119,7 @@ void He3TubeEfficiency::exec() {
   }
 
   std::size_t numHists = m_inputWS->getNumberHistograms();
-  m_progress = new API::Progress(this, 0.0, 1.0, numHists);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHists);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
@@ -199,13 +199,13 @@ void He3TubeEfficiency::correctForEfficiency(
 }
 
 /**
-* This function calculates the exponential contribution to the He3 tube
-* efficiency.
-* @param spectraIndex :: the current index to calculate
-* @param idet :: the current detector pointer
-* @throw out_of_range if twice tube thickness is greater than tube diameter
-* @return the exponential contribution for the given detector
-*/
+ * This function calculates the exponential contribution to the He3 tube
+ * efficiency.
+ * @param spectraIndex :: the current index to calculate
+ * @param idet :: the current detector pointer
+ * @throw out_of_range if twice tube thickness is greater than tube diameter
+ * @return the exponential contribution for the given detector
+ */
 double
 He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
                                         const Geometry::IDetector &idet) {
@@ -248,11 +248,11 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
 }
 
 /**
-* Update the shape cache if necessary
-* @param det :: a pointer to the detector to query
-* @param detRadius :: An output parameter that contains the detector radius
-* @param detAxis :: An output parameter that contains the detector axis vector
-*/
+ * Update the shape cache if necessary
+ * @param det :: a pointer to the detector to query
+ * @param detRadius :: An output parameter that contains the detector radius
+ * @param detAxis :: An output parameter that contains the detector axis vector
+ */
 void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
                                             double &detRadius,
                                             Kernel::V3D &detAxis) {
@@ -311,16 +311,16 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
 }
 
 /**
-* For basic shapes centered on the origin (0,0,0) this returns the distance to
-* the surface in the direction of the point given
-*  @param start :: the distance calculated from origin to the surface in a line
-*  towards this point. It should be outside the shape
-*  @param shape :: the object to calculate for, should be centered on the
-* origin
-*  @return the distance to the surface in the direction of the point given
-*  @throw invalid_argument if there is any error finding the distance
-* @returns The distance to the surface in metres
-*/
+ * For basic shapes centered on the origin (0,0,0) this returns the distance to
+ * the surface in the direction of the point given
+ *  @param start :: the distance calculated from origin to the surface in a line
+ *  towards this point. It should be outside the shape
+ *  @param shape :: the object to calculate for, should be centered on the
+ * origin
+ *  @return the distance to the surface in the direction of the point given
+ *  @throw invalid_argument if there is any error finding the distance
+ * @returns The distance to the surface in metres
+ */
 double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
                                         const Geometry::IObject *shape) const {
   // get a vector from the point that was passed to the origin
@@ -346,20 +346,20 @@ double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
 }
 
 /**
-* Calculate the detector efficiency from the detector parameters and the
-* spectrum's x-axis.
-* @param alpha :: the value to feed to the exponential
-* @param scale_factor :: an overall value for scaling the efficiency
-* @return the calculated efficiency
-*/
+ * Calculate the detector efficiency from the detector parameters and the
+ * spectrum's x-axis.
+ * @param alpha :: the value to feed to the exponential
+ * @param scale_factor :: an overall value for scaling the efficiency
+ * @return the calculated efficiency
+ */
 double He3TubeEfficiency::detectorEfficiency(const double alpha,
                                              const double scale_factor) const {
   return (scale_factor / (1.0 - std::exp(-alpha)));
 }
 
 /**
-* Logs if there were any problems locating spectra.
-*/
+ * Logs if there were any problems locating spectra.
+ */
 void He3TubeEfficiency::logErrors() const {
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
   if (nspecs > 0) {
@@ -374,14 +374,14 @@ void He3TubeEfficiency::logErrors() const {
 }
 
 /**
-* Retrieve the detector parameter either from the workspace property or from
-* the associated detector property.
-* @param wsPropName :: the workspace property name for the detector parameter
-* @param currentIndex :: the currently requested spectra index
-* @param detPropName :: the detector property name for the detector parameter
-* @param idet :: the current detector
-* @return the value of the detector property
-*/
+ * Retrieve the detector parameter either from the workspace property or from
+ * the associated detector property.
+ * @param wsPropName :: the workspace property name for the detector parameter
+ * @param currentIndex :: the currently requested spectra index
+ * @param detPropName :: the detector property name for the detector parameter
+ * @param idet :: the current detector
+ * @return the value of the detector property
+ */
 double He3TubeEfficiency::getParameter(std::string wsPropName,
                                        std::size_t currentIndex,
                                        std::string detPropName,
@@ -400,8 +400,8 @@ double He3TubeEfficiency::getParameter(std::string wsPropName,
 }
 
 /**
-* Execute for events
-*/
+ * Execute for events
+ */
 void He3TubeEfficiency::execEvent() {
   this->g_log.information("Processing event workspace");
 
@@ -419,7 +419,7 @@ void He3TubeEfficiency::execEvent() {
 
   std::size_t numHistograms = m_outputWS->getNumberHistograms();
   auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
-  m_progress = new API::Progress(this, 0.0, 1.0, numHistograms);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHistograms);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
@@ -474,12 +474,12 @@ void He3TubeEfficiency::execEvent() {
 }
 
 /** Private function to calculate the effeciency correction from
-* points(wavelength)
-* @param effCorrection :: Vector that will hold the values for each wavelength
-* @param wavelength :: The points calculated from the histogram
-* @param expConstant :: The exponential constant
-* @param scale :: The scale factor
-*/
+ * points(wavelength)
+ * @param effCorrection :: Vector that will hold the values for each wavelength
+ * @param wavelength :: The points calculated from the histogram
+ * @param expConstant :: The exponential constant
+ * @param scale :: The scale factor
+ */
 void He3TubeEfficiency::computeEfficiencyCorrection(
     std::vector<double> &effCorrection, const Points &xes,
     const double expConstant, const double scale) const {
@@ -491,10 +491,10 @@ void He3TubeEfficiency::computeEfficiencyCorrection(
 }
 
 /**
-* Private function for doing the event correction.
-* @param events :: the list of events to correct
-* @param expval :: the value of the exponent for the detector efficiency
-*/
+ * Private function for doing the event correction.
+ * @param events :: the list of events to correct
+ * @param expval :: the value of the exponent for the detector efficiency
+ */
 template <class T>
 void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval) {
   const double scale = this->getProperty("ScaleFactor");

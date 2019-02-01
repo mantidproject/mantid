@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAK_H_
 #define MANTID_DATAOBJECTS_PEAK_H_
 
@@ -51,16 +57,16 @@ public:
   /// Copy constructor
   Peak(const Peak &other);
 
-// MSVC 2015/17 can build with noexcept = default however
-// intellisense still incorrectly reports this as an error despite compiling.
-// https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
-// For that reason we still use the supplied default which should be noexcept
-// once the above is fixed we can remove this workaround
+  // MSVC 2015/17 can build with noexcept = default however
+  // intellisense still incorrectly reports this as an error despite compiling.
+  // https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
+  // For that reason we still use the supplied default which should be noexcept
+  // once the above is fixed we can remove this workaround
 
 #if defined(_MSC_VER) && _MSC_VER <= 1910
   Peak(Peak &&) = default;
   Peak &operator=(Peak &&) = default;
-#elif((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
+#elif ((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
   // The noexcept default declaration was fixed in GCC 4.9.0
   // so for versions 4.8.x and below use default only
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903
@@ -104,6 +110,8 @@ public:
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
+  void setSamplePos(double samX, double samY, double samZ) override;
+  void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
   void resetHKL();
 
   Mantid::Kernel::V3D getQLabFrame() const override;
@@ -154,6 +162,7 @@ public:
   int getPeakNumber() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
+  virtual Mantid::Kernel::V3D getSamplePos() const override;
   double getL1() const override;
   double getL2() const override;
 

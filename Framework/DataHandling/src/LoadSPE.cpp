@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSPE.h"
-#include "MantidDataHandling/SaveSPE.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/SaveSPE.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cstdio>
-#include <limits>
 #include <fstream>
+#include <limits>
 
 namespace Mantid {
 namespace DataHandling {

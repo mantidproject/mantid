@@ -33,7 +33,7 @@ Usage
     ws = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=nSpec, UnitX="Wavelength", 
         VerticalAxisUnit="SpectraNumber")
             
-    wsOut = FindReflectometryLines(ws)
+    wsOut = FindReflectometryLines(ws, Version=1)
 
     for i in range(wsOut.columnCount()):
         print("{} {}".format(wsOut.getColumnNames()[i], wsOut.column(i)[0]))

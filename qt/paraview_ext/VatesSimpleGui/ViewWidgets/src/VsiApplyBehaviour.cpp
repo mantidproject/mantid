@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h"
 
 namespace Mantid {
@@ -34,6 +40,6 @@ void VsiApplyBehaviour::applied(pqPropertiesPanel *) {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(m_colorScaleLock);
   this->pqApplyBehavior::applied(nullptr);
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

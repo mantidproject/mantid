@@ -15,7 +15,7 @@ output workspace will cover the entire range of all the input
 workspaces, with the largest bin widths used in regions of overlap.
 
 The combination of each workspace is performed using the :ref:`algm-Plus` algorithm,
-this does not preform any weighting based on the duration of collection, or proton charge.
+this does not perform any weighting based on the duration of collection, or proton charge.
 If you wish to perform Merge runs that should not be equally weighted then they should be
 corrected individually prior to merging.
 
@@ -57,7 +57,7 @@ Group Workspaces that are not multiperiod
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If group workspaces are provided that are not multi-period, this
-algorithm will merge across all nested workspaces, to give a singe
+algorithm will merge across all nested workspaces, to give a single
 output matrix workspace.
 
 Merging Sample Logs
@@ -126,7 +126,7 @@ appended to the end of the first workspace.
 ChildAlgorithms used
 ####################
 
-The :ref:`algm-Rebin` algorithm is used, if neccessary, to put all the
+The :ref:`algm-Rebin` algorithm is used, if necessary, to put all the
 input workspaces onto a common binning.
 
 The :ref:`algm-Plus` algorithm is used to combine each of the workspaces

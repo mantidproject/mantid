@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_QENSFITSIMULTANEOUSTEST_H_
 #define MANTID_ALGORITHMS_QENSFITSIMULTANEOUSTEST_H_
 
@@ -7,7 +13,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidDataHandling/Load.h"
@@ -21,10 +26,10 @@
 using Mantid::CurveFitting::Algorithms::QENSFitSimultaneous;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::Kernel::make_cow;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::Kernel::make_cow;
 
 class QENSFitSimultaneousTest : public CxxTest::TestSuite {
 public:
@@ -132,7 +137,7 @@ private:
             AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
                 outputBaseName + "_Workspaces"));
     TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             outputBaseName + "_Result"));
 
     TS_ASSERT_EQUALS(groupWorkspace->size(), expectedGroupSize);

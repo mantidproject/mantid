@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
 C
 C Compression of 32bit integer data into byte-relative format
@@ -10,8 +16,8 @@ C The final space used is (NIN-1)/4 +1 + NEXTRA longwords, where NEXTRA is the
 C number of extra longwords used in giving absolute values.
 C
 */
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 #include "byte_rel_comp.h"
 

@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
 #include "DPDFBackgroundRemover.h"
 // Mantid Headers from the same project
-#include "SliceSelector.h"
-#include "DPDFInputDataControl.h"
 #include "DPDFDisplayControl.h"
 #include "DPDFFitControl.h"
 #include "DPDFFourierTransform.h"
+#include "DPDFInputDataControl.h"
+#include "SliceSelector.h"
 // Mantid headers from other projects
+#include "MantidKernel/UsageService.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidKernel/UsageService.h"
 // 3rd party library headers
 // System includes
 
@@ -119,6 +125,6 @@ void BackgroundRemover::summonSliceSelector() {
   m_sliceSelector->raise();          // raise on top
   m_sliceSelector->activateWindow(); // set as active window
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

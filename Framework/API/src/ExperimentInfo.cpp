@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -15,9 +21,9 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
@@ -28,11 +34,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 
 #include "MantidTypes/SpectrumDefinition.h"
@@ -61,7 +67,39 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
-}
+
+// used to terminate SAX process
+class DummyException {
+public:
+  std::string m_validFrom;
+  std::string m_validTo;
+  DummyException(const std::string &validFrom, const std::string &validTo)
+      : m_validFrom(validFrom), m_validTo(validTo) {}
+};
+// SAX content handler for grapping stuff quickly from IDF
+class myContentHandler : public Poco::XML::ContentHandler {
+  void startElement(const XMLString &, const XMLString &localName,
+                    const XMLString &, const Attributes &attrList) override {
+    if (localName == "instrument") {
+      throw DummyException(
+          static_cast<std::string>(attrList.getValue("", "valid-from")),
+          static_cast<std::string>(attrList.getValue("", "valid-to")));
+    }
+  }
+  void endElement(const XMLString &, const XMLString &,
+                  const XMLString &) override {}
+  void startDocument() override {}
+  void endDocument() override {}
+  void characters(const XMLChar[], int, int) override {}
+  void endPrefixMapping(const XMLString &) override {}
+  void ignorableWhitespace(const XMLChar[], int, int) override {}
+  void processingInstruction(const XMLString &, const XMLString &) override {}
+  void setDocumentLocator(const Locator *) override {}
+  void skippedEntity(const XMLString &) override {}
+  void startPrefixMapping(const XMLString &, const XMLString &) override {}
+};
+
+} // namespace
 
 /** Constructor
  */
@@ -181,11 +219,11 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "DetectorInfo and number of detectors in "
                              "instrument");
 }
-}
+} // namespace
 
 /** Set the instrument
-* @param instr :: Shared pointer to an instrument.
-*/
+ * @param instr :: Shared pointer to an instrument.
+ */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_spectrumInfoWrapper = nullptr;
 
@@ -210,10 +248,10 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
-*workspace
-*
-*  @return The instrument class
-*/
+ *workspace
+ *
+ *  @return The instrument class
+ */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   populateIfNotLoaded();
   checkDetectorInfoSize(*sptr_instrument, detectorInfo());
@@ -222,24 +260,24 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
 }
 
 /**  Returns a new copy of the instrument parameters
-*    @return a (new) copy of the instruments parameter map
-*/
+ *    @return a (new) copy of the instruments parameter map
+ */
 Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
   populateIfNotLoaded();
   return *m_parmap;
 }
 
 /**  Returns a const reference to the instrument parameters.
-*    @return a const reference to the instrument ParameterMap.
-*/
+ *    @return a const reference to the instrument ParameterMap.
+ */
 const Geometry::ParameterMap &ExperimentInfo::instrumentParameters() const {
   populateIfNotLoaded();
   return *m_parmap;
 }
 
 /**  Returns a const reference to the instrument parameters.
-*    @return a const reference to the instrument ParameterMap.
-*/
+ *    @return a const reference to the instrument ParameterMap.
+ */
 const Geometry::ParameterMap &
 ExperimentInfo::constInstrumentParameters() const {
   populateIfNotLoaded();
@@ -285,7 +323,7 @@ struct ParameterValue {
   const Run &runData;
 };
 ///@endcond
-}
+} // namespace
 
 namespace {
 bool isPositionParameter(const std::string &name) {
@@ -352,14 +390,14 @@ void adjustPositionsFromScaleFactor(ComponentInfo &componentInfo,
   applyRectangularDetectorScaleToComponentInfo(
       componentInfo, component->getComponentID(), ScaleX, ScaleY);
 }
-}
+} // namespace
 
 /** Add parameters to the instrument parameter map that are defined in
-* instrument
-*   definition file or parameter file, which may contain parameters that require
-*   logfile data to be available. Logs must be loaded before running this
-* method.
-*/
+ * instrument
+ *   definition file or parameter file, which may contain parameters that
+ * require logfile data to be available. Logs must be loaded before running this
+ * method.
+ */
 void ExperimentInfo::populateInstrumentParameters() {
   populateIfNotLoaded();
 
@@ -597,36 +635,36 @@ ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
 }
 
 /** Get a constant reference to the Sample associated with this workspace.
-* @return const reference to Sample object
-*/
+ * @return const reference to Sample object
+ */
 const Sample &ExperimentInfo::sample() const {
   populateIfNotLoaded();
   return *m_sample;
 }
 
 /** Get a reference to the Sample associated with this workspace.
-*  This non-const method will copy the sample if it is shared between
-*  more than one workspace, and the reference returned will be to the copy.
-* @return reference to sample object
-*/
+ *  This non-const method will copy the sample if it is shared between
+ *  more than one workspace, and the reference returned will be to the copy.
+ * @return reference to sample object
+ */
 Sample &ExperimentInfo::mutableSample() {
   populateIfNotLoaded();
   return m_sample.access();
 }
 
 /** Get a constant reference to the Run object associated with this workspace.
-* @return const reference to run object
-*/
+ * @return const reference to run object
+ */
 const Run &ExperimentInfo::run() const {
   populateIfNotLoaded();
   return *m_run;
 }
 
 /** Get a reference to the Run object associated with this workspace.
-*  This non-const method will copy the Run object if it is shared between
-*  more than one workspace, and the reference returned will be to the copy.
-* @return reference to Run object
-*/
+ *  This non-const method will copy the Run object if it is shared between
+ *  more than one workspace, and the reference returned will be to the copy.
+ * @return reference to Run object
+ */
 Run &ExperimentInfo::mutableRun() {
   populateIfNotLoaded();
   return m_run.access();
@@ -734,9 +772,8 @@ Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
   std::string emodeStr;
   if (run().hasProperty(emodeTag)) {
     emodeStr = run().getPropertyValueAsType<std::string>(emodeTag);
-  } else if (sptr_instrument &&
-             constInstrumentParameters().contains(sptr_instrument.get(),
-                                                  emodeTag)) {
+  } else if (sptr_instrument && constInstrumentParameters().contains(
+                                    sptr_instrument.get(), emodeTag)) {
     Geometry::Parameter_sptr param =
         constInstrumentParameters().get(sptr_instrument.get(), emodeTag);
     emodeStr = param->asString();
@@ -817,71 +854,14 @@ void ExperimentInfo::setEFixed(const detid_t detID, const double value) {
   pmap.addDouble(det.get(), "Efixed", value);
 }
 
-// used to terminate SAX process
-class DummyException {
-public:
-  std::string m_validFrom;
-  std::string m_validTo;
-  DummyException(const std::string &validFrom, const std::string &validTo)
-      : m_validFrom(validFrom), m_validTo(validTo) {}
-};
-
-// SAX content handler for grapping stuff quickly from IDF
-class myContentHandler : public Poco::XML::ContentHandler {
-  void startElement(const XMLString &, const XMLString &localName,
-                    const XMLString &, const Attributes &attrList) override {
-    if (localName == "instrument") {
-      throw DummyException(
-          static_cast<std::string>(attrList.getValue("", "valid-from")),
-          static_cast<std::string>(attrList.getValue("", "valid-to")));
-    }
-  }
-  void endElement(const XMLString &, const XMLString &,
-                  const XMLString &) override {}
-  void startDocument() override {}
-  void endDocument() override {}
-  void characters(const XMLChar[], int, int) override {}
-  void endPrefixMapping(const XMLString &) override {}
-  void ignorableWhitespace(const XMLChar[], int, int) override {}
-  void processingInstruction(const XMLString &, const XMLString &) override {}
-  void setDocumentLocator(const Locator *) override {}
-  void skippedEntity(const XMLString &) override {}
-  void startPrefixMapping(const XMLString &, const XMLString &) override {}
-};
-
-/** Return from an IDF the values of the valid-from and valid-to attributes
-*
-*  @param IDFfilename :: Full path of an IDF
-*  @param[out] outValidFrom :: Used to return valid-from date
-*  @param[out] outValidTo :: Used to return valid-to date
-*/
-void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
-                                    std::string &outValidFrom,
-                                    std::string &outValidTo) {
-  SAXParser pParser;
-  // Create on stack to ensure deletion. Relies on pParser also being local
-  // variable.
-  myContentHandler conHand;
-  pParser.setContentHandler(&conHand);
-
-  try {
-    pParser.parse(IDFfilename);
-  } catch (DummyException &e) {
-    outValidFrom = e.m_validFrom;
-    outValidTo = e.m_validTo;
-  } catch (...) {
-    // should throw some sensible here
-  }
-}
-
 /** Return workspace start date as an ISO 8601 string. If this info not stored
-*in workspace the
-*   method returns current date. This date is used for example to retrieve the
-*instrument file.
-*
-*  @return workspace start date as a string (current time if start date not
-*available)
-*/
+ *in workspace the
+ *   method returns current date. This date is used for example to retrieve the
+ *instrument file.
+ *
+ *  @return workspace start date as a string (current time if start date not
+ *available)
+ */
 std::string ExperimentInfo::getWorkspaceStartDate() const {
   populateIfNotLoaded();
   std::string date;
@@ -929,25 +909,53 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
   return date;
 }
 
-/** A given instrument may have multiple IDFs associated with it. This method
-*return an identifier which identify a given IDF for a given instrument.
-* An IDF filename is required to be of the form IDFname + _Definition +
-*Identifier + .xml, the identifier then is the part of a filename that
-*identifies the IDF valid at a given date.
-*
-*  If several IDF files are valid at the given date the file with the most
-*recent from date is selected. If no such files are found the file with the
-*latest from date is selected.
-*
-*  If no file is found for the given instrument, an empty string is returned.
-*
-*  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
-*  @param date :: ISO 8601 date
-*  @return full path of IDF
-*
-* @throws Exception::NotFoundError If no valid instrument definition filename is
-* found
-*/
+/** Return from an IDF the values of the valid-from and valid-to attributes
+ *
+ *  @param IDFfilename :: Full path of an IDF
+ *  @param[out] outValidFrom :: Used to return valid-from date
+ *  @param[out] outValidTo :: Used to return valid-to date
+ */
+void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
+                                    std::string &outValidFrom,
+                                    std::string &outValidTo) {
+  SAXParser pParser;
+  // Create on stack to ensure deletion. Relies on pParser also being local
+  // variable.
+  myContentHandler conHand;
+  pParser.setContentHandler(&conHand);
+
+  try {
+    pParser.parse(IDFfilename);
+  } catch (DummyException &e) {
+    outValidFrom = e.m_validFrom;
+    outValidTo = e.m_validTo;
+  } catch (...) {
+    // should throw some sensible here
+  }
+}
+
+/** A given instrument may have multiple definition files associated with it.
+ *This method returns a file name which identifies a given instrument definition
+ *for a given instrument.
+ *The instrument geometry can be loaded from either a ".xml" file (old-style
+ *IDF) or a ".hdf5/.nxs" file (new-style nexus).
+ *The filename is required to be of the form InstrumentName + _Definition +
+ *Identifier + extension. The identifier then is the part of a filename that
+ *identifies the instrument definition valid at a given date.
+ *
+ *  If several instrument files files are valid at the given date the file with
+ *the most recent from date is selected. If no such files are found the file
+ *with the latest from date is selected.
+ *
+ *  If no file is found for the given instrument, an empty string is returned.
+ *
+ *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+ *  @param date :: ISO 8601 date
+ *  @return full path of instrument geometry file
+ *
+ * @throws Exception::NotFoundError If no valid instrument definition filename
+ *is found
+ */
 std::string
 ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
                                       const std::string &date) {
@@ -960,30 +968,32 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
     return ExperimentInfo::getInstrumentFilename(instrumentName, now);
   }
 
-  g_log.debug() << "Looking for instrument XML file for " << instrumentName
+  g_log.debug() << "Looking for instrument file for " << instrumentName
                 << " that is valid on '" << date << "'\n";
   // Lookup the instrument (long) name
   std::string instrument(
       Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
-  // Get the search directory for XML instrument definition files (IDFs)
+  // Get the instrument directories for instrument file search
   const std::vector<std::string> &directoryNames =
       Kernel::ConfigService::Instance().getInstrumentDirectories();
 
-  boost::regex regex(instrument + "_Definition.*\\.xml",
-                     boost::regex_constants::icase);
+  const boost::regex regex(instrument + "_Definition.*\\.(xml|nxs|hdf5)",
+                           boost::regex_constants::icase);
   Poco::DirectoryIterator end_iter;
   DateAndTime d(date);
   bool foundGoodFile =
       false; // True if we have found a matching file (valid at the given date)
-  std::string mostRecentIDF; // store most recently starting matching IDF if
-                             // found, else most recently starting IDF.
+  std::string mostRecentInstFile; // store most recently starting matching
+                                  // instrument file if found, else most
+                                  // recently starting instrument file.
   DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
-                                              // recently starting IDF, if none
-                                              // match
+                                              // recently starting instrument
+                                              // file, if none match
   DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
                                                       // the most recently
-                                                      // starting matching IDF
+                                                      // starting matching
+                                                      // instrument file
   for (const auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first beat file
@@ -1002,9 +1012,13 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
         getValidFromTo(pathName, validFrom, validTo);
         g_log.debug() << "File '" << pathName << " valid dates: from '"
                       << validFrom << "' to '" << validTo << "'\n";
-        DateAndTime from(validFrom);
-        // Use a default valid-to date if none was found.
-        DateAndTime to;
+
+        // Use default valid "from" and "to" dates if none were found.
+        DateAndTime to, from;
+        if (validFrom.length() > 0)
+          from.setFromISO8601(validFrom);
+        else
+          from = refDate;
         if (validTo.length() > 0)
           to.setFromISO8601(validTo);
         else
@@ -1016,20 +1030,20 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
                                         // matching file found
             foundGoodFile = true;
             refDateGoodFile = from;
-            mostRecentIDF = pathName;
+            mostRecentInstFile = pathName;
           }
         }
-        if (!foundGoodFile && (from > refDate)) { // Use most recently starting
-                                                  // file, in case we don't find
-                                                  // a matching file.
+        if (!foundGoodFile && (from >= refDate)) { // Use most recently starting
+                                                   // file, in case we don't
+                                                   // find a matching file.
           refDate = from;
-          mostRecentIDF = pathName;
+          mostRecentInstFile = pathName;
         }
       }
     }
   }
-  g_log.debug() << "IDF selected is " << mostRecentIDF << '\n';
-  return mostRecentIDF;
+  g_log.debug() << "Instrument file selected is " << mostRecentInstFile << '\n';
+  return mostRecentInstFile;
 }
 
 /** Return a const reference to the DetectorInfo object.
@@ -1458,7 +1472,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     std::string paramValue = tokens[3];
     int size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
-      paramValue += ";" + tokens[4];
+      paramValue += ";" + tokens[i];
 
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];

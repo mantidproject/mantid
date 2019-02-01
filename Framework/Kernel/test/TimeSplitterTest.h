@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * TimeSplitterTest.h
  *
@@ -8,10 +14,10 @@
 #ifndef TIMESPLITTERTEST_H_
 #define TIMESPLITTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <ctime>
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSplitter.h"
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;

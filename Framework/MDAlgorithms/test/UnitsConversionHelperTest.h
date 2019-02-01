@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CONVERT2_MDEVENTS_UNITS_CONVERSION_TEST_H_
 #define CONVERT2_MDEVENTS_UNITS_CONVERSION_TEST_H_
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_SETGONIOMETERTEST_H_
 #define MANTID_CRYSTAL_SETGONIOMETERTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/SetGoniometer.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;

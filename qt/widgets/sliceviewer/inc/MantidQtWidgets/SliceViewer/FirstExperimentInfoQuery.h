@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_
 #define MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -67,7 +73,7 @@ public:
     return hasRotatedGoniometer;
   }
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_ */

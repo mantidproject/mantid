@@ -60,7 +60,7 @@ Usage
     from __future__ import print_function
     import numpy
 
-    # Funtions x and y defined over the time domain: z(t) = x(t) + i * y(t)
+    # Functions x and y defined over the time domain: z(t) = x(t) + i * y(t)
     dt=0.001
     t=numpy.arange(-1,1,dt)
 

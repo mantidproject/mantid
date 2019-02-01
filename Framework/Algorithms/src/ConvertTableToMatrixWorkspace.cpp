@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -5,7 +11,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -19,6 +26,7 @@ DECLARE_ALGORITHM(ConvertTableToMatrixWorkspace)
 using namespace Kernel;
 using namespace API;
 using namespace HistogramData;
+using namespace DataObjects;
 
 void ConvertTableToMatrixWorkspace::init() {
   declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
@@ -51,8 +59,7 @@ void ConvertTableToMatrixWorkspace::exec() {
   auto X = inputWorkspace->getColumn(columnX)->numeric_fill<>();
   auto Y = inputWorkspace->getColumn(columnY)->numeric_fill<>();
 
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, nrows, nrows);
+  MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(1, Points(nrows));
 
   outputWorkspace->mutableX(0).assign(X.begin(), X.end());
   outputWorkspace->mutableY(0).assign(Y.begin(), Y.end());

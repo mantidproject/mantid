@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidRemoteAlgorithms/QueryRemoteJob2.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidRemoteAlgorithms/QueryRemoteJob2.h"
+#include "MantidKernel/NullValidator.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {

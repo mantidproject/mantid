@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include <boost/python/class.hpp>
@@ -55,7 +61,7 @@ std::vector<double> getFsSquared(ReflectionGenerator &self,
 
   return self.getFsSquared(converter());
 }
-}
+} // namespace
 
 void export_ReflectionGenerator() {
   enum_<ReflectionConditionFilter>("ReflectionConditionFilter")

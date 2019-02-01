@@ -28,8 +28,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include <QVarLengthArray>
 
 #include "ApplicationWindow.h"
@@ -124,7 +124,7 @@ using CurveType = GraphOptions::CurveType;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("Graph");
-}
+} // namespace
 
 Graph::Graph(int x, int y, int width, int height, QWidget *parent, Qt::WFlags f)
     : QWidget(parent, f) {
@@ -244,8 +244,7 @@ MultiLayer *Graph::multiLayer() {
 
 void Graph::deselectMarker() {
   selectedMarker = -1;
-  if (d_markers_selector)
-    delete d_markers_selector;
+  delete d_markers_selector;
 
   emit enableTextEditor(nullptr);
 
@@ -416,9 +415,9 @@ bool Graph::isColorBarEnabled(int axis) const {
   return false;
 }
 /** Finds out if the specified axis has a log scale or not
-*  @param axis the aixs to check e.g. yright ...
-*  @return true if there is a log scale on that axis
-*/
+ *  @param axis the aixs to check e.g. yright ...
+ *  @return true if there is a log scale on that axis
+ */
 bool Graph::isLog(const QwtPlot::Axis &axis) const {
   ScaleEngine *sc_engine =
       dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
@@ -1355,7 +1354,7 @@ void Graph::setAxisScale(int axis, double start, double end, int scaleType,
               start = sp->getMinPositiveValue();
             }
             sp->mutableColorMap().changeScaleType(
-                (GraphOptions::ScaleType)type);
+                (MantidColorMap::ScaleType)type);
             sp->mutableColorMap().setNthPower(sc_engine->nthPower());
             rightAxis->setColorMap(QwtDoubleInterval(start, end),
                                    sp->getColorMap());
@@ -2604,9 +2603,9 @@ bool Graph::addCurves(Table *w, const QStringList &names, int style,
       case Table::xErr:
       case Table::yErr:
         noOfErrorCols++;
-      // Fall through, as we want errors to be at the end of the list in the
-      // same way as labels
-      // are. So _no break_ here on purpose.
+        // Fall through, as we want errors to be at the end of the list in the
+        // same way as labels
+        // are. So _no break_ here on purpose.
 
       case Table::Label:
         // Keep error/label columns at the end of the list
@@ -2644,7 +2643,7 @@ bool Graph::addCurves(Table *w, const QStringList &names, int style,
         // If X column is given - use it
         xColName = xColNameGiven;
       else
-        // Otherise, use associated one
+        // Otherwise, use associated one
         xColName = w->colName(w->colX(colIndex));
 
       if (xColName.isEmpty() || yColName.isEmpty())
@@ -4564,8 +4563,7 @@ void Graph::setActiveTool(PlotToolInterface *tool) {
     return;
   }
 
-  if (d_active_tool)
-    delete d_active_tool;
+  delete d_active_tool;
 
   d_active_tool = tool;
 }
@@ -4577,21 +4575,17 @@ void Graph::disableTools() {
   if (drawLineActive())
     drawLine(false);
 
-  if (d_active_tool)
-    delete d_active_tool;
+  delete d_active_tool;
   d_active_tool = nullptr;
 
-  if (d_range_selector)
-    delete d_range_selector;
+  delete d_range_selector;
   d_range_selector = nullptr;
 }
 
 bool Graph::enableRangeSelectors(const QObject *status_target,
                                  const char *status_slot) {
-  if (d_range_selector) {
-    delete d_range_selector;
-    d_range_selector = nullptr;
-  }
+  delete d_range_selector;
+  d_range_selector = nullptr;
   d_range_selector = new RangeSelectorTool(this, status_target, status_slot);
   setActiveTool(d_range_selector);
   connect(d_range_selector, SIGNAL(changed()), this,
@@ -4732,12 +4726,14 @@ Spectrogram *Graph::plotSpectrogram(Spectrogram *d_spectrogram,
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, false);
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
   } else if (type == GraphOptions::ColorMap) {
-    d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
+    d_spectrogram->mutableColorMap().changeScaleType(
+        MantidColorMap::ScaleType::Linear);
     d_spectrogram->setDefaultColorMap();
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
   } else if (type == GraphOptions::ColorMapContour) {
-    d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
+    d_spectrogram->mutableColorMap().changeScaleType(
+        MantidColorMap::ScaleType::Linear);
     d_spectrogram->setDefaultColorMap();
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
@@ -4846,14 +4842,10 @@ bool Graph::validCurvesDataSize() {
 
 Graph::~Graph() {
   setActiveTool(nullptr);
-  if (d_range_selector)
-    delete d_range_selector;
-  if (d_peak_fit_tool)
-    delete d_peak_fit_tool;
-  if (d_magnifier)
-    delete d_magnifier;
-  if (d_panner)
-    delete d_panner;
+  delete d_range_selector;
+  delete d_peak_fit_tool;
+  delete d_magnifier;
+  delete d_panner;
   delete titlePicker;
   delete scalePicker;
   delete cp;
@@ -5359,10 +5351,8 @@ void Graph::changeIntensity(bool bIntensityChanged) {
  * @param on :: boolean parameter to switch on zooming
  */
 void Graph::enablePanningMagnifier(bool on) {
-  if (d_magnifier)
-    delete d_magnifier;
-  if (d_panner)
-    delete d_panner;
+  delete d_magnifier;
+  delete d_panner;
 
   QwtPlotCanvas *cnvs = d_plot->canvas(); // canvas();
   if (on) {
@@ -5398,8 +5388,7 @@ bool Graph::isFixedAspectRatioEnabled() {
  */
 void Graph::enableFixedAspectRatio(bool on) {
 #if QWT_VERSION >= 0x050200
-  if (d_rescaler)
-    delete d_rescaler;
+  delete d_rescaler;
 
   QwtPlotCanvas *cnvs = d_plot->canvas();
   if (on) {
@@ -5622,8 +5611,12 @@ void Graph::updateDataCurves() {
 void Graph::checkValuesInAxisRange(MantidMatrixCurve *mc) {
   auto *data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
+  auto const dataSize = data->size();
+  if (dataSize == 0) {
+    throw std::runtime_error("Cannot draw the curve: no plottable values.");
+  }
   double xMax(
-      data->x(data->size() - 1)); // Needs to be max of current graph (x-axis)
+      data->x(dataSize - 1)); // Needs to be max of current graph (x-axis)
   if (xMin > xMax) {
     std::swap(xMin, xMax);
   }
@@ -5648,9 +5641,9 @@ void Graph::checkValuesInAxisRange(MantidMatrixCurve *mc) {
 }
 
 /**
-  * Process dragMousePress signal from d_plot.
-  * @param pos :: Mouse position.
-  */
+ * Process dragMousePress signal from d_plot.
+ * @param pos :: Mouse position.
+ */
 void Graph::slotDragMousePress(QPoint pos) {
   if (hasActiveTool())
     return;
@@ -5658,9 +5651,9 @@ void Graph::slotDragMousePress(QPoint pos) {
 }
 
 /**
-  * Process dragMouseRelease signal from d_plot.
-  * @param pos :: Mouse position.
-  */
+ * Process dragMouseRelease signal from d_plot.
+ * @param pos :: Mouse position.
+ */
 void Graph::slotDragMouseRelease(QPoint pos) {
   if (hasActiveTool())
     return;
@@ -5668,9 +5661,9 @@ void Graph::slotDragMouseRelease(QPoint pos) {
 }
 
 /**
-  * Process dragMouseMove signal from d_plot.
-  * @param pos :: Mouse position.
-  */
+ * Process dragMouseMove signal from d_plot.
+ * @param pos :: Mouse position.
+ */
 void Graph::slotDragMouseMove(QPoint pos) {
   if (hasActiveTool())
     return;
@@ -5706,24 +5699,27 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("AxesNumberColors")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesNumberColors")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("AxesNumberColors").c_str())
+            .split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisLabelsColor(i, QColor(sl[i]));
   }
 
   if (tsv.selectLine("AxesTitleColors")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesTitleColors")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("AxesTitleColors").c_str())
+            .split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisTitleColor(i, QColor(sl[i]));
   }
 
   if (tsv.selectLine("AxesTitleAlignment")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("AxesTitleAlignment")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("AxesTitleAlignment").c_str())
+            .split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       setAxisTitleAlignment(i, sl[i].toInt());
@@ -5844,8 +5840,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("EnabledTickLabels")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("EnabledTickLabels")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("EnabledTickLabels").c_str())
+            .split("\t");
     sl.pop_front();
     for (int i = 0; i < sl.count(); ++i)
       enableAxisLabels(i, sl[i].toInt());
@@ -5857,8 +5854,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   for (int i = 0; tsv.selectLine("ImageMarker", i); ++i) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("ImageMarker", i)
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("ImageMarker", i).c_str())
+            .split("\t");
     insertImageMarker(sl, fileVersion);
   }
 
@@ -5876,8 +5874,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("LabelsRotation")) {
-    QStringList sl = QString::fromUtf8(tsv.lineAsString("LabelsRotation")
-                                           .c_str()).split("\t");
+    QStringList sl =
+        QString::fromUtf8(tsv.lineAsString("LabelsRotation").c_str())
+            .split("\t");
     setAxisLabelRotation(QwtPlot::xBottom, sl[1].toInt());
     setAxisLabelRotation(QwtPlot::xTop, sl[2].toInt());
   }
@@ -6243,12 +6242,12 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
       }
 
       /* You may notice we plot the spectrogram before loading it.
-        * Why? Because plotSpectrogram overrides the spectrograms' settings
-        * based off the second parameter (which has been chosen arbitrarily
-        * in this case). We're just use plotSpectrogram to add the spectrogram
-        * to the graph for us, and then loading the settings into the
-        * spectrogram.
-        */
+       * Why? Because plotSpectrogram overrides the spectrograms' settings
+       * based off the second parameter (which has been chosen arbitrarily
+       * in this case). We're just use plotSpectrogram to add the spectrogram
+       * to the graph for us, and then loading the settings into the
+       * spectrogram.
+       */
       if (!s)
         continue;
 
@@ -6467,8 +6466,8 @@ std::string Graph::saveToProject() {
   }
 
   if (d_plot->canvas()->lineWidth() > 0)
-    tsv.writeLine("CanvasFrame") << d_plot->canvas()->lineWidth()
-                                 << canvasFrameColor().name();
+    tsv.writeLine("CanvasFrame")
+        << d_plot->canvas()->lineWidth() << canvasFrameColor().name();
 
   tsv.writeLine("CanvasBackground");
   tsv << d_plot->canvasBackground().name();

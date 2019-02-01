@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "IndirectBayesTab.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "IndirectBayesTab.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,5 +39,5 @@ IndirectBayesTab::~IndirectBayesTab() {}
 void IndirectBayesTab::runPythonScript(const QString &pyInput) {
   emit runAsPythonScript(pyInput, true);
 }
-}
+} // namespace CustomInterfaces
 } // namespace MantidQt

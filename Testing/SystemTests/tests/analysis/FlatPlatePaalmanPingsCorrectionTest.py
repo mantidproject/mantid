@@ -1,8 +1,14 @@
-import stresstesting
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+import systemtesting
 from mantid.simpleapi import *
 
 
-class FlatPlatePaalmanPingsCorrectionTest(stresstesting.MantidStressTest):
+class FlatPlatePaalmanPingsCorrectionTest(systemtesting.MantidSystemTest):
     def create_input_workspace(self, ws):
         # ws = ws with first two channels set to 2.602 AA and last two channels to 31.974AA
         LoadNexus(Filename='IN16B_felo_002K.nxs', OutputWorkspace=ws)
@@ -38,7 +44,7 @@ class FlatPlatePaalmanPingsCorrectionTest(stresstesting.MantidStressTest):
                                                       CanFrontThickness=can_front_thickness, CanBackThickness=can_back_thickness)
 
         LoadNexusProcessed(Filename="FlatPlatePaalmanPings_" + name + ".nxs", OutputWorkspace='ref')
-        result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', Tolerance=1e-6)
+        result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', Tolerance=1e-6, CheckInstrument=False)
         if not result[0]:
             self.assertTrue(result[0], "Mismatch in " + name + ": " + result[1].row(0)['Message'])
 

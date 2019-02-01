@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_SLICINGALGORITHMTEST_H_
 #define MANTID_MDEVENTS_SLICINGALGORITHMTEST_H_
 
-#include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidMDAlgorithms/SlicingAlgorithm.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/VMD.h"
+#include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

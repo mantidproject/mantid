@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -37,24 +43,24 @@ using namespace Geometry;
 using namespace DataObjects;
 
 /** Initialisation method
-*/
+ */
 void LoadIsawDetCal::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
-  const auto exts = std::vector<std::string>({".DetCal"});
+  const auto exts =
+      std::vector<std::string>({".DetCal", ".detcal", ".peaks", ".integrate"});
   declareProperty(
       Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
       "The input filename of the ISAW DetCal file (Two files "
       "allowed for SNAP) ");
 
-  declareProperty(
-      Kernel::make_unique<API::FileProperty>(
-          "Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"),
-      "The input filename of the second ISAW DetCal file (West "
-      "banks for SNAP) ");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename2", "", API::FileProperty::OptionalLoad, exts),
+                  "The input filename of the second ISAW DetCal file (West "
+                  "banks for SNAP) ");
 
   declareProperty("TimeOffset", 0.0, "Time Offset", Direction::Output);
 }
@@ -85,7 +91,7 @@ std::string getInstName(API::Workspace_const_sptr wksp) {
 
   throw std::runtime_error("Failed to determine instrument name");
 }
-}
+} // namespace
 
 std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
   std::map<std::string, std::string> result;
@@ -109,9 +115,9 @@ std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
 }
 
 /** Executes the algorithm
-*
-*  @throw runtime_error Thrown if algorithm cannot execute
-*/
+ *
+ *  @throw runtime_error Thrown if algorithm cannot execute
+ */
 void LoadIsawDetCal::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("InputWorkspace");
@@ -487,5 +493,5 @@ void LoadIsawDetCal::applyScalings(
   }
 }
 
-} // namespace Algorithm
+} // namespace DataHandling
 } // namespace Mantid

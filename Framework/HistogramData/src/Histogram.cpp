@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramIterator.h"
 
@@ -285,11 +291,11 @@ void Histogram::resize(size_t n) {
   }
 }
 
-HistogramIterator Histogram::begin() const {
+HistogramIterator Histogram::begin() const & {
   return HistogramIterator(*this, 0);
 }
 
-HistogramIterator Histogram::end() const {
+HistogramIterator Histogram::end() const & {
   return HistogramIterator(*this, size());
 }
 

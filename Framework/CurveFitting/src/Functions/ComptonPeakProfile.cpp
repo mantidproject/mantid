@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
-#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
@@ -29,7 +35,7 @@ const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 const double STDDEV_TO_FWHM = 0.5 * std::sqrt(std::log(4.0));
 ///@endcond
-}
+} // namespace
 
 /**
  */

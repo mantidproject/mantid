@@ -1,3 +1,10 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -10,13 +17,12 @@
 #include "MuonAnalysisResultTableCreator.h"
 
 using Mantid::API::AnalysisDataService;
-using Mantid::API::ITableWorkspace;
 using Mantid::API::ExperimentInfo;
+using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::TableRow;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
-
 namespace {
 
 /**
@@ -59,7 +65,7 @@ constexpr static size_t ERROR_LENGTH(5);
 const static QString ERROR_QSTRING{QString::fromStdString(ERROR_STRING)};
 const static std::string COSTFN_STRING("Cost function value");
 const static QString COSTFN_QSTRING{QString::fromStdString(COSTFN_STRING)};
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -85,7 +91,6 @@ MuonAnalysisResultTableCreator::MuonAnalysisResultTableCreator(
         "Log values passed in to result table creator are null!");
   }
 }
-
 /**
  * Create a results table with the given options
  * @returns :: results table workspace
@@ -123,9 +128,13 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   for (const auto &log : m_logs) {
 
     auto val = valMap[log];
-    // multiple files use strings due to x-y format
-    if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+    auto dashIndex = val.toString().indexOf("-");
 
+    // multiple files use strings due to x-y format
+    if (dashIndex != 0 && dashIndex != -1) {
+      addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
+               !log.endsWith(" (text)")) {
       addColumnToResultsTable(table, wsParamsByLabel, log); //
 
     } else {
@@ -363,7 +372,8 @@ QStringList MuonAnalysisResultTableCreator::addParameterColumns(
 
   // Add columns to table and update list of parameters to display
   const auto addToTableAndList = [&table, &paramsToDisplay](
-      const QString &paramName, const std::string &colName) {
+                                     const QString &paramName,
+                                     const std::string &colName) {
     addColumnToTable(table, "double", colName, PLOT_TYPE_Y);
     addColumnToTable(table, "double", colName + ERROR_STRING, PLOT_TYPE_YERR);
     paramsToDisplay.append(paramName);
@@ -491,13 +501,15 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
-      } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+      } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
+                 !log.endsWith(" (text)")) {
         valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
       }
 
-      if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+      if (MuonAnalysisHelper::isNumber(val.toString()) &&
+          !log.endsWith(" (text)")) {
         row << valueToWrite.toDouble();
       } else {
         row << valueToWrite.toStdString();
@@ -512,13 +524,13 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
   }
 }
 /**
-* Add column for a log to the table for the case of multiple fits.
-* Have to check multiple values are not returned
-* @param table :: [input, output] Table to write to
-* @param paramsByLabel :: [input] Map of <label name, <workspace name,
-* <parameter, value>>>
-* @param log :: [input] the log we are going to add to the table
-*/
+ * Add column for a log to the table for the case of multiple fits.
+ * Have to check multiple values are not returned
+ * @param table :: [input, output] Table to write to
+ * @param paramsByLabel :: [input] Map of <label name, <workspace name,
+ * <parameter, value>>>
+ * @param log :: [input] the log we are going to add to the table
+ */
 void MuonAnalysisResultTableCreator::addColumnToResultsTable(
     ITableWorkspace_sptr &table,
     const QMap<QString, WSParameterList> &paramsByLabel,
@@ -534,13 +546,13 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
   for (const auto &wsName : paramsByLabel[labelName].keys()) {
     const auto &logValues = m_logValues->value(wsName);
     const auto &val = logValues[log];
-
     // Special case: if log is time in sec, subtract the first start time
     if (log.endsWith(" (s)")) {
       auto seconds =
           val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
       valuesPerWorkspace.append(QString::number(seconds));
-    } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+    } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
+               !log.endsWith(" (text)")) {
 
       valuesPerWorkspace.append(QString::number(val.toDouble()));
 
@@ -549,6 +561,13 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
     }
   }
   valuesPerWorkspace.sort();
+
+  auto dashIndex = valuesPerWorkspace.front().toStdString().find_first_of("-");
+  if (dashIndex != std::string::npos && dashIndex != 0) {
+
+    addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    return;
+  }
   const auto &min = valuesPerWorkspace.front().toDouble();
   const auto &max = valuesPerWorkspace.back().toDouble();
   if (min == max) {
@@ -587,12 +606,16 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
         const auto &logValues = m_logValues->value(wsName);
         const auto &val = logValues[log];
 
+        auto dashIndex = val.toString().indexOf("-");
         // Special case: if log is time in sec, subtract the first start time
         if (log.endsWith(" (s)")) {
           auto seconds =
               val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
-        } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+        } else if (dashIndex != 0 && dashIndex != -1) {
+          valuesPerWorkspace.append(logValues[log].toString());
+        } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
+                   !log.endsWith(" (text)")) {
 
           valuesPerWorkspace.append(QString::number(val.toDouble()));
 
@@ -605,15 +628,42 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       // Why not use std::minmax_element? To avoid MSVC warning: QT bug 41092
       // (https://bugreports.qt.io/browse/QTBUG-41092)
       valuesPerWorkspace.sort();
-      const auto &min = valuesPerWorkspace.front().toDouble();
-      const auto &max = valuesPerWorkspace.back().toDouble();
-      if (min == max) {
-        row << min;
-      } else {
+
+      auto dashIndex =
+          valuesPerWorkspace.front().toStdString().find_first_of("-");
+      if (dashIndex != std::string::npos && dashIndex != 0) {
         std::ostringstream oss;
-        oss << valuesPerWorkspace.front().toStdString() << "-"
-            << valuesPerWorkspace.back().toStdString();
+        auto dad = valuesPerWorkspace.front().toStdString();
+        oss << valuesPerWorkspace.front().toStdString();
         row << oss.str();
+
+      } else {
+        if (MuonAnalysisHelper::isNumber(valuesPerWorkspace.front())) {
+          const auto &min = valuesPerWorkspace.front().toDouble();
+          const auto &max = valuesPerWorkspace.back().toDouble();
+          if (min == max) {
+            row << min;
+          } else {
+            std::ostringstream oss;
+            oss << valuesPerWorkspace.front().toStdString() << "-"
+                << valuesPerWorkspace.back().toStdString();
+            row << oss.str();
+          }
+        } else {
+          const auto &front = valuesPerWorkspace.front().toStdString();
+          const auto &back = valuesPerWorkspace.back().toStdString();
+          if (front == back) {
+            row << front;
+          } else {
+            std::ostringstream oss;
+            oss << valuesPerWorkspace[0].toStdString();
+
+            for (int k = 1; k < valuesPerWorkspace.size(); k++) {
+              oss << ", " << valuesPerWorkspace[k].toStdString();
+              row << oss.str();
+            }
+          }
+        }
       }
       columnIndex++;
     }
@@ -622,26 +672,25 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
     const auto parseColumnName =
         [&paramsToDisplay](
             const std::string &columnName) -> std::pair<int, std::string> {
-          if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
-            return {0, columnName};
-          } else {
-            // column name is f[n].param
-            size_t pos = columnName.find_first_of('.');
-            if (pos != std::string::npos) {
-              try {
-                const auto &paramName = columnName.substr(pos + 1);
-                const auto wsIndex = std::stoi(columnName.substr(1, pos));
-                return {wsIndex, paramName};
-              } catch (const std::exception &ex) {
-                throw std::runtime_error("Failed to parse column name " +
-                                         columnName + ": " + ex.what());
-              }
-            } else {
-              throw std::runtime_error("Failed to parse column name " +
-                                       columnName);
-            }
+      if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
+        return {0, columnName};
+      } else {
+        // column name is f[n].param
+        size_t pos = columnName.find_first_of('.');
+        if (pos != std::string::npos) {
+          try {
+            const auto &paramName = columnName.substr(pos + 1);
+            const auto wsIndex = std::stoi(columnName.substr(1, pos));
+            return {wsIndex, paramName};
+          } catch (const std::exception &ex) {
+            throw std::runtime_error("Failed to parse column name " +
+                                     columnName + ": " + ex.what());
           }
-        };
+        } else {
+          throw std::runtime_error("Failed to parse column name " + columnName);
+        }
+      }
+    };
 
     // Add param values
     const auto &params = paramsByLabel[labelName];

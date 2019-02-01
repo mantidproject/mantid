@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 
 # pylint: disable=invalid-name
@@ -127,7 +133,7 @@ class SANSSave(DataProcessorAlgorithm):
 
         # SaveNXcanSAS clashes with SaveNexusProcessed
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NXcanSAS, file_types,
-                                                            [SaveType.Nexus])
+                                                            [])
 
         # SaveNISTDAT clashes with SaveRKH, both can save to .dat
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NistQxy, file_types, [SaveType.RKH])
