@@ -219,7 +219,6 @@ public:
     TS_ASSERT_DELTA(ws->getPeaks()[1].getDSpacing(), 2.4928, 0.001);
     TS_ASSERT_DELTA(ws->getPeaks()[2].getDSpacing(), 2.9677, 0.001);
   }
-
 };
 
 #endif /* MANTID_CRYSTAL_LOADPEAKSFILETEST_H_ */

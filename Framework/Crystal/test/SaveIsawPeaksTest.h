@@ -7,9 +7,9 @@
 #ifndef MANTID_CRYSTAL_SAVEISAWPEAKSTEST_H_
 #define MANTID_CRYSTAL_SAVEISAWPEAKSTEST_H_
 
-#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
@@ -164,11 +164,11 @@ public:
     TS_ASSERT_DELTA(p.getWavelength(), p2.getWavelength(), 0.001);
     TS_ASSERT_DELTA(p.getL1(), p2.getL1(), 1e-3);
     TS_ASSERT_DELTA(p.getL2(), p2.getL2(), 1e-3);
-    TS_ASSERT_DELTA(p.getTOF(), p2.getTOF(), 0.1); // channel number is about TOF
+    TS_ASSERT_DELTA(p.getTOF(), p2.getTOF(),
+                    0.1); // channel number is about TOF
 
     TS_ASSERT_DELTA(p.getDSpacing(), p2.getDSpacing(), 0.001);
   }
-
 };
 
 #endif /* MANTID_CRYSTAL_SAVEISAWPEAKSTEST_H_ */
