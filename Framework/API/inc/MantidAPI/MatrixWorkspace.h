@@ -15,7 +15,6 @@
 #include "MantidKernel/EmptyValues.h"
 
 #include <atomic>
-#include <boost/optional.hpp>
 #include <mutex>
 
 namespace Mantid {
