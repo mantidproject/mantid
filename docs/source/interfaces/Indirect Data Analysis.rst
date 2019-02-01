@@ -64,7 +64,8 @@ Input File
   :math:`S(Q, \omega)`.
 
 Group Input
-  Provides an option to group or ungroup the input data.
+  The :ref:`ElasticWindowMultiple <algm-ElasticWindowMultiple>` algorithm is performed on the inputed files and returns a group
+  workspace as the output. This option, if unchecked, will ungroup these output workspaces.
 
 Load History
   If unchecked the input workspace will be loaded without it's history.
@@ -86,7 +87,7 @@ Normalise to Lowest Temp
 
 SE log name
   The name of the sample environment log entry in the input files sample logs
-  (defaults to sample).
+  (defaults to ‘sample’).
 
 SE log value
   The value to be taken from the "SE log name" data series (defaults to the
@@ -123,9 +124,10 @@ as function of run number. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
 MSDFit searches for the log files named <runnumber>_sample.txt in your chosen
-raw file directory (the name ‘sample’ is for OSIRIS). If they exist the
-temperature is read and the MSD is plotted versus temperature; if they do not
-exist the MSD is plotted versus run number (last 3 digits).
+raw file directory (the name ‘sample’ is for OSIRIS). These log files will exist 
+if the correct temperature was loaded using SE-log-name in the Elwin tab. If they 
+exist the temperature is read and the MSD is plotted versus temperature; if they do 
+not exist the MSD is plotted versus run number (last 3 digits).
 
 The fitted parameters for all runs are in _msd_Table and the <u2> in _msd. To
 run the Sequential fit a workspace named <inst><first-run>_to_<last-run>_eq is
@@ -136,8 +138,8 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The Peters model[1] reduces to a Gaussian at large (towards infinity) beta. The Yi[2] model
-reduces to a Gaussian at sigma equal to zero.
+The `Peters model[1] <https://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdPeters.html>`_ 
+reduces to a Gaussian at large (towards infinity) beta. The Yi[2] model reduces to a Gaussian at sigma equal to zero.
 
 .. interface:: Data Analysis
   :width: 450
@@ -147,7 +149,7 @@ Options
 ~~~~~~~
 
 Sample
-  A file that has been created using the Elwin tab with an :math:`x` axis of
+  A file with extension *_eq.nxs* that has been created using the Elwin tab with an :math:`x` axis of
   :math:`Q`. Alternatively, a workspace may be provided.
 
 Single Input/Multiple Input
