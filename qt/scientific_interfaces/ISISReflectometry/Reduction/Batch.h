@@ -30,6 +30,8 @@ public:
   bool hasSelection() const;
   template <typename T> bool isSelected(T const &item) const;
 
+  PerThetaDefaults const *defaultsForTheta(double thetaAngle) const;
+
 private:
   Experiment const &m_experiment;
   Instrument const &m_instrument;

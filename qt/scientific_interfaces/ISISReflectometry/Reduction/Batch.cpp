@@ -24,5 +24,10 @@ RunsTable &Batch::mutableRunsTable() { return m_runsTable; }
 Slicing const &Batch::slicing() const { return m_slicing; }
 
 bool Batch::hasSelection() const { return m_runsTable.hasSelection(); }
+
+PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
+  return experiment().defaultsForTheta(thetaAngle,
+                                       runsTable().thetaTolerance());
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

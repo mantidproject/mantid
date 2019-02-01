@@ -61,13 +61,18 @@ void updatePropertiesFromMap(
   }
 }
 
-void updateWorkspacesNameProperties(AlgorithmRuntimeProps &properties,
-                                    ReductionWorkspaces const &workspaces) {
-  updateProperty("InputRunList", workspaces.inputRunNumbers(), properties);
-  updateProperty("FirstTransmissionRunList",
-                 workspaces.transmissionRuns().firstRunList(), properties);
-  updateProperty("SecondTransmissionRunList",
-                 workspaces.transmissionRuns().secondRunList(), properties);
+void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
+                                     std::vector<std::string> inputRunNumbers) {
+  updateProperty("InputRunList", inputRunNumbers, properties);
+}
+
+void updateTransmissionWorkspaceProperties(
+    AlgorithmRuntimeProps &properties,
+    TransmissionRunPair const &transmissionRuns) {
+  updateProperty("FirstTransmissionRunList", transmissionRuns.firstRunList(),
+                 properties);
+  updateProperty("SecondTransmissionRunList", transmissionRuns.secondRunList(),
+                 properties);
 }
 
 void updateRangeInQProperties(AlgorithmRuntimeProps &properties,
@@ -78,7 +83,10 @@ void updateRangeInQProperties(AlgorithmRuntimeProps &properties,
 }
 
 void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
-  updateWorkspacesNameProperties(properties, row.reducedWorkspaceNames());
+  updateInputWorkspacesProperties(
+      properties, row.reducedWorkspaceNames().inputRunNumbers());
+  updateTransmissionWorkspaceProperties(
+      properties, row.reducedWorkspaceNames().transmissionRuns());
   updateRangeInQProperties(properties, row.qRange());
   updateProperty("ThetaIn", row.theta(), properties);
   updateProperty("ScaleFactor", row.scaleFactor(), properties);
@@ -147,6 +155,19 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
   updatePropertiesFromMap(properties, experiment.stitchParameters());
 }
 
+void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
+                                     PerThetaDefaults const *perThetaDefaults) {
+  if (!perThetaDefaults)
+    return;
+
+  updateTransmissionWorkspaceProperties(
+      properties, perThetaDefaults->transmissionWorkspaceNames());
+  updateRangeInQProperties(properties, perThetaDefaults->qRange());
+  updateProperty("ScaleFactor", perThetaDefaults->scaleFactor(), properties);
+  updateProperty("ProcessingInstructions",
+                 perThetaDefaults->processingInstructions(), properties);
+}
+
 void addAlgorithmForRow(Row &row, Batch const &model,
                         BatchAlgorithmRunner &batchAlgoRunner) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
@@ -155,6 +176,8 @@ void addAlgorithmForRow(Row &row, Batch const &model,
   auto properties = AlgorithmRuntimeProps();
   // updateEventProperties(properties, model.experiment());
   updateExperimentProperties(properties, model.experiment());
+  updatePerThetaDefaultProperties(properties,
+                                  model.defaultsForTheta(row.theta()));
   // updateInstrumentProperties(properties, model.experiment());
   // updateSaveProperties(properties, model.experiment());
   updateRowProperties(properties, row);
