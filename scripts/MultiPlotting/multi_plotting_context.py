@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
-from MultiPlotting.subplot.subPlot_context import subPlotContext
+from MultiPlotting.subplot.subplot_context import subplotContext
 
 
 xBounds = "xBounds"
@@ -21,7 +21,7 @@ class PlottingContext(object):
         self.context[yBounds] = [0., 0.]
 
     def addSubplot(self, name, subplot):
-        self.subplots[name] = subPlotContext(name, subplot)
+        self.subplots[name] = subplotContext(name, subplot)
 
     def addLine(self, subplotName, workspace, specNum):
         try:

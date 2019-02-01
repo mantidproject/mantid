@@ -8,7 +8,7 @@ from copy import copy
 # to recover plot when using the plot selector
 
 
-class subPlotContext(object):
+class subplotContext(object):
 
     def __init__(self, name, subplot):
         self.name = name

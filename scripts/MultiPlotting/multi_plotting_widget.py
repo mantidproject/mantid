@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets, QtCore
 from copy import deepcopy
-from MultiPlotting.subplot.subPlot import subPlot
+from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
 
@@ -27,7 +27,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.connect_plot_selection(self._selection_changed)
 
         # add some dummy plot
-        self.plots = subPlot(self._context)
+        self.plots = subplot(self._context)
         self.plots.connect_quick_edit_signal(self._update_quick_edit)
 
         # create GUI layout

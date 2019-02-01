@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from MultiPlotting.subplot.subPlot_context import subPlotContext
+from MultiPlotting.subplot.subplot_context import subplotContext
 from mantid import plots
 
 try:
@@ -49,7 +49,7 @@ class SubPlotContextTest(unittest.TestCase):
     def setUp(self):
         name = "test"
         self.subplot = mock.MagicMock()
-        self.context = subPlotContext(name, self.subplot)
+        self.context = subplotContext(name, self.subplot)
 
     def test_add_line_no_erros(self):
         ws = mock.MagicMock()

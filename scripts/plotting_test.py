@@ -12,8 +12,8 @@ import sys
 
 from Muon.GUI.Common import message_box
 
-from MultiPlotting.multiPlotting_widget import MultiPlotWidget
-from MultiPlotting.multiPlotting_context import *
+from MultiPlotting.multi_plotting_widget import MultiPlotWidget
+from MultiPlotting.multi_plotting_context import *
 from MultiPlotting.label import Label
 
 import mantid.simpleapi as mantid

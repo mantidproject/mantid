@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from MultiPlotting.subplot.subPlot import subPlot
-from MultiPlotting.multiPlotting_context import PlottingContext
+from MultiPlotting.subplot.subplot import subplot
+from MultiPlotting.multi_plotting_context import PlottingContext
 
 from Muon.GUI.Common import mock_widget
 try:
@@ -27,7 +27,7 @@ class SubplotTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         context = PlottingContext()
-        self.subplot = subPlot(context)
+        self.subplot = subplot(context)
         self.subplot.canvas.draw = mock.MagicMock()
 
     def setup_rm(self):

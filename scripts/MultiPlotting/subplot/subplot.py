@@ -14,11 +14,11 @@ from MultiPlotting.edit_windows.select_subplot import SelectSubplot
 # visualises multiple plots
 
 
-class subPlot(QtWidgets.QWidget):
+class subplot(QtWidgets.QWidget):
     quickEditSignal = QtCore.Signal(object)
 
     def __init__(self, context):
-        super(subPlot, self).__init__()
+        super(subplot, self).__init__()
         self._context = context
         self.figure = Figure()
         self.figure.set_facecolor("none")
