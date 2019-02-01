@@ -785,6 +785,7 @@ set( TEST_FILES
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
   test/InterfaceManagerTest.h
+  test/LogValueFinderTest.h
   test/NonOrthogonalTest.h
   test/PlotAxisTest.h
   test/SelectionNotificationServiceTest.h
