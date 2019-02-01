@@ -11,18 +11,24 @@ import os
 import getpass
 from threading import Timer
 import datetime
+from glob import glob
+import shutil
+import psutil
 
 from mantid.kernel import ConfigService, logger
-from mantid.api import AnalysisDataService as ADS
+from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
 from mantidqt.project.projectsaver import ProjectSaver
+from mantidqt.project.projectloader import ProjectLoader
 from mantid.simpleapi import OrderWorkspaceHistory, AlgorithmManager
 
 
 class ProjectRecovery(object):
-    def __init__(self, globalfiguremanager, window_finder):
+    def __init__(self, globalfiguremanager, window_finder, multifileinterpreter):
         self.recovery_directory = os.path.join(ConfigService.getAppDataDir(), "workbench-recovery")
         self.recovery_directory_hostname = os.path.join(self.recovery_directory, getpass.getuser())
         self.recovery_directory_pid = os.path.join(self.recovery_directory_hostname, os.getpid())
+
+        self.recovery_order_workspace_history_file = os.path.join(ConfigService.getAppDataDir(), "ordered_recovery.py")
 
         self.time_between_saves = 300.0  # seconds
         self._timer_thread = Timer(self.time_between_saves, self.recovery_save)
@@ -32,9 +38,7 @@ class ProjectRecovery(object):
 
         self.gfm = globalfiguremanager
         self.interface_finding_func = window_finder
-
-        # Create the recovery location for this user
-        self._create_host_dirs()
+        self.multi_file_interpreter = multifileinterpreter
 
         self.algs_to_ignore = ["MonitorLiveData", "EnggSaveGSASIIFitResultsToHDF5",
                                "EnggSaveSinglePeakFitResultsToHDF5", "ExampleSaveAscii", "SANSSave", "SaveANSTOAscii",
@@ -56,6 +60,9 @@ class ProjectRecovery(object):
         # and the inner delimiter is `+` for the list of lists. e.g. [[a, b],[c, d]] = "a + b , c + d".
         self.alg_properties_to_ignore = "StartLiveData + PropertyName"
 
+        # The recovery GUI's presenter is set when needed
+        self.recovery_presenter = None
+
     ######################################################
     #  Utility
     ######################################################
@@ -66,16 +73,27 @@ class ProjectRecovery(object):
     def stop_recovery_thread(self):
         self._timer_thread.cancel()
 
-    def _create_host_dirs(self):
-        if not os.path.exists(self.recovery_directory_hostname):
-            os.makedirs(self.recovery_directory_hostname)
+    @staticmethod
+    def _remove_empty_folders_from_dir(directory):
+        folders = glob(os.path.join(directory, "*", ""))
+        for folder in folders:
+            try:
+                os.rmdir(folder)
+            except OSError:
+                # Fail silently as expected for all folders
+                pass
+
+    @staticmethod
+    def _remove_all_folders_from_dir(directory):
+        shutil.rmtree(directory)
 
     ######################################################
     #  Saving
     ######################################################
 
     def recovery_save(self):
-        # todo: Get a list of interfaces that could be saved and pass it down to save_project but check it's length is greater than 0 for this check
+        # todo: Get a list of interfaces that could be saved and pass it down to save_project but check it's length is
+        #  greater than 0 for this check
         if len(ADS.getObjectNames()) == 0:
             logger.debug("Project Recovery: Nothing to save")
             self._spin_off_another_time_thread()
@@ -83,7 +101,10 @@ class ProjectRecovery(object):
 
         logger.debug("Project Recovery: Saving Started")
 
+        # Create directory for save location
         recovery_dir = os.path.join(self.recovery_directory_pid, datetime.datetime.now().isoformat())
+        if not os.path.exists(recovery_dir):
+            os.makedirs(recovery_dir)
 
         self._add_lock_file(directory=recovery_dir)
 
@@ -135,9 +156,10 @@ class ProjectRecovery(object):
 
             alg.execute()
 
-    # todo: Implement this
-    def _empty_group_workspace(self, ws):
-        return False
+    @staticmethod
+    def _empty_group_workspace(ws):
+        if isinstance(ws, WorkspaceGroup) and len(ws.getNames()) == 0:
+            return True
 
     def _save_project(self, directory):
         project_saver = ProjectSaver(project_file_ext=self.recovery_file_ext)
@@ -158,8 +180,89 @@ class ProjectRecovery(object):
             os.remove(lock_file)
 
     ######################################################
+    #  Decision
+    ######################################################
+
+    def check_for_recover_checkpoint(self):
+        try:
+            # Clean directory first
+            self._remove_empty_folders_from_dir(self.recovery_directory_hostname)
+
+            checkpoints = os.listdir(self.recovery_directory_hostname)
+            return len(checkpoints) != 0 and len(checkpoints) > self._number_of_workbench_processes()
+        except Exception as e:
+            if isinstance(e, KeyboardInterrupt):
+                raise
+            # fail silently and return false
+            return False
+
+    @staticmethod
+    def _number_of_workbench_processes():
+        if os.name == 'nt':  # Windows packaged and development
+            executable_names = ["launch_workbench.pyw", "workbench-script.pyw"]
+        else:  # Confirmed on Ubuntu 18.04 Dev and MacOS
+            executable_names = ["workbench", "workbench-script"]
+
+        total_mantids = 0
+        for proc in psutil.process_iter():
+            process_name = os.path.basename(os.path.normpath(proc.cmdline()[1]))
+            if process_name in executable_names:
+                total_mantids += 1
+
+        return total_mantids
+
+    ######################################################
     #  Loading
     ######################################################
+
+    def attempt_recovery(self):
+        self.recovery_presenter =
+
+    def load_checkpoint(self, directory):
+        # Start Regen of workspaces
+        self._regen_workspaces(directory)
+
+        # Load interfaces back. This must occur after workspaces have been loaded back because otherwise some interfaces
+        # may be unable to be recreated.
+        self._load_project_interfaces(directory)
+
+    def _load_project_interfaces(self, directory):
+        project_loader = ProjectLoader(self.recovery_file_ext)
+        # This method will only load interfaces/plots if all workspaces that are expected have been loaded successfully
+        if not project_loader.load_project(directory=directory, load_workspaces=False):
+            logger.error("Project Recovery: Not all workspaces were recovered successfully, any interfaces requiring "
+                         "lost workspaces are not opened")
+
+    def _regen_workspaces(self, directory):
+        self._compile_recovery_script(directory)
+
+        # Open it in the editor and run it
+        self._open_script_in_editor(self.recovery_order_workspace_history_file)
+        self._run_script_in_open_editor()
+
+    def _compile_recovery_script(self, directory):
+        alg_name = "OrderWorkspaceHistory"
+        alg = AlgorithmManager.createUnmanaged(alg_name, 1)
+        alg.initialize()
+        alg.setChild(True)
+        alg.setLogging(False)
+        alg.setRethrows(True)
+        alg.setProperty("RecoverCheckpointFolder", directory)
+        alg.setProperty("OutputFilePath", self.recovery_order_workspace_history_file)
+        alg.execute()
+
+    def _open_script_in_editor(self, script):
+        # Get number of lines
+        num_lines = 0
+        with open(script) as f:
+            num_lines = len(f.readlines())
+
+        # todo: attach this to the GUI process bar
+
+        self.multi_file_interpreter.open_file_in_new_tab(script)
+
+    def _run_script_in_open_editor(self):
+        self.multi_file_interpreter.execute_current()
 
     ######################################################
     #  Checkpoint Repair

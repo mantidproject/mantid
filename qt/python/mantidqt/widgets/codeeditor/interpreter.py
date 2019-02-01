@@ -93,6 +93,7 @@ class EditorIO(object):
 class PythonFileInterpreter(QWidget):
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
+    sig_progress = Signal(int)
 
     def __init__(self, content=None, filename=None,
                  parent=None):
@@ -118,6 +119,8 @@ class PythonFileInterpreter(QWidget):
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
+
+        self.sig_progress.connect(self._presenter.model.sig_exec_progress)
 
     @property
     def filename(self):

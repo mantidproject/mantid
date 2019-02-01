@@ -37,10 +37,11 @@ class ProjectLoader(object):
         self.decoder_factory = DecoderFactory()
         self.project_file_ext = project_file_ext
 
-    def load_project(self, directory):
+    def load_project(self, directory, load_workspaces=True):
         """
         Will load the project in the given directory
         :param directory: String or string castable object; the directory of the project
+        :param load_workspaces: Bool; True if you want ProjectLoader to handle loading workspaces else False.
         :return: Bool; True if all workspace loaded successfully, False if not loaded successfully.
         """
         # It can be expected that if at this point it is NoneType that it's an error
@@ -51,8 +52,10 @@ class ProjectLoader(object):
         self.project_reader.read_project(directory)
 
         # Load in the workspaces
-        self.workspace_loader.load_workspaces(directory=directory,
-                                              workspaces_to_load=self.project_reader.workspace_names)
+        if load_workspaces:
+            self.workspace_loader.load_workspaces(directory=directory,
+                                                  workspaces_to_load=self.project_reader.workspace_names)
+
         workspace_success = _confirm_all_workspaces_loaded(workspaces_to_confirm=self.project_reader.workspace_names)
 
         if workspace_success:

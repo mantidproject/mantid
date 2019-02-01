@@ -120,6 +120,7 @@ class MultiPythonFileInterpreter(QWidget):
         return tabs
 
     def current_editor(self):
+        print(self._tabs.currentWidget())
         return self._tabs.currentWidget()
 
     def editor_at(self, idx):
