@@ -79,7 +79,7 @@ Improvements
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
 - :ref:`SaveReflections <algm-SaveReflections>` now supports saving indexed modulated peaks in the Jana format.
-
+- `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ has been added as an external project
 
 Bugfixes
 ########
@@ -88,6 +88,7 @@ Bugfixes
 - Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
 - sudden drops at either end of spectra in Pearl caused by partial bins are now cropped.
 - The Powder Diffraction GUI now remembers whether linear or logorithmic binning was selected between uses
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now does not use cache file when the grouping has changed.
 
 New
 ###
