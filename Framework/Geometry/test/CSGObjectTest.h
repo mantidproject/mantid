@@ -720,15 +720,113 @@ public:
     // inner radius=0.5, outer=1. Random sequence set up so as to give point
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
-    size_t maxAttempts(1);
+    constexpr size_t maxAttempts{1};
     V3D point;
     TS_ASSERT_THROWS_NOTHING(
         point = shell->generatePointInObject(rng, maxAttempts));
 
-    const double tolerance(1e-10);
+    constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(-1. + 2. * 0.55, point.X(), tolerance);
     TS_ASSERT_DELTA(-1. + 2. * 0.65, point.Y(), tolerance);
     TS_ASSERT_DELTA(-1. + 2. * 0.70, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideCuboid() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randX{0.55};
+    constexpr double randY{0.65};
+    constexpr double randZ{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randX));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randY));
+
+    constexpr double xLength{0.3};
+    constexpr double yLength{0.5};
+    constexpr double zLength{0.2};
+    auto cuboid =
+        ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = cuboid->generatePointInObject(rng, maxAttempts));
+
+    constexpr double tolerance{1e-10};
+    TS_ASSERT_DELTA(xLength - randX * 2. * xLength, point.X(), tolerance);
+    TS_ASSERT_DELTA(-yLength + randY * 2. * yLength, point.Y(), tolerance);
+    TS_ASSERT_DELTA(-zLength + randZ * 2. * zLength, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideCylinder() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randT{0.65};
+    constexpr double randR{0.55};
+    constexpr double randZ{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randT));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randR));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+
+    constexpr double radius{0.3};
+    constexpr double height{0.5};
+    const V3D axis{0., 0., 1.};
+    const V3D bottomCentre{
+        -1.,
+        2.,
+        -3.,
+    };
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(
+        radius, height, bottomCentre, axis, "cyl");
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = cylinder->generatePointInObject(rng, maxAttempts));
+    // Global->cylinder local coordinates
+    point -= bottomCentre;
+    constexpr double tolerance{1e-10};
+    const double polarAngle{2. * M_PI * randT};
+    const double radialLength{radius * std::sqrt(randR)};
+    const double axisLength{height * randZ};
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideSphere() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randT{0.65};
+    constexpr double randF{0.55};
+    constexpr double randR{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randT));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randF));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randR));
+
+    constexpr double radius{0.23};
+    auto sphere = ComponentCreationHelper::createSphere(radius);
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = sphere->generatePointInObject(rng, maxAttempts));
+    // Global->cylinder local coordinates
+    constexpr double tolerance{1e-10};
+    const double azimuthalAngle{2. * M_PI * randT};
+    const double polarAngle{std::acos(2. * randF - 1.)};
+    const double r{radius * randR};
+    TS_ASSERT_DELTA(r * std::cos(azimuthalAngle) * std::sin(polarAngle),
+                    point.X(), tolerance);
+    TS_ASSERT_DELTA(r * std::sin(azimuthalAngle) * std::sin(polarAngle),
+                    point.Y(), tolerance);
+    TS_ASSERT_DELTA(r * std::cos(polarAngle), point.Z(), tolerance);
   }
 
   void testGeneratePointInsideRespectsMaxAttempts() {
@@ -744,7 +842,7 @@ public:
     // inner radius=0.5, outer=1. Random sequence set up so as to give point
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
-    size_t maxAttempts(1);
+    constexpr size_t maxAttempts{1};
     TS_ASSERT_THROWS(shell->generatePointInObject(rng, maxAttempts),
                      std::runtime_error);
   }
@@ -755,22 +853,26 @@ public:
     // Generate "random" sequence.
     MockRNG rng;
     Sequence rand;
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.01));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.02));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.03));
+    constexpr double randX{0.92};
+    constexpr double randY{0.14};
+    constexpr double randZ{0.83};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randX));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randY));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
 
-    // Radius=0.5
-    auto ball = ComponentCreationHelper::createSphere(0.5);
+    constexpr double halfWidth{0.75};
+    auto ball = ComponentCreationHelper::createCuboid(halfWidth);
     // Create a thin infinite rectangular region to restrict point generation
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
-    size_t maxAttempts(1);
+    constexpr size_t maxAttempts{1};
     V3D point;
     TS_ASSERT_THROWS_NOTHING(
         point = ball->generatePointInObject(rng, activeRegion, maxAttempts));
-    const double tolerance(1e-10);
-    TS_ASSERT_DELTA(-0.1 + 0.01 * 0.2, point.X(), tolerance);
-    TS_ASSERT_DELTA(-0.1 + 0.02 * 0.2, point.Y(), tolerance);
-    TS_ASSERT_DELTA(-0.1 + 0.03 * 0.2, point.Z(), tolerance);
+    // We should get the point generated from the second 'random' triplet.
+    constexpr double tolerance{1e-10};
+    TS_ASSERT_DELTA(-0.1 + randX * 0.2, point.X(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randY * 0.2, point.Y(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randZ * 0.2, point.Z(), tolerance)
   }
 
   void testSolidAngleSphere()

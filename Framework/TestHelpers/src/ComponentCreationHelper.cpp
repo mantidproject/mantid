@@ -163,19 +163,25 @@ boost::shared_ptr<CSGObject> createCuboid(double xHalfLength,
   const V2D rightFront{xHalfLength, yHalfLength};
   const double sn{std::sin(angle)};
   const double cs{std::cos(angle)};
-  const V2D rotatedLF{leftFront.X() * cs - leftFront.Y() * sn, leftFront.X() * sn + leftFront.Y() * cs};
-  const V2D rotatedLB{leftBack.X() * cs - leftBack.Y() * sn, leftBack.X() * sn + leftBack.Y() * cs};
-  const V2D rotatedRF{rightFront.X() * cs - rightFront.Y() * sn, rightFront.X() * sn + rightFront.Y() * cs};
+  const V2D rotatedLF{leftFront.X() * cs - leftFront.Y() * sn,
+                      leftFront.X() * sn + leftFront.Y() * cs};
+  const V2D rotatedLB{leftBack.X() * cs - leftBack.Y() * sn,
+                      leftBack.X() * sn + leftBack.Y() * cs};
+  const V2D rotatedRF{rightFront.X() * cs - rightFront.Y() * sn,
+                      rightFront.X() * sn + rightFront.Y() * cs};
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << rotatedLF.X() << "\" y=\"" << rotatedLF.Y()
-                 << "\" z=\"" << -zHalfLength << "\"  /> "
-                 << "<left-front-top-point  x=\"" << rotatedLF.X() << "\" y=\"" << rotatedLF.Y()
-                 << "\" z=\"" << zHalfLength << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << rotatedLB.X() << "\" y=\"" << rotatedLB.Y()
-                 << "\" z=\"" << -zHalfLength << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << rotatedRF.X() << "\" y=\"" << rotatedRF.Y()
-                 << "\" z=\"" << -zHalfLength << "\"  /> "
+                 << "<left-front-bottom-point x=\"" << rotatedLF.X()
+                 << "\" y=\"" << rotatedLF.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
+                 << "<left-front-top-point  x=\"" << rotatedLF.X() << "\" y=\""
+                 << rotatedLF.Y() << "\" z=\"" << zHalfLength << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << rotatedLB.X()
+                 << "\" y=\"" << rotatedLB.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rotatedRF.X()
+                 << "\" y=\"" << rotatedRF.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
                  << "</cuboid>";
 
   std::string xmlCuboidShape(xmlShapeStream.str());
