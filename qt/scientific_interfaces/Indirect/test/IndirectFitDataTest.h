@@ -193,9 +193,10 @@ public:
     data->setExcludeRegionString("2,5", 1);
     data->setExcludeRegionString("1,2,5,6,3,4", 2);
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "1.0,8.0");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.0,5.0");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(2), "1.0,2.0,5.0,6.0,3.0,4.0");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "1.000,8.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.000,5.000");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(2),
+                     "1.000,2.000,5.000,6.000,3.000,4.000");
     TS_ASSERT_EQUALS(data->getExcludeRegion(3), "");
   }
 
@@ -225,11 +226,12 @@ public:
 
     std::vector<double> const regionVector{2.0, 6.0};
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.0,6.0");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.000,6.000");
     TS_ASSERT_EQUALS(data->getExcludeRegion(1),
-                     "2.0,6.0,1.0,2.0,3.0,4.0,6.0,7.0");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(2),
-                     "1.0,2.0,2.0,3.0,18.0,20.0,21.0,22.0,7.0,8.0");
+                     "2.000,6.000,1.000,2.000,3.000,4.000,6.000,7.000");
+    TS_ASSERT_EQUALS(
+        data->getExcludeRegion(2),
+        "1.000,2.000,2.000,3.000,18.000,20.000,21.000,22.000,7.000,8.000");
     TS_ASSERT_EQUALS(data->excludeRegionsVector(0), regionVector);
   }
 
@@ -241,11 +243,12 @@ public:
     data->setExcludeRegionString("6,  2,1  ,2,  3,4  ,7,6", 1);
     data->setExcludeRegionString("1,2 ,2,3,  20,  18,21,22,7, 8   ", 2);
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.0,6.0");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.000,6.000");
     TS_ASSERT_EQUALS(data->getExcludeRegion(1),
-                     "2.0,6.0,1.0,2.0,3.0,4.0,6.0,7.0");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(2),
-                     "1.0,2.0,2.0,3.0,18.0,20.0,21.0,22.0,7.0,8.0");
+                     "2.000,6.000,1.000,2.000,3.000,4.000,6.000,7.000");
+    TS_ASSERT_EQUALS(
+        data->getExcludeRegion(2),
+        "1.000,2.000,2.000,3.000,18.000,20.000,21.000,22.000,7.000,8.000");
   }
 
   void
@@ -255,8 +258,8 @@ public:
     data->setExcludeRegionString("6.29,2.93", 0);
     data->setExcludeRegionString("2.6,2.3,1.99,3.01", 1);
 
-    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.9,6.3");
-    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.3,2.6,2.0,3.0");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(0), "2.900,6.300");
+    TS_ASSERT_EQUALS(data->getExcludeRegion(1), "2.300,2.600,2.000,3.000");
   }
 
   void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
@@ -365,8 +368,9 @@ public:
     data1->setExcludeRegionString("6,2", 1);
     auto const combinedData = data2->combine(*data1);
 
-    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(0), "1.0,2.0,5.0,6.0");
-    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(1), "2.0,6.0");
+    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(0),
+                     "1.000,2.000,5.000,6.000");
+    TS_ASSERT_EQUALS(combinedData.getExcludeRegion(1), "2.000,6.000");
   }
 
   void
