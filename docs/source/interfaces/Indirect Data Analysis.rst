@@ -138,7 +138,7 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The `Peters model <https://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdPeters.html>`_[1]
+The `Peters model <https://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdPeters.html>`_ [1]
 reduces to a `Gaussian <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdGauss.html>`_ at large 
 (towards infinity) beta. The `Yi Model <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdYi.html>`_ [2] 
 reduces to a `Gaussian <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdGauss.html>`_ at sigma equal to zero.
@@ -482,12 +482,14 @@ Single Input/Multiple Input
   Choose between loading a single workspace or multiple workspaces. 
 
 Fit Parameter
-  Either 'Width' or 'EISF' can be selected here. This determines whether a width or EISF parameter will be 
-  fit across.
+  This allows you to select the type of parameter displayed in the neighbouring combobox to its right (see option below). 
+  The allowed types are 'Width' and 'EISF'. Changing this combobox will also change the available Fit types in the Function 
+  Browser.
 
 Width/EISF
   Next to the 'Fit Parameter' menu, will be either a 'Width' or 'EISF' menu, depending on which was selected. 
-  This menu can be used to select the specific width/EISF parameter to be fit.
+  This menu can be used to select the specific width/EISF parameter to be fit. Selecting one of these parameters will automatically 
+  set the active spectrum index of the loaded workspace in which this parameter is located.
 
 Function Browser
   This is used to decide the details of your fit including the fit type and minimizer used. Further options 
