@@ -465,8 +465,9 @@ std::string ConvFitModel::simultaneousFitOutputName() const {
 
 std::string ConvFitModel::singleFitOutputName(std::size_t index,
                                               std::size_t spectrum) const {
-  return createSingleFitOutputName(
-      "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", index, spectrum);
+  return createSingleFitOutputName("%1%_conv_" + m_fitType +
+                                       m_backgroundString + "_s%2%_Results",
+                                   index, spectrum);
 }
 
 Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
