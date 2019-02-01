@@ -33,6 +33,7 @@ class FullTree3D3L {
 public:
   static constexpr size_t nodesCount{585};
   static constexpr uint8_t level{3};
+
 public:
   struct Box {
     std::array<double, 3> lowerLeft;
@@ -441,7 +442,7 @@ public:
 private:
   bool compareWithFullTreeRecursive(FullTree3D3L::PtDistr &distr, size_t id,
                                     Mantid::API::IMDNode *nd) {
-    if(id >= FullTree3D3L::nodesCount)
+    if (id >= FullTree3D3L::nodesCount)
       return false;
     bool res = distr[id].empty();
     if (nd->isLeaf()) {
