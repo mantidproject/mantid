@@ -54,6 +54,7 @@ class BrowseFileWidgetModel(object):
             except Exception as error:
                 failed_files += [(filename, error)]
                 continue
+
             if ws['OutputWorkspace'][0].workspace.getInstrument().getName() != self._context.instrument:
                 failed_files += [(filename, 'Instrument is not selected instrument')]
                 continue
