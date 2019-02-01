@@ -7,7 +7,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 
-#include "../MultiDatasetFit/MDFLogValueFinder.h"
+#include "MantidQtWidgets/Common/LogValueFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
@@ -24,7 +24,7 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::Kernel::Math::StatisticType;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
-using MantidQt::CustomInterfaces::MDFLogValueFinder;
+using MantidQt::MantidWidgets::LogValueFinder;
 
 class MDFLogValueFinderTest : public CxxTest::TestSuite {
 public:
@@ -41,7 +41,7 @@ public:
     QStringList wsNames;
     wsNames << QString::fromStdString(ws1.name())
             << QString::fromStdString(ws2.name());
-    MDFLogValueFinder finder(wsNames);
+    LogValueFinder finder(wsNames);
     std::vector<std::string> logNames;
     const std::vector<std::string> expectedNames = {
         "stringProp", "dblProp", "intProp", "boolProp", "timeSeries"};
@@ -56,7 +56,7 @@ public:
     QStringList wsNames;
     wsNames << QString::fromStdString(ws0.name())
             << QString::fromStdString(ws1.name());
-    MDFLogValueFinder finder(wsNames);
+    LogValueFinder finder(wsNames);
     double valIndex0 = 0.;
     TS_ASSERT_THROWS_NOTHING(
         valIndex0 = finder.getLogValue("dblProp", StatisticType::Mean, 0));
@@ -81,7 +81,7 @@ public:
     QStringList wsNames;
     wsNames << QString::fromStdString(ws0.name())
             << QString::fromStdString(ws1.name());
-    MDFLogValueFinder finder(wsNames);
+    LogValueFinder finder(wsNames);
     double val0, val1;
     TS_ASSERT_THROWS_NOTHING(
         val0 = finder.getLogValue("intProp", StatisticType::Mean, 0));
@@ -97,7 +97,7 @@ public:
     QStringList wsNames;
     wsNames << QString::fromStdString(ws0.name())
             << QString::fromStdString(ws1.name());
-    MDFLogValueFinder finder(wsNames);
+    LogValueFinder finder(wsNames);
     double val0, val1;
     TS_ASSERT_THROWS_NOTHING(
         val0 = finder.getLogValue("timeSeries", StatisticType::Mean, 0));
@@ -113,7 +113,7 @@ public:
     QStringList wsNames;
     wsNames << QString::fromStdString(ws0.name())
             << QString::fromStdString(ws1.name());
-    MDFLogValueFinder finder(wsNames);
+    LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 0),
                      std::invalid_argument);
     TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 1),
@@ -126,7 +126,7 @@ public:
     QStringList wsNames;
     wsNames << QString::fromStdString(ws0.name())
             << QString::fromStdString(ws1.name());
-    MDFLogValueFinder finder(wsNames);
+    LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(
         finder.getLogValue("dblProp", StatisticType::Mean, "no_workspace"),
         std::invalid_argument);
@@ -138,7 +138,7 @@ public:
     QStringList wsNames;
     wsNames << QString::fromStdString(ws0.name())
             << QString::fromStdString(ws1.name());
-    MDFLogValueFinder finder(wsNames);
+    LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(finder.getLogValue("dblProp", StatisticType::Mean, 2),
                      std::invalid_argument);
   }

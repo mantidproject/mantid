@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MultiDatasetFit.h"
 #include "MDFDataController.h"
-#include "MDFEditLocalParameterDialog.h"
 #include "MDFPlotController.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -24,6 +23,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
 #include <QMessageBox>
 #include <QSettings>
@@ -466,7 +466,7 @@ void MultiDatasetFit::editLocalParameterValues(const QString &parName) {
     wsIndices.push_back(getWorkspaceIndex(i));
   }
 
-  MDF::EditLocalParameterDialog dialog(this, m_functionBrowser, parName, wsNames, wsIndices);
+  MantidQt::MantidWidgets::EditLocalParameterDialog dialog(this, m_functionBrowser, parName, wsNames, wsIndices);
   if (dialog.exec() == QDialog::Accepted) {
     auto values = dialog.getValues();
     auto fixes = dialog.getFixes();

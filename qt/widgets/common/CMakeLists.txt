@@ -9,6 +9,7 @@ set ( QT5_SRC_FILES
   src/BoolPropertyWidget.cpp
   src/DataSelector.cpp
   src/DropEventHelper.cpp
+  src/EditLocalParameterDialog.cpp
   src/FileDialogHandler.cpp
   src/FilePropertyWidget.cpp
   src/FindFilesThreadPoolManager.cpp
@@ -28,6 +29,10 @@ set ( QT5_SRC_FILES
   src/InterfaceManager.cpp
   src/LineEditWithClear.cpp
   src/ListPropertyWidget.cpp
+  src/LocalParameterEditor.cpp
+  src/LocalParameterItemDelegate.cpp
+  src/LogValueFinder.cpp
+  src/LogValueSelector.cpp
   src/ManageUserDirectories.cpp
   src/MantidDesktopServices.cpp
   src/MantidHelpInterface.cpp
@@ -93,6 +98,7 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
   inc/MantidQtWidgets/Common/DataSelector.h
+  inc/MantidQtWidgets/Common/EditLocalParameterDialog.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
@@ -107,6 +113,10 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
+  inc/MantidQtWidgets/Common/LocalParameterEditor.h
+  inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
+  inc/MantidQtWidgets/Common/LogValueFinder.h
+  inc/MantidQtWidgets/Common/LogValueSelector.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
   inc/MantidQtWidgets/Common/MantidTreeModel.h
@@ -187,6 +197,8 @@ set ( QT5_INC_FILES
 
 set ( QT5_UI_FILES
   inc/MantidQtWidgets/Common/DataSelector.ui
+  inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
+  inc/MantidQtWidgets/Common/LogValueSelector.ui
   inc/MantidQtWidgets/Common/ManageUserDirectories.ui
   inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
   inc/MantidQtWidgets/Common/MWRunFiles.ui
@@ -206,6 +218,7 @@ set ( SRC_FILES
   src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
   src/DropEventHelper.cpp
+  src/EditLocalParameterDialog.cpp
   src/FileDialogHandler.cpp
   src/FilePropertyWidget.cpp
   src/GenericDialog.cpp
@@ -215,6 +228,9 @@ set ( SRC_FILES
   src/InterfaceFactory.cpp
   src/InterfaceManager.cpp
   src/ListPropertyWidget.cpp
+  src/LocalParameterEditor.cpp
+  src/LocalParameterItemDelegate.cpp
+  src/LogValueFinder.cpp
   src/ManageUserDirectories.cpp
   src/MantidDesktopServices.cpp
   src/MantidDialog.cpp
@@ -368,9 +384,12 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
+  inc/MantidQtWidgets/Common/EditLocalParameterDialog.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
+  inc/MantidQtWidgets/Common/LocalParameterEditor.h
+  inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
   inc/MantidQtWidgets/Common/MantidDialog.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
@@ -617,21 +636,22 @@ set ( INC_FILES
 )
 
 set ( UI_FILES
-  inc/MantidQtWidgets/Common/ManageUserDirectories.ui
-  inc/MantidQtWidgets/Common/MWRunFiles.ui
-  inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
+  inc/MantidQtWidgets/Common/CatalogSearch.ui
+  inc/MantidQtWidgets/Common/CatalogSelector.ui
   inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsDialog.ui
   inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWidget.ui
   inc/MantidQtWidgets/Common/DataSelector.ui
-  inc/MantidQtWidgets/Common/CatalogSearch.ui
-  inc/MantidQtWidgets/Common/CatalogSelector.ui
+  inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
   inc/MantidQtWidgets/Common/IndirectInstrumentConfig.ui
   inc/MantidQtWidgets/Common/LogValueSelector.ui
+  inc/MantidQtWidgets/Common/ManageUserDirectories.ui
   inc/MantidQtWidgets/Common/MWDiag.ui
+  inc/MantidQtWidgets/Common/MWRunFiles.ui
   inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
   inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
   inc/MantidQtWidgets/Common/RenameParDialog.ui
+  inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
   inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
   inc/MantidQtWidgets/Common/SequentialFitDialog.ui
   inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.ui

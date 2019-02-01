@@ -2,11 +2,7 @@ set ( SRC_FILES
 	MDFAddWorkspaceDialog.cpp
 	MDFDataController.cpp
 	MDFDatasetPlotData.cpp
-	MDFEditLocalParameterDialog.cpp
 	MDFFunctionPlotData.cpp
-	MDFLocalParameterEditor.cpp
-	MDFLocalParameterItemDelegate.cpp
-	MDFLogValueFinder.cpp
 	MDFPlotController.cpp
 	MultiDatasetFit.cpp
 )
@@ -18,11 +14,7 @@ set ( INC_FILES
 	MDFAddWorkspaceDialog.h
 	MDFDataController.h
 	MDFDatasetPlotData.h
-	MDFEditLocalParameterDialog.h
 	MDFFunctionPlotData.h
-	MDFLocalParameterEditor.h
-	MDFLocalParameterItemDelegate.h
-	MDFLogValueFinder.h
 	MDFPlotController.h
 	MultiDatasetFit.h
 )
@@ -32,15 +24,11 @@ set ( MOC_FILES
     MDFAddWorkspaceDialog.h
     MDFDataController.h
     MDFPlotController.h
-    MDFLocalParameterEditor.h
-    MDFLocalParameterItemDelegate.h
-    MDFEditLocalParameterDialog.h
 )
 
 set ( UI_FILES
    MultiDatasetFit.ui
    MDFAddWorkspaceDialog.ui
-   EditLocalParameterDialog.ui
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMultiDatasetFit

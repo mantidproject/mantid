@@ -6,10 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisFitFunctionPresenter.h"
 #include "MantidAPI/IFunction.h"
-#include "MultiDatasetFit/MDFEditLocalParameterDialog.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
-using MantidQt::CustomInterfaces::MDF::EditLocalParameterDialog;
-
+using MantidQt::MantidWidgets::EditLocalParameterDialog;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 

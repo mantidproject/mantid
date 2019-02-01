@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MDFEditLocalParameterDialog.h"
-#include "MDFLocalParameterItemDelegate.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
+#include "MantidQtWidgets/Common/LocalParameterItemDelegate.h"
 #include "MantidKernel/make_unique.h"
 
 #include <QClipboard>
@@ -20,8 +20,7 @@ const int roleColumn = 1;
 } // namespace
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace MDF {
+namespace MantidWidgets {
 
 /**
  * Constructor used inside and outside of MultiDatasetFit interface
@@ -63,7 +62,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(
 void EditLocalParameterDialog::doSetup(const QString &parName,
                                        const QStringList &wsNames,
                                        const std::vector<size_t> &wsIndices) {
-  m_logFinder = Mantid::Kernel::make_unique<MDFLogValueFinder>(wsNames);
+  m_logFinder = Mantid::Kernel::make_unique<LogValueFinder>(wsNames);
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
   for (const auto &logName : m_logFinder->getLogNames()) {
@@ -74,7 +73,11 @@ void EditLocalParameterDialog::doSetup(const QString &parName,
   connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this,
           SIGNAL(logOptionsChecked(bool)));
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(0, QHeaderView::Stretch);
+#else
+  header->setSectionResizeMode(QHeaderView::Stretch);
+#endif
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
@@ -354,6 +357,5 @@ bool EditLocalParameterDialog::isLogCheckboxTicked() const {
   return m_uiForm.logValueSelector->isCheckboxTicked();
 }
 
-} // namespace MDF
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
