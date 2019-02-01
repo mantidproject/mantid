@@ -71,7 +71,7 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
   }
 
-  void test_that_addWorkspace_will_add_as_many_workspaces_as_you_want() {
+  void test_that_addWorkspace_will_add_multiple_workspaces() {
     Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
     auto const workspace2 = createWorkspace(3, 3);
     auto const workspace3 = createWorkspace(3, 2);
@@ -109,6 +109,9 @@ public:
 
   void
   test_that_getInstrumentResolution_will_return_the_none_if_the_workspace_has_no_analyser() {
+    /// A unit test for a positive response from getInstrumentResolution needs
+    /// to be added. The workspace used in the test will need to have an
+    /// analyser attached to its instrument
     Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
     auto const workspace2 = createWorkspace(3, 3);
     m_ads->addOrReplace("Name2", workspace2);
