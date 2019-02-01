@@ -158,6 +158,8 @@ public:
   void setStartX(double);
   void setEndX(double);
   void updateFunctionBrowserData(size_t nData);
+  void editLocalParameter(const QString &parName, const QStringList &wsNames,
+                          const std::vector<size_t> &wsIndices);
 
   void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
 
@@ -174,10 +176,9 @@ protected slots:
 signals:
   void functionChanged();
   void fitScheduled();
-
   void sequentialFitScheduled();
-
   void browserClosed();
+  void localParameterEditRequested(const QString &parName);
 
 private:
   void initFunctionBrowser();

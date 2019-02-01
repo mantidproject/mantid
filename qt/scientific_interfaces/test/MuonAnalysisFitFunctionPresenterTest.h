@@ -52,6 +52,9 @@ public:
   MOCK_METHOD3(setLocalParameterFixed, void(const QString &, int, bool));
   MOCK_METHOD3(setLocalParameterTie, void(const QString &, int, QString));
   MOCK_METHOD1(setCurrentDataset, void(int));
+  MOCK_METHOD3(editLocalParameter,
+               void(const QString &parName, const QStringList &wsNames,
+                    const std::vector<size_t> &wsIndices));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 private:

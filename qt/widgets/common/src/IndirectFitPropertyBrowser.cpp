@@ -57,6 +57,9 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
   m_functionBrowser->setObjectName("functionBrowser");
   connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this,
           SIGNAL(functionChanged()));
+  connect(m_functionBrowser,
+          SIGNAL(localParameterButtonClicked(const QString &)), this,
+          SIGNAL(localParameterEditRequested(const QString &)));
 }
 
 void IndirectFitPropertyBrowser::iniFitOptionsBrowser() {
@@ -651,6 +654,12 @@ void IndirectFitPropertyBrowser::setEndX(double) {}
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(size_t nData) {
   m_functionBrowser->setNumberOfDatasets(static_cast<int>(nData));
+}
+
+void IndirectFitPropertyBrowser::editLocalParameter(
+    const QString &parName, const QStringList &wsNames,
+    const std::vector<size_t> &wsIndices) {
+  m_functionBrowser->editLocalParameter(parName, wsNames, wsIndices);
 }
 
 void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {

@@ -19,6 +19,7 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/UserFunctionDialog.h"
 
@@ -2172,6 +2173,29 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
 /// @param n :: Number of datasets added.
 void FunctionBrowser::addDatasets(int n) {
   setNumberOfDatasets(m_numberOfDatasets + n);
+}
+
+/**
+ * Launches the Edit Local Parameter dialog and deals with the input from it.
+ * @param parName :: Name of parameter that button was clicked for.
+ * @param wsNames :: Names of the workspaces the datasets came from.
+ * @param wsIndices :: The workspace indices of the datasets.
+ */
+void FunctionBrowser::editLocalParameter(const QString &parName,
+                                         const QStringList &wsNames,
+                                         const std::vector<size_t> &wsIndices) {
+  EditLocalParameterDialog dialog(parentWidget(), this, parName, wsNames, wsIndices);
+  if (dialog.exec() == QDialog::Accepted) {
+    auto values = dialog.getValues();
+    auto fixes = dialog.getFixes();
+    auto ties = dialog.getTies();
+    assert(values.size() == getNumberOfDatasets());
+    for (int i = 0; i < values.size(); ++i) {
+      setLocalParameterValue(parName, i, values[i]);
+      setLocalParameterFixed(parName, i, fixes[i]);
+      setLocalParameterTie(parName, i, ties[i]);
+    }
+  }
 }
 
 /// Return the multidomain function for multi-dataset fitting

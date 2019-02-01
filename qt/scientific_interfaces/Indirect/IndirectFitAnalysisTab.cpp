@@ -204,6 +204,9 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(updateParameterValues()));
 
+  connect(m_fitPropertyBrowser,
+          SIGNAL(localParameterEditRequested(const QString &)), this,
+          SLOT(editLocalParameterValues(const QString &)));
   //connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)),
   //        m_plotPresenter.get(), SLOT(setStartX(double)));
   //connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)),
@@ -1091,6 +1094,24 @@ void IndirectFitAnalysisTab::updateResultOptions() {
     m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
   m_outOptionsPresenter->setPlotEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
+}
+
+/// Start an editor to display and edit individual local parameter values.
+/// @param parName :: Fully qualified name for a local parameter (Global
+/// unchecked).
+void IndirectFitAnalysisTab::editLocalParameterValues(const QString &parName) {
+  QStringList wsNames;
+  std::vector<size_t> wsIndices;
+  auto const numberWorkspaces = m_fittingModel->numberOfWorkspaces();
+  for (size_t i = 0; i <numberWorkspaces; ++i) {
+    auto const name = QString::fromStdString(m_fittingModel->getWorkspace(i)->getName());
+    auto const numberSpectra = m_fittingModel->getNumberOfSpectra(i);
+    for (size_t j = 0; j < numberSpectra; ++j) {
+      wsNames.push_back(name);
+      wsIndices.push_back(j);
+    }
+  }
+  m_fitPropertyBrowser->editLocalParameter(parName, wsNames, wsIndices);
 }
 
 } // namespace IDA

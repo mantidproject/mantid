@@ -207,18 +207,7 @@ void MuonAnalysisFitFunctionPresenter::editLocalParameterClicked(
   // spectrum indices are all zero
   std::vector<size_t> wsIndices(nDatasets, 0);
 
-  EditLocalParameterDialog dialog(nullptr, m_funcBrowser, parName, wsNames,
-                                  wsIndices);
-  if (dialog.exec() == QDialog::Accepted) {
-    const auto values = dialog.getValues();
-    const auto fixes = dialog.getFixes();
-    const auto ties = dialog.getTies();
-    for (int i = 0; i < nDatasets; i++) {
-      m_funcBrowser->setLocalParameterValue(parName, i, values[i]);
-      m_funcBrowser->setLocalParameterFixed(parName, i, fixes[i]);
-      m_funcBrowser->setLocalParameterTie(parName, i, ties[i]);
-    }
-  }
+  m_funcBrowser->editLocalParameter(parName, wsNames, wsIndices);
 }
 
 /**

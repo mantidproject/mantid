@@ -189,6 +189,8 @@ public slots:
   void setCurrentDataset(int i) override;
   void removeDatasets(QList<int> indices);
   void addDatasets(int n);
+  void editLocalParameter(const QString &parName, const QStringList &wsNames,
+                          const std::vector<size_t> &wsIndices) override;
 
 protected:
   /// Create the Qt property browser

@@ -191,6 +191,7 @@ protected slots:
 private slots:
   void updatePlotGuess();
   void plotSelectedSpectra();
+  void editLocalParameterValues(const QString &parName);
 
 private:
   /// Overidden by child class.

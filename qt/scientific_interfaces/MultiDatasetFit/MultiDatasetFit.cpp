@@ -23,7 +23,6 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
-#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
 #include <QMessageBox>
 #include <QSettings>
@@ -466,18 +465,7 @@ void MultiDatasetFit::editLocalParameterValues(const QString &parName) {
     wsIndices.push_back(getWorkspaceIndex(i));
   }
 
-  MantidQt::MantidWidgets::EditLocalParameterDialog dialog(this, m_functionBrowser, parName, wsNames, wsIndices);
-  if (dialog.exec() == QDialog::Accepted) {
-    auto values = dialog.getValues();
-    auto fixes = dialog.getFixes();
-    auto ties = dialog.getTies();
-    assert(values.size() == getNumberOfSpectra());
-    for (int i = 0; i < values.size(); ++i) {
-      setLocalParameterValue(parName, i, values[i]);
-      setLocalParameterFixed(parName, i, fixes[i]);
-      setLocalParameterTie(parName, i, ties[i]);
-    }
-  }
+  m_functionBrowser->editLocalParameter(parName, wsNames, wsIndices);
 }
 
 /// Set the fit status info string after a fit is finished.
