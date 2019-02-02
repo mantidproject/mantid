@@ -19,7 +19,7 @@ chopper_system:
                                 #   in which case it will be assumed that the slits are equally spaced.
       slot_ang_pos: [0, 36.48, 72.76, 145.52]
       radius: 367               # Disk radius
-      isDouble: True            # Is this a double disk system?
+      isDouble: False           # Is this a double disk system?
       isPhaseIndependent: True  # Is this disk to be phased independently?
       defaultPhase: "0"         # What is the default phase for this disk (either a time in microseconds
                                 #   or a slot index [as a string] for the desired rep to go through)

@@ -116,6 +116,7 @@ class PyChopGui(QMainWindow):
         self.flxedt.setText('%3.2f' % (val))
         nframe = self.engine.moderator.n_frame if hasattr(self.engine.moderator, 'n_frame') else 1
         self.repfig_nframe_edit.setText(str(nframe))
+        self.repfig_nframe_rep1only.setChecked(False)
         if hasattr(self.engine.chopper_system, 'default_frequencies'):
             cb = [self.widgets['FrequencyCombo']['Combo'], self.widgets['PulseRemoverCombo']['Combo']]
             for idx, freq in enumerate(self.engine.chopper_system.default_frequencies):
@@ -534,7 +535,7 @@ class PyChopGui(QMainWindow):
         if len(self.engine.chopper_system.choppers) > 1:
             self.engine.n_frame = int(self.repfig_nframe_edit.text())
             self.repaxes.clear()
-            self.engine.plotMultiRepFrame(self.repaxes)
+            self.engine.plotMultiRepFrame(self.repaxes, first_rep=self.repfig_nframe_rep1only.isChecked())
             self.repcanvas.draw()
 
     def _gen_text_ei(self, ei, obj_in):
@@ -844,10 +845,12 @@ class PyChopGui(QMainWindow):
         self.repfig_nframe_edit = QLineEdit('1')
         self.repfig_nframe_button = QPushButton('Replot')
         self.repfig_nframe_button.clicked.connect(lambda: self.plot_frame())
+        self.repfig_nframe_rep1only = QCheckBox('First Rep Only')
         self.repfig_nframe_box = QHBoxLayout()
         self.repfig_nframe_box.addWidget(self.repfig_nframe_label)
         self.repfig_nframe_box.addWidget(self.repfig_nframe_edit)
         self.repfig_nframe_box.addWidget(self.repfig_nframe_button)
+        self.repfig_nframe_box.addWidget(self.repfig_nframe_rep1only)
         self.reptab = QWidget(self.tabs)
         self.repfig_nframe = QWidget(self.reptab)
         self.repfig_nframe.setLayout(self.repfig_nframe_box)

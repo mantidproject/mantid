@@ -258,7 +258,7 @@ class ChopperSystem(object):
     def getAllowedEi(self, Ei_in=None):
         return set(np.round(self._MulpyRepDriver(Ei_in, calc_res=False)[0], decimals=4))
 
-    def plotMultiRepFrame(self, h_plt=None, Ei_in=None, frequency=None):
+    def plotMultiRepFrame(self, h_plt=None, Ei_in=None, frequency=None, first_rep=False):
         """
         Plots the time-distance diagram into a given Matplotlib axes, i
         for a give focused incident energy (in meV) and chopper frequencies (in Hz).
@@ -294,7 +294,12 @@ class ChopperSystem(object):
         for i in range(len(lines)):
             x0 = (-lines[i][0][1] / lines[i][0][0] - lines[i][1][1] / lines[i][1][0]) / 2.
             x1 = ((modSamDist-lines[i][0][1]) / lines[i][0][0] + (modSamDist-lines[i][1][1]) / lines[i][1][0]) / 2.
-            maincolor = 'b' if (np.abs(x0) < 500) else 'm'
+            if (np.abs(x0) > 500):
+                if first_rep:
+                    continue
+                maincolor = 'm'
+            else:
+                maincolor = 'b'
             plt.plot([x0, x1], [0, modSamDist], c=maincolor)
             x2 = ((totDist-lines[i][0][1]) / lines[i][0][0] + (totDist-lines[i][1][1]) / lines[i][1][0]) / 2.
             lineM = totDist / (x2 - x0)
