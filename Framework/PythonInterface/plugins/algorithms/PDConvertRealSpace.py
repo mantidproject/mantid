@@ -76,7 +76,7 @@ class PDConvertRealSpace(PythonAlgorithm):
         sample_kwargs={"<b_coh>^2":input_ws.sample().getMaterial().cohScatterLengthSqrd(),
                        "<b_tot^2>":input_ws.sample().getMaterial().totalScatterLengthSqrd(),
                        "rho":input_ws.sample().getMaterial().numberDensity}
-        if ((sample_kwargs["<b_coh>^2"]<=0) or (sample_kwargs["<b_tot>^2"]<=0) or
+        if ((sample_kwargs["<b_coh>^2"]<=0) or (sample_kwargs["<b_tot^2>"]<=0) or
            (sample_kwargs["rho"]<=0)):
             raise RuntimeError('Please run SetSampleMaterial algorithm before running'+
                                ' this algorithm')
