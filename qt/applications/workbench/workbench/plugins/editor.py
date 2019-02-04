@@ -88,8 +88,9 @@ class MultiFileEditor(PluginWidget):
         data = event.mimeData()
         for url in data.urls():
             filepath = url.toLocalFile()
-            if osp.isfile(filepath):
-                self.open_file_in_new_tab(filepath)
+            if filepath.endswith('.py') or filepath.endswith('.pyw'):
+                if osp.isfile(filepath):
+                    self.open_file_in_new_tab(filepath)
 
     def get_plugin_title(self):
         return "Editor"
