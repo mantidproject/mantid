@@ -137,10 +137,9 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The `Peters model <https://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdPeters.html>`_ [1]
-reduces to a `Gaussian <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdGauss.html>`_ at large 
-(towards infinity) beta. The `Yi Model <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdYi.html>`_ [2] 
-reduces to a `Gaussian <http://docs.mantidproject.org/nightly/fitting/fitfunctions/MsdGauss.html>`_ at sigma equal to zero.
+The :ref:`Peters model <func-MsdPeters>` [1] reduces to a :ref:`Gaussian <func-MsdGauss>` at large 
+(towards infinity) beta. The :ref:`Yi Model <func-MsdYi>` [2] reduces to a :ref:`Gaussian <func-MsdGauss>` at sigma 
+equal to zero.
 
 .. interface:: Data Analysis
   :width: 450
@@ -274,8 +273,8 @@ I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
 
-The fit types available for use in IqtFit are `Exponentials <https://docs.mantidproject.org/nightly/fitting/fitfunctions/ExpDecay.html>`_ 
-and `Stretched Exponential <https://docs.mantidproject.org/nightly/fitting/fitfunctions/StretchExp.html>`_.
+The fit types available for use in IqtFit are :ref:`Exponentials <func-ExpDecay>` and 
+:ref:`Stretched Exponential <func-StretchExp>`.
 
 .. interface:: Data Analysis
   :width: 450
@@ -362,13 +361,10 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The fit types available in ConvFit are One `Lorentzian <http://docs.mantidproject.org/nightly/fitting/fitfunctions/Lorentzian.html>`_, 
-Two Lorentzian, `TeixeiraWater (SQE) <https://docs.mantidproject.org/nightly/fitting/fitfunctions/TeixeiraWaterSQE.html>`_, 
-`InelasticDiffSphere <https://docs.mantidproject.org/nightly/fitting/fitfunctions/InelasticDiffSphere.html>`_, 
-`InelasticDiffRotDiscreteCircle <https://docs.mantidproject.org/nightly/fitting/fitfunctions/InelasticDiffRotDiscreteCircle.html>`_, 
-`ElasticDiffSphere <https://docs.mantidproject.org/nightly/fitting/fitfunctions/ElasticDiffSphere.html>`_, 
-`ElasticDiffRotDiscreteCircle <https://docs.mantidproject.org/nightly/fitting/fitfunctions/ElasticDiffRotDiscreteCircle.html>`_ and 
-`StretchedExpFT <http://docs.mantidproject.org/nightly/fitting/fitfunctions/StretchedExpFT.html>`_.
+The fit types available in ConvFit are One :ref:`Lorentzian <func-Lorentzian>`, Two Lorentzian, 
+:ref:`TeixeiraWater (SQE) <func-TeixeiraWaterSQE>`, :ref:`InelasticDiffSphere <func-InelasticDiffSphere>`, 
+:ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`, :ref:`ElasticDiffSphere <func-ElasticDiffSphere>`, 
+:ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` and :ref:`StretchedExpFT <func-StretchedExpFT>`.
 
 .. interface:: Data Analysis
   :width: 450
@@ -458,13 +454,9 @@ This interface can be used for a jump diffusion fit as well as fitting across
 EISF. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
-The fit types available in F(Q)Fit are `ChudleyElliot <https://docs.mantidproject.org/nightly/fitting/fitfunctions/ChudleyElliot.html>`_,
-`HallRoss <http://docs.mantidproject.org/nightly/fitting/fitfunctions/HallRoss.html>`_, 
-`FickDiffusion <https://docs.mantidproject.org/nightly/fitting/fitfunctions/FickDiffusion.html>`_, 
-`TeixeiraWater <https://docs.mantidproject.org/nightly/fitting/fitfunctions/TeixeiraWater.html>`_, 
-`EISFDiffCylinder <https://docs.mantidproject.org/nightly/fitting/fitfunctions/EISFDiffCylinder.html>`_, 
-`EISFDiffSphere <http://docs.mantidproject.org/nightly/fitting/fitfunctions/EISFDiffSphere.html>`_ and 
-`EISFDiffSphereAlkyl <https://docs.mantidproject.org/nightly/fitting/fitfunctions/EISFDiffSphereAlkyl.html>`_.
+The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-HallRoss>`, 
+:ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>`, :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`, 
+:ref:`EISFDiffSphere <func-EISFDiffSphere>` and :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>`.
 
 .. interface:: Data Analysis
   :width: 450
