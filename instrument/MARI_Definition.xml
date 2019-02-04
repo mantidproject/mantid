@@ -154,8 +154,8 @@
   <!-- MONITORS -->
 
   <component type="monitor" idlist="monitor">
-    <location z="-4.739" />
-    <location z="-1.442" />
+    <location z="-3.250" />
+    <location z="-1.511" />
     <location z="5.82" />
   </component>
   
