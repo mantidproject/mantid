@@ -97,7 +97,7 @@ public:
   void wheelEvent(QWheelEvent *e) override;
 
   /// Clear keyboard shortcut binding
-  void clearKeyBinding(int keyIdentifier);
+  void clearKeyBinding(const QString &keyCombination);
 
   /// Return a pointer to the object responsible for code completion
   inline QsciAPIs *scintillaAPI() const { return m_completer; }

@@ -173,9 +173,10 @@ class PythonFileInterpreter(QWidget):
         self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
 
     def clear_key_binding(self, key_str):
-        key_code = QKeySequence(key_str)[0]
-        # need to do some validity checking of the key code
-        self.editor.clearKeyBinding(key_code)
+        """Clear a keyboard shortcut bound to a Scintilla command"""
+        if not QKeySequence(key_str).toString():
+            raise ValueError("Invalid key combination '%s'".format(key_str))
+        self.editor.clearKeyBinding(key_str)
 
     def toggle_comment(self):
         if self.editor.selectedText() == '':   # If nothing selected, do nothing
@@ -222,10 +223,9 @@ class PythonFileInterpreter(QWidget):
 
     def _are_comments(self, code_lines):
         for line in code_lines:
-            if not line.strip():
-                continue
-            if not line.strip().startswith('#'):
-                return False
+            if line.strip():
+                if not line.strip().startswith('#'):
+                    return False
         return True
 
     def _setup_editor(self, default_content, filename):

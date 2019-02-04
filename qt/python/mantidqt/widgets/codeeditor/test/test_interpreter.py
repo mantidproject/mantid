@@ -52,6 +52,18 @@ class PythonFileInterpreterTest(GuiTest):
         w.execute_async()
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
+    def test_clear_key_binding(self):
+        test_cases = {'Ctrl+A': None, 'Shift+A': Exception,
+                      'Ctrl+AAA': ValueError, 'Ctrl+Shift+A': Exception}
+
+        w = PythonFileInterpreter()
+        for key_combo, expected_result in test_cases.items():
+            if expected_result is not None:
+                with self.assertRaises(expected_result):
+                    w.clear_key_binding(key_combo)
+            else:
+                self.assertEqual(w.clear_key_binding(key_combo), None)
+
 
 if __name__ == '__main__':
     unittest.main()

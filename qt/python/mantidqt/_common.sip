@@ -127,7 +127,7 @@ public:
   QString selectedText() const;
   QString text() const;
 
-  void clearKeyBinding(int keyIdentifier);
+  void clearKeyBinding(const QString &keyCombination);
   void enableAutoCompletion(AutoCompletionSource source);
   void disableAutoCompletion();
   void getCursorPosition(int *line, int *index) const;
