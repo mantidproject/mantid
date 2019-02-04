@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
+import os.path as osp
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout
 
@@ -50,6 +51,8 @@ class MultiFileEditor(PluginWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
+        self.setAcceptDrops(True)
+
         # attributes
         self.run_action = create_action(self, "Run",
                                         on_triggered=self.editors.execute_current,
@@ -72,6 +75,21 @@ class MultiFileEditor(PluginWidget):
         :return: True if editors can be closed, false if cancelled
         """
         return self.editors.close_all()
+
+    def dragEnterEvent(self, event):
+        data = event.mimeData()
+        if data.hasText() and data.hasUrls:
+            filepaths = [url.toLocalFile() for url in data.urls()]
+            for filepath in filepaths:
+                if osp.isfile(filepath):
+                    event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        data = event.mimeData()
+        for url in data.urls():
+            filepath = url.toLocalFile()
+            if osp.isfile(filepath):
+                self.open_file_in_new_tab(filepath)
 
     def get_plugin_title(self):
         return "Editor"
