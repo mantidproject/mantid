@@ -10,14 +10,20 @@ from Muon.GUI.MuonAnalysis.muon_analysis_2 import MuonAnalysisGui
 import PyQt4.QtCore as QtCore
 from save_python import getWidgetIfOpen
 
+
 Name = "Muon_Analysis_2"
 
 
 def main():
     try:
         global muon
-        muon.setWindowState(muon.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
-        muon.activateWindow()
+        if not muon.isHidden():
+            muon.setWindowState(muon.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+            muon.activateWindow()
+        else:
+            muon = MuonAnalysisGui()
+            muon.resize(700, 700)
+            muon.show()
     except:
         muon = MuonAnalysisGui()
         muon.resize(700, 700)
