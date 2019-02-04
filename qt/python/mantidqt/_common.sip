@@ -1,10 +1,14 @@
 %ModuleCode
 #include "MantidQtWidgets/Common/Message.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 %End
 
 %InitialisationCode
+qRegisterMetaType<std::string>("StdString");
+qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
 %End
 
@@ -255,4 +259,37 @@ class ManageUserDirectories : QDialog {
 %End
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
+};
+
+// ---------------------------------
+// Fit Property Browser
+// ---------------------------------
+class FitPropertyBrowser : public QDockWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+%End
+public:
+    FitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
+    void init();
+    SIP_PYOBJECT getFittingFunction() const;
+%MethodCode
+    auto f = sipCpp->getFittingFunction();
+    sipRes = FROM_CSTRING(f->asString().c_str());
+%End
+    int sizeOfFunctionsGroup() const;
+    void loadFunction(QString funStr);
+    double startX() const;
+    void setStartX(double start);
+    double endX() const;
+    void setEndX(double end);
+    void setXRange(double start, double end);
+    int workspaceIndex() const;
+    void setWorkspaceIndex(int i);
+    QStringList getWorkspaceNames();
+    void fit();
+    void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+signals:
+    void startXChanged(double);
+    void endXChanged(double);
+    void fittingDone(const QString &);
 };

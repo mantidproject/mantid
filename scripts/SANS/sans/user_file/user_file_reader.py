@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 from sans.common.file_information import find_full_file_path
 from sans.user_file.user_file_parser import UserFileParser
 
@@ -23,17 +24,13 @@ class UserFileReader(object):
         # 2. Exists and is a sequence type => extend the existing list
         # 3. Does not exist and is a standard value => create a list with that value and add it
         # 4. Does not exist and is a sequence type => add the list itself
-        for key, value in list(parsed.items()):
-            is_list = isinstance(value, list)
-            is_key_in_output = key in output
-            if is_key_in_output and is_list:
-                output[key].extend(value)
-            elif is_key_in_output and not is_list:
-                output[key].append(value)
-            elif not is_key_in_output and is_list:
+        for key, value in parsed.items():
+            if not isinstance(value, list):
+                value = [value]
+            if key not in output:
                 output[key] = value
             else:
-                output[key] = [value]
+                output[key].extend(value)
 
     def read_user_file(self):
         # Read in all elements

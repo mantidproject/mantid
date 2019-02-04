@@ -41,9 +41,10 @@ set ( EXPORT_FILES
   src/Exports/ReflectionGenerator.cpp
   src/Exports/DetectorInfo.cpp
   src/Exports/DetectorInfoItem.cpp
-  src/Exports/DetectorInfoIterator.cpp
   src/Exports/DetectorInfoPythonIterator.cpp
   src/Exports/ComponentInfo.cpp
+  src/Exports/ComponentInfoItem.cpp
+  src/Exports/ComponentInfoPythonIterator.cpp
 )
 
 #############################################################################################
@@ -111,7 +112,7 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonGeometryModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/geometry )
+mtd_install_targets( TARGETS PythonGeometryModule INSTALL_DIRS ${BIN_DIR}/mantid/geometry ${WORKBENCH_BIN_DIR}/mantid/geometry )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/geometry )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/geometry ${WORKBENCH_BIN_DIR}/mantid/geometry)

@@ -47,6 +47,8 @@ public:
                                      const MatrixWorkspace_const_sptr ws2) {
     m_lhs = ws1;
     m_rhs = ws2;
+    m_lhsBlocksize = ws1->blocksize();
+    m_rhsBlocksize = ws2->blocksize();
     BinaryOperation::checkRequirements();
     return BinaryOperation::checkSizeCompatibility(ws1, ws2);
   }
@@ -55,17 +57,13 @@ private:
   // Unhide base class method to avoid Intel compiler warning
   using BinaryOperation::checkSizeCompatibility;
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &, Mantid::MantidVec &,
-                              Mantid::MantidVec &) override {}
-  void performBinaryOperation(const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &, const double,
-                              const double, Mantid::MantidVec &,
-                              Mantid::MantidVec &) override {}
+  void performBinaryOperation(const HistogramData::Histogram &,
+                              const HistogramData::Histogram &,
+                              HistogramData::HistogramY &,
+                              HistogramData::HistogramE &) override {}
+  void performBinaryOperation(const HistogramData::Histogram &, const double,
+                              const double, HistogramData::HistogramY &,
+                              HistogramData::HistogramE &) override {}
 };
 
 namespace {

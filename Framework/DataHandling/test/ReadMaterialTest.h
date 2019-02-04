@@ -34,7 +34,7 @@ public:
   }
 
   void testSuccessfullValidateInputsAtomicNumber() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -63,22 +63,109 @@ public:
                      "Cannot specify both ChemicalFormula and AtomicNumber")
   }
 
-  void testFailureValidateInputsNoMaterial() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+  void testFailureValidateInputsNoCoherentXSection() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 0;
       setMaterial.massNumber = 0;
+      setMaterial.incoherentXSection = 1.;
+      setMaterial.attenuationXSection = 1.;
+      setMaterial.scatteringXSection = 1.;
+      setMaterial.sampleNumberDensity = 1.;
       return setMaterial;
     }
     ();
 
     auto result = ReadMaterial::validateInputs(params);
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result["CoherentXSection"],
+                     "The cross section must be specified when "
+                     "no ChemicalFormula or AtomicNumber is "
+                     "given.")
+  }
 
-    TS_ASSERT_EQUALS(result["ChemicalFormula"], "Need to specify the material")
+  void testFailureValidateInputsNoIncoherentXSection() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 0;
+      setMaterial.massNumber = 0;
+      setMaterial.coherentXSection = 1.;
+      setMaterial.attenuationXSection = 1.;
+      setMaterial.scatteringXSection = 1.;
+      setMaterial.sampleNumberDensity = 1.;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result["IncoherentXSection"],
+                     "The cross section must be specified when "
+                     "no ChemicalFormula or AtomicNumber is "
+                     "given.")
+  }
+  void testFailureValidateInputsNoAttenuationXSection() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 0;
+      setMaterial.massNumber = 0;
+      setMaterial.coherentXSection = 1.;
+      setMaterial.incoherentXSection = 1.;
+      setMaterial.scatteringXSection = 1.;
+      setMaterial.sampleNumberDensity = 1.;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result["AttenuationXSection"],
+                     "The cross section must be specified when "
+                     "no ChemicalFormula or AtomicNumber is "
+                     "given.")
+  }
+  void testFailureValidateInputsNoScatteringXSection() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 0;
+      setMaterial.massNumber = 0;
+      setMaterial.coherentXSection = 1.;
+      setMaterial.incoherentXSection = 1.;
+      setMaterial.attenuationXSection = 1.;
+      setMaterial.sampleNumberDensity = 1.;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(result["ScatteringXSection"],
+                     "The cross section must be specified when "
+                     "no ChemicalFormula or AtomicNumber is "
+                     "given.")
+  }
+  void testFailureValidateInputsNoSampleNumberDensity() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 0;
+      setMaterial.massNumber = 0;
+      setMaterial.coherentXSection = 1.;
+      setMaterial.incoherentXSection = 1.;
+      setMaterial.attenuationXSection = 1.;
+      setMaterial.scatteringXSection = 1.;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+    TS_ASSERT_EQUALS(result.size(), 1)
+    TS_ASSERT_EQUALS(
+        result["SampleNumberDensity"],
+        "The number density must be specified with a use-defined material.")
   }
 
   void testSuccessfullValidateInputsSampleNumber() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -93,7 +180,7 @@ public:
   }
 
   void testSuccessfullValidateInputsZParam() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -109,7 +196,7 @@ public:
   }
 
   void testSuccessfullValidateInputsSampleMass() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -124,7 +211,7 @@ public:
   }
 
   void testFailureValidateInputsSampleNumberAndZParam() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -138,11 +225,11 @@ public:
     auto result = ReadMaterial::validateInputs(params);
 
     TS_ASSERT_EQUALS(result["ZParameter"],
-                     "Can not give ZParameter with SampleNumberDensity set")
+                     "Cannot give ZParameter with SampleNumberDensity set")
   }
 
   void testFailureValidateInputsZParamWithSampleMass() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -156,11 +243,11 @@ public:
     auto result = ReadMaterial::validateInputs(params);
 
     TS_ASSERT_EQUALS(result["SampleMassDensity"],
-                     "Can not give SampleMassDensity with ZParameter set")
+                     "Cannot give SampleMassDensity with ZParameter set")
   }
 
   void testFailureValidateInputsZParamWithoutUnitCell() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -176,7 +263,7 @@ public:
   }
 
   void testFailureValidateInputsSampleNumWithSampleMass() {
-    const ReadMaterial::MaterialParameters params = [this]() -> auto {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
@@ -190,7 +277,7 @@ public:
 
     TS_ASSERT_EQUALS(
         result["SampleMassDensity"],
-        "Can not give SampleMassDensity with SampleNumberDensity set")
+        "Cannot give SampleMassDensity with SampleNumberDensity set")
   }
 
   void testMaterialIsCorrect() {

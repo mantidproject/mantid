@@ -14,7 +14,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -179,7 +178,7 @@ void CompareWorkspaces::init() {
           "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
-  m_messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_messages = boost::make_shared<TableWorkspace>();
   m_messages->addColumn("str", "Message");
   m_messages->addColumn("str", "Workspace 1");
   m_messages->addColumn("str", "Workspace 2");

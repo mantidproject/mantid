@@ -106,8 +106,8 @@ msg_gerrit() {
 	die 'The Change-Id line must appear in a footer at the bottom.'
 }
 
-# First check that a ticket is referenced
-msg_trac
+# First check that a ticket is referenced - disable for now
+#msg_trac
 # Pipe commit message into the state machine.
 state=first
 cat "$commit_msg" |

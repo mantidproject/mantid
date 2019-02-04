@@ -16,9 +16,11 @@ Specification
 
 A sample environment is defined by:
 
-- one or more available containers, each with a defined geometry & composition
-- optional additional components that will be in the beam, each with their own
-  geometry and composition.
+- one or more available containers, each with a defined :ref:`geometry
+  <HowToDefineGeometricShape>` and :ref:`composition <Materials>`
+- optional additional components that will be in the beam, each with
+  their own :ref:`geometry <HowToDefineGeometricShape>` and
+  :ref:`composition <Materials>`
 
 At a minimum a sample environment is expected to define a container with both its
 geometry and composition.
@@ -71,17 +73,17 @@ is used to reference the material when defining a container or component.
 The other attributes define the properties of the material. The allowed attributes
 map to the arguments of a similar name on the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm
 
-- formula
-- atomicnumber
-- massnumber
-- numberdensity
-- zparameter
-- unitcellvol
-- massdensity
-- totalscatterxsec
-- cohscatterxsec
-- incohscatterxsec
-- absorptionxsec
+- ``formula``
+- ``atomicnumber``
+- ``massnumber``
+- ``numberdensity``
+- ``zparameter``
+- ``unitcellvol``
+- ``massdensity``
+- ``totalscatterxsec``
+- ``cohscatterxsec``
+- ``incohscatterxsec``
+- ``absorptionxsec``
 
 Non-container Components
 ------------------------

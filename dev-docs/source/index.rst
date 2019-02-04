@@ -139,7 +139,7 @@ Testing
    RunningTheUnitTests
    DebuggingUnitTests
    UnitTestGoodPractice
-   IndividualTicketTesting
+   ReviewingAPullRequest
    WritingPerformanceTests
    SystemTests
    DataFilesForTesting
@@ -154,8 +154,8 @@ Testing
 :doc:`UnitTestGoodPractice`
    Guidance on writing good unit tests.
 
-:doc:`IndividualTicketTesting`
-   What to expect and inspect when reviewing an individual contribution to mantid.
+:doc:`ReviewingAPullRequest`
+   What to do when reviewing an individual contribution to mantid.
 
 :doc:`WritingPerformanceTests`
    A walk through of how to write a performance test.
@@ -208,6 +208,7 @@ Component Overviews
    MultiThreadingInAlgorithms
    PythonVSCppAlgorithms
    RemoteJobSubmissionAPI
+   Widgets/Plotting
    Workbench
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation

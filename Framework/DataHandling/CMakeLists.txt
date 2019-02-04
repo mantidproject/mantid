@@ -65,7 +65,7 @@
 	src/LoadILLIndirect2.cpp
 	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
-	src/LoadILLSANS.cpp
+    	src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadISISPolarizationEfficiencies.cpp
@@ -108,6 +108,7 @@
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
 	src/LoadSampleShape.cpp
+	src/LoadSampleEnvironment.cpp
 	src/LoadSESANS.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
@@ -141,7 +142,6 @@
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
-	src/SNSDataArchive.cpp
 	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
@@ -164,7 +164,7 @@
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
-	src/SaveMask.cpp
+  src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
@@ -177,7 +177,7 @@
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
-	src/SaveReflectometryAscii.cpp
+  src/SaveReflectometryAscii.cpp
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSESANS.cpp
@@ -301,6 +301,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
 	inc/MantidDataHandling/LoadSampleShape.h
+	inc/MantidDataHandling/LoadSampleEnvironment.h
 	inc/MantidDataHandling/LoadSESANS.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
@@ -335,7 +336,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/RotateSource.h
-	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
@@ -371,7 +371,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
-	inc/MantidDataHandling/SaveReflectometryAscii.h
+  inc/MantidDataHandling/SaveReflectometryAscii.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSESANS.h
@@ -486,7 +486,9 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
+	LoadStlTest.h
 	LoadSampleShapeTest.h
+	LoadSampleEnvironmentTest.h
 	LoadSESANSTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
@@ -518,7 +520,6 @@ set ( TEST_FILES
 	RenameLogTest.h
 	RotateInstrumentComponentTest.h
 	RotateSourceTest.h
-	SNSDataArchiveTest.h
 	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h
 	SaveAsciiTest.h
@@ -552,7 +553,7 @@ set ( TEST_FILES
 	SavePHXTest.h
 	SaveParameterFileTest.h
 	SaveRKHTest.h
-	SaveReflectometryAsciiTest.h
+  SaveReflectometryAsciiTest.h
 	SaveReflCustomAsciiTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSESANSTest.h
@@ -610,4 +611,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS DataHandling ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS DataHandling INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

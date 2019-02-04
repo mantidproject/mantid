@@ -32,6 +32,13 @@ Improved
 * Added a load button to load selected workspaces without processing.
 * Added save_can option to output unsubtracted can and sample workspaces.
 * Can set PhiMin, PhiMax, and UseMirror mask options from the options column in the table
+* Autocomplete for Sample shape column in the table.
+* Can separate items in variable q binning with commas or spaces. E.g. L/Q 0.0, 0.02 0.3 0.05, 0.8
+* Can export table as a csv, which can be re-loaded as a batch file.
+* File path to batch file will be added to your directories automatically upon loading
+* If loading of user file fails, user file field will remain empty to make it clear it has not be loaded successfully.
+* Workspaces are centred upon loading.
+* All limit strings in the user file (L/ ) are now space-separable to allow for uniform structure in the user file. For backwards compatibility, any string which was comma separable remains comma separable as well.
 
 Bug fixes
 #########
@@ -41,7 +48,12 @@ Bug fixes
 * The GUI no longer hangs whilst searching the archive for files.
 * Updated the options and units displayed in wavelength and momentum range combo boxes.
 * Fixed a bug which crashed the beam centre finder if a phi mask was set.
-* Removed option to process in non-compatibility mode to avoid calculation issues
+* Removed option to process in non-compatibility mode to avoid calculation issues.
+* GUI can correctly read user files with variable step sizes, in /LOG and /LIN modes.
+* Fixed occasional crash when entering data into table.
+* Fixed error message when trying to load or process table with empty rows.
+* Removed option to process in non-compatibility mode to avoid calculation issues.
+* Default name for added runs has correct number of digits.
 
 Improvements
 ############

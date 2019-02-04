@@ -106,6 +106,9 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           matrixWS->getInstrument() &&
           !matrixWS->getInstrument()->getName().empty());
       menu->addSeparator();
+    } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
+      menu->addAction(m_showData);
+      menu->addSeparator();
     }
     menu->addAction(m_rename);
     menu->addAction(m_saveNexus);
