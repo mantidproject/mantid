@@ -430,7 +430,7 @@ public:
     constexpr static wide_integer<Bits, Signed> operator_unary_tilda(const wide_integer<Bits, Signed>& lhs) noexcept {
         wide_integer<Bits, Signed> res{};
         for (int i = 0; i < arr_size; ++i) {
-            res.m_arr[i] = static_cast<base_type>(~lhs.m_arr[i]);
+            res.m_arr[i] = ~lhs.m_arr[i];
         }
         return res;
     }
