@@ -30,7 +30,7 @@ Analyser
   you are interested in seeing the results of.
 
 Reflection
-  The reflection number of the instrument setup.
+  The reflection plane of the instrument set up.
 
 .. tip:: If you need clarification as to the instrument setup you should use
   please speak to the instrument scientist who dealt with your experiment.
@@ -190,8 +190,8 @@ used by the :ref:`Rebin <algm-Rebin>` algorithm.
 ILL Energy Transfer
 -------------------
 
-This tab handles the reduction of data from the IN16B instrument at the ILL. See the algorithm 
-:ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>`.
+This tab handles the reduction of data from the IN16B instrument and will appear when the default facility is set to be 
+the ILL. See the algorithm :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>`.
 
 .. interface:: Data Reduction
   :widget: tabILLEnergyTransfer
