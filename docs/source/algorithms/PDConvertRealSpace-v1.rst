@@ -36,6 +36,23 @@ where :math:`\rho_0` is the sample number density and :math:`\langle b_{coh} \ra
 
 NOTE: This algorithm requires that :ref:`algm-SetSampleMaterial` is called prior in order to determine the :math:`\rho_0` and :math:`\langle b_{coh} \rangle^2` terms.
 
+PyStoG
+------
+This algorithm uses the external project `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ and specifically uses the :class:`pystog.converter.Converter` object. To modify the underlying algorithms, the following functions are used for the conversions.
+
+- :math:`G(r)` conversions are:
+    - To :math:`G_K(r)` see :meth:`pystog.converter.Converter.G_to_GK`
+    - To :math:`g(r)` see :meth:`pystog.converter.Converter.G_to_g`
+
+- :math:`G_K(r)` conversions are:
+    - To :math:`G(r)` see :meth:`pystog.converter.Converter.GK_to_G`
+    - To :math:`g(r)` see :meth:`pystog.converter.Converter.GK_to_g`
+
+- :math:`g(r)` conversions are:
+    - To :math:`G(r)` see :meth:`pystog.converter.Converter.g_to_G`
+    - To :math:`GK(r)` see :meth:`pystog.converter.Converter.g_to_GK`
+
+
 Usage
 -----
 

@@ -39,6 +39,29 @@ where :math:`N_s` is the number of scatters in the sample and both :math:`\langl
 
 NOTE: This algorithm requires that :ref:`algm-SetSampleMaterial` is called prior in order to determine the :math:`\langle b_{tot}^2 \rangle` and :math:`\langle b_{coh} \rangle^2` terms.
 
+PyStoG
+------
+This algorithm uses the external project `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ and specifically uses the :class:`pystog.converter.Converter` object. To modify the underlying algorithms, the following functions are used for the conversions.
+
+- :math:`\frac{d\sigma}{d\Omega}(Q)` conversions are:
+    - To :math:`F(Q)` see :meth:`pystog.converter.Converter.DCS_to_F`
+    - To :math:`F_K(Q)` see :meth:`pystog.converter.Converter.DCS_to_FK`
+    - To :math:`S(Q)` see :meth:`pystog.converter.Converter.DCS_to_S`
+
+- :math:`S(Q)` conversions are:
+    - To :math:`F(Q)` see :meth:`pystog.converter.Converter.S_to_F`
+    - To :math:`F_K(Q)` see :meth:`pystog.converter.Converter.S_to_FK`
+    - To :math:`\frac{d\sigma}{d\Omega}(Q)` see :meth:`pystog.converter.Converter.S_to_DCS`
+
+- :math:`F(Q)` conversions are:
+    - To :math:`\frac{d\sigma}{d\Omega}(Q)` see :meth:`pystog.converter.Converter.F_to_DCS`
+    - To :math:`F_K(Q)` see :meth:`pystog.converter.Converter.F_to_FK`
+    - To :math:`S(Q)` see :meth:`pystog.converter.Converter.F_to_S`
+
+- :math:`F_K(Q)` conversions are:
+    - To :math:`\frac{d\sigma}{d\Omega}(Q)` see :meth:`pystog.converter.Converter.FK_to_DCS`
+    - To :math:`F(Q)` see :meth:`pystog.converter.Converter.FK_to_F`
+    - To :math:`S(Q)` see :meth:`pystog.converter.Converter.FK_to_S`
 
 Usage
 -----
