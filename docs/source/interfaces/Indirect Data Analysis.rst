@@ -7,13 +7,9 @@
 Overview
 --------
 
-
 The Indirect Data Analysis interface is a collection of tools within MantidPlot
 for analysing reduced data from indirect geometry spectrometers, such as IRIS and
 OSIRIS.
-
-.. interface:: Data Analysis
-  :width: 450
 
 The majority of the functions used within this interface can be used with both
 reduced files (*_red.nxs*) and workspaces (*_red*) created using the Indirect Data
@@ -25,6 +21,9 @@ Four of the available tabs are QENS fitting interfaces and share common features
 layout. These common factors are documented in the :ref:`qens-fitting-features` section of this document.
 
 These interfaces do not support GroupWorkspace as input.
+
+.. interface:: Data Analysis
+  :width: 450
 
 Action Buttons
 ~~~~~~~~~~~~~~

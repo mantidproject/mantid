@@ -7,14 +7,14 @@ Indirect Corrections
 Overview
 --------
 
-.. interface:: Corrections
-  :align: right
-  :width: 350
-
 Provides correction routines for quasielastic, inelastic and diffraction
 reductions.
 
 These interfaces do not support GroupWorkspace's as input.
+
+.. interface:: Corrections
+  :align: right
+  :width: 350
 
 Action Buttons
 ~~~~~~~~~~~~~~
@@ -32,9 +32,6 @@ Manage Directories
 Container Subtraction
 ---------------------
 
-.. interface:: Corrections
-  :widget: tabContainerSubtraction
-  
 The Container Subtraction Tab is used to remove the containers contribution to a run.
 
 Once run the corrected output and can correction is shown in the preview plot. Note 
@@ -44,6 +41,9 @@ however when data is initially selected the X axis unit matches that of the samp
 The input and container workspaces will be converted to wavelength (using
 :ref:`ConvertUnits <algm-ConvertUnits>`) if they do not already have wavelength
 as their X unit.
+
+.. interface:: Corrections
+  :widget: tabContainerSubtraction
  
 Options
 ~~~~~~~
@@ -81,12 +81,12 @@ Save Result
 Calculate Paalman Pings
 -----------------------
 
-.. interface:: Corrections
-  :widget: tabCalculatePaalmanPings
-
 Calculates absorption corrections in the Paalman & Pings absorption factors that
 could be applied to the data when given information about the sample (and
 optionally can) geometry.
+
+.. interface:: Corrections
+  :widget: tabCalculatePaalmanPings
 
 Options
 ~~~~~~~
@@ -246,12 +246,12 @@ References:
 Calculate Monte Carlo Absorption
 --------------------------------
 
-.. interface:: Corrections
-  :widget: tabAbsorptionCorrections
-
 The Calculate Monte Carlo Absorption tab provides a cross platform alternative to the
 Calculate Paalman Pings tab. In this tab a Monte Carlo implementation is used to calculate the 
 absorption corrections.
+
+.. interface:: Corrections
+  :widget: tabAbsorptionCorrections
 
 Options
 ~~~~~~~
@@ -384,9 +384,6 @@ Sample Height
 Apply Absorption Corrections
 ----------------------------
 
-.. interface:: Corrections
-  :widget: tabApplyAbsorptionCorrections
-
 The Apply Corrections tab applies the corrections calculated in the Calculate Paalman 
 Pings or Calculate Monte Carlo Absorption tabs of the Indirect Data Corrections interface.
 
@@ -412,6 +409,9 @@ rebin (using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`) the sample to
 match the container, if the correction factors do not match you will be given
 the option to interpolate (:ref:`SplineInterpolation
 <algm-SplineInterpolation>`) the correction factor to match the sample.
+
+.. interface:: Corrections
+  :widget: tabApplyAbsorptionCorrections
 
 Options
 ~~~~~~~

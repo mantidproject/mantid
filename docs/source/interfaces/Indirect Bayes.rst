@@ -7,11 +7,11 @@
 Overview
 --------
 
+Provides Bayesian analysis routines primarily for use with QENS data.
+
 .. interface:: Bayes
   :align: right
   :width: 350
-
-Provides Bayesian analysis routines primarily for use with QENS data.
 
 Action Buttons
 --------------
@@ -26,9 +26,6 @@ Manage Directories
 ResNorm
 -------
 
-.. interface:: Bayes
-  :widget: ResNorm
-
 This tab creates a group 'normalisation' file by taking a resolution file and
 fitting it to all the groups in the resolution (vanadium) data file which has
 the same grouping as the sample data of interest.
@@ -41,6 +38,9 @@ additional suffices of *_Intensity* & *_Stretch*.
 
 The processing on this tab is provided by the :ref:`ResNorm <algm-ResNorm>`
 algorithm.
+
+.. interface:: Bayes
+  :widget: ResNorm
 
 Options
 ~~~~~~~
@@ -75,9 +75,6 @@ Quasi
 
 .. warning:: This interface is only available on Windows
 
-.. interface:: Bayes
-  :widget: Quasi
-
 The model that is being fitted is that of a :math:`\delta`-function (elastic component)
 of amplitude :math:`A(0)` and Lorentzians of amplitude :math:`A(j)` and HWHM
 :math:`W(j)` where :math:`j=1,2,3`. The whole function is then convolved with
@@ -101,6 +98,9 @@ identified with :math:`(2\pi)\beta\hbar/\tau` .  The model that is fitted is
 that of an elastic component and the stretched exponential and the program gives
 the best estimate for the :math:`\beta` parameter and the width for each group
 of spectra.
+
+.. interface:: Bayes
+  :widget: Quasi
 
 Options
 ~~~~~~~
@@ -159,12 +159,12 @@ Stretch
 
 .. warning:: This interface is only available on Windows
 
-.. interface:: Bayes
-  :widget: Stretch
-
 This is a variation of the stretched exponential option of Quasi. For each
 spectrum, a fit is performed for a grid of β and σ values. The distribution of
 goodness of fit values is plotted.
+
+.. interface:: Bayes
+  :widget: Stretch
 
 Options
 ~~~~~~~
