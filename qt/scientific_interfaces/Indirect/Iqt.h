@@ -24,7 +24,6 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
-  void setBrowserWorkspace() override{};
 
   bool isErrorsEnabled();
 

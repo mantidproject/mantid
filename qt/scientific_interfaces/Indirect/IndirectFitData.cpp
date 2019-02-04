@@ -392,7 +392,6 @@ void IndirectFitData::setStartX(double const &startX,
 }
 
 void IndirectFitData::setEndX(double const &endX, std::size_t const &spectrum) {
-  std::cerr <<"Set EndX " << endX << ' ' << spectrum << std::endl;
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.second = endX;

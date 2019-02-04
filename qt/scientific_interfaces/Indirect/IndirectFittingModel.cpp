@@ -433,6 +433,14 @@ std::size_t IndirectFittingModel::getNumberOfSpectra(std::size_t index) const {
         "index provided is too large.");
 }
 
+std::size_t IndirectFittingModel::getNumberOfDatasets() const {
+  size_t sum = 0;
+  for(auto const &ws : m_fittingData) {
+    sum += ws->numberOfSpectra();
+  }
+  return sum;
+}
+
 std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
   if (m_fitOutput)
     return m_fitOutput->getResultParameterNames();

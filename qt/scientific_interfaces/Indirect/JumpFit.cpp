@@ -77,7 +77,7 @@ void JumpFit::setupFitTab() {
 
 void JumpFit::updateAvailableFitTypes() {
   auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
-  clearFitTypeComboBox();
+  //clearFitTypeComboBox();
   if (parameter == "Width")
     addFunctions(getWidthFunctions());
   else if (parameter == "EISF")
@@ -85,10 +85,10 @@ void JumpFit::updateAvailableFitTypes() {
 }
 
 void JumpFit::addFunctions(std::vector<std::string> const &functions) {
-  auto &factory = FunctionFactory::Instance();
-  for (auto const &function : functions)
-    addComboBoxFunctionGroup(QString::fromStdString(function),
-                             {factory.createFunction(function)});
+  //auto &factory = FunctionFactory::Instance();
+  //for (auto const &function : functions)
+  //  addComboBoxFunctionGroup(QString::fromStdString(function),
+  //                           {factory.createFunction(function)});
 }
 
 void JumpFit::updateModelFitTypeString() {

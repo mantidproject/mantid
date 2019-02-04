@@ -66,6 +66,7 @@ public:
   virtual boost::optional<std::string> isInvalidFunction() const;
   virtual std::size_t numberOfWorkspaces() const;
   std::size_t getNumberOfSpectra(std::size_t index) const;
+  std::size_t getNumberOfDatasets() const;
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::IFunction_sptr getFittingFunction() const;
 

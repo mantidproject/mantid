@@ -54,69 +54,6 @@ public:
 
   void setConvolveMembers(bool convolveMembers);
 
-  void updateTies();
-
-  void setCustomSettingEnabled(const QString &customName, bool enabled);
-
-  void setParameterValue(const std::string &functionName,
-                         const std::string &parameterName, double value);
-
-  void setDefaultPeakType(const std::string &function);
-
-  void addCheckBoxFunctionGroup(
-      const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functions,
-      bool defaultValue = false);
-
-  void addSpinnerFunctionGroup(
-      const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functions,
-      int minimum = 0, int maximum = 10, int defaultValue = 0);
-
-  void addComboBoxFunctionGroup(
-      const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functions);
-  void clearFitTypeComboBox();
-
-  void setBackgroundOptions(const QStringList &backgrounds);
-
-  bool boolSettingValue(const QString &settingKey) const;
-
-  void setCustomBoolSetting(const QString &settingKey, bool value);
-
-  int intSettingValue(const QString &settingKey) const;
-
-  double doubleSettingValue(const QString &settingKey) const;
-
-  QString enumSettingValue(const QString &settingKey) const;
-
-  void addBoolCustomSetting(const QString &settingKey,
-                            const QString &settingName,
-                            bool defaultValue = false);
-
-  void addDoubleCustomSetting(const QString &settingKey,
-                              const QString &settingName,
-                              double defaultValue = 0);
-
-  void addIntCustomSetting(const QString &settingKey,
-                           const QString &settingName, int defaultValue = 0);
-
-  void addEnumCustomSetting(const QString &settingKey,
-                            const QString &settingName,
-                            const QStringList &options);
-
-  void addOptionalDoubleSetting(const QString &settingKey,
-                                const QString &settingName,
-                                const QString &optionKey,
-                                const QString &optionName, bool enabled = false,
-                                double defaultValue = 0);
-
-  void setCustomSettingChangesFunction(const QString &settingKey,
-                                       bool changesFunction);
-
-public slots:
-  void setBrowserWorkspace() override;
-
 protected:
   IndirectFittingModel *fittingModel() const;
 
@@ -148,10 +85,6 @@ protected slots:
   void setDataTableStartX(double startX);
   void setDataTableEndX(double endX);
   void setDataTableExclude(const std::string &exclude);
-  void setBrowserStartX(double startX);
-  void setBrowserEndX(double endX);
-  void updateBrowserFittingRange();
-  void setBrowserWorkspace(std::size_t dataIndex);
   void setBrowserWorkspaceIndex(std::size_t spectrum);
   void tableStartXChanged(double startX, std::size_t dataIndex,
                           std::size_t spectrum);
@@ -168,15 +101,6 @@ protected slots:
   void singleFit(std::size_t dataIndex, std::size_t spectrum);
   void executeFit();
 
-  void updateAttributeValues();
-  void updateAttributeValues(Mantid::API::IFunction_sptr function,
-                             std::vector<std::string> const &attributeNames);
-  void updateAttributeValues(
-      Mantid::API::IFunction_sptr function,
-      std::vector<std::string> const &attributeNames,
-      std::unordered_map<std::string, Mantid::API::IFunction::Attribute> const
-          &attributes);
-  void updateFitBrowserAttributeValues();
   std::unordered_map<std::string, Mantid::API::IFunction::Attribute>
   getAttributes(Mantid::API::IFunction_sptr const &function,
                 std::vector<std::string> const &attributeNames);

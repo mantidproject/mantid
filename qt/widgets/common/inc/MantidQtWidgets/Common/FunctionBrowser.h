@@ -156,6 +156,8 @@ public:
   Mantid::API::IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
   void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
+  /// Get the index of the current dataset.
+  int getCurrentDataset() const override;
 
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);

@@ -48,6 +48,7 @@ public:
   virtual void setLocalParameterTie(const QString &parName, int i,
                                     QString tie) = 0;
   virtual void setCurrentDataset(int i) = 0;
+  virtual int getCurrentDataset() const = 0;
 };
 
 } // namespace MantidWidgets

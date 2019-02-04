@@ -2449,6 +2449,12 @@ void FunctionBrowser::updateMultiDatasetParameters(
   }
 }
 
+/// Get the index of the current dataset.
+int FunctionBrowser::getCurrentDataset() const
+{
+  return m_currentDataset;
+}
+
 /// Resize the browser's columns
 /// @param s0 :: New size for the first column (Parameter).
 /// @param s1 :: New size for the second column (Value).

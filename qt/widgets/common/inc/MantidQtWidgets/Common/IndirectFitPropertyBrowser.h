@@ -55,112 +55,14 @@ public:
   bool ignoreInvalidData() const;
 
   void updateParameters(const Mantid::API::IFunction &fun);
-
-  Mantid::API::IFunction_sptr background() const;
-
-  boost::optional<size_t> backgroundIndex() const;
-
-  boost::optional<size_t>
-  functionIndex(Mantid::API::IFunction_sptr function) const;
-
   QString selectedFitType() const;
-
-  QString backgroundName() const;
-
-  QHash<QString, QString> getTies() const;
-
-  size_t numberOfCustomFunctions(const std::string &functionName) const;
-
-  std::vector<double> parameterValue(const std::string &functionName,
-                                     const std::string &parameterName) const;
-
-  void setParameterValue(const std::string &functionName,
-                         const std::string &parameterName, double value);
-
-  void setParameterValue(Mantid::API::IFunction_sptr function,
-                         const std::string &parameterName, double value);
-
-  void setBackground(const std::string &backgroundName);
-
   void setConvolveMembers(bool convolveMembers);
-
-  void setCustomSettingEnabled(const QString &customName, bool enabled);
-
   void setFitEnabled(bool enable);
-
-  void addCheckBoxFunctionGroup(
-      const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functions,
-      bool defaultValue = false);
-
-  void addSpinnerFunctionGroup(
-      const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functions,
-      int minimum = 0, int maximum = 10, int defaultValue = 0);
-
-  void addComboBoxFunctionGroup(
-      const QString &groupName,
-      const std::vector<Mantid::API::IFunction_sptr> &functions);
-  void clearFitTypeComboBox();
-
-  void setBackgroundOptions(const QStringList &backgrounds);
-
-  bool boolSettingValue(const QString &settingKey) const;
-
-  void setCustomBoolSetting(const QString &settingKey, bool value);
-
-  int intSettingValue(const QString &settingKey) const;
-
-  double doubleSettingValue(const QString &settingKey) const;
-
-  QString enumSettingValue(const QString &settingKey) const;
-
-  void addBoolCustomSetting(const QString &settingKey,
-                            const QString &settingName,
-                            bool defaultValue = false);
-
-  void addIntCustomSetting(const QString &settingKey,
-                           const QString &settingName, int defaultValue = 0);
-
-  void addDoubleCustomSetting(const QString &settingKey,
-                              const QString &settingName,
-                              double defaultValue = 0);
-
-  void addEnumCustomSetting(const QString &settingKey,
-                            const QString &settingName,
-                            const QStringList &options);
-
-  void addOptionalDoubleSetting(const QString &settingKey,
-                                const QString &settingName,
-                                const QString &optionKey,
-                                const QString &optionName, bool enabled = false,
-                                double defaultValue = 0);
-
-  void setCustomSettingChangesFunction(const QString &settingKey,
-                                       bool changesFunction);
-
-  void updateTies();
-  void updateTie(std::size_t index);
-  void addTie(const QString &tie);
-  void removeTie(const QString &parameter);
-  void updateErrors();
-  void clearErrors();
-
-  // void removeFunction(PropertyHandler *handler) override;
-
   void setWorkspaceIndex(int i);
   int workspaceIndex() const;
-  void updateAttributes();
-  int count() const;
-  Mantid::API::IFunction_sptr getFunctionAtIndex(int) const;
-  void setDefaultPeakType(const std::string &function);
-  void setWorkspaceName(const QString &function);
-  void setStartX(double);
-  void setEndX(double);
   void updateFunctionBrowserData(size_t nData);
   void editLocalParameter(const QString &parName, const QStringList &wsNames,
                           const std::vector<size_t> &wsIndices);
-
   void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
 
 public slots:
@@ -169,7 +71,6 @@ public slots:
 
 protected slots:
   void clear();
-  void clearAllCustomFunctions();
   void browserVisibilityChanged(bool isVisible);
 
 
