@@ -221,9 +221,10 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
       out[i * 3 + 1] = Q3[1] - Q2[1];
       out[i * 3 + 2] = Q3[2] - Q2[2];
     } catch (std::runtime_error &) {
-      out[i * 3] = 0.15;     // std::numeric_limits<double>::infinity();
-      out[i * 3 + 1] = 0.15; // std::numeric_limits<double>::infinity();
-      out[i * 3 + 2] = 0.15; // std::numeric_limits<double>::infinity();
+      // set penalty for unindexed peaks greater than tolerance
+      out[i * 3] = 0.15;
+      out[i * 3 + 1] = 0.15;
+      out[i * 3 + 2] = 0.15;
     }
   }
 }
