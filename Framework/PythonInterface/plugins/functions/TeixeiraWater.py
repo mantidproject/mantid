@@ -46,7 +46,7 @@ class TeixeiraWater(IFunction1D):
         for i, x in enumerate(xvals, start=0):
             hwhm = self.hbar * np.square(x * length) / (tau * (6 + np.square(x * length)))
             jacobian.set(i, 0, -hwhm / tau)
-            jacobian.set(i, 1, hwhm * (1.0 - hwhm * tau) / length)
+            jacobian.set(i, 1, 2 * hwhm * (1.0 - hwhm * tau) / length)
 
 
 # Required to have Mantid recognise the new function
