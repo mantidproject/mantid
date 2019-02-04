@@ -15,6 +15,7 @@ Name = "Muon_Analysis_2"
 
 def main():
     try:
+        global muon
         muon.setWindowState(muon.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         muon.activateWindow()
     except:
@@ -43,6 +44,3 @@ def loadFromProject(project):
 
 if __name__ == '__main__':
     muon = main()
-    # cannot assign straight to muonGUI
-    # prevents reopening to the same GUI
-    muonGUI = muon
