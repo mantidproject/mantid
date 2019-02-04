@@ -81,7 +81,7 @@ class MultiFileEditor(PluginWidget):
         if data.hasText() and data.hasUrls:
             filepaths = [url.toLocalFile() for url in data.urls()]
             for filepath in filepaths:
-                if osp.isfile(filepath):
+                if filepath.endswith('.py') or filepath.endswith('.pyw'):
                     event.acceptProposedAction()
 
     def dropEvent(self, event):
