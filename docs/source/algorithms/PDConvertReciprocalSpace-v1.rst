@@ -18,7 +18,7 @@ The neutron diffraction is measuring the differential scattering cross section (
     \frac{d\sigma}{d\Omega} = \frac{N}{\phi d\Omega}
 
 Here the :math:`N` is the number of scattered neutrons in unit time in a solid angle :math:`d\Omega`, and 
-:math:`\phi` is the incident neutron flux. There are other quantities of interest for experimentalists:
+:math:`\phi` is the incident neutron flux. The algorithm supports the following conversions:
 
 .. math::
     :label: SofQ
@@ -34,6 +34,10 @@ Here the :math:`N` is the number of scattered neutrons in unit time in a solid a
     :label: FKofQ
     
     F_K(Q) = \langle b_{coh} \rangle^2 [S(Q) - 1] = \frac{\langle b_{coh} \rangle^2}{Q} F(Q)
+
+where :math:`N_s` is the number of scatters in the sample and both :math:`\langle b_{tot}^2 \rangle` and :math:`\langle b_{coh} \rangle^2` are defined in the :ref:`Materials concept page <Materials>`. 
+
+NOTE: This algorithm requires that :ref:`algm-SetSampleMaterial` is called prior in order to determine the :math:`\langle b_{tot}^2 \rangle` and :math:`\langle b_{coh} \rangle^2` terms.
 
 
 Usage
