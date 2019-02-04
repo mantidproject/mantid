@@ -9,23 +9,16 @@
 
 #include <Eigen/Dense>
 #include <ostream>
-// boost::multiprecision has knawn bug in versions
-// less 1.61
-#define MULTIPRECISION_BOOST_VALID_VERSION 106100
+#include "int.h"
 
-#if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
-#include <boost/multiprecision/cpp_int.hpp>
 namespace morton_index {
-using uint128_t = boost::multiprecision::uint128_t;
-using uint256_t = boost::multiprecision::uint256_t;
+using std::operator"" _uint128;
+using std::operator"" _uint256;
+using uint96_t = std::wide_uint<96>;
+using uint128_t = std::uint128_t;
+using uint256_t = std::uint256_t;
 } // namespace morton_index
-#else
-// Dummy types to avoid using boost::multiprecision
-namespace morton_index {
-using uint128_t = uint64_t;
-using uint256_t = uint64_t;
-} // namespace morton_index
-#endif // BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
+
 
 namespace morton_index {
 
@@ -52,108 +45,7 @@ using BinIndices = Eigen::Matrix<size_t, 1, static_cast<int>(ND)>;
  * This class implements the structure of size 96bit, that can be used
  * as Morton index.
  */
-#pragma pack(push, 1)
-struct Morton96 {
-  uint64_t lower;
-  uint32_t upper;
-
-  explicit Morton96(const uint128_t &cmpl);
-  template <typename IntT> Morton96(const IntT &smth_int);
-  uint128_t to_uint128_t() const;
-
-  bool operator<(const Morton96 &b) const;
-  bool operator>(const Morton96 &b) const;
-  bool operator>=(const Morton96 &b) const;
-  bool operator<=(const Morton96 &b) const;
-  bool operator==(const Morton96 &b) const;
-  bool operator!=(const Morton96 &b) const;
-  friend uint128_t operator-(const Morton96 &a, const Morton96 &b);
-  template <typename T> uint128_t operator+(const T &b) const;
-  Morton96 operator+(const Morton96 &b) const;
-  template <typename T> uint128_t operator/(const T &b) const;
-  template <typename T> uint128_t operator*(const T &b) const;
-  friend std::ostream &operator<<(std::ostream &os, const Morton96 &morton96);
-};
-#pragma pack(pop)
-
-inline Morton96::Morton96(const uint128_t &smpl) {
-  union {
-    uint128_t smpl;   // simple
-    uint64_t cmpl[2]; // complex
-  } uni = {smpl};
-  upper = static_cast<uint32_t>(uni.cmpl[1]);
-  lower = uni.cmpl[0];
-}
-
-template <typename IntT>
-inline Morton96::Morton96(const IntT &smth_int)
-    : Morton96(uint128_t(smth_int)) {}
-
-inline uint128_t Morton96::to_uint128_t() const {
-  union {
-    uint64_t cmpl[2]; // complex
-    uint128_t smpl;   // simple
-  } uni = {{lower, upper}};
-  return uni.smpl;
-}
-
-inline bool Morton96::operator<(const Morton96 &b) const {
-  if (upper != b.upper)
-    return upper < b.upper;
-  else
-    return lower < b.lower;
-}
-
-inline bool Morton96::operator>(const Morton96 &b) const {
-  if (upper != b.upper)
-    return upper > b.upper;
-  else
-    return lower > b.lower;
-}
-
-inline bool Morton96::operator==(const Morton96 &b) const {
-
-  return lower == b.lower && upper == b.upper;
-}
-
-inline bool Morton96::operator>=(const Morton96 &b) const {
-  return *this > b || *this == b;
-}
-
-inline bool Morton96::operator<=(const Morton96 &b) const {
-
-  return *this < b || *this == b;
-}
-
-inline bool Morton96::operator!=(const Morton96 &b) const {
-
-  return lower != b.lower || upper != b.upper;
-}
-
-inline uint128_t operator-(const Morton96 &a, const Morton96 &b) {
-  return a.to_uint128_t() - b.to_uint128_t();
-}
-
-template <typename T> inline uint128_t Morton96::operator+(const T &b) const {
-  return to_uint128_t() + b;
-}
-
-inline Morton96 Morton96::operator+(const Morton96 &b) const {
-  return Morton96(to_uint128_t() + b.to_uint128_t());
-}
-
-template <typename T> inline uint128_t Morton96::operator/(const T &b) const {
-  return to_uint128_t() / b;
-}
-
-template <typename T> inline uint128_t Morton96::operator*(const T &b) const {
-  return to_uint128_t() * b;
-}
-
-inline std::ostream &operator<<(std::ostream &os, const Morton96 &morton96) {
-  os << morton96.to_uint128_t();
-  return os;
-}
+using Morton96 = uint96_t;
 
 /**
  * This structure binds the size of accesible memory to store

@@ -119,11 +119,8 @@ void ConvertToMD::init() {
                   "workspace. The workspace will load data from the file on "
                   "demand in order to reduce memory use.");
 
-#if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
   std::vector<std::string> converterType{"Default", "Indexed"};
-#else
-  std::vector<std::string> converterType{"Default"};
-#endif
+
   auto loadTypeValidator =
       boost::make_shared<StringListValidator>(converterType);
   declareProperty("ConverterType", "Default", loadTypeValidator,

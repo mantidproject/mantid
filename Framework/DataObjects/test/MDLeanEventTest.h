@@ -10,6 +10,7 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidDataObjects/MortonIndex/int.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_array.hpp>
@@ -125,15 +126,7 @@ public:
 
     MDLeanEvent<ND> event(0.0f, 0.0f, &floatCoord[0]);
     using EventAccess = MDLeanEvent<ND>::template AccessFor<MDLeanEventTest>;
-#if BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
-    try {
-      EventAccess::convertToIndex(event, bounds);
-    } catch (std::runtime_error &exception) {
-      TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
-                           std::string::npos,
-                       true);
-    }
-#else
+
     EventAccess::convertToIndex(event, bounds);
     EventAccess::convertToCoordinates(event, bounds);
 
@@ -141,7 +134,31 @@ public:
     TS_ASSERT_EQUALS(event.getCenter(1), 10);
     TS_ASSERT_EQUALS(event.getCenter(2), 5);
     TS_ASSERT_EQUALS(event.getCenter(3), 5);
-#endif // BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
+  }
+
+  void test_retrieve_coordinates_3d() {
+    constexpr size_t ND(3);
+
+    morton_index::MDSpaceBounds<ND> bounds;
+    // clang-format off
+    bounds <<
+           0.0f, 2.0f,
+        0.0f, 10.0f,
+        3.0f, 7.0f;
+    // clang-format on
+
+    morton_index::MDCoordinate<ND> floatCoord;
+    floatCoord << 1.5f, 10.0f, 5.0f;
+
+    MDLeanEvent<ND> event(0.0f, 0.0f, &floatCoord[0]);
+    using EventAccess = MDLeanEvent<ND>::template AccessFor<MDLeanEventTest>;
+
+    EventAccess::convertToIndex(event, bounds);
+    EventAccess::convertToCoordinates(event, bounds);
+
+    TS_ASSERT_EQUALS(event.getCenter(0), 1.5);
+    TS_ASSERT_EQUALS(event.getCenter(1), 10);
+    TS_ASSERT_EQUALS(event.getCenter(2), 5);
   }
 };
 

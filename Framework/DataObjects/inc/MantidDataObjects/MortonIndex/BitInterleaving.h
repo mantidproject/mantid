@@ -40,7 +40,6 @@ template <size_t N, typename IntT, typename MortonT> IntT compact(MortonT) {
   throw std::runtime_error("No compact() specialisation.");
 }
 
-#if BOOST_VERSION >= MULTIPRECISION_BOOST_VALID_VERSION
 /* Bit masks used for pad and compact operations are derived using
  * docs/bit_padding_generator.py. */
 /* For more details see docs/bit_interleaving.md. */
@@ -143,164 +142,144 @@ template <> inline uint16_t compact<3, uint16_t, uint64_t>(uint64_t x) {
 }
 
 template <> inline uint128_t pad<1, uint32_t, uint128_t>(uint32_t v) {
-
   uint128_t x(v);
-  x &= uint128_t("0xffffffff");
-  x = (x | x << 16) & uint128_t("0xffff0000ffff");
-  x = (x | x << 8) & uint128_t("0xff00ff00ff00ff");
-  x = (x | x << 4) & uint128_t("0xf0f0f0f0f0f0f0f");
-  x = (x | x << 2) & uint128_t("0x3333333333333333");
-  x = (x | x << 1) & uint128_t("0x5555555555555555");
+  x &= 0xffffffff_uint128;
+  x = (x | x << 16) & 0xffff0000ffff_uint128;
+  x = (x | x << 8) & 0xff00ff00ff00ff_uint128;
+  x = (x | x << 4) & 0xf0f0f0f0f0f0f0f_uint128;
+  x = (x | x << 2) & 0x3333333333333333_uint128;
+  x = (x | x << 1) & 0x5555555555555555_uint128;
   return x;
 }
 
 template <> inline uint32_t compact<1, uint32_t, uint128_t>(uint128_t x) {
 
-  x &= uint128_t("0x5555555555555555");
-  x = (x | x >> 1) & uint128_t("0x3333333333333333");
-  x = (x | x >> 2) & uint128_t("0xf0f0f0f0f0f0f0f");
-  x = (x | x >> 4) & uint128_t("0xff00ff00ff00ff");
-  x = (x | x >> 8) & uint128_t("0xffff0000ffff");
-  x = (x | x >> 16) & uint128_t("0xffffffff");
+  x &= 0x5555555555555555_uint128;
+  x = (x | x >> 1) & 0x3333333333333333_uint128;
+  x = (x | x >> 2) & 0xf0f0f0f0f0f0f0f_uint128;
+  x = (x | x >> 4) & 0xff00ff00ff00ff_uint128;
+  x = (x | x >> 8) & 0xffff0000ffff_uint128;
+  x = (x | x >> 16) & 0xffffffff_uint128;
   return (uint32_t)x;
 }
 
 template <> inline uint128_t pad<2, uint32_t, uint128_t>(uint32_t v) {
 
   uint128_t x(v);
-  x &= uint128_t("0xffffffff");
-  x = (x | x << 32) & uint128_t("0xffff00000000ffff");
-  x = (x | x << 16) & uint128_t("0xff0000ff0000ff0000ff");
-  x = (x | x << 8) & uint128_t("0xf00f00f00f00f00f00f00f");
-  x = (x | x << 4) & uint128_t("0xc30c30c30c30c30c30c30c3");
-  x = (x | x << 2) & uint128_t("0x249249249249249249249249");
+  x &= 0xffffffff_uint128;
+  x = (x | x << 32) & 0xffff00000000ffff_uint128;
+  x = (x | x << 16) & 0xff0000ff0000ff0000ff_uint128;
+  x = (x | x << 8) & 0xf00f00f00f00f00f00f00f_uint128;
+  x = (x | x << 4) & 0xc30c30c30c30c30c30c30c3_uint128;
+  x = (x | x << 2) & 0x249249249249249249249249_uint128;
   return x;
 }
 
 template <> inline uint32_t compact<2, uint32_t, uint128_t>(uint128_t x) {
 
-  x &= uint128_t("0x249249249249249249249249");
-  x = (x | x >> 2) & uint128_t("0xc30c30c30c30c30c30c30c3");
-  x = (x | x >> 4) & uint128_t("0xf00f00f00f00f00f00f00f");
-  x = (x | x >> 8) & uint128_t("0xff0000ff0000ff0000ff");
-  x = (x | x >> 16) & uint128_t("0xffff00000000ffff");
-  x = (x | x >> 32) & uint128_t("0xffffffff");
+  x &= 0x249249249249249249249249_uint128;
+  x = (x | x >> 2) & 0xc30c30c30c30c30c30c30c3_uint128;
+  x = (x | x >> 4) & 0xf00f00f00f00f00f00f00f_uint128;
+  x = (x | x >> 8) & 0xff0000ff0000ff0000ff_uint128;
+  x = (x | x >> 16) & 0xffff00000000ffff_uint128;
+  x = (x | x >> 32) & 0xffffffff_uint128;
   return (uint32_t)x;
 }
 
 template <> inline uint128_t pad<3, uint32_t, uint128_t>(uint32_t v) {
 
   uint128_t x(v);
-  x &= uint128_t("0xffffffff");
-  x = (x | x << 64) & uint128_t("0xffc0000000000000003fffff");
-  x = (x | x << 32) & uint128_t("0xffc00000003ff800000007ff");
-  x = (x | x << 16) & uint128_t("0xf80007c0003f0000f80007c0003f");
-  x = (x | x << 8) & uint128_t("0xc0380700c0380700c0380700c03807");
-  x = (x | x << 4) & uint128_t("0x8430843084308430843084308430843");
-  x = (x | x << 2) & uint128_t("0x9090909090909090909090909090909");
-  x = (x | x << 1) & uint128_t("0x11111111111111111111111111111111");
+  x &= 0xffffffff_uint128;
+  x = (x | x << 64) & 0xffc0000000000000003fffff_uint128;
+  x = (x | x << 32) & 0xffc00000003ff800000007ff_uint128;
+  x = (x | x << 16) & 0xf80007c0003f0000f80007c0003f_uint128;
+  x = (x | x << 8) & 0xc0380700c0380700c0380700c03807_uint128;
+  x = (x | x << 4) & 0x8430843084308430843084308430843_uint128;
+  x = (x | x << 2) & 0x9090909090909090909090909090909_uint128;
+  x = (x | x << 1) & 0x11111111111111111111111111111111_uint128;
   return x;
 }
 
 template <> inline uint32_t compact<3, uint32_t, uint128_t>(uint128_t x) {
 
-  x &= uint128_t("0x11111111111111111111111111111111");
-  x = (x | x >> 1) & uint128_t("0x9090909090909090909090909090909");
-  x = (x | x >> 2) & uint128_t("0x8430843084308430843084308430843");
-  x = (x | x >> 4) & uint128_t("0xc0380700c0380700c0380700c03807");
-  x = (x | x >> 8) & uint128_t("0xf80007c0003f0000f80007c0003f");
-  x = (x | x >> 16) & uint128_t("0xffc00000003ff800000007ff");
-  x = (x | x >> 32) & uint128_t("0xffc0000000000000003fffff");
-  x = (x | x >> 64) & uint128_t("0xffffffff");
+  x &= 0x11111111111111111111111111111111_uint128;
+  x = (x | x >> 1) & 0x9090909090909090909090909090909_uint128;
+  x = (x | x >> 2) & 0x8430843084308430843084308430843_uint128;
+  x = (x | x >> 4) & 0xc0380700c0380700c0380700c03807_uint128;
+  x = (x | x >> 8) & 0xf80007c0003f0000f80007c0003f_uint128;
+  x = (x | x >> 16) & 0xffc00000003ff800000007ff_uint128;
+  x = (x | x >> 32) & 0xffc0000000000000003fffff_uint128;
+  x = (x | x >> 64) & 0xffffffff_uint128;
   return (uint32_t)x;
 }
 
 template <> inline uint256_t pad<2, uint64_t, uint256_t>(uint64_t v) {
 
   uint256_t x(v);
-  x &= uint256_t("0xffffffffffffffff");
-  x = (x | x << 64) & uint256_t("0xffffffff0000000000000000ffffffff");
-  x = (x | x << 32) & uint256_t("0xffff00000000ffff00000000ffff00000000ffff");
+  x &= 0xffffffffffffffff_uint256;
+  x = (x | x << 64) & 0xffffffff0000000000000000ffffffff_uint256;
+  x = (x | x << 32) & 0xffff00000000ffff00000000ffff00000000ffff_uint256;
   x = (x | x << 16) &
-      uint256_t("0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff");
+      0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff_uint256;
   x = (x | x << 8) &
-      uint256_t("0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f");
+      0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f_uint256;
   x = (x | x << 4) &
-      uint256_t("0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3");
+      0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3_uint256;
   x = (x | x << 2) &
-      uint256_t("0x249249249249249249249249249249249249249249249249");
+      0x249249249249249249249249249249249249249249249249_uint256;
   return x;
 }
 
 template <> inline uint64_t compact<2, uint64_t, uint256_t>(uint256_t x) {
 
-  x &= uint256_t("0x249249249249249249249249249249249249249249249249");
+  x &= 0x249249249249249249249249249249249249249249249249_uint256;
   x = (x | x >> 2) &
-      uint256_t("0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3");
+      0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3_uint256;
   x = (x | x >> 4) &
-      uint256_t("0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f");
+      0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f_uint256;
   x = (x | x >> 8) &
-      uint256_t("0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff");
-  x = (x | x >> 16) & uint256_t("0xffff00000000ffff00000000ffff00000000ffff");
-  x = (x | x >> 32) & uint256_t("0xffffffff0000000000000000ffffffff");
-  x = (x | x >> 64) & uint256_t("0xffffffffffffffff");
+      0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff_uint256;
+  x = (x | x >> 16) & 0xffff00000000ffff00000000ffff00000000ffff_uint256;
+  x = (x | x >> 32) & 0xffffffff0000000000000000ffffffff_uint256;
+  x = (x | x >> 64) & 0xffffffffffffffff_uint256;
   return (uint64_t)x;
 }
 
 template <> inline uint256_t pad<3, uint64_t, uint256_t>(uint64_t v) {
 
   uint256_t x(v);
-  x &= uint256_t("0xffffffffffffffff");
+  x &= 0xffffffffffffffff_uint256;
   x = (x | x << 128) &
-      uint256_t("0xfffff800000000000000000000000000000007ffffffffff");
+      0xfffff800000000000000000000000000000007ffffffffff_uint256;
   x = (x | x << 64) &
-      uint256_t("0xfffff80000000000000007ffffc0000000000000003fffff");
+      0xfffff80000000000000007ffffc0000000000000003fffff_uint256;
   x = (x | x << 32) &
-      uint256_t("0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff");
-  x = (x | x << 16) &
-      uint256_t(
-          "0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f");
-  x = (x | x << 8) &
-      uint256_t(
-          "0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807");
-  x = (x | x << 4) &
-      uint256_t(
-          "0x843084308430843084308430843084308430843084308430843084308430843");
-  x = (x | x << 2) &
-      uint256_t(
-          "0x909090909090909090909090909090909090909090909090909090909090909");
-  x = (x | x << 1) &
-      uint256_t(
-          "0x1111111111111111111111111111111111111111111111111111111111111111");
+      0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff_uint256;
+  x = (x | x << 16) & 0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f_uint256;
+  x = (x | x << 8) & 0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807_uint256;
+  x = (x | x << 4) & 0x843084308430843084308430843084308430843084308430843084308430843_uint256;
+  x = (x | x << 2) & 0x909090909090909090909090909090909090909090909090909090909090909_uint256;
+  x = (x | x << 1) & 0x1111111111111111111111111111111111111111111111111111111111111111_uint256;
   return x;
 }
 
 template <> inline uint64_t compact<3, uint64_t, uint256_t>(uint256_t x) {
 
-  x &= uint256_t(
-      "0x1111111111111111111111111111111111111111111111111111111111111111");
-  x = (x | x >> 1) &
-      uint256_t(
-          "0x909090909090909090909090909090909090909090909090909090909090909");
-  x = (x | x >> 2) &
-      uint256_t(
-          "0x843084308430843084308430843084308430843084308430843084308430843");
-  x = (x | x >> 4) &
-      uint256_t(
-          "0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807");
-  x = (x | x >> 8) &
-      uint256_t(
-          "0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f");
+  x &= 0x1111111111111111111111111111111111111111111111111111111111111111_uint256;
+  x = (x | x >> 1) & 0x909090909090909090909090909090909090909090909090909090909090909_uint256;
+  x = (x | x >> 2) & 0x843084308430843084308430843084308430843084308430843084308430843_uint256;
+  x = (x | x >> 4) & 0xc0380700c0380700c0380700c0380700c0380700c0380700c0380700c03807_uint256;
+  x = (x | x >> 8) & 0xf80007c0003f0000f80007c0003f0000f80007c0003f0000f80007c0003f_uint256;
   x = (x | x >> 16) &
-      uint256_t("0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff");
+      0xffc00000003ff800000007ff00000000ffc00000003ff800000007ff_uint256;
   x = (x | x >> 32) &
-      uint256_t("0xfffff80000000000000007ffffc0000000000000003fffff");
+      0xfffff80000000000000007ffffc0000000000000003fffff_uint256;
   x = (x | x >> 64) &
-      uint256_t("0xfffff800000000000000000000000000000007ffffffffff");
-  x = (x | x >> 128) & uint256_t("0xffffffffffffffff");
+      0xfffff800000000000000000000000000000007ffffffffff_uint256;
+  x = (x | x >> 128) & 0xffffffffffffffff_uint256;
   return (uint64_t)x;
 }
-#endif // BOOST_VERSION >= 106100
+
 /**
  * Interleaves an integer coordinate.
  *
@@ -314,7 +293,7 @@ template <size_t ND, typename IntT, typename MortonT>
 MortonT interleave(const IntArray<ND, IntT> &coord) {
   MortonT retVal(0);
   for (size_t i = 0; i < ND; i++) {
-    retVal |= pad<ND - 1, IntT, MortonT>(coord[i]) << i;
+    retVal |= pad<ND - 1, IntT, MortonT>(coord[i]) << static_cast<int>(i);
   }
   return retVal;
 }
@@ -337,14 +316,14 @@ template <size_t ND, typename IntT, typename MortonT>
 IntArray<ND, IntT> deinterleave(const MortonT z) {
   IntArray<ND, IntT> retVal;
   for (size_t i = 0; i < ND; i++) {
-    retVal[i] = (IntT)compact<ND - 1, IntT, MortonT>(z >> i);
+    retVal[i] = static_cast<IntT>(compact<ND - 1, IntT, MortonT>(z >> static_cast<int>(i)));
   }
   return retVal;
 }
 
 template <size_t ND, typename IntT>
 IntArray<ND, IntT> deinterleave(const Morton96 &z) {
-  return deinterleave<ND, IntT, uint128_t>(z.to_uint128_t());
+  return deinterleave<ND, IntT, uint128_t>(uint128_t(z));
 }
 
 template <size_t ND, typename IntT, typename MortonT> struct Interleaver {

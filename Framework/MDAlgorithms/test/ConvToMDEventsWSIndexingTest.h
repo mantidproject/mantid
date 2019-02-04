@@ -355,16 +355,6 @@ public:
   }
 
   void test_multithreading() {
-#if BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
-    try {
-      checkStructure(SimpleInput(11).generate(), lowerLeft, upperRight,
-                     splitTreshold);
-    } catch (std::runtime_error &exception) {
-      TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
-                           std::string::npos,
-                       true);
-    }
-#else
     std::cout << sizeof(morton_index::uint128_t) << "   sizeof\n";
     std::cout << "Start test1." << std::endl;
     std::array<float, 3> curPt{{static_cast<float>(lowerLeft[0]),
@@ -410,20 +400,9 @@ public:
     delete topNodeWithErrorMulti.root;
     TS_ASSERT_EQUALS(check, true);
     std::cout << "End test1." << std::endl;
-#endif // BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
   }
 
   void test_sructure() {
-#if BOOST_VERSION < MULTIPRECISION_BOOST_VALID_VERSION
-    try {
-      checkStructure(SimpleInput(11).generate(), lowerLeft, upperRight,
-                     splitTreshold);
-    } catch (std::runtime_error &exception) {
-      TS_ASSERT_EQUALS(std::string(exception.what()).find("specialisation.") !=
-                           std::string::npos,
-                       true);
-    }
-#else
     std::cout << sizeof(morton_index::uint128_t) << "   sizeof\n";
     static std::vector<std::shared_ptr<InputGenerator>> generators;
     // All points in one child node
@@ -443,7 +422,6 @@ public:
           checkStructure(gen->generate(), lowerLeft, upperRight, splitTreshold),
           true);
     }
-#endif // MULTIPRECISION_BOOST_VALID_VERSION
   }
 
 private:
