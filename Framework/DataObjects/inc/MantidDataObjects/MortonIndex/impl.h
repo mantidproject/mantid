@@ -261,10 +261,10 @@ struct wide_integer<Bits, Signed>::_impl {
         wide_integer<Bits, Signed> lhs = rhs;
         int cur_shift = n % base_bits;
         if (cur_shift) {
-            lhs.m_arr[0] <<= cur_shift;
+            lhs.m_arr[0] = static_cast<base_type>(lhs.m_arr[0] << cur_shift);
             for (int i = 1; i < arr_size; ++i) {
-                lhs.m_arr[i - 1] |= lhs.m_arr[i] >> (base_bits - cur_shift);
-                lhs.m_arr[i] <<= cur_shift;
+                lhs.m_arr[i - 1] = static_cast<base_type>(lhs.m_arr[i - 1] | (lhs.m_arr[i] >> (base_bits - cur_shift)));
+                lhs.m_arr[i] = static_cast<base_type>(lhs.m_arr[i] << cur_shift);
             }
             n -= cur_shift;
         }
@@ -297,10 +297,10 @@ struct wide_integer<Bits, Signed>::_impl {
         wide_integer<Bits, Signed> lhs = rhs;
         int cur_shift = n % base_bits;
         if (cur_shift) {
-            lhs.m_arr[arr_size - 1] >>= cur_shift;
+            lhs.m_arr[arr_size - 1] = static_cast<base_type>(lhs.m_arr[arr_size - 1] >> cur_shift);
             for (int i = arr_size - 2; i >= 0; --i) {
-                lhs.m_arr[i + 1] |= lhs.m_arr[i] << (base_bits - cur_shift);
-                lhs.m_arr[i] >>= cur_shift;
+                lhs.m_arr[i + 1] |= static_cast<base_type>(lhs.m_arr[i + 1] | (lhs.m_arr[i] << (base_bits - cur_shift)));
+                lhs.m_arr[i] = static_cast<base_type>(lhs.m_arr[i] >> cur_shift);
             }
             n -= cur_shift;
         }
@@ -374,7 +374,7 @@ private:
             if (res_i < curr_rhs) {
                 is_underflow = true;
             }
-            res_i -= curr_rhs;
+            res_i = static_cast<base_type>(res_i - curr_rhs);
         }
 
         if (is_underflow && r_idx < arr_size) {
@@ -406,7 +406,7 @@ private:
                 is_overflow = res_i == 0;
             }
 
-            res_i += curr_rhs;
+            res_i = static_cast<base_type>(res_i + curr_rhs);
             if (res_i < curr_rhs) {
                 is_overflow = true;
             }
@@ -430,7 +430,7 @@ public:
     constexpr static wide_integer<Bits, Signed> operator_unary_tilda(const wide_integer<Bits, Signed>& lhs) noexcept {
         wide_integer<Bits, Signed> res{};
         for (int i = 0; i < arr_size; ++i) {
-            res.m_arr[i] = ~lhs.m_arr[i];
+            res.m_arr[i] = static_cast<base_type>(lhs.m_arr[i]);
         }
         return res;
     }
@@ -491,7 +491,7 @@ private:
             if (res_i < rhs_i) {
                 is_underflow = true;
             }
-            res_i -= rhs_i;
+            res_i = static_cast<base_type>(res_i - rhs_i);
         }
 
         return res;
@@ -511,7 +511,7 @@ private:
                 is_overflow = res_i == 0;
             }
 
-            res_i += rhs_i;
+            res_i = static_cast<base_type>(res_i + rhs_i);
             if (res_i < rhs_i) {
                 is_overflow = true;
             }
@@ -531,7 +531,7 @@ public:
 
         for (size_t i = 0; i < arr_size * base_bits; ++i) {
             if (t.m_arr[arr_size - 1] & 1) {
-                res = operator_plus(res, shift_left(a, i));
+                res = operator_plus(res, shift_left(a, static_cast<int>(i)));
             }
 
             t = shift_right(t, 1);
