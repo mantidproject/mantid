@@ -348,11 +348,11 @@
   <value val="1"/>
 </parameter>
 <!-- Vanadium mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
-<!-- This is the value for the cylinder mounted on the CCR stick (39.2g) -->
+<!-- This is the value for the cylinder mounted on the CCR stick (39.2g with legs) -->
 <parameter name="vanadium-mass">
-  <value val="39.20"/>
+  <value val="32.58"/>
 </parameter>
-<!-- This is the value for the cylinder mounted on the candle stick (37.36g)
+<!-- This is the value for the cylinder mounted on the candle stick (37.36g with legs)
 <parameter name="vanadium-mass">
   <value val="37.36"/>
 </parameter> -->
