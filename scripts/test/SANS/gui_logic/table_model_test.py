@@ -277,6 +277,26 @@ class TableModelTest(unittest.TestCase):
 
         self.assertEqual(actual_list, expected_list)
 
+    def test_that_get_non_empty_rows_returns_non_empty_rows(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel("", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(1, table_index_model)
+        table_index_model = TableIndexModel('', "", "", "", "", "", "",
+                                            "", "", "", "5", "", "")
+        table_model.add_table_entry(2, table_index_model)
+        table_index_model = TableIndexModel("", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(3, table_index_model)
+
+        non_empty_rows_actual = table_model.get_non_empty_rows([0, 1, 2, 3])
+        non_empty_rows_expected = [1, 2]
+
+        self.assertEqual(non_empty_rows_actual, non_empty_rows_expected)
+
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
         table_model = TableModel()

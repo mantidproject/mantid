@@ -235,7 +235,7 @@ std::string IqtFitModel::singleFitOutputName(std::size_t index,
                                              std::size_t spectrum) const {
   auto const fitString = getFitString(getWorkspace(0));
   return createSingleFitOutputName(
-      "%1%" + fitString + "_" + m_fitType + "_s%2%", index, spectrum);
+      "%1%" + fitString + "_" + m_fitType + "_s%2%_Results", index, spectrum);
 }
 
 void IqtFitModel::setFitTypeString(const std::string &fitType) {

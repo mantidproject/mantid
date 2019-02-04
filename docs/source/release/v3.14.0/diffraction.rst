@@ -58,6 +58,7 @@ Improvements
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` now attempts to index all the peaks at each iteration instead of only using initially indexed peaks.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 - SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
 - :ref:`IntegratePeaksUsingClusters <algm-IntegratePeaksUsingClusters>` will now treat NaN's as background.
@@ -97,7 +98,7 @@ Improvements
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
 - :ref:`SaveReflections <algm-SaveReflections>` now supports saving indexed modulated peaks in the Jana format.
-
+- `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ has been added as an external project
 
 Bugfixes
 ########
@@ -106,11 +107,21 @@ Bugfixes
 - Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
 - sudden drops at either end of spectra in Pearl caused by partial bins are now cropped.
 - The Powder Diffraction GUI now remembers whether linear or logorithmic binning was selected between uses
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now does not use cache file when the grouping has changed.
 
 New
 ###
 
 - :ref:`HB2AReduce <algm-HB2AReduce>` algorithm reduces HFIR POWDER (HB-2A) data
 - :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
+
+
+Engineering Diffraction
+-----------------------
+
+New
+###
+
+- Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
 
 :ref:`Release 3.14.0 <v3.14.0>`

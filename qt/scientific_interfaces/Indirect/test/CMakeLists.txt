@@ -3,6 +3,7 @@
 ###########################################################################
 set ( TEST_FILES
   ConvFitDataPresenterTest.h
+  ConvFitModelTest.h
   IndirectDataTablePresenterTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
@@ -13,7 +14,10 @@ set ( TEST_FILES
   IndirectFitPlotPresenterTest.h
   IndirectFittingModelTest.h
   IndirectSpectrumSelectionPresenterTest.h
+  IqtFitModelTest.h
   JumpFitDataPresenterTest.h
+  JumpFitModelTest.h
+  MSDFitModelTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest

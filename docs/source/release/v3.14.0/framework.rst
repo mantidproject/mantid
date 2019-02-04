@@ -149,6 +149,7 @@ Improvements
 - :py:obj:`mantid.kernel.Logger` now handles unicode in python2
 - :py:meth:`mantid.api.ITableWorkspace.columnTypes` now returns human readable strings for non-primitive column types.
 - It is now possible to build custom materials with :class:`mantid.kernel.MaterialBuilder` without setting a formula or atomic number. In this case, all cross sections and number density have to be given.
+- Python plotting now handles `twinx` and `twiny` axes for workspaces.
 
 Bugfixes
 ########
