@@ -38,7 +38,7 @@ class HallRoss(IFunction1D):
         xvals = np.array(xvals)
 
         with np.errstate(divide='ignore'):
-            hwhm = self.hbar*(1.0 - np.exp( -l * xvals * xvals )) / tau
+            hwhm = self.hbar*(1.0 - np.exp( -l * np.square(xvals))) / tau
         return hwhm
 
     def functionDeriv1D(self, xvals, jacobian):
@@ -47,10 +47,10 @@ class HallRoss(IFunction1D):
         l = l**2 / 2
 
         for i, x in enumerate(xvals, start=0):
-            ex = math.exp(-l*x*x)
-            hwhm = self.hbar*(1.0-ex)/tau
-            jacobian.set(i,0,-hwhm/tau)
-            jacobian.set(i,1,x*x*ex/tau)
+            ex = math.exp(-l * np.square(x))
+            hwhm = self.hbar * (1.0 - ex)/tau
+            jacobian.set(i, 0, -hwhm/tau)
+            jacobian.set(i, 1, np.square(x)*ex/tau)
 
 
 # Required to have Mantid recognise the new function

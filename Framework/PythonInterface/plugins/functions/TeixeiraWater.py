@@ -36,7 +36,7 @@ class TeixeiraWater(IFunction1D):
         xvals = np.array(xvals)
 
         with np.errstate(divide='ignore'):
-            hwhm = self.hbar * xvals * xvals * length / (tau * (1 + xvals * xvals * length))
+            hwhm = self.hbar * np.square(xvals * length) / (tau * (6 + np.square(xvals * length)))
         return hwhm
 
     def functionDeriv1D(self, xvals, jacobian):
@@ -44,9 +44,9 @@ class TeixeiraWater(IFunction1D):
         length = self.getParameterValue("L")
 
         for i, x in enumerate(xvals, start=0):
-            hwhm = self.hbar * x * x * length/(tau * (1 + x * x * length))
-            jacobian.set(i,0,-hwhm / tau)
-            jacobian.set(i,1,hwhm * (1.0 - hwhm * tau) / length)
+            hwhm = self.hbar * np.square(x * length) / (tau * (6 + np.square(x * length)))
+            jacobian.set(i, 0, -hwhm / tau)
+            jacobian.set(i, 1, hwhm * (1.0 - hwhm * tau) / length)
 
 
 # Required to have Mantid recognise the new function

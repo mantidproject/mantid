@@ -37,8 +37,7 @@ class ChudleyElliot(IFunction1D):
         xvals = np.array(xvals)
 
         with np.errstate(divide='ignore'):
-            hwhm = self.hbar*(1.0 - np.sin(xvals * length)
-                              / (xvals * length))/tau
+            hwhm = self.hbar*(1.0 - np.sinc(xvals*length/np.pi))/tau
         return hwhm
 
     def functionDeriv1D(self, xvals, jacobian):
@@ -46,7 +45,7 @@ class ChudleyElliot(IFunction1D):
         length = self.getParameterValue("L")
 
         for i, x in enumerate(xvals, start=0):
-            s = 1.0 - math.sin(x*length)/(x*length)
+            s = 1.0 - np.sinc(x*length/np.pi)
             hwhm = self.hbar*s/tau
             jacobian.set(i, 0, -hwhm/tau)
             jacobian.set(i, 1, (math.cos(x*length)-s)/(length*tau))
